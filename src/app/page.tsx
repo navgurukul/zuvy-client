@@ -1,13 +1,9 @@
-import Head from "next/head";
-import Image from "next/image";
-import Script from "next/script";
+import LoginPage from "@/components/loginPage/LoginPage";
 
 export default function Home() {
   return (
-    <div>
-      <div>
-        <p>Hello World</p>
-      </div>
-    </div>
+    <>
+      <LoginPage />
+    </>
   );
 }
