@@ -15,7 +15,7 @@ function StudentSidebar() {
         height={"60"}
       />
       {/* </div> */}
-      <div className="flex flex-col w-full mt-3">
+      <div className="flex h-full flex-col w-full mt-3">
         <SidebarRoutes />
       </div>
     </div>

@@ -7,6 +7,8 @@ import {
   List,
   MessageCircleQuestion,
   MessagesSquare,
+  LogOut,
+  Code,
 } from "lucide-react";
 
 import { usePathname } from "next/navigation";
@@ -25,14 +27,19 @@ const guestRoutes = [
     href: "/search",
   },
   {
-    icon: MessageCircleQuestion,
-    label: "Help",
-    href: "/help",
+    icon: Code,
+    label: "Playground",
+    href: "/playground",
   },
   {
     icon: MessagesSquare,
     label: "Discussion",
     href: "/discussion",
+  },
+  {
+    icon: MessageCircleQuestion,
+    label: "Help",
+    href: "/help",
   },
 ];
 
@@ -49,6 +56,14 @@ const teacherRoutes = [
   },
 ];
 
+const commonRoutes = [
+  {
+    icon: LogOut,
+    label: "Logout",
+    href: "/logout",
+  },
+];
+
 export const SidebarRoutes = () => {
   const pathname = usePathname();
 
@@ -57,15 +72,27 @@ export const SidebarRoutes = () => {
   const routes = isTeacherPage ? teacherRoutes : guestRoutes;
 
   return (
-    <div className="flex flex-col w-full">
-      {routes.map((route) => (
-        <SidebarItem
-          key={route.href}
-          icon={route.icon}
-          label={route.label}
-          href={route.href}
-        />
-      ))}
+    <div className="flex justify-between flex-col h-full">
+      <div>
+        {routes.map((route) => (
+          <SidebarItem
+            key={route.href}
+            icon={route.icon}
+            label={route.label}
+            href={route.href}
+          />
+        ))}
+      </div>
+      <div>
+        {commonRoutes.map((route) => (
+          <SidebarItem
+            key={route.href}
+            icon={route.icon}
+            label={route.label}
+            href={route.href}
+          />
+        ))}
+      </div>
     </div>
   );
 };
