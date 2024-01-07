@@ -1,4 +1,4 @@
-import LoginPage from "@/app/auth/login/_components/LoginPage";
+"use client";
 
 export default function Home() {
   return <>Helloo</>;

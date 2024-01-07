@@ -12,7 +12,7 @@ function LoginPage({}: Props) {
       <MaxWidthWrapper className="mb-12 mt-28 sm:mt-40 flex flex-col items-center justify-center text-center">
         <div className="mx-auto mb-4 flex max-w-fit items-center justify-center space-x-2 rounded-full border border-gray-600 bg-white px-7 py-2 shadow-md backdrop-blur hover:border-gray-600 hover:bg-white/50 ">
           <p className="text-sm font-semibold text-gray-700 ">
-            Zuvy is under costuction
+            Zuvy is under construction
           </p>
         </div>
         <h1 className="max-w-4xl text-5xl font-bold md:text-6xl lg:text-6xl   ">
@@ -21,7 +21,8 @@ function LoginPage({}: Props) {
           <span className="text-yellow-900">in Seconds.</span>
         </h1>
         <p className="mt-5 max-w-prose text-zinc-700 sm:text-lg ">
-          Zuvy is The Future of Learinng Simply Signin an Start your journey.
+          The Future of Learning Begins with a Simple Sign-in. Start Your
+          Journey Today!
         </p>
         <Button
           className={buttonVariants({
