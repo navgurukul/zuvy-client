@@ -1,8 +1,9 @@
 import { Inter } from "next/font/google";
-import Navbar from "../_components/outside-navbar";
 import { cn } from "@/lib/utils";
 
-import "../globals.css";
+import "../../globals.css";
+import StudentSidebar from "@/app/_components/student-sidebar";
+import StudentNavbar from "@/app/_components/student-navbar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -14,11 +15,12 @@ export default function RootLayout({
   return (
     <div
       className={cn(
-        "min-h-screen font-sans antialiased grainy ",
+        "min-h-screen text-center font-sans antialiased",
         inter.className
       )}
     >
-      <Navbar />
+      <StudentNavbar />
+      {/* <StudentSidebar /> */}
       {children}
     </div>
   );
