@@ -2,7 +2,7 @@ import React from "react";
 
 function Heading() {
   return (
-    <div className="flex align-center justify-between text-start my-2">
+    <div className="flex align-center justify-between text-start my-2 flex-wrap">
       <h1 className="text-3xl font-semibold tracking-tight m-0">
         Welcome back, <span className="text-muted-foreground"> Souvik!</span>
       </h1>

@@ -6,6 +6,7 @@ import React from "react";
 import Heading from "./_components/heading";
 import { Stat } from "./_components/stat";
 import Schedule from "./_components/schedule";
+import Doubt from "./_components/doubt";
 
 function page() {
   return (
@@ -20,8 +21,13 @@ function page() {
         </AlertDescription>
       </Alert>
       <div className="flex items-start my-3 gap-5">
-        <Schedule />
-        <Stat />
+        <div className="flex-1">
+          <Schedule />
+        </div>
+        <div>
+          <Stat />
+          <Doubt className="mt-2" />
+        </div>
       </div>
     </div>
   );

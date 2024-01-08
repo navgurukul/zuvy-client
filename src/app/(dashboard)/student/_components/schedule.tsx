@@ -18,8 +18,6 @@ import { Button } from "@/components/ui/button";
 type ScheduleProps = React.ComponentProps<typeof Card>;
 
 function Schedule({ className, ...props }: ScheduleProps) {
-  const [date, setDate] = useState<Date | undefined>(new Date());
-
   return (
     <>
       <div className="flex-1">

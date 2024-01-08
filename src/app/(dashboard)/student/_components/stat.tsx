@@ -1,4 +1,3 @@
-// import { BellIcon, CheckIcon } from "@radix-ui/react-icons";
 "use client";
 
 import { cn } from "@/lib/utils";
@@ -11,6 +10,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ChevronRight, ChevronUp, Crown, MoveRight } from "lucide-react";
 // import { Switch } from "@/components/ui/switch"
 
 const notifications = [
@@ -32,41 +33,67 @@ type CardProps = React.ComponentProps<typeof Card>;
 
 export function Stat({ className, ...props }: CardProps) {
   return (
-    <Card className={cn("w-[380px] text-start", className)} {...props}>
+    <Card
+      className={cn(
+        "w-[380px] text-start bg-popover-foreground text-white",
+        className
+      )}
+      {...props}
+    >
       <CardHeader>
-        <CardTitle>Leaderboard</CardTitle>
-        <CardDescription>You have 3 unread messages.</CardDescription>
+        <CardTitle className="flex justify-between items-center">
+          Leaderboard
+          <ChevronRight />
+        </CardTitle>
       </CardHeader>
-      <CardContent className="grid gap-4">
-        <div className=" flex items-center space-x-4 rounded-md border p-4">
-          {/* <BellIcon /> */}
-          <div className="flex-1 space-y-1">
-            <p className="text-sm font-medium leading-none">
-              Push Notifications
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Send notifications to device.
-            </p>
+      <CardContent>
+        <div className="my-5 grid justify-items-center grid-cols-3 gap-4">
+          <div className="text-center mt-7 grid justify-items-center content-start">
+            <Avatar>
+              <AvatarImage src="https://github.com/shadcn.png" />
+              <AvatarFallback>Souvik Deb</AvatarFallback>
+            </Avatar>
+            <p className="text-md font-bold mt-2">Ankur</p>
+            <p className="text-4xl font-bold text-white">2</p>
           </div>
-          {/* <Switch /> */}
+          <div className=" text-center grid justify-items-center content-start relative">
+            <Crown
+              color="gold"
+              className="absolute -top-6 left-5 -rotate-12 "
+            />
+            <Avatar className="w-16 h-16">
+              <AvatarImage src="https://github.com/shadcn.png" />
+              <AvatarFallback>Souvik Deb</AvatarFallback>
+            </Avatar>
+            <p className="text-md font-bold mt-2">Priyomjeet</p>
+            <p className="text-8xl font-bold text-white">1</p>
+          </div>
+          <div className="text-center mt-7 grid justify-items-center content-start">
+            <Avatar>
+              <AvatarImage src="https://github.com/shadcn.png" />
+              <AvatarFallback>Souvik Deb</AvatarFallback>
+            </Avatar>
+            <p className="text-md font-bold mt-2">Dixit</p>
+            <p className="text-4xl font-bold text-white">3</p>
+          </div>
         </div>
-        <div>
-          {notifications.map((notification, index) => (
-            <div
-              key={index}
-              className="mb-4 grid grid-cols-[25px_1fr] items-start pb-4 last:mb-0 last:pb-0"
-            >
-              <span className="flex h-2 w-2 translate-y-1 rounded-full bg-sky-500" />
-              <div className="space-y-1">
-                <p className="text-sm font-medium leading-none">
-                  {notification.title}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {notification.description}
-                </p>
-              </div>
-            </div>
-          ))}
+        <div className=" mt-6 text-center">
+          <a
+            href="/"
+            className="inline-flex justify-between items-center py-2 px-2 pr-4 mb-7 text-sm text-gray-700 bg-gray-100 rounded-full dark:bg-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700"
+            role="alert"
+            aria-label="Whatsapp us"
+          >
+            <button>
+              <span className="text-xs font-bold bg-secondary rounded-full text-white px-4 py-1.5 mr-3">
+                22
+              </span>
+            </button>
+            <span className="text-sm font-medium max-md:hidden mr-2">
+              Your rank
+            </span>
+            <ChevronUp color="#518672" />
+          </a>
         </div>
       </CardContent>
     </Card>

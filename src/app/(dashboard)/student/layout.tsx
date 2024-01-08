@@ -21,10 +21,10 @@ export default function RootLayout({
       )}
     >
       <StudentNavbar />
-      <MaxWidthWrapper>
-        {/* <StudentSidebar /> */}
-        {children}
-      </MaxWidthWrapper>
+      {/* <MaxWidthWrapper> */}
+      {/* <StudentSidebar /> */}
+      {/* {children}
+      </MaxWidthWrapper> */}
     </div>
   );
 }
