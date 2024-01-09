@@ -3,12 +3,14 @@
 import { LucideIcon } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
+import { Logout } from "@/utils/logout";
 import { cn } from "@/lib/utils";
 
 interface SidebarItemProps {
   icon: LucideIcon;
   label: string;
   href: string;
+  onClick?: () => void;
 }
 
 export const SidebarItem = ({ icon: Icon, label, href }: SidebarItemProps) => {
@@ -21,7 +23,8 @@ export const SidebarItem = ({ icon: Icon, label, href }: SidebarItemProps) => {
     pathname?.startsWith(`${href}/`);
 
   const onClick = () => {
-    router.push(href);
+    label === "Logout" ? Logout() :
+      router.push(href);
   };
 
   return (
@@ -31,7 +34,7 @@ export const SidebarItem = ({ icon: Icon, label, href }: SidebarItemProps) => {
       className={cn(
         "flex items-center gap-x-2 text-slate-500 text-sm font-[500] pl-6 transition-all hover:text-slate-600 hover:bg-slate-300/20 w-full rounded-r-lg",
         isActive &&
-          "text-sky-700 bg-sky-200/20 hover:bg-sky-200/20 hover:text-sky-700 "
+        "text-sky-700 bg-sky-200/20 hover:bg-sky-200/20 hover:text-sky-700 "
       )}
     >
       <div className="flex items-center gap-x-2 py-4">

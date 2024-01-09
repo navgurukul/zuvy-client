@@ -60,7 +60,7 @@ const commonRoutes = [
   {
     icon: LogOut,
     label: "Logout",
-    href: "/logout",
+    href: "/",
   },
 ];
 

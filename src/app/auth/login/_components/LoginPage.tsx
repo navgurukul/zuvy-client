@@ -15,13 +15,15 @@ function LoginPage({}: Props) {
     return [header, reversedBody, signature].join(".");
   }
 
+  const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const sendGoogleUserData = async (token: any) => {
     try {
       const resp = await axios.get(
-        "https://merd-api.merakilearn.org/users/me",
+        `${BASE_URL}/users/me`,
         {
           headers: {
             accept: "application/json",
@@ -30,9 +32,9 @@ function LoginPage({}: Props) {
         }
       );
       localStorage.setItem("AUTH", JSON.stringify(resp.data.user));
-      router.push("/student");
-      setLoading(false);
-    } catch (err) {
+      router.push("/student"); 
+    }
+       catch (err) {
       console.log(err);
     }
   };
