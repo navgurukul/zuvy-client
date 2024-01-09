@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import "../../globals.css";
 import StudentSidebar from "@/app/_components/student-sidebar";
 import StudentNavbar from "@/app/_components/student-navbar";
+import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,8 +21,7 @@ export default function RootLayout({
       )}
     >
       <StudentNavbar />
-      {/* <StudentSidebar /> */}
-      {children}
+      <MaxWidthWrapper>{children}</MaxWidthWrapper>
     </div>
   );
 }

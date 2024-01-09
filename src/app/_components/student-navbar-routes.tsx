@@ -9,6 +9,9 @@ import {
   MessagesSquare,
   LogOut,
   Code,
+  Search,
+  Slack,
+  Bell,
 } from "lucide-react";
 
 import { usePathname } from "next/navigation";
@@ -17,29 +20,19 @@ import { SidebarItem } from "./sidebar-item";
 
 const guestRoutes = [
   {
-    icon: Layout,
-    label: "Dashboard",
+    icon: Search,
+    label: "Search",
     href: "/",
   },
   {
-    icon: Compass,
-    label: "Browse",
-    href: "/search",
+    icon: Slack,
+    label: "Slack",
+    href: "/slack",
   },
   {
-    icon: Code,
-    label: "Playground",
-    href: "/playground",
-  },
-  {
-    icon: MessagesSquare,
-    label: "Discussion",
-    href: "/discussion",
-  },
-  {
-    icon: MessageCircleQuestion,
-    label: "Help",
-    href: "/help",
+    icon: Bell,
+    label: "Notifications",
+    href: "/notiication",
   },
 ];
 
@@ -56,15 +49,15 @@ const teacherRoutes = [
   },
 ];
 
-const commonRoutes = [
-  {
-    icon: LogOut,
-    label: "Logout",
-    href: "/logout",
-  },
-];
+// const commonRoutes = [
+//   {
+//     icon: LogOut,
+//     label: "Logout",
+//     href: "/logout",
+//   },
+// ];
 
-export const SidebarRoutes = () => {
+export const StudentSidebarRoutes = () => {
   const pathname = usePathname();
 
   const isTeacherPage = pathname?.includes("/teacher");
@@ -83,7 +76,7 @@ export const SidebarRoutes = () => {
           />
         ))}
       </div>
-      <div>
+      {/* <div>
         {commonRoutes.map((route) => (
           <SidebarItem
             key={route.href}
@@ -92,7 +85,7 @@ export const SidebarRoutes = () => {
             href={route.href}
           />
         ))}
-      </div>
+      </div> */}
     </div>
   );
 };
