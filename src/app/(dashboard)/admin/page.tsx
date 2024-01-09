@@ -1,5 +1,5 @@
 "use client";
 
 export default function Home() {
-  return <>Helloo</>;
+  return <>Admin dashboard is under CONSTRUCTION</>;
 }
