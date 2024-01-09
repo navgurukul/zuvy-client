@@ -2,8 +2,9 @@ import React from "react";
 
 import Image from "next/image";
 import { SidebarRoutes } from "./sidebar-routes";
+import { StudentSidebarRoutes } from "./student-navbar-routes";
 
-function StudentSidebar() {
+function MobileStudentSidebar() {
   return (
     <div className="h-full flex align-center flex-col overflow-y-auto bg-white">
       {/* <div className="p-6"> */}
@@ -16,10 +17,10 @@ function StudentSidebar() {
       />
       {/* </div> */}
       <div className="flex h-full flex-col w-full mt-3">
-        <SidebarRoutes />
+        <StudentSidebarRoutes />
       </div>
     </div>
   );
 }
 
-export default StudentSidebar;
+export default MobileStudentSidebar;
