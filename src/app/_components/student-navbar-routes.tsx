@@ -12,6 +12,7 @@ import {
   Search,
   Slack,
   Bell,
+  CircleUser,
 } from "lucide-react";
 
 import { usePathname } from "next/navigation";
@@ -19,6 +20,11 @@ import { usePathname } from "next/navigation";
 import { SidebarItem } from "./sidebar-item";
 
 const guestRoutes = [
+  {
+    icon: CircleUser,
+    label: "Profile",
+    href: "/profile",
+  },
   {
     icon: Search,
     label: "Search",

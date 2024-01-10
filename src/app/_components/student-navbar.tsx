@@ -1,9 +1,8 @@
 import Link from "next/link";
-import MaxWidthWrapper from "../../components/MaxWidthWrapper";
 import Image from "next/image";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import StudentSidebar from "./student-sidebar";
-import { Bell, Menu, Search, Slack } from "lucide-react";
+import { Bell, Menu, Search } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import MobileStudentSidebar from "./mobile-student-navbar";
@@ -92,10 +91,12 @@ const StudentNavbar = () => {
               ></path>
             </svg>
             <Bell />
-            <Avatar>
-              <AvatarImage src="https://github.com/shadcn.png" />
-              <AvatarFallback>NAME</AvatarFallback>
-            </Avatar>
+            <Link href="/profile">
+              <Avatar>
+                <AvatarImage src="https://github.com/shadcn.png" />
+                <AvatarFallback>NAME</AvatarFallback>
+              </Avatar>
+            </Link>
           </div>
           <div className="md:hidden">
             <Sheet>
