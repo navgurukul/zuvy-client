@@ -2,7 +2,6 @@
 
 import { LucideIcon } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
-
 import { Logout } from "@/utils/logout";
 import { cn } from "@/lib/utils";
 
@@ -23,8 +22,11 @@ export const SidebarItem = ({ icon: Icon, label, href }: SidebarItemProps) => {
     pathname?.startsWith(`${href}/`);
 
   const onClick = () => {
-    label === "Logout" ? Logout() :
+    if (label === "Logout") {
+      Logout();
+    } else {
       router.push(href);
+    }
   };
 
   return (
