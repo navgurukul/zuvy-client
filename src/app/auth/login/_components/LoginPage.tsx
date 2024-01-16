@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
-
+import { setCookie } from 'cookies-next';
 import "./styles/login.css";
 
 type Props = {};
@@ -17,7 +17,7 @@ function LoginPage({}: Props) {
 
   const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   const sendGoogleUserData = async (token: any) => {
@@ -32,7 +32,9 @@ function LoginPage({}: Props) {
         }
       );
       localStorage.setItem("AUTH", JSON.stringify(resp.data.user));
-      router.push("/student"); 
+      setCookie('user', 'student');
+      router.push("/student-dashboard"); 
+
     }
        catch (err) {
       console.log(err);
@@ -49,6 +51,8 @@ function LoginPage({}: Props) {
       localStorage.setItem("loggedOutToken", JSON.stringify(loggedOutToken));
       localStorage.setItem("token", reverseJwtBody(tokenVal));
       sendGoogleUserData(reverseJwtBody(tokenVal));
+    }else{
+      setLoading(false);
     }
 
     if (!localStorage.getItem("token")) {
