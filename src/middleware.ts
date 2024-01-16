@@ -1,26 +1,25 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+const publicRoutes = ['/'];
+const privateRoutes = ['/student', '/admin'];
+
 export function middleware(request: NextRequest) {
     const user = request.cookies.get("user")?.value ?? "false";
-    const   matcher = ['/', '/student-dashboard','/admin']
+    const isPrivateRoute = privateRoutes.includes(request.nextUrl.pathname);
+    const isPublicRoute = publicRoutes.includes(request.nextUrl.pathname);
 
-    if(matcher.includes(request.nextUrl.pathname)) {
-    if (user === "false") {
-        if (request.nextUrl.pathname.startsWith('/student-dashboard')) {
-            return NextResponse.redirect(new URL('/', request.url));
-        }
-        if (request.nextUrl.pathname.startsWith('/admin')) {
-            return NextResponse.redirect(new URL('/', request.url));
-        }
-    } else if (user === "student") {
-        if (request.nextUrl.pathname.startsWith('/') && request.nextUrl.pathname !== '/student-dashboard') {
-            return NextResponse.redirect(new URL('/student-dashboard', request.url));
-        }
-    } else if (user === "admin") {
-        if (request.nextUrl.pathname.startsWith('/') && request.nextUrl.pathname !== '/admin') {
-            return NextResponse.redirect(new URL('/admin', request.url));
-        }
+    switch (true) {
+        case isPrivateRoute && user === "false":
+            return NextResponse.rewrite(new URL('/', request.url));
+        case isPrivateRoute && user === "student" && request.nextUrl.pathname !== '/student':
+            return NextResponse.rewrite(new URL('/student', request.url));
+        case isPrivateRoute && user === "admin" && request.nextUrl.pathname !== '/admin':
+            return NextResponse.rewrite(new URL('/admin', request.url));
+        case isPublicRoute && user !== "false":
+            return NextResponse.rewrite(new URL('/', request.url));
+        default:
+          
+            return NextResponse.next();
     }
-}
 }
