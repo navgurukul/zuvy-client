@@ -18,6 +18,7 @@
     "axios": "^1.6.5",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "cookies-next": "^4.1.0",
     "date-fns": "^3.1.0",
     "dotenv": "^16.4.0",
     "gapi": "^0.0.3",
