@@ -1,57 +1,69 @@
-"use client";
-
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
-import Image from "next/image";
-import { Pencil } from "lucide-react";
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
+import Link from "next/link";
+import React from "react";
+import { ArrowLeft, Camera } from "lucide-react";
 type Props = {};
 
-export default function Profile({}: Props) {
-  const [activeTab, setActiveTab] = useState<string>("notifications");
-
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-  };
+function page({}: Props) {
   return (
-    <>
+    <div>
       <MaxWidthWrapper className='flex flex-col items-center justify-between sm:flex-col '>
-        <div className='flex items-center justify-between min-w-full flex-col  '>
+        <div className='flex items-start justify-between min-w-full '>
+          <div>
+            <Link href='/'>
+              <ArrowLeft />
+            </Link>
+          </div>
           <div className='flex flex-col items-center mx-auto justify-center'>
             <div className='relative'>
-              <Avatar className='h-40 w-40'>
+              <Avatar className='h-40 w-40 flex flex-col justify-center items-center'>
                 <AvatarImage src='https://github.com/shadcn.png' />
                 <AvatarFallback>NAME</AvatarFallback>
               </Avatar>
+              <button className='absolute bottom-0 right-0 bg-[#2f433a] text-white rounded-full p-2 shadow-md hover:bg-[#518672] focus:outline-none'>
+                <Camera />
+              </button>
             </div>
-            <div className=' cursor-pointer mx-auto mt-4 mb-4 flex max-w-fit items-center justify-center space-x-2 rounded-full  bg-white px-7 py-2 shadow-md backdrop-blur hover:border-gray-600 hover:bg-white/50 '>
-              <p className='text-sm font-semibold text-gray-700 '>
-                Divya Sharma
-              </p>
+            <div className='flex items-start justify-center flex-col '>
+              <p className='mt-2  '>Name</p>
+              <input
+                className='flex h-18 w-[420px] rounded-md mt-4 border border-black/30 bg-transparent px-2 py-2 text-sm placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-black/30 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50'
+                type='name'
+                placeholder='Divya Sharma '
+                disabled
+              />
             </div>
-            <div className='cursor-pointer mx-auto mt-4 mb-4 flex max-w-fit items-center justify-center space-x-2 rounded-full  bg-white px-7 py-2 shadow-md backdrop-blur hover:border-gray-600 hover:bg-white/50 '>
-              <p className='text-sm font-semibold text-gray-700 '>
-                divyasharma20@gmail.com
-              </p>
+            <div className='flex items-start justify-center flex-col '>
+              <p className='mt-2  '>Email</p>
+              <input
+                className='flex h-18 w-[420px] rounded-md mt-4 border border-black/30 bg-transparent px-2 py-2 text-sm placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-black/30 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50'
+                type='email'
+                placeholder='divyasharma20@gmail.com'
+                disabled
+              />
             </div>
-            <div className='cursor-pointer mx-auto mt-4 mb-4 flex max-w-fit items-center justify-center space-x-2 rounded-full  bg-white px-7 py-2 shadow-md backdrop-blur hover:border-gray-600 hover:bg-white/50 '>
-              <p className='text-sm font-semibold text-gray-700 '>
-                +14567892145
-              </p>
+            <div className='flex items-start justify-center flex-col '>
+              <p className='mt-2  '>Phone Number</p>
+              <input
+                className='flex h-18 w-[420px] rounded-md mt-4 border border-black/30 bg-transparent px-2 py-2 text-sm placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-black/30 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50'
+                type='mumber'
+                placeholder=' +14567892145'
+                disabled
+              />
             </div>
-            <button className='bg-[#f0f0f0] p-1 mt-3 h-30 w-70 w-[100px]'>
-              <Link href='/editprofile'>
-                <span className='text-sm font-semibold text-gray-700 '>
-                  Edit Profile
+            <button className='bg-[#f0f0f0] rounded p-3 mt-3 h-30  w-[180px]'>
+              <Link href='/profile'>
+                <span className='text-sm text-gray-700  font-semibold'>
+                  Update Profile
                 </span>
               </Link>
             </button>
           </div>
         </div>
       </MaxWidthWrapper>
-    </>
+    </div>
   );
 }
+
+export default page;
