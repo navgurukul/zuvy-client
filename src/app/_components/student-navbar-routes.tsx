@@ -1,20 +1,5 @@
 "use client";
 
-import {
-  BarChart,
-  Compass,
-  Layout,
-  List,
-  MessageCircleQuestion,
-  MessagesSquare,
-  LogOut,
-  Code,
-  Search,
-  Slack,
-  Bell,
-  CircleUser,
-} from "lucide-react";
-
 import { usePathname } from "next/navigation";
 
 import { SidebarItem } from "./sidebar-item";
