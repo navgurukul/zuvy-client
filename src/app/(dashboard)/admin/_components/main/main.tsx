@@ -2,6 +2,7 @@ import React from 'react';
 import HomeContent from './homeContent/homeContent';
 import Notifications from './notifications/notifications';
 import Courses from './courses/courses';
+import CourseDetails from './courses/courseDetails';
 import RecourceBank from './recourceBank/recourceBank';
 import Instructors from './instructors/instructors';
 import Reports from './reports/reports';

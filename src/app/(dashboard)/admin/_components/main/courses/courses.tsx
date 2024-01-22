@@ -36,7 +36,7 @@ const Courses: React.FC = () => {
 
   useEffect(() => {
     // TODO: Change the API_ENDPOINT TO ORIGINAL ONE.
-    fetch('YOUR_BACKEND_API_ENDPOINT')
+    fetch('BACKEND_API_ENDPOINT_FOR_FETCHING_COURSES ')
       .then(response => response.json())
       .then(data => setCourses(data))
       .catch(error => console.error('Error fetching courses:', error));
@@ -60,21 +60,21 @@ const Courses: React.FC = () => {
           />
           <Dialog>
             <DialogTrigger>
-              <Button variant="outline" className={styles.newCourseBtn}>
+              <Button className={styles.newCourseBtn}>
                 {" "}
                 + New Course
               </Button>
             </DialogTrigger>
-            <DialogOverlay/>
+            <DialogOverlay />
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>New Course</DialogTitle>
-                <DialogDescription style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <DialogTitle className={styles.newCourse}>New Course</DialogTitle>
+                <DialogDescription >
                   <div style={{ marginBottom: '10px' }}>
-                    <label htmlFor="courseName" style={{ marginBottom: '5px' }}>Course Name:</label>
+                    <label htmlFor="courseName" className={styles.dialogCourseName}>Course Name:</label>
                     <input type="text" id="courseName" placeholder="Enter course name" className={styles.inputBox} />
                   </div>
-                  <Button variant="primary" onClick={() => handleCreateCourse()} className={styles.createCourseBtn}>
+                  <Button onClick={() => handleCreateCourse()} className={styles.createCourseBtnDialog}>
                     Create Course
                   </Button>
                 </DialogDescription>
@@ -113,7 +113,7 @@ const Courses: React.FC = () => {
         <div className={styles.courceContainer}>
           {filteredCourses.length === 0 ? (
             <div className={styles.centeredContainer}>
-              <p>Create your first course and share with students</p>
+              <h4 className={styles.firstCourseText}>Create your first course and share with students</h4>
               <Dialog>
                 <DialogTrigger>
                   <Button variant="outline" className={styles.newCourseBtn}>
@@ -133,6 +133,7 @@ const Courses: React.FC = () => {
                 </DialogContent>
               </Dialog>
               <hr className={styles.hrLine} />
+              <p className={styles.needHelpText}>Need help getting started? Checkout the tutorials below</p>
             </div>
           ) : (
             filteredCourses.map((course, index) => (
