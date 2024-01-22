@@ -5,7 +5,7 @@ import React from "react";
 import { Video } from "lucide-react";
 type pageProps = {};
 
-const page: React.FC<pageProps> = () => {
+const Page: React.FC<pageProps> = () => {
   return (
     // <MaxWidthWrapper className=" flex flex-col ">
     <>
@@ -110,4 +110,4 @@ const page: React.FC<pageProps> = () => {
     // </MaxWidthWrapper>
   );
 };
-export default page;
+export default Page;

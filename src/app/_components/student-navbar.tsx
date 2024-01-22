@@ -5,7 +5,7 @@ import StudentSidebar from "./student-sidebar";
 import { Bell, Menu, Search } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import MobileStudentSidebar from "./mobile-student-navbar";
+import { MobileStudentSidebar } from "./mobile-student-navbar";
 
 const StudentNavbar = () => {
   return (

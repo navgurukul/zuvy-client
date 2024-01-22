@@ -17,9 +17,9 @@ function Doubt({ className, ...props }: DoubtProps) {
           <Image
             src={"/mentor.svg"}
             alt="logo"
-            // className="py-2"
-            width={"80"}
-            height={"80"}
+            className="py-2"
+            width={80}
+            height={80}
           />
           <div className="text-end">
             <p className="text-md font-bold text-white">

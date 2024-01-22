@@ -1,4 +1,5 @@
 "use client";
+
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { PartyPopper } from "lucide-react";
 
@@ -8,7 +9,7 @@ import { Stat } from "./_components/stat";
 import Schedule from "./_components/schedule";
 import Doubt from "./_components/doubt";
 
-function page() {
+function Page() {
   return (
     <div>
       <Heading />
@@ -42,4 +43,4 @@ function page() {
   );
 }
 
-export default page;
+export default Page;
