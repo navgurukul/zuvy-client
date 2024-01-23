@@ -1,15 +1,28 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./cources.module.css";
 import { Input } from "@/components/ui/input";
 
 const GeneralDetails: React.FC = () => {
   const [duration, setDuration] = useState<number | null>(null);
   const [language, setLanguage] = useState<string | null>(null);
+  const [bootcampTopic,setBootcampTopic] = useState<string | null>(null);
   const [courseData, setCourseData] = useState({
-    courseName: "",
-    topic: "",
+    id: 2,
+    name: "",
+    bootcampTopic: "",
     courseDescription: "",
   });
+
+  useEffect(() => {
+    fetch('http://localhost:5001/bootcamp/2')
+      .then(response => response.json())
+      .then(data => {
+        setCourseData(data);
+        setDuration(data.duration);
+        setLanguage(data.language);
+      })
+      .catch(error => console.error('Error fetching course details:', error));
+  }, []);
 
   const handleDurationChange = (months: number) => {
     setDuration(months);
@@ -26,9 +39,8 @@ const GeneralDetails: React.FC = () => {
 
   const handleSaveChanges = async () => {
     try {
-        //TODO: CHANGE THIS END POINT TO THE ORIGINAL ONE
-      const response = await fetch("API_ENDPOINT_FOR_POSTING_GENERAL_DETAILS", {
-        method: "POST",
+      const response = await fetch(`http://localhost:5001/bootcamp/2`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
@@ -43,13 +55,6 @@ const GeneralDetails: React.FC = () => {
         throw new Error("Failed to save changes");
       }
       console.log("Changes saved successfully");
-      setCourseData({
-        courseName: "",
-        topic: "",
-        courseDescription: "",
-      });
-      setDuration(null);
-      setLanguage(null);
     } catch (error) {
       console.error("Error saving changes:", error);
     }
@@ -75,7 +80,8 @@ const GeneralDetails: React.FC = () => {
           type="text"
           id="courseName"
           placeholder="Enter course name"
-          name="courseName"
+          name="name"
+          value={courseData.name}
           onChange={handleInputChange}
         />
       </div>
@@ -88,7 +94,8 @@ const GeneralDetails: React.FC = () => {
           type="text"
           id="topic"
           placeholder="Enter topic"
-          name="topic"
+          name="bootcampTopic"
+          value={courseData.bootcampTopic}
           onChange={handleInputChange}
         />
       </div>
@@ -102,6 +109,7 @@ const GeneralDetails: React.FC = () => {
           placeholder="Enter course description"
           className={styles.textBox}
           name="courseDescription"
+          value={courseData.courseDescription}
           onChange={handleInputChange}
         />
       </div>
@@ -111,32 +119,14 @@ const GeneralDetails: React.FC = () => {
           Duration (in months):
         </label>
 
-        <div className={styles.durationButtons}>
-          <button
-            onClick={() => handleDurationChange(6)}
-            className={`${styles.durationButton} ${
-              duration === 6 ? styles.active : ""
-            }`}
-          >
-            6
-          </button>
-          <button
-            onClick={() => handleDurationChange(12)}
-            className={`${styles.durationButton} ${
-              duration === 12 ? styles.active : ""
-            }`}
-          >
-            12
-          </button>
-          <button
-            onClick={() => handleDurationChange(18)}
-            className={`${styles.durationButton} ${
-              duration === 18 ? styles.active : ""
-            }`}
-          >
-            18
-          </button>
-        </div>
+        <Input
+          type="number"
+          id="duration"
+          placeholder="Enter duration in months"
+          name="duration"
+          value={duration || ""}
+          onChange={(e) => handleDurationChange(Number(e.target.value))}
+        />
       </div>
 
       <div className={styles.labelInputContainer}>

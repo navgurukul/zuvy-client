@@ -122,27 +122,14 @@ const Batches: React.FC = () => {
                     <label htmlFor="capEnrollment" className={styles.label}>
                       Cap Enrollment:
                     </label>
-
-                    <div className={styles.durationButtons}>
-                      <button
-                        onClick={() => handleCapChange(50)}
-                        className={`${styles.durationButton} ${cap === 50 ? styles.active : ""}`}
-                      >
-                        50
-                      </button>
-                      <button
-                        onClick={() => handleCapChange(100)}
-                        className={`${styles.durationButton} ${cap === 100 ? styles.active : ""}`}
-                      >
-                        100
-                      </button>
-                      <button
-                        onClick={() => handleCapChange(150)}
-                        className={`${styles.durationButton} ${cap === 150 ? styles.active : ""}`}
-                      >
-                        150
-                      </button>
-                    </div>
+                    <Input
+                      type="number"
+                      id="capEnrollment"
+                      placeholder="Enter cap enrollment"
+                      name="capEnrollment"
+                      value={cap || ""}
+                      onChange={(e) => setCap(Number(e.target.value))}
+                    />
                   </div>
                   <Button onClick={handleCreateBatch} className={styles.createCourseBtnDialog}>
                     Create Batch

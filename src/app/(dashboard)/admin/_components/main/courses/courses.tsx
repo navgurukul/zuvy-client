@@ -15,16 +15,20 @@ import {
 } from "@/components/ui/dialog";
 
 interface Course {
-  courseName: string;
+  name: string;
   learnersCount: number;
   date: string;
   image: string; // URL for the course image
+  id: string; 
 }
+
+
 
 const Courses: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<"all" | "active" | "completed">("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [courses, setCourses] = useState<Course[]>([]);
+  const [newCourseName, setNewCourseName] = useState<string>("");
 
   const handleFilterClick = (filter: "all" | "active" | "completed") => {
     setActiveFilter(filter);
@@ -34,17 +38,46 @@ const Courses: React.FC = () => {
     setSearchQuery(event.target.value);
   };
 
+  const handleNewCourseNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setNewCourseName(event.target.value);
+  };
+
+  const handleCreateCourse = () => {
+    fetch('http://localhost:5001/bootcamp', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: newCourseName,
+      }),
+    })
+      .then(response => response.json())
+      .then(data => {
+        setCourses(prevCourses => [...prevCourses, data]);
+      })
+      .catch(error => console.error('Error creating course:', error));
+  };
+
   useEffect(() => {
-    // TODO: Change the API_ENDPOINT TO ORIGINAL ONE.
-    fetch('BACKEND_API_ENDPOINT_FOR_FETCHING_COURSES ')
+    fetch('http://localhost:5001/bootcamp')
       .then(response => response.json())
       .then(data => setCourses(data))
       .catch(error => console.error('Error fetching courses:', error));
   }, []);
 
+  // const handleCourseClick = (courseId: string) => {
+  //   window.location.href = `course/${courseId}`;
+  // };
+
   const filteredCourses = courses.filter((course) =>
-    course.courseName.toLowerCase().includes(searchQuery.toLowerCase())
+    course.name && course.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  // const handleCardClick = (name: string, id: string) => {
+  //   onMenuItemClick(name);
+  //   courseId(id);
+  // };
+  
 
   return (
     <div>
@@ -69,10 +102,10 @@ const Courses: React.FC = () => {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle className={styles.newCourse}>New Course</DialogTitle>
-                <DialogDescription >
+                <DialogDescription>
                   <div style={{ marginBottom: '10px' }}>
-                    <label htmlFor="courseName" className={styles.dialogCourseName}>Course Name:</label>
-                    <input type="text" id="courseName" placeholder="Enter course name" className={styles.inputBox} />
+                    <label htmlFor="name" className={styles.dialogname}>Course Name:</label>
+                    <input type="text" id="name" placeholder="Enter course name" className={styles.inputBox} value={newCourseName} onChange={handleNewCourseNameChange}/>
                   </div>
                   <Button onClick={() => handleCreateCourse()} className={styles.createCourseBtnDialog}>
                     Create Course
@@ -137,16 +170,20 @@ const Courses: React.FC = () => {
             </div>
           ) : (
             filteredCourses.map((course, index) => (
-              <Card key={index} className={styles.cardContainer}>
+              <Card
+                key={index}
+                className={styles.cardContainer}
+                onClick={() => handleCardClick(course.name, course.id)}
+              >
                 <div className={styles.courseImageContainer}>
                   <img
-                    src={course.image}
-                    alt={`Course: ${course.courseName}`}
+                    src='https://t4.ftcdn.net/jpg/03/78/40/11/360_F_378401105_9LAka9cRxk5Ey2wwanxrLTFCN1U51DL0.jpg'
+                    alt={`Course: ${course.name}`}
                     className={styles.courseImage}
                   />
                 </div>
                 <div className={styles.courseDetails}>
-                  <span className={styles.courseNameText}>{course.courseName}</span>
+                  <span className={styles.nameText}>{course.name}</span>
                 </div>
                 <div className={styles.courseDetails}>
                   <span className={styles.learnersCount}>{course.learnersCount} Learners</span>
