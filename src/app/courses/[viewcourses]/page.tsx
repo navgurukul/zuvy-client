@@ -10,7 +10,10 @@ type Props = {};
 function Page({}: Props) {
   const crumbs = [
     { crumb: "My Courses", href: "/courses" },
-    { crumb: "AFE + Navgurukul Coding Bootcamp", href: "/courses/:id" },
+    {
+      crumb: "AFE + Navgurukul Coding Bootcamp",
+      href: "/courses/:course-name",
+    },
   ];
 
   return (
@@ -52,7 +55,7 @@ function Page({}: Props) {
                 <div>
                   <div className="flex items-center justify-start  ">
                     <Link
-                      href={"/"}
+                      href={"/:intro-to-variables"}
                       className="text-md font-semibold capitalize text-black"
                     >
                       Intro to Variables
@@ -83,12 +86,9 @@ function Page({}: Props) {
               <div className="w-full flex items-center justify-between gap-y-2  ">
                 <div>
                   <div className="flex items-center justify-start  ">
-                    <Link
-                      href={"/"}
-                      className="text-md font-semibold capitalize text-black"
-                    >
+                    <div className="text-md font-semibold capitalize text-black">
                       Intro to Variables
-                    </Link>
+                    </div>
                   </div>
                   <div className="flex items-center justify-start  ">
                     <p className="text-md font-semibold capitalize text-gray-600">
@@ -103,7 +103,7 @@ function Page({}: Props) {
               </div>
             </div>
             <div className="flex flex-start">
-              <Link href={"/courses/recordings/:id"}>
+              <Link href={"/courses/:course-name/recordings"}>
                 <div className="flex items-center">
                   <h1 className="text-lg p-1 font-semibold">
                     See All Classes and Recording
@@ -117,16 +117,16 @@ function Page({}: Props) {
             <div className="flex flex-start">
               <h1 className="text-lg p-1 font-semibold">Course Modules</h1>
             </div>
-            <div className="bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl  ">
+            <Link
+              href={"/courses/:course-name/:module-name"}
+              className="bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl  "
+            >
               <div className="w-full flex items-center justify-between gap-y-2  ">
                 <div className="flex gap-y-2 flex-col p-2  ">
                   <div className="flex items-center justify-start  ">
-                    <Link
-                      href={"/courses/coursemodule/:id"}
-                      className="text-md font-semibold capitalize text-black"
-                    >
+                    <div className="text-md font-semibold capitalize text-black">
                       Programming Basics 1
-                    </Link>
+                    </div>
                   </div>
                   <div className="flex items-center justify-start  ">
                     <p className="text-md font-semibold capitalize text-gray-600">
@@ -140,17 +140,17 @@ function Page({}: Props) {
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl  ">
+            </Link>
+            <Link
+              href={"/courses/:course-name/:module-name"}
+              className="bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl  "
+            >
               <div className="w-full flex items-center justify-between gap-y-2  ">
                 <div className="flex gap-y-2 flex-col p-2  ">
                   <div className="flex items-center justify-start  ">
-                    <Link
-                      href={"/"}
-                      className="text-md font-semibold capitalize text-black"
-                    >
+                    <div className="text-md font-semibold capitalize text-black">
                       Programming Basics 1
-                    </Link>
+                    </div>
                   </div>
                   <div className="flex items-center justify-start  ">
                     <p className="text-md font-semibold capitalize text-gray-600">
@@ -164,7 +164,7 @@ function Page({}: Props) {
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
 
             <div className="bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl  ">
               <div className="w-full flex items-center justify-between gap-y-2  ">
@@ -214,7 +214,7 @@ function Page({}: Props) {
             <h1 className="text-lg p-1 font-semibold">Upcoming Assignments</h1>
           </div>
           <div>
-            <div className="bg-gradient-to-bl my-3 text-start p-5 from-blue-50 to-violet-50 rounded-xl  ">
+            <div className="bg-gradient-to-bl mb-3 text-start p-5 from-blue-50 to-violet-50 rounded-xl  ">
               <Link
                 href={"/"}
                 className="text-md font-semibold capitalize text-black "
@@ -226,7 +226,7 @@ function Page({}: Props) {
                 Deadline 5 Feb 2024
               </p>
             </div>
-            <div className="bg-gradient-to-bl my-3 text-start p-5 from-blue-50 to-violet-50 rounded-xl  ">
+            <div className="bg-gradient-to-bl mb-3 text-start p-5 from-blue-50 to-violet-50 rounded-xl  ">
               <Link
                 href={"/"}
                 className="text-md font-semibold capitalize text-black"
