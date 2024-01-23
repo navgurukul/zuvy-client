@@ -1,33 +1,9 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ChevronRight, ChevronUp, Crown, MoveRight } from "lucide-react";
-// import { Switch } from "@/components/ui/switch"
-
-const notifications = [
-  {
-    title: "Your call has been confirmed.",
-    description: "1 hour ago",
-  },
-  {
-    title: "You have a new message!",
-    description: "1 hour ago",
-  },
-  {
-    title: "Your subscription is expiring soon!",
-    description: "2 hours ago",
-  },
-];
+import { ChevronRight, ChevronUp, Crown } from "lucide-react";
 
 type CardProps = React.ComponentProps<typeof Card>;
 
@@ -51,7 +27,7 @@ export function Stat({ className, ...props }: CardProps) {
           <div className="text-center mt-7 grid justify-items-center content-start">
             <Avatar>
               <AvatarImage src="https://github.com/shadcn.png" />
-              <AvatarFallback>Souvik Deb</AvatarFallback>
+              <AvatarFallback>Ankur</AvatarFallback>
             </Avatar>
             <p className="text-md font-bold mt-2">Ankur</p>
             <p className="text-4xl font-bold text-white">2</p>
@@ -63,7 +39,7 @@ export function Stat({ className, ...props }: CardProps) {
             />
             <Avatar className="w-16 h-16">
               <AvatarImage src="https://github.com/shadcn.png" />
-              <AvatarFallback>Souvik Deb</AvatarFallback>
+              <AvatarFallback>Priyom</AvatarFallback>
             </Avatar>
             <p className="text-md font-bold mt-2">Priyomjeet</p>
             <p className="text-8xl font-bold text-white">1</p>
@@ -71,9 +47,9 @@ export function Stat({ className, ...props }: CardProps) {
           <div className="text-center mt-7 grid justify-items-center content-start">
             <Avatar>
               <AvatarImage src="https://github.com/shadcn.png" />
-              <AvatarFallback>Souvik Deb</AvatarFallback>
+              <AvatarFallback>Prem</AvatarFallback>
             </Avatar>
-            <p className="text-md font-bold mt-2">Dixit</p>
+            <p className="text-md font-bold mt-2">Prem</p>
             <p className="text-4xl font-bold text-white">3</p>
           </div>
         </div>

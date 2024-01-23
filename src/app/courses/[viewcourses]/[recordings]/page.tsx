@@ -1,56 +1,22 @@
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
-import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import Breadcrumb from "@/components/ui/breadcrumb";
+import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
 type Props = {};
 
-function Recordings({}: Props) {
+function Page({}: Props) {
+  const crumbs = [
+    { crumb: "My Courses", href: "/courses" },
+    { crumb: "AFE + Navgurukul Coding Bootcamp", href: "/courses/:id" },
+    { crumb: " Classes and Recordings", href: "/courses/:id/:id" },
+  ];
+
   return (
     <MaxWidthWrapper>
-      <nav className='flex' aria-label='Breadcrumb'>
-        <ol className='inline-flex items-center space-x-1 md:space-x-3'>
-          <li className='inline-flex items-center'>
-            <Link
-              href={"/courses"}
-              className='ml-1 inline-flex text-sm font-medium text-gray-800 hover:underline md:ml-2'
-            >
-              My Courses
-            </Link>
-          </li>
-          <li>
-            <div className='flex items-center'>
-              <span className='mx-2.5 text-gray-800 '>/</span>
-              <Link
-                href={"/courses/:id"}
-                className='ml-1 text-sm font-medium text-gray-800 hover:underline md:ml-2'
-              >
-                {" "}
-                AFE + Navgurukul Coding Bootcamp
-              </Link>
-            </div>
-          </li>
-          <li>
-            <div className='flex items-center'>
-              <span className='mx-2.5 text-gray-800 '>/</span>
-              <Link
-                href={"/courses/:id/:id"}
-                className='ml-1 text-sm font-medium text-gray-800 hover:underline md:ml-2'
-              >
-                {" "}
-                Classes and Recordings
-              </Link>
-            </div>
-          </li>
-        </ol>
-      </nav>
-      <div className='w-full flex items-start ml-2 p-4 '>
-        <p className='flex items-center justify-center '>
-          <ChevronLeft />
-          <Link href={"/courses"}>Back To Course</Link>
-        </p>
-      </div>
-      <div className='gap-y-3 flex flex-col items-center mx-4 '>
+      <Breadcrumb crumbs={crumbs} />
+      <div className='gap-y-3 flex flex-col items-center mx-4 my-10'>
         <div className='flex left-0  '>
           <h1 className='text-lg p-1 font-semibold'>Upcoming Classes</h1>
         </div>
@@ -192,4 +158,4 @@ function Recordings({}: Props) {
   );
 }
 
-export default Recordings;
+export default Page;

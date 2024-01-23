@@ -3,36 +3,19 @@ import Link from "next/link";
 import { BookMinus, ChevronRight, Lock } from "lucide-react";
 
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
+import Breadcrumb from "@/components/ui/breadcrumb";
 
 type Props = {};
 
-function page({}: Props) {
+function Page({}: Props) {
+  const crumbs = [
+    { crumb: "My Courses", href: "/courses" },
+    { crumb: "AFE + Navgurukul Coding Bootcamp", href: "/courses/:id" },
+  ];
+
   return (
     <MaxWidthWrapper>
-      <nav className='flex' aria-label='Breadcrumb'>
-        <ol className='inline-flex items-center space-x-1 md:space-x-3'>
-          <li className='inline-flex items-center'>
-            <Link
-              href={"/courses"}
-              className='ml-1 inline-flex text-sm font-medium text-gray-800 hover:underline md:ml-2'
-            >
-              My Courses
-            </Link>
-          </li>
-          <li>
-            <div className='flex items-center'>
-              <span className='mx-2.5 text-gray-800 '>/</span>
-              <Link
-                href={"/courses/:id"}
-                className='ml-1 text-sm font-medium text-gray-800 hover:underline md:ml-2'
-              >
-                {" "}
-                AFE + Navgurukul Coding Bootcamp
-              </Link>
-            </div>
-          </li>
-        </ol>
-      </nav>
+      <Breadcrumb crumbs={crumbs} />
 
       <div className='md:grid grid-cols-2 lg:grid-cols-3 gap-10  my-10'>
         <div className='lg:col-span-2'>
@@ -261,4 +244,4 @@ function page({}: Props) {
   );
 }
 
-export default page;
+export default Page;
