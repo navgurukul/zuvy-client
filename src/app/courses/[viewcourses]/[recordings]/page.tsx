@@ -5,7 +5,7 @@ import React from "react";
 
 type Props = {};
 
-function page({}: Props) {
+function Recordings({}: Props) {
   return (
     <MaxWidthWrapper>
       <nav className='flex' aria-label='Breadcrumb'>
@@ -192,4 +192,4 @@ function page({}: Props) {
   );
 }
 
-export default page;
+export default Recordings;
