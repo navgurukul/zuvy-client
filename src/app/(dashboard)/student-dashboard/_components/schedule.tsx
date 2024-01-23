@@ -23,7 +23,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
       <div className="">
         <Card className={cn("text-start w-full", className)} {...props}>
           <CardHeader className="bg-muted">
-            <CardTitle>Upcoming sessions</CardTitle>
+            <CardTitle>Upcoming Sessions</CardTitle>
           </CardHeader>
           <CardContent className="grid p-3 gap-4">
             <div className="flex flex-wrap justify-between items-center p-4">
@@ -78,6 +78,27 @@ function Schedule({ className, ...props }: ScheduleProps) {
               <Button className="text-white bg-secondary">
                 Continue solving
               </Button>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className={cn("text-start w-full mt-3", className)} {...props}>
+          <CardHeader className="bg-muted">
+            <CardTitle>Upcoming Submissions</CardTitle>
+          </CardHeader>
+          <CardContent className="grid p-3 gap-4">
+            <div className="flex flex-wrap justify-between items-center p-4">
+              <div className="flex items-center">
+                <GraduationCap />
+                <p className="text-sm ml-2 font-medium leading-none">
+                  Quiz: Intro to variables
+                </p>
+              </div>
+              <div className="flex items-center max-sm:mt-2">
+                <CalendarClock />
+                <p className="text-sm ml-2 text-muted-foreground">
+                  5th Feb, 2024
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
