@@ -34,10 +34,10 @@ function page() {
           <Schedule />
         </div>
         <div className="max-sm:w-full">
-          <Stat />
+          {/* <Stat /> */}
+          <Doubt />
         </div>
       </div>
-      <Doubt className="lg:fixed -bottom-2 right-6 mt-2" />
     </div>
   );
 }
