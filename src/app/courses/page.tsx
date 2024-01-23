@@ -63,7 +63,10 @@ const Page: React.FC<pageProps> = () => {
                   <div className="bg-gray-400 h-1 w-full" />
                 </div>
               </Link>
-              <Link href={"courses/:id"} className="text-gray-900 text-base">
+              <Link
+                href={"courses/:course-name"}
+                className="text-gray-900 text-base"
+              >
                 <div className="bg-white rounded-lg border p-4">
                   <img
                     src="https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8amF2YXNjcmlwdHxlbnwwfHwwfHx8MA%3D%3D"
@@ -76,7 +79,7 @@ const Page: React.FC<pageProps> = () => {
                   <div className="bg-gray-400 h-1 w-full" />
                 </div>
               </Link>
-              <Link href={"courses/:id"} className="text-gray-900 text-base">
+              <Link href={"courses/AFE"} className="text-gray-900 text-base">
                 <div className="bg-white rounded-lg border p-4">
                   <img
                     src="https://images.unsplash.com/photo-1633933703119-5d25460ad829?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bXVzaWMlMjBwcm9kdWN0aW9ufGVufDB8fDB8fHww"
@@ -89,7 +92,7 @@ const Page: React.FC<pageProps> = () => {
                   <div className="bg-gray-400 h-1 w-full" />
                 </div>
               </Link>
-              <Link href={"courses/:id"} className="text-gray-900 text-base">
+              <Link href={"courses/AFE"} className="text-gray-900 text-base">
                 <div className="bg-white rounded-lg border p-4">
                   <img
                     src="https://plus.unsplash.com/premium_photo-1661499751432-a5ee116ae3f3?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTd8fHRhY3RpY3N8ZW58MHx8MHx8fDA%3D"
