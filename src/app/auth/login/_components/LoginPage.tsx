@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
-import { setCookie } from 'cookies-next';
+import { setCookie } from "cookies-next";
 import "./styles/login.css";
 
 type Props = {};
@@ -22,21 +22,16 @@ function LoginPage({}: Props) {
 
   const sendGoogleUserData = async (token: any) => {
     try {
-      const resp = await axios.get(
-        `${BASE_URL}/users/me`,
-        {
-          headers: {
-            accept: "application/json",
-            Authorization: token,
-          },
-        }
-      );
+      const resp = await axios.get(`${BASE_URL}/users/me`, {
+        headers: {
+          accept: "application/json",
+          Authorization: token,
+        },
+      });
       localStorage.setItem("AUTH", JSON.stringify(resp.data.user));
-      setCookie('user', 'student');
-      router.push("/student-dashboard"); 
-
-    }
-       catch (err) {
+      setCookie("user", "student");
+      router.push("/student");
+    } catch (err) {
       console.log(err);
     }
   };
@@ -51,7 +46,7 @@ function LoginPage({}: Props) {
       localStorage.setItem("loggedOutToken", JSON.stringify(loggedOutToken));
       localStorage.setItem("token", reverseJwtBody(tokenVal));
       sendGoogleUserData(reverseJwtBody(tokenVal));
-    }else{
+    } else {
       setLoading(false);
     }
 

@@ -13,7 +13,7 @@ import {
     {
       icon: Layout,
       label: "Dashboard",
-      href: "/student-dashboard",
+      href: "/student",
     },
     {
       icon: Compass,
