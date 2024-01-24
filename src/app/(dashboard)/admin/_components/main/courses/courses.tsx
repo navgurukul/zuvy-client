@@ -29,7 +29,7 @@ const Courses: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [courses, setCourses] = useState<Course[]>([]);
   const [newCourseName, setNewCourseName] = useState<string>("");
-
+  const MAIN_URL = process.env.MAIN_URL
   const handleFilterClick = (filter: "all" | "active" | "completed") => {
     setActiveFilter(filter);
   };
@@ -43,7 +43,7 @@ const Courses: React.FC = () => {
   };
 
   const handleCreateCourse = () => {
-    fetch('http://localhost:5001/bootcamp', {
+    fetch(`${MAIN_URL}/bootcamp`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -60,7 +60,7 @@ const Courses: React.FC = () => {
   };
 
   useEffect(() => {
-    fetch('http://localhost:5001/bootcamp')
+    fetch(`${MAIN_URL}/bootcamp`)
       .then(response => response.json())
       .then(data => setCourses(data))
       .catch(error => console.error('Error fetching courses:', error));
@@ -148,23 +148,28 @@ const Courses: React.FC = () => {
             <div className={styles.centeredContainer}>
               <h4 className={styles.firstCourseText}>Create your first course and share with students</h4>
               <Dialog>
-                <DialogTrigger>
-                  <Button variant="outline" className={styles.newCourseBtn}>
-                    {" "}
-                    + New Course
+            <DialogTrigger>
+              <Button className={styles.newCourseBtn}>
+                {" "}
+                + New Course
+              </Button>
+            </DialogTrigger>
+            <DialogOverlay />
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle className={styles.newCourse}>New Course</DialogTitle>
+                <DialogDescription>
+                  <div style={{ marginBottom: '10px' }}>
+                    <label htmlFor="name" className={styles.dialogname}>Course Name:</label>
+                    <input type="text" id="name" placeholder="Enter course name" className={styles.inputBox} value={newCourseName} onChange={handleNewCourseNameChange}/>
+                  </div>
+                  <Button onClick={() => handleCreateCourse()} className={styles.createCourseBtnDialog}>
+                    Create Course
                   </Button>
-                </DialogTrigger>
-                <DialogOverlay />
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>New Course</DialogTitle>
-                    <DialogDescription>
-                      This action cannot be undone. This will permanently delete your account
-                      and remove your data from our servers.
-                    </DialogDescription>
-                  </DialogHeader>
-                </DialogContent>
-              </Dialog>
+                </DialogDescription>
+              </DialogHeader>
+            </DialogContent>
+          </Dialog>
               <hr className={styles.hrLine} />
               <p className={styles.needHelpText}>Need help getting started? Checkout the tutorials below</p>
             </div>
