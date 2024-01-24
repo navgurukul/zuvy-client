@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import Loader from "../../_components/loader/Loader";
+import Sidebar from "../../_components/sidebar/Sidebar";
 type Props = {};
 
 export default function Page({}: Props) {
@@ -24,6 +25,13 @@ export default function Page({}: Props) {
   const onDisplayhandler = () => {
     setDisplay(!display);
   };
+  const SidearPropObj = {
+    Chapter1: "Video Intro to python",
+    Chapter2: "Video Intro to variables",
+    article: "Article What are constants ?",
+    Quiz: "Quiz",
+    codingProject: "Coding Project",
+  };
   return (
     <div className='flex'>
       <div>
@@ -32,63 +40,9 @@ export default function Page({}: Props) {
           className='flex flex-row justify-end p-3 items-center  hover:underline font-semibold cursor-pointer '
         >
           <ChevronLeft size={18} />
-          <h1 className='text-black'>Hide</h1>
+          <h1 className='text-black'>{display ? "Hide" : "Unhide"}</h1>
         </div>
-        {display && (
-          <aside
-            className={`flex h-screen w-64 flex-col overflow-y-auto border-r bg-white px-3 py-5 z-100 `}
-          >
-            <div className='mt-6 flex flex-1 flex-col justify-between '>
-              <nav className='-mx-3 space-y-6 '>
-                <div className='space-y-2 '>
-                  <label className='px-3 flex flex-start text-sm font-semibold uppercase text-black'>
-                    Chapter List
-                  </label>
-                  <a
-                    className='flex transform items-center rounded-lg px-3 py-2  transition-colors duration-300 hover:bg-gray-100 hover:text-gray-700'
-                    href='#'
-                  >
-                    <span className='mx-2 text-sm font-medium'>
-                      Video Intro to python
-                    </span>
-                  </a>
-                  <a
-                    className='flex transform items-center rounded-lg px-2 py-2  transition-colors duration-300 hover:bg-gray-100 hover:text-gray-700'
-                    href='#'
-                  >
-                    <span className='mx-2 text-sm font-medium'>
-                      Video Intro to Variables
-                    </span>
-                  </a>
-                  <a
-                    className='flex transform items-center rounded-lg px-3 py-2  transition-colors duration-300 hover:bg-gray-100 hover:text-gray-700'
-                    href='#'
-                  >
-                    <span className='mx-2 text-sm font-medium'>
-                      Article:What are constants?
-                    </span>
-                  </a>
-                  <a
-                    className='flex transform items-center rounded-lg px-3 py-2  transition-colors duration-300 hover:bg-gray-100 hover:text-gray-700'
-                    href='#'
-                  >
-                    <span className='mx-2 text-sm font-medium'>
-                      Quiz 10 Questoins{" "}
-                    </span>
-                  </a>
-                  <a
-                    className='flex transform items-center rounded-lg px-3 py-2  transition-colors duration-300 hover:bg-gray-100 hover:text-gray-700'
-                    href='#'
-                  >
-                    <span className='mx-2 text-sm font-medium'>
-                      Coding Project
-                    </span>
-                  </a>
-                </div>
-              </nav>
-            </div>
-          </aside>
-        )}
+        {display && <Sidebar {...SidearPropObj} />}
       </div>
       <div className='flex flex-col mx-auto'>
         <nav className='h-14 flex items-center justify-between z-10 sm:justify-between md:justify-between '>
