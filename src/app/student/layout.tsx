@@ -1,12 +1,7 @@
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import "../globals.css";
-
-<<<<<<<< HEAD:src/app/courses/layout.tsx
-========
-import "../../globals.css";
 import StudentSidebar from "@/app/_components/student-sidebar";
->>>>>>>> 4b89e9d (refactor: change pages to app):src/app/(dashboard)/student-dashboard/layout.tsx
 import StudentNavbar from "@/app/_components/student-navbar";
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 

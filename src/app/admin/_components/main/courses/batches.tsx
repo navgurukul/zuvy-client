@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import styles from "./cources.module.css";
+import Select from "react-select";
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -12,8 +13,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import Select from "react-select";
 
+import styles from "./cources.module.css";
 interface Course {
   groupName: string;
   learnersCount: number;
@@ -23,27 +24,32 @@ interface Course {
 
 const defaultCourses: Course[] = [
   {
-    groupName: 'Group1',
+    groupName: "Group1",
     learnersCount: 67,
-    date: '2022-01-12',
-    image: 'https://t4.ftcdn.net/jpg/03/78/40/11/360_F_378401105_9LAka9cRxk5Ey2wwanxrLTFCN1U51DL0.jpg',
+    date: "2022-01-12",
+    image:
+      "https://t4.ftcdn.net/jpg/03/78/40/11/360_F_378401105_9LAka9cRxk5Ey2wwanxrLTFCN1U51DL0.jpg",
   },
   {
-    groupName: 'Group2',
+    groupName: "Group2",
     learnersCount: 67,
-    date: '2022-02-20',
-    image: 'https://t4.ftcdn.net/jpg/03/78/40/11/360_F_378401105_9LAka9cRxk5Ey2wwanxrLTFCN1U51DL0.jpg',
+    date: "2022-02-20",
+    image:
+      "https://t4.ftcdn.net/jpg/03/78/40/11/360_F_378401105_9LAka9cRxk5Ey2wwanxrLTFCN1U51DL0.jpg",
   },
   {
-    groupName: 'Group3',
+    groupName: "Group3",
     learnersCount: 67,
-    date: '2022-01-12',
-    image: 'https://t4.ftcdn.net/jpg/03/78/40/11/360_F_378401105_9LAka9cRxk5Ey2wwanxrLTFCN1U51DL0.jpg',
+    date: "2022-01-12",
+    image:
+      "https://t4.ftcdn.net/jpg/03/78/40/11/360_F_378401105_9LAka9cRxk5Ey2wwanxrLTFCN1U51DL0.jpg",
   },
 ];
 
 const Batches: React.FC = () => {
-  const [activeFilter, setActiveFilter] = useState<"all" | "active" | "completed">("all");
+  const [activeFilter, setActiveFilter] = useState<
+    "all" | "active" | "completed"
+  >("all");
   const [cap, setCap] = useState<number | null>(null);
   const [dialogData, setDialogData] = useState({
     batchName: "",
@@ -56,8 +62,6 @@ const Batches: React.FC = () => {
     setActiveFilter(filter);
   };
 
- 
-
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setDialogData((prevData) => ({ ...prevData, [name]: value }));
@@ -65,17 +69,20 @@ const Batches: React.FC = () => {
 
   const handleCreateBatch = async () => {
     try {
-      const response = await fetch("BACKEND_API_ENDPOINT_FOR_CREATING_NEW_BATCH", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...dialogData,
-          instructor: selectedInstructor?.value,
-          capEnrollment: cap,
-        }),
-      });
+      const response = await fetch(
+        "BACKEND_API_ENDPOINT_FOR_CREATING_NEW_BATCH",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...dialogData,
+            instructor: selectedInstructor?.value,
+            capEnrollment: cap,
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to create batch");
@@ -101,30 +108,45 @@ const Batches: React.FC = () => {
     { value: "instructor3", label: "Sharma" },
     { value: "instructor4", label: "Tendulkar" },
     { value: "instructor5", label: "Dhawan" },
-    
   ];
 
   return (
     <div>
       <div className={styles.searchContainer}>
-        <Input type="text" placeholder="Search" className={styles.searchInput} />
+        <Input
+          type="text"
+          placeholder="Search"
+          className={styles.searchInput}
+        />
 
         <Dialog>
           <DialogTrigger>
-            <Button className={styles.newCourseBtn}>
-              + New Batch
-            </Button>
+            <Button className={styles.newCourseBtn}>+ New Batch</Button>
           </DialogTrigger>
           <DialogOverlay />
           <DialogContent>
             <DialogHeader>
               <DialogTitle className={styles.newCourse}>New Batch</DialogTitle>
               <DialogDescription>
-                <div style={{ marginBottom: '10px' }}>
-                  <label htmlFor="batchName" className={styles.dialogCourseName}>Batch Name:</label>
-                  <input type="text" id="batchName" placeholder="Enter batch name" className={styles.inputBox} onChange={handleInputChange} />
+                <div style={{ marginBottom: "10px" }}>
+                  <label
+                    htmlFor="batchName"
+                    className={styles.dialogCourseName}
+                  >
+                    Batch Name:
+                  </label>
+                  <input
+                    type="text"
+                    id="batchName"
+                    placeholder="Enter batch name"
+                    className={styles.inputBox}
+                    onChange={handleInputChange}
+                  />
                   <div className={styles.dialogCourseNameContainer}>
-                    <label htmlFor="instructor" className={styles.dialogCourseName}>
+                    <label
+                      htmlFor="instructor"
+                      className={styles.dialogCourseName}
+                    >
                       Instructor:
                     </label>
                     <Select
@@ -132,11 +154,23 @@ const Batches: React.FC = () => {
                       placeholder="Select an Instructor"
                       options={instructorOptions}
                       value={selectedInstructor}
-                      onChange={(selectedOption) => setSelectedInstructor(selectedOption)}
+                      onChange={(selectedOption) =>
+                        setSelectedInstructor(selectedOption)
+                      }
                     />
                   </div>
-                  <label htmlFor="courseCommencement" className={styles.dialogCourseName}>Course Commencement:</label>
-                  <input type="date" id="courseCommencement" className={styles.inputBox} onChange={handleInputChange} />
+                  <label
+                    htmlFor="courseCommencement"
+                    className={styles.dialogCourseName}
+                  >
+                    Course Commencement:
+                  </label>
+                  <input
+                    type="date"
+                    id="courseCommencement"
+                    className={styles.inputBox}
+                    onChange={handleInputChange}
+                  />
                   <label htmlFor="capEnrollment" className={styles.label}>
                     Cap Enrollment:
                   </label>
@@ -149,7 +183,10 @@ const Batches: React.FC = () => {
                     onChange={(e) => setCap(Number(e.target.value))}
                   />
                 </div>
-                <Button onClick={handleCreateBatch} className={styles.createCourseBtnDialog}>
+                <Button
+                  onClick={handleCreateBatch}
+                  className={styles.createCourseBtnDialog}
+                >
                   Create Batch
                 </Button>
               </DialogDescription>
@@ -193,7 +230,9 @@ const Batches: React.FC = () => {
               <span className={styles.groupNameText}>{course.groupName}</span>
             </div>
             <div className={styles.courseDetails}>
-              <span className={styles.learnersCount}>{course.learnersCount}{" "}Learners</span>
+              <span className={styles.learnersCount}>
+                {course.learnersCount} Learners
+              </span>
               <span>{course.date}</span>
             </div>
           </Card>
