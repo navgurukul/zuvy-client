@@ -7,10 +7,8 @@ interface CourseDetailsProps {
 }
 
 const CourseDetails: React.FC = () => {
-  const [activeFilter, setActiveFilter] = useState<"generalDetails" | "batches" | "curriculum" | "certificates">("generalDetails");
-
-
-  const handleFilterClick = (filter: "generalDetails" | "batches" | "curriculum" | "certificates") => {
+  const [activeFilter, setActiveFilter] = useState<"generalDetails" | "batches" | "curriculum" | "liveClasses">("generalDetails");
+  const handleFilterClick = (filter: "generalDetails" | "batches" | "curriculum" | "liveClasses") => {
     setActiveFilter(filter);
   };
 
@@ -41,10 +39,10 @@ const CourseDetails: React.FC = () => {
             Curriculum
           </span>
           <span
-            className={activeFilter === "certificates" ? `${styles.active}` : ""}
-            onClick={() => handleFilterClick("certificates")}
+            className={activeFilter === "liveClasses" ? `${styles.active}` : ""}
+            onClick={() => handleFilterClick("liveClasses")}
           >
-            Certificates
+            Live Classes
           </span>
         </div>
       </div>

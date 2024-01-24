@@ -1,6 +1,7 @@
 import React from "react";
 import { Home, Bell, Book, Database, User, BarChart, Cog, HelpCircle } from 'lucide-react';
 import styles from "./sidebar.module.css";
+import Image from "next/image";
 
 interface SidebarProps {
     onMenuItemClick: (menuItem: string) => void;
@@ -17,20 +18,27 @@ const Sidebar: React.FC<SidebarProps> = ({ onMenuItemClick, selectedMenuItem }) 
         { name: 'Reports', icon: <BarChart /> },
         { name: 'Settings', icon: <Cog /> },
         { name: 'Help', icon: <HelpCircle /> },
-      ];
+    ];
 
     return (
         <div className={styles.sidebar}>
             <div className={styles.logoContainer}>
-                <span>Logo</span>
+              
+                <Image
+                    src={"/logo.PNG"}
+                    alt="logo"
+                    // className="p-2"
+                    width={"60"}
+                    height={"60"}
+                />
+                
             </div>
             <div>
                 {menuItems.map((item, index) => (
                     <div
                         key={index}
-                        className={`${styles.sidebarItem} ${
-                            item.name === selectedMenuItem ? styles.selectedItem : ""
-                        }`}
+                        className={`${styles.sidebarItem} ${item.name === selectedMenuItem ? styles.selectedItem : ""
+                            }`}
                         onClick={() => onMenuItemClick(item.name)}
                     >
                         <span className={styles.sidebarIcon}>{item.icon}</span>

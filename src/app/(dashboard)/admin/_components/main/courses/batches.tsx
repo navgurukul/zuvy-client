@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import Select from "react-select";
 
 interface Course {
   groupName: string;
@@ -46,17 +47,16 @@ const Batches: React.FC = () => {
   const [cap, setCap] = useState<number | null>(null);
   const [dialogData, setDialogData] = useState({
     batchName: "",
-    instructor: "",
     courseCommencement: "",
     capEnrollment: null,
   });
+  const [selectedInstructor, setSelectedInstructor] = useState<any>(null);
 
   const handleFilterClick = (filter: "all" | "active" | "completed") => {
     setActiveFilter(filter);
   };
-  const handleCapChange = (capacity: number) => {
-    setCap(capacity);
-  };
+
+ 
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -65,7 +65,6 @@ const Batches: React.FC = () => {
 
   const handleCreateBatch = async () => {
     try {
-      //TODO:CHANGE TO ORIGINAL END POINT
       const response = await fetch("BACKEND_API_ENDPOINT_FOR_CREATING_NEW_BATCH", {
         method: "POST",
         headers: {
@@ -73,6 +72,7 @@ const Batches: React.FC = () => {
         },
         body: JSON.stringify({
           ...dialogData,
+          instructor: selectedInstructor?.value,
           capEnrollment: cap,
         }),
       });
@@ -80,65 +80,82 @@ const Batches: React.FC = () => {
       if (!response.ok) {
         throw new Error("Failed to create batch");
       }
+
       console.log("Batch created successfully");
+
       setDialogData({
         batchName: "",
-        instructor: "",
         courseCommencement: "",
         capEnrollment: null,
       });
       setCap(null);
+      setSelectedInstructor(null);
     } catch (error) {
       console.error("Error creating batch:", error);
     }
   };
 
+  const instructorOptions = [
+    { value: "instructor1", label: "Kohli" },
+    { value: "instructor2", label: "Dravid" },
+    { value: "instructor3", label: "Sharma" },
+    { value: "instructor4", label: "Tendulkar" },
+    { value: "instructor5", label: "Dhawan" },
+    
+  ];
+
   return (
     <div>
+      <div className={styles.searchContainer}>
+        <Input type="text" placeholder="Search" className={styles.searchInput} />
 
-      <div>
-        <div className={styles.searchContainer}>
-          <Input type="text" placeholder="Search" className={styles.searchInput} />
-
-          <Dialog>
-            <DialogTrigger>
-              <Button className={styles.newCourseBtn}>
-                {" "}
-                + New Batch
-              </Button>
-            </DialogTrigger>
-            <DialogOverlay />
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle className={styles.newCourse}>New Batch</DialogTitle>
-                <DialogDescription>
-                  <div style={{ marginBottom: '10px' }}>
-                    <label htmlFor="batchName" className={styles.dialogCourseName}>Batch Name:</label>
-                    <input type="text" id="batchName" placeholder="Enter batch name" className={styles.inputBox} onChange={handleInputChange} />
-                    <label htmlFor="instructor" className={styles.dialogCourseName}>Instructor:</label>
-                    <input type="text" id="instructor" placeholder="Enter Instructor name" className={styles.inputBox} onChange={handleInputChange} />
-                    <label htmlFor="courseCommencement" className={styles.dialogCourseName}>Course Commencement:</label>
-                    <input type="date" id="courseCommencement" className={styles.inputBox} onChange={handleInputChange} />
-                    <label htmlFor="capEnrollment" className={styles.label}>
-                      Cap Enrollment:
+        <Dialog>
+          <DialogTrigger>
+            <Button className={styles.newCourseBtn}>
+              + New Batch
+            </Button>
+          </DialogTrigger>
+          <DialogOverlay />
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className={styles.newCourse}>New Batch</DialogTitle>
+              <DialogDescription>
+                <div style={{ marginBottom: '10px' }}>
+                  <label htmlFor="batchName" className={styles.dialogCourseName}>Batch Name:</label>
+                  <input type="text" id="batchName" placeholder="Enter batch name" className={styles.inputBox} onChange={handleInputChange} />
+                  <div className={styles.dialogCourseNameContainer}>
+                    <label htmlFor="instructor" className={styles.dialogCourseName}>
+                      Instructor:
                     </label>
-                    <Input
-                      type="number"
-                      id="capEnrollment"
-                      placeholder="Enter cap enrollment"
-                      name="capEnrollment"
-                      value={cap || ""}
-                      onChange={(e) => setCap(Number(e.target.value))}
+                    <Select
+                      id="instructor"
+                      placeholder="Select an Instructor"
+                      options={instructorOptions}
+                      value={selectedInstructor}
+                      onChange={(selectedOption) => setSelectedInstructor(selectedOption)}
                     />
                   </div>
-                  <Button onClick={handleCreateBatch} className={styles.createCourseBtnDialog}>
-                    Create Batch
-                  </Button>
-                </DialogDescription>
-              </DialogHeader>
-            </DialogContent>
-          </Dialog>
-        </div>
+                  <label htmlFor="courseCommencement" className={styles.dialogCourseName}>Course Commencement:</label>
+                  <input type="date" id="courseCommencement" className={styles.inputBox} onChange={handleInputChange} />
+                  <label htmlFor="capEnrollment" className={styles.label}>
+                    Cap Enrollment:
+                  </label>
+                  <Input
+                    type="number"
+                    id="capEnrollment"
+                    placeholder="Enter cap enrollment"
+                    name="capEnrollment"
+                    value={cap || ""}
+                    onChange={(e) => setCap(Number(e.target.value))}
+                  />
+                </div>
+                <Button onClick={handleCreateBatch} className={styles.createCourseBtnDialog}>
+                  Create Batch
+                </Button>
+              </DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
       </div>
       <div className={styles.contentContainer}>
         <div className={styles.content}>
