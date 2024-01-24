@@ -12,9 +12,10 @@ const GeneralDetails: React.FC = () => {
     bootcampTopic: "",
     courseDescription: "",
   });
+  const MAIN_URL = process.env.MAIN_URL
 
   useEffect(() => {
-    fetch('http://localhost:5001/bootcamp/2')
+    fetch(`${MAIN_URL}/bootcamp/courseID`)
       .then(response => response.json())
       .then(data => {
         setCourseData(data);
@@ -39,7 +40,7 @@ const GeneralDetails: React.FC = () => {
 
   const handleSaveChanges = async () => {
     try {
-      const response = await fetch(`http://localhost:5001/bootcamp/2`, {
+      const response = await fetch(`${MAIN_URL}/bootcamp/courseID`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
