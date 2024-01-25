@@ -23,4 +23,4 @@ function MobileStudentSidebar() {
   );
 }
 
-export default MobileStudentSidebar;
+export { MobileStudentSidebar };
