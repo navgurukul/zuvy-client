@@ -6,6 +6,7 @@ import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 import Breadcrumb from "@/components/ui/breadcrumb";
 import CircularLoader from "../_components/circularLoader";
 import Loader from "../_components/Loader";
+import Image from "next/image";
 
 type Props = {};
 
@@ -190,9 +191,10 @@ function Page({}: Props) {
           </div>
           <div className="bg-gradient-to-bl p-3 from-blue-50 to-violet-50 flex rounded-xl  ">
             <div className="flex flex-col items-center justify-center p-4 gap-3">
-              <img
+              <Image
                 src="https://images.unsplash.com/photo-1580894732444-8ecded7900cd?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                 className="w-10 h-10 rounded-full "
+                alt="mentor profile pic"
               />
               <span className="text-lg font-semibold">Shilpa Mishra</span>
               <p>

@@ -11,7 +11,8 @@ import Heading from "../../header";
 
 import styles from "./cources.module.css";
 import NewCourseDialog from "./newCourseDialog";
-import api from "@/utils/axios.default";
+import api from "@/utils/axios.config";
+import Image from "next/image";
 interface Course {
   name: string;
   learnersCount: number;
@@ -168,7 +169,7 @@ const Courses: React.FC = () => {
                 // onClick={() => handleCardClick(course.name, course.id)}
               >
                 <div className={styles.courseImageContainer}>
-                  <img
+                  <Image
                     src="https://t4.ftcdn.net/jpg/03/78/40/11/360_F_378401105_9LAka9cRxk5Ey2wwanxrLTFCN1U51DL0.jpg"
                     alt={`Course: ${course.name}`}
                     className={styles.courseImage}

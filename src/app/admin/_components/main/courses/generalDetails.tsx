@@ -1,28 +1,36 @@
 import React, { useState, useEffect } from "react";
 import styles from "./cources.module.css";
 import { Input } from "@/components/ui/input";
+import api from "@/utils/axios.config";
+import Image from "next/image";
 
 const GeneralDetails: React.FC = () => {
   const [duration, setDuration] = useState<number | null>(null);
   const [language, setLanguage] = useState<string | null>(null);
-  const [bootcampTopic,setBootcampTopic] = useState<string | null>(null);
+  const [bootcampTopic, setBootcampTopic] = useState<string | null>(null);
   const [courseData, setCourseData] = useState({
     id: 2,
     name: "",
     bootcampTopic: "",
     courseDescription: "",
   });
-  const MAIN_URL = process.env.MAIN_URL
+  const MAIN_URL = process.env.MAIN_URL;
 
   useEffect(() => {
-    fetch(`${MAIN_URL}/bootcamp/courseID`)
-      .then(response => response.json())
-      .then(data => {
+    const fetchCourseDetails = async () => {
+      try {
+        const response = await api.get(`/bootcamp/courseID`); // Use relative path now
+        const data = response.data;
         setCourseData(data);
         setDuration(data.duration);
         setLanguage(data.language);
-      })
-      .catch(error => console.error('Error fetching course details:', error));
+      } catch (error) {
+        console.error("Error fetching course details:", error);
+        // Handle error gracefully, e.g., display an error message to the user
+      }
+    };
+
+    fetchCourseDetails();
   }, []);
 
   const handleDurationChange = (months: number) => {
@@ -33,7 +41,9 @@ const GeneralDetails: React.FC = () => {
     setLanguage(selectedLanguage);
   };
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = event.target;
     setCourseData((prevData) => ({ ...prevData, [name]: value }));
   };
@@ -63,7 +73,7 @@ const GeneralDetails: React.FC = () => {
 
   return (
     <div className={styles.centeredContainer}>
-      <img
+      <Image
         src="https://t4.ftcdn.net/jpg/03/78/40/11/360_F_378401105_9LAka9cRxk5Ey2wwanxrLTFCN1U51DL0.jpg"
         alt="Course Image"
         className={styles.courseImage}
