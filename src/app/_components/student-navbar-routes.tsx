@@ -12,42 +12,13 @@ import {
   Search,
   Slack,
   Bell,
+  CircleUser,
 } from "lucide-react";
 
 import { usePathname } from "next/navigation";
 
 import { SidebarItem } from "./sidebar-item";
-
-const guestRoutes = [
-  {
-    icon: Search,
-    label: "Search",
-    href: "/",
-  },
-  {
-    icon: Slack,
-    label: "Slack",
-    href: "/slack",
-  },
-  {
-    icon: Bell,
-    label: "Notifications",
-    href: "/notiication",
-  },
-];
-
-const teacherRoutes = [
-  {
-    icon: List,
-    label: "Courses",
-    href: "/teacher/courses",
-  },
-  {
-    icon: BarChart,
-    label: "Analytics",
-    href: "/teacher/analytics",
-  },
-];
+import { guestRoutes, teacherRoutes } from "@/lib/navbar-routes";
 
 // const commonRoutes = [
 //   {

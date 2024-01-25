@@ -18,7 +18,9 @@
     "axios": "^1.6.5",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "cookies-next": "^4.1.0",
     "date-fns": "^3.1.0",
+    "dotenv": "^16.4.0",
     "gapi": "^0.0.3",
     "gapi-script": "^1.2.0",
     "lucide-react": "^0.303.0",
@@ -26,6 +28,7 @@
     "react": "^18",
     "react-day-picker": "^8.10.0",
     "react-dom": "^18",
+    "react-select": "^5.8.0",
     "styled-components": "^6.1.6",
     "tailwind-merge": "^2.2.0",
     "tailwindcss-animate": "^1.0.7"

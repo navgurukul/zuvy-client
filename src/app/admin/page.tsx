@@ -1,10 +1,10 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import Sidebar from "./_components/sidebar/sidebar";
-import MainContent from './_components/main/main';
+import MainContent from "./_components/main/main";
 
 const Home: React.FC = () => {
-  const [selectedMenuItem, setSelectedMenuItem] = useState<string>('Home');
+  const [selectedMenuItem, setSelectedMenuItem] = useState<string>("Home");
 
   const handleMenuItemClick = (menuItem: string) => {
     setSelectedMenuItem(menuItem);
@@ -12,11 +12,13 @@ const Home: React.FC = () => {
 
   return (
     <div className="admin-container">
-      <Sidebar onMenuItemClick={handleMenuItemClick} selectedMenuItem={selectedMenuItem} />
+      <Sidebar
+        onMenuItemClick={handleMenuItemClick}
+        selectedMenuItem={selectedMenuItem}
+      />
       <MainContent selectedMenuItem={selectedMenuItem} />
     </div>
   );
 };
 
 export default Home;
-

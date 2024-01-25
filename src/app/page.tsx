@@ -1,5 +1,6 @@
-import React from "react";
-import LoginPage from "./_components/LoginPage";
+"use client";
+
+import LoginPage from "./auth/login/_components/LoginPage";
 
 export default function Home() {
   return (
