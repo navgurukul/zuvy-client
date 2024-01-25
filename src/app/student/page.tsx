@@ -20,15 +20,7 @@ function page() {
           to becoming a star programmer. Happy coding!
         </AlertDescription>
       </Alert>
-      {/* <div className="flex flex-wrap items-start my-3 gap-5">
-        <div className="flex-1">
-          <Schedule />
-        </div>
-        <div className="max-sm:w-full">
-          <Stat />
-          <Doubt className="mt-2" />
-        </div>
-      </div> */}
+
       <div className="flex flex-wrap items-stretch my-3 gap-5">
         <div className="flex-1">
           <Schedule />

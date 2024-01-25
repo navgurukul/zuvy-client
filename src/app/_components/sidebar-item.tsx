@@ -16,10 +16,8 @@ export const SidebarItem = ({ icon: Icon, label, href }: SidebarItemProps) => {
   const pathname = usePathname();
   const router = useRouter();
 
-  const isActive =
-    (pathname === "/" && href === "/") ||
-    pathname === href ||
-    pathname?.startsWith(`${href}/`);
+  const isActive = (pathname === "/" && href === "/") || pathname === href;
+  // || pathname?.startsWith(`${href}/`);
 
   const onClick = () => {
     if (label === "Logout") {
@@ -36,7 +34,7 @@ export const SidebarItem = ({ icon: Icon, label, href }: SidebarItemProps) => {
       className={cn(
         "flex items-center gap-x-2 text-slate-500 text-sm font-[500] pl-6 transition-all hover:text-slate-600 hover:bg-slate-300/20 w-full rounded-r-lg",
         isActive &&
-        "text-sky-700 bg-sky-200/20 hover:bg-sky-200/20 hover:text-sky-700 "
+          "text-sky-700 bg-sky-200/20 hover:bg-sky-200/20 hover:text-sky-700 "
       )}
     >
       <div className="flex items-center gap-x-2 py-4">

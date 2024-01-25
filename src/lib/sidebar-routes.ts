@@ -18,7 +18,7 @@ import {
     {
       icon: Compass,
       label: "Browse",
-      href: "/courses",
+      href: "/student/courses",
     },
     {
       icon: Code,
