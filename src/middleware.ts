@@ -3,7 +3,8 @@ import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
     const user = request.cookies.get("user")?.value ?? "false";
-    const   matcher = ['/', '/student-dashboard','/admin']
+    const   matcher = ['/', '/student-dashboard','/admin','/profile']
+    console.log(user)
 
     if(matcher.includes(request.nextUrl.pathname)) {
     if (user === "false") {
@@ -11,6 +12,9 @@ export function middleware(request: NextRequest) {
             return NextResponse.redirect(new URL('/', request.url));
         }
         if (request.nextUrl.pathname.startsWith('/admin')) {
+            return NextResponse.redirect(new URL('/', request.url));
+        }
+        if (request.nextUrl.pathname.startsWith('/profile')) {
             return NextResponse.redirect(new URL('/', request.url));
         }
     } else if (user === "student") {

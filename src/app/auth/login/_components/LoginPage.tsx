@@ -8,7 +8,7 @@ import "./styles/login.css";
 
 type Props = {};
 
-function LoginPage({}: Props) {
+function LoginPage({ }: Props) {
   function reverseJwtBody(jwt: string): string {
     const [header, body, signature] = jwt.split(".");
     const reversedBody = body.split("").reverse().join("");
@@ -32,11 +32,19 @@ function LoginPage({}: Props) {
         }
       );
       localStorage.setItem("AUTH", JSON.stringify(resp.data.user));
-      setCookie('user', 'student');
-      router.push("/student-dashboard"); 
+      console.log(resp.data.user.rolesList);
+      if (resp.data.user.rolesList.length !== 0 && resp.data.user.rolesList[0]) {
+        setCookie('user', resp.data.user.rolesList[0]);
+        if (resp.data.user.rolesList[0] === "admin") {
+          router.push("/admin");
+        } else {
+          setCookie('user', 'student');
+        }
+        router.push("/student-dashboard");
 
+      }
     }
-       catch (err) {
+    catch (err) {
       console.log(err);
     }
   };
@@ -51,7 +59,7 @@ function LoginPage({}: Props) {
       localStorage.setItem("loggedOutToken", JSON.stringify(loggedOutToken));
       localStorage.setItem("token", reverseJwtBody(tokenVal));
       sendGoogleUserData(reverseJwtBody(tokenVal));
-    }else{
+    } else {
       setLoading(false);
     }
 
