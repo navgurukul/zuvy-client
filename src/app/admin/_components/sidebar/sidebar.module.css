@@ -44,12 +44,12 @@
 
 .sidebarItem:hover {
     background-color: #ccc;
-    border-radius: 8px; 
+    border-radius: 5px; 
 }
 
 .selectedItem {
     background-color: #fff;
-    border-radius: 10px;
+    border-radius: 5px;
     display: flex;
     align-items: center;
     justify-content: center;

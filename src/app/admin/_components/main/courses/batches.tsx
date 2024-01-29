@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 
 import styles from "./cources.module.css";
+import Image from "next/image";
 interface Course {
   groupName: string;
   learnersCount: number;
@@ -220,7 +221,7 @@ const Batches: React.FC = () => {
         {defaultCourses.map((course, index) => (
           <Card key={index} className={styles.cardContainer}>
             <div className={styles.courseImageContainer}>
-              <img
+              <Image
                 src={course.image}
                 alt={`Course: ${course.groupName}`}
                 className={styles.courseImage}
