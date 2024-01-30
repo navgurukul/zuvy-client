@@ -25,10 +25,7 @@
     "cookies-next": "^4.1.0",
     "date-fns": "^3.1.0",
     "dotenv": "^16.4.0",
-<<<<<<< HEAD
-=======
     "framer-motion": "^11.0.2",
->>>>>>> cc57bebdcd2bb4e3ca09491824b30890acde8c11
     "gapi": "^0.0.3",
     "gapi-script": "^1.2.0",
     "lucide-react": "^0.303.0",

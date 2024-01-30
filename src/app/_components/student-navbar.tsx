@@ -91,11 +91,7 @@ const StudentNavbar = () => {
               ></path>
             </svg>
             <Bell />
-<<<<<<< HEAD
-            <Link href="/profile">
-=======
             <Link href="/student/profile">
->>>>>>> cc57bebdcd2bb4e3ca09491824b30890acde8c11
               <Avatar>
                 <AvatarImage src="https://github.com/shadcn.png" />
                 <AvatarFallback>NAME</AvatarFallback>

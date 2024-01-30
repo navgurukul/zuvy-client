@@ -1,23 +1,5 @@
 "use client";
 
-<<<<<<< HEAD
-import {
-  BarChart,
-  Compass,
-  Layout,
-  List,
-  MessageCircleQuestion,
-  MessagesSquare,
-  LogOut,
-  Code,
-  Search,
-  Slack,
-  Bell,
-  CircleUser,
-} from "lucide-react";
-
-=======
->>>>>>> cc57bebdcd2bb4e3ca09491824b30890acde8c11
 import { usePathname } from "next/navigation";
 
 import { SidebarItem } from "./sidebar-item";

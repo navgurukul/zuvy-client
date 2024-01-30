@@ -1,47 +1,33 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import styles from "./cources.module.css";
 import { Input } from "@/components/ui/input";
-<<<<<<< HEAD
-=======
 import api from "@/utils/axios.config";
 import Image from "next/image";
->>>>>>> cc57bebdcd2bb4e3ca09491824b30890acde8c11
+import { usePathname } from "next/navigation";
 
-const GeneralDetails: React.FC = () => {
+const GeneralDetails = ({ id }: { id: string }) => {
+  // misc
+
   const [duration, setDuration] = useState<number | null>(null);
   const [language, setLanguage] = useState<string | null>(null);
-<<<<<<< HEAD
-  const [bootcampTopic,setBootcampTopic] = useState<string | null>(null);
-=======
   const [bootcampTopic, setBootcampTopic] = useState<string | null>(null);
->>>>>>> cc57bebdcd2bb4e3ca09491824b30890acde8c11
   const [courseData, setCourseData] = useState({
     id: 2,
     name: "",
     bootcampTopic: "",
     courseDescription: "",
+    coverImage: "",
   });
-<<<<<<< HEAD
-  const MAIN_URL = process.env.MAIN_URL
-
-  useEffect(() => {
-    fetch(`${MAIN_URL}/bootcamp/courseID`)
-      .then(response => response.json())
-      .then(data => {
-        setCourseData(data);
-        setDuration(data.duration);
-        setLanguage(data.language);
-      })
-      .catch(error => console.error('Error fetching course details:', error));
-=======
   const MAIN_URL = process.env.MAIN_URL;
 
   useEffect(() => {
     const fetchCourseDetails = async () => {
       try {
-        const response = await api.get(`/bootcamp/courseID`); // Use relative path now
+        const response = await api.get(`/bootcamp/${id}`); // Use relative path now
         const data = response.data;
-        setCourseData(data);
+        setCourseData(data.bootcamp);
         setDuration(data.duration);
         setLanguage(data.language);
       } catch (error) {
@@ -51,7 +37,6 @@ const GeneralDetails: React.FC = () => {
     };
 
     fetchCourseDetails();
->>>>>>> cc57bebdcd2bb4e3ca09491824b30890acde8c11
   }, []);
 
   const handleDurationChange = (months: number) => {
@@ -62,13 +47,9 @@ const GeneralDetails: React.FC = () => {
     setLanguage(selectedLanguage);
   };
 
-<<<<<<< HEAD
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-=======
   const handleInputChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
->>>>>>> cc57bebdcd2bb4e3ca09491824b30890acde8c11
     const { name, value } = event.target;
     setCourseData((prevData) => ({ ...prevData, [name]: value }));
   };
@@ -97,16 +78,25 @@ const GeneralDetails: React.FC = () => {
   };
 
   return (
-    <div className={styles.centeredContainer}>
-<<<<<<< HEAD
-      <img
-=======
-      <Image
->>>>>>> cc57bebdcd2bb4e3ca09491824b30890acde8c11
-        src="https://t4.ftcdn.net/jpg/03/78/40/11/360_F_378401105_9LAka9cRxk5Ey2wwanxrLTFCN1U51DL0.jpg"
-        alt="Course Image"
-        className={styles.courseImage}
-      />
+    <div className="max-w-[400px] m-auto">
+      <div className="bg-muted flex justify-center rounded-sm my-3">
+        {courseData.coverImage ? (
+          <Image
+            src={courseData.coverImage}
+            alt={`Course: ${courseData.name}`}
+            className={styles.courseImage}
+            fill
+          />
+        ) : (
+          <Image
+            src={"/logo_white.png"}
+            alt="Course"
+            className={styles.courseImage}
+            width={100}
+            height={100}
+          />
+        )}
+      </div>
 
       <button type="submit" className={styles.uploadImageButton}>
         Upload course Image
