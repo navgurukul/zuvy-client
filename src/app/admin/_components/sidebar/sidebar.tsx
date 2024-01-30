@@ -34,10 +34,10 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <div className={styles.sidebar}>
-      <div className="flex justify-center mt-3 mb-6">
+      <div className='flex justify-center mt-3 mb-6'>
         <Image
           src={"/logo.PNG"}
-          alt="logo"
+          alt='logo'
           // className="p-2"
           width={"80"}
           height={"80"}

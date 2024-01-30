@@ -1,6 +1,6 @@
 import React from "react";
-
 import Image from "next/image";
+
 import { SidebarRoutes } from "./sidebar-routes";
 import { StudentSidebarRoutes } from "./student-navbar-routes";
 

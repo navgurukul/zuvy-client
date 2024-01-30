@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+
 import Sidebar from "./_components/sidebar/sidebar";
 import MainContent from "./_components/main/main";
 
@@ -11,7 +12,7 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="admin-container">
+    <div className='admin-container'>
       <Sidebar
         onMenuItemClick={handleMenuItemClick}
         selectedMenuItem={selectedMenuItem}
