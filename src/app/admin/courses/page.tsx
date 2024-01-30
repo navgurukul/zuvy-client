@@ -20,7 +20,7 @@ interface Course {
   name: string;
   learnersCount: number;
   date: string;
-  image: string; // URL for the course image
+  coverImage: string; // URL for the course image
   id: string;
 }
 
