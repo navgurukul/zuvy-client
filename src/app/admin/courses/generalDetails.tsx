@@ -37,7 +37,7 @@ const GeneralDetails = ({ id }: { id: string }) => {
     };
 
     fetchCourseDetails();
-  }, []);
+  }, [id]);
 
   const handleDurationChange = (months: number) => {
     setDuration(months);

@@ -64,7 +64,7 @@ function LoginPage({}: Props) {
     if (!localStorage.getItem("loggedOut")) {
       localStorage.setItem("loggedOut", String(false));
     }
-  }, []);
+  }, [sendGoogleUserData]);
 
   return (
     <>
