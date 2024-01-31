@@ -1,18 +1,13 @@
-"use client";
-import MaxWidthWrapper from "@/components/MaxWidthWrapper";
-import { ArrowRight, ChevronRight, Copy } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import Link from "next/link";
-import React, { useState } from "react";
+import React from "react";
 import { Video } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
 import Loader from "./_components/Loader";
 import Image from "next/image";
 
 type pageProps = {};
 
 const Page: React.FC<pageProps> = () => {
-  const [progress, setProgress] = useState(23);
-
   return (
     // <MaxWidthWrapper className=" flex flex-col ">
     <>

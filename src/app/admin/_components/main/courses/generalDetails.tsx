@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import styles from "./cources.module.css";
 import { Input } from "@/components/ui/input";
 import api from "@/utils/axios.config";
 import Image from "next/image";
+import styles from "./cources.module.css";
 
 const GeneralDetails: React.FC = () => {
+  const MAIN_URL = process.env.MAIN_URL;
   const [duration, setDuration] = useState<number | null>(null);
   const [language, setLanguage] = useState<string | null>(null);
   const [bootcampTopic, setBootcampTopic] = useState<string | null>(null);
@@ -14,7 +15,6 @@ const GeneralDetails: React.FC = () => {
     bootcampTopic: "",
     courseDescription: "",
   });
-  const MAIN_URL = process.env.MAIN_URL;
 
   useEffect(() => {
     const fetchCourseDetails = async () => {
@@ -74,67 +74,67 @@ const GeneralDetails: React.FC = () => {
   return (
     <div className={styles.centeredContainer}>
       <Image
-        src="https://t4.ftcdn.net/jpg/03/78/40/11/360_F_378401105_9LAka9cRxk5Ey2wwanxrLTFCN1U51DL0.jpg"
-        alt="Course Image"
+        src='https://t4.ftcdn.net/jpg/03/78/40/11/360_F_378401105_9LAka9cRxk5Ey2wwanxrLTFCN1U51DL0.jpg'
+        alt='Course Image'
         className={styles.courseImage}
       />
 
-      <button type="submit" className={styles.uploadImageButton}>
+      <button type='submit' className={styles.uploadImageButton}>
         Upload course Image
       </button>
 
       <div className={styles.labelInputContainer}>
-        <label htmlFor="courseName" className={styles.label}>
+        <label htmlFor='courseName' className={styles.label}>
           Name:
         </label>
         <Input
-          type="text"
-          id="courseName"
-          placeholder="Enter course name"
-          name="name"
+          type='text'
+          id='courseName'
+          placeholder='Enter course name'
+          name='name'
           value={courseData.name}
           onChange={handleInputChange}
         />
       </div>
 
       <div className={styles.labelInputContainer}>
-        <label htmlFor="topic" className={styles.label}>
+        <label htmlFor='topic' className={styles.label}>
           Topic:
         </label>
         <Input
-          type="text"
-          id="topic"
-          placeholder="Enter topic"
-          name="bootcampTopic"
+          type='text'
+          id='topic'
+          placeholder='Enter topic'
+          name='bootcampTopic'
           value={courseData.bootcampTopic}
           onChange={handleInputChange}
         />
       </div>
 
       <div className={styles.labelInputContainer}>
-        <label htmlFor="courseDescription" className={styles.label}>
+        <label htmlFor='courseDescription' className={styles.label}>
           Course Description:
         </label>
         <textarea
-          id="courseDescription"
-          placeholder="Enter course description"
+          id='courseDescription'
+          placeholder='Enter course description'
           className={styles.textBox}
-          name="courseDescription"
+          name='courseDescription'
           value={courseData.courseDescription}
           onChange={handleInputChange}
         />
       </div>
 
       <div className={styles.labelInputContainer}>
-        <label htmlFor="duration" className={styles.label}>
+        <label htmlFor='duration' className={styles.label}>
           Duration (in months):
         </label>
 
         <Input
-          type="number"
-          id="duration"
-          placeholder="Enter duration in months"
-          name="duration"
+          type='number'
+          id='duration'
+          placeholder='Enter duration in months'
+          name='duration'
           value={duration || ""}
           onChange={(e) => handleDurationChange(Number(e.target.value))}
         />
