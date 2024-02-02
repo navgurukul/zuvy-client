@@ -1,50 +1,56 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import styles from "./cources.module.css";
-import { Input } from "@/components/ui/input";
-import api from "@/utils/axios.config";
+import React from "react";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
 
-const GeneralDetails = ({ id }: { id: string }) => {
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import api from "@/utils/axios.config";
+import { LANGUAGES } from "@/utils/constant";
+
+import styles from "./cources.module.css";
+import { Label } from "@/components/ui/label";
+interface GeneralDetailsProps {
+  id: string;
+  courseData: {
+    id: string;
+    name: string;
+    bootcampTopic: string;
+    coverImage: string;
+    duration: number;
+    language: string;
+    capEnrollment: number;
+    // startDate: string;
+  };
+  setCourseData: React.Dispatch<
+    React.SetStateAction<{
+      id: string;
+      name: string;
+      bootcampTopic: string;
+      coverImage: string;
+      duration: number;
+      language: string;
+      capEnrollment: number;
+      // startDate: string;
+    }>
+  >;
+}
+
+const GeneralDetails: React.FC<GeneralDetailsProps> = ({
+  id,
+  courseData,
+  setCourseData,
+}) => {
   // misc
 
-  const [duration, setDuration] = useState<number | null>(null);
-  const [language, setLanguage] = useState<string | null>(null);
-  const [bootcampTopic, setBootcampTopic] = useState<string | null>(null);
-  const [courseData, setCourseData] = useState({
-    id: 2,
-    name: "",
-    bootcampTopic: "",
-    courseDescription: "",
-    coverImage: "",
-  });
-  const MAIN_URL = process.env.MAIN_URL;
+  // state and variables
+  const [date, setDate] = React.useState<Date | undefined>(new Date());
 
-  useEffect(() => {
-    const fetchCourseDetails = async () => {
-      try {
-        const response = await api.get(`/bootcamp/${id}`); // Use relative path now
-        const data = response.data;
-        setCourseData(data.bootcamp);
-        setDuration(data.duration);
-        setLanguage(data.language);
-      } catch (error) {
-        console.error("Error fetching course details:", error);
-        // Handle error gracefully, e.g., display an error message to the user
-      }
-    };
-
-    fetchCourseDetails();
-  }, [id]);
-
-  const handleDurationChange = (months: number) => {
-    setDuration(months);
-  };
+  // func
 
   const handleLanguageChange = (selectedLanguage: string) => {
-    setLanguage(selectedLanguage);
+    setCourseData({ ...courseData, language: selectedLanguage });
   };
 
   const handleInputChange = (
@@ -56,21 +62,24 @@ const GeneralDetails = ({ id }: { id: string }) => {
 
   const handleSaveChanges = async () => {
     try {
-      const response = await fetch(`${MAIN_URL}/bootcamp/courseID`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await api.patch(
+        `/bootcamp/${id}`,
+        {
+          name: courseData.name,
+          bootcampTopic: courseData.bootcampTopic,
+          coverImage: courseData.coverImage,
+          duration: courseData.duration,
+          language: courseData.language,
+          capEnrollment: courseData.capEnrollment,
+          // startDate: date,
         },
-        body: JSON.stringify({
-          ...courseData,
-          duration,
-          language,
-        }),
-      });
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-      if (!response.ok) {
-        throw new Error("Failed to save changes");
-      }
       console.log("Changes saved successfully");
     } catch (error) {
       console.error("Error saving changes:", error);
@@ -98,14 +107,12 @@ const GeneralDetails = ({ id }: { id: string }) => {
         )}
       </div>
 
-      <button type="submit" className={styles.uploadImageButton}>
-        Upload course Image
-      </button>
+      <Button variant={"outline"}>Upload course Image</Button>
 
       <div className={styles.labelInputContainer}>
-        <label htmlFor="courseName" className={styles.label}>
+        <Label htmlFor="courseName" className={styles.label}>
           Name:
-        </label>
+        </Label>
         <Input
           type="text"
           id="courseName"
@@ -117,9 +124,9 @@ const GeneralDetails = ({ id }: { id: string }) => {
       </div>
 
       <div className={styles.labelInputContainer}>
-        <label htmlFor="topic" className={styles.label}>
+        <Label htmlFor="topic" className={styles.label}>
           Topic:
-        </label>
+        </Label>
         <Input
           type="text"
           id="topic"
@@ -131,69 +138,69 @@ const GeneralDetails = ({ id }: { id: string }) => {
       </div>
 
       <div className={styles.labelInputContainer}>
-        <label htmlFor="courseDescription" className={styles.label}>
-          Course Description:
-        </label>
-        <textarea
-          id="courseDescription"
-          placeholder="Enter course description"
-          className={styles.textBox}
-          name="courseDescription"
-          value={courseData.courseDescription}
-          onChange={handleInputChange}
+        <Label htmlFor="startDate" className={styles.label}>
+          Start Date:
+        </Label>
+        <Calendar
+          id="startDate"
+          mode="single"
+          selected={date}
+          onSelect={setDate}
+          className="p-0 flex justify-center"
+          classNames={{ month: "rounded-md border p-3" }}
         />
       </div>
-
       <div className={styles.labelInputContainer}>
-        <label htmlFor="duration" className={styles.label}>
+        <Label htmlFor="duration" className={styles.label}>
           Duration (in months):
-        </label>
+        </Label>
 
         <Input
           type="number"
           id="duration"
           placeholder="Enter duration in months"
           name="duration"
-          value={duration || ""}
-          onChange={(e) => handleDurationChange(Number(e.target.value))}
+          value={courseData.duration || ""}
+          onChange={handleInputChange}
         />
       </div>
 
       <div className={styles.labelInputContainer}>
-        <label className={styles.label}>Language:</label>
+        <Label htmlFor="duration" className={styles.label}>
+          Cap Enrollment:
+        </Label>
+
+        <Input
+          type="number"
+          id="capEnrollment"
+          placeholder="Enter the enrollment cap"
+          name="capEnrollment"
+          value={courseData.capEnrollment || ""}
+          onChange={handleInputChange}
+        />
+      </div>
+
+      <div className={styles.labelInputContainer}>
+        <Label className={styles.label}>Language:</Label>
         <div>
-          <div className={styles.languageButtons}>
-            <button
-              onClick={() => handleLanguageChange("Hindi")}
-              className={`${styles.languageButton} ${
-                language === "Hindi" ? styles.active : ""
-              }`}
-            >
-              Hindi
-            </button>
-            <button
-              onClick={() => handleLanguageChange("English")}
-              className={`${styles.languageButton} ${
-                language === "English" ? styles.active : ""
-              }`}
-            >
-              English
-            </button>
-            <button
-              onClick={() => handleLanguageChange("Kannada")}
-              className={`${styles.languageButton} ${
-                language === "Kannada" ? styles.active : ""
-              }`}
-            >
-              Kannada
-            </button>
+          <div className="text-start mb-8">
+            {LANGUAGES.map((lang) => (
+              <button
+                onClick={() => handleLanguageChange(lang)}
+                className={` px-2 py-1 mr-3 rounded-sm ${
+                  courseData.language === lang
+                    ? "bg-muted-foreground text-white"
+                    : "bg-muted"
+                }`}
+              >
+                {lang}
+              </button>
+            ))}
           </div>
         </div>
       </div>
 
-      <button onClick={handleSaveChanges} className={styles.saveChangesButton}>
-        Save Changes
-      </button>
+      <Button onClick={handleSaveChanges}>Save Changes</Button>
     </div>
   );
 };
