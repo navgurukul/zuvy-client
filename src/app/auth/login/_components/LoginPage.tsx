@@ -8,7 +8,7 @@ import "./styles/login.css";
 
 type Props = {};
 
-function LoginPage({ }: Props) {
+function LoginPage({}: Props) {
   function reverseJwtBody(jwt: string): string {
     const [header, body, signature] = jwt.split(".");
     const reversedBody = body.split("").reverse().join("");
@@ -30,10 +30,13 @@ function LoginPage({ }: Props) {
       });
       localStorage.setItem("AUTH", JSON.stringify(resp.data.user));
       if (!resp.data.user.rolesList[0]) {
-        setCookie("secure_typeuser", JSON.stringify(btoa('student')));
+        setCookie("secure_typeuser", JSON.stringify(btoa("student")));
         return router.push("/student");
       } else if (resp.data.user.rolesList[0]) {
-        setCookie("secure_typeuser", JSON.stringify(btoa(resp.data.user.rolesList[0])));
+        setCookie(
+          "secure_typeuser",
+          JSON.stringify(btoa(resp.data.user.rolesList[0]))
+        );
         return router.push(`/${resp.data.user.rolesList[0]}`);
       }
     } catch (err) {
@@ -61,7 +64,7 @@ function LoginPage({ }: Props) {
     if (!localStorage.getItem("loggedOut")) {
       localStorage.setItem("loggedOut", String(false));
     }
-  }, []);
+  }, [sendGoogleUserData]);
 
   return (
     <>

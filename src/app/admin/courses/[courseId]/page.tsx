@@ -1,27 +1,32 @@
+"use client";
 import React, { useState } from "react";
-import styles from "./cources.module.css";
-import Batches from "./batches";
-import GeneralDetails from "./generalDetails";
-interface CourseDetailsProps {
+import styles from "../cources.module.css";
+import Batches from "../batches";
+import GeneralDetails from "../generalDetails";
+interface CourseDetailsProps {}
 
-}
-
-const CourseDetails: React.FC = () => {
-  const [activeFilter, setActiveFilter] = useState<"generalDetails" | "batches" | "curriculum" | "liveClasses">("generalDetails");
-  const handleFilterClick = (filter: "generalDetails" | "batches" | "curriculum" | "liveClasses") => {
+const Page = ({ params }: { params: { courseId: string } }) => {
+  const [activeFilter, setActiveFilter] = useState<
+    "generalDetails" | "batches" | "curriculum" | "liveClasses"
+  >("generalDetails");
+  const handleFilterClick = (
+    filter: "generalDetails" | "batches" | "curriculum" | "liveClasses"
+  ) => {
     setActiveFilter(filter);
   };
+
+  console.log("first", params.courseId);
 
   return (
     <div>
       <div className={styles.bootcampName}>Courses / AFE Bootcamp</div>
-      <h1 className={styles.bootcampHeading}>
-   AFE Bootcamp
-      </h1>
+      <h1 className={styles.bootcampHeading}>AFE Bootcamp</h1>
       <div className={styles.contentContainer}>
         <div className={styles.content}>
           <span
-            className={activeFilter === "generalDetails" ? `${styles.active}` : ""}
+            className={
+              activeFilter === "generalDetails" ? `${styles.active}` : ""
+            }
             onClick={() => handleFilterClick("generalDetails")}
           >
             General Details
@@ -46,20 +51,19 @@ const CourseDetails: React.FC = () => {
           </span>
         </div>
       </div>
-      <hr className={styles.hrLine}/>
+      <hr className={styles.hrLine} />
       {activeFilter === "generalDetails" && (
-      <div>
-        <GeneralDetails/>
-
-      </div>
+        <div>
+          <GeneralDetails id={params.courseId} />
+        </div>
       )}
       {activeFilter === "batches" && (
         <div>
-          <Batches/>
-          </div>
+          <Batches />
+        </div>
       )}
     </div>
   );
 };
 
-export default CourseDetails;
+export default Page;

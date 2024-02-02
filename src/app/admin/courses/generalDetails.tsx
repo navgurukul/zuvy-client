@@ -1,10 +1,15 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import styles from "./cources.module.css";
 import { Input } from "@/components/ui/input";
 import api from "@/utils/axios.config";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
-const GeneralDetails: React.FC = () => {
+const GeneralDetails = ({ id }: { id: string }) => {
+  // misc
+
   const [duration, setDuration] = useState<number | null>(null);
   const [language, setLanguage] = useState<string | null>(null);
   const [bootcampTopic, setBootcampTopic] = useState<string | null>(null);
@@ -13,15 +18,16 @@ const GeneralDetails: React.FC = () => {
     name: "",
     bootcampTopic: "",
     courseDescription: "",
+    coverImage: "",
   });
   const MAIN_URL = process.env.MAIN_URL;
 
   useEffect(() => {
     const fetchCourseDetails = async () => {
       try {
-        const response = await api.get(`/bootcamp/courseID`); // Use relative path now
+        const response = await api.get(`/bootcamp/${id}`); // Use relative path now
         const data = response.data;
-        setCourseData(data);
+        setCourseData(data.bootcamp);
         setDuration(data.duration);
         setLanguage(data.language);
       } catch (error) {
@@ -31,7 +37,7 @@ const GeneralDetails: React.FC = () => {
     };
 
     fetchCourseDetails();
-  }, []);
+  }, [id]);
 
   const handleDurationChange = (months: number) => {
     setDuration(months);
@@ -72,12 +78,25 @@ const GeneralDetails: React.FC = () => {
   };
 
   return (
-    <div className={styles.centeredContainer}>
-      <Image
-        src="https://t4.ftcdn.net/jpg/03/78/40/11/360_F_378401105_9LAka9cRxk5Ey2wwanxrLTFCN1U51DL0.jpg"
-        alt="Course Image"
-        className={styles.courseImage}
-      />
+    <div className="max-w-[400px] m-auto">
+      <div className="bg-muted flex justify-center rounded-sm my-3">
+        {courseData.coverImage ? (
+          <Image
+            src={courseData.coverImage}
+            alt={`Course: ${courseData.name}`}
+            className={styles.courseImage}
+            fill
+          />
+        ) : (
+          <Image
+            src={"/logo_white.png"}
+            alt="Course"
+            className={styles.courseImage}
+            width={100}
+            height={100}
+          />
+        )}
+      </div>
 
       <button type="submit" className={styles.uploadImageButton}>
         Upload course Image
