@@ -20,34 +20,34 @@ function LoginPage({}: Props) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  const sendGoogleUserData = async (token: any) => {
-    try {
-      const resp = await axios.get(`${BASE_URL}/users/me`, {
-        headers: {
-          accept: "application/json",
-          Authorization: token,
-        },
-      });
-      localStorage.setItem("AUTH", JSON.stringify(resp.data.user));
-      if (!resp.data.user.rolesList[0]) {
-        setCookie("secure_typeuser", JSON.stringify(btoa("student")));
-        return router.push("/student");
-      } else if (resp.data.user.rolesList[0]) {
-        setCookie(
-          "secure_typeuser",
-          JSON.stringify(btoa(resp.data.user.rolesList[0]))
-        );
-        return router.push(`/${resp.data.user.rolesList[0]}`);
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const tokenVal = urlParams.get("token");
     const loggedOutToken = urlParams.get("loggedOutToken");
+
+    const sendGoogleUserData = async (token: any) => {
+      try {
+        const resp = await axios.get(`${BASE_URL}/users/me`, {
+          headers: {
+            accept: "application/json",
+            Authorization: token,
+          },
+        });
+        localStorage.setItem("AUTH", JSON.stringify(resp.data.user));
+        if (!resp.data.user.rolesList[0]) {
+          setCookie("secure_typeuser", JSON.stringify(btoa("student")));
+          return router.push("/student");
+        } else if (resp.data.user.rolesList[0]) {
+          setCookie(
+            "secure_typeuser",
+            JSON.stringify(btoa(resp.data.user.rolesList[0]))
+          );
+          return router.push(`/${resp.data.user.rolesList[0]}`);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
 
     if (tokenVal) {
       setLoading(true);
@@ -64,7 +64,7 @@ function LoginPage({}: Props) {
     if (!localStorage.getItem("loggedOut")) {
       localStorage.setItem("loggedOut", String(false));
     }
-  }, [sendGoogleUserData]);
+  }, []);
 
   return (
     <>

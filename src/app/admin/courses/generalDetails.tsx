@@ -186,6 +186,7 @@ const GeneralDetails: React.FC<GeneralDetailsProps> = ({
           <div className="text-start mb-8">
             {LANGUAGES.map((lang) => (
               <button
+                key={lang}
                 onClick={() => handleLanguageChange(lang)}
                 className={` px-2 py-1 mr-3 rounded-sm ${
                   courseData.language === lang

@@ -94,13 +94,17 @@ const Page = ({ params }: { params: { courseId: string } }) => {
           <div className="text-start border-b-2 border-muted">
             <TabsList className="rounded-none rounded-t-sm ">
               {courseMenu.map(({ title, value }) => (
-                <TabsTrigger value={value}>{title}</TabsTrigger>
+                <TabsTrigger key={value} value={value}>
+                  {title}
+                </TabsTrigger>
               ))}
             </TabsList>
           </div>
           <div className="text-center mt-10">
             {courseMenu.map(({ component, value }) => (
-              <TabsContent value={value}>{component}</TabsContent>
+              <TabsContent key={value} value={value}>
+                {component}
+              </TabsContent>
             ))}
           </div>
         </Tabs>
