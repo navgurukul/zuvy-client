@@ -29,8 +29,16 @@ function LoginPage({}: Props) {
         },
       });
       localStorage.setItem("AUTH", JSON.stringify(resp.data.user));
-      setCookie("user", "student");
-      router.push("/student");
+      if (!resp.data.user.rolesList[0]) {
+        setCookie("secure_typeuser", JSON.stringify(btoa("student")));
+        return router.push("/student");
+      } else if (resp.data.user.rolesList[0]) {
+        setCookie(
+          "secure_typeuser",
+          JSON.stringify(btoa(resp.data.user.rolesList[0]))
+        );
+        return router.push(`/${resp.data.user.rolesList[0]}`);
+      }
     } catch (err) {
       console.log(err);
     }
@@ -56,7 +64,7 @@ function LoginPage({}: Props) {
     if (!localStorage.getItem("loggedOut")) {
       localStorage.setItem("loggedOut", String(false));
     }
-  }, []);
+  }, [sendGoogleUserData]);
 
   return (
     <>

@@ -1,25 +1,8 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 
-import Sidebar from "./_components/sidebar/sidebar";
-import MainContent from "./_components/main/main";
+function page() {
+  return <div>Home</div>;
+}
 
-const Home: React.FC = () => {
-  const [selectedMenuItem, setSelectedMenuItem] = useState<string>("Home");
-
-  const handleMenuItemClick = (menuItem: string) => {
-    setSelectedMenuItem(menuItem);
-  };
-
-  return (
-    <div className='admin-container'>
-      <Sidebar
-        onMenuItemClick={handleMenuItemClick}
-        selectedMenuItem={selectedMenuItem}
-      />
-      <MainContent selectedMenuItem={selectedMenuItem} />
-    </div>
-  );
-};
-
-export default Home;
+export default page;
