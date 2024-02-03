@@ -3,14 +3,14 @@
 import { usePathname } from "next/navigation";
 
 import { SidebarItem } from "./sidebar-item";
-import { commonRoutes, guestRoutes, teacherRoutes } from "@/lib/sidebar-routes";
+import { commonRoutes, guestRoutes, adminRoutes } from "@/lib/sidebar-routes";
 
 export const SidebarRoutes = () => {
   const pathname = usePathname();
 
-  const isTeacherPage = pathname?.includes("/teacher");
+  const isAdmin = pathname?.includes("/admin");
 
-  const routes = isTeacherPage ? teacherRoutes : guestRoutes;
+  const routes = isAdmin ? adminRoutes : guestRoutes;
 
   return (
     <div className="flex justify-between flex-col h-full">

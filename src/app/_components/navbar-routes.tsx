@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 
 import { SidebarItem } from "./sidebar-item";
-import { guestRoutes, teacherRoutes } from "@/lib/navbar-routes";
+import { adminRoutes, guestRoutes, teacherRoutes } from "@/lib/navbar-routes";
 
 // const commonRoutes = [
 //   {
@@ -13,12 +13,12 @@ import { guestRoutes, teacherRoutes } from "@/lib/navbar-routes";
 //   },
 // ];
 
-export const StudentSidebarRoutes = () => {
+export const MobileNavbarRoutes = () => {
   const pathname = usePathname();
 
-  const isTeacherPage = pathname?.includes("/teacher");
+  const isAdmin = pathname?.includes("/admin");
 
-  const routes = isTeacherPage ? teacherRoutes : guestRoutes;
+  const routes = isAdmin ? adminRoutes : guestRoutes;
 
   return (
     <div className="flex justify-between flex-col h-full">
