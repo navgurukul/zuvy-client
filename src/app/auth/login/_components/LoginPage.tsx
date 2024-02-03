@@ -5,10 +5,14 @@ import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { setCookie } from "cookies-next";
 import "./styles/login.css";
+import { saveStudent } from "@/redux/slices/userSlice";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/redux/store/store";
 
 type Props = {};
 
 function LoginPage({}: Props) {
+  const dispatch = useDispatch<AppDispatch>();
   function reverseJwtBody(jwt: string): string {
     const [header, body, signature] = jwt.split(".");
     const reversedBody = body.split("").reverse().join("");
@@ -18,37 +22,39 @@ function LoginPage({}: Props) {
   const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
-  const sendGoogleUserData = async (token: any) => {
-    try {
-      const resp = await axios.get(`${BASE_URL}/users/me`, {
-        headers: {
-          accept: "application/json",
-          Authorization: token,
-        },
-      });
-      console.log(resp.data.user);
-      localStorage.setItem("AUTH", JSON.stringify(resp.data.user));
-      if (!resp.data.user.rolesList[0]) {
-        setCookie("secure_typeuser", JSON.stringify(btoa("student")));
-        return router.push("/student");
-      } else if (resp.data.user.rolesList[0]) {
-        setCookie(
-          "secure_typeuser",
-          JSON.stringify(btoa(resp.data.user.rolesList[0]))
-        );
-        return router.push(`/${resp.data.user.rolesList[0]}`);
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
+  const router = useRouter();
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const tokenVal = urlParams.get("token");
     const loggedOutToken = urlParams.get("loggedOutToken");
+
+    const sendGoogleUserData = async (token: any) => {
+      try {
+        const resp = await axios.get(`${BASE_URL}/users/me`, {
+          headers: {
+            accept: "application/json",
+            Authorization: token,
+          },
+        });
+        dispatch(saveStudent(resp.data.user));
+        localStorage.setItem("AUTH", JSON.stringify(resp.data.user));
+
+        if (!resp.data.user.rolesList[0]) {
+          setCookie("secure_typeuser", JSON.stringify(btoa("student")));
+          return router.push("/student");
+        } else if (resp.data.user.rolesList[0]) {
+          setCookie(
+            "secure_typeuser",
+            JSON.stringify(btoa(resp.data.user.rolesList[0]))
+          );
+          return router.push(`/${resp.data.user.rolesList[0]}`);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
 
     if (tokenVal) {
       setLoading(true);

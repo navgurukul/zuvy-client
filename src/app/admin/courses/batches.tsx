@@ -24,27 +24,27 @@ interface Course {
 }
 
 const defaultCourses: Course[] = [
-  {
-    groupName: "Group1",
-    learnersCount: 67,
-    date: "2022-01-12",
-    image:
-      "https://t4.ftcdn.net/jpg/03/78/40/11/360_F_378401105_9LAka9cRxk5Ey2wwanxrLTFCN1U51DL0.jpg",
-  },
-  {
-    groupName: "Group2",
-    learnersCount: 67,
-    date: "2022-02-20",
-    image:
-      "https://t4.ftcdn.net/jpg/03/78/40/11/360_F_378401105_9LAka9cRxk5Ey2wwanxrLTFCN1U51DL0.jpg",
-  },
-  {
-    groupName: "Group3",
-    learnersCount: 67,
-    date: "2022-01-12",
-    image:
-      "https://t4.ftcdn.net/jpg/03/78/40/11/360_F_378401105_9LAka9cRxk5Ey2wwanxrLTFCN1U51DL0.jpg",
-  },
+  // {
+  //   groupName: "Group1",
+  //   learnersCount: 67,
+  //   date: "2022-01-12",
+  //   image:
+  //     "https://t4.ftcdn.net/jpg/03/78/40/11/360_F_378401105_9LAka9cRxk5Ey2wwanxrLTFCN1U51DL0.jpg",
+  // },
+  // {
+  //   groupName: "Group2",
+  //   learnersCount: 67,
+  //   date: "2022-02-20",
+  //   image:
+  //     "https://t4.ftcdn.net/jpg/03/78/40/11/360_F_378401105_9LAka9cRxk5Ey2wwanxrLTFCN1U51DL0.jpg",
+  // },
+  // {
+  //   groupName: "Group3",
+  //   learnersCount: 67,
+  //   date: "2022-01-12",
+  //   image:
+  //     "https://t4.ftcdn.net/jpg/03/78/40/11/360_F_378401105_9LAka9cRxk5Ey2wwanxrLTFCN1U51DL0.jpg",
+  // },
 ];
 
 const Batches: React.FC = () => {
