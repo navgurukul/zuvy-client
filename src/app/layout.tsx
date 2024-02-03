@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 // import Navbar from "@/app/_components/Navbar";
 import "./globals.css";
 import Head from "next/head";
+import { ReduxToolkitProvider } from "@/redux/Provider/provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -32,7 +33,7 @@ export default function RootLayout({
         )}
       >
         {/* <Navbar /> */}
-        {children}
+        <ReduxToolkitProvider>{children}</ReduxToolkitProvider>
       </body>
     </html>
   );
