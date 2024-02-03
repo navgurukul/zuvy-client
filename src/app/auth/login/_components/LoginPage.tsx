@@ -71,7 +71,7 @@ function LoginPage({}: Props) {
     if (!localStorage.getItem("loggedOut")) {
       localStorage.setItem("loggedOut", String(false));
     }
-  }, []);
+  }, [BASE_URL, router]);
 
   return (
     <>

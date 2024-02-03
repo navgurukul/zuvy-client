@@ -1,11 +1,15 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
-import styles from "../cources.module.css";
-import Batches from "../batches";
-import GeneralDetails from "../generalDetails";
+
+import Batches from "./_components/batches";
+import GeneralDetails from "./_components/generalDetails";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Breadcrumb from "@/components/ui/breadcrumb";
 import api from "@/utils/axios.config";
+
+import styles from "../_components/cources.module.css";
+import LiveClass from "./_components/liveClass";
 
 interface Page {}
 
@@ -48,7 +52,7 @@ const Page = ({ params }: { params: { courseId: string } }) => {
     {
       title: "Live Class",
       value: "liveClass",
-      // component: <Batches />,
+      component: <LiveClass />,
     },
     {
       title: "Settings",
