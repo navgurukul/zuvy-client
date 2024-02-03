@@ -22,6 +22,19 @@ const guestRoutes = [
       href: "/notiication",
     },
   ];
+
+  const adminRoutes = [
+    {
+      icon: CircleUser,
+      label: "Profile",
+      href: "/student/profile",
+    },
+    {
+      icon: Search,
+      label: "Search",
+      href: "/",
+    },
+  ];
   
   const teacherRoutes = [
     {
@@ -37,4 +50,4 @@ const guestRoutes = [
   ];
 
 
-  export {teacherRoutes, guestRoutes}
+  export {teacherRoutes, guestRoutes,adminRoutes}
