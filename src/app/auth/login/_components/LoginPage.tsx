@@ -2,12 +2,14 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
-import axios from "axios";
-import { Button } from "@/components/ui/button";
 import { setCookie } from "cookies-next";
+import axios from "axios";
+
+import { Button } from "@/components/ui/button";
 import { saveStudent } from "@/redux/slices/userSlice";
-import "./styles/login.css";
 import { AppDispatch } from "@/redux/store/store";
+
+import "./styles/login.css";
 
 type Props = {};
 
