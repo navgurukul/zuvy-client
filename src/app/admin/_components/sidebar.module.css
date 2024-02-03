@@ -6,6 +6,8 @@
     background: #e7e7e7;
     padding: 8px 16px;
     text-align: center;
+    height: 100vh;
+    position: fixed;
 }
 
 .sidebar:hover {
@@ -44,12 +46,12 @@
 
 .sidebarItem:hover {
     background-color: #ccc;
-    border-radius: 8px; 
+    border-radius: 5px; 
 }
 
 .selectedItem {
     background-color: #fff;
-    border-radius: 10px;
+    border-radius: 5px;
     display: flex;
     align-items: center;
     justify-content: center;

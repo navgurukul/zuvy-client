@@ -5,7 +5,7 @@ import StudentSidebar from "./student-sidebar";
 import { Bell, Menu, Search } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import MobileStudentSidebar from "./mobile-student-navbar";
+import { MobileStudentSidebar } from "./mobile-student-navbar";
 
 const StudentNavbar = () => {
   return (
@@ -91,7 +91,7 @@ const StudentNavbar = () => {
               ></path>
             </svg>
             <Bell />
-            <Link href="/profile">
+            <Link href="/student/profile">
               <Avatar>
                 <AvatarImage src="https://github.com/shadcn.png" />
                 <AvatarFallback>NAME</AvatarFallback>

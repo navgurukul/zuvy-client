@@ -15,10 +15,10 @@ export default function RootLayout({
 }) {
   return (
     <div
-      className={cn(
-        "min-h-screen text-center font-sans antialiased",
-        inter.className
-      )}
+    // className={cn(
+    //   "min-h-screen text-center font-sans antialiased",
+    //   inter.className
+    // )}
     >
       <StudentNavbar />
       <MaxWidthWrapper>{children}</MaxWidthWrapper>

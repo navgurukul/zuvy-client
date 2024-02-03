@@ -1,33 +1,31 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import { ChevronDown, Plus } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogOverlay,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import Heading from "../../header";
+import { Dialog, DialogOverlay, DialogTrigger } from "@/components/ui/dialog";
+import Heading from "../_components/header";
+import NewCourseDialog from "./_components/newCourseDialog";
+import api from "@/utils/axios.config";
 
-import styles from "./cources.module.css";
-import NewCourseDialog from "./newCourseDialog";
+import styles from "./_components/cources.module.css";
+
 interface Course {
   name: string;
   learnersCount: number;
   date: string;
-  image: string; // URL for the course image
+  coverImage: string; // URL for the course image
   id: string;
 }
 
 const Courses: React.FC = () => {
   // misc
-  const MAIN_URL = process.env.MAIN_URL;
+  const router = useRouter();
 
   // state and variables
   const [activeFilter, setActiveFilter] = useState<
@@ -58,38 +56,31 @@ const Courses: React.FC = () => {
       course.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleCreateCourse = () => {
-    fetch(`${MAIN_URL}/bootcamp`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: newCourseName,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setCourses((prevCourses) => [...prevCourses, data]);
-      })
-      .catch((error) => console.error("Error creating course:", error));
+  const handleCreateCourse = async () => {
+    try {
+      const response = await api.post("/bootcamp", { name: newCourseName });
+      const data = response.data;
+      setCourses((prevCourses) => [...prevCourses, data]);
+    } catch (error) {
+      console.error("Error creating course:", error);
+    }
+  };
+
+  const handleCardClick = (id: string) => {
+    router.push(`courses/${id}`);
   };
 
   // async
   useEffect(() => {
-    fetch(`${MAIN_URL}/bootcamp`)
-      .then((response) => response.json())
-      .then((data) => setCourses(data))
-      .catch((error) => console.error("Error fetching courses:", error));
+    try {
+      api.get("/bootcamp").then((response) => setCourses(response.data));
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+    }
   }, []);
 
   // const handleCourseClick = (courseId: string) => {
   //   window.location.href = `course/${courseId}`;
-  // };
-
-  // const handleCardClick = (name: string, id: string) => {
-  //   onMenuItemClick(name);
-  //   courseId(id);
   // };
 
   return (
@@ -147,7 +138,7 @@ const Courses: React.FC = () => {
             </span>
           </div>
         </div>
-        <div className={styles.courceContainer}>
+        <div className="my-5 flex justify-start gap-3">
           {filteredCourses.length === 0 ? (
             <div className={styles.centeredContainer}>
               <h4 className={styles.firstCourseText}>
@@ -176,15 +167,26 @@ const Courses: React.FC = () => {
             filteredCourses.map((course, index) => (
               <Card
                 key={index}
-                className={styles.cardContainer}
-                // onClick={() => handleCardClick(course.name, course.id)}
+                className="h-max w-[400px] cursor-pointer"
+                onClick={() => handleCardClick(course.id.toString())}
               >
-                <div className={styles.courseImageContainer}>
-                  <img
-                    src="https://t4.ftcdn.net/jpg/03/78/40/11/360_F_378401105_9LAka9cRxk5Ey2wwanxrLTFCN1U51DL0.jpg"
-                    alt={`Course: ${course.name}`}
-                    className={styles.courseImage}
-                  />
+                <div className="bg-muted flex justify-center">
+                  {course.coverImage ? (
+                    <Image
+                      src={course.coverImage}
+                      alt={`Course: ${course.name}`}
+                      className={styles.courseImage}
+                      fill
+                    />
+                  ) : (
+                    <Image
+                      src={"/logo_white.png"}
+                      alt={`Course: ${course.name}`}
+                      className={styles.courseImage}
+                      width={100}
+                      height={100}
+                    />
+                  )}
                 </div>
                 <div className={styles.courseDetails}>
                   <span className={styles.nameText}>{course.name}</span>
