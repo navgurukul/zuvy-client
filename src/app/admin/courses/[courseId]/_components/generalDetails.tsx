@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import api from "@/utils/axios.config";
 import { LANGUAGES } from "@/utils/constant";
-
-import styles from "./cources.module.css";
 import { Label } from "@/components/ui/label";
+
+import styles from "../../_components/cources.module.css";
+
 interface GeneralDetailsProps {
   id: string;
   courseData: {
@@ -110,9 +111,7 @@ const GeneralDetails: React.FC<GeneralDetailsProps> = ({
       <Button variant={"outline"}>Upload course Image</Button>
 
       <div className={styles.labelInputContainer}>
-        <Label htmlFor="courseName" className={styles.label}>
-          Name:
-        </Label>
+        <Label htmlFor="courseName">Name:</Label>
         <Input
           type="text"
           id="courseName"
@@ -124,9 +123,7 @@ const GeneralDetails: React.FC<GeneralDetailsProps> = ({
       </div>
 
       <div className={styles.labelInputContainer}>
-        <Label htmlFor="topic" className={styles.label}>
-          Topic:
-        </Label>
+        <Label htmlFor="topic">Topic:</Label>
         <Input
           type="text"
           id="topic"
@@ -138,9 +135,7 @@ const GeneralDetails: React.FC<GeneralDetailsProps> = ({
       </div>
 
       <div className={styles.labelInputContainer}>
-        <Label htmlFor="startDate" className={styles.label}>
-          Start Date:
-        </Label>
+        <Label htmlFor="startDate">Start Date:</Label>
         <Calendar
           id="startDate"
           mode="single"
@@ -151,9 +146,7 @@ const GeneralDetails: React.FC<GeneralDetailsProps> = ({
         />
       </div>
       <div className={styles.labelInputContainer}>
-        <Label htmlFor="duration" className={styles.label}>
-          Duration (in months):
-        </Label>
+        <Label htmlFor="duration">Duration (in months):</Label>
 
         <Input
           type="number"
@@ -166,9 +159,7 @@ const GeneralDetails: React.FC<GeneralDetailsProps> = ({
       </div>
 
       <div className={styles.labelInputContainer}>
-        <Label htmlFor="duration" className={styles.label}>
-          Cap Enrollment:
-        </Label>
+        <Label htmlFor="duration">Cap Enrollment:</Label>
 
         <Input
           type="number"
@@ -181,7 +172,7 @@ const GeneralDetails: React.FC<GeneralDetailsProps> = ({
       </div>
 
       <div className={styles.labelInputContainer}>
-        <Label className={styles.label}>Language:</Label>
+        <Label>Language:</Label>
         <div>
           <div className="text-start mb-8">
             {LANGUAGES.map((lang) => (
