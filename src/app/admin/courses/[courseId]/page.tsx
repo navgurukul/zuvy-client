@@ -26,7 +26,7 @@ const Page = ({ params }: { params: { courseId: string } }) => {
     bootcampTopic: "",
     // courseDescription: "",
     coverImage: "",
-    // startDate: "",
+    startTime: "",
     duration: 0,
     language: "The bootcamp language",
     capEnrollment: 0,
