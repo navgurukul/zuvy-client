@@ -1,6 +1,6 @@
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 
-import { useSelector } from "react-redux";
 import { RootState, useAppSelector } from "@/redux/store/store";
 import { Button } from "@/components/ui/button";
 
@@ -10,6 +10,7 @@ import api from "@/utils/axios.config";
 type Props = {};
 
 const Settings = (props: Props) => {
+  const router = useRouter();
   const courseID = useAppSelector(
     (state: RootState) => state.saveUserReducer.courseID
   );
@@ -18,6 +19,7 @@ const Settings = (props: Props) => {
     try {
       const response = await api.delete(`/bootcamp/${courseID}`);
       console.log(response.data);
+      router.push("/admin/courses");
     } catch (error) {
       console.error("Error deleting:", error);
     }

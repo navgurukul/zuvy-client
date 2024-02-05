@@ -93,7 +93,7 @@ const Page = ({ params }: { params: { courseId: string } }) => {
     };
 
     fetchCourseDetails();
-  }, [params.courseId]);
+  }, [params.courseId, dispatch]);
 
   return (
     <div>

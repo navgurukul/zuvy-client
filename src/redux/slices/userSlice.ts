@@ -1,4 +1,3 @@
-"use client";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface SaveUserState {
@@ -14,7 +13,7 @@ export const saveUser = createSlice({
   name: "saveUser",
   initialState,
   reducers: {
-    saveStudent: (state, action: PayloadAction<any>) => {
+    saveStudent: (state, action: PayloadAction<{}>) => {
       state.user = action.payload;
       console.log(state.user);
     },
