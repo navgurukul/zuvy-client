@@ -22,7 +22,7 @@ interface GeneralDetailsProps {
     duration: number;
     language: string;
     capEnrollment: number;
-    // startDate: string;
+    startTime: string;
   };
   setCourseData: React.Dispatch<
     React.SetStateAction<{
@@ -33,7 +33,7 @@ interface GeneralDetailsProps {
       duration: number;
       language: string;
       capEnrollment: number;
-      // startDate: string;
+      startTime: string;
     }>
   >;
 }
@@ -58,7 +58,9 @@ const GeneralDetails: React.FC<GeneralDetailsProps> = ({
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = event.target;
-    setCourseData((prevData) => ({ ...prevData, [name]: value }));
+    const numericValue = isNaN(Number(value)) ? value : parseInt(value);
+
+    setCourseData((prevData) => ({ ...prevData, [name]: numericValue }));
   };
 
   const handleSaveChanges = async () => {
@@ -73,6 +75,7 @@ const GeneralDetails: React.FC<GeneralDetailsProps> = ({
           language: courseData.language,
           capEnrollment: courseData.capEnrollment,
           // startDate: date,
+          startTime: date,
         },
         {
           headers: {
@@ -110,7 +113,7 @@ const GeneralDetails: React.FC<GeneralDetailsProps> = ({
 
       <Button variant={"outline"}>Upload course Image</Button>
 
-      <div className={styles.labelInputContainer}>
+      <div className="my-3 text-start">
         <Label htmlFor="courseName">Name:</Label>
         <Input
           type="text"
@@ -122,7 +125,7 @@ const GeneralDetails: React.FC<GeneralDetailsProps> = ({
         />
       </div>
 
-      <div className={styles.labelInputContainer}>
+      <div className="my-3 text-start">
         <Label htmlFor="topic">Topic:</Label>
         <Input
           type="text"
@@ -134,7 +137,7 @@ const GeneralDetails: React.FC<GeneralDetailsProps> = ({
         />
       </div>
 
-      <div className={styles.labelInputContainer}>
+      <div className="my-3 text-start">
         <Label htmlFor="startDate">Start Date:</Label>
         <Calendar
           id="startDate"
@@ -145,7 +148,7 @@ const GeneralDetails: React.FC<GeneralDetailsProps> = ({
           classNames={{ month: "rounded-md border p-3" }}
         />
       </div>
-      <div className={styles.labelInputContainer}>
+      <div className="my-3 text-start">
         <Label htmlFor="duration">Duration (in months):</Label>
 
         <Input
@@ -158,7 +161,7 @@ const GeneralDetails: React.FC<GeneralDetailsProps> = ({
         />
       </div>
 
-      <div className={styles.labelInputContainer}>
+      <div className="my-3 text-start">
         <Label htmlFor="duration">Cap Enrollment:</Label>
 
         <Input
@@ -171,7 +174,7 @@ const GeneralDetails: React.FC<GeneralDetailsProps> = ({
         />
       </div>
 
-      <div className={styles.labelInputContainer}>
+      <div className="my-3 text-start">
         <Label>Language:</Label>
         <div>
           <div className="text-start mb-8">
