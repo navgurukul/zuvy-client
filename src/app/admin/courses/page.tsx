@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { ChevronDown, Plus } from "lucide-react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 import { Input } from "@/components/ui/input";
@@ -12,9 +11,9 @@ import { Dialog, DialogOverlay, DialogTrigger } from "@/components/ui/dialog";
 import Heading from "../_components/header";
 import NewCourseDialog from "./_components/newCourseDialog";
 import api from "@/utils/axios.config";
+import OptimizedImageWithFallback from "@/components/ImageWithFallback";
 
 import styles from "./_components/cources.module.css";
-import OptimizedImageWithFallback from "@/components/ImageWithFallback";
 
 interface Course {
   name: string;
@@ -51,12 +50,6 @@ const Courses: React.FC = () => {
     setNewCourseName(event.target.value);
   };
 
-  const filteredCourses = courses.filter(
-    (course) =>
-      course.name &&
-      course.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   const handleCreateCourse = async () => {
     try {
       const response = await api.post("/bootcamp", { name: newCourseName });
@@ -80,10 +73,6 @@ const Courses: React.FC = () => {
     }
   }, []);
 
-  // const handleCourseClick = (courseId: string) => {
-  //   window.location.href = `course/${courseId}`;
-  // };
-
   return (
     <div>
       <Heading title={"Courses"} />
@@ -98,10 +87,10 @@ const Courses: React.FC = () => {
           />
           <Dialog>
             <DialogTrigger>
-              <Button className="text-white bg-secondary">
+              <div className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-secondary text-white hover:bg-primary h-10 px-4 py-2">
                 <Plus className="w-5 mr-2" />
                 <p>New Course</p>
-              </Button>
+              </div>
             </DialogTrigger>
             <DialogOverlay />
             <NewCourseDialog
@@ -140,17 +129,17 @@ const Courses: React.FC = () => {
           </div>
         </div>
         <div className="my-5 flex justify-center items-center">
-          {filteredCourses.length === 0 ? (
+          {courses.length === 0 ? (
             <div className="mt-24">
               <h4 className={styles.firstCourseText}>
                 Create your first course and share with students
               </h4>
               <Dialog>
                 <DialogTrigger>
-                  <Button className="text-white bg-secondary">
+                  <div className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-secondary text-white hover:bg-primary h-10 px-4 py-2">
                     <Plus className="w-5 mr-2" />
                     <p>New Course</p>
-                  </Button>
+                  </div>
                 </DialogTrigger>
                 <DialogOverlay />
                 <NewCourseDialog
@@ -166,7 +155,7 @@ const Courses: React.FC = () => {
             </div>
           ) : (
             <div className="grid grid-cols-3 gap-3">
-              {filteredCourses.map((course, index) => (
+              {courses.map((course, index) => (
                 <Card
                   key={index}
                   className="h-max w-[400px] cursor-pointer"
@@ -179,24 +168,6 @@ const Courses: React.FC = () => {
                       fallBackSrc={"/logo_white.png"}
                       className={styles.courseImage}
                     />
-
-                    {/* {course.coverImage ? (
-                      <Image
-                        src={`/${course.coverImage}`}
-                        alt={`${course.name}`}
-                        className={styles.courseImage}
-                        fill
-                        onError={}
-                      />
-                    ) : (
-                      <Image
-                        src={"/logo_white.png"}
-                        alt={`${course.name}`}
-                        className={styles.courseImage}
-                        width={100}
-                        height={100}
-                      />
-                    )} */}
                   </div>
                   <div className={styles.courseDetails}>
                     <span className={styles.nameText}>{course.name}</span>
