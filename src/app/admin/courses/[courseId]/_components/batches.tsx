@@ -223,7 +223,7 @@ const Batches: React.FC = () => {
           <Card key={index} className={styles.cardContainer}>
             <div className={styles.courseImageContainer}>
               <Image
-                src={course.image}
+                src={`/${course.image}`}
                 alt={`Course: ${course.groupName}`}
                 className={styles.courseImage}
               />

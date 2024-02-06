@@ -6,7 +6,7 @@ import { useDispatch } from "react-redux";
 import { saveCourseId } from "@/redux/slices/userSlice";
 import { AppDispatch } from "@/redux/store/store";
 import Batches from "./_components/batches";
-import GeneralDetails from "./_components/generalDetails";
+// import GeneralDetails from "./_components/generalDetails";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Breadcrumb from "@/components/ui/breadcrumb";
 import api from "@/utils/axios.config";
@@ -15,6 +15,7 @@ import styles from "../_components/cources.module.css";
 import LiveClass from "./_components/liveClass";
 import Settings from "./_components/settings";
 import Students from "./_components/students";
+import { GeneralDetails } from "./_components/generalDetails";
 
 interface Page {}
 
@@ -27,7 +28,7 @@ const Page = ({ params }: { params: { courseId: string } }) => {
     bootcampTopic: "",
     // courseDescription: "",
     coverImage: "",
-    // startDate: "",
+    startTime: "",
     duration: 0,
     language: "The bootcamp language",
     capEnrollment: 0,
@@ -53,7 +54,7 @@ const Page = ({ params }: { params: { courseId: string } }) => {
     {
       title: "Curriculum",
       value: "curriculum",
-      // component: <Batches />,
+      // component: <InputForm />,
     },
     {
       title: "Live Class",
