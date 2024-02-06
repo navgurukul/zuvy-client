@@ -86,11 +86,11 @@ const Courses: React.FC = () => {
             onChange={handleSearchChange}
           />
           <Dialog>
-            <DialogTrigger>
-              <div className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-secondary text-white hover:bg-primary h-10 px-4 py-2">
+            <DialogTrigger asChild>
+              <Button className="text-white bg-secondary">
                 <Plus className="w-5 mr-2" />
                 <p>New Course</p>
-              </div>
+              </Button>
             </DialogTrigger>
             <DialogOverlay />
             <NewCourseDialog
@@ -135,11 +135,11 @@ const Courses: React.FC = () => {
                 Create your first course and share with students
               </h4>
               <Dialog>
-                <DialogTrigger>
-                  <div className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-secondary text-white hover:bg-primary h-10 px-4 py-2">
+                <DialogTrigger asChild>
+                  <Button className="text-white bg-secondary">
                     <Plus className="w-5 mr-2" />
                     <p>New Course</p>
-                  </div>
+                  </Button>
                 </DialogTrigger>
                 <DialogOverlay />
                 <NewCourseDialog
