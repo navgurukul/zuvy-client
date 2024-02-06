@@ -77,12 +77,6 @@
   margin-bottom: 24px;
 }
 
-.courseImage {
-  width: 100%;
-  height: 245px;
-
-}
-
 .cardContent {
   padding: 10px;
   text-align: left;
@@ -154,11 +148,7 @@
   margin-bottom: 20px;
 }
 
-.centeredContainer {
-  display: flex;
-  flex-direction: column;
 
-}
 
 .hrLine {
   width: 100%;
@@ -167,10 +157,7 @@
   border: 1px solid #ccc;
 }
 
-.centeredContainer {
-  max-width: 400px;
-  margin: auto;
-}
+
 
 .courseImage {
   width: auto;

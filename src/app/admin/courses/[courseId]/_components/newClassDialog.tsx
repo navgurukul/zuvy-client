@@ -13,6 +13,8 @@ import { Label } from "@/components/ui/label";
 import { Combobox } from "@/components/ui/combobox";
 import { Calendar } from "@/components/ui/calendar";
 import { ENROLLMENT_CAP } from "@/utils/constant";
+import { Input } from "@/components/ui/input";
+import CalendarInput from "@/app/_components/calendarInput";
 
 // interface newClassDialogProps {
 //   newCourseName: string;
@@ -47,7 +49,7 @@ const data = [
 
 const NewClassDialog = ({}) => {
   // state and variables
-  const [date, setDate] = React.useState<Date | undefined>(new Date());
+  const [date, setDate] = React.useState<Date>(new Date());
   const [cap, setCap] = React.useState<number>(50);
 
   const handleCap = (value: number) => {
@@ -61,11 +63,10 @@ const NewClassDialog = ({}) => {
         <DialogDescription>
           <div className="my-6">
             <Label htmlFor="name">Batch Name:</Label>
-            <input
+            <Input
               type="text"
               id="name"
               placeholder="Enter course name"
-              className={styles.inputBox}
               value={"New Class"}
             />
           </div>
@@ -73,8 +74,8 @@ const NewClassDialog = ({}) => {
             <Label htmlFor="date">Instructor:</Label>
             <Combobox data={data} title={"Select Instructor"} />
           </div>
-          <div className="my-6">
-            <Label htmlFor="name">Course Commencement:</Label>
+          {/* <div className="my-6">
+            <Label htmlFor="name">Date:</Label>
             <Calendar
               id="startDate"
               mode="single"
@@ -83,8 +84,18 @@ const NewClassDialog = ({}) => {
               className="p-0 flex justify-center"
               classNames={{ month: "rounded-md border p-3" }}
             />
-          </div>
+          </div> */}
 
+          <CalendarInput date={date} setDate={setDate} />
+          <div className="my-6">
+            <Label htmlFor="time">Time:</Label>
+            <Input
+              type="text"
+              id="time"
+              placeholder="Enter Time"
+              // value=
+            />
+          </div>
           <div className={styles.labelInputContainer}>
             <Label>Enrollment Cap:</Label>
             <div>
@@ -99,7 +110,7 @@ const NewClassDialog = ({}) => {
                         : "bg-muted"
                     }`}
                   >
-                    {cap}
+                    {capValue}
                   </button>
                 ))}
               </div>
