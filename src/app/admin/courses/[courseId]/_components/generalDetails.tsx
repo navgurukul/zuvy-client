@@ -35,12 +35,12 @@ import { LANGUAGES } from "@/utils/constant";
 import api from "@/utils/axios.config";
 
 const FormSchema = z.object({
-  name: z.string().optional(),
+  name: z.string(),
   bootcampTopic: z.string(),
   //   coverImage: z.string().min(2, {
   //     message: "Username must be at least 2 characters.",
   //   }),
-  duration: z.coerce.number().optional(),
+  duration: z.string().optional(),
   language: z.string(),
   capEnrollment: z.coerce.number().int().positive().optional(),
   startTime: z.date().optional(),
@@ -53,10 +53,10 @@ interface GeneralDetailsProps {
     name: string;
     bootcampTopic: string;
     coverImage: string;
-    duration: number;
+    duration: string;
     language: string;
     capEnrollment: number;
-    startTime: string;
+    startTime: Date;
   };
   setCourseData: React.Dispatch<
     React.SetStateAction<{
@@ -64,10 +64,10 @@ interface GeneralDetailsProps {
       name: string;
       bootcampTopic: string;
       coverImage: string;
-      duration: number;
+      duration: string;
       language: string;
       capEnrollment: number;
-      startTime: string;
+      startTime: Date;
     }>
   >;
 }
@@ -75,8 +75,9 @@ interface GeneralDetailsProps {
 export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
   id,
   courseData,
-  setCourseData,
 }) => {
+  // const startTime = new Date(courseData.startTime);
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -86,6 +87,7 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
       duration: courseData.duration,
       language: courseData.language,
       capEnrollment: courseData.capEnrollment,
+      startTime: courseData.startTime,
     },
     values: {
       name: courseData.name,
@@ -94,6 +96,7 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
       duration: courseData.duration,
       language: courseData.language,
       capEnrollment: courseData.capEnrollment,
+      startTime: courseData.startTime,
     },
   });
 
@@ -111,19 +114,19 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
             },
           }
         )
-        .then(() => {
+        .then((response) => {
           toast({
-            title: "Submission successful",
-            // description: (
-            //   <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-            //     <code className="text-white">
-            //       {JSON.stringify(data, null, 2)}
-            //     </code>
-            //   </pre>
-            // ),
+            title: response.data.status,
+            description: response.data.message,
+            className: "text-start capitalize",
           });
         });
     } catch (error) {
+      toast({
+        title: "Failed",
+        variant: "destructive",
+        // description: error.message,
+      });
       console.error("Error saving changes:", error);
     }
   }
@@ -163,7 +166,11 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
               <FormItem className="text-start">
                 <FormLabel>Topic</FormLabel>
                 <FormControl>
-                  <Input placeholder="shadcn" {...field} value={field.value} />
+                  <Input
+                    placeholder="Enter Bootcamp Name"
+                    {...field}
+                    value={field.value}
+                  />
                 </FormControl>
                 {/* <FormDescription>
                   This is your public display name.
@@ -177,7 +184,7 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
             name="startTime"
             render={({ field }) => (
               <FormItem className="flex flex-col text-start">
-                <FormLabel>Date of birth</FormLabel>
+                <FormLabel>Date of Commencement</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -202,9 +209,7 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
-                      disabled={(date) =>
-                        date > new Date() || date < new Date("1900-01-01")
-                      }
+                      disabled={(date) => date < new Date()}
                       initialFocus
                     />
                   </PopoverContent>
@@ -224,8 +229,8 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
                 <FormLabel>Duration</FormLabel>
                 <FormControl>
                   <Input
-                    type="number"
-                    placeholder="shadcn"
+                    type="text"
+                    placeholder="Enter Bootcamp Duration"
                     {...field}
                     value={field.value}
                   />
@@ -242,11 +247,11 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
             name="capEnrollment"
             render={({ field }) => (
               <FormItem className="text-start">
-                <FormLabel>Cap Enrollment</FormLabel>
+                <FormLabel>Cap Enrollment at</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
-                    placeholder="shadcn"
+                    placeholder="Enter Bootcamp Enrollment Cap"
                     {...field}
                     value={field.value}
                   />
