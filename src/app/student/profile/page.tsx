@@ -9,7 +9,7 @@ type Props = {};
 
 function Page({}: Props) {
   const user = useAppSelector((state) => state.saveUserReducer.user);
-
+  const newUser = JSON.parse(user);
   return (
     <div>
       <MaxWidthWrapper className='flex flex-col items-center justify-between sm:flex-col '>
@@ -22,7 +22,7 @@ function Page({}: Props) {
           <div className='flex flex-col items-center mx-auto justify-center'>
             <div className='relative'>
               <Avatar className='h-40 w-40 flex flex-col justify-center items-center'>
-                <AvatarImage src={user.profile_picture} />
+                <AvatarImage src={newUser.profile_picture} />
                 <AvatarFallback>NAME</AvatarFallback>
               </Avatar>
               <button className='absolute bottom-0 right-0 bg-[#2f433a] text-white rounded-full p-2 shadow-md hover:bg-[#518672] focus:outline-none'>
@@ -34,7 +34,7 @@ function Page({}: Props) {
               <input
                 className='flex h-18 w-[420px] rounded-md mt-4 border border-black/30 bg-transparent px-2 py-2 text-sm placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-black/30 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50'
                 type='name'
-                placeholder={user.name}
+                placeholder={newUser.name}
                 disabled
               />
             </div>
@@ -43,7 +43,7 @@ function Page({}: Props) {
               <input
                 className='flex h-18 w-[420px] rounded-md mt-4 border border-black/30 bg-transparent px-2 py-2 text-sm placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-black/30 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50'
                 type='email'
-                placeholder={user.email}
+                placeholder={newUser.email}
                 disabled
               />
             </div>

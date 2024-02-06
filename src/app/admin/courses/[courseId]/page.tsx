@@ -14,6 +14,7 @@ import api from "@/utils/axios.config";
 import styles from "../_components/cources.module.css";
 import LiveClass from "./_components/liveClass";
 import Settings from "./_components/settings";
+import Students from "./_components/students";
 
 interface Page {}
 
@@ -62,12 +63,12 @@ const Page = ({ params }: { params: { courseId: string } }) => {
     {
       title: "Settings",
       value: "settings",
-      component: <Settings />,
+      component: <Settings id={params.courseId} />,
     },
     {
       title: "Students",
       value: "students",
-      // component: <Batches />,
+      component: <Students />,
     },
   ];
 

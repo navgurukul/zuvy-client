@@ -41,8 +41,9 @@ function LoginPage({}: Props) {
             Authorization: token,
           },
         });
-        dispatch(saveStudent(resp.data.user));
+        // dispatch(saveStudent(resp.data.user));
         localStorage.setItem("AUTH", JSON.stringify(resp.data.user));
+        // console.log(localStorage.getItem("AUTH"));
         if (!resp.data.user.rolesList[0]) {
           setCookie("secure_typeuser", JSON.stringify(btoa("student")));
           return router.push("/student");

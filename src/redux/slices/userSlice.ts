@@ -5,8 +5,12 @@ interface SaveUserState {
   courseID: string;
 }
 const initialState: SaveUserState = {
-  user: {} as any,
+  user: localStorage.getItem("AUTH") || {},
   courseID: "",
+};
+
+const userData = () => {
+  return localStorage.getItem("AUTH");
 };
 
 export const saveUser = createSlice({
@@ -15,7 +19,8 @@ export const saveUser = createSlice({
   reducers: {
     saveStudent: (state, action: PayloadAction<{}>) => {
       state.user = action.payload;
-      console.log(state.user);
+      // console.log(state.user);
+      console.log(userData);
     },
     saveCourseId: (state, action: PayloadAction<string>) => {
       state.courseID = action.payload;

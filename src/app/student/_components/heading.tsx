@@ -4,7 +4,9 @@ import { RootState, useAppSelector } from "@/redux/store/store";
 
 function Heading() {
   const user = useAppSelector((state: RootState) => state.saveUserReducer.user);
-  const username = user.name.split(" ");
+  const newUser = JSON.parse(user);
+
+  const username = newUser.name.split(" ");
   const newUserName =
     username[0].charAt(0).toUpperCase() + username[0].slice(1).toLowerCase();
 

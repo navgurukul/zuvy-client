@@ -7,13 +7,13 @@ import { Button } from "@/components/ui/button";
 import DeleteConfirmationModal from "./deleteModal";
 import api from "@/utils/axios.config";
 
-type Props = {};
+type Props = {
+  id: string;
+};
 
 const Settings = (props: Props) => {
   const router = useRouter();
-  const courseID = useAppSelector(
-    (state: RootState) => state.saveUserReducer.courseID
-  );
+  const courseID = props.id;
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const handleDelete = async () => {
     try {
