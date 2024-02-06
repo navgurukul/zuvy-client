@@ -14,6 +14,7 @@ import NewCourseDialog from "./_components/newCourseDialog";
 import api from "@/utils/axios.config";
 
 import styles from "./_components/cources.module.css";
+import OptimizedImageWithFallback from "@/components/ImageWithFallback";
 
 interface Course {
   name: string;
@@ -138,9 +139,9 @@ const Courses: React.FC = () => {
             </span>
           </div>
         </div>
-        <div className="my-5 flex justify-start gap-3">
+        <div className="my-5 flex justify-center items-center">
           {filteredCourses.length === 0 ? (
-            <div className={styles.centeredContainer}>
+            <div className="mt-24">
               <h4 className={styles.firstCourseText}>
                 Create your first course and share with students
               </h4>
@@ -164,41 +165,51 @@ const Courses: React.FC = () => {
               </p>
             </div>
           ) : (
-            filteredCourses.map((course, index) => (
-              <Card
-                key={index}
-                className="h-max w-[400px] cursor-pointer"
-                onClick={() => handleCardClick(course.id.toString())}
-              >
-                <div className="bg-muted flex justify-center">
-                  {course.coverImage ? (
-                    <Image
+            <div className="grid grid-cols-3 gap-3">
+              {filteredCourses.map((course, index) => (
+                <Card
+                  key={index}
+                  className="h-max w-[400px] cursor-pointer"
+                  onClick={() => handleCardClick(course.id.toString())}
+                >
+                  <div className="bg-muted flex justify-center">
+                    <OptimizedImageWithFallback
                       src={course.coverImage}
-                      alt={`Course: ${course.name}`}
+                      alt={course.name}
+                      fallBackSrc={"/logo_white.png"}
                       className={styles.courseImage}
-                      fill
                     />
-                  ) : (
-                    <Image
-                      src={"/logo_white.png"}
-                      alt={`Course: ${course.name}`}
-                      className={styles.courseImage}
-                      width={100}
-                      height={100}
-                    />
-                  )}
-                </div>
-                <div className={styles.courseDetails}>
-                  <span className={styles.nameText}>{course.name}</span>
-                </div>
-                <div className={styles.courseDetails}>
-                  <span className={styles.learnersCount}>
-                    {course.learnersCount} Learners
-                  </span>
-                  <span>{course.date}</span>
-                </div>
-              </Card>
-            ))
+
+                    {/* {course.coverImage ? (
+                      <Image
+                        src={`/${course.coverImage}`}
+                        alt={`${course.name}`}
+                        className={styles.courseImage}
+                        fill
+                        onError={}
+                      />
+                    ) : (
+                      <Image
+                        src={"/logo_white.png"}
+                        alt={`${course.name}`}
+                        className={styles.courseImage}
+                        width={100}
+                        height={100}
+                      />
+                    )} */}
+                  </div>
+                  <div className={styles.courseDetails}>
+                    <span className={styles.nameText}>{course.name}</span>
+                  </div>
+                  <div className={styles.courseDetails}>
+                    <span className={styles.learnersCount}>
+                      {course.learnersCount} Learners
+                    </span>
+                    <span>{course.date}</span>
+                  </div>
+                </Card>
+              ))}
+            </div>
           )}
         </div>
       </div>
