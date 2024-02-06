@@ -1,5 +1,6 @@
+"use client";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-
+// var localStorage: Storage;
 interface SaveUserState {
   user: {};
   courseID: string;
