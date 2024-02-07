@@ -14,6 +14,7 @@ import api from "@/utils/axios.config";
 import OptimizedImageWithFallback from "@/components/ImageWithFallback";
 
 import styles from "./_components/cources.module.css";
+import { COURSE_FILTER } from "@/utils/constant";
 
 interface Course {
   name: string;
@@ -81,7 +82,8 @@ const Courses: React.FC = () => {
           <Input
             type="text"
             placeholder="Search"
-            className={styles.searchInput}
+            // className={styles.searchInput}
+            className="max-w-[500px]"
             value={searchQuery}
             onChange={handleSearchChange}
           />
@@ -100,32 +102,27 @@ const Courses: React.FC = () => {
             />
           </Dialog>
         </div>
-        <div className={styles.contentContainer}>
-          <div className={styles.content}>
-            <span
-              className={activeFilter === "all" ? `${styles.active}` : ""}
-              onClick={() => handleFilterClick("all")}
-            >
-              All
-            </span>
-            <span
-              className={activeFilter === "active" ? `${styles.active}` : ""}
-              onClick={() => handleFilterClick("active")}
-            >
-              Active
-            </span>
-            <span
-              className={activeFilter === "completed" ? `${styles.active}` : ""}
-              onClick={() => handleFilterClick("completed")}
-            >
-              Completed
-            </span>
+        <div className="flex mt-5 mb-10">
+          <div className="flex mr-2">
+            {COURSE_FILTER.map((filter: any) => (
+              <p
+                className={`${
+                  activeFilter === filter
+                    ? "bg-muted-foreground text-white"
+                    : ""
+                } capitalize mr-2 cursor-pointer py-1 px-2 rounded-md`}
+                onClick={() => handleFilterClick(filter)}
+              >
+                {filter}
+              </p>
+            ))}
+
             <span> | </span>
           </div>
           <div>
-            <span className={styles.filterDropdown}>
-              All Partners &nbsp; <ChevronDown />
-            </span>
+            <p className="flex items-center bg-muted-foreground text-white py-1 px-2 rounded-md">
+              All Partners <ChevronDown />
+            </p>
           </div>
         </div>
         <div className="my-5 flex justify-center items-center">
@@ -168,14 +165,16 @@ const Courses: React.FC = () => {
                       fallBackSrc={"/logo_white.png"}
                     />
                   </div>
-                  <div className={styles.courseDetails}>
-                    <span className={styles.nameText}>{course.name}</span>
-                  </div>
-                  <div className={styles.courseDetails}>
-                    <span className={styles.learnersCount}>
-                      {course.learnersCount} Learners
-                    </span>
-                    <span>{course.date}</span>
+                  <div className="text-start px-4 py-3 bg-muted">
+                    <p className="capitalize mb-2 font-semibold">
+                      {course.name}
+                    </p>
+                    <div className="">
+                      <span className={styles.learnersCount}>
+                        {course.learnersCount} Learners
+                      </span>
+                      <span>{course.date}</span>
+                    </div>
                   </div>
                 </Card>
               ))}

@@ -121,6 +121,7 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
           }
         )
         .then((res) => {
+          console.log("RESPONSE", res.data.updatedBootcamp[0]);
           const {
             id,
             name,
@@ -130,7 +131,7 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
             duration,
             language,
             capEnrollment,
-          } = res.data.update_data.bootcamp;
+          } = res.data.updatedBootcamp[0];
           setCourseData({
             id,
             name,
@@ -182,15 +183,7 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
             const imageUrl = res.data.file.url;
             setCourseData({ ...courseData, coverImage: imageUrl });
           });
-
-        // if (response) {
-        //   // Handle successful upload
-        // } else {
-        //   // Handle error
-        //   console.error("Failed to upload image:", response.statusText);
-        // }
       } catch (error) {
-        // Handle network error
         console.error("Network error:", error);
       }
     }
@@ -207,32 +200,7 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
               fallBackSrc={"/logo_white.png"}
               // className=""
             />
-            {/* <Image
-              src={"/logo_white.png"}
-              alt="Course"
-              className={styles.courseImage}
-              width={100}
-              height={100}
-            /> */}
           </div>
-          {/* <FormField
-            control={form.control}
-            name="coverImage"
-            render={({ field }) => (
-              <FormItem className="text-start">
-                <FormLabel>Upload course image </FormLabel>
-                <FormControl>
-                  <Input
-                    type="file"
-                    placeholder="shadcn"
-                    {...field}
-                    value={field.value}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          /> */}
           <div>
             <Input
               id="picture"
@@ -257,7 +225,12 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
               <FormItem className="text-start">
                 <FormLabel>Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="shadcn" {...field} value={field.value} />
+                  <Input
+                    placeholder="shadcn"
+                    {...field}
+                    value={field.value}
+                    className="capitalize"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
