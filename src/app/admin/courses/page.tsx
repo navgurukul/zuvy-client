@@ -161,12 +161,11 @@ const Courses: React.FC = () => {
                   className="h-max w-[400px] cursor-pointer"
                   onClick={() => handleCardClick(course.id.toString())}
                 >
-                  <div className="bg-muted flex justify-center">
+                  <div className="bg-muted flex justify-center h-[200px] relative overflow-hidden rounded-sm">
                     <OptimizedImageWithFallback
                       src={course.coverImage}
                       alt={course.name}
                       fallBackSrc={"/logo_white.png"}
-                      className={styles.courseImage}
                     />
                   </div>
                   <div className={styles.courseDetails}>
