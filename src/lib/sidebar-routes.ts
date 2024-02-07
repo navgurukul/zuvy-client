@@ -30,17 +30,17 @@ const guestRoutes = [
   {
     icon: Code,
     label: "Playground",
-    href: "/playground",
+    href: "/student/playground",
   },
   {
     icon: MessagesSquare,
     label: "Discussion",
-    href: "/discussion",
+    href: "/student/discussion",
   },
   {
     icon: MessageCircleQuestion,
     label: "Help",
-    href: "/help",
+    href: "/student/help",
   },
 ];
 
@@ -58,14 +58,14 @@ const teacherRoutes = [
 ];
 
 const adminRoutes = [
-  { icon: Home, label: "Home", href: "/admin" },
+  { label: "Home", icon: Home,  href: "/admin" },
   { label: "Notifications", icon: Bell, href: "/admin/home" },
   { label: "Courses", icon: Book, href: "/admin/courses" },
-  { label: "Resource Bank", icon: Database, href: "/admin/home" },
-  { label: "Instructors", icon: User, href: "/admin/home" },
-  { label: "Reports", icon: BarChart, href: "/admin/home" },
-  { label: "Settings", icon: Cog, href: "/admin/home" },
-  { label: "Help", icon: HelpCircle, href: "/admin/home" },
+  { label: "Resource Bank", icon: Database, href: "/admin/resource" },
+  { label: "Instructors", icon: User, href: "/admin/instructor" },
+  { label: "Reports", icon: BarChart, href: "/admin/reports" },
+  { label: "Settings", icon: Cog, href: "/admin/settings" },
+  { label: "Help", icon: HelpCircle, href: "/admin/help" },
 ];
 
 const commonRoutes = [

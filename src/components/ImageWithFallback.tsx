@@ -24,6 +24,7 @@ function OptimizedImageWithFallback({
           height={100}
           className={className}
           //   objectFit="cover"
+          priority
         />
       )}
     </>
