@@ -106,6 +106,7 @@ const Courses: React.FC = () => {
           <div className="flex mr-2">
             {COURSE_FILTER.map((filter: any) => (
               <p
+                key={filter}
                 className={`${
                   activeFilter === filter
                     ? "bg-muted-foreground text-white"
