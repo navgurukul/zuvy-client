@@ -5,27 +5,26 @@ function OptimizedImageWithFallback({
   src,
   alt,
   fallBackSrc = fallback.src,
-  className,
-}: {
+}: // className = "",
+{
   src: string;
   alt: string;
   fallBackSrc: string;
-  className: any;
+  // className: any;
 }) {
   return (
     <>
       {src && src.trim() !== "" ? (
-        <Image src={src} alt={alt} />
+        <div className="relative h-[200px] w-full">
+          <Image
+            src={src}
+            alt={alt}
+            fill
+            className="w-full h-full object-cover relative"
+          />
+        </div>
       ) : (
-        <Image
-          src={fallBackSrc}
-          alt={alt}
-          width={100}
-          height={100}
-          className={className}
-          //   objectFit="cover"
-          priority
-        />
+        <Image src={fallBackSrc} alt={alt} width={200} height={200} priority />
       )}
     </>
   );

@@ -33,17 +33,18 @@ import styles from "../../_components/cources.module.css";
 import { Label } from "@/components/ui/label";
 import { LANGUAGES } from "@/utils/constant";
 import api from "@/utils/axios.config";
+import { useRef } from "react";
+import axios from "axios";
+import OptimizedImageWithFallback from "@/components/ImageWithFallback";
 
 const FormSchema = z.object({
   name: z.string(),
   bootcampTopic: z.string(),
-  //   coverImage: z.string().min(2, {
-  //     message: "Username must be at least 2 characters.",
-  //   }),
   duration: z.string().optional(),
   language: z.string(),
   capEnrollment: z.coerce.number().int().positive().optional(),
   startTime: z.date().optional(),
+  coverImage: z.string(),
 });
 
 interface GeneralDetailsProps {
@@ -75,30 +76,35 @@ interface GeneralDetailsProps {
 export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
   id,
   courseData,
+  setCourseData,
 }) => {
-  // const startTime = new Date(courseData.startTime);
+  const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       name: courseData.name,
       bootcampTopic: courseData.bootcampTopic,
-      //   coverImage: "",
+      coverImage: courseData.coverImage,
       duration: courseData.duration,
       language: courseData.language,
       capEnrollment: courseData.capEnrollment,
-      startTime: courseData.startTime,
+      startTime: new Date(courseData.startTime),
     },
     values: {
       name: courseData.name,
       bootcampTopic: courseData.bootcampTopic,
-      //   coverImage: "",
+      coverImage: courseData.coverImage,
       duration: courseData.duration,
       language: courseData.language,
       capEnrollment: courseData.capEnrollment,
-      startTime: courseData.startTime,
+      startTime: new Date(courseData.startTime),
     },
   });
+
+  // const handleImageChange=(e)=>{
+
+  // }
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     try {
@@ -114,10 +120,31 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
             },
           }
         )
-        .then((response) => {
+        .then((res) => {
+          console.log("RESPONSE", res.data.updatedBootcamp[0]);
+          const {
+            id,
+            name,
+            bootcampTopic,
+            coverImage,
+            startTime,
+            duration,
+            language,
+            capEnrollment,
+          } = res.data.updatedBootcamp[0];
+          setCourseData({
+            id,
+            name,
+            bootcampTopic,
+            coverImage,
+            startTime,
+            duration,
+            language,
+            capEnrollment,
+          });
           toast({
-            title: response.data.status,
-            description: response.data.message,
+            title: res.data.status,
+            description: res.data.message,
             className: "text-start capitalize",
           });
         });
@@ -131,21 +158,66 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
     }
   }
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const formData = new FormData();
+      formData.append("image", file);
+
+      try {
+        const response = await axios
+          .post(`${BASE_URL}/courseEditor/ImageUploadS3`, formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          })
+          .then((res) => {
+            const imageUrl = res.data.file.url;
+            setCourseData({ ...courseData, coverImage: imageUrl });
+          });
+      } catch (error) {
+        console.error("Network error:", error);
+      }
+    }
+  };
+
   return (
     <div className="max-w-[400px] m-auto">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="bg-muted flex justify-center rounded-sm my-3">
-            <Image
-              src={"/logo_white.png"}
-              alt="Course"
-              className={styles.courseImage}
-              width={100}
-              height={100}
+          <div className="bg-muted flex justify-center rounded-sm my-3 overflow-hidden">
+            <OptimizedImageWithFallback
+              src={courseData.coverImage}
+              alt={courseData.name}
+              fallBackSrc={"/logo_white.png"}
+              // className=""
             />
           </div>
-          <Input id="picture" type="file" />
-          {/* <Button variant={"outline"}>Upload course Image</Button> */}
+          <div>
+            <Input
+              id="picture"
+              type="file"
+              onChange={handleFileChange}
+              className="hidden"
+              ref={fileInputRef}
+            />
+            <Button
+              variant={"outline"}
+              type="button"
+              onClick={handleButtonClick}
+            >
+              Upload course Image
+            </Button>
+          </div>
+
           <FormField
             control={form.control}
             name="name"
@@ -153,7 +225,12 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
               <FormItem className="text-start">
                 <FormLabel>Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="shadcn" {...field} value={field.value} />
+                  <Input
+                    placeholder="shadcn"
+                    {...field}
+                    value={field.value}
+                    className="capitalize"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -172,9 +249,6 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
                     value={field.value}
                   />
                 </FormControl>
-                {/* <FormDescription>
-                  This is your public display name.
-                </FormDescription> */}
                 <FormMessage />
               </FormItem>
             )}
@@ -235,9 +309,6 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
                     value={field.value}
                   />
                 </FormControl>
-                {/* <FormDescription>
-                  This is your public display name.
-                </FormDescription> */}
                 <FormMessage />
               </FormItem>
             )}
@@ -256,9 +327,6 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
                     value={field.value}
                   />
                 </FormControl>
-                {/* <FormDescription>
-                  This is your public display name.
-                </FormDescription> */}
                 <FormMessage />
               </FormItem>
             )}
@@ -272,21 +340,10 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
                 <FormControl>
                   <RadioGroup
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
                     className="flex"
+                    value={field.value}
                   >
                     {LANGUAGES.map((lang) => (
-                      //   <button
-                      //     key={lang}
-                      //     // onClick={() => handleLanguageChange(lang)}
-                      //     // className={` px-2 py-1 mr-3 rounded-sm ${
-                      //     //   courseData.language === lang
-                      //     //     ? "bg-muted-foreground text-white"
-                      //     //     : "bg-muted"
-                      //     // }`}
-                      //   >
-                      //     {lang}
-                      //   </button>
                       <FormItem
                         key={lang}
                         className="flex items-center space-x-3 space-y-0"
