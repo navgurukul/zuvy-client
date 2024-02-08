@@ -121,7 +121,6 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
           }
         )
         .then((res) => {
-          console.log("RESPONSE", res.data.updatedBootcamp[0]);
           const {
             id,
             name,
