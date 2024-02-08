@@ -152,7 +152,7 @@ const Courses: React.FC = () => {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-3">
+            <div className="flex flex-wrap justify-center gap-3">
               {courses.map((course, index) => (
                 <Card
                   key={index}
