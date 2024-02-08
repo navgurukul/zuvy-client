@@ -3,15 +3,36 @@
 
 import React, { useState } from "react";
 
+import * as z from "zod";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import Dropzone from "./dropzone";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import api from "@/utils/axios.config";
 interface TwoOptionsModalProps {
   isOpen: boolean;
   onClose: () => void;
   id: string;
 }
+interface FormData {
+  studentName: string;
+  studentEmail: string;
+}
+const formSchema = z.object({
+  studentName: z.string(),
+  studentEmail: z.string().email(),
+});
 
 const AddStudentsModal: React.FC<TwoOptionsModalProps> = ({
   isOpen,
@@ -21,9 +42,17 @@ const AddStudentsModal: React.FC<TwoOptionsModalProps> = ({
   const [selectedOption, setSelectedOption] = useState<string | null>(
     "Bulk Upload"
   );
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      studentName: "",
+      studentEmail: "",
+    },
+  });
   const [input1Value, setInput1Value] = useState("");
   const [input2Value, setInput2Value] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [studentData, setStudentData] = useState<{}>();
 
   const handleOptionClick = (option: string) => {
     setSelectedOption(option);
@@ -44,6 +73,36 @@ const AddStudentsModal: React.FC<TwoOptionsModalProps> = ({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     setFile(selectedFile);
+  };
+  const handleSubmit: SubmitHandler<FormData> = async (data) => {
+    console.log(data);
+    const transformedObject = {
+      students: [
+        {
+          email: data.studentEmail,
+          name: data.studentName,
+        },
+      ],
+    };
+    if (data) {
+      const requestBody = transformedObject;
+      console.log(requestBody);
+      try {
+        const response = await api.post(
+          `/bootcamp/students/${id}`,
+          requestBody,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        console.log("Response", response.data);
+      } catch (error: any) {
+        console.error("Error", error.message);
+      }
+    }
   };
 
   return (
@@ -84,26 +143,57 @@ const AddStudentsModal: React.FC<TwoOptionsModalProps> = ({
           </div>
           {selectedOption === "One at a time" && (
             <div className=''>
-              <h1 className=' my-4 flex flex-start'>Student Name</h1>
-              <input
-                type='text'
-                placeholder='Student Name'
-                value={input1Value}
-                onChange={handleInput1Change}
-                className='block w-full mb-2 p-2 border border-gray-300 rounded'
-              />
-              <h1 className='my-4 flex flex-start'>Email</h1>
+              <Form {...form}>
+                <FormLabel className=' my-4 flex flex-start'>
+                  Student Name
+                </FormLabel>
+                <form onSubmit={form.handleSubmit(handleSubmit)}>
+                  <FormField
+                    control={form.control}
+                    name='studentName'
+                    render={({ field }) => {
+                      return (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder='Student name'
+                              type='text'
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
+                  />
 
-              <input
-                type='text'
-                placeholder='Student Email'
-                value={input2Value}
-                onChange={handleInput2Change}
-                className='block w-full mb-4 p-2 border border-gray-300 rounded'
-              />
-              <div className='w-full flex flex-row justify-end m-3 p-3 '>
-                <Button className=''>Add Students</Button>
-              </div>
+                  <FormLabel className='my-4 flex flex-start'>Email</FormLabel>
+                  <FormField
+                    control={form.control}
+                    name='studentEmail'
+                    render={({ field }) => {
+                      return (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder='Student Email'
+                              type='email'
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
+                  />
+
+                  <div className='w-full flex flex-row justify-end m-3 p-3 '>
+                    <Button type='submit' className=''>
+                      Add Students
+                    </Button>
+                  </div>
+                </form>
+              </Form>
             </div>
           )}
           {selectedOption === "Bulk Upload" && (
