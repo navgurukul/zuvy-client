@@ -2,13 +2,17 @@ import React from "react";
 
 import { Button } from "@/components/ui/button";
 import {
+  DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 
 import styles from "./cources.module.css";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 interface newCourseDialogProps {
   newCourseName: string;
@@ -26,31 +30,28 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
   return (
     <DialogContent>
       <DialogHeader>
-        <DialogTitle className={styles.newCourse}>New Course</DialogTitle>
-        <DialogDescription>
-          <div style={{ marginBottom: "10px" }}>
-            <label htmlFor="name" className={styles.dialogname}>
-              Course Name:
-            </label>
-            <input
-              type="text"
-              id="name"
-              placeholder="Enter course name"
-              className={styles.inputBox}
-              value={newCourseName}
-              onChange={handleNewCourseNameChange}
-            />
-          </div>
-          <div className="text-end">
-            <Button
-              onClick={() => handleCreateCourse()}
-              // className={styles.createCourseBtnDialog}
-            >
-              Create Course
-            </Button>
-          </div>
-        </DialogDescription>
+        <DialogTitle>New Course</DialogTitle>
+        <div className="py-4">
+          <Label htmlFor="name">Course Name:</Label>
+          <Input
+            type="text"
+            id="name"
+            placeholder="Enter course name"
+            value={newCourseName}
+            onChange={handleNewCourseNameChange}
+          />
+        </div>
       </DialogHeader>
+      <DialogFooter className="sm:justify-end">
+        <DialogClose asChild>
+          <Button
+            onClick={() => handleCreateCourse()}
+            // className={styles.createCourseBtnDialog}
+          >
+            Create Course
+          </Button>
+        </DialogClose>
+      </DialogFooter>
     </DialogContent>
   );
 };

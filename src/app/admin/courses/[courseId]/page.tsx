@@ -15,6 +15,7 @@ import styles from "../_components/cources.module.css";
 import LiveClass from "./_components/liveClass";
 import Settings from "./_components/settings";
 import { GeneralDetails } from "./_components/generalDetails";
+import Curriculum from "./_components/curriculum";
 
 interface Page {}
 
@@ -53,7 +54,7 @@ const Page = ({ params }: { params: { courseId: string } }) => {
     {
       title: "Curriculum",
       value: "curriculum",
-      // component: <InputForm />,
+      component: <Curriculum id={params.courseId} />,
     },
     {
       title: "Live Class",
