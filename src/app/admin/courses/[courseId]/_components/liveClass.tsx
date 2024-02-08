@@ -6,6 +6,8 @@ import { Combobox } from "@/components/ui/combobox";
 import ClassCard from "./classCard";
 import { Dialog, DialogOverlay, DialogTrigger } from "@/components/ui/dialog";
 import NewClassDialog from "./newClassDialog";
+import api from "@/utils/axios.config";
+import { toast } from "@/components/ui/use-toast";
 
 function LiveClass() {
   const [classType, setClassType] = useState("active");
@@ -36,6 +38,36 @@ function LiveClass() {
       label: "Astro",
     },
   ];
+
+  const createNewClass = async () => {
+    try {
+      const response = await api
+        .get(
+          `/classes`,
+
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        )
+        .then((res) => {
+          console.log("CLAASSS", res);
+          // toast({
+          //   title: res.data.status,
+          //   description: res.data.message,
+          //   className: "text-start capitalize",
+          // });
+        });
+    } catch (error) {
+      // toast({
+      //   title: "Failed",
+      //   variant: "destructive",
+      //   // description: error.message,
+      // });
+      console.error("Error saving changes:", error);
+    }
+  };
   return (
     <div>
       <div className="flex gap-6 my-6 max-w-[800px]">
@@ -47,8 +79,11 @@ function LiveClass() {
           <Combobox data={data} title={"Search Classes"} />
         </div>
         <Dialog>
-          <DialogTrigger>
-            <Button className="text-white bg-secondary">
+          <DialogTrigger asChild>
+            <Button
+              className="text-white bg-secondary"
+              onClick={createNewClass}
+            >
               {/* <Plus className="w-5 mr-2" /> */}
               <p>Creat New Class</p>
             </Button>

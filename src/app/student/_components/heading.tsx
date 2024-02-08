@@ -4,11 +4,10 @@ import { RootState, useAppSelector } from "@/redux/store/store";
 
 function Heading() {
   const user = useAppSelector((state: RootState) => state.saveUserReducer.user);
-  const newUser = JSON.parse(user);
-
-  const username = newUser.name.split(" ");
+  const username = user.name?.split(" ");
   const newUserName =
-    username[0].charAt(0).toUpperCase() + username[0].slice(1).toLowerCase();
+    username?.[0].charAt(0).toUpperCase() +
+    username?.[0].slice(1).toLowerCase();
 
   return (
     <div className='flex align-center justify-between text-start my-2 flex-wrap'>
