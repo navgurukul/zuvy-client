@@ -20,7 +20,6 @@ import { GeneralDetails } from "./_components/generalDetails";
 interface Page {}
 
 const Page = ({ params }: { params: { courseId: string } }) => {
-  const dispatch = useDispatch<AppDispatch>();
   // const [duration, setDuration] = useState<number | null>(null);
   const [courseData, setCourseData] = useState({
     id: "",
@@ -69,7 +68,7 @@ const Page = ({ params }: { params: { courseId: string } }) => {
     {
       title: "Students",
       value: "students",
-      component: <Students />,
+      component: <Students id={params.courseId} />,
     },
   ];
 
@@ -86,7 +85,6 @@ const Page = ({ params }: { params: { courseId: string } }) => {
     const fetchCourseDetails = async () => {
       try {
         const response = await api.get(`/bootcamp/${params.courseId}`);
-        dispatch(saveCourseId(params.courseId));
         const data = response.data;
         setCourseData(data.bootcamp);
       } catch (error) {
@@ -95,7 +93,7 @@ const Page = ({ params }: { params: { courseId: string } }) => {
     };
 
     fetchCourseDetails();
-  }, [params.courseId, dispatch]);
+  }, [params.courseId]);
 
   return (
     <div>

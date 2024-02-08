@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -5,9 +6,11 @@ import { Plus } from "lucide-react";
 
 import AddStudentsModal from "./addStudentsmodal";
 
-type Props = {};
+type Props = {
+  id: string;
+};
 
-const Students = (props: Props) => {
+const Students = ({ id }: Props) => {
   const [isModalOpen, setModalopen] = useState<boolean>(false);
   const handleOpenModal = () => {
     setModalopen(true);
@@ -26,7 +29,7 @@ const Students = (props: Props) => {
           fill='none'
           xmlns='http://www.w3.org/2000/svg'
         >
-          <g clip-path='url(#clip0_20269_10897)'>
+          <g clipPath='url(#clip0_20269_10897)'>
             <path
               d='M113.87 36.5181C102.505 34.7044 89.5632 33.7366 76.085 33.7366C63.7501 33.7366 51.8662 34.5459 41.2305 36.072C41.233 35.9086 41.2353 35.7453 41.2426 35.582C41.5246 26.1016 45.5037 17.1075 52.3294 10.5222C59.1551 3.93681 68.286 0.28258 77.7704 0.340522C87.2548 0.398465 96.3403 4.16398 103.085 10.8322C109.83 17.5005 113.699 26.5425 113.865 36.0256C113.867 36.1914 113.87 36.3547 113.87 36.5181Z'
               fill='#518672'
@@ -218,7 +221,11 @@ const Students = (props: Props) => {
         <Button className='w-1/3 gap-x-2 ' onClick={handleOpenModal}>
           <Plus /> Add Students
         </Button>
-        <AddStudentsModal isOpen={isModalOpen} onClose={handleCloseModal} />
+        <AddStudentsModal
+          id={id}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+        />
       </div>
     </div>
   );

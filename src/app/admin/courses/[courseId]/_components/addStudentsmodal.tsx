@@ -1,3 +1,4 @@
+"use client";
 // components/TwoOptionsModal.tsx
 
 import React, { useState } from "react";
@@ -9,11 +10,13 @@ import Dropzone from "./dropzone";
 interface TwoOptionsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  id: string;
 }
 
 const AddStudentsModal: React.FC<TwoOptionsModalProps> = ({
   isOpen,
   onClose,
+  id,
 }) => {
   const [selectedOption, setSelectedOption] = useState<string | null>(
     "Bulk Upload"
@@ -105,13 +108,13 @@ const AddStudentsModal: React.FC<TwoOptionsModalProps> = ({
           )}
           {selectedOption === "Bulk Upload" && (
             <>
-              <Dropzone className='p-16 mt-10 border-neutral-200' />
-              <p className='text-sm font-semibold text-gray-500'>
-                Upload CSV or Excel file
-              </p>
+              <Dropzone
+                id={id}
+                className='px-5 py-2 mt-10 border-dashed border-2 rounded-[10px]'
+              />
+
               {/* <div className='fixed inset-0 bg-gray-700 opacity-25 z-50'></div> */}
-              {
-                /* <div className='flex flex-col items-start  w-full gap-y-5 border border-gray-300 p-3 rounded-lg '>
+              {/* <div className='flex flex-col items-start  w-full gap-y-5 border border-gray-300 p-3 rounded-lg '>
                 <h2 className='flex-start font-semibold '>Student List.csv</h2>
                 <div className='w-full flex items-center justify-between '>
                   <Progress value={30} className='h-2 w-[350px]' />
@@ -128,12 +131,7 @@ const AddStudentsModal: React.FC<TwoOptionsModalProps> = ({
                     </span>
                   </li>{" "}
                 </div>
-              </div> */
-
-                <div className='w-full flex flex-row justify-end m-3 p-3 '>
-                  <Button className=''>Add Students</Button>
-                </div>
-              }
+              </div> */}
             </>
           )}
         </div>
