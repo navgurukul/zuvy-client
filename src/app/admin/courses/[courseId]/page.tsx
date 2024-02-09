@@ -14,13 +14,13 @@ import api from "@/utils/axios.config";
 import styles from "../_components/cources.module.css";
 import LiveClass from "./_components/liveClass";
 import Settings from "./_components/settings";
+import Students from "./_components/students";
 import { GeneralDetails } from "./_components/generalDetails";
 import Curriculum from "./_components/curriculum";
 
 interface Page {}
 
 const Page = ({ params }: { params: { courseId: string } }) => {
-  const dispatch = useDispatch<AppDispatch>();
   // const [duration, setDuration] = useState<number | null>(null);
   const [courseData, setCourseData] = useState({
     id: "",
@@ -64,12 +64,12 @@ const Page = ({ params }: { params: { courseId: string } }) => {
     {
       title: "Settings",
       value: "settings",
-      component: <Settings />,
+      component: <Settings id={params.courseId} />,
     },
     {
       title: "Students",
       value: "students",
-      // component: <Batches />,
+      component: <Students id={params.courseId} />,
     },
   ];
 
@@ -86,7 +86,6 @@ const Page = ({ params }: { params: { courseId: string } }) => {
     const fetchCourseDetails = async () => {
       try {
         const response = await api.get(`/bootcamp/${params.courseId}`);
-        dispatch(saveCourseId(params.courseId));
         const data = response.data;
         setCourseData(data.bootcamp);
       } catch (error) {
@@ -95,16 +94,16 @@ const Page = ({ params }: { params: { courseId: string } }) => {
     };
 
     fetchCourseDetails();
-  }, [params.courseId, dispatch]);
+  }, [params.courseId]);
 
   return (
     <div>
       <Breadcrumb crumbs={crumbs} />
-      <h1 className="text-3xl text-start font-bold my-6">{courseData.name}</h1>
+      <h1 className='text-3xl text-start font-bold my-6'>{courseData.name}</h1>
       <div className={styles.contentContainer}>
-        <Tabs defaultValue="generalDetails" className="w-full">
-          <div className="text-start border-b-2 border-muted">
-            <TabsList className="rounded-none rounded-t-sm ">
+        <Tabs defaultValue='generalDetails' className='w-full'>
+          <div className='text-start border-b-2 border-muted'>
+            <TabsList className='rounded-none rounded-t-sm '>
               {courseMenu.map(({ title, value }) => (
                 <TabsTrigger key={value} value={value}>
                   {title}
@@ -112,7 +111,7 @@ const Page = ({ params }: { params: { courseId: string } }) => {
               ))}
             </TabsList>
           </div>
-          <div className="text-center mt-10">
+          <div className='text-center mt-10'>
             {courseMenu.map(({ component, value }) => (
               <TabsContent key={value} value={value}>
                 {component}

@@ -1,11 +1,14 @@
+"use client";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-
 interface SaveUserState {
   user: {};
   courseID: string;
 }
+const getUserDataFromLocalStorage = () => {
+  return typeof window !== "undefined" ? localStorage.getItem("AUTH") : null;
+};
 const initialState: SaveUserState = {
-  user: {} as any,
+  user: getUserDataFromLocalStorage() || {},
   courseID: "",
 };
 
@@ -13,13 +16,8 @@ export const saveUser = createSlice({
   name: "saveUser",
   initialState,
   reducers: {
-    saveStudent: (state, action: PayloadAction<{}>) => {
-      state.user = action.payload;
-      console.log(state.user);
-    },
-    saveCourseId: (state, action: PayloadAction<string>) => {
-      state.courseID = action.payload;
-    },
+    saveStudent: (state, action: PayloadAction<{}>) => {},
+    saveCourseId: (state, action: PayloadAction<string>) => {},
   },
 }) as any;
 
