@@ -21,6 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import api from "@/utils/axios.config";
 import { toast } from "@/components/ui/use-toast";
+import { DialogContent, DialogTitle } from "@radix-ui/react-dialog";
 interface TwoOptionsModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -89,15 +90,19 @@ const AddStudentsModal: React.FC<TwoOptionsModalProps> = ({
             },
           })
           .then((response) => {
+            console.log("Response", response.data);
             toast({
               title: response.data.status,
               description: response.data.message,
               className: "text-start capitalize",
             });
           });
-
-        console.log("Response", response.data);
       } catch (error: any) {
+        toast({
+          title: "Failed",
+          variant: "destructive",
+          // description: error.message,
+        });
         console.error("Error", error.message);
       }
     }
@@ -112,7 +117,9 @@ const AddStudentsModal: React.FC<TwoOptionsModalProps> = ({
       <div className='flex items-center justify-center min-h-screen '>
         <div className='bg-white p-7 rounded-lg shadow-lg w-[500px]  '>
           <div className='flex justify-between'>
-            <h1 className='text-xl font-semibold mb-4'>Add Students</h1>
+            <DialogTitle className='text-xl font-semibold mb-4'>
+              Add Students
+            </DialogTitle>
             <button onClick={onClose}>
               <X size={20} className='text-gray-400' />
             </button>

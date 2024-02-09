@@ -3,8 +3,10 @@ import React, { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { Dialog, DialogOverlay, DialogTrigger } from "@/components/ui/dialog";
 
 import AddStudentsModal from "./addStudentsmodal";
+import { DialogContent } from "@radix-ui/react-dialog";
 
 type Props = {
   id: string;
@@ -218,14 +220,22 @@ const Students = ({ id }: Props) => {
           Add prospective students to the course and assign to batches Add
           Student(s)
         </span>
-        <Button className='w-1/3 gap-x-2 ' onClick={handleOpenModal}>
-          <Plus /> Add Students
-        </Button>
-        <AddStudentsModal
-          id={id}
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-        />
+
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant='default' onClick={handleOpenModal}>
+              <Plus /> Add Students
+            </Button>
+          </DialogTrigger>
+          {/* <DialogOverlay /> */}
+          <DialogContent>
+            <AddStudentsModal
+              id={id}
+              isOpen={isModalOpen}
+              onClose={handleCloseModal}
+            />
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

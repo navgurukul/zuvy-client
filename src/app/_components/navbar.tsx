@@ -11,7 +11,8 @@ import { RootState, useAppSelector } from "@/redux/store/store";
 
 const Navbar = () => {
   const user = useAppSelector((state: RootState) => state.saveUserReducer.user);
-  const newUser = JSON.parse(user);
+  // const newUser = JSON.parse(user);
+  console.log(user);
   return (
     <nav className='bg-muted'>
       {/* <MaxWidthWrapper> */}
@@ -43,7 +44,7 @@ const Navbar = () => {
             <Bell />
             <Link href='/student/profile'>
               <Avatar>
-                <AvatarImage src={newUser.profile_picture} />
+                <AvatarImage src={user.profile_picture} />
                 <AvatarFallback>NAME</AvatarFallback>
               </Avatar>
             </Link>

@@ -5,7 +5,18 @@ interface SaveUserState {
   courseID: string;
 }
 const getUserDataFromLocalStorage = () => {
-  return typeof window !== "undefined" ? localStorage.getItem("AUTH") : null;
+  const storedData =
+    typeof window !== "undefined" ? localStorage.getItem("AUTH") : null;
+
+  if (storedData && typeof storedData === "string") {
+    try {
+      return JSON.parse(storedData);
+    } catch (error) {
+      console.error("Error parsing stored data:", error);
+    }
+  }
+
+  return storedData;
 };
 const initialState: SaveUserState = {
   user: getUserDataFromLocalStorage() || {},

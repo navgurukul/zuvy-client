@@ -19,9 +19,10 @@ interface EmailData {
   name?: string;
 }
 const Dropzone = ({ className, id }: Props) => {
-  const [emailData, setEmailData] = useState<EmailData[]>();
-  const [display, setDisplay] = useState<boolean>(false);
+  const [emailData, setEmailData] = useState<EmailData[] | null>();
+  const [display, setDisplay] = useState<boolean>(true);
   const [record, setRecord] = useState<Number | undefined>();
+  const [csvData, setCsvData] = useState();
   const filteredArray = emailData?.filter(
     (item) => item.email !== null && item.email !== undefined
   );
@@ -76,9 +77,15 @@ const Dropzone = ({ className, id }: Props) => {
           complete: (results: any) => {
             // Handle the parsed data (results.data)
             console.log("CSV Data:", results.data);
+            setCsvData(results.data);
             setEmailData(results.data);
           },
           error: (error: any) => {
+            toast({
+              title: "Failed",
+              variant: "destructive",
+              // description: error.message,
+            });
             console.error("CSV Parsing Error:", error.message);
           },
         });
@@ -110,30 +117,42 @@ const Dropzone = ({ className, id }: Props) => {
         <p className='text-gray-400 text-xs'>
           Format for student data:
           <Link
-            href={"/"}
-            className='mx-2 text-xs font-semibold text-[#2F433A]'
+            href={
+              "https://merakilearn.s3.ap-south-1.amazonaws.com/courseEditor/ea0a71f2-dd61-453e-9e19-6da30da52dc6-vertopal.com_jsonformatter (2).csv"
+            }
+            className='mx-2 text-xs font-semibold text-primary'
           >
             Sample_Student_Data.csv
           </Link>
         </p>
       </div>
-      {display && (
+      {csvData && (
         <div className='flex flex-col items-start mt-5  w-full gap-y-5 border border-gray-300 p-3 rounded-lg '>
-          <div className='w-full flex justify-between'>
-            <h2 className='flex-start font-semibold '>Student List.csv</h2>
-            <X
-              size={20}
-              className='text-gray-400 cursor-pointer'
-              onClick={handleDisplay}
-            />
-          </div>
-          <div className='w-full flex items-center justify-between '></div>
-          <div className='w-full flex gap-y-5 flex-col items-start'>
-            <h3 className='flex-start'>Upload Status</h3>
-            <li className='text-green-500  '>
-              <span className='text-black'>{record} records uploaded</span>
-            </li>
-          </div>
+          {display && (
+            <div className='w-full'>
+              <div className='w-full flex flex-row justify-between'>
+                <h2 className='flex-start font-semibold '>Student List.csv</h2>
+                <X
+                  size={20}
+                  className='text-gray-400 cursor-pointer flex-end'
+                  onClick={handleDisplay}
+                />
+              </div>
+              <div className='w-full flex gap-y-5 flex-col items-start'>
+                <h3 className='flex-start'>Upload Status</h3>
+                <li className='text-green-500  '>
+                  <span className='text-black'>
+                    {csvData.length - 1} no of emails and names are in csv file
+                  </span>
+                </li>
+                <li className='text-green-500  '>
+                  <span className='text-black'>
+                    {record ? record : 0} records uploaded
+                  </span>
+                </li>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
