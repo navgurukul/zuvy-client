@@ -1,32 +1,27 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
 
-import { saveCourseId } from "@/redux/slices/userSlice";
-import { AppDispatch } from "@/redux/store/store";
-import Batches from "./_components/batches";
-// import GeneralDetails from "./_components/generalDetails";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Breadcrumb from "@/components/ui/breadcrumb";
 import api from "@/utils/axios.config";
-
-import styles from "../_components/cources.module.css";
+import Batches from "./_components/batches";
 import LiveClass from "./_components/liveClass";
 import Settings from "./_components/settings";
 import Students from "./_components/students";
 import { GeneralDetails } from "./_components/generalDetails";
 import Curriculum from "./_components/curriculum";
 
+import styles from "../_components/cources.module.css";
+
 interface Page {}
 
 const Page = ({ params }: { params: { courseId: string } }) => {
-  // const [duration, setDuration] = useState<number | null>(null);
+  // state and variables
   const [courseData, setCourseData] = useState({
     id: "",
     name: "",
     bootcampTopic: "",
-    // courseDescription: "",
     coverImage: "",
     startTime: new Date(),
     duration: "",
@@ -64,7 +59,7 @@ const Page = ({ params }: { params: { courseId: string } }) => {
     {
       title: "Settings",
       value: "settings",
-      component: <Settings id={params.courseId} />,
+      component: <Settings courseId={params.courseId} />,
     },
     {
       title: "Students",

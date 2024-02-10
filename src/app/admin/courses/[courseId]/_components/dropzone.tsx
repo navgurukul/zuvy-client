@@ -1,72 +1,42 @@
 "use client";
+
 import React, { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import Papa from "papaparse";
 import { Upload } from "lucide-react";
-import api from "@/utils/axios.config";
-import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import Link from "next/link";
-import { Progress } from "@/components/ui/progress";
-import { toast } from "@/components/ui/use-toast";
 
 type Props = {
+  studentData: any;
   className: string;
-  id: string;
+  setStudentData: any;
 };
-interface EmailData {
-  email: string | null;
-  name?: string;
-}
-const Dropzone = ({ className, id }: Props) => {
-  const [emailData, setEmailData] = useState<EmailData[]>();
-  const [display, setDisplay] = useState<boolean>(false);
-  const [record, setRecord] = useState<Number | undefined>();
-  const filteredArray = emailData?.filter(
-    (item) => item.email !== null && item.email !== undefined
-  );
-  const outputArray = {
-    students: filteredArray?.map((Item) => ({
-      name: Item.name || "Unknown",
-      email: Item.email,
-    })),
+
+const Dropzone = ({ className, studentData, setStudentData }: Props) => {
+  // misc
+
+  // state and variables
+  const [fileName, setFileName] = useState("");
+
+  // func
+  const handleDataFormat = (data: any) => {
+    const filteredArray = data?.filter(
+      (item: any) => item.email !== null && item.email !== undefined
+    );
+
+    setStudentData(filteredArray);
   };
-  console.log(outputArray.students?.length);
-  const handleDisplay = () => {
-    setDisplay(false);
+
+  const removeFile = () => {
+    setFileName("");
+    setStudentData({});
   };
-  // const handleClose =() => {}
-  const handleStudentOnboarding = async () => {
-    if (outputArray) {
-      setRecord(outputArray.students?.length);
-      const requestBody = outputArray;
-      console.log(requestBody);
-      try {
-        const response = await api
-          .post(`/bootcamp/students/${id}`, requestBody, {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          })
-          .then((response) => {
-            console.log("Response", response.data);
-            if (response.data) setDisplay(true);
-            setEmailData(null);
-            toast({
-              title: response.data.status,
-              description: response.data.message,
-              className: "text-start capitalize",
-            });
-          });
-      } catch (error: any) {
-        console.error("Error", error.message);
-      }
-    }
-  };
-  // console.log(outputArray);
+
   const onDrop = useCallback((acceptedFiles: File[]) => {
     acceptedFiles.forEach((file) => {
       const reader = new FileReader();
+      setFileName(file.name);
 
       reader.onload = () => {
         // Use Papaparse to parse the CSV data
@@ -75,8 +45,7 @@ const Dropzone = ({ className, id }: Props) => {
           dynamicTyping: true,
           complete: (results: any) => {
             // Handle the parsed data (results.data)
-            console.log("CSV Data:", results.data);
-            setEmailData(results.data);
+            handleDataFormat(results.data);
           },
           error: (error: any) => {
             console.error("CSV Parsing Error:", error.message);
@@ -95,53 +64,51 @@ const Dropzone = ({ className, id }: Props) => {
       <div {...getRootProps({ className: className })}>
         <input {...getInputProps()} />
         {isDragActive ? (
-          <div className='h-[150px]'>
+          <div className="h-[150px]">
             <p>Drop the files here ...</p>
           </div>
         ) : (
-          <div className='p-2 gap-y-4 flex flex-col justify-center items-center w-full h-full '>
-            <Upload className='mb-[20px]' />
-            <p className=' mx-3 font-semibold'>Upload Or Drag File</p>
-            <p className='text-gray-400'> .csv files are supported</p>
+          <div className="p-2 gap-y-4 flex flex-col justify-center items-center w-full h-full ">
+            <Upload className="mb-[20px]" />
+            <p className=" mx-3 font-semibold">Upload Or Drag File</p>
+            <p className="text-gray-400"> .csv files are supported</p>
           </div>
         )}
       </div>
-      <div className='flex pt-2 justify-between items-center'>
-        <p className='text-gray-400 text-xs'>
-          Format for student data:
-          <Link
-            href={"/"}
-            className='mx-2 text-xs font-semibold text-[#2F433A]'
-          >
-            Sample_Student_Data.csv
-          </Link>
-        </p>
-      </div>
-      {display && (
-        <div className='flex flex-col items-start mt-5  w-full gap-y-5 border border-gray-300 p-3 rounded-lg '>
-          <div className='w-full flex justify-between'>
-            <h2 className='flex-start font-semibold '>Student List.csv</h2>
+
+      {fileName ? (
+        <div className="flex flex-col items-start mt-5  w-full gap-y-5 border border-gray-300 p-3 rounded-lg ">
+          <div className="w-full flex items-center justify-between">
+            <h2 className="font-bold ">{fileName}</h2>
             <X
               size={20}
-              className='text-gray-400 cursor-pointer'
-              onClick={handleDisplay}
+              className="text-gray-400 cursor-pointer"
+              onClick={removeFile}
             />
           </div>
-          <div className='w-full flex items-center justify-between '></div>
-          <div className='w-full flex gap-y-5 flex-col items-start'>
-            <h3 className='flex-start'>Upload Status</h3>
-            <li className='text-green-500  '>
-              <span className='text-black'>{record} records uploaded</span>
-            </li>
+          <div className="text-start">
+            <h3 className="mb-2 font-semibold">Upload Status</h3>
+            <div className="flex items-center justify-start space-x-2">
+              <div className="w-2 h-2 rounded-full bg-secondary" />
+              <span className="text-black">
+                {studentData.length} records uploaded
+              </span>
+            </div>
           </div>
         </div>
+      ) : (
+        <div className="flex pt-2 justify-between items-center">
+          <p className="text-gray-400 text-xs">
+            Format for student data:
+            <Link
+              href="https://merakilearn.s3.ap-south-1.amazonaws.com/courseEditor/ea0a71f2-dd61-453e-9e19-6da30da52dc6-vertopal.com_jsonformatter"
+              className="mx-2 text-xs font-semibold text-[#2F433A]"
+            >
+              Sample_Student_Data.csv
+            </Link>
+          </p>
+        </div>
       )}
-
-      <div className='w-full flex flex-row justify-end m-3 p-3 '>
-        <Button onClick={handleStudentOnboarding} disabled={!emailData}>
-          Add Students
-        </Button>
-      </div>
     </>
   );
 };
