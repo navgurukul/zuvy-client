@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import api from "@/utils/axios.config";
 
 import styles from "../../_components/cources.module.css";
 import { Label } from "@/components/ui/label";
@@ -15,6 +16,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { ENROLLMENT_CAP } from "@/utils/constant";
 import { Input } from "@/components/ui/input";
 import CalendarInput from "@/app/_components/calendarInput";
+import { toast } from "@/components/ui/use-toast";
 
 // interface newClassDialogProps {
 //   newCourseName: string;
@@ -46,14 +48,88 @@ const data = [
     label: "Astro",
   },
 ];
+function DateTimePicker({ label, dateTime, setDateTime }) {
+  const handleDateChange = (event: { target: { value: any; }; }) => {
+    const newDate = event.target.value;
+    const time = dateTime.toISOString().split('T')[1];
+    setDateTime(new Date(`${newDate}T${time}`));
+  };
+
+  const handleTimeChange = (event: { target: { value: any; }; }) => {
+    const date = dateTime.toISOString().split('T')[0];
+    const newTime = event.target.value;
+    setDateTime(new Date(`${date}T${newTime}:00.000Z`));
+  };
+
+  return (
+    <div className="my-6">
+      <Label htmlFor={`${label}DateTime`}>{label}:</Label>
+      <div className="flex">
+        <input
+          type="date"
+          value={dateTime.toISOString().split('T')[0]}
+          onChange={handleDateChange}
+        />
+        <input
+          type="time"
+          value={dateTime.toISOString().split('T')[1].slice(0, 5)}
+          onChange={handleTimeChange}
+        />
+      </div>
+    </div>
+  );
+}
+
+
 
 const NewClassDialog = ({}) => {
-  // state and variables
-  const [date, setDate] = React.useState<Date>(new Date());
-  const [cap, setCap] = React.useState<number>(50);
+  
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [startDateTime, setStartDateTime] = useState(new Date());
+  const [endDateTime, setEndDateTime] = useState(new Date());
+  const [timeZone, setTimeZone] = useState("");
+  const [attendees, setAttendees] = useState([]);
+  const [batchId, setBatchId] = useState("");
+  const [bootcampId, setBootcampId] = useState("");
+  const [attendeesInput, setAttendeesInput] = useState("");
 
-  const handleCap = (value: number) => {
-    setCap(value);
+  const handleCreateCourse = async () => {
+    const attendeesArray = attendeesInput.split(", ");
+    
+    const userIdLocal = JSON.parse(localStorage.getItem("AUTH") || "");
+    const newCourseData = {
+      title,
+      description,
+      startDateTime,
+      endDateTime,
+      timeZone: "Asia/Kolkata",
+      attendees: attendeesArray,
+      batchId,
+      bootcampId,
+      userId: userIdLocal.id,
+    };
+  
+    try {
+      const postClass = await api.post(`/classes`, newCourseData);
+  
+      console.log("New Course Data:", newCourseData);
+  
+
+      toast({
+        title: "Success",
+        variant: "default",
+        className: "text-start capitalize",
+      });
+     
+   
+  
+      return postClass;
+    } catch (error) {
+
+      console.error("Error creating class:", error);
+
+    }
   };
 
   return (
@@ -62,63 +138,76 @@ const NewClassDialog = ({}) => {
         <DialogTitle className={styles.newCourse}>New Course</DialogTitle>
         <DialogDescription>
           <div className="my-6">
-            <Label htmlFor="name">Batch Name:</Label>
+            <Label htmlFor="name">Meet Title</Label>
             <Input
               type="text"
               id="name"
-              placeholder="Enter course name"
-              value={"New Class"}
+              placeholder="Enter meet title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
             />
           </div>
           <div className="my-6">
-            <Label htmlFor="date">Instructor:</Label>
-            <Combobox data={data} title={"Select Instructor"} />
-          </div>
-          {/* <div className="my-6">
-            <Label htmlFor="name">Date:</Label>
-            <Calendar
-              id="startDate"
-              mode="single"
-              selected={date}
-              onSelect={setDate}
-              className="p-0 flex justify-center"
-              classNames={{ month: "rounded-md border p-3" }}
-            />
-          </div> */}
-
-          <CalendarInput date={date} setDate={setDate} />
-          <div className="my-6">
-            <Label htmlFor="time">Time:</Label>
+            <Label htmlFor="description">Description:</Label>
             <Input
               type="text"
-              id="time"
-              placeholder="Enter Time"
-              // value=
+              id="description"
+              placeholder="Enter course description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
             />
           </div>
-          <div className={styles.labelInputContainer}>
-            <Label>Enrollment Cap:</Label>
-            <div>
-              <div className="text-start mb-8">
-                {ENROLLMENT_CAP.map((capValue) => (
-                  <button
-                    key={capValue}
-                    onClick={() => handleCap(capValue)}
-                    className={` px-2 py-1 mr-3 rounded-sm ${
-                      cap === capValue
-                        ? "bg-muted-foreground text-white"
-                        : "bg-muted"
-                    }`}
-                  >
-                    {capValue}
-                  </button>
-                ))}
-              </div>
-            </div>
+          <div className="my-6">
+          <DateTimePicker
+        label="Start Date"
+        dateTime={startDateTime}
+        setDateTime={setStartDateTime}
+      />
+    
           </div>
+          <div className="my-6">
+          <DateTimePicker
+        label="End Date"
+        dateTime={endDateTime}
+        setDateTime={setEndDateTime}
+      />
+          </div>
+       
+       <div className="my-6">
+            <Label htmlFor="attendees">Attendees:</Label>
+            <Input
+              type="text"
+              id="attendees"
+              placeholder="Enter attendees separated by commas"
+              value={attendeesInput}
+              onChange={(e) => setAttendeesInput(e.target.value)}
+            />
+          </div>
+          <div className="my-6">
+            <Label htmlFor="batchId">Batch ID:</Label>
+            <Input
+              type="text"
+              id="batchId"
+              placeholder="Enter batch ID"
+              value={batchId}
+              onChange={(e) => setBatchId(e.target.value)}
+            />
+          </div>
+          <div className="my-6">
+            <Label htmlFor="bootcampId">Bootcamp ID:</Label>
+            <Input
+              type="text"
+              id="bootcampId"
+              placeholder="Enter bootcamp ID"
+              value={bootcampId}
+              onChange={(e) => setBootcampId(e.target.value)}
+            />
+          </div>
+       
+        
 
           <div className="text-end">
-            <Button>Create Course</Button>
+            <Button onClick={handleCreateCourse}>Create Course</Button>
           </div>
         </DialogDescription>
       </DialogHeader>
