@@ -20,42 +20,48 @@ const Dropzone = ({ className, studentData, setStudentData }: Props) => {
   const [fileName, setFileName] = useState("");
 
   // func
-  const handleDataFormat = (data: any) => {
-    const filteredArray = data?.filter(
-      (item: any) => item.email !== null && item.email !== undefined
-    );
+  const handleDataFormat = useCallback(
+    (data: any) => {
+      const filteredArray = data?.filter(
+        (item: any) => item.email !== null && item.email !== undefined
+      );
 
-    setStudentData(filteredArray);
-  };
+      setStudentData(filteredArray);
+    },
+    [setStudentData]
+  );
 
   const removeFile = () => {
     setFileName("");
     setStudentData({});
   };
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    acceptedFiles.forEach((file) => {
-      const reader = new FileReader();
-      setFileName(file.name);
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      acceptedFiles.forEach((file) => {
+        const reader = new FileReader();
+        setFileName(file.name);
 
-      reader.onload = () => {
-        // Use Papaparse to parse the CSV data
-        Papa.parse(reader.result as string, {
-          header: true,
-          dynamicTyping: true,
-          complete: (results: any) => {
-            // Handle the parsed data (results.data)
-            handleDataFormat(results.data);
-          },
-          error: (error: any) => {
-            console.error("CSV Parsing Error:", error.message);
-          },
-        });
-      };
+        reader.onload = () => {
+          // Use Papaparse to parse the CSV data
+          Papa.parse(reader.result as string, {
+            header: true,
+            dynamicTyping: true,
+            complete: (results: any) => {
+              // Handle the parsed data (results.data)
+              handleDataFormat(results.data);
+            },
+            error: (error: any) => {
+              console.error("CSV Parsing Error:", error.message);
+            },
+          });
+        };
 
-      reader.readAsText(file);
-    });
-  }, []);
+        reader.readAsText(file);
+      });
+    },
+    [handleDataFormat]
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 

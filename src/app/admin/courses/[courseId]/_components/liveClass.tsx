@@ -7,8 +7,8 @@ import { Dialog, DialogOverlay, DialogTrigger } from "@/components/ui/dialog";
 import NewClassDialog from "./newClassDialog";
 import api from "@/utils/axios.config";
 import { ChevronRight } from "lucide-react";
-import axios from 'axios';
-import Moment from 'react-moment';
+import axios from "axios";
+import Moment from "react-moment";
 
 function LiveClass() {
   const [classType, setClassType] = useState("active");
@@ -16,15 +16,14 @@ function LiveClass() {
   const [bootCampIdInput, setBootCampIdInput] = useState("");
 
   useEffect(() => {
-    
-    api.post(`/classes/getClassesByBootcampId/${bootCampIdInput}`)
-      .then(response => {
+    api
+      .post(`/classes/getClassesByBootcampId/${bootCampIdInput}`)
+      .then((response) => {
         console.log(response);
         setAllClasses(response.data.classesLink);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error("Error fetching data:", error);
-     
       });
   }, [bootCampIdInput]);
 
@@ -32,7 +31,9 @@ function LiveClass() {
     setClassType(type);
   };
 
-  const handleBootCampIdInputChange = (event: { target: { value: React.SetStateAction<string>; }; }) => {
+  const handleBootCampIdInputChange = (event: {
+    target: { value: React.SetStateAction<string> };
+  }) => {
     setBootCampIdInput(event.target.value);
   };
 
@@ -60,8 +61,8 @@ function LiveClass() {
   ];
   return (
     <div>
-        <div className="flex gap-6 my-6 max-w-[800px]">
-      <Combobox data={data} title={"Select Batch"} />
+      <div className="flex gap-6 my-6 max-w-[800px]">
+        <Combobox data={data} title={"Select Batch"} />
         <input
           type="text"
           placeholder="Enter BootCamp ID"
@@ -69,17 +70,14 @@ function LiveClass() {
           onChange={handleBootCampIdInputChange}
         />
         <Combobox data={data} title={"Select Module"} />
-        </div>
+      </div>
       <div className="flex justify-between">
         <div className="w-[400px] pr-3">
           <Combobox data={data} title={"Search Classes"} />
-        </div>          
-         <Dialog>
+        </div>
+        <Dialog>
           <DialogTrigger asChild>
-            <Button
-              className="text-white bg-secondary"
-              
-            >
+            <Button className="text-white bg-secondary">
               {/* <Plus className="w-5 mr-2" /> */}
               <p>Create New Class</p>
             </Button>
@@ -106,13 +104,20 @@ function LiveClass() {
       </div>
       <div className="grid grid-cols-3 gap-6">
         {allClasses && allClasses.length > 0 ? (
-          allClasses.map((classData, index) => (
-            <div key={index} className="bg-gradient-to-bl p-3 from-blue-50 to-violet-50 flex rounded-xl">
+          allClasses.map((classData: any, index) => (
+            <div
+              key={index}
+              className="bg-gradient-to-bl p-3 from-blue-50 to-violet-50 flex rounded-xl"
+            >
               <div className="px-1 py-4 flex items-start">
                 <div className="text-gray-900 text-base flex ">
                   <div className="flex flex-col items-center justify-center ">
-                    <span className=" text-xl"><Moment format="DD">{classData.startTime}</Moment></span>
-                    <span className=" text-xl"><Moment format="MMM">{classData.startTime}</Moment></span>
+                    <span className=" text-xl">
+                      <Moment format="DD">{classData.startTime}</Moment>
+                    </span>
+                    <span className=" text-xl">
+                      <Moment format="MMM">{classData.startTime}</Moment>
+                    </span>
                   </div>
                   <div className="bg-gray-500 w-[2px] h-15 mx-2 " />
                 </div>
@@ -120,11 +125,14 @@ function LiveClass() {
               <div className="w-full flex items-center justify-between gap-y-2">
                 <div>
                   <div className="flex items-center justify-start">
-                    <div className="text-md font-semibold capitalize text-black">{classData.title}</div>
+                    <div className="text-md font-semibold capitalize text-black">
+                      {classData.title}
+                    </div>
                   </div>
                   <div className="flex items-center justify-start">
                     <p className="text-md font-semibold capitalize text-gray-600">
-                      <Moment format="hh:mm">{classData.startTime}</Moment> - <Moment format="hh:mm">{classData.endTime}</Moment>
+                      <Moment format="hh:mm">{classData.startTime}</Moment> -{" "}
+                      <Moment format="hh:mm">{classData.endTime}</Moment>
                     </p>
                   </div>
                 </div>

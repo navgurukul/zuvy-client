@@ -48,15 +48,23 @@ const data = [
     label: "Astro",
   },
 ];
-function DateTimePicker({ label, dateTime, setDateTime }) {
-  const handleDateChange = (event: { target: { value: any; }; }) => {
+function DateTimePicker({
+  label,
+  dateTime,
+  setDateTime,
+}: {
+  label: string;
+  dateTime: Date;
+  setDateTime: any;
+}) {
+  const handleDateChange = (event: { target: { value: any } }) => {
     const newDate = event.target.value;
-    const time = dateTime.toISOString().split('T')[1];
+    const time = dateTime.toISOString().split("T")[1];
     setDateTime(new Date(`${newDate}T${time}`));
   };
 
-  const handleTimeChange = (event: { target: { value: any; }; }) => {
-    const date = dateTime.toISOString().split('T')[0];
+  const handleTimeChange = (event: { target: { value: any } }) => {
+    const date = dateTime.toISOString().split("T")[0];
     const newTime = event.target.value;
     setDateTime(new Date(`${date}T${newTime}:00.000Z`));
   };
@@ -67,12 +75,12 @@ function DateTimePicker({ label, dateTime, setDateTime }) {
       <div className="flex">
         <input
           type="date"
-          value={dateTime.toISOString().split('T')[0]}
+          value={dateTime.toISOString().split("T")[0]}
           onChange={handleDateChange}
         />
         <input
           type="time"
-          value={dateTime.toISOString().split('T')[1].slice(0, 5)}
+          value={dateTime.toISOString().split("T")[1].slice(0, 5)}
           onChange={handleTimeChange}
         />
       </div>
@@ -80,10 +88,7 @@ function DateTimePicker({ label, dateTime, setDateTime }) {
   );
 }
 
-
-
 const NewClassDialog = ({}) => {
-  
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [startDateTime, setStartDateTime] = useState(new Date());
@@ -96,7 +101,7 @@ const NewClassDialog = ({}) => {
 
   const handleCreateCourse = async () => {
     const attendeesArray = attendeesInput.split(", ");
-    
+
     const userIdLocal = JSON.parse(localStorage.getItem("AUTH") || "");
     const newCourseData = {
       title,
@@ -109,26 +114,21 @@ const NewClassDialog = ({}) => {
       bootcampId,
       userId: userIdLocal.id,
     };
-  
+
     try {
       const postClass = await api.post(`/classes`, newCourseData);
-  
+
       console.log("New Course Data:", newCourseData);
-  
 
       toast({
         title: "Success",
         variant: "default",
         className: "text-start capitalize",
       });
-     
-   
-  
+
       return postClass;
     } catch (error) {
-
       console.error("Error creating class:", error);
-
     }
   };
 
@@ -158,22 +158,21 @@ const NewClassDialog = ({}) => {
             />
           </div>
           <div className="my-6">
-          <DateTimePicker
-        label="Start Date"
-        dateTime={startDateTime}
-        setDateTime={setStartDateTime}
-      />
-    
+            <DateTimePicker
+              label="Start Date"
+              dateTime={startDateTime}
+              setDateTime={setStartDateTime}
+            />
           </div>
           <div className="my-6">
-          <DateTimePicker
-        label="End Date"
-        dateTime={endDateTime}
-        setDateTime={setEndDateTime}
-      />
+            <DateTimePicker
+              label="End Date"
+              dateTime={endDateTime}
+              setDateTime={setEndDateTime}
+            />
           </div>
-       
-       <div className="my-6">
+
+          <div className="my-6">
             <Label htmlFor="attendees">Attendees:</Label>
             <Input
               type="text"
@@ -203,8 +202,6 @@ const NewClassDialog = ({}) => {
               onChange={(e) => setBootcampId(e.target.value)}
             />
           </div>
-       
-        
 
           <div className="text-end">
             <Button onClick={handleCreateCourse}>Create Course</Button>

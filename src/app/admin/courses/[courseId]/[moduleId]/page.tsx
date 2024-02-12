@@ -29,17 +29,22 @@ export default function Page({ params }: { params: { moduleId: string } }) {
     };
 
     getChapters();
-  }, []);
+  }, [params.moduleId]);
 
   return (
     <ResizablePanelGroup direction="horizontal">
       <ResizablePanel onClick={() => console.log("first", chapters)}>
         <div>
-          {chapters.map((chapter: { name: string; content: string }) => (
-            <div onClick={() => handleActiveChapter(chapter.content)}>
-              {chapter.name}
-            </div>
-          ))}
+          {chapters.map(
+            (chapter: { name: string; content: string; id: number }) => (
+              <div
+                onClick={() => handleActiveChapter(chapter.content)}
+                key={chapter.id.toString()}
+              >
+                {chapter.name}
+              </div>
+            )
+          )}
         </div>
       </ResizablePanel>
       <ResizableHandle withHandle />
