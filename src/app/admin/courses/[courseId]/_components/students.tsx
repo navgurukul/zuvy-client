@@ -7,7 +7,7 @@ import { Dialog, DialogOverlay, DialogTrigger } from "@/components/ui/dialog";
 
 import AddStudentsModal from "./addStudentsmodal";
 import { DialogContent } from "@radix-ui/react-dialog";
-
+import AddStudentsDataTable from "./StudentsDataTable/addStudentsDataTable";
 type Props = {
   id: string;
 };
@@ -22,8 +22,10 @@ const Students = ({ id }: Props) => {
     setModalopen(false);
   };
   return (
-    <div className='flex  flex-col items-center justify-center py-12'>
-      <div>
+    <>
+      <AddStudentsDataTable />
+      <div className='flex  flex-col items-center justify-center py-12'>
+        {/* <div>
         <svg
           width='164'
           height='180'
@@ -214,30 +216,31 @@ const Students = ({ id }: Props) => {
             </clipPath>
           </defs>
         </svg>
-      </div>
-      <div className='flex flex-col  items-center gap-y-2 '>
-        <span>
+      </div> */}
+        <div className='flex flex-col  items-center gap-y-2 '>
+          {/* <span>
           Add prospective students to the course and assign to batches Add
           Student(s)
-        </span>
+        </span> */}
 
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant='default' onClick={handleOpenModal}>
-              <Plus /> Add Students
-            </Button>
-          </DialogTrigger>
-          {/* <DialogOverlay /> */}
-          <DialogContent>
-            <AddStudentsModal
-              id={id}
-              isOpen={isModalOpen}
-              onClose={handleCloseModal}
-            />
-          </DialogContent>
-        </Dialog>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant='default' onClick={handleOpenModal}>
+                <Plus /> Add Students
+              </Button>
+            </DialogTrigger>
+            {/* <DialogOverlay /> */}
+            <DialogContent>
+              <AddStudentsModal
+                id={id}
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
