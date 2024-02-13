@@ -14,9 +14,6 @@ type Props = {
 const Settings = (props: Props) => {
   // misc
   const router = useRouter();
-  const courseID = useAppSelector(
-    (state: RootState) => state.saveUserReducer.courseID
-  );
 
   // state and variables
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);

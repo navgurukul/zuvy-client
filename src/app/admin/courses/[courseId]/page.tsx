@@ -21,6 +21,7 @@ interface Page {}
 
 const Page = ({ params }: { params: { courseId: string } }) => {
   // const [duration, setDuration] = useState<number | null>(null);
+
   const [courseData, setCourseData] = useState({
     id: "",
     name: "",

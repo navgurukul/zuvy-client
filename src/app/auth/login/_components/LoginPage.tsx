@@ -6,16 +6,12 @@ import { setCookie } from "cookies-next";
 import axios from "axios";
 
 import { Button } from "@/components/ui/button";
-import { saveStudent } from "@/redux/slices/userSlice";
-import { AppDispatch } from "@/redux/store/store";
 
 import "./styles/login.css";
 
 type Props = {};
 
 function LoginPage({}: Props) {
-  const dispatch = useDispatch<AppDispatch>();
-
   function reverseJwtBody(jwt: string): string {
     const [header, body, signature] = jwt.split(".");
     const reversedBody = body.split("").reverse().join("");
@@ -74,7 +70,7 @@ function LoginPage({}: Props) {
     if (!localStorage.getItem("loggedOut")) {
       localStorage.setItem("loggedOut", String(false));
     }
-  }, [BASE_URL, router, dispatch]);
+  }, [BASE_URL, router]);
 
   return (
     <>

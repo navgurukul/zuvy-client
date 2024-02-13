@@ -5,11 +5,14 @@ import Link from "next/link";
 import React from "react";
 import { ArrowLeft, Camera } from "lucide-react";
 import { useAppSelector } from "@/redux/store/store";
+import { useStore } from "../../../store/store";
+
 type Props = {};
 
 function Page({}: Props) {
-  const user = useAppSelector((state) => state.saveUserReducer.user);
-
+  const { studentData } = useStore();
+  const AuthData = localStorage.getItem("AUTH");
+  const user = JSON.parse(AuthData);
   return (
     <div>
       <MaxWidthWrapper className='flex flex-col items-center justify-between sm:flex-col '>

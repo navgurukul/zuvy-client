@@ -1,9 +1,11 @@
 "use client";
-import React from "react";
-import { RootState, useAppSelector } from "@/redux/store/store";
+import dynamic from "next/dynamic";
+import { useStore } from "../../../store/store";
 
 function Heading() {
-  const user = useAppSelector((state: RootState) => state.saveUserReducer.user);
+  const { studentData } = useStore();
+  const user = studentData;
+
   const username = user.name?.split(" ");
   const newUserName =
     username?.[0].charAt(0).toUpperCase() +

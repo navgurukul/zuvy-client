@@ -8,11 +8,13 @@ import { Bell, Menu, Search } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MobileNavbarRoutes } from "./navbar-routes";
 import { RootState, useAppSelector } from "@/redux/store/store";
-
+import { useStore } from "../../store/store";
 const Navbar = () => {
-  const user = useAppSelector((state: RootState) => state.saveUserReducer.user);
-  // const newUser = JSON.parse(user);
-  console.log(user);
+  // const AuthData = localStorage.getItem("AUTH");
+  // const user = AuthData ? JSON.parse(AuthData) : null;
+  // console.log(studentData);
+  const { studentData } = useStore();
+
   return (
     <nav className='bg-muted'>
       {/* <MaxWidthWrapper> */}
@@ -44,7 +46,7 @@ const Navbar = () => {
             <Bell />
             <Link href='/student/profile'>
               <Avatar>
-                <AvatarImage src={user.profile_picture} />
+                <AvatarImage src={studentData.profile_picture} />
                 <AvatarFallback>NAME</AvatarFallback>
               </Avatar>
             </Link>
