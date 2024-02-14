@@ -6,20 +6,13 @@ import ClassCard from "./classCard";
 import { Dialog, DialogOverlay, DialogTrigger } from "@/components/ui/dialog";
 import NewClassDialog from "./newClassDialog";
 import api from "@/utils/axios.config";
-import { ChevronRight } from "lucide-react";
-import axios from 'axios';
 import Moment from 'react-moment';
 import { transform } from "framer-motion";
 
 
-interface ClassData {
-  title: string;
-  // Add other properties if necessary
-}
 function LiveClass({ courseId }: { courseId: string }) {
   const [classType, setClassType] = useState("active");
   const [allClasses, setAllClasses] = useState([]);
-  const [bootCampIdInput, setBootCampIdInput] = useState("");
   const [bootcampData,setBootcampData]=useState([])
 
   useEffect(() => {

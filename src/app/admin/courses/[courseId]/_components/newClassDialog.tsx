@@ -17,7 +17,7 @@ import { ENROLLMENT_CAP } from "@/utils/constant";
 import { Input } from "@/components/ui/input";
 import CalendarInput from "@/app/_components/calendarInput";
 import { toast } from "@/components/ui/use-toast";
-import axios from 'axios'
+
 
 
 // interface newClassDialogProps {
@@ -90,8 +90,6 @@ const NewClassDialog = ({ courseId }: { courseId: string }) => {
   const [description, setDescription] = useState("");
   const [startDateTime, setStartDateTime] = useState(new Date());
   const [endDateTime, setEndDateTime] = useState(new Date());
-  const [timeZone, setTimeZone] = useState("");
-  const [attendees, setAttendees] = useState([]);
   const [batchId, setBatchId] = useState("");
   const [attendeesInput, setAttendeesInput] = useState("");
   const [bootcampData,setBootcampData]=useState([])
