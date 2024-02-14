@@ -7,34 +7,44 @@ import { Dialog, DialogOverlay, DialogTrigger } from "@/components/ui/dialog";
 import NewClassDialog from "./newClassDialog";
 import api from "@/utils/axios.config";
 import { ChevronRight } from "lucide-react";
-import axios from "axios";
-import Moment from "react-moment";
+import axios from 'axios';
+import Moment from 'react-moment';
+import { transform } from "framer-motion";
 
-function LiveClass() {
+
+interface ClassData {
+  title: string;
+  // Add other properties if necessary
+}
+function LiveClass({ courseId }: { courseId: string }) {
   const [classType, setClassType] = useState("active");
   const [allClasses, setAllClasses] = useState([]);
   const [bootCampIdInput, setBootCampIdInput] = useState("");
+  const [bootcampData,setBootcampData]=useState([])
 
   useEffect(() => {
-    api
-      .post(`/classes/getClassesByBootcampId/${bootCampIdInput}`)
-      .then((response) => {
+  
+    api.get(`/bootcamp/batches/${courseId}`)
+      .then(response => {
         console.log(response);
-        setAllClasses(response.data.classesLink);
+       
+        const transformedData = response.data.map((item: { id: any; name: any; }) => ({
+          value: (item.id).toString(),
+          label: item.name,
+      }));
+      console.log(transformedData)
+      console.log(data)
+
+        setBootcampData(transformedData)
+        
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
       });
-  }, [bootCampIdInput]);
+  }, []);
 
   const handleClassType = (type: "active" | "complete") => {
     setClassType(type);
-  };
-
-  const handleBootCampIdInputChange = (event: {
-    target: { value: React.SetStateAction<string> };
-  }) => {
-    setBootCampIdInput(event.target.value);
   };
 
   const data = [
@@ -61,21 +71,22 @@ function LiveClass() {
   ];
   return (
     <div>
-      <div className="flex gap-6 my-6 max-w-[800px]">
-        <Combobox data={data} title={"Select Batch"} />
-        <input
-          type="text"
-          placeholder="Enter BootCamp ID"
-          value={bootCampIdInput}
-          onChange={handleBootCampIdInputChange}
-        />
-        <Combobox data={data} title={"Select Module"} />
-      </div>
+        <div className="flex gap-6 my-6 max-w-[800px]">
+      <Combobox data={bootcampData} title={"Select Batch"} onChange={function (selectedValue: string): void {
+          throw new Error("Function not implemented.");
+        } } />
+       
+        <Combobox data={data} title={"Select Module"} onChange={function (selectedValue: string): void {
+          throw new Error("Function not implemented.");
+        } } />
+        </div>
       <div className="flex justify-between">
         <div className="w-[400px] pr-3">
-          <Combobox data={data} title={"Search Classes"} />
-        </div>
-        <Dialog>
+          <Combobox data={data} title={"Search Classes"} onChange={function (selectedValue: string): void {
+            throw new Error("Function not implemented.");
+          } } />
+        </div>          
+         <Dialog  >
           <DialogTrigger asChild>
             <Button className="text-white bg-secondary">
               {/* <Plus className="w-5 mr-2" /> */}
@@ -83,7 +94,7 @@ function LiveClass() {
             </Button>
           </DialogTrigger>
           <DialogOverlay />
-          <NewClassDialog />
+          <NewClassDialog courseId={courseId} />
         </Dialog>
       </div>
       <div className="flex justify-start gap-6 my-6">
@@ -104,44 +115,8 @@ function LiveClass() {
       </div>
       <div className="grid grid-cols-3 gap-6">
         {allClasses && allClasses.length > 0 ? (
-          allClasses.map((classData: any, index) => (
-            <div
-              key={index}
-              className="bg-gradient-to-bl p-3 from-blue-50 to-violet-50 flex rounded-xl"
-            >
-              <div className="px-1 py-4 flex items-start">
-                <div className="text-gray-900 text-base flex ">
-                  <div className="flex flex-col items-center justify-center ">
-                    <span className=" text-xl">
-                      <Moment format="DD">{classData.startTime}</Moment>
-                    </span>
-                    <span className=" text-xl">
-                      <Moment format="MMM">{classData.startTime}</Moment>
-                    </span>
-                  </div>
-                  <div className="bg-gray-500 w-[2px] h-15 mx-2 " />
-                </div>
-              </div>
-              <div className="w-full flex items-center justify-between gap-y-2">
-                <div>
-                  <div className="flex items-center justify-start">
-                    <div className="text-md font-semibold capitalize text-black">
-                      {classData.title}
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-start">
-                    <p className="text-md font-semibold capitalize text-gray-600">
-                      <Moment format="hh:mm">{classData.startTime}</Moment> -{" "}
-                      <Moment format="hh:mm">{classData.endTime}</Moment>
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center">
-                  <a href={classData.hangoutLink}>Join Class</a>
-                  <ChevronRight size={20} />
-                </div>
-              </div>
-            </div>
+          allClasses.map((classData, index) => (
+            <ClassCard classData={classData}/>
           ))
         ) : (
           <p>No classes available.</p>
