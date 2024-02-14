@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,8 +17,6 @@ import { ENROLLMENT_CAP } from "@/utils/constant";
 import { Input } from "@/components/ui/input";
 import CalendarInput from "@/app/_components/calendarInput";
 import { toast } from "@/components/ui/use-toast";
-
-
 
 // interface newClassDialogProps {
 //   newCourseName: string;
@@ -50,8 +48,16 @@ const data = [
     label: "Astro",
   },
 ];
-function DateTimePicker({ label, dateTime, setDateTime }:{label:any,dateTime:any,setDateTime:any}) {
-  const handleDateChange = (event: { target: { value: any; }; }) => {
+function DateTimePicker({
+  label,
+  dateTime,
+  setDateTime,
+}: {
+  label: any;
+  dateTime: any;
+  setDateTime: any;
+}) {
+  const handleDateChange = (event: { target: { value: any } }) => {
     const newDate = event.target.value;
     const time = dateTime.toISOString().split("T")[1];
     setDateTime(new Date(`${newDate}T${time}`));
@@ -82,41 +88,37 @@ function DateTimePicker({ label, dateTime, setDateTime }:{label:any,dateTime:any
   );
 }
 
-
-
 const NewClassDialog = ({ courseId }: { courseId: string }) => {
-  
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [startDateTime, setStartDateTime] = useState(new Date());
   const [endDateTime, setEndDateTime] = useState(new Date());
   const [batchId, setBatchId] = useState("");
   const [attendeesInput, setAttendeesInput] = useState("");
-  const [bootcampData,setBootcampData]=useState([])
+  const [bootcampData, setBootcampData] = useState([]);
 
   useEffect(() => {
-  
-    api.get(`/bootcamp/batches/${courseId}`)
-      .then(response => {
+    api
+      .get(`/bootcamp/batches/${courseId}`)
+      .then((response) => {
         console.log(response);
-       
-        const transformedData = response.data.map((item: { id: any; name: any; }) => ({
-          value: (item.id).toString(),
-          label: item.name,
-      })); 
-        setBootcampData(transformedData)
-        
+
+        const transformedData = response.data.map(
+          (item: { id: any; name: any }) => ({
+            value: item.id.toString(),
+            label: item.name,
+          })
+        );
+        setBootcampData(transformedData);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error("Error fetching data:", error);
-     
       });
-  }, []);
+  }, [courseId]);
+
   const handleComboboxChange = (value: string) => {
     setBatchId(value);
-  
   };
-
 
   const handleCreateCourse = async () => {
     const attendeesArray = attendeesInput.split(", ");
@@ -130,16 +132,16 @@ const NewClassDialog = ({ courseId }: { courseId: string }) => {
       timeZone: "Asia/Kolkata",
       attendees: attendeesArray,
       batchId,
-      bootcampId:courseId.toString(),
+      bootcampId: courseId.toString(),
       userId: userIdLocal.id,
-      roles:userIdLocal.rolesList
+      roles: userIdLocal.rolesList,
     };
 
     try {
       const postClass = await api.post(`/classes`, newCourseData);
 
       console.log("New Course Data:", newCourseData);
-      if (postClass.data.status=="success"){
+      if (postClass.data.status == "success") {
         toast({
           title: "Success",
           variant: "default",
@@ -204,9 +206,13 @@ const NewClassDialog = ({ courseId }: { courseId: string }) => {
           </div>
           <div className="my-6">
             <Label htmlFor="batchId">Batch ID:</Label>
-            <Combobox data={bootcampData} title={"Select Batch"} onChange={handleComboboxChange}/>
+            <Combobox
+              data={bootcampData}
+              title={"Select Batch"}
+              onChange={handleComboboxChange}
+            />
           </div>
-          
+
           <div className="text-end">
             <Button onClick={handleCreateCourse}>Create Course</Button>
           </div>

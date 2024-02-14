@@ -6,35 +6,29 @@ import ClassCard from "./classCard";
 import { Dialog, DialogOverlay, DialogTrigger } from "@/components/ui/dialog";
 import NewClassDialog from "./newClassDialog";
 import api from "@/utils/axios.config";
-import Moment from 'react-moment';
-import { transform } from "framer-motion";
-
 
 function LiveClass({ courseId }: { courseId: string }) {
   const [classType, setClassType] = useState("active");
   const [allClasses, setAllClasses] = useState([]);
-  const [bootcampData,setBootcampData]=useState([])
+  const [bootcampData, setBootcampData] = useState([]);
 
   useEffect(() => {
-  
-    api.get(`/bootcamp/batches/${courseId}`)
-      .then(response => {
-        console.log(response);
-       
-        const transformedData = response.data.map((item: { id: any; name: any; }) => ({
-          value: (item.id).toString(),
-          label: item.name,
-      }));
-      console.log(transformedData)
-      console.log(data)
+    api
+      .get(`/bootcamp/batches/${courseId}`)
+      .then((response) => {
+        const transformedData = response.data.map(
+          (item: { id: any; name: any }) => ({
+            value: item.id.toString(),
+            label: item.name,
+          })
+        );
 
-        setBootcampData(transformedData)
-        
+        setBootcampData(transformedData);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
       });
-  }, []);
+  }, [courseId]);
 
   const handleClassType = (type: "active" | "complete") => {
     setClassType(type);
@@ -64,22 +58,34 @@ function LiveClass({ courseId }: { courseId: string }) {
   ];
   return (
     <div>
-        <div className="flex gap-6 my-6 max-w-[800px]">
-      <Combobox data={bootcampData} title={"Select Batch"} onChange={function (selectedValue: string): void {
-          throw new Error("Function not implemented.");
-        } } />
-       
-        <Combobox data={data} title={"Select Module"} onChange={function (selectedValue: string): void {
-          throw new Error("Function not implemented.");
-        } } />
-        </div>
+      <div className="flex gap-6 my-6 max-w-[800px]">
+        <Combobox
+          data={bootcampData}
+          title={"Select Batch"}
+          onChange={function (selectedValue: string): void {
+            throw new Error("Function not implemented.");
+          }}
+        />
+
+        <Combobox
+          data={data}
+          title={"Select Module"}
+          onChange={function (selectedValue: string): void {
+            throw new Error("Function not implemented.");
+          }}
+        />
+      </div>
       <div className="flex justify-between">
         <div className="w-[400px] pr-3">
-          <Combobox data={data} title={"Search Classes"} onChange={function (selectedValue: string): void {
-            throw new Error("Function not implemented.");
-          } } />
-        </div>          
-         <Dialog  >
+          <Combobox
+            data={data}
+            title={"Search Classes"}
+            onChange={function (selectedValue: string): void {
+              throw new Error("Function not implemented.");
+            }}
+          />
+        </div>
+        <Dialog>
           <DialogTrigger asChild>
             <Button className="text-white bg-secondary">
               {/* <Plus className="w-5 mr-2" /> */}
@@ -109,7 +115,7 @@ function LiveClass({ courseId }: { courseId: string }) {
       <div className="grid grid-cols-3 gap-6">
         {allClasses && allClasses.length > 0 ? (
           allClasses.map((classData, index) => (
-            <ClassCard classData={classData}/>
+            <ClassCard classData={classData} key={index} />
           ))
         ) : (
           <p>No classes available.</p>
