@@ -13,6 +13,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
+  DialogClose,
 } from "@/components/ui/dialog";
 
 import styles from "../../_components/cources.module.css";
@@ -120,79 +122,74 @@ const Batches: React.FC = () => {
           placeholder="Search"
           className={styles.searchInput}
         />
-
         <Dialog>
-          <DialogTrigger>
+          <DialogTrigger asChild>
             <Button className={styles.newCourseBtn}>+ New Batch</Button>
           </DialogTrigger>
-          <DialogOverlay />
-          <DialogContent>
+          <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle className={styles.newCourse}>New Batch</DialogTitle>
-              <DialogDescription>
-                <div style={{ marginBottom: "10px" }}>
-                  <label
-                    htmlFor="batchName"
-                    className={styles.dialogCourseName}
-                  >
-                    Batch Name:
-                  </label>
-                  <input
-                    type="text"
-                    id="batchName"
-                    placeholder="Enter batch name"
-                    className={styles.inputBox}
-                    onChange={handleInputChange}
-                  />
-                  <div className={styles.dialogCourseNameContainer}>
-                    <label
-                      htmlFor="instructor"
-                      className={styles.dialogCourseName}
-                    >
-                      Instructor:
-                    </label>
-                    <Select
-                      id="instructor"
-                      placeholder="Select an Instructor"
-                      options={instructorOptions}
-                      value={selectedInstructor}
-                      onChange={(selectedOption) =>
-                        setSelectedInstructor(selectedOption)
-                      }
-                    />
-                  </div>
-                  <label
-                    htmlFor="courseCommencement"
-                    className={styles.dialogCourseName}
-                  >
-                    Course Commencement:
-                  </label>
-                  <input
-                    type="date"
-                    id="courseCommencement"
-                    className={styles.inputBox}
-                    onChange={handleInputChange}
-                  />
-                  <label htmlFor="capEnrollment" className={styles.label}>
-                    Cap Enrollment:
-                  </label>
-                  <Input
-                    type="number"
-                    id="capEnrollment"
-                    placeholder="Enter cap enrollment"
-                    name="capEnrollment"
-                    value={cap || ""}
-                    onChange={(e) => setCap(Number(e.target.value))}
-                  />
-                </div>
+            </DialogHeader>
+            <div style={{ marginBottom: "10px" }}>
+              <label htmlFor="batchName" className={styles.dialogCourseName}>
+                Batch Name:
+              </label>
+              <input
+                type="text"
+                id="batchName"
+                placeholder="Enter batch name"
+                className={styles.inputBox}
+                onChange={handleInputChange}
+              />
+              <div className={styles.dialogCourseNameContainer}>
+                <label htmlFor="instructor" className={styles.dialogCourseName}>
+                  Instructor:
+                </label>
+                <Select
+                  id="instructor"
+                  placeholder="Select an Instructor"
+                  options={instructorOptions}
+                  value={selectedInstructor}
+                  onChange={(selectedOption) =>
+                    setSelectedInstructor(selectedOption)
+                  }
+                />
+              </div>
+              <label
+                htmlFor="courseCommencement"
+                className={styles.dialogCourseName}
+              >
+                Course Commencement:
+              </label>
+              <input
+                type="date"
+                id="courseCommencement"
+                className={styles.inputBox}
+                onChange={handleInputChange}
+              />
+              <label htmlFor="capEnrollment" className={styles.label}>
+                Cap Enrollment:
+              </label>
+              <Input
+                type="number"
+                id="capEnrollment"
+                placeholder="Enter cap enrollment"
+                name="capEnrollment"
+                value={cap || ""}
+                onChange={(e) => setCap(Number(e.target.value))}
+              />
+            </div>
+            <DialogFooter className="sm:justify-start">
+              <DialogClose asChild>
                 <Button
+                  type="button"
                   onClick={handleCreateBatch}
                   className={styles.createCourseBtnDialog}
                 >
                   Create Batch
                 </Button>
-              </DialogDescription>
-            </DialogHeader>
+              </DialogClose>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
@@ -223,7 +220,7 @@ const Batches: React.FC = () => {
           <Card key={index} className={styles.cardContainer}>
             <div className={styles.courseImageContainer}>
               <Image
-                src={course.image}
+                src={`/${course.image}`}
                 alt={`Course: ${course.groupName}`}
                 className={styles.courseImage}
               />

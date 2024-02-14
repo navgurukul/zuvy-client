@@ -27,21 +27,21 @@ const guestRoutes = [
     label: "Browse",
     href: "/student/courses",
   },
-  {
-    icon: Code,
-    label: "Playground",
-    href: "/playground",
-  },
-  {
-    icon: MessagesSquare,
-    label: "Discussion",
-    href: "/discussion",
-  },
-  {
-    icon: MessageCircleQuestion,
-    label: "Help",
-    href: "/help",
-  },
+  // {
+  //   icon: Code,
+  //   label: "Playground",
+  //   href: "/student/playground",
+  // },
+  // {
+  //   icon: MessagesSquare,
+  //   label: "Discussion",
+  //   href: "/student/discussion",
+  // },
+  // {
+  //   icon: MessageCircleQuestion,
+  //   label: "Help",
+  //   href: "/student/help",
+  // },
 ];
 
 const teacherRoutes = [
@@ -58,14 +58,14 @@ const teacherRoutes = [
 ];
 
 const adminRoutes = [
-  { icon: Home, label: "Home", href: "/admin" },
-  { label: "Notifications", icon: Bell, href: "/admin/home" },
+  { label: "Home", icon: Home,  href: "/admin" },
   { label: "Courses", icon: Book, href: "/admin/courses" },
-  { label: "Resource Bank", icon: Database, href: "/admin/home" },
-  { label: "Instructors", icon: User, href: "/admin/home" },
-  { label: "Reports", icon: BarChart, href: "/admin/home" },
-  { label: "Settings", icon: Cog, href: "/admin/home" },
-  { label: "Help", icon: HelpCircle, href: "/admin/home" },
+  // { label: "Notifications", icon: Bell, href: "/admin/home" },
+  // { label: "Resource Bank", icon: Database, href: "/admin/resource" },
+  // { label: "Instructors", icon: User, href: "/admin/instructor" },
+  // { label: "Reports", icon: BarChart, href: "/admin/reports" },
+  // { label: "Settings", icon: Cog, href: "/admin/settings" },
+  // { label: "Help", icon: HelpCircle, href: "/admin/help" },
 ];
 
 const commonRoutes = [

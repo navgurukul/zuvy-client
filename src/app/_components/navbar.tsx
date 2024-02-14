@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 import Image from "next/image";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -6,8 +7,11 @@ import { Bell, Menu, Search } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MobileNavbarRoutes } from "./navbar-routes";
+import { RootState, useAppSelector } from "@/redux/store/store";
 
 const Navbar = () => {
+  const user = useAppSelector((state: RootState) => state.saveUserReducer.user);
+  const newUser = typeof user === "string" ? JSON.parse(user) : user;
   return (
     <nav className="bg-muted">
       {/* <MaxWidthWrapper> */}
@@ -39,7 +43,7 @@ const Navbar = () => {
             <Bell />
             <Link href="/student/profile">
               <Avatar>
-                <AvatarImage src="https://github.com/shadcn.png" />
+                <AvatarImage src={newUser.profile_picture} />
                 <AvatarFallback>NAME</AvatarFallback>
               </Avatar>
             </Link>

@@ -2,28 +2,30 @@
 
 import React, { useEffect, useState } from "react";
 
-import Batches from "./_components/batches";
-import GeneralDetails from "./_components/generalDetails";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Breadcrumb from "@/components/ui/breadcrumb";
 import api from "@/utils/axios.config";
+import Batches from "./_components/batches";
+import LiveClass from "./_components/liveClass";
+import Settings from "./_components/settings";
+import Students from "./_components/students";
+import { GeneralDetails } from "./_components/generalDetails";
+import Curriculum from "./_components/curriculum";
 
 import styles from "../_components/cources.module.css";
-import LiveClass from "./_components/liveClass";
 
 interface Page {}
 
 const Page = ({ params }: { params: { courseId: string } }) => {
-  // const [duration, setDuration] = useState<number | null>(null);
+  // state and variables
   const [courseData, setCourseData] = useState({
     id: "",
     name: "",
     bootcampTopic: "",
-    // courseDescription: "",
     coverImage: "",
-    // startDate: "",
-    duration: 0,
-    language: "The bootcamp language",
+    startTime: new Date(),
+    duration: "",
+    language: "",
     capEnrollment: 0,
   });
 
@@ -47,22 +49,22 @@ const Page = ({ params }: { params: { courseId: string } }) => {
     {
       title: "Curriculum",
       value: "curriculum",
-      // component: <Batches />,
+      component: <Curriculum courseId={params.courseId} />,
     },
     {
       title: "Live Class",
       value: "liveClass",
-      component: <LiveClass />,
+      component: <LiveClass courseId={params.courseId}/>,
     },
     {
       title: "Settings",
       value: "settings",
-      // component: <Batches />,
+      component: <Settings courseId={params.courseId} />,
     },
     {
       title: "Students",
       value: "students",
-      // component: <Batches />,
+      component: <Students id={params.courseId} />,
     },
   ];
 

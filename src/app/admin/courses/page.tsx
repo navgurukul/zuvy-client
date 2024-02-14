@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { ChevronDown, Plus } from "lucide-react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 import { Input } from "@/components/ui/input";
@@ -12,8 +11,10 @@ import { Dialog, DialogOverlay, DialogTrigger } from "@/components/ui/dialog";
 import Heading from "../_components/header";
 import NewCourseDialog from "./_components/newCourseDialog";
 import api from "@/utils/axios.config";
+import OptimizedImageWithFallback from "@/components/ImageWithFallback";
 
 import styles from "./_components/cources.module.css";
+import { COURSE_FILTER } from "@/utils/constant";
 
 interface Course {
   name: string;
@@ -50,12 +51,6 @@ const Courses: React.FC = () => {
     setNewCourseName(event.target.value);
   };
 
-  const filteredCourses = courses.filter(
-    (course) =>
-      course.name &&
-      course.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   const handleCreateCourse = async () => {
     try {
       const response = await api.post("/bootcamp", { name: newCourseName });
@@ -79,10 +74,6 @@ const Courses: React.FC = () => {
     }
   }, []);
 
-  // const handleCourseClick = (courseId: string) => {
-  //   window.location.href = `course/${courseId}`;
-  // };
-
   return (
     <div>
       <Heading title={"Courses"} />
@@ -91,12 +82,13 @@ const Courses: React.FC = () => {
           <Input
             type="text"
             placeholder="Search"
-            className={styles.searchInput}
+            // className={styles.searchInput}
+            className="max-w-[500px]"
             value={searchQuery}
             onChange={handleSearchChange}
           />
           <Dialog>
-            <DialogTrigger>
+            <DialogTrigger asChild>
               <Button className="text-white bg-secondary">
                 <Plus className="w-5 mr-2" />
                 <p>New Course</p>
@@ -110,42 +102,38 @@ const Courses: React.FC = () => {
             />
           </Dialog>
         </div>
-        <div className={styles.contentContainer}>
-          <div className={styles.content}>
-            <span
-              className={activeFilter === "all" ? `${styles.active}` : ""}
-              onClick={() => handleFilterClick("all")}
-            >
-              All
-            </span>
-            <span
-              className={activeFilter === "active" ? `${styles.active}` : ""}
-              onClick={() => handleFilterClick("active")}
-            >
-              Active
-            </span>
-            <span
-              className={activeFilter === "completed" ? `${styles.active}` : ""}
-              onClick={() => handleFilterClick("completed")}
-            >
-              Completed
-            </span>
+        <div className="flex mt-5 mb-10">
+          <div className="flex mr-2">
+            {COURSE_FILTER.map((filter: any) => (
+              <p
+                key={filter}
+                className={`${
+                  activeFilter === filter
+                    ? "bg-muted-foreground text-white"
+                    : ""
+                } capitalize mr-2 cursor-pointer py-1 px-2 rounded-md`}
+                onClick={() => handleFilterClick(filter)}
+              >
+                {filter}
+              </p>
+            ))}
+
             <span> | </span>
           </div>
           <div>
-            <span className={styles.filterDropdown}>
-              All Partners &nbsp; <ChevronDown />
-            </span>
+            <p className="flex items-center bg-muted-foreground text-white py-1 px-2 rounded-md">
+              All Partners <ChevronDown />
+            </p>
           </div>
         </div>
-        <div className="my-5 flex justify-start gap-3">
-          {filteredCourses.length === 0 ? (
-            <div className={styles.centeredContainer}>
+        <div className="my-5 flex justify-center items-center">
+          {courses.length === 0 ? (
+            <div className="mt-24">
               <h4 className={styles.firstCourseText}>
                 Create your first course and share with students
               </h4>
               <Dialog>
-                <DialogTrigger>
+                <DialogTrigger asChild>
                   <Button className="text-white bg-secondary">
                     <Plus className="w-5 mr-2" />
                     <p>New Course</p>
@@ -164,41 +152,34 @@ const Courses: React.FC = () => {
               </p>
             </div>
           ) : (
-            filteredCourses.map((course, index) => (
-              <Card
-                key={index}
-                className="h-max w-[400px] cursor-pointer"
-                onClick={() => handleCardClick(course.id.toString())}
-              >
-                <div className="bg-muted flex justify-center">
-                  {course.coverImage ? (
-                    <Image
+            <div className="flex flex-wrap justify-center gap-3">
+              {courses.map((course, index) => (
+                <Card
+                  key={index}
+                  className="h-max w-[400px] cursor-pointer"
+                  onClick={() => handleCardClick(course.id.toString())}
+                >
+                  <div className="bg-muted flex justify-center h-[200px] relative overflow-hidden rounded-sm">
+                    <OptimizedImageWithFallback
                       src={course.coverImage}
-                      alt={`Course: ${course.name}`}
-                      className={styles.courseImage}
-                      fill
+                      alt={course.name}
+                      fallBackSrc={"/logo_white.png"}
                     />
-                  ) : (
-                    <Image
-                      src={"/logo_white.png"}
-                      alt={`Course: ${course.name}`}
-                      className={styles.courseImage}
-                      width={100}
-                      height={100}
-                    />
-                  )}
-                </div>
-                <div className={styles.courseDetails}>
-                  <span className={styles.nameText}>{course.name}</span>
-                </div>
-                <div className={styles.courseDetails}>
-                  <span className={styles.learnersCount}>
-                    {course.learnersCount} Learners
-                  </span>
-                  <span>{course.date}</span>
-                </div>
-              </Card>
-            ))
+                  </div>
+                  <div className="text-start px-4 py-3 bg-muted">
+                    <p className="capitalize mb-2 font-semibold">
+                      {course.name}
+                    </p>
+                    <div className="">
+                      <span className={styles.learnersCount}>
+                        {course.learnersCount} Learners
+                      </span>
+                      <span>{course.date}</span>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
           )}
         </div>
       </div>
