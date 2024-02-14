@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +17,8 @@ import { ENROLLMENT_CAP } from "@/utils/constant";
 import { Input } from "@/components/ui/input";
 import CalendarInput from "@/app/_components/calendarInput";
 import { toast } from "@/components/ui/use-toast";
+import axios from 'axios'
+
 
 // interface newClassDialogProps {
 //   newCourseName: string;
@@ -48,7 +50,7 @@ const data = [
     label: "Astro",
   },
 ];
-function DateTimePicker({ label, dateTime, setDateTime }) {
+function DateTimePicker({ label, dateTime, setDateTime }:{label:any,dateTime:any,setDateTime:any}) {
   const handleDateChange = (event: { target: { value: any; }; }) => {
     const newDate = event.target.value;
     const time = dateTime.toISOString().split('T')[1];
@@ -82,7 +84,7 @@ function DateTimePicker({ label, dateTime, setDateTime }) {
 
 
 
-const NewClassDialog = ({}) => {
+const NewClassDialog = ({ courseId }: { courseId: string }) => {
   
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -91,8 +93,32 @@ const NewClassDialog = ({}) => {
   const [timeZone, setTimeZone] = useState("");
   const [attendees, setAttendees] = useState([]);
   const [batchId, setBatchId] = useState("");
-  const [bootcampId, setBootcampId] = useState("");
   const [attendeesInput, setAttendeesInput] = useState("");
+  const [bootcampData,setBootcampData]=useState([])
+
+  useEffect(() => {
+  
+    api.get(`/bootcamp/batches/${courseId}`)
+      .then(response => {
+        console.log(response);
+       
+        const transformedData = response.data.map((item: { id: any; name: any; }) => ({
+          value: (item.id).toString(),
+          label: item.name,
+      })); 
+        setBootcampData(transformedData)
+        
+      })
+      .catch(error => {
+        console.error("Error fetching data:", error);
+     
+      });
+  }, []);
+  const handleComboboxChange = (value: string) => {
+    setBatchId(value);
+  
+  };
+
 
   const handleCreateCourse = async () => {
     const attendeesArray = attendeesInput.split(", ");
@@ -106,24 +132,22 @@ const NewClassDialog = ({}) => {
       timeZone: "Asia/Kolkata",
       attendees: attendeesArray,
       batchId,
-      bootcampId,
+      bootcampId:courseId.toString(),
       userId: userIdLocal.id,
+      roles:userIdLocal.rolesList
     };
   
     try {
       const postClass = await api.post(`/classes`, newCourseData);
   
       console.log("New Course Data:", newCourseData);
-  
-
-      toast({
-        title: "Success",
-        variant: "default",
-        className: "text-start capitalize",
-      });
-     
-   
-  
+      if (postClass.data.status=="success"){
+        toast({
+          title: "Success",
+          variant: "default",
+          className: "text-start capitalize",
+        });
+      }
       return postClass;
     } catch (error) {
 
@@ -138,11 +162,11 @@ const NewClassDialog = ({}) => {
         <DialogTitle className={styles.newCourse}>New Course</DialogTitle>
         <DialogDescription>
           <div className="my-6">
-            <Label htmlFor="name">Meet Title</Label>
+            <Label htmlFor="name">Class Title</Label>
             <Input
               type="text"
               id="name"
-              placeholder="Enter meet title"
+              placeholder="Enter Class title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
@@ -185,27 +209,9 @@ const NewClassDialog = ({}) => {
           </div>
           <div className="my-6">
             <Label htmlFor="batchId">Batch ID:</Label>
-            <Input
-              type="text"
-              id="batchId"
-              placeholder="Enter batch ID"
-              value={batchId}
-              onChange={(e) => setBatchId(e.target.value)}
-            />
+            <Combobox data={bootcampData} title={"Select Batch"} onChange={handleComboboxChange}/>
           </div>
-          <div className="my-6">
-            <Label htmlFor="bootcampId">Bootcamp ID:</Label>
-            <Input
-              type="text"
-              id="bootcampId"
-              placeholder="Enter bootcamp ID"
-              value={bootcampId}
-              onChange={(e) => setBootcampId(e.target.value)}
-            />
-          </div>
-       
-        
-
+          
           <div className="text-end">
             <Button onClick={handleCreateCourse}>Create Course</Button>
           </div>
