@@ -39,6 +39,7 @@
     "gapi": "^0.0.3",
     "gapi-script": "^1.2.0",
     "lucide-react": "^0.303.0",
+    "moment": "^2.30.1",
     "next": "13.5.4",
     "papaparse": "^5.4.1",
     "react": "^18",
