@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { BookMinus, ChevronRight, Lock } from "lucide-react";
 
@@ -7,10 +9,12 @@ import Breadcrumb from "@/components/ui/breadcrumb";
 import CircularLoader from "../_components/circularLoader";
 import Loader from "../_components/Loader";
 import Image from "next/image";
+import api from "@/utils/axios.config";
 
 type Props = {};
 
-function Page({}: Props) {
+function Page({ params }: { params: { viewcourses: string } }) {
+  const [courseModules, setCourseModules] = useState([]);
   const crumbs = [
     { crumb: "My Courses", href: "/student/courses" },
     {
@@ -18,6 +22,21 @@ function Page({}: Props) {
       href: "/student/courses/:course-name",
     },
   ];
+
+  useEffect(() => {
+    const getCourseModules = async () => {
+      try {
+        const response = await api.get(
+          `/Content/modules/${params.viewcourses}`
+        );
+        console.log(response);
+        setCourseModules(response.data);
+      } catch (error) {
+        console.error("Error deleting:", error);
+      }
+    };
+    getCourseModules();
+  }, [params.viewcourses]);
 
   return (
     <MaxWidthWrapper>
@@ -120,68 +139,38 @@ function Page({}: Props) {
             <div className="flex flex-start">
               <h1 className="text-lg p-1 font-semibold">Course Modules</h1>
             </div>
-            <Link
-              href={"/student/courses/:course-name/:module-name"}
-              className="bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl  "
-            >
-              <div className="w-full flex items-center justify-between gap-y-2  ">
-                <div className="flex gap-y-2 flex-col p-2  ">
-                  <div className="flex items-center justify-start  ">
-                    <div className="text-md font-semibold capitalize text-black">
-                      Programming Basics 1
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-start  ">
-                    <p className="text-md font-semibold capitalize text-gray-600">
-                      Time Commitment: 2weeks
-                    </p>
-                  </div>
-                </div>
-                <div className="">
-                  <CircularLoader />
-                </div>
-              </div>
-            </Link>
-            <Link
-              href={"/student/courses/:course-name/:module-name"}
-              className="bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl  "
-            >
-              <div className="w-full flex items-center justify-between gap-y-2  ">
-                <div className="flex gap-y-2 flex-col p-2  ">
-                  <div className="flex items-center justify-start  ">
-                    <div className="text-md font-semibold capitalize text-black">
-                      Programming Basics 1
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-start  ">
-                    <p className="text-md font-semibold capitalize text-gray-600">
-                      Time Commitment: 2weeks
-                    </p>
-                  </div>
-                </div>
-                <div className="">
-                  <CircularLoader />
-                </div>
-              </div>
-            </Link>
 
-            <div className="bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl  ">
-              <div className="w-full flex items-center justify-between gap-y-2  ">
-                <div className="flex gap-y-2 flex-col p-2  ">
-                  <div className="flex items-center justify-start  ">
-                    <Link
-                      href={"/"}
-                      className="text-md font-semibold capitalize text-black"
-                    >
-                      Certificate
-                    </Link>
-                  </div>
-                </div>
-                <div className="flex items-center  justify-center">
-                  <Lock size={20} />
-                </div>
-              </div>
-            </div>
+            {courseModules.length > 0 ? (
+              courseModules.map(
+                ({ name, id }: { name: string; id: number }) => (
+                  <Link
+                    key={id}
+                    href={`/student/courses/${params.viewcourses}/modules/${id}`}
+                    className="bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl  "
+                  >
+                    <div className="w-full flex items-center justify-between gap-y-2  ">
+                      <div className="flex gap-y-2 flex-col p-2  ">
+                        <div className="flex items-center justify-start  ">
+                          <div className="text-md font-semibold capitalize text-black">
+                            {name}
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-start  ">
+                          <p className="text-md font-semibold capitalize text-gray-600">
+                            Time Commitment: 2weeks
+                          </p>
+                        </div>
+                      </div>
+                      <div className="">
+                        <CircularLoader />
+                      </div>
+                    </div>
+                  </Link>
+                )
+              )
+            ) : (
+              <div>No Modules Found</div>
+            )}
           </div>
         </div>
 
