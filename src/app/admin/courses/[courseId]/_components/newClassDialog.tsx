@@ -130,7 +130,7 @@ const NewClassDialog = ({ courseId }: { courseId: string }) => {
       startDateTime,
       endDateTime,
       timeZone: "Asia/Kolkata",
-      attendees: attendeesArray,
+      attendees: [],
       batchId,
       bootcampId: courseId.toString(),
       userId: userIdLocal.id,
@@ -194,16 +194,7 @@ const NewClassDialog = ({ courseId }: { courseId: string }) => {
             />
           </div>
 
-          <div className="my-6">
-            <Label htmlFor="attendees">Attendees:</Label>
-            <Input
-              type="text"
-              id="attendees"
-              placeholder="Enter attendees separated by commas"
-              value={attendeesInput}
-              onChange={(e) => setAttendeesInput(e.target.value)}
-            />
-          </div>
+     
           <div className="my-6">
             <Label htmlFor="batchId">Batch ID:</Label>
             <Combobox
