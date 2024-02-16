@@ -22,7 +22,7 @@ export interface ComboboxProps {
   data: any;
   title: string;
   onChange: (selectedValue: string) => void;
-}
+ }
 
 export function Combobox({ data, title, onChange }: ComboboxProps)  {
   const [open, setOpen] = React.useState(false);
@@ -45,7 +45,7 @@ export function Combobox({ data, title, onChange }: ComboboxProps)  {
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command>
-          <CommandInput placeholder="Search framework..." />
+          <CommandInput placeholder={title} />
           <CommandEmpty>No framework found.</CommandEmpty>
           <CommandGroup>
             {data.map((framework: any) => (
