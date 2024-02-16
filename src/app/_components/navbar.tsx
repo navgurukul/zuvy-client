@@ -11,7 +11,6 @@ import { useLazyLoadedStudentData } from "@/store/store";
 
 const Navbar = () => {
   const { studentData } = useLazyLoadedStudentData();
-  console.log(studentData);
   return (
     <nav className='bg-muted'>
       {/* <MaxWidthWrapper> */}

@@ -1,10 +1,12 @@
 import { create } from "zustand";
+import { useEffect } from "react";
 
 type CounterStore = {
   studentData: {
     name: string;
     profile_picture: string;
     email: string;
+    id: number;
   } | null;
 };
 
@@ -24,10 +26,14 @@ export const initializeStudentData = () => {
 export const useLazyLoadedStudentData = () => {
   const studentData = useStudentData((state) => state.studentData);
 
-  if (!studentData) {
-    const initializedData = initializeStudentData();
-    useStudentData.setState({ studentData: initializedData });
-  }
+  useEffect(() => {
+    const initializeData = async () => {
+      const initializedData = initializeStudentData();
+      useStudentData.setState({ studentData: initializedData });
+    };
+
+    initializeData();
+  }, []); // Empty dependency array ensures useEffect runs only once when the component mounts
 
   return useStudentData();
 };

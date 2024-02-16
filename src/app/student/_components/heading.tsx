@@ -3,11 +3,12 @@ import React from "react";
 import { useLazyLoadedStudentData } from "@/store/store";
 function Heading() {
   const { studentData } = useLazyLoadedStudentData();
-  const username = studentData?.name.split(" ");
-  const newUserName =
-    username?.[0].charAt(0).toUpperCase() +
-    username?.[0].slice(1).toLowerCase();
+  const username: string[] | undefined = studentData?.name.split(" ");
+  const newUserName: string | undefined =
+    username?.[0]?.charAt(0)?.toUpperCase() +
+    (username?.[0]?.slice(1)?.toLowerCase() || "");
   console.log(newUserName);
+
   return (
     <div className='flex align-center justify-between text-start my-2 flex-wrap'>
       <h1 className='text-3xl font-semibold tracking-tight m-0'>

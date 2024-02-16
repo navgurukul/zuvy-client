@@ -35,6 +35,7 @@ import api from "@/utils/axios.config";
 import Link from "next/link";
 import Loader from "@/app/student/courses/_components/Loader";
 import AddStudentsModal from "./addStudentsmodal";
+import { toast } from "@/components/ui/use-toast";
 
 const Batches = ({
   courseID,
@@ -93,11 +94,29 @@ const Batches = ({
       capEnrollment: +values.capEnrollment,
     };
     try {
-      const response = await api.post(`/batch`, convertedData, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await api
+        .post(`/batch`, convertedData, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+        .then((response) => {
+          const fetchBatches = async () => {
+            try {
+              const response = await api.get(`/bootcamp/batches/${courseID}`);
+              setBatches(response.data);
+            } catch (error: any) {
+              console.log(error.message);
+            }
+          };
+          fetchBatches();
+
+          toast({
+            title: response.data.status,
+            description: response.data.message,
+            className: "text-start capitalize",
+          });
+        });
       console.log("Batch created successfully");
     } catch (error) {
       console.error("Error creating batch:", error);
@@ -206,16 +225,11 @@ const Batches = ({
           batches.map((batch: any, index: number) => (
             <Link key={batch.id} href={"/"} className='text-gray-900 text-base'>
               <div className='bg-white rounded-lg border p-4'>
-                <Image
-                  src='https://images.unsplash.com/photo-1581276879432-15e50529f34b?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8cmVhY3R8ZW58MHx8MHx8fDA%3D'
-                  alt='Placeholder Image'
-                  className='w-full h-48 rounded-md object-cover'
-                  width={100}
-                  height={48}
-                />
                 <div className='px-1 py-4 flex flex-col items-start'>
-                  <div>{batch.name}</div>
-                  <div>{batch.capEnrollment}</div>
+                  <h1 className='font-semibold capitalize'>{batch.name}</h1>
+                  <h2 className=' capitalize'>
+                    {batch.capEnrollment} <span>Learners</span>
+                  </h2>
                 </div>
               </div>
             </Link>
