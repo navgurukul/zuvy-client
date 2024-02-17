@@ -145,7 +145,7 @@ function LiveClass({ courseId }: { courseId: string }) {
             <ClassCard classData={classData} key={index} />
           ))
         ) : (
-          <p style={{float:'left'}}>No classes available.</p>
+          <p style={{marginLeft:"300px"}}>No classes available.</p>
         )}
       </div>
     </div>
