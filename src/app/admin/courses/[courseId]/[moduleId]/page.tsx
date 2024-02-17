@@ -103,10 +103,10 @@ function Page({
   };
 
   return (
-    <div className='flex'>
+    <div className="flex">
       {/* Sidebar with labels */}
-      <div className='w-1/4 border-r-2 text-left p-4'>
-        <h4 className='text-lg font-bold mb-2'>Chapter List</h4>
+      <div className="w-1/4 border-r-2 text-left p-4">
+        <h4 className="text-lg font-bold mb-2">Chapter List</h4>
         <ul>
           {moduleData.map((item, index) => (
             <li
@@ -119,7 +119,7 @@ function Page({
               {`${item.label}: ${item.name ? item.name : "No name"}`}
               {/* Show the number of questions for Quiz and MCQ */}
               {["quiz"].includes(item.label) && (
-                <span className='text-sm ml-2 text-gray-500'>
+                <span className="text-sm ml-2 text-gray-500">
                   ({item.questions ? item.questions.length : 0} questions)
                 </span>
               )}
@@ -128,8 +128,8 @@ function Page({
         </ul>
       </div>
       {/* Right side content */}
-      <div className='w-3/4 p-4'>
-        <h2 className='text-lg font-semibold mb-2'>{moduleID}</h2>
+      <div className="w-3/4 p-4">
+        <h2 className="text-lg font-semibold mb-2">{moduleID}</h2>
         {selectedModuleID &&
           moduleData
             .filter((item) => item.id === selectedModuleID)
@@ -145,18 +145,18 @@ function Page({
                     {/* Only render form if label is "assignment" */}
                     <form onSubmit={handleAssignmentSubmit}>
                       <input
-                        type='text'
-                        placeholder='Assignment Link'
+                        type="text"
+                        placeholder="Assignment Link"
                         value={assignmentLink}
                         onChange={handleAssignmentLinkChange}
                       />
-                      <button type='submit'>Submit</button>
+                      <button type="submit">Submit</button>
                     </form>
                   </div>
                 )}
                 {item.label === "quiz" && (
                   <div>
-                    <h3 className='font-semibold'>Quiz</h3>
+                    <h3 className="font-semibold">Quiz</h3>
                     <ul>
                       {item.questions &&
                         item.questions.map((question) => (
@@ -170,7 +170,7 @@ function Page({
                               onValueChange={(value) =>
                                 console.log("Selected option:", value)
                               }
-                              className='flex'
+                              className="flex"
                             >
                               {question.options.map((option) => (
                                 <div
@@ -181,7 +181,7 @@ function Page({
                                 >
                                   <RadioGroupItem
                                     value={option.text}
-                                    className='mr-2'
+                                    className="mr-2"
                                   />
                                   <label>{option.text}</label>
                                 </div>

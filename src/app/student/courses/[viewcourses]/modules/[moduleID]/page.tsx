@@ -41,7 +41,7 @@ const ContentComponent: React.FC<{ content: any; isQuiz?: boolean }> = ({
 
   return (
     <div
-      className={` text-start max-w-3xl mx-auto p-4 ${
+      className={` text-start max-w-3xl mx-auto py-4 ${
         isQuiz ? "text-black" : ""
       }`}
     >
@@ -267,7 +267,7 @@ function Page({
                 )}
                 {item.label === "quiz" && (
                   <div>
-                    <h3 className="font-semibold">Quiz</h3>
+                    {/* <h3 className="font-semibold">Quiz</h3> */}
                     <ul>
                       {item.questions &&
                         item.questions.map((question) => (
