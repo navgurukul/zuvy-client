@@ -45,6 +45,14 @@ const Courses: React.FC = () => {
     setSearchQuery(event.target.value);
   };
 
+  const getBootcamp = () => {
+    try {
+      api.get("/bootcamp").then((response) => setCourses(response.data));
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+    }
+  };
+
   const handleNewCourseNameChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -55,7 +63,7 @@ const Courses: React.FC = () => {
     try {
       const response = await api.post("/bootcamp", { name: newCourseName });
       const data = response.data;
-      setCourses((prevCourses) => [...prevCourses, data]);
+      getBootcamp();
     } catch (error) {
       console.error("Error creating course:", error);
     }
@@ -67,11 +75,7 @@ const Courses: React.FC = () => {
 
   // async
   useEffect(() => {
-    try {
-      api.get("/bootcamp").then((response) => setCourses(response.data));
-    } catch (error) {
-      console.error("Error fetching courses:", error);
-    }
+    getBootcamp();
   }, []);
 
   return (
