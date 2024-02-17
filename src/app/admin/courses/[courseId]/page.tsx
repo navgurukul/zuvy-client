@@ -60,7 +60,7 @@ const Page = ({ params }: { params: { courseId: string } }) => {
     {
       title: "Live Class",
       value: "liveClass",
-      component: <LiveClass courseId={params.courseId}/>,
+      component: <LiveClass courseId={params.courseId} />,
     },
     {
       title: "Settings",
