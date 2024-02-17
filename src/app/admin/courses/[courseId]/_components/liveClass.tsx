@@ -11,6 +11,7 @@ function LiveClass({ courseId }: { courseId: string }) {
   const [classType, setClassType] = useState("active");
   const [allClasses, setAllClasses] = useState([]);
   const [bootcampData, setBootcampData] = useState([]);
+  const [batchId, setBatchId] = useState("");
 
   useEffect(() => {
     api
@@ -26,12 +27,40 @@ function LiveClass({ courseId }: { courseId: string }) {
         setBootcampData(transformedData);
       })
       .catch((error) => {
-        console.error("Error fetching data:", error);
+        console.log("Error fetching data:", error);
       });
   }, [courseId]);
 
+  useEffect(() => {
+    let fetchId;
+    let fetchUrl;
+    if (!batchId) {
+      fetchId = courseId;
+      fetchUrl = "getClassesByBootcampId"
+    }
+    else {
+      fetchId = batchId
+      fetchUrl = "getClassesByBatchId"
+    }
+    api.get(`/classes/${fetchUrl}/${fetchId}`)
+      .then((response) => {
+        setAllClasses(response.data.classesLink)
+      })
+  }, [courseId, batchId])
+
+
+
   const handleClassType = (type: "active" | "complete") => {
     setClassType(type);
+  };
+
+  const handleComboboxChange = (value: string) => {
+    if (batchId === value) {
+      setBatchId("")
+    } else {
+      setBatchId(value);
+      
+    }
   };
 
   const data = [
@@ -57,26 +86,24 @@ function LiveClass({ courseId }: { courseId: string }) {
     },
   ];
   return (
-    <div>
+    <div >
       <div className="flex gap-6 my-6 max-w-[800px]">
         <Combobox
           data={bootcampData}
           title={"Select Batch"}
-          onChange={function (selectedValue: string): void {
-            throw new Error("Function not implemented.");
-          }}
+          onChange={handleComboboxChange}
         />
 
-        <Combobox
+        {/* <Combobox
           data={data}
           title={"Select Module"}
           onChange={function (selectedValue: string): void {
             throw new Error("Function not implemented.");
           }}
-        />
+        /> */}
       </div>
       <div className="flex justify-between">
-        <div className="w-[400px] pr-3">
+        {/* <div className="w-[400px] pr-3">
           <Combobox
             data={data}
             title={"Search Classes"}
@@ -84,7 +111,7 @@ function LiveClass({ courseId }: { courseId: string }) {
               throw new Error("Function not implemented.");
             }}
           />
-        </div>
+        </div> */}
         <Dialog>
           <DialogTrigger asChild>
             <Button className="text-white bg-secondary">
@@ -97,7 +124,7 @@ function LiveClass({ courseId }: { courseId: string }) {
         </Dialog>
       </div>
       <div className="flex justify-start gap-6 my-6">
-        <Badge
+        {/* <Badge
           variant={classType === "active" ? "default" : "outline"}
           onClick={() => handleClassType("active")}
           className="rounded-md"
@@ -110,7 +137,7 @@ function LiveClass({ courseId }: { courseId: string }) {
           className="rounded-md"
         >
           Completed Classes
-        </Badge>
+        </Badge> */}
       </div>
       <div className="grid grid-cols-3 gap-6">
         {allClasses && allClasses.length > 0 ? (
@@ -118,7 +145,7 @@ function LiveClass({ courseId }: { courseId: string }) {
             <ClassCard classData={classData} key={index} />
           ))
         ) : (
-          <p>No classes available.</p>
+          <p style={{marginLeft:"300px"}}>No classes available.</p>
         )}
       </div>
     </div>
