@@ -30,13 +30,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-import styles from "../../_components/courses.module.css";
 import api from "@/utils/axios.config";
-import Link from "next/link";
-import Loader from "@/app/student/courses/_components/Loader";
 import AddStudentsModal from "./addStudentsmodal";
 import { toast } from "@/components/ui/use-toast";
-
+import { Card as card, CardDescription, CardTitle } from "@/components/ui/card";
 const Batches = ({
   courseID,
   unassigned_students,
@@ -45,6 +42,7 @@ const Batches = ({
   unassigned_students: number;
 }) => {
   const [batches, setBatches] = useState([]);
+  const [unassignedStudents, setUnassignedStudents] = useState<number>();
   useEffect(() => {
     const fetchBatches = async () => {
       try {
@@ -57,6 +55,19 @@ const Batches = ({
 
     fetchBatches();
   }, [courseID]);
+  // useEffect(() => {
+  //   const fetchCourseDetails = async () => {
+  //     try {
+  //       const response = await api.get(`/bootcamp/${courseID}`);
+  //       const data = response.data;
+  //       console.log(data);
+  //     } catch (error) {
+  //       console.error("Error fetching course details:", error);
+  //     }
+  //   };
+
+  //   fetchCourseDetails();
+  // }, []);
 
   const formSchema = z.object({
     name: z.string().min(2, {
@@ -76,7 +87,7 @@ const Batches = ({
   const { handleSubmit, register } = useForm({
     resolver: zodResolver(formSchema),
   });
-
+  console.log(unassigned_students);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -131,7 +142,7 @@ const Batches = ({
             <Button>New Batch</Button>
           </DialogTrigger>
           <DialogOverlay />
-          <AddStudentsModal id={courseID} />
+          <AddStudentsModal message={true} id={courseID} />
         </Dialog>
       );
     } else {
@@ -220,19 +231,22 @@ const Batches = ({
         <Input type='search' placeholder='Search' className='w-1/2' />
         {renderModal()}
       </div>
+
       <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 mt-2'>
         {batches.length > 0 &&
           batches.map((batch: any, index: number) => (
-            <Link key={batch.id} href={"/"} className='text-gray-900 text-base'>
+            <Card key={batch.id} className='text-gray-900 text-base'>
               <div className='bg-white rounded-lg border p-4'>
                 <div className='px-1 py-4 flex flex-col items-start'>
-                  <h1 className='font-semibold capitalize'>{batch.name}</h1>
-                  <h2 className=' capitalize'>
+                  <CardTitle className='font-semibold capitalize'>
+                    {batch.name}
+                  </CardTitle>
+                  <CardDescription className=' capitalize'>
                     {batch.capEnrollment} <span>Learners</span>
-                  </h2>
+                  </CardDescription>
                 </div>
               </div>
-            </Link>
+            </Card>
           ))}
       </div>
     </div>
