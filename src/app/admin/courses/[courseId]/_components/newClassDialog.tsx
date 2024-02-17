@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,
@@ -62,13 +63,13 @@ function DateTimePicker({
     const time = dateTime.toISOString().split("T")[1];
     setDateTime(new Date(`${newDate}T${time}`));
   };
-
+  
   const handleTimeChange = (event: { target: { value: any } }) => {
     const date = dateTime.toISOString().split("T")[0];
     const newTime = event.target.value;
     setDateTime(new Date(`${date}T${newTime}:00.000Z`));
   };
-
+  
   return (
     <div className="my-6">
       <Label htmlFor={`${label}DateTime`}>{label}:</Label>
@@ -96,13 +97,12 @@ const NewClassDialog = ({ courseId }: { courseId: string }) => {
   const [batchId, setBatchId] = useState("");
   const [attendeesInput, setAttendeesInput] = useState("");
   const [bootcampData, setBootcampData] = useState([]);
+  const [isDialogOpen, setDialogOpen] = useState(true);
 
   useEffect(() => {
     api
       .get(`/bootcamp/batches/${courseId}`)
       .then((response) => {
-        console.log(response);
-
         const transformedData = response.data.map(
           (item: { id: any; name: any }) => ({
             value: item.id.toString(),
@@ -112,7 +112,7 @@ const NewClassDialog = ({ courseId }: { courseId: string }) => {
         setBootcampData(transformedData);
       })
       .catch((error) => {
-        console.error("Error fetching data:", error);
+        console.log("Error fetching data:", error);
       });
   }, [courseId]);
 
@@ -139,25 +139,32 @@ const NewClassDialog = ({ courseId }: { courseId: string }) => {
 
     try {
       const postClass = await api.post(`/classes`, newCourseData);
-
-      console.log("New Course Data:", newCourseData);
       if (postClass.data.status == "success") {
         toast({
-          title: "Success",
+          title: "class created successfully",
           variant: "default",
           className: "text-start capitalize",
         });
+        setDialogOpen(false);
       }
+
       return postClass;
     } catch (error) {
+      toast({
+        title: "class creation failed",
+        variant: "default",
+        className: "text-start capitalize",
+      });
       console.error("Error creating class:", error);
     }
   };
+ 
+
 
   return (
     <DialogContent>
       <DialogHeader>
-        <DialogTitle className={styles.newCourse}>New Course</DialogTitle>
+        <DialogTitle className={styles.newCourse}>New Class</DialogTitle>
         <DialogDescription>
           <div className="my-6">
             <Label htmlFor="name">Class Title</Label>
@@ -194,19 +201,20 @@ const NewClassDialog = ({ courseId }: { courseId: string }) => {
             />
           </div>
 
-     
+
           <div className="my-6">
-            <Label htmlFor="batchId">Batch ID:</Label>
+            <Label htmlFor="batchId">Batch:</Label>
             <Combobox
               data={bootcampData}
               title={"Select Batch"}
               onChange={handleComboboxChange}
             />
           </div>
-
+          <DialogClose asChild>
           <div className="text-end">
-            <Button onClick={handleCreateCourse}>Create Course</Button>
+            <Button onClick={handleCreateCourse}>Create Class</Button>
           </div>
+          </DialogClose>
         </DialogDescription>
       </DialogHeader>
     </DialogContent>
