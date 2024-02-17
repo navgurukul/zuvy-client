@@ -19,7 +19,13 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { STUDENT_ONBOARDING_TYPES } from "@/utils/constant";
 
-const AddStudentsModal = ({ id }: { id: string }) => {
+const AddStudentsModal = ({
+  id,
+  message,
+}: {
+  id: string;
+  message: boolean;
+}) => {
   // misc
   interface Student {
     email: string;
@@ -67,6 +73,11 @@ const AddStudentsModal = ({ id }: { id: string }) => {
             });
           });
       } catch (error: any) {
+        toast({
+          title: error.data.status,
+          description: error.data.message,
+          className: "text-start capitalize",
+        });
         console.error("Error", error.message);
       }
     }
@@ -75,7 +86,12 @@ const AddStudentsModal = ({ id }: { id: string }) => {
   return (
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>Add Students</DialogTitle>
+        <DialogTitle>{message ? "New Batch" : "Add Students"}</DialogTitle>
+        <span>
+          {message
+            ? "All the students are assigned to batches. Please add new students to create new batches"
+            : ""}
+        </span>
       </DialogHeader>
       <div className='flex items-center justify-start  '>
         {STUDENT_ONBOARDING_TYPES.map(({ id, label }) => (
