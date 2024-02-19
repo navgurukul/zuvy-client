@@ -1,7 +1,5 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import Select from "react-select";
-import Image from "next/image";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -41,8 +39,10 @@ const Batches = ({
   courseID: string;
   unassigned_students: number;
 }) => {
+  const [unassignedStudents, setUnassignedStudents] =
+    useState(unassigned_students);
+
   const [batches, setBatches] = useState([]);
-  const [unassignedStudents, setUnassignedStudents] = useState<number>();
   useEffect(() => {
     const fetchBatches = async () => {
       try {
@@ -55,19 +55,20 @@ const Batches = ({
 
     fetchBatches();
   }, [courseID]);
-  // useEffect(() => {
-  //   const fetchCourseDetails = async () => {
-  //     try {
-  //       const response = await api.get(`/bootcamp/${courseID}`);
-  //       const data = response.data;
-  //       console.log(data);
-  //     } catch (error) {
-  //       console.error("Error fetching course details:", error);
-  //     }
-  //   };
+  useEffect(() => {
+    const fetchCourseDetails = async () => {
+      try {
+        const response = await api.get(`/bootcamp/${courseID}`);
+        console.log("HI");
+        const data = response.data;
+        console.log(data);
+      } catch (error) {
+        console.error("Error fetching course details:", error);
+      }
+    };
 
-  //   fetchCourseDetails();
-  // }, []);
+    fetchCourseDetails();
+  }, [courseID, unassignedStudents]);
 
   const formSchema = z.object({
     name: z.string().min(2, {
@@ -87,7 +88,7 @@ const Batches = ({
   const { handleSubmit, register } = useForm({
     resolver: zodResolver(formSchema),
   });
-  console.log(unassigned_students);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -121,6 +122,19 @@ const Batches = ({
             }
           };
           fetchBatches();
+          const fetchCourseDetails = async () => {
+            try {
+              const response = await api.get(`/bootcamp/${courseID}`);
+              console.log("HI");
+              const data = response.data;
+              console.log(data);
+              setUnassignedStudents(data.bootcamp.unassigned_students);
+            } catch (error) {
+              console.error("Error fetching course details:", error);
+            }
+          };
+
+          fetchCourseDetails();
 
           toast({
             title: response.data.status,
@@ -129,13 +143,19 @@ const Batches = ({
           });
         });
       console.log("Batch created successfully");
-    } catch (error) {
+    } catch (error: any) {
+      toast({
+        title: "Failed",
+        description: error.data.message,
+        className: "text-start capitalize",
+        variant: "destructive",
+      });
       console.error("Error creating batch:", error);
     }
   };
 
   const renderModal = () => {
-    if (unassigned_students === 0) {
+    if (unassignedStudents === 0) {
       return (
         <Dialog>
           <DialogTrigger asChild>
@@ -183,7 +203,6 @@ const Batches = ({
                         <FormControl>
                           <Input placeholder='20230' type='name' {...field} />
                         </FormControl>
-
                         <FormMessage />
                       </FormItem>
                     )}
@@ -206,7 +225,7 @@ const Batches = ({
                     )}
                   />
                   <FormDescription>
-                    {unassigned_students} students will be added to this batch
+                    {unassignedStudents} students will be added to this batch
                     (Maximum current availability)
                   </FormDescription>
                   <div className='w-full flex flex-col items-end gap-y-5 '>
