@@ -12,17 +12,18 @@ function LiveClass({ courseId }: { courseId: string }) {
   const [allClasses, setAllClasses] = useState([]);
   const [bootcampData, setBootcampData] = useState([]);
   const [batchId, setBatchId] = useState("");
+  const [upcomingClasses, setUpcomingClasses] = useState([]);
+  const [ongoingClasses, setOngoingClasses] = useState([]);
+  const [completedClasses, setCompletedClasses] = useState([]);
 
   useEffect(() => {
     api
       .get(`/bootcamp/batches/${courseId}`)
       .then((response) => {
-        const transformedData = response.data.map(
-          (item: { id: any; name: any }) => ({
-            value: item.id.toString(),
-            label: item.name,
-          })
-        );
+        const transformedData = response.data.map((item: { id: any; name: any }) => ({
+          value: item.id.toString(),
+          label: item.name,
+        }));
 
         setBootcampData(transformedData);
       })
@@ -36,57 +37,42 @@ function LiveClass({ courseId }: { courseId: string }) {
     let fetchUrl;
     if (!batchId) {
       fetchId = courseId;
-      fetchUrl = "getClassesByBootcampId"
+      fetchUrl = "getClassesByBootcampId";
+    } else {
+      fetchId = batchId;
+      fetchUrl = "getClassesByBatchId";
     }
-    else {
-      fetchId = batchId
-      fetchUrl = "getClassesByBatchId"
-    }
+
     api.get(`/classes/${fetchUrl}/${fetchId}`)
       .then((response) => {
-        setAllClasses(response.data.classesLink)
+        console.log(response);
+        setUpcomingClasses(response.data.upcomingClasses);
+        setOngoingClasses(response.data.ongoingClasses);
+        setCompletedClasses(response.data.completedClasses);
       })
-  }, [courseId, batchId])
+      .catch((error) => {
+        console.log("Error fetching classes:", error);
+      });
+  }, [courseId, batchId]);
 
-
-
-  const handleClassType = (type: "active" | "complete") => {
+  const handleClassType = (type: "active" | "complete" | "upcoming") => {
     setClassType(type);
+
+    if (type === "active") {
+      setAllClasses(ongoingClasses);
+    } else if (type === 'complete') {
+      setAllClasses(completedClasses);
+    } else if (type === "upcoming") {
+      setAllClasses(upcomingClasses);
+    }
   };
 
   const handleComboboxChange = (value: string) => {
-    if (batchId === value) {
-      setBatchId("")
-    } else {
-      setBatchId(value);
-      
-    }
+    setBatchId(value === batchId ? "" : value);
   };
 
-  const data = [
-    {
-      value: "next.js",
-      label: "Next.js",
-    },
-    {
-      value: "sveltekit",
-      label: "SvelteKit",
-    },
-    {
-      value: "nuxt.js",
-      label: "Nuxt.js",
-    },
-    {
-      value: "remix",
-      label: "Remix",
-    },
-    {
-      value: "astro",
-      label: "Astro",
-    },
-  ];
   return (
-    <div >
+    <div>
       <div className="flex gap-6 my-6 max-w-[800px]">
         <Combobox
           data={bootcampData}
@@ -103,7 +89,7 @@ function LiveClass({ courseId }: { courseId: string }) {
         /> */}
       </div>
       <div className="flex justify-between">
-        {/* <div className="w-[400px] pr-3">
+{/* <div className="w-[400px] pr-3">
           <Combobox
             data={data}
             title={"Search Classes"}
@@ -115,7 +101,6 @@ function LiveClass({ courseId }: { courseId: string }) {
         <Dialog>
           <DialogTrigger asChild>
             <Button className="text-white bg-secondary">
-              {/* <Plus className="w-5 mr-2" /> */}
               <p>Create New Class</p>
             </Button>
           </DialogTrigger>
@@ -124,7 +109,7 @@ function LiveClass({ courseId }: { courseId: string }) {
         </Dialog>
       </div>
       <div className="flex justify-start gap-6 my-6">
-        {/* <Badge
+        <Badge
           variant={classType === "active" ? "default" : "outline"}
           onClick={() => handleClassType("active")}
           className="rounded-md"
@@ -132,20 +117,27 @@ function LiveClass({ courseId }: { courseId: string }) {
           Active Classes
         </Badge>
         <Badge
+          variant={classType === "upcoming" ? "default" : "outline"}
+          onClick={() => handleClassType("upcoming")}
+          className="rounded-md"
+        >
+          Upcoming Classes
+        </Badge>
+        <Badge
           variant={classType === "complete" ? "default" : "outline"}
           onClick={() => handleClassType("complete")}
           className="rounded-md"
         >
           Completed Classes
-        </Badge> */}
+        </Badge>
       </div>
       <div className="grid grid-cols-3 gap-6">
         {allClasses && allClasses.length > 0 ? (
-          allClasses.map((classData, index) => (
-            <ClassCard classData={classData} key={index} />
+          allClasses.map((classData: any, index: any) => (
+            <ClassCard classData={classData} key={index} classType={classType}/>
           ))
         ) : (
-          <p style={{marginLeft:"300px"}}>No classes available.</p>
+          <p style={{ marginLeft: "300px" }}>No classes available.</p>
         )}
       </div>
     </div>
