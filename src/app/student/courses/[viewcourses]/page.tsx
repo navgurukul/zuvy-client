@@ -63,7 +63,7 @@ function Page({
       }
     };
     if (userID) getModulesProgress();
-  }, [userID]);
+  }, [userID, params.viewcourses]);
 
   return (
     <MaxWidthWrapper>
