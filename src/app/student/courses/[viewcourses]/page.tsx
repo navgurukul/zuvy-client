@@ -3,18 +3,30 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { BookMinus, ChevronRight, Lock } from "lucide-react";
-
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 import Breadcrumb from "@/components/ui/breadcrumb";
-import CircularLoader from "../_components/circularLoader";
+import { useLazyLoadedStudentData } from "@/store/store";
+import { CircularProgress } from "@nextui-org/react";
 import Loader from "../_components/Loader";
 import Image from "next/image";
 import api from "@/utils/axios.config";
+import { Button } from "@/components/ui/button";
 
-type Props = {};
+type PageProps = {
+  params: {
+    viewcourses: string;
+  };
+};
 
-function Page({ params }: { params: { viewcourses: string } }) {
+function Page({
+  params,
+}: {
+  params: { viewcourses: string; moduleID: string };
+}) {
+  const { studentData } = useLazyLoadedStudentData();
   const [courseModules, setCourseModules] = useState([]);
+  const userID = studentData?.id && studentData?.id;
+  const [modulesProgress, setModulesProgress] = useState([]);
   const crumbs = [
     { crumb: "My Courses", href: "/student/courses" },
     {
@@ -29,7 +41,6 @@ function Page({ params }: { params: { viewcourses: string } }) {
         const response = await api.get(
           `/Content/modules/${params.viewcourses}`
         );
-        console.log(response);
         setCourseModules(response.data);
       } catch (error) {
         console.error("Error deleting:", error);
@@ -37,6 +48,22 @@ function Page({ params }: { params: { viewcourses: string } }) {
     };
     getCourseModules();
   }, [params.viewcourses]);
+
+  useEffect(() => {
+    const getModulesProgress = async () => {
+      try {
+        const response = await api.get(
+          `/Content/modules/${params.viewcourses}?user_id=${userID}`
+        );
+        response.data.map((module: any) => {
+          setModulesProgress(response.data);
+        });
+      } catch (error) {
+        console.error("Error deleting:", error);
+      }
+    };
+    if (userID) getModulesProgress();
+  }, [userID]);
 
   return (
     <MaxWidthWrapper>
@@ -161,9 +188,23 @@ function Page({ params }: { params: { viewcourses: string } }) {
                           </p>
                         </div>
                       </div>
-                      <div className="">
-                        <CircularLoader />
-                      </div>
+
+                      {modulesProgress.map((module: any) => {
+                        if (module.id == id) {
+                          return (
+                            <div key={module.id} className="">
+                              <CircularProgress
+                                size="md"
+                                value={module.progress}
+                                color="warning"
+                                showValueLabel={true}
+                              />
+                            </div>
+                          );
+                        } else {
+                          return null;
+                        }
+                      })}
                     </div>
                   </Link>
                 )
@@ -192,12 +233,12 @@ function Page({ params }: { params: { viewcourses: string } }) {
                 Ask doubts or general questions about the programs anytime and
                 get answers within a few hours
               </p>
-              <button className="bg-gray-300 px-4 py-2 rounded-lg mt-2 w-[200px] ">
+              <Button className="bg-gray-300 px-4 py-2 rounded-lg mt-2 w-[200px] ">
                 Start New Chat
-              </button>
-              <button className=" px-4 py-2 rounded-lg mt-2 w-[200px] ">
+              </Button>
+              <Button className=" px-4 py-2 rounded-lg mt-2 w-[200px] ">
                 View Past Chat
-              </button>
+              </Button>
             </div>
           </div>
 
