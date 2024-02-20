@@ -32,6 +32,23 @@ function LiveClass({ courseId }: { courseId: string }) {
       });
   }, [courseId]);
 
+  
+  const handleClassType = (type: "active" | "complete" | "upcoming") => {
+    setClassType(type);
+  };
+  
+  useEffect(() => {
+    if (classType === "active") {
+      setAllClasses(ongoingClasses);
+    } else if (classType === 'complete') {
+      setAllClasses(completedClasses);
+    } else if (classType === "upcoming") {
+      setAllClasses(upcomingClasses);
+    }
+  }, [classType, ongoingClasses, completedClasses, upcomingClasses]);
+  
+  
+
   useEffect(() => {
     let fetchId;
     let fetchUrl;
@@ -45,30 +62,20 @@ function LiveClass({ courseId }: { courseId: string }) {
 
     api.get(`/classes/${fetchUrl}/${fetchId}`)
       .then((response) => {
-        console.log(response);
         setUpcomingClasses(response.data.upcomingClasses);
         setOngoingClasses(response.data.ongoingClasses);
         setCompletedClasses(response.data.completedClasses);
+        handleClassType(classType)
       })
       .catch((error) => {
         console.log("Error fetching classes:", error);
       });
   }, [courseId, batchId]);
 
-  const handleClassType = (type: "active" | "complete" | "upcoming") => {
-    setClassType(type);
 
-    if (type === "active") {
-      setAllClasses(ongoingClasses);
-    } else if (type === 'complete') {
-      setAllClasses(completedClasses);
-    } else if (type === "upcoming") {
-      setAllClasses(upcomingClasses);
-    }
-  };
 
   const handleComboboxChange = (value: string) => {
-    setBatchId(value === batchId ? "" : value);
+    setBatchId((prevBatchId: string) => (prevBatchId === value ? "" : value));
   };
 
   return (
@@ -89,7 +96,7 @@ function LiveClass({ courseId }: { courseId: string }) {
         /> */}
       </div>
       <div className="flex justify-between">
-{/* <div className="w-[400px] pr-3">
+        {/* <div className="w-[400px] pr-3">
           <Combobox
             data={data}
             title={"Search Classes"}
@@ -134,7 +141,7 @@ function LiveClass({ courseId }: { courseId: string }) {
       <div className="grid grid-cols-3 gap-6">
         {allClasses && allClasses.length > 0 ? (
           allClasses.map((classData: any, index: any) => (
-            <ClassCard classData={classData} key={index} classType={classType}/>
+            <ClassCard classData={classData} key={index} classType={classType} />
           ))
         ) : (
           <p style={{ marginLeft: "300px" }}>No classes available.</p>
