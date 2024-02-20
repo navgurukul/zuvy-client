@@ -63,13 +63,13 @@ function DateTimePicker({
     const time = dateTime.toISOString().split("T")[1];
     setDateTime(new Date(`${newDate}T${time}`));
   };
-  
+
   const handleTimeChange = (event: { target: { value: any } }) => {
     const date = dateTime.toISOString().split("T")[0];
     const newTime = event.target.value;
     setDateTime(new Date(`${date}T${newTime}:00.000Z`));
   };
-  
+
   return (
     <div className="my-6">
       <Label htmlFor={`${label}DateTime`}>{label}:</Label>
@@ -158,14 +158,12 @@ const NewClassDialog = ({ courseId }: { courseId: string }) => {
       console.error("Error creating class:", error);
     }
   };
- 
-
 
   return (
     <DialogContent>
       <DialogHeader>
         <DialogTitle className={styles.newCourse}>New Class</DialogTitle>
-        <DialogDescription>
+        <DialogDescription className="text-start">
           <div className="my-6">
             <Label htmlFor="name">Class Title</Label>
             <Input
@@ -201,7 +199,6 @@ const NewClassDialog = ({ courseId }: { courseId: string }) => {
             />
           </div>
 
-
           <div className="my-6">
             <Label htmlFor="batchId">Batch:</Label>
             <Combobox
@@ -211,9 +208,9 @@ const NewClassDialog = ({ courseId }: { courseId: string }) => {
             />
           </div>
           <DialogClose asChild>
-          <div className="text-end">
-            <Button onClick={handleCreateCourse}>Create Class</Button>
-          </div>
+            <div className="text-end">
+              <Button onClick={handleCreateCourse}>Create Class</Button>
+            </div>
           </DialogClose>
         </DialogDescription>
       </DialogHeader>

@@ -22,9 +22,15 @@ export interface ComboboxProps {
   data: any;
   title: string;
   onChange: (selectedValue: string) => void;
- }
+  disabled?: boolean;
+}
 
-export function Combobox({ data, title, onChange }: ComboboxProps)  {
+export function Combobox({
+  data,
+  title,
+  onChange,
+  disabled = false,
+}: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
 
@@ -36,6 +42,7 @@ export function Combobox({ data, title, onChange }: ComboboxProps)  {
           role="combobox"
           aria-expanded={open}
           className="w-full justify-between"
+          disabled={disabled}
         >
           {value
             ? data.find((framework: any) => framework.value === value)?.label

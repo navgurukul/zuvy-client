@@ -246,9 +246,9 @@ const Batches = ({
 
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-6">
         {batches.length > 0 ? (
-          <Input type="search" placeholder="Search" className="w-1/2" />
+          <Input type="search" placeholder="Search" className="w-[400px]" />
         ) : null}
         {renderModal()}
       </div>
