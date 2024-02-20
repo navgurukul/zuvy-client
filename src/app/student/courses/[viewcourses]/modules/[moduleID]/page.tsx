@@ -6,7 +6,9 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
 import { useLazyLoadedStudentData } from "@/store/store";
-import { ArrowBigLeft } from "lucide-react";
+import { ArrowBigLeft, CheckCircle2 } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
 
 // Define the type for module data
 interface ModuleDataItem {
@@ -15,6 +17,7 @@ interface ModuleDataItem {
   name?: string;
   content?: string;
   questions?: Question[];
+  completed?: boolean;
 }
 
 interface Question {
@@ -73,7 +76,9 @@ function Page({
   useEffect(() => {
     const getModuleData = async () => {
       try {
-        const response = await api.get(`/Content/chapter/${moduleID}`);
+        const response = await api.get(
+          `/Content/chapter/${moduleID}?user_id=${userID}`
+        );
         const data: ModuleDataItem[] = response.data;
 
         const assignmentItem = data.find(
@@ -96,6 +101,7 @@ function Page({
         }
 
         setModuleData(data);
+        console.log(data);
 
         // Set selectedModuleID to the ID of the first module
         if (data.length > 0) {
@@ -105,8 +111,8 @@ function Page({
         console.error("Error fetching module data:", error);
       }
     };
-    getModuleData();
-  }, [moduleID]);
+    if (userID) getModuleData();
+  }, [moduleID, userID]);
 
   const handleAssignmentLinkChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -126,10 +132,21 @@ function Page({
         }
       );
       const data = response.data;
+      console.log(response);
+      toast({
+        title: "Successfully Submitted Assignment",
+        description: response.data.projectUrl,
+        className: "text-start capitalize bg-green-500 text-white",
+      });
 
       // Add any additional logic here after successful form submission
-    } catch (error) {
-      console.error("Error creating course:", error);
+    } catch (error: any) {
+      console.error("Assignment Not Submitted:", error);
+      toast({
+        title: "Error Submitting",
+        description: error.response.data.message,
+        className: "text-start capitalize bg-red-500 text-white",
+      });
     }
 
     return false; // Prevent default form submission
@@ -146,8 +163,19 @@ function Page({
         }
       );
       const data = response.data;
-    } catch (error) {
-      console.error("Error creating course:", error);
+      console.log(response);
+      toast({
+        title: "Completed Article Successfully",
+        description: "You have completed the article successfully",
+        className: "text-start capitalize bg-green-500 text-white",
+      });
+    } catch (error: any) {
+      console.error("Error Completing Article:", error);
+      toast({
+        title: "Error",
+        description: error.response.data.message,
+        className: "text-start capitalize bg-red-500 text-white",
+      });
     }
   };
 
@@ -186,8 +214,19 @@ function Page({
       });
 
       const data = response.data;
+
+      toast({
+        title: "Quiz Submitted Successfully",
+        description: "Successfully submitted the quiz",
+        className: "text-start capitalize bg-green-500 text-white",
+      });
     } catch (error) {
       console.error("Error creating course:", error);
+      toast({
+        title: "Error",
+        description: "Cannot submit the quiz again",
+        className: "text-start capitalize bg-red-500 text-white",
+      });
     }
   };
 
@@ -197,7 +236,7 @@ function Page({
 
       <div className="w-1/4 border-r-2 text-left p-4">
         <button onClick={() => router.back()}>
-          <ArrowBigLeft className="text-green-700" />
+          <ArrowBigLeft className="text-[#518672]" />
         </button>
 
         <h4 className="text-lg font-bold mb-2 mt-5">Chapter List</h4>
@@ -205,12 +244,15 @@ function Page({
           {moduleData.map((item, index) => (
             <li
               key={index}
-              className={`cursor-pointer capitalize py-2 px-4 hover:bg-gray-300 ${
+              className={`flex cursor-pointer capitalize py-2 px-4 hover:bg-gray-300 ${
                 selectedModuleID === item.id ? "font-bold" : ""
               }`}
               onClick={() => setSelectedModuleID(item.id)}
             >
-              {`${item.label}: ${item.name ? item.name : ""}`}
+              {`${item.label}: ${item.name ? item.name : ""}`}{" "}
+              {item.completed && (
+                <CheckCircle2 size={18} className="text-[#518672] ml-5 mt-1" />
+              )}
               {/* Show number of questions for Quiz and MCQ */}
               {["quiz"].includes(item.label) && (
                 <span className="text-sm ml-2 text-gray-500">
@@ -232,12 +274,12 @@ function Page({
                 {item.label === "article" && item.content && (
                   <>
                     <ContentComponent content={item.content} />
-                    <button
-                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                    <Button
+                      disabled={item?.completed}
                       onClick={handleArticleComplete}
                     >
                       Complete
-                    </button>
+                    </Button>
                   </>
                 )}
 
@@ -255,13 +297,13 @@ function Page({
                         className="border border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md px-4 py-2 outline-none"
                       />
                       {/* Submit button */}
-                      <button
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                      <Button
+                        disabled={item?.completed}
                         onClick={handleAssignmentSubmit}
                         type="button"
                       >
                         Submit
-                      </button>
+                      </Button>
                     </form>
                   </div>
                 )}
@@ -278,7 +320,6 @@ function Page({
                             />
 
                             <div className="flex justify-start  ">
-                              {" "}
                               <RadioGroup
                                 onValueChange={(value) =>
                                   setSelectedOptions((prev) => ({
@@ -307,12 +348,13 @@ function Page({
                         ))}
                     </ul>
                     {/* Submit button for quiz */}
-                    <button
-                      className="mt-5 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                    <Button
+                      disabled={item?.completed}
+                      className="mt-5"
                       onClick={handleQuizSubmit}
                     >
                       Submit Quiz
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>

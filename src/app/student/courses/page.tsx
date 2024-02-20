@@ -15,19 +15,17 @@ type pageProps = {};
 const Page: React.FC<pageProps> = () => {
   const { studentData } = useLazyLoadedStudentData();
   const [enrolledCourse, setEnrolledCourse] = useState([]);
-
   const userID = studentData?.id && studentData?.id;
   useEffect(() => {
     const getEnrolledCourses = async () => {
       try {
         const response = await api.get(`/student/${userID}`);
-        console.log(response.data);
         setEnrolledCourse(response.data);
       } catch (error) {
         console.error("Error deleting:", error);
       }
     };
-    getEnrolledCourses();
+    if (userID) getEnrolledCourses();
   }, [userID]);
 
   return (
