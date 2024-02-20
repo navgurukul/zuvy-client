@@ -26,7 +26,7 @@ const Page = ({ params }: { params: { courseId: string } }) => {
     startTime: new Date(),
     duration: "",
     language: "",
-    capEnrollment: 0,
+    // capEnrollment: 0,
     unassigned_students: 0,
   });
 
@@ -100,11 +100,11 @@ const Page = ({ params }: { params: { courseId: string } }) => {
   return (
     <div>
       <Breadcrumb crumbs={crumbs} />
-      <h1 className='text-3xl text-start font-bold my-6'>{courseData.name}</h1>
+      <h1 className="text-3xl text-start font-bold my-6">{courseData.name}</h1>
       <div className={styles.contentContainer}>
-        <Tabs defaultValue='generalDetails' className='w-full'>
-          <div className='text-start border-b-2 border-muted'>
-            <TabsList className='rounded-none rounded-t-sm '>
+        <Tabs defaultValue="generalDetails" className="w-full">
+          <div className="text-start border-b-2 border-muted">
+            <TabsList className="rounded-none rounded-t-sm ">
               {courseMenu.map(({ title, value }) => (
                 <TabsTrigger key={value} value={value}>
                   {title}
@@ -112,7 +112,7 @@ const Page = ({ params }: { params: { courseId: string } }) => {
               ))}
             </TabsList>
           </div>
-          <div className='text-center mt-10'>
+          <div className="text-center mt-10">
             {courseMenu.map(({ component, value }) => (
               <TabsContent key={value} value={value}>
                 {component}
