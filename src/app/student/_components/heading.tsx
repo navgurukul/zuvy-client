@@ -1,15 +1,13 @@
 "use client";
 import React from "react";
-import { RootState, useAppSelector } from "@/redux/store/store";
-
+import { useLazyLoadedStudentData } from "@/store/store";
 function Heading() {
-  const user = useAppSelector((state: RootState) => state.saveUserReducer.user);
-  const newUser = typeof user === "string" ? JSON.parse(user) : user;
-
-  const username = newUser.name?.split(" ");
-  const newUserName =
-    username?.[0].charAt(0).toUpperCase() +
-    username?.[0].slice(1).toLowerCase();
+  const { studentData } = useLazyLoadedStudentData();
+  const username: string[] | undefined = studentData?.name?.split(" ");
+  const newUserName: string | undefined =
+    username?.[0]?.charAt(0)?.toUpperCase() +
+    (username?.[0]?.slice(1)?.toLowerCase() || "");
+  console.log(newUserName);
 
   return (
     <div className="flex align-center justify-between text-start my-2 flex-wrap">

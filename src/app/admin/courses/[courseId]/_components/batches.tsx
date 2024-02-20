@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-import Select from "react-select";
-import Image from "next/image";
+"use client";
+import React, { useEffect, useState } from "react";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -16,226 +15,261 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
-import styles from "../../_components/cources.module.css";
+import api from "@/utils/axios.config";
+import AddStudentsModal from "./addStudentsmodal";
+import { toast } from "@/components/ui/use-toast";
+import { Card as card, CardDescription, CardTitle } from "@/components/ui/card";
+const Batches = ({
+  courseID,
+  unassigned_students,
+}: {
+  courseID: string;
+  unassigned_students: number;
+}) => {
+  const [unassignedStudents, setUnassignedStudents] =
+    useState(unassigned_students);
 
-interface Course {
-  groupName: string;
-  learnersCount: number;
-  date: string;
-  image: string; // URL for the course image
-}
+  const [batches, setBatches] = useState([]);
+  useEffect(() => {
+    const fetchBatches = async () => {
+      try {
+        const response = await api.get(`/bootcamp/batches/${courseID}`);
+        setBatches(response.data);
+      } catch (error: any) {
+        console.log(error.message);
+      }
+    };
 
-const defaultCourses: Course[] = [
-  // {
-  //   groupName: "Group1",
-  //   learnersCount: 67,
-  //   date: "2022-01-12",
-  //   image:
-  //     "https://t4.ftcdn.net/jpg/03/78/40/11/360_F_378401105_9LAka9cRxk5Ey2wwanxrLTFCN1U51DL0.jpg",
-  // },
-  // {
-  //   groupName: "Group2",
-  //   learnersCount: 67,
-  //   date: "2022-02-20",
-  //   image:
-  //     "https://t4.ftcdn.net/jpg/03/78/40/11/360_F_378401105_9LAka9cRxk5Ey2wwanxrLTFCN1U51DL0.jpg",
-  // },
-  // {
-  //   groupName: "Group3",
-  //   learnersCount: 67,
-  //   date: "2022-01-12",
-  //   image:
-  //     "https://t4.ftcdn.net/jpg/03/78/40/11/360_F_378401105_9LAka9cRxk5Ey2wwanxrLTFCN1U51DL0.jpg",
-  // },
-];
+    fetchBatches();
+  }, [courseID]);
+  useEffect(() => {
+    const fetchCourseDetails = async () => {
+      try {
+        const response = await api.get(`/bootcamp/${courseID}`);
+        console.log("HI");
+        const data = response.data;
+        console.log(data);
+      } catch (error) {
+        console.error("Error fetching course details:", error);
+      }
+    };
 
-const Batches: React.FC = () => {
-  const [activeFilter, setActiveFilter] = useState<
-    "all" | "active" | "completed"
-  >("all");
-  const [cap, setCap] = useState<number | null>(null);
-  const [dialogData, setDialogData] = useState({
-    batchName: "",
-    courseCommencement: "",
-    capEnrollment: null,
+    fetchCourseDetails();
+  }, [courseID, unassignedStudents]);
+
+  const formSchema = z.object({
+    name: z.string().min(2, {
+      message: "Batch name must be at least 2 characters.",
+    }),
+    instructorId: z
+      .string()
+      .refine((instructorId) => !isNaN(parseInt(instructorId))),
+    bootcampId: z.string().refine((bootcampId) => !isNaN(parseInt(bootcampId))),
+    capEnrollment: z
+      .string()
+      .refine((capEnrollment) => !isNaN(parseInt(capEnrollment)), {
+        message: "A cap enrollment is required",
+      }),
   });
-  const [selectedInstructor, setSelectedInstructor] = useState<any>(null);
 
-  const handleFilterClick = (filter: "all" | "active" | "completed") => {
-    setActiveFilter(filter);
-  };
+  const { handleSubmit, register } = useForm({
+    resolver: zodResolver(formSchema),
+  });
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-    setDialogData((prevData) => ({ ...prevData, [name]: value }));
-  };
-
-  const handleCreateBatch = async () => {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      instructorId: "",
+      bootcampId: courseID,
+      capEnrollment: "",
+    },
+  });
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const convertedData = {
+      ...values,
+      instructorId: +values.instructorId,
+      bootcampId: +values.bootcampId,
+      capEnrollment: +values.capEnrollment,
+    };
     try {
-      const response = await fetch(
-        "BACKEND_API_ENDPOINT_FOR_CREATING_NEW_BATCH",
-        {
-          method: "POST",
+      const response = await api
+        .post(`/batch`, convertedData, {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            ...dialogData,
-            instructor: selectedInstructor?.value,
-            capEnrollment: cap,
-          }),
-        }
-      );
+        })
+        .then((response) => {
+          const fetchBatches = async () => {
+            try {
+              const response = await api.get(`/bootcamp/batches/${courseID}`);
+              setBatches(response.data);
+            } catch (error: any) {
+              console.log(error.message);
+            }
+          };
+          fetchBatches();
+          const fetchCourseDetails = async () => {
+            try {
+              const response = await api.get(`/bootcamp/${courseID}`);
+              console.log("HI");
+              const data = response.data;
+              console.log(data);
+              setUnassignedStudents(data.bootcamp.unassigned_students);
+            } catch (error) {
+              console.error("Error fetching course details:", error);
+            }
+          };
 
-      if (!response.ok) {
-        throw new Error("Failed to create batch");
-      }
+          fetchCourseDetails();
 
+          toast({
+            title: response.data.status,
+            description: response.data.message,
+            className: "text-start capitalize",
+          });
+        });
       console.log("Batch created successfully");
-
-      setDialogData({
-        batchName: "",
-        courseCommencement: "",
-        capEnrollment: null,
+    } catch (error: any) {
+      toast({
+        title: "Failed",
+        description: error.data.message,
+        className: "text-start capitalize",
+        variant: "destructive",
       });
-      setCap(null);
-      setSelectedInstructor(null);
-    } catch (error) {
       console.error("Error creating batch:", error);
     }
   };
 
-  const instructorOptions = [
-    { value: "instructor1", label: "Kohli" },
-    { value: "instructor2", label: "Dravid" },
-    { value: "instructor3", label: "Sharma" },
-    { value: "instructor4", label: "Tendulkar" },
-    { value: "instructor5", label: "Dhawan" },
-  ];
+  const renderModal = () => {
+    if (unassignedStudents === 0) {
+      return (
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button>New Batch</Button>
+          </DialogTrigger>
+          <DialogOverlay />
+          <AddStudentsModal message={true} id={courseID} />
+        </Dialog>
+      );
+    } else {
+      return (
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button>New Batch</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>New Batch</DialogTitle>
+              Unassigned Students in Records: {unassigned_students}
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-8"
+                >
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Batch Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Batch Name" {...field} />
+                        </FormControl>
+
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="instructorId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Instructor Id</FormLabel>
+                        <FormControl>
+                          <Input placeholder="20230" type="name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="capEnrollment"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Cap Enrollment</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Cap Enrollment"
+                            type="number"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormDescription>
+                    {unassignedStudents} students will be added to this batch
+                    (Maximum current availability)
+                  </FormDescription>
+                  <div className="w-full flex flex-col items-end gap-y-5 ">
+                    <DialogClose asChild>
+                      <Button className="w-1/2" type="submit">
+                        Create batch
+                      </Button>
+                    </DialogClose>
+                  </div>
+                </form>
+              </Form>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
+      );
+    }
+  };
 
   return (
     <div>
-      <div className={styles.searchContainer}>
-        <Input
-          type="text"
-          placeholder="Search"
-          className={styles.searchInput}
-        />
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button className={styles.newCourseBtn}>+ New Batch</Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className={styles.newCourse}>New Batch</DialogTitle>
-            </DialogHeader>
-            <div style={{ marginBottom: "10px" }}>
-              <label htmlFor="batchName" className={styles.dialogCourseName}>
-                Batch Name:
-              </label>
-              <input
-                type="text"
-                id="batchName"
-                placeholder="Enter batch name"
-                className={styles.inputBox}
-                onChange={handleInputChange}
-              />
-              <div className={styles.dialogCourseNameContainer}>
-                <label htmlFor="instructor" className={styles.dialogCourseName}>
-                  Instructor:
-                </label>
-                <Select
-                  id="instructor"
-                  placeholder="Select an Instructor"
-                  options={instructorOptions}
-                  value={selectedInstructor}
-                  onChange={(selectedOption) =>
-                    setSelectedInstructor(selectedOption)
-                  }
-                />
-              </div>
-              <label
-                htmlFor="courseCommencement"
-                className={styles.dialogCourseName}
-              >
-                Course Commencement:
-              </label>
-              <input
-                type="date"
-                id="courseCommencement"
-                className={styles.inputBox}
-                onChange={handleInputChange}
-              />
-              <label htmlFor="capEnrollment" className={styles.label}>
-                Cap Enrollment:
-              </label>
-              <Input
-                type="number"
-                id="capEnrollment"
-                placeholder="Enter cap enrollment"
-                name="capEnrollment"
-                value={cap || ""}
-                onChange={(e) => setCap(Number(e.target.value))}
-              />
-            </div>
-            <DialogFooter className="sm:justify-start">
-              <DialogClose asChild>
-                <Button
-                  type="button"
-                  onClick={handleCreateBatch}
-                  className={styles.createCourseBtnDialog}
-                >
-                  Create Batch
-                </Button>
-              </DialogClose>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+      <div className="flex items-center justify-between">
+        {batches.length > 0 ? (
+          <Input type="search" placeholder="Search" className="w-1/2" />
+        ) : null}
+        {renderModal()}
       </div>
-      <div className={styles.contentContainer}>
-        <div className={styles.content}>
-          <span
-            className={activeFilter === "all" ? `${styles.active}` : ""}
-            onClick={() => handleFilterClick("all")}
-          >
-            All
-          </span>
-          <span
-            className={activeFilter === "active" ? `${styles.active}` : ""}
-            onClick={() => handleFilterClick("active")}
-          >
-            Active
-          </span>
-          <span
-            className={activeFilter === "completed" ? `${styles.active}` : ""}
-            onClick={() => handleFilterClick("completed")}
-          >
-            Completed
-          </span>
-        </div>
-      </div>
-      <div className={styles.courceContainer}>
-        {defaultCourses.map((course, index) => (
-          <Card key={index} className={styles.cardContainer}>
-            <div className={styles.courseImageContainer}>
-              <Image
-                src={`/${course.image}`}
-                alt={`Course: ${course.groupName}`}
-                className={styles.courseImage}
-              />
-            </div>
-            <div className={styles.courseDetails}>
-              <span className={styles.groupNameText}>{course.groupName}</span>
-            </div>
-            <div className={styles.courseDetails}>
-              <span className={styles.learnersCount}>
-                {course.learnersCount} Learners
-              </span>
-              <span>{course.date}</span>
-            </div>
-          </Card>
-        ))}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 mt-2">
+        {batches.length > 0
+          ? batches.map((batch: any, index: number) => (
+              <Card key={batch.id} className="text-gray-900 text-base">
+                <div className="bg-white rounded-lg border p-4">
+                  <div className="px-1 py-4 flex flex-col items-start">
+                    <CardTitle className="font-semibold capitalize">
+                      {batch.name}
+                    </CardTitle>
+                    <CardDescription className=" capitalize">
+                      {batch.capEnrollment} <span>Learners</span>
+                    </CardDescription>
+                  </div>
+                </div>
+              </Card>
+            ))
+          : null}
       </div>
     </div>
   );

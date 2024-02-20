@@ -3,7 +3,6 @@ import { Inter } from "next/font/google";
 // import Navbar from "@/app/_components/Navbar";
 
 import { cn } from "@/lib/utils";
-import { ReduxToolkitProvider } from "@/redux/Provider/provider";
 import { Toaster } from "@/components/ui/toaster";
 
 import "./globals.css";
@@ -27,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="light">
+    <html lang='en' className='light'>
       <body
         className={cn(
           "min-h-screen text-center font-sans antialiased",
@@ -35,7 +34,7 @@ export default function RootLayout({
         )}
       >
         {/* <Navbar /> */}
-        <ReduxToolkitProvider>{children}</ReduxToolkitProvider>
+        {children}
         <Toaster />
       </body>
     </html>

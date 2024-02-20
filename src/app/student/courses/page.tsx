@@ -1,13 +1,30 @@
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Video } from "lucide-react";
 import Loader from "./_components/Loader";
 import Image from "next/image";
+import api from "@/utils/axios.config";
+import { useLazyLoadedStudentData } from "@/store/store";
 
 type pageProps = {};
 
 const Page: React.FC<pageProps> = () => {
+  const { studentData } = useLazyLoadedStudentData();
+  const [enrolledCourse, setEnrolledCourse] = useState([]);
+  const userID = studentData?.id && studentData?.id;
+  useEffect(() => {
+    const getEnrolledCourses = async () => {
+      try {
+        const response = await api.get(`/student/${userID}`);
+        setEnrolledCourse(response.data);
+      } catch (error) {
+        console.error("Error deleting:", error);
+      }
+    };
+    if (userID) getEnrolledCourses();
+  }, [userID]);
+
   return (
     // <MaxWidthWrapper className=" flex flex-col ">
     <>
@@ -52,69 +69,39 @@ const Page: React.FC<pageProps> = () => {
 
           <div className="container  mx-auto p-1">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4">
-              <Link href={"courses/:id"} className="text-gray-900 text-base">
-                <div className="bg-white rounded-lg border p-4">
-                  <Image
-                    src="https://images.unsplash.com/photo-1581276879432-15e50529f34b?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8cmVhY3R8ZW58MHx8MHx8fDA%3D"
-                    alt="Placeholder Image"
-                    className="w-full h-48 rounded-md object-cover"
-                    width={100}
-                    height={48}
-                  />
-                  <div className="px-1 py-4">
-                    AFE + Navgurukul Coding Bootcamp
-                  </div>
-                  <Loader />
-                </div>
-              </Link>
-              <Link
-                href={"courses/:course-name"}
-                className="text-gray-900 text-base"
-              >
-                <div className="bg-white rounded-lg border p-4">
-                  <Image
-                    src="https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8amF2YXNjcmlwdHxlbnwwfHwwfHx8MA%3D%3D"
-                    alt="Placeholder Image"
-                    className="w-full h-48 rounded-md object-cover"
-                    width={100}
-                    height={48}
-                  />
-                  <div className="px-1 py-4">
-                    AFE + Navgurukul Coding Bootcamp
-                  </div>
-                  <Loader />
-                </div>
-              </Link>
-              <Link href={"courses/AFE"} className="text-gray-900 text-base">
-                <div className="bg-white rounded-lg border p-4">
-                  <Image
-                    src="https://images.unsplash.com/photo-1633933703119-5d25460ad829?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bXVzaWMlMjBwcm9kdWN0aW9ufGVufDB8fDB8fHww"
-                    alt="Placeholder Image"
-                    className="w-full h-48 rounded-md object-cover"
-                    width={100}
-                    height={48}
-                  />
-                  <div className="px-1 py-4">
-                    AFE + Navgurukul Coding Bootcamp
-                  </div>
-                  <Loader />
-                </div>
-              </Link>
-              <Link href={"courses/AFE"} className="text-gray-900 text-base">
-                <div className="bg-white rounded-lg border p-4">
-                  <Image
-                    src="https://plus.unsplash.com/premium_photo-1661499751432-a5ee116ae3f3?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTd8fHRhY3RpY3N8ZW58MHx8MHx8fDA%3D"
-                    alt="Placeholder Image"
-                    className="w-full h-48 rounded-md object-cover"
-                    width={100}
-                    height={48}
-                  />
-                  <div className="px-1 py-4">
-                    AFE + Navgurukul Coding Bootcamp
-                  </div>
-                  <Loader />
-                </div>
-              </Link>
+              {enrolledCourse.length > 0 ? (
+                enrolledCourse.map(
+                  ({
+                    name,
+                    coverImage,
+                    id,
+                  }: {
+                    name: string;
+                    coverImage: string;
+                    id: number;
+                  }) => (
+                    <Link
+                      key={id}
+                      href={`courses/${id}`}
+                      className="text-gray-900 text-base"
+                    >
+                      <div className="bg-white rounded-lg border p-4">
+                        <Image
+                          src={coverImage}
+                          alt="Placeholder Image"
+                          className="w-full h-48 rounded-md object-cover"
+                          width={100}
+                          height={48}
+                        />
+                        <div className="px-1 py-4">{name}</div>
+                        <Loader />
+                      </div>
+                    </Link>
+                  )
+                )
+              ) : (
+                <p>No courses available.</p>
+              )}
             </div>
           </div>
         </div>

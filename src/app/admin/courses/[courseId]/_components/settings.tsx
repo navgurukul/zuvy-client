@@ -16,7 +16,6 @@ const Settings = ({ courseId }: { courseId: string }) => {
   const handleDelete = async () => {
     try {
       const response = await api.delete(`/bootcamp/${courseId}`);
-      console.log(response.data);
       router.push("/admin/courses");
     } catch (error) {
       console.error("Error deleting:", error);
