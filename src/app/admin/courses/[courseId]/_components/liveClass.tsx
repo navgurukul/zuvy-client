@@ -6,9 +6,12 @@ import ClassCard from "./classCard";
 import { Dialog, DialogOverlay, DialogTrigger } from "@/components/ui/dialog";
 import NewClassDialog from "./newClassDialog";
 import api from "@/utils/axios.config";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 function LiveClass({ courseId }: { courseId: string }) {
-  const [classType, setClassType] = useState("active");
+  // state and variables
+  const [classType, setClassType] = useState("upcoming");
   const [allClasses, setAllClasses] = useState([]);
   const [bootcampData, setBootcampData] = useState([]);
   const [batchId, setBatchId] = useState("");
@@ -16,14 +19,29 @@ function LiveClass({ courseId }: { courseId: string }) {
   const [ongoingClasses, setOngoingClasses] = useState([]);
   const [completedClasses, setCompletedClasses] = useState([]);
 
+  // func
+
+  const handleClassType = (
+    type: string | "active" | "complete" | "upcoming"
+  ) => {
+    setClassType(type);
+  };
+
+  const handleComboboxChange = (value: string) => {
+    setBatchId((prevBatchId: string) => (prevBatchId === value ? "" : value));
+  };
+
+  // async
   useEffect(() => {
     api
       .get(`/bootcamp/batches/${courseId}`)
       .then((response) => {
-        const transformedData = response.data.map((item: { id: any; name: any }) => ({
-          value: item.id.toString(),
-          label: item.name,
-        }));
+        const transformedData = response.data.map(
+          (item: { id: any; name: any }) => ({
+            value: item.id.toString(),
+            label: item.name,
+          })
+        );
 
         setBootcampData(transformedData);
       })
@@ -31,6 +49,16 @@ function LiveClass({ courseId }: { courseId: string }) {
         console.log("Error fetching data:", error);
       });
   }, [courseId]);
+
+  useEffect(() => {
+    if (classType === "active") {
+      setAllClasses(ongoingClasses);
+    } else if (classType === "complete") {
+      setAllClasses(completedClasses);
+    } else if (classType === "upcoming") {
+      setAllClasses(upcomingClasses);
+    }
+  }, [classType, ongoingClasses, completedClasses, upcomingClasses]);
 
   useEffect(() => {
     let fetchId;
@@ -43,61 +71,48 @@ function LiveClass({ courseId }: { courseId: string }) {
       fetchUrl = "getClassesByBatchId";
     }
 
-    api.get(`/classes/${fetchUrl}/${fetchId}`)
+    api
+      .get(`/classes/${fetchUrl}/${fetchId}`)
       .then((response) => {
-        console.log(response);
         setUpcomingClasses(response.data.upcomingClasses);
         setOngoingClasses(response.data.ongoingClasses);
         setCompletedClasses(response.data.completedClasses);
+        handleClassType(classType);
       })
       .catch((error) => {
         console.log("Error fetching classes:", error);
       });
   }, [courseId, batchId]);
 
-  const handleClassType = (type: "active" | "complete" | "upcoming") => {
-    setClassType(type);
-
-    if (type === "active") {
-      setAllClasses(ongoingClasses);
-    } else if (type === 'complete') {
-      setAllClasses(completedClasses);
-    } else if (type === "upcoming") {
-      setAllClasses(upcomingClasses);
-    }
-  };
-
-  const handleComboboxChange = (value: string) => {
-    setBatchId(value === batchId ? "" : value);
-  };
-
   return (
     <div>
-      <div className="flex gap-6 my-6 max-w-[800px]">
+      <div className="flex text-start gap-6 my-6 max-w-[800px]">
         <Combobox
           data={bootcampData}
           title={"Select Batch"}
           onChange={handleComboboxChange}
         />
-
-        {/* <Combobox
-          data={data}
+        <Combobox
+          data={[]}
           title={"Select Module"}
+          disabled
           onChange={function (selectedValue: string): void {
             throw new Error("Function not implemented.");
           }}
-        /> */}
+        />
       </div>
       <div className="flex justify-between">
-{/* <div className="w-[400px] pr-3">
-          <Combobox
-            data={data}
-            title={"Search Classes"}
-            onChange={function (selectedValue: string): void {
-              throw new Error("Function not implemented.");
-            }}
+        <div className="w-[400px] pr-3">
+          <Input
+            type="text"
+            placeholder="Search Classes"
+            // className={styles.searchInput}
+            className="max-w-[500px]"
+            disabled
+            //  value={searchQuery}
+            //  onChange={handleSearchChange}
           />
-        </div> */}
+        </div>
         <Dialog>
           <DialogTrigger asChild>
             <Button className="text-white bg-secondary">
@@ -131,15 +146,19 @@ function LiveClass({ courseId }: { courseId: string }) {
           Completed Classes
         </Badge>
       </div>
-      <div className="grid grid-cols-3 gap-6">
-        {allClasses && allClasses.length > 0 ? (
-          allClasses.map((classData: any, index: any) => (
-            <ClassCard classData={classData} key={index} classType={classType}/>
-          ))
-        ) : (
-          <p style={{ marginLeft: "300px" }}>No classes available.</p>
-        )}
-      </div>
+      {allClasses && allClasses.length > 0 ? (
+        <div className="grid grid-cols-3 gap-6">
+          {allClasses.map((classData: any, index: any) => (
+            <ClassCard
+              classData={classData}
+              key={index}
+              classType={classType}
+            />
+          ))}
+        </div>
+      ) : (
+        <p className="text-center mt-6">No Classes Available</p>
+      )}
     </div>
   );
 }
