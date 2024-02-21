@@ -12,50 +12,50 @@ import { useLazyLoadedStudentData } from "@/store/store";
 const Navbar = () => {
   const { studentData } = useLazyLoadedStudentData();
   return (
-    <nav className='bg-muted'>
+    <nav className="bg-muted">
       {/* <MaxWidthWrapper> */}
-      <div className='flex items-center justify-between border-green-[#2f433a]'>
-        <div className='flex items-center'>
+      <div className="flex items-center justify-between border-green-[#2f433a]">
+        <div className="flex items-center">
           <Sheet>
             <SheetTrigger>
-              <div className='bg-white p-4 rounded-r-lg'>
+              <div className="bg-white p-4 rounded-r-lg">
                 <Menu />
               </div>
             </SheetTrigger>
-            <SheetContent side='left' className='w-[280px] sm:w-[540px]'>
+            <SheetContent side="left" className="w-[280px] sm:w-[540px]">
               <Sidebar />
             </SheetContent>
           </Sheet>
-          <Link href={"/"} className='flex z-40 '>
+          <Link href={"/"} className="flex z-40 ">
             <Image
               src={"/logo.PNG"}
-              alt='logo'
+              alt="logo"
               // className="py-2"
               width={"70"}
               height={"70"}
             />
           </Link>
         </div>
-        <div className='mr-2 px-2'>
-          <div className='sm:items-center space-x-4 hidden md:flex'>
+        <div className="mr-2 px-2">
+          <div className="sm:items-center space-x-4 hidden md:flex">
             <Search />
             <Bell />
-            <Link href='/student/profile'>
+            <Link href="/profile">
               <Avatar>
                 <AvatarImage src={studentData?.profile_picture} />
                 <AvatarFallback>NAME</AvatarFallback>
               </Avatar>
             </Link>
           </div>
-          <div className='md:hidden'>
+          <div className="md:hidden">
             <Sheet>
               <SheetTrigger>
                 <Avatar>
-                  <AvatarImage src='https://github.com/shadcn.png' />
+                  <AvatarImage src="https://github.com/shadcn.png" />
                   <AvatarFallback>NAME</AvatarFallback>
                 </Avatar>
               </SheetTrigger>
-              <SheetContent side='right' className='w-[280px] sm:w-[540px]'>
+              <SheetContent side="right" className="w-[280px] sm:w-[540px]">
                 <MobileNavbarRoutes />
               </SheetContent>
             </Sheet>

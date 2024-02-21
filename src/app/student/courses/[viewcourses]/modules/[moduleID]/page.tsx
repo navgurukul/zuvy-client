@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import api from "@/utils/axios.config";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useRouter } from "next/navigation";
-import Script from "next/script";
-import { useLazyLoadedStudentData } from "@/store/store";
 import { ArrowBigLeft, CheckCircle2 } from "lucide-react";
+
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import api from "@/utils/axios.config";
+import { useLazyLoadedStudentData } from "@/store/store";
 import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 
@@ -37,6 +37,7 @@ const ContentComponent: React.FC<{ content: any; isQuiz?: boolean }> = ({
   content,
   isQuiz,
 }) => {
+  // misc
   // Remove inline styles for quiz questions as it has text color white:-
   const sanitizedContent = isQuiz
     ? content.replace(/style=".*?"/g, "")
@@ -59,9 +60,12 @@ function Page({
 }: {
   params: { viewcourses: string; moduleID: string };
 }) {
+  // misc
   const { studentData } = useLazyLoadedStudentData();
-  const userID = studentData?.id && studentData?.id;
   const router = useRouter();
+
+  // state and variables
+  const userID = studentData?.id && studentData?.id;
   const moduleID = params.moduleID;
   const [moduleData, setModuleData] = useState<ModuleDataItem[]>([]);
   const [selectedModuleID, setSelectedModuleID] = useState<number | null>(null);
@@ -73,47 +77,7 @@ function Page({
     [key: number]: number;
   }>({});
 
-  useEffect(() => {
-    const getModuleData = async () => {
-      try {
-        const response = await api.get(
-          `/Content/chapter/${moduleID}?user_id=${userID}`
-        );
-        const data: ModuleDataItem[] = response.data;
-
-        const assignmentItem = data.find(
-          (item: ModuleDataItem) => item.label === "assignment"
-        );
-        if (assignmentItem) {
-          setAssignmentId(assignmentItem.id);
-        }
-        const articleItem = data.find(
-          (item: ModuleDataItem) => item.label === "article"
-        );
-        if (articleItem) {
-          setArticleId(articleItem.id);
-        }
-        const quizItem = data.find(
-          (item: ModuleDataItem) => item.label === "quiz"
-        );
-        if (quizItem) {
-          setQuizId(quizItem.id);
-        }
-
-        setModuleData(data);
-        console.log(data);
-
-        // Set selectedModuleID to the ID of the first module
-        if (data.length > 0) {
-          setSelectedModuleID(data[0].id);
-        }
-      } catch (error) {
-        console.error("Error fetching module data:", error);
-      }
-    };
-    if (userID) getModuleData();
-  }, [moduleID, userID]);
-
+  // func
   const handleAssignmentLinkChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -136,7 +100,7 @@ function Page({
       toast({
         title: "Successfully Submitted Assignment",
         description: response.data.projectUrl,
-        className: "text-start capitalize bg-green-500 text-white",
+        className: "text-start capitalize",
       });
 
       // Add any additional logic here after successful form submission
@@ -145,7 +109,8 @@ function Page({
       toast({
         title: "Error Submitting",
         description: error.response.data.message,
-        className: "text-start capitalize bg-red-500 text-white",
+        className: "text-start capitalize",
+        variant: "destructive",
       });
     }
 
@@ -163,18 +128,18 @@ function Page({
         }
       );
       const data = response.data;
-      console.log(response);
       toast({
         title: "Completed Article Successfully",
         description: "You have completed the article successfully",
-        className: "text-start capitalize bg-green-500 text-white",
+        className: "text-start capitalize",
       });
     } catch (error: any) {
       console.error("Error Completing Article:", error);
       toast({
         title: "Error",
         description: error.response.data.message,
-        className: "text-start capitalize bg-red-500 text-white",
+        className: "text-start capitalize ",
+        variant: "destructive",
       });
     }
   };
@@ -218,17 +183,60 @@ function Page({
       toast({
         title: "Quiz Submitted Successfully",
         description: "Successfully submitted the quiz",
-        className: "text-start capitalize bg-green-500 text-white",
+        className: "text-start capitalize",
       });
     } catch (error) {
       console.error("Error creating course:", error);
       toast({
         title: "Error",
         description: "Cannot submit the quiz again",
-        className: "text-start capitalize bg-red-500 text-white",
+        className: "text-start capitalize",
+        variant: "destructive",
       });
     }
   };
+
+  // async
+  useEffect(() => {
+    const getModuleData = async () => {
+      try {
+        const response = await api.get(
+          `/Content/chapter/${moduleID}?user_id=${userID}`
+        );
+        const data: ModuleDataItem[] = response.data;
+
+        const assignmentItem = data.find(
+          (item: ModuleDataItem) => item.label === "assignment"
+        );
+        if (assignmentItem) {
+          setAssignmentId(assignmentItem.id);
+        }
+        const articleItem = data.find(
+          (item: ModuleDataItem) => item.label === "article"
+        );
+        if (articleItem) {
+          setArticleId(articleItem.id);
+        }
+        const quizItem = data.find(
+          (item: ModuleDataItem) => item.label === "quiz"
+        );
+        if (quizItem) {
+          setQuizId(quizItem.id);
+        }
+
+        setModuleData(data);
+        console.log(data);
+
+        // Set selectedModuleID to the ID of the first module
+        if (data.length > 0) {
+          setSelectedModuleID(data[0].id);
+        }
+      } catch (error) {
+        console.error("Error fetching module data:", error);
+      }
+    };
+    if (userID) getModuleData();
+  }, [moduleID, userID]);
 
   return (
     <div className="flex">
