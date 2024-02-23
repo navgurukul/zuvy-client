@@ -58,7 +58,7 @@ function LiveClass({ courseId }: { courseId: string }) {
   ];
   return (
     <div>
-      <div className="flex gap-6 my-6 max-w-[800px]">
+      <div className='flex gap-6 my-6 max-w-[800px]'>
         <Combobox
           data={bootcampData}
           title={"Select Batch"}
@@ -75,8 +75,8 @@ function LiveClass({ courseId }: { courseId: string }) {
           }}
         />
       </div>
-      <div className="flex justify-between">
-        <div className="w-[400px] pr-3">
+      <div className='flex justify-between'>
+        <div className='w-[400px] pr-3'>
           <Combobox
             data={data}
             title={"Search Classes"}
@@ -87,7 +87,7 @@ function LiveClass({ courseId }: { courseId: string }) {
         </div>
         <Dialog>
           <DialogTrigger asChild>
-            <Button className="text-white bg-secondary">
+            <Button className='text-white bg-secondary'>
               {/* <Plus className="w-5 mr-2" /> */}
               <p>Create New Class</p>
             </Button>
@@ -96,23 +96,23 @@ function LiveClass({ courseId }: { courseId: string }) {
           <NewClassDialog courseId={courseId} />
         </Dialog>
       </div>
-      <div className="flex justify-start gap-6 my-6">
+      <div className='flex justify-start gap-6 my-6'>
         <Badge
           variant={classType === "active" ? "default" : "outline"}
           onClick={() => handleClassType("active")}
-          className="rounded-md"
+          className='rounded-md'
         >
           Active Classes
         </Badge>
         <Badge
           variant={classType === "complete" ? "default" : "outline"}
           onClick={() => handleClassType("complete")}
-          className="rounded-md"
+          className='rounded-md'
         >
           Completed Classes
         </Badge>
       </div>
-      <div className="grid grid-cols-3 gap-6">
+      <div className='grid grid-cols-3 gap-6'>
         {allClasses && allClasses.length > 0 ? (
           allClasses.map((classData, index) => (
             <ClassCard classData={classData} key={index} />

@@ -13,10 +13,14 @@ import { GeneralDetails } from "./_components/generalDetails";
 import Curriculum from "./_components/curriculum";
 
 import styles from "../_components/cources.module.css";
+// import { useStudentData } from "@/store/store";
 
 interface Page {}
 
 const Page = ({ params }: { params: { courseId: string } }) => {
+  // const { setBootcampId } = useStudentData();
+  // setBootcampId(params.courseId);
+
   // state and variables
   const [courseData, setCourseData] = useState({
     id: "",

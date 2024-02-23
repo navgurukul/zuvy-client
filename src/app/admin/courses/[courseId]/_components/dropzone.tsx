@@ -50,7 +50,6 @@ const Dropzone = ({ className, studentData, setStudentData }: Props) => {
             complete: (results: any) => {
               // Handle the parsed data (results.data)
               handleDataFormat(results.data);
-              console.log(results.data);
             },
             error: (error: any) => {
               console.error("CSV Parsing Error:", error.message);
