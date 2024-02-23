@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import api from "@/utils/axios.config";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useRouter } from "next/navigation";
-import Script from "next/script";
-import { useLazyLoadedStudentData } from "@/store/store";
 import { ArrowBigLeft, CheckCircle2 } from "lucide-react";
+
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import api from "@/utils/axios.config";
+import { useLazyLoadedStudentData } from "@/store/store";
 import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 
@@ -37,6 +37,7 @@ const ContentComponent: React.FC<{ content: any; isQuiz?: boolean }> = ({
   content,
   isQuiz,
 }) => {
+  // misc
   // Remove inline styles for quiz questions as it has text color white:-
   const sanitizedContent = isQuiz
     ? content.replace(/style=".*?"/g, "")
@@ -57,13 +58,15 @@ const ContentComponent: React.FC<{ content: any; isQuiz?: boolean }> = ({
 function Page({
   params,
 }: {
-  params: { viewcourses: string; moduleId: string };
+  params: { viewcourses: string; moduleID: string };
 }) {
+  // misc
   const { studentData } = useLazyLoadedStudentData();
-  const userID = studentData?.id && studentData?.id;
   const router = useRouter();
-  const moduleID = params.moduleId;
-  console.log(moduleID);
+
+  // state and variables
+  const userID = studentData?.id && studentData?.id;
+  const moduleID = params.moduleID;
   const [moduleData, setModuleData] = useState<ModuleDataItem[]>([]);
   const [selectedModuleID, setSelectedModuleID] = useState<number | null>(null);
   const [assignmentLink, setAssignmentLink] = useState("");
@@ -74,45 +77,7 @@ function Page({
     [key: number]: number;
   }>({});
 
-  useEffect(() => {
-    const getModuleData = async () => {
-      try {
-        const response = await api.get(`/Content/chapter/${moduleID}`);
-        const data: ModuleDataItem[] = response.data;
-        console.log(data);
-        const assignmentItem = data.find(
-          (item: ModuleDataItem) => item.label === "assignment"
-        );
-        if (assignmentItem) {
-          setAssignmentId(assignmentItem.id);
-        }
-        const articleItem = data.find(
-          (item: ModuleDataItem) => item.label === "article"
-        );
-        if (articleItem) {
-          setArticleId(articleItem.id);
-        }
-        const quizItem = data.find(
-          (item: ModuleDataItem) => item.label === "quiz"
-        );
-        if (quizItem) {
-          setQuizId(quizItem.id);
-        }
-
-        setModuleData(data);
-        console.log(data);
-
-        // Set selectedModuleID to the ID of the first module
-        if (data.length > 0) {
-          setSelectedModuleID(data[0].id);
-        }
-      } catch (error) {
-        console.error("Error fetching module data:", error);
-      }
-    };
-    if (userID) getModuleData();
-  }, [moduleID, userID]);
-
+  // func
   const handleAssignmentLinkChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -135,7 +100,7 @@ function Page({
       toast({
         title: "Successfully Submitted Assignment",
         description: response.data.projectUrl,
-        className: "text-start capitalize bg-green-500 text-white",
+        className: "text-start capitalize",
       });
 
       // Add any additional logic here after successful form submission
@@ -144,7 +109,8 @@ function Page({
       toast({
         title: "Error Submitting",
         description: error.response.data.message,
-        className: "text-start capitalize bg-red-500 text-white",
+        className: "text-start capitalize",
+        variant: "destructive",
       });
     }
 
@@ -162,18 +128,18 @@ function Page({
         }
       );
       const data = response.data;
-      console.log(response);
       toast({
         title: "Completed Article Successfully",
         description: "You have completed the article successfully",
-        className: "text-start capitalize bg-green-500 text-white",
+        className: "text-start capitalize",
       });
     } catch (error: any) {
       console.error("Error Completing Article:", error);
       toast({
         title: "Error",
         description: error.response.data.message,
-        className: "text-start capitalize bg-red-500 text-white",
+        className: "text-start capitalize ",
+        variant: "destructive",
       });
     }
   };
@@ -217,28 +183,71 @@ function Page({
       toast({
         title: "Quiz Submitted Successfully",
         description: "Successfully submitted the quiz",
-        className: "text-start capitalize bg-green-500 text-white",
+        className: "text-start capitalize",
       });
     } catch (error) {
       console.error("Error creating course:", error);
       toast({
         title: "Error",
         description: "Cannot submit the quiz again",
-        className: "text-start capitalize bg-red-500 text-white",
+        className: "text-start capitalize",
+        variant: "destructive",
       });
     }
   };
 
+  // async
+  useEffect(() => {
+    const getModuleData = async () => {
+      try {
+        const response = await api.get(
+          `/Content/chapter/${moduleID}?user_id=${userID}`
+        );
+        const data: ModuleDataItem[] = response.data;
+
+        const assignmentItem = data.find(
+          (item: ModuleDataItem) => item.label === "assignment"
+        );
+        if (assignmentItem) {
+          setAssignmentId(assignmentItem.id);
+        }
+        const articleItem = data.find(
+          (item: ModuleDataItem) => item.label === "article"
+        );
+        if (articleItem) {
+          setArticleId(articleItem.id);
+        }
+        const quizItem = data.find(
+          (item: ModuleDataItem) => item.label === "quiz"
+        );
+        if (quizItem) {
+          setQuizId(quizItem.id);
+        }
+
+        setModuleData(data);
+        console.log(data);
+
+        // Set selectedModuleID to the ID of the first module
+        if (data.length > 0) {
+          setSelectedModuleID(data[0].id);
+        }
+      } catch (error) {
+        console.error("Error fetching module data:", error);
+      }
+    };
+    if (userID) getModuleData();
+  }, [moduleID, userID]);
+
   return (
-    <div className='flex'>
+    <div className="flex">
       {/* Sidebar with labels */}
 
-      <div className='w-1/4 border-r-2 text-left p-4'>
+      <div className="w-1/4 border-r-2 text-left p-4">
         <button onClick={() => router.back()}>
-          <ArrowBigLeft className='text-[#518672]' />
+          <ArrowBigLeft className="text-[#518672]" />
         </button>
 
-        <h4 className='text-lg font-bold mb-2 mt-5'>Chapter List</h4>
+        <h4 className="text-lg font-bold mb-2 mt-5">Chapter List</h4>
         <ul>
           {moduleData.map((item, index) => (
             <li
@@ -250,11 +259,11 @@ function Page({
             >
               {`${item.label}: ${item.name ? item.name : ""}`}{" "}
               {item.completed && (
-                <CheckCircle2 size={18} className='text-[#518672] ml-5 mt-1' />
+                <CheckCircle2 size={18} className="text-[#518672] ml-5 mt-1" />
               )}
               {/* Show number of questions for Quiz and MCQ */}
               {["quiz"].includes(item.label) && (
-                <span className='text-sm ml-2 text-gray-500'>
+                <span className="text-sm ml-2 text-gray-500">
                   ({item.questions ? item.questions.length : 0} questions)
                 </span>
               )}
@@ -263,7 +272,7 @@ function Page({
         </ul>
       </div>
       {/* Right side content */}
-      <div className='w-3/4 p-4 flex items-end justify-start text'>
+      <div className="w-3/4 p-4 flex items-end justify-start text">
         {selectedModuleID &&
           moduleData
             .filter((item) => item.id === selectedModuleID)
@@ -289,19 +298,26 @@ function Page({
                     <form>
                       {/* Form input fields */}
                       <input
-                        type='text'
-                        placeholder='Assignment Link'
+                        type="text"
+                        placeholder="Assignment Link"
                         value={assignmentLink}
                         onChange={handleAssignmentLinkChange}
-                        className='border border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md px-4 py-2 outline-none'
+                        className="border border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md px-4 py-2 outline-none"
                       />
-                      <button type='submit'>Submit</button>
+                      {/* Submit button */}
+                      <Button
+                        disabled={item?.completed}
+                        onClick={handleAssignmentSubmit}
+                        type="button"
+                      >
+                        Submit
+                      </Button>
                     </form>
                   </div>
                 )}
                 {item.label === "quiz" && (
                   <div>
-                    <h3 className='font-semibold'>Quiz</h3>
+                    {/* <h3 className="font-semibold">Quiz</h3> */}
                     <ul>
                       {item.questions &&
                         item.questions.map((question) => (
@@ -311,7 +327,7 @@ function Page({
                               isQuiz={true}
                             />
 
-                            <div className='flex justify-start  '>
+                            <div className="flex justify-start  ">
                               <RadioGroup
                                 onValueChange={(value) =>
                                   setSelectedOptions((prev) => ({
@@ -322,14 +338,14 @@ function Page({
                                         : value,
                                   }))
                                 }
-                                className='flex'
+                                className="flex"
                                 value={selectedOptions[question.id]?.toString()}
                               >
                                 {question.options.map((option) => (
                                   <p key={option.number}>
                                     <RadioGroupItem
                                       value={option.number.toString()}
-                                      className='mr-2'
+                                      className="mr-2"
                                     />
                                     <label>{option.text}</label>
                                   </p>
@@ -342,7 +358,7 @@ function Page({
                     {/* Submit button for quiz */}
                     <Button
                       disabled={item?.completed}
-                      className='mt-5'
+                      className="mt-5"
                       onClick={handleQuizSubmit}
                     >
                       Submit Quiz

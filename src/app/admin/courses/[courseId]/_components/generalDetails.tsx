@@ -1,21 +1,23 @@
 "use client";
 
+import { useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import axios from "axios";
 
 import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import {
@@ -23,26 +25,18 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
+import OptimizedImageWithFallback from "@/components/ImageWithFallback";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
-
-import styles from "../../_components/cources.module.css";
-import { Label } from "@/components/ui/label";
 import { LANGUAGES } from "@/utils/constant";
 import api from "@/utils/axios.config";
-import { useRef } from "react";
-import axios from "axios";
-import OptimizedImageWithFallback from "@/components/ImageWithFallback";
 
 const FormSchema = z.object({
   name: z.string(),
   bootcampTopic: z.string(),
   duration: z.string().optional(),
   language: z.string(),
-  capEnrollment: z.coerce.number().int().positive().optional(),
+  // capEnrollment: z.coerce.number().int().positive().optional(),
   startTime: z.date().optional(),
   coverImage: z.string(),
 });
@@ -54,7 +48,7 @@ interface CourseData {
   coverImage: string;
   duration: string;
   language: string;
-  capEnrollment: number;
+  // capEnrollment: number;
   startTime: Date;
   unassigned_students: number;
 }
@@ -80,16 +74,16 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
       coverImage: courseData.coverImage,
       duration: courseData.duration,
       language: courseData.language,
-      capEnrollment: courseData.capEnrollment,
+      // capEnrollment: courseData.capEnrollment,
       startTime: new Date(courseData.startTime),
     },
     values: {
-      name: courseData.name,
-      bootcampTopic: courseData.bootcampTopic,
-      coverImage: courseData.coverImage,
-      duration: courseData.duration,
-      language: courseData.language,
-      capEnrollment: courseData.capEnrollment,
+      name: courseData.name ?? "",
+      bootcampTopic: courseData.bootcampTopic ?? "",
+      coverImage: courseData.coverImage ?? "",
+      duration: courseData.duration ?? "",
+      language: courseData.language ?? "",
+      // capEnrollment: courseData.capEnrollment,
       startTime: new Date(courseData.startTime),
     },
   });
@@ -121,7 +115,7 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
             startTime,
             duration,
             language,
-            capEnrollment,
+            // capEnrollment,
             unassigned_students,
           } = res.data.updatedBootcamp[0];
           setCourseData({
@@ -132,7 +126,7 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
             startTime,
             duration,
             language,
-            capEnrollment,
+            // capEnrollment,
             unassigned_students,
           });
           toast({
@@ -183,10 +177,10 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
   };
 
   return (
-    <div className='max-w-[400px] m-auto'>
+    <div className="max-w-[400px] m-auto">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-          <div className='bg-muted flex justify-center rounded-sm my-3 overflow-hidden'>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <div className="bg-muted flex justify-center rounded-sm my-3 overflow-hidden">
             <OptimizedImageWithFallback
               src={courseData.coverImage}
               alt={courseData.name}
@@ -196,15 +190,15 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
           </div>
           <div>
             <Input
-              id='picture'
-              type='file'
+              id="picture"
+              type="file"
               onChange={handleFileChange}
-              className='hidden'
+              className="hidden"
               ref={fileInputRef}
             />
             <Button
               variant={"outline"}
-              type='button'
+              type="button"
               onClick={handleButtonClick}
             >
               Upload course Image
@@ -213,16 +207,16 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
 
           <FormField
             control={form.control}
-            name='name'
+            name="name"
             render={({ field }) => (
-              <FormItem className='text-start'>
+              <FormItem className="text-start">
                 <FormLabel>Name</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder='shadcn'
+                    placeholder="shadcn"
                     {...field}
                     value={field.value}
-                    className='capitalize'
+                    className="capitalize"
                   />
                 </FormControl>
                 <FormMessage />
@@ -231,13 +225,13 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
           />
           <FormField
             control={form.control}
-            name='bootcampTopic'
+            name="bootcampTopic"
             render={({ field }) => (
-              <FormItem className='text-start'>
+              <FormItem className="text-start">
                 <FormLabel>Topic</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder='Enter Bootcamp Name'
+                    placeholder="Enter Bootcamp Name"
                     {...field}
                     value={field.value}
                   />
@@ -248,9 +242,9 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
           />
           <FormField
             control={form.control}
-            name='startTime'
+            name="startTime"
             render={({ field }) => (
-              <FormItem className='flex flex-col text-start'>
+              <FormItem className="flex flex-col text-start">
                 <FormLabel>Date of Commencement</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
@@ -267,13 +261,13 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
                         ) : (
                           <span>Pick a date</span>
                         )}
-                        <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className='w-auto p-0' align='start'>
+                  <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
-                      mode='single'
+                      mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
                       disabled={(date) => date < new Date()}
@@ -281,23 +275,20 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
                     />
                   </PopoverContent>
                 </Popover>
-                {/* <FormDescription>
-                  Your date of birth is used to calculate your age.
-                </FormDescription> */}
                 <FormMessage />
               </FormItem>
             )}
           />
           <FormField
             control={form.control}
-            name='duration'
+            name="duration"
             render={({ field }) => (
-              <FormItem className='text-start'>
+              <FormItem className="text-start">
                 <FormLabel>Duration</FormLabel>
                 <FormControl>
                   <Input
-                    type='text'
-                    placeholder='Enter Bootcamp Duration'
+                    type="text"
+                    placeholder="Enter Bootcamp Duration"
                     {...field}
                     value={field.value}
                   />
@@ -306,16 +297,16 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
               </FormItem>
             )}
           />
-          <FormField
+          {/* <FormField
             control={form.control}
-            name='capEnrollment'
+            name="capEnrollment"
             render={({ field }) => (
-              <FormItem className='text-start'>
+              <FormItem className="text-start">
                 <FormLabel>Cap Enrollment at</FormLabel>
                 <FormControl>
                   <Input
-                    type='number'
-                    placeholder='Enter Bootcamp Enrollment Cap'
+                    type="number"
+                    placeholder="Enter Bootcamp Enrollment Cap"
                     {...field}
                     value={field.value}
                   />
@@ -323,28 +314,28 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
                 <FormMessage />
               </FormItem>
             )}
-          />
+          /> */}
           <FormField
             control={form.control}
-            name='language'
+            name="language"
             render={({ field }) => (
-              <FormItem className='space-y-3 text-start'>
+              <FormItem className="space-y-3 text-start">
                 <FormLabel>Language</FormLabel>
                 <FormControl>
                   <RadioGroup
                     onValueChange={field.onChange}
-                    className='flex'
+                    className="flex"
                     value={field.value}
                   >
                     {LANGUAGES.map((lang) => (
                       <FormItem
                         key={lang}
-                        className='flex items-center space-x-3 space-y-0'
+                        className="flex items-center space-x-3 space-y-0"
                       >
                         <FormControl>
                           <RadioGroupItem value={lang} />
                         </FormControl>
-                        <FormLabel className='font-normal'>{lang}</FormLabel>
+                        <FormLabel className="font-normal">{lang}</FormLabel>
                       </FormItem>
                     ))}
                   </RadioGroup>
@@ -354,7 +345,7 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
             )}
           />
 
-          <Button type='submit'>Submit</Button>
+          <Button type="submit">Submit</Button>
         </form>
       </Form>
     </div>

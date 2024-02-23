@@ -1,16 +1,32 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { BookMinus, ChevronRight, Lock } from "lucide-react";
-
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 import Breadcrumb from "@/components/ui/breadcrumb";
-import CircularLoader from "../_components/circularLoader";
+import { useLazyLoadedStudentData } from "@/store/store";
+import { CircularProgress } from "@nextui-org/react";
 import Loader from "../_components/Loader";
 import Image from "next/image";
+import api from "@/utils/axios.config";
+import { Button } from "@/components/ui/button";
 
-type Props = {};
+type PageProps = {
+  params: {
+    viewcourses: string;
+  };
+};
 
-function Page({}: Props) {
+function Page({
+  params,
+}: {
+  params: { viewcourses: string; moduleID: string };
+}) {
+  const { studentData } = useLazyLoadedStudentData();
+  const [courseModules, setCourseModules] = useState([]);
+  const userID = studentData?.id && studentData?.id;
+  const [modulesProgress, setModulesProgress] = useState([]);
   const crumbs = [
     { crumb: "My Courses", href: "/student/courses" },
     {
@@ -18,6 +34,36 @@ function Page({}: Props) {
       href: "/student/courses/:course-name",
     },
   ];
+
+  useEffect(() => {
+    const getCourseModules = async () => {
+      try {
+        const response = await api.get(
+          `/Content/modules/${params.viewcourses}`
+        );
+        setCourseModules(response.data);
+      } catch (error) {
+        console.error("Error deleting:", error);
+      }
+    };
+    getCourseModules();
+  }, [params.viewcourses]);
+
+  useEffect(() => {
+    const getModulesProgress = async () => {
+      try {
+        const response = await api.get(
+          `/Content/modules/${params.viewcourses}?user_id=${userID}`
+        );
+        response.data.map((module: any) => {
+          setModulesProgress(response.data);
+        });
+      } catch (error) {
+        console.error("Error deleting:", error);
+      }
+    };
+    if (userID) getModulesProgress();
+  }, [userID, params.viewcourses]);
 
   return (
     <MaxWidthWrapper>
@@ -120,68 +166,52 @@ function Page({}: Props) {
             <div className="flex flex-start">
               <h1 className="text-lg p-1 font-semibold">Course Modules</h1>
             </div>
-            <Link
-              href={"/student/courses/:course-name/:module-name"}
-              className="bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl  "
-            >
-              <div className="w-full flex items-center justify-between gap-y-2  ">
-                <div className="flex gap-y-2 flex-col p-2  ">
-                  <div className="flex items-center justify-start  ">
-                    <div className="text-md font-semibold capitalize text-black">
-                      Programming Basics 1
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-start  ">
-                    <p className="text-md font-semibold capitalize text-gray-600">
-                      Time Commitment: 2weeks
-                    </p>
-                  </div>
-                </div>
-                <div className="">
-                  <CircularLoader />
-                </div>
-              </div>
-            </Link>
-            <Link
-              href={"/student/courses/:course-name/:module-name"}
-              className="bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl  "
-            >
-              <div className="w-full flex items-center justify-between gap-y-2  ">
-                <div className="flex gap-y-2 flex-col p-2  ">
-                  <div className="flex items-center justify-start  ">
-                    <div className="text-md font-semibold capitalize text-black">
-                      Programming Basics 1
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-start  ">
-                    <p className="text-md font-semibold capitalize text-gray-600">
-                      Time Commitment: 2weeks
-                    </p>
-                  </div>
-                </div>
-                <div className="">
-                  <CircularLoader />
-                </div>
-              </div>
-            </Link>
 
-            <div className="bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl  ">
-              <div className="w-full flex items-center justify-between gap-y-2  ">
-                <div className="flex gap-y-2 flex-col p-2  ">
-                  <div className="flex items-center justify-start  ">
-                    <Link
-                      href={"/"}
-                      className="text-md font-semibold capitalize text-black"
-                    >
-                      Certificate
-                    </Link>
-                  </div>
-                </div>
-                <div className="flex items-center  justify-center">
-                  <Lock size={20} />
-                </div>
-              </div>
-            </div>
+            {courseModules.length > 0 ? (
+              courseModules.map(
+                ({ name, id }: { name: string; id: number }) => (
+                  <Link
+                    key={id}
+                    href={`/student/courses/${params.viewcourses}/modules/${id}`}
+                    className="bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl  "
+                  >
+                    <div className="w-full flex items-center justify-between gap-y-2  ">
+                      <div className="flex gap-y-2 flex-col p-2  ">
+                        <div className="flex items-center justify-start  ">
+                          <div className="text-md font-semibold capitalize text-black">
+                            {name}
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-start  ">
+                          <p className="text-md font-semibold capitalize text-gray-600">
+                            Time Commitment: 2weeks
+                          </p>
+                        </div>
+                      </div>
+
+                      {modulesProgress.map((module: any) => {
+                        if (module.id == id) {
+                          return (
+                            <div key={module.id} className="">
+                              <CircularProgress
+                                size="md"
+                                value={module.progress}
+                                color="warning"
+                                showValueLabel={true}
+                              />
+                            </div>
+                          );
+                        } else {
+                          return null;
+                        }
+                      })}
+                    </div>
+                  </Link>
+                )
+              )
+            ) : (
+              <div>No Modules Found</div>
+            )}
           </div>
         </div>
 
@@ -203,12 +233,12 @@ function Page({}: Props) {
                 Ask doubts or general questions about the programs anytime and
                 get answers within a few hours
               </p>
-              <button className="bg-gray-300 px-4 py-2 rounded-lg mt-2 w-[200px] ">
+              <Button className="bg-gray-300 px-4 py-2 rounded-lg mt-2 w-[200px] ">
                 Start New Chat
-              </button>
-              <button className=" px-4 py-2 rounded-lg mt-2 w-[200px] ">
+              </Button>
+              <Button className=" px-4 py-2 rounded-lg mt-2 w-[200px] ">
                 View Past Chat
-              </button>
+              </Button>
             </div>
           </div>
 
