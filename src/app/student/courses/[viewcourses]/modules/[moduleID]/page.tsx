@@ -12,8 +12,10 @@ import { Button } from "@/components/ui/button";
 import { select } from "@nextui-org/react";
 
 // Define the type for module data
+// index is a property coming from api and not any index of an array/object
 interface ModuleDataItem {
   id: number;
+  index: number;
   label: string;
   name?: string;
   content?: string;
@@ -65,9 +67,14 @@ function Page({
   const router = useRouter();
   const moduleID = params.moduleID;
   const [moduleData, setModuleData] = useState<ModuleDataItem[]>([]);
-  const [selectedChapterID, setSelectedChapterID] = useState<number | null>(
-    null
-  );
+  const [selectedChapter, setSelectedChapter] = useState<{
+    index: number | null;
+    id: number | null;
+  }>({
+    index: null,
+    id: null,
+  });
+
   const [assignmentLink, setAssignmentLink] = useState("");
   const [assignmentId, setAssignmentId] = useState(0);
   const [articleId, setArticleId] = useState(0);
@@ -85,12 +92,15 @@ function Page({
         );
         const data: ModuleDataItem[] = response.data;
 
-        setModuleData(data);
-        console.log(data);
+        const sortedData = data.sort((a, b) => {
+          return a.index - b.index;
+        });
+
+        setModuleData(sortedData);
 
         // Set selectedChapterID to the ID of the first module
         if (data.length > 0) {
-          setSelectedChapterID(data[0].id);
+          setSelectedChapter({ index: data[0].index, id: data[0].id });
         }
       } catch (error) {
         console.error("Error fetching module data:", error);
@@ -111,19 +121,18 @@ function Page({
         `/tracking/assignment?bootcampId=${params.viewcourses}`,
         {
           userId: userID,
-          assignmentId: selectedChapterID,
+          assignmentId: selectedChapter.id,
           moduleId: parseInt(moduleID),
           projectUrl: assignmentLink,
         }
       );
       const data = response.data;
-      console.log(response);
       toast({
         title: "Successfully Submitted Assignment",
         description: response.data.projectUrl,
         className: "text-start capitalize bg-green-500 text-white",
       });
-      setAssignmentId(selectedChapterID ?? 0);
+      setAssignmentId(selectedChapter.id ?? 0);
 
       // Add any additional logic here after successful form submission
     } catch (error: any) {
@@ -138,24 +147,24 @@ function Page({
     return false;
   };
 
-  const handleArticleComplete = async (articleId: number) => {
+  const handleArticleComplete = async () => {
     try {
       const response = await api.post(
         `/tracking/article?bootcampId=${params.viewcourses}`,
         {
           userId: userID,
-          articleId: selectedChapterID,
+          articleId: selectedChapter.id,
           moduleId: moduleID,
         }
       );
       const data = response.data;
-      console.log(response);
+
       toast({
         title: "Completed Article Successfully",
         description: "You have completed the article successfully",
         className: "text-start capitalize bg-green-500 text-white",
       });
-      setArticleId(selectedChapterID ?? 0);
+      setArticleId(selectedChapter.id ?? 0);
     } catch (error: any) {
       console.error("Error Completing Article:", error);
       toast({
@@ -169,7 +178,7 @@ function Page({
   const handleQuizSubmit = async () => {
     try {
       const moduleItem = moduleData.find(
-        (item) => item.id === selectedChapterID
+        (item) => item.index === selectedChapter.index
       );
 
       if (!moduleItem) {
@@ -214,13 +223,11 @@ function Page({
         }
       );
 
-      console.log(selectedOptionsArray);
-
       const response = await api.post("/tracking/quiz", {
         userId: userID,
         bootcampId: 9,
         moduleId: moduleID,
-        quizId: selectedChapterID,
+        quizId: selectedChapter.id,
         quiz: selectedOptionsArray ?? [],
       });
 
@@ -231,7 +238,7 @@ function Page({
         description: "Successfully submitted the quiz",
         className: "text-start capitalize bg-green-500 text-white",
       });
-      setQuizId(selectedChapterID ?? 0);
+      setQuizId(selectedChapter.id ?? 0);
     } catch (error) {
       console.error("Error creating course:", error);
       toast({
@@ -260,9 +267,11 @@ function Page({
             <li
               key={index}
               className={`flex justify-between cursor-pointer capitalize py-2 px-4 hover:bg-gray-300 ${
-                selectedChapterID === item.id ? "font-bold" : ""
+                selectedChapter.index === item.index ? "font-bold" : ""
               }`}
-              onClick={() => setSelectedChapterID(item.id)}
+              onClick={() =>
+                setSelectedChapter({ index: item.index, id: item.id })
+              }
             >
               {`${item.label}: ${item.name ? item.name : ""}`}{" "}
               {item.completed && (
@@ -280,9 +289,9 @@ function Page({
       </div>
       {/* Right side content */}
       <div className="w-3/4 p-4 flex items-end justify-start text">
-        {selectedChapterID &&
+        {selectedChapter.index &&
           moduleData
-            .filter((item) => item.id === selectedChapterID)
+            .filter((item) => item.index === selectedChapter.index)
             .map((item, index) => (
               <div key={index}>
                 {/* Render different types of content based on label */}
@@ -292,7 +301,7 @@ function Page({
                     <Button
                       disabled={item?.completed}
                       onClick={() => {
-                        handleArticleComplete(selectedChapterID);
+                        handleArticleComplete();
                       }}
                     >
                       Complete

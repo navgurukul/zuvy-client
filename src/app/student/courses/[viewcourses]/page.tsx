@@ -17,6 +17,8 @@ interface CourseProgress {
   info: {
     progress: number;
     bootcamp_name: string;
+    instructor_name: string;
+    instructor_profile_picture: string;
   };
   code: number;
 }
@@ -54,7 +56,6 @@ function Page({
         );
         response.data.map((module: any) => {
           setModulesProgress(response.data);
-          console.log("modulesProgress", response.data);
         });
       } catch (error) {
         console.error("Error getting modules progress", error);
@@ -70,7 +71,6 @@ function Page({
           `/bootcamp/${userID}/progress?bootcamp_id=${params.viewcourses}`
         );
         setCourseProgress(response.data);
-        console.log("course progress", response.data);
       } catch (error) {
         console.error("Error getting course progress:", error);
       }
@@ -247,21 +247,23 @@ function Page({
           <div className="bg-gradient-to-bl p-3 from-blue-50 to-violet-50 flex rounded-xl  ">
             <div className="flex flex-col items-center justify-center p-4 gap-3">
               <Image
-                src="https://images.unsplash.com/photo-1580894732444-8ecded7900cd?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                src={courseProgress?.info?.instructor_profile_picture ?? ""}
                 className="w-10 h-10 rounded-full "
-                alt="mentor profile pic"
+                alt="instructor profile pic"
                 width={10}
                 height={10}
               />
-              <span className="text-lg font-semibold">Shilpa Mishra</span>
+              <span className="text-lg font-semibold">
+                {courseProgress?.info?.instructor_name}
+              </span>
               <p>
                 Ask doubts or general questions about the programs anytime and
                 get answers within a few hours
               </p>
-              <Button className="bg-gray-300 px-4 py-2 rounded-lg mt-2 w-[200px] ">
+              <Button className="px-4 py-2 rounded-lg mt-2 w-[200px] ">
                 Start New Chat
               </Button>
-              <Button className=" px-4 py-2 rounded-lg mt-2 w-[200px] ">
+              <Button disabled className="px-4 py-2 rounded-lg mt-2 w-[200px] ">
                 View Past Chat
               </Button>
             </div>
