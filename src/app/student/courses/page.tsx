@@ -1,10 +1,9 @@
 "use client";
-import MaxWidthWrapper from "@/components/MaxWidthWrapper";
-import { ArrowRight, ChevronRight, Copy } from "lucide-react";
+
+import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { Video } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
 import Loader from "./_components/Loader";
 import Image from "next/image";
 import api from "@/utils/axios.config";

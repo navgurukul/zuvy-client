@@ -12,6 +12,7 @@ type CounterStore = {
 
 export const useStudentData = create<CounterStore>((set) => ({
   studentData: null,
+  // Custom function to set bootcampId
 }));
 
 export const initializeStudentData = () => {
@@ -24,7 +25,7 @@ export const initializeStudentData = () => {
 };
 
 export const useLazyLoadedStudentData = () => {
-  const studentData = useStudentData((state) => state.studentData);
+  const { studentData } = useStudentData();
 
   useEffect(() => {
     const initializeData = async () => {
@@ -35,5 +36,5 @@ export const useLazyLoadedStudentData = () => {
     initializeData();
   }, []); // Empty dependency array ensures useEffect runs only once when the component mounts
 
-  return useStudentData();
+  return { studentData };
 };

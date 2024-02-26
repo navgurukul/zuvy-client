@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { select } from "@nextui-org/react";
 
 // Define the type for module data
-// index is a property coming from api and not any index of an array/object
+// index is a property coming from and not any index of an array/object
 interface ModuleDataItem {
   id: number;
   index: number;
@@ -133,6 +133,11 @@ function Page({
         className: "text-start capitalize bg-green-500 text-white",
       });
       setAssignmentId(selectedChapter.id ?? 0);
+
+      // get the index of the current chapter:
+      const currentIndex = moduleData.findIndex(
+        (item) => item.index === selectedChapter.index
+      );
 
       // Add any additional logic here after successful form submission
     } catch (error: any) {

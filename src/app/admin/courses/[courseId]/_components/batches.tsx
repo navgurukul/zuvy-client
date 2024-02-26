@@ -59,9 +59,7 @@ const Batches = ({
     const fetchCourseDetails = async () => {
       try {
         const response = await api.get(`/bootcamp/${courseID}`);
-        console.log("HI");
         const data = response.data;
-        console.log(data);
       } catch (error) {
         console.error("Error fetching course details:", error);
       }
@@ -125,9 +123,7 @@ const Batches = ({
           const fetchCourseDetails = async () => {
             try {
               const response = await api.get(`/bootcamp/${courseID}`);
-              console.log("HI");
               const data = response.data;
-              console.log(data);
               setUnassignedStudents(data.bootcamp.unassigned_students);
             } catch (error) {
               console.error("Error fetching course details:", error);

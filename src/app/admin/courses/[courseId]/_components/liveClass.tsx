@@ -86,7 +86,7 @@ function LiveClass({ courseId }: { courseId: string }) {
 
   return (
     <div>
-      <div className="flex text-start gap-6 my-6 max-w-[800px]">
+      <div className='flex text-start gap-6 my-6 max-w-[800px]'>
         <Combobox
           data={bootcampData}
           title={"Select Batch"}
@@ -101,13 +101,13 @@ function LiveClass({ courseId }: { courseId: string }) {
           }}
         />
       </div>
-      <div className="flex justify-between">
-        <div className="w-[400px] pr-3">
+      <div className='flex justify-between'>
+        <div className='w-[400px] pr-3'>
           <Input
-            type="text"
-            placeholder="Search Classes"
+            type='text'
+            placeholder='Search Classes'
             // className={styles.searchInput}
-            className="max-w-[500px]"
+            className='max-w-[500px]'
             disabled
             //  value={searchQuery}
             //  onChange={handleSearchChange}
@@ -115,7 +115,7 @@ function LiveClass({ courseId }: { courseId: string }) {
         </div>
         <Dialog>
           <DialogTrigger asChild>
-            <Button className="text-white bg-secondary">
+            <Button className='text-white bg-secondary'>
               <p>Create New Class</p>
             </Button>
           </DialogTrigger>
@@ -123,31 +123,31 @@ function LiveClass({ courseId }: { courseId: string }) {
           <NewClassDialog courseId={courseId} />
         </Dialog>
       </div>
-      <div className="flex justify-start gap-6 my-6">
+      <div className='flex justify-start gap-6 my-6'>
         <Badge
           variant={classType === "active" ? "default" : "outline"}
           onClick={() => handleClassType("active")}
-          className="rounded-md"
+          className='rounded-md'
         >
           Active Classes
         </Badge>
         <Badge
           variant={classType === "upcoming" ? "default" : "outline"}
           onClick={() => handleClassType("upcoming")}
-          className="rounded-md"
+          className='rounded-md'
         >
           Upcoming Classes
         </Badge>
         <Badge
           variant={classType === "complete" ? "default" : "outline"}
           onClick={() => handleClassType("complete")}
-          className="rounded-md"
+          className='rounded-md'
         >
           Completed Classes
         </Badge>
       </div>
       {allClasses && allClasses.length > 0 ? (
-        <div className="grid grid-cols-3 gap-6">
+        <div className='grid grid-cols-3 gap-6'>
           {allClasses.map((classData: any, index: any) => (
             <ClassCard
               classData={classData}
@@ -157,7 +157,7 @@ function LiveClass({ courseId }: { courseId: string }) {
           ))}
         </div>
       ) : (
-        <p className="text-center mt-6">No Classes Available</p>
+        <p className='text-center mt-6'>No Classes Available</p>
       )}
     </div>
   );
