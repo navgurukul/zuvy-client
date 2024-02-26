@@ -38,9 +38,9 @@ const Navbar = () => {
         </div>
         <div className="mr-2 px-2">
           <div className="sm:items-center space-x-4 hidden md:flex">
-            <Search />
-            <Bell />
-            <Link href="/profile">
+            {/* <Search /> */}
+            {/* <Bell /> */}
+            <Link href="/student/profile">
               <Avatar>
                 <AvatarImage src={studentData?.profile_picture} />
                 <AvatarFallback>NAME</AvatarFallback>
