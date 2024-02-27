@@ -40,7 +40,7 @@ const Navbar = () => {
           <div className="sm:items-center space-x-4 hidden md:flex">
             {/* <Search /> */}
             {/* <Bell /> */}
-            <Link href="/student/profile">
+            <Link href="/profile">
               <Avatar>
                 <AvatarImage src={studentData?.profile_picture} />
                 <AvatarFallback>NAME</AvatarFallback>
