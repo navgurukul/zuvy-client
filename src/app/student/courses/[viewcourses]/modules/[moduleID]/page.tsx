@@ -9,10 +9,13 @@ import { useLazyLoadedStudentData } from "@/store/store";
 import { ArrowBigLeft, CheckCircle2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
+import { select } from "@nextui-org/react";
 
 // Define the type for module data
+// index is a property coming from and not any index of an array/object
 interface ModuleDataItem {
   id: number;
+  index: number;
   label: string;
   name?: string;
   content?: string;
@@ -64,11 +67,19 @@ function Page({
   const router = useRouter();
   const moduleID = params.moduleID;
   const [moduleData, setModuleData] = useState<ModuleDataItem[]>([]);
-  const [selectedModuleID, setSelectedModuleID] = useState<number | null>(null);
+  const [selectedChapter, setSelectedChapter] = useState<{
+    index: number | null;
+    id: number | null;
+  }>({
+    index: null,
+    id: null,
+  });
+
   const [assignmentLink, setAssignmentLink] = useState("");
   const [assignmentId, setAssignmentId] = useState(0);
   const [articleId, setArticleId] = useState(0);
   const [quizId, setQuizId] = useState(0);
+
   const [selectedOptions, setSelectedOptions] = useState<{
     [key: number]: number;
   }>({});
@@ -81,38 +92,22 @@ function Page({
         );
         const data: ModuleDataItem[] = response.data;
 
-        const assignmentItem = data.find(
-          (item: ModuleDataItem) => item.label === "assignment"
-        );
-        if (assignmentItem) {
-          setAssignmentId(assignmentItem.id);
-        }
-        const articleItem = data.find(
-          (item: ModuleDataItem) => item.label === "article"
-        );
-        if (articleItem) {
-          setArticleId(articleItem.id);
-        }
-        const quizItem = data.find(
-          (item: ModuleDataItem) => item.label === "quiz"
-        );
-        if (quizItem) {
-          setQuizId(quizItem.id);
-        }
+        const sortedData = data.sort((a, b) => {
+          return a.index - b.index;
+        });
 
-        setModuleData(data);
-        console.log(data);
+        setModuleData(sortedData);
 
-        // Set selectedModuleID to the ID of the first module
+        // Set selectedChapterID to the ID of the first module
         if (data.length > 0) {
-          setSelectedModuleID(data[0].id);
+          setSelectedChapter({ index: data[0].index, id: data[0].id });
         }
       } catch (error) {
         console.error("Error fetching module data:", error);
       }
     };
     if (userID) getModuleData();
-  }, [moduleID, userID]);
+  }, [moduleID, userID, articleId, assignmentId, quizId]);
 
   const handleAssignmentLinkChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -126,18 +121,23 @@ function Page({
         `/tracking/assignment?bootcampId=${params.viewcourses}`,
         {
           userId: userID,
-          assignmentId: assignmentId,
+          assignmentId: selectedChapter.id,
           moduleId: parseInt(moduleID),
           projectUrl: assignmentLink,
         }
       );
       const data = response.data;
-      console.log(response);
       toast({
         title: "Successfully Submitted Assignment",
         description: response.data.projectUrl,
         className: "text-start capitalize bg-green-500 text-white",
       });
+      setAssignmentId(selectedChapter.id ?? 0);
+
+      // get the index of the current chapter:
+      const currentIndex = moduleData.findIndex(
+        (item) => item.index === selectedChapter.index
+      );
 
       // Add any additional logic here after successful form submission
     } catch (error: any) {
@@ -149,7 +149,7 @@ function Page({
       });
     }
 
-    return false; // Prevent default form submission
+    return false;
   };
 
   const handleArticleComplete = async () => {
@@ -158,17 +158,18 @@ function Page({
         `/tracking/article?bootcampId=${params.viewcourses}`,
         {
           userId: userID,
-          articleId: articleId,
+          articleId: selectedChapter.id,
           moduleId: moduleID,
         }
       );
       const data = response.data;
-      console.log(response);
+
       toast({
         title: "Completed Article Successfully",
         description: "You have completed the article successfully",
         className: "text-start capitalize bg-green-500 text-white",
       });
+      setArticleId(selectedChapter.id ?? 0);
     } catch (error: any) {
       console.error("Error Completing Article:", error);
       toast({
@@ -181,12 +182,36 @@ function Page({
 
   const handleQuizSubmit = async () => {
     try {
+      const moduleItem = moduleData.find(
+        (item) => item.index === selectedChapter.index
+      );
+
+      if (!moduleItem) {
+        console.error("Module not found");
+        return;
+      }
+
+      const totalQuestions = moduleItem.questions
+        ? moduleItem.questions.length
+        : 0;
+      const totalSelectedOptions = Object.keys(selectedOptions).length;
+
+      if (totalQuestions !== totalSelectedOptions) {
+        // If the number of questions is not equal to the number of selected options,
+        // show an error indicating that all questions must be answered.
+        toast({
+          title: "Error",
+          description:
+            "Please answer all questions before submitting the quiz.",
+          className: "text-start capitalize bg-red-500 text-white",
+        });
+        return;
+      }
+
+      // All questions have been answered, proceed with submission
       const selectedOptionsArray = Object.entries(selectedOptions).map(
         ([questionId, selectedOptionNumber]) => {
-          const moduleItem = moduleData.find(
-            (item) => item.id === selectedModuleID
-          );
-          const question = (moduleItem?.questions ?? []).find(
+          const question = moduleItem?.questions?.find(
             (q) => q.id === parseInt(questionId)
           );
 
@@ -203,14 +228,12 @@ function Page({
         }
       );
 
-      console.log(selectedOptionsArray);
-
       const response = await api.post("/tracking/quiz", {
         userId: userID,
         bootcampId: 9,
         moduleId: moduleID,
-        quizId: quizId,
-        quiz: selectedOptionsArray ?? [], // Ensure selectedOptionsArray is not undefined
+        quizId: selectedChapter.id,
+        quiz: selectedOptionsArray ?? [],
       });
 
       const data = response.data;
@@ -220,11 +243,12 @@ function Page({
         description: "Successfully submitted the quiz",
         className: "text-start capitalize bg-green-500 text-white",
       });
+      setQuizId(selectedChapter.id ?? 0);
     } catch (error) {
       console.error("Error creating course:", error);
       toast({
         title: "Error",
-        description: "Cannot submit the quiz again",
+        description: "Cannot submit the quiz",
         className: "text-start capitalize bg-red-500 text-white",
       });
     }
@@ -235,7 +259,10 @@ function Page({
       {/* Sidebar with labels */}
 
       <div className="w-1/4 border-r-2 text-left p-4">
-        <button onClick={() => router.back()}>
+        {/* Go back Arrow button below */}
+        <button
+          onClick={() => router.push(`/student/courses/${params.viewcourses}`)}
+        >
           <ArrowBigLeft className="text-[#518672]" />
         </button>
 
@@ -244,14 +271,16 @@ function Page({
           {moduleData.map((item, index) => (
             <li
               key={index}
-              className={`flex cursor-pointer capitalize py-2 px-4 hover:bg-gray-300 ${
-                selectedModuleID === item.id ? "font-bold" : ""
+              className={`flex justify-between cursor-pointer capitalize py-2 px-4 hover:bg-gray-300 ${
+                selectedChapter.index === item.index ? "font-bold" : ""
               }`}
-              onClick={() => setSelectedModuleID(item.id)}
+              onClick={() =>
+                setSelectedChapter({ index: item.index, id: item.id })
+              }
             >
               {`${item.label}: ${item.name ? item.name : ""}`}{" "}
               {item.completed && (
-                <CheckCircle2 size={18} className="text-[#518672] ml-5 mt-1" />
+                <CheckCircle2 size={18} className="text-[#518672] ml-1 mt-1" />
               )}
               {/* Show number of questions for Quiz and MCQ */}
               {["quiz"].includes(item.label) && (
@@ -265,9 +294,9 @@ function Page({
       </div>
       {/* Right side content */}
       <div className="w-3/4 p-4 flex items-end justify-start text">
-        {selectedModuleID &&
+        {selectedChapter.index &&
           moduleData
-            .filter((item) => item.id === selectedModuleID)
+            .filter((item) => item.index === selectedChapter.index)
             .map((item, index) => (
               <div key={index}>
                 {/* Render different types of content based on label */}
@@ -276,7 +305,9 @@ function Page({
                     <ContentComponent content={item.content} />
                     <Button
                       disabled={item?.completed}
-                      onClick={handleArticleComplete}
+                      onClick={() => {
+                        handleArticleComplete();
+                      }}
                     >
                       Complete
                     </Button>
@@ -294,6 +325,7 @@ function Page({
                         placeholder="Assignment Link"
                         value={assignmentLink}
                         onChange={handleAssignmentLinkChange}
+                        disabled={item?.completed}
                         className="border border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md px-4 py-2 outline-none"
                       />
                       {/* Submit button */}

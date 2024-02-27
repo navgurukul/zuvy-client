@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ChevronDown, Plus } from "lucide-react";
+import { ChevronDown, GraduationCap, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,7 @@ interface Course {
   date: string;
   coverImage: string; // URL for the course image
   id: string;
+  students_in_bootcamp: number;
 }
 
 const Courses: React.FC = () => {
@@ -122,13 +123,13 @@ const Courses: React.FC = () => {
               </p>
             ))}
 
-            <span> | </span>
+            {/* <span> | </span> */}
           </div>
-          <div>
+          {/* <div>
             <p className="flex items-center bg-muted-foreground text-white py-1 px-2 rounded-md">
               All Partners <ChevronDown />
             </p>
-          </div>
+          </div> */}
         </div>
         <div className="my-5 flex justify-center items-center">
           {courses.length === 0 ? (
@@ -174,11 +175,12 @@ const Courses: React.FC = () => {
                     <p className="capitalize mb-2 font-semibold">
                       {course.name}
                     </p>
-                    <div className="">
-                      <span className={styles.learnersCount}>
-                        {course.learnersCount} Learners
+                    <div className="flex gap-2 items-center">
+                      <GraduationCap width={20} />
+                      <span className="text-sm font-semibold">
+                        {course.students_in_bootcamp} Learners
                       </span>
-                      <span>{course.date}</span>
+                      {/* <span>{course.date}</span> */}
                     </div>
                   </div>
                 </Card>

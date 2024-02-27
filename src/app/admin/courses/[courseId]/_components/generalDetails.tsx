@@ -1,21 +1,23 @@
 "use client";
 
+import { useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import axios from "axios";
 
 import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import {
@@ -23,19 +25,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
+import OptimizedImageWithFallback from "@/components/ImageWithFallback";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
-
-import styles from "../../_components/cources.module.css";
-import { Label } from "@/components/ui/label";
 import { LANGUAGES } from "@/utils/constant";
 import api from "@/utils/axios.config";
-import { useRef } from "react";
-import axios from "axios";
-import OptimizedImageWithFallback from "@/components/ImageWithFallback";
 
 const FormSchema = z.object({
   name: z.string(),
@@ -84,11 +78,11 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
       startTime: new Date(courseData.startTime),
     },
     values: {
-      name: courseData.name,
-      bootcampTopic: courseData.bootcampTopic,
-      coverImage: courseData.coverImage,
-      duration: courseData.duration,
-      language: courseData.language,
+      name: courseData.name ?? "",
+      bootcampTopic: courseData.bootcampTopic ?? "",
+      coverImage: courseData.coverImage ?? "",
+      duration: courseData.duration ?? "",
+      language: courseData.language ?? "",
       // capEnrollment: courseData.capEnrollment,
       startTime: new Date(courseData.startTime),
     },
@@ -281,9 +275,6 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
                     />
                   </PopoverContent>
                 </Popover>
-                {/* <FormDescription>
-                  Your date of birth is used to calculate your age.
-                </FormDescription> */}
                 <FormMessage />
               </FormItem>
             )}
