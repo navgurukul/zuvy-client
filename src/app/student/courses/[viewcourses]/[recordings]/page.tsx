@@ -6,9 +6,17 @@ import Link from "next/link";
 import React,{useState,useEffect} from "react";
 import api from "@/utils/axios.config";
 import ClassCard from '@/app/admin/courses/[courseId]/_components/classCard'
-type Props = {};
+type PageProps = {
+  params: {
+    viewcourses: string;
+  };
+};
 
-function Page({}: Props) {
+function Page({
+  params,
+}: {
+  params: { viewcourses: string; moduleID: string };
+}) {
   const [upcomingClasses, setUpcomingClasses] = useState([]);
   const [ongoingClasses, setOngoingClasses] = useState([]);
   const [completedClasses, setCompletedClasses] = useState([]);
@@ -16,17 +24,17 @@ function Page({}: Props) {
     { crumb: "My Courses", href: "/student/courses" },
     {
       crumb: "AFE + Navgurukul Coding Bootcamp",
-      href: "/student/courses/:course-name",
+      href: `/student/courses/${params.viewcourses}`,
     },
     {
       crumb: " Classes and Recordings",
-      href: "/student/courses/:course-name/recordings",
+      href: `/student/courses/${params.viewcourses}/recordings`,
     },
   ];
   useEffect(() => {
     const userIdLocal = JSON.parse(localStorage.getItem("AUTH") || "");
 
-    api.get(`/bootcamp/studentClasses/1`, {
+    api.get(`/bootcamp/studentClasses/${params.viewcourses}`, {
         params: {
             userId: userIdLocal.id
         }
