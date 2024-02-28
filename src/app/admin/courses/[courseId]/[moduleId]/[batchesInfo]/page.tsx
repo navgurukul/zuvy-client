@@ -12,6 +12,19 @@ import { Pencil } from "lucide-react";
 import { CalendarDays } from "lucide-react";
 import { Hand } from "lucide-react";
 import Breadcrumb from "@/components/ui/breadcrumb";
+import { useRouter } from "next/navigation";
+import { toast } from "@/components/ui/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 type Props = {};
 export type StudentData = {
@@ -25,10 +38,31 @@ export type StudentData = {
   profilePicture: string;
   id: string;
 };
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 const BatchesInfo = (props: Props) => {
+  const router = useRouter();
   const { studentsInfo, setStudentsInfo } = useStudentData();
-
   const pathname = usePathname();
   const matches = pathname.match(/\/(\d+)\/(\d+)\/(\d+)/);
   const [studentsData, setStudentData] = useState<StudentData[]>([]);
@@ -70,7 +104,6 @@ const BatchesInfo = (props: Props) => {
           const response = await api.get(
             `/bootcamp/students/${bootcampId}?batch_id=${batchId}`
           );
-          console.log(response.data);
           setStudentData(response.data.studentsEmails);
           setStudentsInfo(response.data.studentsEmails);
         }
@@ -78,8 +111,91 @@ const BatchesInfo = (props: Props) => {
     };
     fetchBatchesInfo();
   }, [matches, setStudentsInfo]);
-  console.log(studentsData);
 
+  const batchDeleteHandler = async () => {
+    if (matches) {
+      const [firstValue, bootcampId, batchId] = matches;
+      try {
+        await api.delete(`/batch/${batchId}`).then(() => {
+          toast({
+            title: "Batch Deleted Succesfully",
+            className: "text-start capitalize",
+          });
+        });
+        router.push(`/admin/courses/${bootcampId}`);
+      } catch (error) {
+        toast({
+          title: "Batch not Deleted ",
+          className: "text-start capitalize",
+        });
+      }
+    }
+  };
+
+  const formSchema = z.object({
+    name: z.string().min(2, {
+      message: "Batch name must be at least 2 characters.",
+    }),
+    instructorId: z
+      .string()
+      .refine((instructorId) => !isNaN(parseInt(instructorId))),
+    // bootcampId: z.string().refine((bootcampId) => !isNaN(parseInt(bootcampId))),
+    capEnrollment: z
+      .string()
+      .refine((capEnrollment) => !isNaN(parseInt(capEnrollment)), {
+        message: "A cap enrollment is required",
+      }),
+  });
+
+  const { handleSubmit, register } = useForm({
+    resolver: zodResolver(formSchema),
+  });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      instructorId: "",
+      capEnrollment: "",
+    },
+  });
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const convertedData = {
+      ...values,
+      instructorId: +values.instructorId,
+      capEnrollment: +values.capEnrollment,
+    };
+    try {
+      if (matches) {
+        const [firstValue, bootcampId, batchId] = matches;
+
+        const response = await api
+          .patch(`/batch/${batchId}`, convertedData)
+          .then((res) => {
+            toast({
+              title: "Batches Updated Succesfully",
+            });
+            const fetchBatchesInfo = async () => {
+              try {
+                if (matches) {
+                  const [firstValue, bootcampId, batchId] = matches;
+                  const response = await api.get(
+                    `/bootcamp/students/${bootcampId}?batch_id=${batchId}`
+                  );
+                  setStudentData(response.data.studentsEmails);
+                  setStudentsInfo(response.data.studentsEmails);
+                }
+              } catch (error) {}
+            };
+            fetchBatchesInfo();
+          });
+      }
+    } catch (error) {
+      toast({
+        title: "Batches Did'nt Succesfully",
+      });
+    }
+  };
   return (
     <>
       <Breadcrumb crumbs={crumbs} />
@@ -87,34 +203,126 @@ const BatchesInfo = (props: Props) => {
         <div className='flex justify-between'>
           <div className='w-1/2 flex flex-col items-start '>
             <div className=''>
-              <h1 className=' text-start text-[30px] font-semibold'>
+              <h1 className='capitalize text-start text-[30px] font-semibold'>
                 {studentsData.length > 0 ? studentsData[0].batchName : ""}
               </h1>
-              <div className='flex w-full gap-3 items-center justify-center'>
-                <p className='gap-x-3 flex text-sm font-normal'>
-                  <CalendarDays />
-                  {formattedDate}
-                </p>
-                <p className='gap-x-3 flex text-sm font-normal'>
-                  <Hand />
-                  Prajakta Kishori
-                </p>
-              </div>
             </div>
             <Input
               type='search'
               placeholder='Student Name, Email'
               className='w-1/2 my-12'
+              disabled
             />
           </div>
           <div className='flex m-4'>
-            <div className='flex mx-4 text-sm'>
-              <Pencil size={20} className='text-gray-500 mx-4' />
-              <p>Edit Details</p>
+            <div className='flex items-center mx-4 text-sm'>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className='flex '>
+                    <Pencil size={18} className='mx-4' />
+                    Edit Batch
+                  </button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Update Batch</DialogTitle>
+
+                    <Form {...form}>
+                      <form
+                        onSubmit={form.handleSubmit(onSubmit)}
+                        className='space-y-8'
+                      >
+                        <FormField
+                          control={form.control}
+                          name='name'
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Batch Name</FormLabel>
+                              <FormControl>
+                                <Input placeholder='Batch Name' {...field} />
+                              </FormControl>
+
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name='instructorId'
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Instructor Id</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder='20230'
+                                  type='name'
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name='capEnrollment'
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Cap Enrollment</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder='Cap Enrollment'
+                                  type='number'
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormDescription>
+                          This form will Update the batch info
+                        </FormDescription>
+                        <div className='w-full flex flex-col items-end gap-y-5 '>
+                          <DialogClose asChild>
+                            <Button className='w-1/2' type='submit'>
+                              Update batch
+                            </Button>
+                          </DialogClose>
+                        </div>
+                      </form>
+                    </Form>
+                  </DialogHeader>
+                </DialogContent>
+              </Dialog>
             </div>
-            <div className='flex text-sm'>
-              <Trash2 size={20} className='text-red-500 mx-4' />
-              <p className='text-red-500'>Delete</p>
+            <div className='flex items-center text-sm'>
+              <AlertDialog>
+                <AlertDialogTrigger className='flex'>
+                  <Trash2 size={20} className='text-red-500 mx-4' />
+                  <p className='text-red-500'>Delete</p>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Are you absolutely sure?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete
+                      this batch
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={batchDeleteHandler}
+                      variant='destructive'
+                    >
+                      Continue
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
         </div>

@@ -180,7 +180,10 @@ export const columns: ColumnDef<StudentData>[] = [
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={deleteStudentHandler}>
+              <AlertDialogAction
+                className='bg-red-500'
+                onClick={deleteStudentHandler}
+              >
                 Continue
               </AlertDialogAction>
             </AlertDialogFooter>

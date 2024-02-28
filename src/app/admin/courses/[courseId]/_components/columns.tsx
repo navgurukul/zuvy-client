@@ -281,12 +281,15 @@ export const columns: ColumnDef<StudentData>[] = [
               <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
               <AlertDialogDescription>
                 This action cannot be undone. This will permanently delete the
-                student from this batch
+                student from this bootcamp
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={deleteStudentHandler}>
+              <AlertDialogAction
+                className='bg-red-600'
+                onClick={deleteStudentHandler}
+              >
                 Continue
               </AlertDialogAction>
             </AlertDialogFooter>

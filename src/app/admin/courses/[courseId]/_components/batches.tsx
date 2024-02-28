@@ -34,6 +34,7 @@ import { toast } from "@/components/ui/use-toast";
 import { Card as card, CardDescription, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { useStudentData } from "@/store/store";
+import { fetchStudentData } from "./students";
 const Batches = ({
   courseID,
   unassigned_students,
@@ -67,7 +68,7 @@ const Batches = ({
     };
 
     fetchBatches();
-  }, [courseID]);
+  }, [batches, courseID]);
   useEffect(() => {
     const fetchCourseDetails = async () => {
       try {
