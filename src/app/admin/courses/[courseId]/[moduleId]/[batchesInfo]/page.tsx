@@ -316,7 +316,7 @@ const BatchesInfo = (props: Props) => {
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={batchDeleteHandler}
-                      variant='destructive'
+                      className='bg-red-500'
                     >
                       Continue
                     </AlertDialogAction>
