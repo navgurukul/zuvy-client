@@ -38,8 +38,8 @@ const Navbar = () => {
         </div>
         <div className="mr-2 px-2">
           <div className="sm:items-center space-x-4 hidden md:flex">
-            <Search />
-            <Bell />
+            {/* <Search /> */}
+            {/* <Bell /> */}
             <Link href="/profile">
               <Avatar>
                 <AvatarImage src={studentData?.profile_picture} />

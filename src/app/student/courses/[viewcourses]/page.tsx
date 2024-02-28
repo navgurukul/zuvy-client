@@ -12,6 +12,17 @@ import Image from "next/image";
 import api from "@/utils/axios.config";
 import { Button } from "@/components/ui/button";
 
+interface CourseProgress {
+  status: string;
+  info: {
+    progress: number;
+    bootcamp_name: string;
+    instructor_name: string;
+    instructor_profile_picture: string;
+  };
+  code: number;
+}
+
 type PageProps = {
   params: {
     viewcourses: string;
@@ -24,30 +35,18 @@ function Page({
   params: { viewcourses: string; moduleID: string };
 }) {
   const { studentData } = useLazyLoadedStudentData();
-  const [courseModules, setCourseModules] = useState([]);
   const userID = studentData?.id && studentData?.id;
   const [modulesProgress, setModulesProgress] = useState([]);
+  const [courseProgress, setCourseProgress] = useState<CourseProgress | null>(
+    null
+  );
   const crumbs = [
     { crumb: "My Courses", href: "/student/courses" },
     {
-      crumb: "AFE + Navgurukul Coding Bootcamp",
-      href: "/student/courses/:course-name",
+      crumb: courseProgress?.info?.bootcamp_name || "Course",
+      href: `/student/courses/${params.viewcourses}`,
     },
   ];
-
-  useEffect(() => {
-    const getCourseModules = async () => {
-      try {
-        const response = await api.get(
-          `/Content/modules/${params.viewcourses}`
-        );
-        setCourseModules(response.data);
-      } catch (error) {
-        console.error("Error deleting:", error);
-      }
-    };
-    getCourseModules();
-  }, [params.viewcourses]);
 
   useEffect(() => {
     const getModulesProgress = async () => {
@@ -59,11 +58,25 @@ function Page({
           setModulesProgress(response.data);
         });
       } catch (error) {
-        console.error("Error deleting:", error);
+        console.error("Error getting modules progress", error);
       }
     };
     if (userID) getModulesProgress();
   }, [userID, params.viewcourses]);
+
+  useEffect(() => {
+    const getCourseProgress = async () => {
+      try {
+        const response = await api.get(
+          `/bootcamp/${userID}/progress?bootcamp_id=${params.viewcourses}`
+        );
+        setCourseProgress(response.data);
+      } catch (error) {
+        console.error("Error getting course progress:", error);
+      }
+    };
+    if (userID) getCourseProgress();
+  }, [userID]);
 
   return (
     <MaxWidthWrapper>
@@ -79,9 +92,9 @@ function Page({
                 </div>
                 <div className="flex items-center justify-center flex-col  ">
                   <div className="">
-                    <h1> AFE + Navgurukul Coding Bootcamp</h1>
+                    <h1> {courseProgress?.info?.bootcamp_name}</h1>
                   </div>
-                  <Loader />
+                  <Loader progress={courseProgress?.info?.progress} />
                 </div>
               </div>
             </div>
@@ -167,13 +180,27 @@ function Page({
               <h1 className="text-lg p-1 font-semibold">Course Modules</h1>
             </div>
 
-            {courseModules.length > 0 ? (
-              courseModules.map(
-                ({ name, id }: { name: string; id: number }) => (
+            {modulesProgress.length > 0 ? (
+              modulesProgress.map(
+                ({
+                  name,
+                  id,
+                  lock,
+                  progress,
+                }: {
+                  name: string;
+                  id: number;
+                  lock: boolean;
+                  progress: number;
+                }) => (
                   <Link
                     key={id}
                     href={`/student/courses/${params.viewcourses}/modules/${id}`}
-                    className="bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl  "
+                    className={
+                      lock
+                        ? "bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl "
+                        : "bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl pointer-events-none opacity-50"
+                    }
                   >
                     <div className="w-full flex items-center justify-between gap-y-2  ">
                       <div className="flex gap-y-2 flex-col p-2  ">
@@ -189,22 +216,20 @@ function Page({
                         </div>
                       </div>
 
-                      {modulesProgress.map((module: any) => {
-                        if (module.id == id) {
-                          return (
-                            <div key={module.id} className="">
-                              <CircularProgress
-                                size="md"
-                                value={module.progress}
-                                color="warning"
-                                showValueLabel={true}
-                              />
-                            </div>
-                          );
-                        } else {
-                          return null;
-                        }
-                      })}
+                      {lock ? (
+                        <div key={id} className="">
+                          <CircularProgress
+                            size="md"
+                            value={progress}
+                            color="warning"
+                            showValueLabel={true}
+                          />
+                        </div>
+                      ) : (
+                        <>
+                          <Lock opacity={50} width={35} height={20} />
+                        </>
+                      )}
                     </div>
                   </Link>
                 )
@@ -222,21 +247,23 @@ function Page({
           <div className="bg-gradient-to-bl p-3 from-blue-50 to-violet-50 flex rounded-xl  ">
             <div className="flex flex-col items-center justify-center p-4 gap-3">
               <Image
-                src="https://images.unsplash.com/photo-1580894732444-8ecded7900cd?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                src={courseProgress?.info?.instructor_profile_picture ?? ""}
                 className="w-10 h-10 rounded-full "
-                alt="mentor profile pic"
+                alt="instructor profile pic"
                 width={10}
                 height={10}
               />
-              <span className="text-lg font-semibold">Shilpa Mishra</span>
+              <span className="text-lg font-semibold">
+                {courseProgress?.info?.instructor_name}
+              </span>
               <p>
                 Ask doubts or general questions about the programs anytime and
                 get answers within a few hours
               </p>
-              <Button className="bg-gray-300 px-4 py-2 rounded-lg mt-2 w-[200px] ">
+              <Button className="px-4 py-2 rounded-lg mt-2 w-[200px] ">
                 Start New Chat
               </Button>
-              <Button className=" px-4 py-2 rounded-lg mt-2 w-[200px] ">
+              <Button disabled className="px-4 py-2 rounded-lg mt-2 w-[200px] ">
                 View Past Chat
               </Button>
             </div>

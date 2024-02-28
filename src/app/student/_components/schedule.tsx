@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 // import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -14,10 +14,44 @@ import {
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import api from "@/utils/axios.config";
+import { useLazyLoadedStudentData } from "@/store/store";
+import Link from "next/link";
+
+interface ResumeCourse {
+  bootcamp_name?: string;
+  module_name?: string;
+  bootcampId?: number;
+  moduleId?: number;
+}
 
 type ScheduleProps = React.ComponentProps<typeof Card>;
 
 function Schedule({ className, ...props }: ScheduleProps) {
+  const [courseStarted, setCourseStarted] = useState<boolean>(true);
+  const { studentData } = useLazyLoadedStudentData();
+  const userID = studentData?.id && studentData?.id;
+  const [resumeCourse, setResumeCourse] = useState<ResumeCourse>({});
+
+  useEffect(() => {
+    const getResumeCourse = async () => {
+      try {
+        const response = await api.get(`/tracking/latest/learning/${userID}`);
+        setResumeCourse(response.data);
+        // If we get res, then course started, hence courseStarted: true;
+        setCourseStarted(true);
+      } catch (error) {
+        console.error("Error getting resume course:", error);
+        if (
+          (error as any)?.response?.data?.message ===
+          `Cannot read properties of undefined (reading 'moduleId')`
+        ) {
+          setCourseStarted(false);
+        }
+      }
+    };
+    if (userID) getResumeCourse();
+  }, [userID]);
   return (
     <>
       <div className="">
@@ -67,15 +101,18 @@ function Schedule({ className, ...props }: ScheduleProps) {
                 <BookOpenText className="self-start max-sm:hidden" />
                 <div className="flex-1 ml-2 space-y-1">
                   <p className="text-sm font-medium leading-none">
-                    React: State
+                    {resumeCourse?.bootcamp_name}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Create a basic counter
+                    {resumeCourse.module_name}
                   </p>
                 </div>
               </div>
-
-              <Button>Continue solving</Button>
+              <Link
+                href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`}
+              >
+                <Button>Continue</Button>
+              </Link>
             </div>
           </CardContent>
         </Card>

@@ -15,7 +15,7 @@ function Heading() {
         Welcome back,{" "}
         <span className="text-muted-foreground"> {newUserName}!</span>
       </h1>
-      <div className="text-sm font-medium tracking-tight sm:text-end max-sm:mt-2 text-start">
+      {/* <div className="text-sm font-medium tracking-tight sm:text-end max-sm:mt-2 text-start">
         <p className="m-0">
           Batch: <span className="text-muted-foreground">Alpha</span>
         </p>
@@ -26,7 +26,7 @@ function Heading() {
             Amazon Coding Bootcamp{" "}
           </span>
         </p>
-      </div>
+      </div> */}
     </div>
   );
 }
