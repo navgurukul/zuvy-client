@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { useEffect } from "react";
+import Students from "@/app/admin/courses/[courseId]/_components/students";
 
 type CounterStore = {
   studentData: {
@@ -8,11 +9,22 @@ type CounterStore = {
     email: string;
     id: number;
   } | null;
+  studentsInfo: any[];
+  setStudentsInfo: (newStudentsInfo: any[]) => void;
+  anotherStudentState: any[]; // Add another state
+  setAnotherStudentState: (newValue: any[]) => void;
 };
 
 export const useStudentData = create<CounterStore>((set) => ({
   studentData: null,
-  // Custom function to set bootcampId
+  studentsInfo: [],
+  setStudentsInfo: (newStudentsInfo: any[]) => {
+    set({ studentsInfo: newStudentsInfo });
+  },
+  anotherStudentState: [],
+  setAnotherStudentState: (newValue: any[]) => {
+    set({ anotherStudentState: newValue });
+  },
 }));
 
 export const initializeStudentData = () => {
@@ -25,7 +37,13 @@ export const initializeStudentData = () => {
 };
 
 export const useLazyLoadedStudentData = () => {
-  const { studentData } = useStudentData();
+  const {
+    studentData,
+    studentsInfo,
+    setStudentsInfo,
+    anotherStudentState,
+    setAnotherStudentState,
+  } = useStudentData();
 
   useEffect(() => {
     const initializeData = async () => {
@@ -36,5 +54,12 @@ export const useLazyLoadedStudentData = () => {
     initializeData();
   }, []); // Empty dependency array ensures useEffect runs only once when the component mounts
 
-  return { studentData };
+  console.log(studentsInfo);
+  return {
+    studentData,
+    studentsInfo,
+    setStudentsInfo,
+    anotherStudentState,
+    setAnotherStudentState,
+  };
 };
