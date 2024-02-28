@@ -40,32 +40,32 @@ function Page({
     { crumb: "My Courses", href: "/student/courses" },
     {
       crumb: "AFE + Navgurukul Coding Bootcamp",
-      href: "/student/courses/:course-name",
+      href: `/student/courses/${params.viewcourses}`,
     },
   ];
   useEffect(() => {
     const userIdLocal = JSON.parse(localStorage.getItem("AUTH") || "");
 
-    api.get(`/bootcamp/studentClasses/1`, {
-        params: {
-            userId: userIdLocal.id
-        }
-    })  
-    .then((response) => {
+    api.get(`/bootcamp/studentClasses/${params.viewcourses}`, {
+      params: {
+        userId: userIdLocal.id
+      }
+    })
+      .then((response) => {
         const { upcomingClasses, ongoingClasses, completedClasses } = response.data;
         setUpcomingClasses(upcomingClasses);
         setOngoingClasses(ongoingClasses);
         setCompletedClasses(completedClasses);
         console.log(upcomingClasses)
-    })
-    .catch((error) => {
+      })
+      .catch((error) => {
         console.log("Error fetching classes:", error);
-    });
-}, []);
+      });
+  }, []);
 
-useEffect(() => {
+  useEffect(() => {
     console.log(upcomingClasses, ongoingClasses, completedClasses);
-}, [upcomingClasses, ongoingClasses, completedClasses]);
+  }, [upcomingClasses, ongoingClasses, completedClasses]);
 
   useEffect(() => {
     const getCourseModules = async () => {
@@ -119,25 +119,25 @@ useEffect(() => {
             </div>
           </div>
           <div className="gap-y-3 flex flex-col">
-  <div className="flex flex-start">
-    <h1 className="text-lg p-1 font-semibold">Upcoming Classes</h1>
-  </div>
+            <div className="flex flex-start">
+              <h1 className="text-lg p-1 font-semibold">Upcoming Classes</h1>
+            </div>
 
 
-  {upcomingClasses.map((classObj, index) => (
-    
-    <ClassCard classData={classObj} key={index} classType="Upcomng"/>
-  ))}
+            {upcomingClasses.map((classObj, index) => (
 
-  <div className="flex flex-start">
-    <Link href="/student/courses/:course-name/recordings">
-      <div className="flex items-center">
-        <h1 className="text-lg p-1 font-semibold">See All Classes and Recording</h1>
-        <ChevronRight size={20} />
-      </div>
-    </Link>
-  </div>
-</div>
+              <ClassCard classData={classObj} key={index} classType="Upcomng" />
+            ))}
+
+            <div className="flex flex-start">
+              <Link href={`/student/courses/${params.viewcourses}/recordings`}>
+                <div className="flex items-center">
+                  <h1 className="text-lg p-1 font-semibold">See All Classes and Recording</h1>
+                  <ChevronRight size={20} />
+                </div>
+              </Link>
+            </div>
+          </div>
 
           <div className="mt-10">
             <div className="flex flex-start">
