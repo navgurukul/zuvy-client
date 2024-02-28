@@ -63,7 +63,6 @@ function Page({
   const userID = studentData?.id && studentData?.id;
   const router = useRouter();
   const moduleID = params.moduleId;
-  console.log(moduleID);
   const [moduleData, setModuleData] = useState<ModuleDataItem[]>([]);
   const [selectedModuleID, setSelectedModuleID] = useState<number | null>(null);
   const [assignmentLink, setAssignmentLink] = useState("");
@@ -273,12 +272,6 @@ function Page({
                 {item.label === "article" && item.content && (
                   <>
                     <ContentComponent content={item.content} />
-                    <Button
-                      disabled={item?.completed}
-                      onClick={handleArticleComplete}
-                    >
-                      Complete
-                    </Button>
                   </>
                 )}
 
@@ -340,13 +333,6 @@ function Page({
                         ))}
                     </ul>
                     {/* Submit button for quiz */}
-                    <Button
-                      disabled={item?.completed}
-                      className='mt-5'
-                      onClick={handleQuizSubmit}
-                    >
-                      Submit Quiz
-                    </Button>
                   </div>
                 )}
               </div>
