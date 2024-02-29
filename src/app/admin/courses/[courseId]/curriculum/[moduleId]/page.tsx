@@ -65,7 +65,6 @@ function Page({
   const moduleID = params.moduleId;
   const [moduleData, setModuleData] = useState<ModuleDataItem[]>([]);
   const [selectedModuleID, setSelectedModuleID] = useState<number | null>(null);
-  const [assignmentLink, setAssignmentLink] = useState("");
   const [assignmentId, setAssignmentId] = useState(0);
   const [articleId, setArticleId] = useState(0);
   const [quizId, setQuizId] = useState(0);
@@ -111,122 +110,6 @@ function Page({
     };
     if (userID) getModuleData();
   }, [moduleID, userID]);
-
-  const handleAssignmentLinkChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setAssignmentLink(event.target.value);
-  };
-
-  const handleAssignmentSubmit = async () => {
-    try {
-      const response = await api.post(
-        `/tracking/assignment?bootcampId=${params.viewcourses}`,
-        {
-          userId: userID,
-          assignmentId: assignmentId,
-          moduleId: parseInt(moduleID),
-          projectUrl: assignmentLink,
-        }
-      );
-      const data = response.data;
-      console.log(response);
-      toast({
-        title: "Successfully Submitted Assignment",
-        description: response.data.projectUrl,
-        className: "text-start capitalize bg-green-500 text-white",
-      });
-
-      // Add any additional logic here after successful form submission
-    } catch (error: any) {
-      console.error("Assignment Not Submitted:", error);
-      toast({
-        title: "Error Submitting",
-        description: error.response.data.message,
-        className: "text-start capitalize bg-red-500 text-white",
-      });
-    }
-
-    return false; // Prevent default form submission
-  };
-
-  const handleArticleComplete = async () => {
-    try {
-      const response = await api.post(
-        `/tracking/article?bootcampId=${params.viewcourses}`,
-        {
-          userId: userID,
-          articleId: articleId,
-          moduleId: moduleID,
-        }
-      );
-      const data = response.data;
-      console.log(response);
-      toast({
-        title: "Completed Article Successfully",
-        description: "You have completed the article successfully",
-        className: "text-start capitalize bg-green-500 text-white",
-      });
-    } catch (error: any) {
-      console.error("Error Completing Article:", error);
-      toast({
-        title: "Error",
-        description: error.response.data.message,
-        className: "text-start capitalize bg-red-500 text-white",
-      });
-    }
-  };
-
-  const handleQuizSubmit = async () => {
-    try {
-      const selectedOptionsArray = Object.entries(selectedOptions).map(
-        ([questionId, selectedOptionNumber]) => {
-          const moduleItem = moduleData.find(
-            (item) => item.id === selectedModuleID
-          );
-          const question = (moduleItem?.questions ?? []).find(
-            (q) => q.id === parseInt(questionId)
-          );
-
-          const option = question?.options.find(
-            (opt) => opt.number === selectedOptionNumber
-          );
-
-          return {
-            mcqId: parseInt(questionId),
-            chossenOption: selectedOptionNumber,
-            status: option?.correct ? "pass" : "fail",
-            attemptCount: 1,
-          };
-        }
-      );
-
-      console.log(selectedOptionsArray);
-
-      const response = await api.post("/tracking/quiz", {
-        userId: userID,
-        bootcampId: 9,
-        moduleId: moduleID,
-        quizId: quizId,
-        quiz: selectedOptionsArray ?? [], // Ensure selectedOptionsArray is not undefined
-      });
-
-      const data = response.data;
-
-      toast({
-        title: "Quiz Submitted Successfully",
-        description: "Successfully submitted the quiz",
-        className: "text-start capitalize bg-green-500 text-white",
-      });
-    } catch (error) {
-      console.error("Error creating course:", error);
-      toast({
-        title: "Error",
-        description: "Cannot submit the quiz again",
-        className: "text-start capitalize bg-red-500 text-white",
-      });
-    }
-  };
 
   return (
     <div className="flex">
@@ -276,21 +159,9 @@ function Page({
                 )}
 
                 {item.label === "assignment" && (
-                  <div>
+                  <>
                     <ContentComponent content={item.content} />
-                    {/* Only render form if label is "assignment" */}
-                    <form>
-                      {/* Form input fields */}
-                      <input
-                        type="text"
-                        placeholder="Assignment Link"
-                        value={assignmentLink}
-                        onChange={handleAssignmentLinkChange}
-                        className="border border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md px-4 py-2 outline-none"
-                      />
-                      <button type="submit">Submit</button>
-                    </form>
-                  </div>
+                  </>
                 )}
                 {item.label === "quiz" && (
                   <div>
@@ -306,15 +177,6 @@ function Page({
 
                             <div className="flex justify-start  ">
                               <RadioGroup
-                                onValueChange={(value) =>
-                                  setSelectedOptions((prev) => ({
-                                    ...prev,
-                                    [question.id]:
-                                      typeof value === "string"
-                                        ? parseInt(value, 10)
-                                        : value,
-                                  }))
-                                }
                                 className="flex"
                                 value={selectedOptions[question.id]?.toString()}
                               >
@@ -322,7 +184,11 @@ function Page({
                                   <p key={option.number}>
                                     <RadioGroupItem
                                       value={option.number.toString()}
-                                      className="mr-2"
+                                      className={`mr-2 ${
+                                        option.correct
+                                          ? "text-green-500"
+                                          : "text-red-500"
+                                      }`}
                                     />
                                     <label>{option.text}</label>
                                   </p>
@@ -332,7 +198,6 @@ function Page({
                           </li>
                         ))}
                     </ul>
-                    {/* Submit button for quiz */}
                   </div>
                 )}
               </div>
