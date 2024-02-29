@@ -110,7 +110,7 @@ const BatchesInfo = (props: Props) => {
       } catch (error) {}
     };
     fetchBatchesInfo();
-  }, [matches, setStudentsInfo]);
+  }, []);
 
   const batchDeleteHandler = async () => {
     if (matches) {
@@ -199,27 +199,27 @@ const BatchesInfo = (props: Props) => {
   return (
     <>
       <Breadcrumb crumbs={crumbs} />
-      <MaxWidthWrapper className='p-4'>
-        <div className='flex justify-between'>
-          <div className='w-1/2 flex flex-col items-start '>
-            <div className=''>
-              <h1 className='capitalize text-start text-[30px] font-semibold'>
+      <MaxWidthWrapper className="p-4">
+        <div className="flex justify-between">
+          <div className="w-1/2 flex flex-col items-start ">
+            <div className="">
+              <h1 className="capitalize text-start text-[30px] font-semibold">
                 {studentsData.length > 0 ? studentsData[0].batchName : ""}
               </h1>
             </div>
             <Input
-              type='search'
-              placeholder='Student Name, Email'
-              className='w-1/2 my-12'
+              type="search"
+              placeholder="Student Name, Email"
+              className="w-1/2 my-12"
               disabled
             />
           </div>
-          <div className='flex m-4'>
-            <div className='flex items-center mx-4 text-sm'>
+          <div className="flex m-4">
+            <div className="flex items-center mx-4 text-sm">
               <Dialog>
                 <DialogTrigger asChild>
-                  <button className='flex '>
-                    <Pencil size={18} className='mx-4' />
+                  <button className="flex ">
+                    <Pencil size={18} className="mx-4" />
                     Edit Batch
                   </button>
                 </DialogTrigger>
@@ -230,16 +230,16 @@ const BatchesInfo = (props: Props) => {
                     <Form {...form}>
                       <form
                         onSubmit={form.handleSubmit(onSubmit)}
-                        className='space-y-8'
+                        className="space-y-8"
                       >
                         <FormField
                           control={form.control}
-                          name='name'
+                          name="name"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Batch Name</FormLabel>
                               <FormControl>
-                                <Input placeholder='Batch Name' {...field} />
+                                <Input placeholder="Batch Name" {...field} />
                               </FormControl>
 
                               <FormMessage />
@@ -248,14 +248,14 @@ const BatchesInfo = (props: Props) => {
                         />
                         <FormField
                           control={form.control}
-                          name='instructorId'
+                          name="instructorId"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Instructor Id</FormLabel>
                               <FormControl>
                                 <Input
-                                  placeholder='20230'
-                                  type='name'
+                                  placeholder="20230"
+                                  type="name"
                                   {...field}
                                 />
                               </FormControl>
@@ -265,14 +265,14 @@ const BatchesInfo = (props: Props) => {
                         />
                         <FormField
                           control={form.control}
-                          name='capEnrollment'
+                          name="capEnrollment"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Cap Enrollment</FormLabel>
                               <FormControl>
                                 <Input
-                                  placeholder='Cap Enrollment'
-                                  type='number'
+                                  placeholder="Cap Enrollment"
+                                  type="number"
                                   {...field}
                                 />
                               </FormControl>
@@ -283,9 +283,9 @@ const BatchesInfo = (props: Props) => {
                         <FormDescription>
                           This form will Update the batch info
                         </FormDescription>
-                        <div className='w-full flex flex-col items-end gap-y-5 '>
+                        <div className="w-full flex flex-col items-end gap-y-5 ">
                           <DialogClose asChild>
-                            <Button className='w-1/2' type='submit'>
+                            <Button className="w-1/2" type="submit">
                               Update batch
                             </Button>
                           </DialogClose>
@@ -296,11 +296,11 @@ const BatchesInfo = (props: Props) => {
                 </DialogContent>
               </Dialog>
             </div>
-            <div className='flex items-center text-sm'>
+            <div className="flex items-center text-sm">
               <AlertDialog>
-                <AlertDialogTrigger className='flex'>
-                  <Trash2 size={20} className='text-red-500 mx-4' />
-                  <p className='text-red-500'>Delete</p>
+                <AlertDialogTrigger className="flex">
+                  <Trash2 size={20} className="text-red-500 mx-4" />
+                  <p className="text-red-500">Delete</p>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
@@ -316,7 +316,7 @@ const BatchesInfo = (props: Props) => {
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={batchDeleteHandler}
-                      className='bg-red-500'
+                      className="bg-red-500"
                     >
                       Continue
                     </AlertDialogAction>
