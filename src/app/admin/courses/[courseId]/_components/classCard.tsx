@@ -24,16 +24,16 @@ function ClassCard({ classData, classType }: { classData: any; classType: any })
               <Moment format="hh:mm">{classData.startTime}</Moment> - <Moment format="hh:mm">{classData.endTime}</Moment>
             </p>
           </div>
-          {/* {classType === "complete" && (
+          {classType === "complete" && (
             <div>
               <p onClick={() => handleViewRecording(classData)}>View Recording</p>
             </div>
-          )} */}
+          )}
         </div>
         <div className="flex items-center">
           {classType !== "complete" && (
             <>
-              <a href={classData.hangoutLink}>Join Class</a>
+              <a href={classData.hangoutLink} target="_blank">Join Class</a>
               <ChevronRight size={20} />
             </>
           )}
