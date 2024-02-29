@@ -278,6 +278,18 @@ function Page({
                 {item.label === "assignment" && (
                   <div>
                     <ContentComponent content={item.content} />
+                    {/* Only render form if label is "assignment" */}
+                    <form>
+                      {/* Form input fields */}
+                      <input
+                        type="text"
+                        placeholder="Assignment Link"
+                        value={assignmentLink}
+                        onChange={handleAssignmentLinkChange}
+                        className="border border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md px-4 py-2 outline-none"
+                      />
+                      <button type="submit">Submit</button>
+                    </form>
                   </div>
                 )}
                 {item.label === "quiz" && (
@@ -293,7 +305,19 @@ function Page({
                             />
 
                             <div className="flex justify-start  ">
-                              <RadioGroup className="flex">
+                              <RadioGroup
+                                onValueChange={(value) =>
+                                  setSelectedOptions((prev) => ({
+                                    ...prev,
+                                    [question.id]:
+                                      typeof value === "string"
+                                        ? parseInt(value, 10)
+                                        : value,
+                                  }))
+                                }
+                                className="flex"
+                                value={selectedOptions[question.id]?.toString()}
+                              >
                                 {question.options.map((option) => (
                                   <p key={option.number}>
                                     <RadioGroupItem

@@ -91,6 +91,7 @@ const Courses: React.FC = () => {
             className="max-w-[500px]"
             value={searchQuery}
             onChange={handleSearchChange}
+            disabled
           />
           <Dialog>
             <DialogTrigger asChild>
@@ -108,7 +109,7 @@ const Courses: React.FC = () => {
           </Dialog>
         </div>
         <div className="flex mt-5 mb-10">
-          <div className="flex mr-2">
+          {/* <div className="flex mr-2">
             {COURSE_FILTER.map((filter: any) => (
               <p
                 key={filter}
@@ -123,8 +124,8 @@ const Courses: React.FC = () => {
               </p>
             ))}
 
-            {/* <span> | </span> */}
-          </div>
+       
+          </div> */}
           {/* <div>
             <p className="flex items-center bg-muted-foreground text-white py-1 px-2 rounded-md">
               All Partners <ChevronDown />

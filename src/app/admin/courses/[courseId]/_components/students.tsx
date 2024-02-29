@@ -9,6 +9,7 @@ import api from "@/utils/axios.config";
 import StudentsDataTable from "./dataTable";
 import { columns } from "./columns";
 import { Input } from "@/components/ui/input";
+import { useStudentData } from "@/store/store";
 
 type Props = {
   id: string;
@@ -21,6 +22,7 @@ export type StudentData = {
   batchName: string;
   batchId: number;
   progress: number;
+  profilePicture: string;
 };
 export const fetchStudentData = async (id: string, setStudentData: any) => {
   try {
@@ -35,17 +37,28 @@ export const fetchStudentData = async (id: string, setStudentData: any) => {
 
 const Students = ({ id }: Props) => {
   const [studentsData, setStudentData] = useState<StudentData[]>([]);
+  const { anotherStudentState, setAnotherStudentState } = useStudentData();
 
   useEffect(() => {
-    fetchStudentData(id, setStudentData);
-  }, [id]);
-
+    const fetchStudentData = async () => {
+      try {
+        const response = await api.get(`/bootcamp/students/${id}`);
+        const data = response.data;
+        setStudentData(data.studentsEmails);
+        setAnotherStudentState(data.studentsEmails);
+      } catch (error) {
+        // Handle error appropriately
+        console.error("Error fetching student data:", error);
+      }
+    };
+    fetchStudentData();
+  }, [id, setAnotherStudentState, anotherStudentState]);
+  console.log(studentsData);
   return (
     <div>
       {studentsData.length > 0 && (
         <div className='py-2 my-2 flex items-center justify-between w-full'>
           <Input type='search' placeholder='search' className='w-1/3' />
-
           <Dialog>
             <DialogTrigger asChild>
               <Button className='w-1/6 gap-x-2 '>
@@ -59,7 +72,7 @@ const Students = ({ id }: Props) => {
       )}
 
       {studentsData.length > 0 && (
-        <StudentsDataTable columns={columns} data={studentsData} />
+        <StudentsDataTable columns={columns} data={anotherStudentState} />
       )}
       {studentsData.length <= 0 && (
         <div className='flex  flex-col items-center justify-center py-12'>
