@@ -60,30 +60,30 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-const BatchesInfo = (props: Props) => {
+const BatchesInfo = ({
+  params,
+}: {
+  params: { courseId: string; batchId: string };
+}) => {
   const router = useRouter();
   const { studentsInfo, setStudentsInfo } = useStudentData();
-  const pathname = usePathname();
-  const matches = pathname.match(/\/(\d+)\/(\d+)\/(\d+)/);
+  //   const pathname = usePathname();
+  //   const matches = pathname.match(/\/(\d+)\/(\d+)\/(\d+)/);
   const [studentsData, setStudentData] = useState<StudentData[]>([]);
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, "0"); // Months are zero-based
-  const day = String(today.getDate()).padStart(2, "0");
+  //   const today = new Date();
+  //   const year = today.getFullYear();
+  //   const month = String(today.getMonth() + 1).padStart(2, "0"); // Months are zero-based
+  //   const day = String(today.getDate()).padStart(2, "0");
 
   const crumbs = [
     {
       crumb: "My Courses",
-      href: `/admin/courses/${
-        studentsData.length > 0 ? studentsData[0].bootcampId : ""
-      }`,
+      href: `/admin/courses`,
     },
     {
-      crumb: `Batches`,
+      crumb: `Batch`,
       href: `/admin/courses/${
         studentsData.length > 0 ? studentsData[0].bootcampId : ""
-      }/${studentsData.length > 0 ? studentsData[0].batchId : ""}/${
-        studentsData.length > 0 ? studentsData[0].batchId : ""
       }`,
     },
     {
@@ -98,37 +98,37 @@ const BatchesInfo = (props: Props) => {
   useEffect(() => {
     const fetchBatchesInfo = async () => {
       try {
-        if (matches) {
-          const [bootcampId, batchId] = matches;
-          const response = await api.get(
-            `/bootcamp/students/${bootcampId}?batch_id=${batchId}`
-          );
-          setStudentData(response.data.studentsEmails);
-          setStudentsInfo(response.data.studentsEmails);
-        }
+        // if (matches) {
+        // const [bootcampId, batchId] = matches;
+        const response = await api.get(
+          `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}`
+        );
+        setStudentData(response.data.studentsEmails);
+        setStudentsInfo(response.data.studentsEmails);
+        // }
       } catch (error) {}
     };
     fetchBatchesInfo();
-  }, [matches]);
+  }, []);
 
   const batchDeleteHandler = async () => {
-    if (matches) {
-      const [firstValue, bootcampId, batchId] = matches;
-      try {
-        await api.delete(`/batch/${batchId}`).then(() => {
-          toast({
-            title: "Batch Deleted Succesfully",
-            className: "text-start capitalize",
-          });
-        });
-        router.push(`/admin/courses/${bootcampId}`);
-      } catch (error) {
+    // if (matches) {
+    //   const [firstValue, bootcampId, batchId] = matches;
+    try {
+      await api.delete(`/batch/${params.batchId}`).then(() => {
         toast({
-          title: "Batch not Deleted ",
+          title: "Batch Deleted Succesfully",
           className: "text-start capitalize",
         });
-      }
+      });
+      router.push(`/admin/courses/${params.courseId}`);
+    } catch (error) {
+      toast({
+        title: "Batch not Deleted ",
+        className: "text-start capitalize",
+      });
     }
+    // }
   };
 
   const formSchema = z.object({
@@ -165,30 +165,30 @@ const BatchesInfo = (props: Props) => {
       capEnrollment: +values.capEnrollment,
     };
     try {
-      if (matches) {
-        const [firstValue, bootcampId, batchId] = matches;
+      //   if (matches) {
+      //   const [firstValue, bootcampId, batchId] = matches;
 
-        const response = await api
-          .patch(`/batch/${batchId}`, convertedData)
-          .then((res) => {
-            toast({
-              title: "Batches Updated Succesfully",
-            });
-            const fetchBatchesInfo = async () => {
-              try {
-                if (matches) {
-                  const [firstValue, bootcampId, batchId] = matches;
-                  const response = await api.get(
-                    `/bootcamp/students/${bootcampId}?batch_id=${batchId}`
-                  );
-                  setStudentData(response.data.studentsEmails);
-                  setStudentsInfo(response.data.studentsEmails);
-                }
-              } catch (error) {}
-            };
-            fetchBatchesInfo();
+      const response = await api
+        .patch(`/batch/${params.batchId}`, convertedData)
+        .then((res) => {
+          toast({
+            title: "Batches Updated Succesfully",
           });
-      }
+          const fetchBatchesInfo = async () => {
+            try {
+              //   if (matches) {
+              //   const [firstValue, bootcampId, batchId] = matches;
+              const response = await api.get(
+                `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}`
+              );
+              setStudentData(response.data.studentsEmails);
+              setStudentsInfo(response.data.studentsEmails);
+              //   }
+            } catch (error) {}
+          };
+          fetchBatchesInfo();
+        });
+      //   }
     } catch (error) {
       toast({
         title: "Batches Didn't Succesfully",
