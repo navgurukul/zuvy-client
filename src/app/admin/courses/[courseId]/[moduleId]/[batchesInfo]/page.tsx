@@ -95,12 +95,11 @@ const BatchesInfo = (props: Props) => {
       }`,
     },
   ];
-  const formattedDate = `${year}-${month}-${day}`;
   useEffect(() => {
     const fetchBatchesInfo = async () => {
       try {
         if (matches) {
-          const [firstValue, bootcampId, batchId] = matches;
+          const [bootcampId, batchId] = matches;
           const response = await api.get(
             `/bootcamp/students/${bootcampId}?batch_id=${batchId}`
           );
@@ -110,7 +109,7 @@ const BatchesInfo = (props: Props) => {
       } catch (error) {}
     };
     fetchBatchesInfo();
-  }, []);
+  }, [matches]);
 
   const batchDeleteHandler = async () => {
     if (matches) {
@@ -192,7 +191,7 @@ const BatchesInfo = (props: Props) => {
       }
     } catch (error) {
       toast({
-        title: "Batches Did'nt Succesfully",
+        title: "Batches Didn't Succesfully",
       });
     }
   };
