@@ -95,7 +95,6 @@ function LiveClass({ courseId }: { courseId: string }) {
         <Combobox
           data={[]}
           title={"Select Module"}
-          disabled
           onChange={function (selectedValue: string): void {
             throw new Error("Function not implemented.");
           }}
