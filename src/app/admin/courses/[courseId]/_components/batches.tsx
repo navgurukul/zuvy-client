@@ -253,7 +253,6 @@ const Batches = ({
       );
     }
   };
-  console.log(batches);
 
   return (
     <div>
@@ -269,7 +268,7 @@ const Batches = ({
           ? batches.map((batch: any, index: number) => (
               <Link
                 key={batch.name}
-                href={`/admin/courses/${courseID}/${batch.id}/${batch.id}`}
+                href={`/admin/courses/${courseID}/batch/${batch.id}`}
               >
                 <Card key={batch.id} className="text-gray-900 text-base">
                   <div className="bg-white rounded-lg border p-4">

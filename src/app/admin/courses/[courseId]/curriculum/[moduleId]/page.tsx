@@ -229,15 +229,15 @@ function Page({
   };
 
   return (
-    <div className='flex'>
+    <div className="flex">
       {/* Sidebar with labels */}
 
-      <div className='w-1/4 border-r-2 text-left p-4'>
+      <div className="w-1/4 border-r-2 text-left p-4">
         <button onClick={() => router.back()}>
-          <ArrowBigLeft className='text-[#518672]' />
+          <ArrowBigLeft className="text-[#518672]" />
         </button>
 
-        <h4 className='text-lg font-bold mb-2 mt-5'>Chapter List</h4>
+        <h4 className="text-lg font-bold mb-2 mt-5">Chapter List</h4>
         <ul>
           {moduleData.map((item, index) => (
             <li
@@ -249,11 +249,11 @@ function Page({
             >
               {`${item.label}: ${item.name ? item.name : ""}`}{" "}
               {item.completed && (
-                <CheckCircle2 size={18} className='text-[#518672] ml-5 mt-1' />
+                <CheckCircle2 size={18} className="text-[#518672] ml-5 mt-1" />
               )}
               {/* Show number of questions for Quiz and MCQ */}
               {["quiz"].includes(item.label) && (
-                <span className='text-sm ml-2 text-gray-500'>
+                <span className="text-sm ml-2 text-gray-500">
                   ({item.questions ? item.questions.length : 0} questions)
                 </span>
               )}
@@ -262,7 +262,7 @@ function Page({
         </ul>
       </div>
       {/* Right side content */}
-      <div className='w-3/4 p-4 flex items-end justify-start text'>
+      <div className="w-3/4 p-4 flex items-end justify-start text">
         {selectedModuleID &&
           moduleData
             .filter((item) => item.id === selectedModuleID)
@@ -282,19 +282,19 @@ function Page({
                     <form>
                       {/* Form input fields */}
                       <input
-                        type='text'
-                        placeholder='Assignment Link'
+                        type="text"
+                        placeholder="Assignment Link"
                         value={assignmentLink}
                         onChange={handleAssignmentLinkChange}
-                        className='border border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md px-4 py-2 outline-none'
+                        className="border border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md px-4 py-2 outline-none"
                       />
-                      <button type='submit'>Submit</button>
+                      <button type="submit">Submit</button>
                     </form>
                   </div>
                 )}
                 {item.label === "quiz" && (
                   <div>
-                    <h3 className='font-semibold'>Quiz</h3>
+                    <h3 className="font-semibold">Quiz</h3>
                     <ul>
                       {item.questions &&
                         item.questions.map((question) => (
@@ -304,7 +304,7 @@ function Page({
                               isQuiz={true}
                             />
 
-                            <div className='flex justify-start  '>
+                            <div className="flex justify-start  ">
                               <RadioGroup
                                 onValueChange={(value) =>
                                   setSelectedOptions((prev) => ({
@@ -315,14 +315,14 @@ function Page({
                                         : value,
                                   }))
                                 }
-                                className='flex'
+                                className="flex"
                                 value={selectedOptions[question.id]?.toString()}
                               >
                                 {question.options.map((option) => (
                                   <p key={option.number}>
                                     <RadioGroupItem
                                       value={option.number.toString()}
-                                      className='mr-2'
+                                      className="mr-2"
                                     />
                                     <label>{option.text}</label>
                                   </p>
