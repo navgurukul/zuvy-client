@@ -118,7 +118,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
             </CardContent>
           </Card>
         ) : null}
-        <Card className={cn("text-start w-full mt-3", className)} {...props}>
+        {/* <Card className={cn("text-start w-full mt-3", className)} {...props}>
           <CardHeader className="bg-muted">
             <CardTitle>Upcoming Submissions</CardTitle>
           </CardHeader>
@@ -138,7 +138,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
 
       {/* <Calendar

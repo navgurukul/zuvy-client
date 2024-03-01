@@ -149,8 +149,8 @@ const Page: React.FC<pageProps> = () => {
                         <Image
                           src={coverImage}
                           alt="Placeholder Image"
-                          className="w-full h-48 rounded-md object-cover"
-                          width={100}
+                          className="rounded-md object-cover"
+                          width={300}
                           height={48}
                         />
                         <div className="px-1 py-4">{name}</div>

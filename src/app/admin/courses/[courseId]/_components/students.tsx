@@ -53,7 +53,6 @@ const Students = ({ id }: Props) => {
     };
     fetchStudentData();
   }, []);
-
   return (
     <div>
       {studentsData.length > 0 && (
