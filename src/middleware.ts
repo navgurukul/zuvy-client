@@ -2,8 +2,16 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
+    // const userData = request.cookies.get("secure_typeuser")?.value ?? "false";
+    // const user = userData === "false" ? "false" : atob(userData);
+    
     const userData = request.cookies.get("secure_typeuser")?.value ?? "false";
-    const user = userData === "false" ? "false" : atob(userData);
+    let user = "false";
+    try {
+        user = userData === "false" ? "false" : atob(userData);
+    } catch (e) {
+        console.error(e);
+    }
     const matcher = ["/", "/student", "/admin", "/volunteer"];
 
     if (matcher.includes(request.nextUrl.pathname)) {
