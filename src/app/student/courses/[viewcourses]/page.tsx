@@ -41,7 +41,6 @@ function Page({
   const [courseProgress, setCourseProgress] = useState<CourseProgress | null>(
     null
   );
-
   const [upcomingClasses, setUpcomingClasses] = useState([]);
   const [ongoingClasses, setOngoingClasses] = useState([]);
   const [completedClasses, setCompletedClasses] = useState([]);
@@ -67,7 +66,6 @@ function Page({
         setUpcomingClasses(upcomingClasses);
         setOngoingClasses(ongoingClasses);
         setCompletedClasses(completedClasses);
-        console.log(upcomingClasses);
       })
       .catch((error) => {
         console.log("Error fetching classes:", error);
