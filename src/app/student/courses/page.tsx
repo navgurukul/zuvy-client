@@ -85,7 +85,7 @@ const Page: React.FC<pageProps> = () => {
         )}
 
         {/* If Course Already Started then Below Message will be displayed: */}
-        {enrolledCourse.length > 0 && courseStarted ? (
+        {enrolledCourse?.length > 0 && courseStarted ? (
           <div className="bg-gradient-to-bl from-blue-50 to-violet-50 rounded-xl  sm:w-full md:w-1/2 lg:w=1/3 p-2 mb-10">
             <div className="px-1 py-4 flex items-start">
               <p className="text-gray-900 text-base">

@@ -28,7 +28,7 @@ interface ResumeCourse {
 type ScheduleProps = React.ComponentProps<typeof Card>;
 
 function Schedule({ className, ...props }: ScheduleProps) {
-  const [courseStarted, setCourseStarted] = useState<boolean>(true);
+  const [courseStarted, setCourseStarted] = useState<boolean>(false);
   const { studentData } = useLazyLoadedStudentData();
   const userID = studentData?.id && studentData?.id;
   const [resumeCourse, setResumeCourse] = useState<ResumeCourse>({});
@@ -91,31 +91,33 @@ function Schedule({ className, ...props }: ScheduleProps) {
             </div>
           </CardContent>
         </Card>
-        <Card className={cn(" text-start w-full mt-3", className)} {...props}>
-          <CardHeader className="bg-muted">
-            <CardTitle>Pick up where you left</CardTitle>
-          </CardHeader>
-          <CardContent className="p-3 grid gap-4">
-            <div className=" flex flex-wrap items-center p-4 justify-between max-sm:justify-center gap-8">
-              <div className="flex max-sm:text-center">
-                <BookOpenText className="self-start max-sm:hidden" />
-                <div className="flex-1 ml-2 space-y-1">
-                  <p className="text-sm font-medium leading-none">
-                    {resumeCourse?.bootcamp_name}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {resumeCourse.module_name}
-                  </p>
+        {courseStarted ? (
+          <Card className={cn(" text-start w-full mt-3", className)} {...props}>
+            <CardHeader className="bg-muted">
+              <CardTitle>Pick up where you left</CardTitle>
+            </CardHeader>
+            <CardContent className="p-3 grid gap-4">
+              <div className=" flex flex-wrap items-center p-4 justify-between max-sm:justify-center gap-8">
+                <div className="flex max-sm:text-center">
+                  <BookOpenText className="self-start max-sm:hidden" />
+                  <div className="flex-1 ml-2 space-y-1">
+                    <p className="text-sm font-medium leading-none">
+                      {resumeCourse?.bootcamp_name}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {resumeCourse.module_name}
+                    </p>
+                  </div>
                 </div>
+                <Link
+                  href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`}
+                >
+                  <Button>Continue</Button>
+                </Link>
               </div>
-              <Link
-                href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`}
-              >
-                <Button>Continue</Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        ) : null}
         <Card className={cn("text-start w-full mt-3", className)} {...props}>
           <CardHeader className="bg-muted">
             <CardTitle>Upcoming Submissions</CardTitle>
