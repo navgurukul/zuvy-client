@@ -221,9 +221,9 @@ function Page({
             <div className="flex flex-col items-center justify-center p-4 gap-3">
               <Image
                 src={courseProgress?.info?.instructor_profile_picture ?? ""}
-                className="w-10 h-10 rounded-full "
+                className="rounded-full "
                 alt="instructor profile pic"
-                width={10}
+                width={40}
                 height={10}
               />
               <span className="text-lg font-semibold">
@@ -236,16 +236,16 @@ function Page({
               <Button className="px-4 py-2 rounded-lg mt-2 w-[200px] ">
                 Start New Chat
               </Button>
-              <Button disabled className="px-4 py-2 rounded-lg mt-2 w-[200px] ">
+              {/* <Button disabled className="px-4 py-2 rounded-lg mt-2 w-[200px] ">
                 View Past Chat
-              </Button>
+              </Button> */}
             </div>
           </div>
 
-          <div className="flex flex-start">
+          {/* <div className="flex flex-start">
             <h1 className="text-lg p-1 font-semibold">Upcoming Assignments</h1>
-          </div>
-          <div>
+          </div> */}
+          {/* <div>
             <div className="bg-gradient-to-bl mb-3 text-start p-5 from-blue-50 to-violet-50 rounded-xl  ">
               <Link
                 href={"/"}
@@ -269,7 +269,7 @@ function Page({
                 Deadline 5 Feb 2024
               </p>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </MaxWidthWrapper>
