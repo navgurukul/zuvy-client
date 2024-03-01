@@ -43,23 +43,23 @@ const GetdataHandler = (id: number) => {
     );
     setAnotherStudentState(updatedData);
   }
-  useEffect(() => {
-    api
-      .get(`/bootcamp/batches/${id}`)
-      .then((response) => {
-        const transformedData = response.data.map(
-          (item: { id: any; name: any }) => ({
-            value: item.id.toString(),
-            label: item.name,
-          })
-        );
+  // useEffect(() => {
+  //   api
+  //     .get(`/bootcamp/batches/${id}`)
+  //     .then((response) => {
+  //       const transformedData = response.data.map(
+  //         (item: { id: any; name: any }) => ({
+  //           value: item.id.toString(),
+  //           label: item.name,
+  //         })
+  //       );
 
-        setBootcampData(transformedData);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
-  }, []);
+  //       setBootcampData(transformedData);
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error fetching data:", error);
+  //     });
+  // }, [id]);
 
   return {
     bootcampData,
