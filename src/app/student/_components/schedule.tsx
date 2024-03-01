@@ -17,14 +17,13 @@ import { Button } from "@/components/ui/button";
 import api from "@/utils/axios.config";
 import { useLazyLoadedStudentData } from "@/store/store";
 import Link from "next/link";
-
+import Moment from 'react-moment';
 interface ResumeCourse {
   bootcamp_name?: string;
   module_name?: string;
   bootcampId?: number;
   moduleId?: number;
 }
-
 type ScheduleProps = React.ComponentProps<typeof Card>;
 
 function Schedule({ className, ...props }: ScheduleProps) {
@@ -32,6 +31,32 @@ function Schedule({ className, ...props }: ScheduleProps) {
   const { studentData } = useLazyLoadedStudentData();
   const userID = studentData?.id && studentData?.id;
   const [resumeCourse, setResumeCourse] = useState<ResumeCourse>({});
+  const [upcomingClasses, setUpcomingClasses] = useState([]);
+  const [ongoingClasses, setOngoingClasses] = useState([]);
+  const [completedClasses, setCompletedClasses] = useState([]);
+  useEffect(() => {
+    const userIdLocal = JSON.parse(localStorage.getItem("AUTH") || "");
+    api.get(`/student/${userIdLocal.id}`).then((res) => {
+      api.get(`/bootcamp/studentClasses/${res.data[0].id}`, { 
+        params: {
+          userId: userIdLocal.id
+        }
+      }).then((response) => {
+        const { upcomingClasses, ongoingClasses, completedClasses } = response.data;
+        setUpcomingClasses(upcomingClasses);
+        setOngoingClasses(ongoingClasses);
+        setCompletedClasses(completedClasses);
+      }).catch((error) => {
+        console.log("Error fetching classes:", error);
+      });
+
+    }).catch((error) => {
+      console.log("Error fetching classes:", error);
+    });
+  }, []);
+
+  useEffect(() => {
+  }, [upcomingClasses, ongoingClasses, completedClasses]);
 
   useEffect(() => {
     const getResumeCourse = async () => {
@@ -60,35 +85,21 @@ function Schedule({ className, ...props }: ScheduleProps) {
             <CardTitle>Upcoming Sessions</CardTitle>
           </CardHeader>
           <CardContent className="grid p-3 gap-4">
-            <div className="flex flex-wrap justify-between items-center p-4">
-              <div className="flex items-center">
-                <PlaySquare />
-                <p className="text-sm ml-2 font-medium leading-none">
-                  ReactJS: Server Side Rendering
-                </p>
+            {upcomingClasses?.map((event: any, index) => (
+              <div className="grid p-3 gap-4">
+                <div className="flex flex-wrap justify-between items-center p-4">
+                  <div className="flex items-center">
+                    <PlaySquare />
+                    <p className="text-sm ml-2 font-medium leading-none">{event.title}</p>
+                  </div>
+                  <div className="flex items-center max-sm:mt-2">
+                    <CalendarClock />
+                    <p className="text-sm ml-2 text-muted-foreground"><Moment format="DD MMM">{event.startTime}</Moment>,<Moment format="hh:mm">{event.startTime}</Moment></p>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center  max-sm:mt-2">
-                <CalendarClock />
-                <p className="text-sm ml-2 text-muted-foreground">
-                  28th Jan, 19:00
-                </p>
-              </div>
-            </div>
-            <Separator />
-            <div className="flex flex-wrap justify-between items-center p-4">
-              <div className="flex items-center">
-                <GraduationCap />
-                <p className="text-sm ml-2 font-medium leading-none">
-                  Webinar on How to Crack MAANG
-                </p>
-              </div>
-              <div className="flex items-center max-sm:mt-2">
-                <CalendarClock />
-                <p className="text-sm ml-2 text-muted-foreground">
-                  28th Jan, 19:00
-                </p>
-              </div>
-            </div>
+            ))}
+
           </CardContent>
         </Card>
         {courseStarted ? (
