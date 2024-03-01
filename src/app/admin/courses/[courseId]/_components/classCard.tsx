@@ -1,8 +1,23 @@
 import { ChevronRight } from "lucide-react";
 import React from "react";
 import Moment from 'react-moment';
-
+import { toast } from "@/components/ui/use-toast";
 function ClassCard({ classData, classType }: { classData: any; classType: any }) {
+  const isVideo = classData.s3link 
+
+  const handleViewRecording = () => {
+    if (isVideo) {
+      window.open(classData.s3link, '_blank');
+    } 
+    else{
+      toast({
+        title: "Recording not yet updated",
+        variant: "default",
+        className: "text-start capitalize",
+      });
+    }
+  };
+
   return (
     <div className="bg-gradient-to-bl p-3 from-blue-50 to-violet-50 flex rounded-xl">
       <div className="px-1 py-4 flex items-start">
@@ -26,7 +41,9 @@ function ClassCard({ classData, classType }: { classData: any; classType: any })
           </div>
           {classType === "complete" && (
             <div>
-              <p onClick={() => handleViewRecording(classData)}>View Recording</p>
+              <button onClick={handleViewRecording} className="text-blue-500 underline cursor-pointer focus:outline-none">
+                View Recording
+              </button>
             </div>
           )}
         </div>
@@ -41,10 +58,6 @@ function ClassCard({ classData, classType }: { classData: any; classType: any })
       </div>
     </div>
   );
-}
-
-function handleViewRecording(classData: any) {
-  console.log("View Recording clicked for class:", classData);
 }
 
 export default ClassCard;

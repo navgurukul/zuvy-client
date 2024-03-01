@@ -132,9 +132,14 @@ function Page({
               <h1 className="text-lg p-1 font-semibold">Upcoming Classes</h1>
             </div>
 
-            {upcomingClasses?.map((classObj, index) => (
-              <ClassCard classData={classObj} key={index} classType="Upcomng" />
-            ))}
+
+            {upcomingClasses?.length > 0 ? (
+              upcomingClasses.map((classObj, index) => (
+                <ClassCard classData={classObj} key={index} classType="Upcoming" />
+              ))
+            ) : (
+              <p>No upcoming classes found</p>
+            )}
 
             <div className="flex flex-start">
               <Link href={`/student/courses/${params.viewcourses}/recordings`}>

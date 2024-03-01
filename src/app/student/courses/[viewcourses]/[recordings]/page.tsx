@@ -44,7 +44,7 @@ function Page({
         setUpcomingClasses(upcomingClasses);
         setOngoingClasses(ongoingClasses);
         setCompletedClasses(completedClasses);
-        console.log(upcomingClasses)
+       
     })
     .catch((error) => {
         console.log("Error fetching classes:", error);
@@ -52,7 +52,7 @@ function Page({
 }, []);
 
 useEffect(() => {
-    console.log(upcomingClasses, ongoingClasses, completedClasses);
+   
 }, [upcomingClasses, ongoingClasses, completedClasses]);
 
 
@@ -60,7 +60,7 @@ useEffect(() => {
     <MaxWidthWrapper>
       <Breadcrumb crumbs={crumbs} />
       
-      {  ongoingClasses.length>0?
+      {  ongoingClasses?.length>0?
       <div className="gap-y-3 flex flex-col items-center mx-4 my-10">
         <div className="flex left-0  ">
           <h1 className="text-lg p-1 font-semibold">Ongoing Class</h1>
@@ -75,21 +75,25 @@ useEffect(() => {
         <div className="flex left-0  ">
           <h1 className="text-lg p-1 font-semibold">Upcoming Classes</h1>
         </div>
-         {upcomingClasses.map((classObj, index) => (
-    
-    <ClassCard classData={classObj} key={index} classType="upcoming"/>
-  ))}
-        
+        {upcomingClasses?.length > 0 ? (
+              upcomingClasses.map((classObj, index) => (
+                <ClassCard classData={classObj} key={index} classType="Upcoming" />
+              ))
+            ) : (
+              <p>No upcoming classes found</p>
+            )}
       </div>
       <div className="gap-y-3 flex flex-col items-center mx-4 ">
         <div className="">
           <h1 className="text-lg p-1 font-semibold">Past Class Recordings</h1>
         </div>
-          {completedClasses.map((classObj, index) => (
-    
-    <ClassCard classData={classObj} key={index} classType="complete"/>
-  ))}
-       
+        {completedClasses?.length > 0 ? (
+              completedClasses.map((classObj, index) => (
+                <ClassCard classData={classObj} key={index} classType="complete" />
+              ))
+            ) : (
+              <p>No past classes found</p>
+            )}
       </div>
     </MaxWidthWrapper>
   );
