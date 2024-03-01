@@ -23,8 +23,7 @@ interface CourseProgress {
   code: number;
 }
 
-import Moment from 'react-moment';
-import ClassCard from '@/app/admin/courses/[courseId]/_components/classCard'
+import ClassCard from "@/app/admin/courses/[courseId]/_components/classCard";
 type PageProps = {
   params: {
     viewcourses: string;
@@ -42,10 +41,6 @@ function Page({
   const [courseProgress, setCourseProgress] = useState<CourseProgress | null>(
     null
   );
-  const [classType, setClassType] = useState("active");
-  const [allClasses, setAllClasses] = useState([]);
-  const [bootcampData, setBootcampData] = useState([]);
-  const [batchId, setBatchId] = useState("");
   const [upcomingClasses, setUpcomingClasses] = useState([]);
   const [ongoingClasses, setOngoingClasses] = useState([]);
   const [completedClasses, setCompletedClasses] = useState([]);
@@ -59,17 +54,18 @@ function Page({
   useEffect(() => {
     const userIdLocal = JSON.parse(localStorage.getItem("AUTH") || "");
 
-    api.get(`/bootcamp/studentClasses/${params.viewcourses}`, {
-      params: {
-        userId: userIdLocal.id
-      }
-    })
+    api
+      .get(`/bootcamp/studentClasses/${params.viewcourses}`, {
+        params: {
+          userId: userIdLocal.id,
+        },
+      })
       .then((response) => {
-        const { upcomingClasses, ongoingClasses, completedClasses } = response.data;
+        const { upcomingClasses, ongoingClasses, completedClasses } =
+          response.data;
         setUpcomingClasses(upcomingClasses);
         setOngoingClasses(ongoingClasses);
         setCompletedClasses(completedClasses);
-        console.log(upcomingClasses)
       })
       .catch((error) => {
         console.log("Error fetching classes:", error);
@@ -136,16 +132,16 @@ function Page({
               <h1 className="text-lg p-1 font-semibold">Upcoming Classes</h1>
             </div>
 
-
-            {upcomingClasses.map((classObj, index) => (
-
+            {upcomingClasses?.map((classObj, index) => (
               <ClassCard classData={classObj} key={index} classType="Upcomng" />
             ))}
 
             <div className="flex flex-start">
               <Link href={`/student/courses/${params.viewcourses}/recordings`}>
                 <div className="flex items-center">
-                  <h1 className="text-lg p-1 font-semibold">See All Classes and Recording</h1>
+                  <h1 className="text-lg p-1 font-semibold">
+                    See All Classes and Recording
+                  </h1>
                   <ChevronRight size={20} />
                 </div>
               </Link>

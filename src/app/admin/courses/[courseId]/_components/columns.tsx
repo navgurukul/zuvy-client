@@ -43,23 +43,23 @@ const GetdataHandler = (id: number) => {
     );
     setAnotherStudentState(updatedData);
   }
-  useEffect(() => {
-    api
-      .get(`/bootcamp/batches/${id}`)
-      .then((response) => {
-        const transformedData = response.data.map(
-          (item: { id: any; name: any }) => ({
-            value: item.id.toString(),
-            label: item.name,
-          })
-        );
+  // useEffect(() => {
+  //   api
+  //     .get(`/bootcamp/batches/${id}`)
+  //     .then((response) => {
+  //       const transformedData = response.data.map(
+  //         (item: { id: any; name: any }) => ({
+  //           value: item.id.toString(),
+  //           label: item.name,
+  //         })
+  //       );
 
-        setBootcampData(transformedData);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
-  }, [id]);
+  //       setBootcampData(transformedData);
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error fetching data:", error);
+  //     });
+  // }, [id]);
 
   return {
     bootcampData,
@@ -89,18 +89,18 @@ function ComboboxPopover({
   const { bootcampData } = GetdataHandler(id);
 
   return (
-    <div className='flex items-center space-x-4'>
+    <div className="flex items-center space-x-4">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button variant='outline' className='w-[150px] justify-start'>
+          <Button variant="outline" className="w-[150px] justify-start">
             {selectedStatus ? <>{selectedStatus.label}</> : <>{title}</>}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className='p-0' side='right' align='start'>
+        <PopoverContent className="p-0" side="right" align="start">
           <Command>
             <CommandList>
               <CommandEmpty>No results found.</CommandEmpty>
-              <CommandGroup className='flex '>
+              <CommandGroup className="flex ">
                 {bootcampData.map((status) => (
                   <CommandItem
                     key={status.value}
@@ -136,14 +136,14 @@ export const columns: ColumnDef<StudentData>[] = [
       const profilePitcure = student.profilePicture;
       const ImageContainer = () => {
         return profilePitcure ? (
-          <Image src={profilePitcure} alt='profilePic' height={50} width={50} />
+          <Image src={profilePitcure} alt="profilePic" height={50} width={50} />
         ) : (
           <Image
             src={"https://avatar.iran.liara.run/public/boy?username=Ash"}
-            alt='profilePic'
+            alt="profilePic"
             height={35}
             width={35}
-            className='rounded-[50%] ml-2'
+            className="rounded-[50%] ml-2"
           />
         );
       };
@@ -208,38 +208,38 @@ export const columns: ColumnDef<StudentData>[] = [
       const student = row.original;
       //   console.log(student.progress);
       return (
-        <div className='relative size-9'>
+        <div className="relative size-9">
           <svg
-            className='size-full'
-            width='24'
-            height='24'
-            viewBox='0 0 36 36'
-            xmlns='http://www.w3.org/2000/svg'
+            className="size-full"
+            width="24"
+            height="24"
+            viewBox="0 0 36 36"
+            xmlns="http://www.w3.org/2000/svg"
           >
             <circle
-              cx='18'
-              cy='18'
-              r='16'
-              fill='none'
-              className='stroke-current text-gray-200 dark:text-gray-700'
-              strokeWidth='2'
+              cx="18"
+              cy="18"
+              r="16"
+              fill="none"
+              className="stroke-current text-gray-200 dark:text-gray-700"
+              strokeWidth="2"
             ></circle>
-            <g className='origin-center -rotate-90 transform'>
+            <g className="origin-center -rotate-90 transform">
               <circle
-                cx='18'
-                cy='18'
-                r='16'
-                fill='none'
-                className='stroke-current text-secondary dark:text-red-400'
-                strokeWidth='2'
-                strokeDasharray='100'
+                cx="18"
+                cy="18"
+                r="16"
+                fill="none"
+                className="stroke-current text-secondary dark:text-red-400"
+                strokeWidth="2"
+                strokeDasharray="100"
                 strokeDashoffset={`${100 - student.progress}`}
               ></circle>
             </g>
           </svg>
 
-          <div className='absolute top-1/2 start-1/2 transform -translate-y-1/2 -translate-x-1/2'>
-            <span className='text-center text-md font-bold text-gray-800 dark:text-white'>
+          <div className="absolute top-1/2 start-1/2 transform -translate-y-1/2 -translate-x-1/2">
+            <span className="text-center text-md font-bold text-gray-800 dark:text-white">
               {student.progress}
             </span>
           </div>
@@ -274,7 +274,7 @@ export const columns: ColumnDef<StudentData>[] = [
       return (
         <AlertDialog>
           <AlertDialogTrigger>
-            <Trash2 className='text-red-600' size={20} />
+            <Trash2 className="text-red-600" size={20} />
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
@@ -287,7 +287,7 @@ export const columns: ColumnDef<StudentData>[] = [
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
-                className='bg-red-600'
+                className="bg-red-600"
                 onClick={deleteStudentHandler}
               >
                 Continue
