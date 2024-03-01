@@ -74,13 +74,18 @@ const Page: React.FC<pageProps> = () => {
         <h1 className="p-1  text-xl font-semibold">My Courses</h1>
       </div>
       <div className="px-2 py-2 md:px-6 md:py-10 ">
-        <div className="flex items-center justify-start">
-          <h1 className="text-lg font-semibold mb-2">
-            Start from where you left
-          </h1>
-        </div>
+        {enrolledCourse.length > 0 && courseStarted ? (
+          <div className="flex items-center justify-start">
+            <h1 className="text-lg font-semibold mb-2">
+              Start from where you left
+            </h1>
+          </div>
+        ) : (
+          <></>
+        )}
+
         {/* If Course Already Started then Below Message will be displayed: */}
-        {courseStarted ? (
+        {enrolledCourse.length > 0 && courseStarted ? (
           <div className="bg-gradient-to-bl from-blue-50 to-violet-50 rounded-xl  sm:w-full md:w-1/2 lg:w=1/3 p-2 mb-10">
             <div className="px-1 py-4 flex items-start">
               <p className="text-gray-900 text-base">
@@ -112,27 +117,7 @@ const Page: React.FC<pageProps> = () => {
           </div>
         ) : (
           // If No Course Started then Below Message will be displayed:
-          <div className="bg-gradient-to-bl from-blue-50 to-violet-50 rounded-xl  sm:w-full md:w-1/2 lg:w=1/3 p-2 mb-10">
-            <div className="px-1 py-4 flex items-start">
-              <p className="text-gray-900 text-base">
-                You have not started any course yet.
-              </p>
-            </div>
-            <div className=" flex flex-col ">
-              <div className="flex items-center justify-start">
-                <span className=" rounded-full bg-gray-100 p-3 text-black">
-                  <Video size={15} />
-                </span>
-                <p className="text-lg capitalize text-black">
-                  Click on any of your enrolled courses below to start learning
-                </p>
-              </div>
-              <div className="flex p-2 items-center justify-end">
-                <p className="text-lg capitalize ">Happy Learning!</p>
-                <ChevronRight size={20} />
-              </div>
-            </div>
-          </div>
+          <></>
         )}
         <div className=" flex flex-col items-center justify-center">
           <div className="x-5 flex items-center justify-start w-full">

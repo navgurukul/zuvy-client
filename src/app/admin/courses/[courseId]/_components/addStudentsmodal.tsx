@@ -100,7 +100,7 @@ const AddStudentsModal = ({
             value={selectedOption}
             onValueChange={handleStudentUploadType}
           >
-            <div className='flex items-center space-x-2 mr-4'>
+            <div className='flex   space-x-2 mr-4'>
               <RadioGroupItem value={id} id={id} />
               <Label htmlFor={id}>{label}</Label>
             </div>

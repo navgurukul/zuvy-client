@@ -32,6 +32,9 @@ import api from "@/utils/axios.config";
 import AddStudentsModal from "./addStudentsmodal";
 import { toast } from "@/components/ui/use-toast";
 import { Card as card, CardDescription, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
+import { useStudentData } from "@/store/store";
+import { fetchStudentData } from "./students";
 const Batches = ({
   courseID,
   unassigned_students,
@@ -41,8 +44,19 @@ const Batches = ({
 }) => {
   const [unassignedStudents, setUnassignedStudents] =
     useState(unassigned_students);
-
+  const [courses, setCourses] = useState([]);
   const [batches, setBatches] = useState([]);
+  const getBootcamp = () => {
+    try {
+      api.get("/bootcamp").then((response) => setCourses(response.data));
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+    }
+  };
+  useEffect(() => {
+    getBootcamp();
+  }, []);
+
   useEffect(() => {
     const fetchBatches = async () => {
       try {
@@ -252,18 +266,23 @@ const Batches = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 mt-2">
         {batches.length > 0
           ? batches.map((batch: any, index: number) => (
-              <Card key={batch.id} className="text-gray-900 text-base">
-                <div className="bg-white rounded-lg border p-4">
-                  <div className="px-1 py-4 flex flex-col items-start">
-                    <CardTitle className="font-semibold capitalize">
-                      {batch.name}
-                    </CardTitle>
-                    <CardDescription className=" capitalize">
-                      {batch.capEnrollment} <span>Learners</span>
-                    </CardDescription>
+              <Link
+                key={batch.name}
+                href={`/admin/courses/${courseID}/batch/${batch.id}`}
+              >
+                <Card key={batch.id} className="text-gray-900 text-base">
+                  <div className="bg-white rounded-lg border p-4">
+                    <div className="px-1 py-4 flex flex-col items-start">
+                      <CardTitle className="font-semibold capitalize">
+                        {batch.name}
+                      </CardTitle>
+                      <CardDescription className=" capitalize">
+                        {batch.students_enrolled} <span>Learners</span>
+                      </CardDescription>
+                    </div>
                   </div>
-                </div>
-              </Card>
+                </Card>
+              </Link>
             ))
           : null}
       </div>
