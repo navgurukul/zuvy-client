@@ -24,10 +24,10 @@ function page() {
         <div className="flex-1">
           <Schedule />
         </div>
-        <div className="max-sm:w-full">
-          {/* <Stat /> */}
+        {/* <div className="max-sm:w-full">
+          <Stat />
           <Doubt />
-        </div>
+        </div> */}
       </div>
     </div>
   );

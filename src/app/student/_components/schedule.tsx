@@ -93,19 +93,24 @@ function Schedule({ className, ...props }: ScheduleProps) {
             {upcomingClasses?.map((event: any, index) => (
               <div className="grid p-3 gap-4" key={event.id}>
                 <div className="flex flex-wrap justify-between items-center p-4">
-                  <div className="flex items-center">
-                    <PlaySquare />
-                    <p className="text-sm ml-2 font-medium leading-none">
-                      {event.title}
-                    </p>
+                  <div>
+                    <div className="flex items-center">
+                      <PlaySquare />
+                      <p className="text-sm ml-2 font-medium leading-none">
+                        {event.title}
+                      </p>
+                    </div>
+                    <div className="flex items-center mt-2">
+                      <CalendarClock />
+                      <p className="text-sm ml-2 text-muted-foreground">
+                        <Moment format="DD MMM">{event.startTime}</Moment>,
+                        <Moment format="hh:mm">{event.startTime}</Moment>
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex items-center max-sm:mt-2">
-                    <CalendarClock />
-                    <p className="text-sm ml-2 text-muted-foreground">
-                      <Moment format="DD MMM">{event.startTime}</Moment>,
-                      <Moment format="hh:mm">{event.startTime}</Moment>
-                    </p>
-                  </div>
+                  <Link target="_blank" href={event.hangoutLink}>
+                    <Button>Join Now</Button>
+                  </Link>
                 </div>
               </div>
             ))}
