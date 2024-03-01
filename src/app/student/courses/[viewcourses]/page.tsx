@@ -153,7 +153,7 @@ function Page({
               <h1 className="text-lg p-1 font-semibold">Course Modules</h1>
             </div>
 
-            {modulesProgress.length > 0 ? (
+            {modulesProgress?.length > 0 ? (
               modulesProgress.map(
                 ({
                   name,
