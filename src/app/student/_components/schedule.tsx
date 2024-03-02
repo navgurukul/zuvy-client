@@ -61,7 +61,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
       });
   }, []);
 
-  useEffect(() => {}, [upcomingClasses, ongoingClasses, completedClasses]);
+  useEffect(() => { }, [upcomingClasses, ongoingClasses, completedClasses]);
 
   useEffect(() => {
     const getResumeCourse = async () => {
@@ -86,36 +86,77 @@ function Schedule({ className, ...props }: ScheduleProps) {
     <>
       <div className="">
         <Card className={cn("text-start w-full", className)} {...props}>
+          {ongoingClasses && ongoingClasses.length > 0 && (
+            <CardHeader className="bg-muted">
+              <CardTitle>Ongoing Sessions</CardTitle>
+            </CardHeader>
+          )}
+          <CardContent className="grid p-3 gap-4">
+            {ongoingClasses?.length > 0 && (
+              ongoingClasses.map((event: any, index) => (
+                <div className="grid p-3 gap-4" key={event.id}>
+                  <div className="flex flex-wrap justify-between items-center p-4">
+                    <div>
+                      <div className="flex items-center">
+                        <PlaySquare />
+                        <p className="text-sm ml-2 font-medium leading-none">
+                          {event.title}
+                        </p>
+                      </div>
+                      <div className="flex items-center mt-2">
+                        <CalendarClock />
+                        <p className="text-sm ml-2 text-muted-foreground">
+                          <Moment format="DD MMM">{event.startTime}</Moment>,
+                          <Moment format="hh:mm">{event.startTime}</Moment>
+                        </p>
+                      </div>
+                    </div>
+                    <Link target="_blank" href={event.hangoutLink}>
+                      <Button>Join Now</Button>
+                    </Link>
+                  </div>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className={cn("text-start w-full", className)} {...props}>
           <CardHeader className="bg-muted">
             <CardTitle>Upcoming Sessions</CardTitle>
           </CardHeader>
           <CardContent className="grid p-3 gap-4">
-            {upcomingClasses?.map((event: any, index) => (
-              <div className="grid p-3 gap-4" key={event.id}>
-                <div className="flex flex-wrap justify-between items-center p-4">
-                  <div>
-                    <div className="flex items-center">
-                      <PlaySquare />
-                      <p className="text-sm ml-2 font-medium leading-none">
-                        {event.title}
-                      </p>
+            {upcomingClasses && upcomingClasses.length > 0 ? (
+              upcomingClasses.map((event: any, index) => (
+                <div className="grid p-3 gap-4" key={event.id}>
+                  <div className="flex flex-wrap justify-between items-center p-4">
+                    <div>
+                      <div className="flex items-center">
+                        <PlaySquare />
+                        <p className="text-sm ml-2 font-medium leading-none">
+                          {event.title}
+                        </p>
+                      </div>
+                      <div className="flex items-center mt-2">
+                        <CalendarClock />
+                        <p className="text-sm ml-2 text-muted-foreground">
+                          <Moment format="DD MMM">{event.startTime}</Moment>,
+                          <Moment format="hh:mm">{event.startTime}</Moment>
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex items-center mt-2">
-                      <CalendarClock />
-                      <p className="text-sm ml-2 text-muted-foreground">
-                        <Moment format="DD MMM">{event.startTime}</Moment>,
-                        <Moment format="hh:mm">{event.startTime}</Moment>
-                      </p>
-                    </div>
+                    <Link target="_blank" href={event.hangoutLink}>
+                      <Button>Join Now</Button>
+                    </Link>
                   </div>
-                  <Link target="_blank" href={event.hangoutLink}>
-                    <Button>Join Now</Button>
-                  </Link>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p>No upcoming classes found</p>
+            )}
           </CardContent>
         </Card>
+
         {courseStarted ? (
           <Card className={cn(" text-start w-full mt-3", className)} {...props}>
             <CardHeader className="bg-muted">
