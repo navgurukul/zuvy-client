@@ -14,6 +14,15 @@ export function middleware(request: NextRequest) {
     }
     const matcher = ["/", "/student", "/admin", "/volunteer"];
 
+    if (user === "student") {
+        if (
+            request.nextUrl.pathname.startsWith("/admin") &&
+            request.nextUrl.pathname !== "/student"
+        ) {
+            return NextResponse.redirect(new URL("/student", request.url));
+        }
+    }
+
     if (matcher.includes(request.nextUrl.pathname)) {
         if (user === "false") {
             if (request.nextUrl.pathname.startsWith("/student")) {
