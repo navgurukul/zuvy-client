@@ -20,7 +20,7 @@ const InstructorPage = () => {
     <MaxWidthWrapper>
       <div className='flex items-center justify-start'>
         <Avatar>
-          <AvatarImage src={studentData?.profile_picture} />
+          {/* <AvatarImage src={studentData?.profile_picture} /> */}
         </Avatar>{" "}
         <p className='text-[30px]'>
           {`Hi, ${newUserName}! Here's Your Schedule`}
