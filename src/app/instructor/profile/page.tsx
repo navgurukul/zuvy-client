@@ -1,10 +1,11 @@
 "use client";
+import React from "react";
+import Link from "next/link";
+import Image from "next/image";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useLazyLoadedStudentData } from "@/store/store";
-import Image from "next/image";
-import Link from "next/link";
-import React from "react";
 
 type Props = {};
 

@@ -4,9 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-type Props = {};
-
-function RadioCheckbox({}: Props) {
+const RadioCheckbox: React.FC = () => {
   let batches = true;
   return (
     <div className='flex items-center justify-between p-3 w-1/2'>
@@ -52,6 +50,6 @@ function RadioCheckbox({}: Props) {
       </div>
     </div>
   );
-}
+};
 
 export default RadioCheckbox;
