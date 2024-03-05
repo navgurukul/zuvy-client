@@ -4,9 +4,9 @@ import React from "react";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import InstructorCard from "./_components/instructorCard";
 import RadioCheckbox from "./_components/radioCheckbox";
-import { useLazyLoadedStudentData } from "@/store/store";
-
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
+
+import { useLazyLoadedStudentData } from "@/store/store";
 
 const InstructorPage = () => {
   const { studentData } = useLazyLoadedStudentData();

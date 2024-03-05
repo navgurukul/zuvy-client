@@ -1,7 +1,6 @@
 import React from "react";
 
 import { Input } from "@/components/ui/input";
-
 import RadioCheckbox from "../_components/radioCheckbox";
 import InstructorCard from "../_components/instructorCard";
 
