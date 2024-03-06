@@ -15,10 +15,10 @@ export const SidebarRoutes = () => {
 
   const isAdmin = pathname?.includes("/admin");
   const isTeacher = pathname?.includes("/instructor");
-  const routes = !isAdmin
-    ? isTeacher
-      ? teacherRoutes
-      : adminRoutes
+  const routes = isAdmin
+    ? adminRoutes
+    : isTeacher
+    ? teacherRoutes
     : guestRoutes;
   return (
     <div className='flex justify-between flex-col h-full'>
