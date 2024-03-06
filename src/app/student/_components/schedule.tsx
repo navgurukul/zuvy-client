@@ -18,6 +18,7 @@ import api from "@/utils/axios.config";
 import { useLazyLoadedStudentData } from "@/store/store";
 import Link from "next/link";
 import Moment from "react-moment";
+import { divider } from "@nextui-org/react";
 interface ResumeCourse {
   bootcamp_name?: string;
   module_name?: string;
@@ -61,7 +62,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
       });
   }, []);
 
-  useEffect(() => { }, [upcomingClasses, ongoingClasses, completedClasses]);
+  useEffect(() => {}, [upcomingClasses, ongoingClasses, completedClasses]);
 
   useEffect(() => {
     const getResumeCourse = async () => {
@@ -85,14 +86,14 @@ function Schedule({ className, ...props }: ScheduleProps) {
   return (
     <>
       <div className="">
-        <Card className={cn("text-start w-full", className)} {...props}>
-          {ongoingClasses && ongoingClasses.length > 0 && (
-            <CardHeader className="bg-muted">
-              <CardTitle>Ongoing Sessions</CardTitle>
-            </CardHeader>
-          )}
+        <Card className={cn("text-start w-full my-2", className)} {...props}>
+          {/* {ongoingClasses && ongoingClasses.length > 0 && ( */}
+          <CardHeader className="bg-muted">
+            <CardTitle>Ongoing Sessions</CardTitle>
+          </CardHeader>
+          {/* )} */}
           <CardContent className="grid p-3 gap-4">
-            {ongoingClasses?.length > 0 && (
+            {ongoingClasses?.length > 0 ? (
               ongoingClasses.map((event: any, index) => (
                 <div className="grid p-3 gap-4" key={event.id}>
                   <div className="flex flex-wrap justify-between items-center p-4">
@@ -105,7 +106,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                       </div>
                       <div className="flex items-center mt-2">
                         <CalendarClock />
-                        <p className="text-sm ml-2 text-muted-foreground">
+                        <p className="text-sm ml-2">
                           <Moment format="DD MMM">{event.startTime}</Moment>,
                           <Moment format="hh:mm">{event.startTime}</Moment>
                         </p>
@@ -117,6 +118,8 @@ function Schedule({ className, ...props }: ScheduleProps) {
                   </div>
                 </div>
               ))
+            ) : (
+              <div className="p-4">No ongoing classes</div>
             )}
           </CardContent>
         </Card>
@@ -139,7 +142,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                       </div>
                       <div className="flex items-center mt-2">
                         <CalendarClock />
-                        <p className="text-sm ml-2 text-muted-foreground">
+                        <p className="text-sm ml-2">
                           <Moment format="DD MMM">{event.startTime}</Moment>,
                           <Moment format="hh:mm">{event.startTime}</Moment>
                         </p>
