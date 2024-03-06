@@ -1,6 +1,6 @@
 "use client";
 import { ColumnDef } from "@tanstack/react-table";
-import { StudentData } from "../students";
+import { StudentData, deleteStudentHandler } from "../students";
 import { onBatchChange } from "../students";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
@@ -11,6 +11,7 @@ import Image from "next/image";
 import DeleteConfirmationModal from "../deleteModal";
 import { Combobox } from "@/components/ui/combobox";
 import { select } from "@nextui-org/react";
+import { deleteStudentFnData } from "@/store/store";
 
 interface Props {
   studentsData: StudentData[];
@@ -138,26 +139,8 @@ export const studentColumns = (
       const student = row.original;
       const { userId, bootcampId } = student;
       // const { onDeleteHandler } = GetdataHandler(bootcampId);
-      const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
+      const { setDeleteModalOpen, isDeleteModalOpen } = deleteStudentFnData();
 
-      const deleteStudentHandler = async () => {
-        try {
-          await api.delete(`/student/${userId}/${bootcampId}`).then((res) => {
-            // onDeleteHandler(row.id);
-            toast({
-              title: res.data.status,
-              description: res.data.message,
-              className: "text-start capitalize",
-            });
-          });
-        } catch (error) {
-          toast({
-            title: "Failed",
-            variant: "destructive",
-          });
-        }
-        setDeleteModalOpen(false);
-      };
       return (
         <>
           <Trash2
@@ -168,7 +151,9 @@ export const studentColumns = (
           <DeleteConfirmationModal
             isOpen={isDeleteModalOpen}
             onClose={() => setDeleteModalOpen(false)}
-            onConfirm={deleteStudentHandler}
+            onConfirm={() => {
+              deleteStudentHandler(userId, bootcampId, setDeleteModalOpen);
+            }}
             modalText="This action cannot be undone. This will permanently delete the
               student from this bootcamp"
             buttonText="Delete Student"
