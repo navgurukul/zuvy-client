@@ -2,27 +2,35 @@ import { ChevronRight } from "lucide-react";
 import React from "react";
 import Moment from 'react-moment';
 import { toast } from "@/components/ui/use-toast";
+import moment from "moment";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-function ClassCard({ classData, classType }: { classData: any; classType: any }) {
-  const isVideo = classData.s3link 
-  const styles = `
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 60%;
-`;
+function StudentClassCard({ classData, classType }: { classData: any; classType: any }) {
+  const isVideo = classData.s3link
+  const truncateStyle = {
+    maxWidth: '20ch',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
+  };
+  
+  const isToday = (startTime: any) => {
+    const today = moment();
+    const classStartTime = moment(startTime);
+
+    return today.isSame(classStartTime, 'day');
+  };
 
 
   const handleViewRecording = () => {
     if (isVideo) {
       window.open(classData.s3link);
-    } 
-    else{
+    }
+    else {
       toast({
         title: "Recording not yet updated",
         variant: "default",
@@ -45,35 +53,46 @@ function ClassCard({ classData, classType }: { classData: any; classType: any })
       <div className="w-full flex items-center justify-between gap-y-2">
         <div>
           <div className="flex items-center justify-start">
-          <div className={`text-md font-semibold capitalize text-black ${styles}`}>
-          <TooltipProvider>
+
+
+            <div className={`text-md font-semibold capitalize text-black`}>
+              <TooltipProvider>
                 <Tooltip>
-                  <TooltipTrigger>{classData.title}</TooltipTrigger>
+                  <TooltipTrigger style={truncateStyle}>{classData.title}</TooltipTrigger>
                   <TooltipContent>
                     <p>{classData.title}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-</div>
+            </div>
           </div>
           <div className="flex items-center justify-start">
             <p className="text-md font-semibold capitalize text-gray-600">
               <Moment format="hh:mm">{classData.startTime}</Moment> - <Moment format="hh:mm">{classData.endTime}</Moment>
             </p>
           </div>
-          
+
         </div>
         <div className="flex items-center">
-        {classType === "complete" && (
+          {classType === "complete" && (
             <>
-            <a href={classData.s3link} target="_blank">view</a>
-            <ChevronRight size={20} />
-          </>
+              <a href={classData.s3link} target="_blank">view</a>
+              <ChevronRight size={20} />
+            </>
           )}
           {classType !== "complete" && (
             <>
-              <a href={classData.hangoutLink} target="_blank">Join Class</a>
-              <ChevronRight size={20} />
+              {isToday(classData.startTime) ? (
+                <>
+                  <a href={classData.hangoutLink} target="_blank">Join Class</a>
+                  <ChevronRight size={20} />
+                </>
+              ) : (
+                <>
+                <p>Available soon</p>
+                </>
+              )}
+
             </>
           )}
         </div>
@@ -82,4 +101,4 @@ function ClassCard({ classData, classType }: { classData: any; classType: any })
   );
 }
 
-export default ClassCard;
+export default StudentClassCard;

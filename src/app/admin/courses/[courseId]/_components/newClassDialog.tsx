@@ -60,16 +60,31 @@ function DateTimePicker({
 }) {
   const handleDateChange = (event: { target: { value: any } }) => {
     const newDate = event.target.value;
-    const time = dateTime.toISOString().split("T")[1];
-    setDateTime(new Date(`${newDate}T${time}`));
+    const isValidDate = isValidDateString(newDate);
+    if (isValidDate) {
+      const time = dateTime.toISOString().split("T")[1];
+      setDateTime(new Date(`${newDate}T${time}`));
+    } else {  
+      toast({
+        title: "Invalid date",
+        variant: "default",
+        className: "text-start capitalize",
+      });
+    }
   };
+  
+  const isValidDateString = (dateString: string) => {
+    const date = new Date(dateString);
+    return !isNaN(date.getTime());
+  };
+  
 
   const handleTimeChange = (event: { target: { value: any } }) => {
     const date = dateTime.toISOString().split("T")[0];
     const newTime = event.target.value;
     setDateTime(new Date(`${date}T${newTime}:00.000Z`));
   };
-
+  
   return (
     <div className="my-6">
       <Label htmlFor={`${label}DateTime`}>{label}:</Label>

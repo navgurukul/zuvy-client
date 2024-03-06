@@ -11,6 +11,7 @@ import Loader from "../_components/Loader";
 import Image from "next/image";
 import api from "@/utils/axios.config";
 import { Button } from "@/components/ui/button";
+import StudentClassCard from "@/app/student/courses/_components/studentClassCard"
 
 interface CourseProgress {
   status: string;
@@ -23,7 +24,6 @@ interface CourseProgress {
   code: number;
 }
 
-import ClassCard from "@/app/admin/courses/[courseId]/_components/classCard";
 type PageProps = {
   params: {
     viewcourses: string;
@@ -52,12 +52,12 @@ function Page({
     },
   ];
   useEffect(() => {
-    const userIdLocal = JSON.parse(localStorage.getItem("AUTH") || "");
+  
 
     api
       .get(`/bootcamp/studentClasses/${params.viewcourses}`, {
         params: {
-          userId: userIdLocal.id,
+          userId: userID,
         },
       })
       .then((response) => {
@@ -128,14 +128,22 @@ function Page({
             </div>
           </div>
           <div className="gap-y-3 flex flex-col">
+            {(ongoingClasses?.length > 0 || upcomingClasses?.length > 0) && (
+              <div className="flex flex-start">
+                <h1 className="text-lg p-1 font-semibold">Ongoing Classes</h1>
+              </div>
+            )}
+            {ongoingClasses?.length > 0 &&
+              ongoingClasses.map((classObj, index) => (
+                <StudentClassCard classData={classObj} key={index} classType="Ongoing" />
+              ))
+            }
             <div className="flex flex-start">
               <h1 className="text-lg p-1 font-semibold">Upcoming Classes</h1>
             </div>
-
-
             {upcomingClasses?.length > 0 ? (
               upcomingClasses.map((classObj, index) => (
-                <ClassCard classData={classObj} key={index} classType="Upcoming" />
+                <StudentClassCard classData={classObj} key={index} classType="Upcoming" />
               ))
             ) : (
               <p>No upcoming classes found</p>
