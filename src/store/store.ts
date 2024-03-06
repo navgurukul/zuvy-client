@@ -15,6 +15,18 @@ type CounterStore = {
   setAnotherStudentState: (newValue: any[]) => void;
 };
 
+type deleteStudentStore = {
+  isDeleteModalOpen: boolean;
+  setDeleteModalOpen: (newValue: boolean) => void;
+}
+
+export const deleteStudentFnData = create<deleteStudentStore>((set) => ({
+  isDeleteModalOpen: false, 
+  setDeleteModalOpen: (newValue: boolean) => {
+    set({ isDeleteModalOpen: newValue });
+  },
+}));
+
 export const useStudentData = create<CounterStore>((set) => ({
   studentData: null,
   studentsInfo: [],

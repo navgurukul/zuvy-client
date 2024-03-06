@@ -8,12 +8,16 @@ interface DeleteConfirmationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
+  modalText?: string;
+  buttonText?: string;
 }
 
 const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
   isOpen,
   onClose,
   onConfirm,
+  modalText,
+  buttonText,
 }) => {
   return (
     <Transition.Root show={isOpen} as={Fragment}>
@@ -62,9 +66,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                     Permanent Deletion
                   </Dialog.Title>
                   <div className="mt-2">
-                    <p className="text-sm text-gray-500">
-                      Are you sure you want to delete this project?
-                    </p>
+                    <p className="text-sm text-gray-500">{modalText}</p>
                   </div>
                 </div>
               </div>
@@ -83,7 +85,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                   className=" p-2 inline-flex justify-center  rounded-md border border-transparent shadow-sm px-4  bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm"
                   onClick={onConfirm}
                 >
-                  Delete Course
+                  {buttonText}
                 </Button>
               </div>
             </div>
