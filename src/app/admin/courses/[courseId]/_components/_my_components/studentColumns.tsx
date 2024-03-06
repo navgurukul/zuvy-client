@@ -1,6 +1,10 @@
 "use client";
 import { ColumnDef } from "@tanstack/react-table";
-import { StudentData, deleteStudentHandler } from "../students";
+import {
+  StudentData,
+  deleteStudentHandler,
+  fetchStudentData,
+} from "../students";
 import { onBatchChange } from "../students";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
@@ -11,7 +15,7 @@ import Image from "next/image";
 import DeleteConfirmationModal from "../deleteModal";
 import { Combobox } from "@/components/ui/combobox";
 import { select } from "@nextui-org/react";
-import { deleteStudentFnData } from "@/store/store";
+import { getDeleteStudentStore, getStoreStudentData } from "@/store/store";
 
 interface Props {
   studentsData: StudentData[];
@@ -139,7 +143,8 @@ export const studentColumns = (
       const student = row.original;
       const { userId, bootcampId } = student;
       // const { onDeleteHandler } = GetdataHandler(bootcampId);
-      const { setDeleteModalOpen, isDeleteModalOpen } = deleteStudentFnData();
+      const { setDeleteModalOpen, isDeleteModalOpen } = getDeleteStudentStore();
+      const { setStoreStudentData } = getStoreStudentData();
 
       return (
         <>
@@ -152,7 +157,12 @@ export const studentColumns = (
             isOpen={isDeleteModalOpen}
             onClose={() => setDeleteModalOpen(false)}
             onConfirm={() => {
-              deleteStudentHandler(userId, bootcampId, setDeleteModalOpen);
+              deleteStudentHandler(
+                userId,
+                bootcampId,
+                setDeleteModalOpen,
+                setStoreStudentData
+              );
             }}
             modalText="This action cannot be undone. This will permanently delete the
               student from this bootcamp"
