@@ -9,7 +9,8 @@ import api from "@/utils/axios.config";
 import StudentsDataTable from "./dataTable";
 import { columns } from "./columns";
 import { Input } from "@/components/ui/input";
-import { useStudentData } from "@/store/store";
+import { toast } from "@/components/ui/use-toast";
+import { studentColumns } from "./_my_components/studentColumns";
 
 type Props = {
   id: string;
@@ -24,6 +25,12 @@ export type StudentData = {
   progress: number;
   profilePicture: string;
 };
+
+type bootcampData = {
+  value: string;
+  label: string;
+};
+
 export const fetchStudentData = async (id: string, setStudentData: any) => {
   try {
     const response = await api.get(`/bootcamp/students/${id}`);
@@ -35,9 +42,55 @@ export const fetchStudentData = async (id: string, setStudentData: any) => {
   }
 };
 
+export async function onBatchChange(
+  selectedvalue: any,
+  rowData: any,
+  student: any
+) {
+  await api
+    .post(
+      `/bootcamp/students/${student.bootcampId}?batch_id=${selectedvalue}`,
+      {
+        students: [
+          {
+            email: student.email,
+            name: student.name,
+          },
+        ],
+      }
+    )
+    .then((res) => {
+      toast({
+        title: "Students Batch Updated Succesfully",
+        className: "text-start capitalize",
+      });
+    });
+}
+
 const Students = ({ id }: Props) => {
   const [studentsData, setStudentData] = useState<StudentData[]>([]);
-  const { anotherStudentState, setAnotherStudentState } = useStudentData();
+  const [bootcampData, setBootcampData] = useState<bootcampData>();
+  const [studentDataLength, setStudentDataLength] = useState(
+    studentsData.length
+  );
+
+  useEffect(() => {
+    api
+      .get(`/bootcamp/batches/${id}`)
+      .then((response) => {
+        const transformedData = response.data.map(
+          (item: { id: any; name: any }) => ({
+            value: item.id.toString(),
+            label: item.name,
+          })
+        );
+
+        setBootcampData(transformedData);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  }, []);
 
   useEffect(() => {
     const fetchStudentData = async () => {
@@ -45,14 +98,15 @@ const Students = ({ id }: Props) => {
         const response = await api.get(`/bootcamp/students/${id}`);
         const data = response.data;
         setStudentData(data.studentsEmails);
-        setAnotherStudentState(data.studentsEmails);
+        // setAnotherStudentState(data.studentsEmails);
       } catch (error) {
         // Handle error appropriately
         console.error("Error fetching student data:", error);
       }
     };
     fetchStudentData();
-  }, []);
+  }, [studentDataLength]);
+
   return (
     <div>
       {studentsData.length > 0 && (
@@ -70,8 +124,12 @@ const Students = ({ id }: Props) => {
         </div>
       )}
 
-      {studentsData.length > 0 && (
-        <StudentsDataTable columns={columns} data={anotherStudentState} />
+      {studentsData.length > 0 && bootcampData && (
+        // <StudentsDataTable columns={columns} data={studentsData} />
+        <StudentsDataTable
+          columns={studentColumns(bootcampData)}
+          data={studentsData}
+        />
       )}
       {studentsData.length <= 0 && (
         <div className="flex  flex-col items-center justify-center py-12">
