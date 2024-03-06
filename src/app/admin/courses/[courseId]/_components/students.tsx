@@ -10,6 +10,7 @@ import StudentsDataTable from "./dataTable";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { studentColumns } from "./_my_components/studentColumns";
+import { getStoreStudentData } from "@/store/store";
 
 type Props = {
   id: string;
@@ -30,11 +31,14 @@ type bootcampData = {
   label: string;
 };
 
-export const fetchStudentData = async (id: string, setStudentData: any) => {
+export const fetchStudentData = async (
+  id: string,
+  setStoreStudentData: any
+) => {
   try {
     const response = await api.get(`/bootcamp/students/${id}`);
     const data = response.data;
-    setStudentData(data.studentsEmails);
+    setStoreStudentData(data.studentsEmails);
   } catch (error) {
     // Handle error appropriately
     console.error("Error fetching student data:", error);
@@ -69,16 +73,17 @@ export async function onBatchChange(
 export async function deleteStudentHandler(
   userId: any,
   bootcampId: any,
-  setDeleteModalOpen: any
+  setDeleteModalOpen: any,
+  setStudentData: any
 ) {
   try {
     await api.delete(`/student/${userId}/${bootcampId}`).then((res) => {
-      console.log(res);
       toast({
         title: res.data.status,
         description: res.data.message,
         className: "text-start capitalize",
       });
+      fetchStudentData(bootcampId, setStudentData);
     });
   } catch (error) {
     toast({
@@ -90,11 +95,8 @@ export async function deleteStudentHandler(
 }
 
 const Students = ({ id }: Props) => {
-  const [studentsData, setStudentData] = useState<StudentData[]>([]);
+  const { studentsData, setStoreStudentData } = getStoreStudentData();
   const [bootcampData, setBootcampData] = useState<bootcampData>();
-  const [studentDataLength, setStudentDataLength] = useState(
-    studentsData.length
-  );
 
   useEffect(() => {
     api
@@ -119,15 +121,13 @@ const Students = ({ id }: Props) => {
       try {
         const response = await api.get(`/bootcamp/students/${id}`);
         const data = response.data;
-        setStudentData(data.studentsEmails);
-        // setAnotherStudentState(data.studentsEmails);
+        setStoreStudentData(data.studentsEmails);
       } catch (error) {
-        // Handle error appropriately
         console.error("Error fetching student data:", error);
       }
     };
     fetchStudentData();
-  }, [studentDataLength]);
+  }, []);
 
   return (
     <div>

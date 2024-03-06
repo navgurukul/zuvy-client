@@ -18,6 +18,8 @@ import {
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { STUDENT_ONBOARDING_TYPES } from "@/utils/constant";
+import { fetchStudentData } from "./students";
+import { getStoreStudentData } from "@/store/store";
 
 const AddStudentsModal = ({
   id,
@@ -37,6 +39,7 @@ const AddStudentsModal = ({
   // state and variables
   const [selectedOption, setSelectedOption] = useState("1");
   const [studentData, setStudentData] = useState<StudentDataState | any>({});
+  const { setStoreStudentData } = getStoreStudentData();
 
   // func
   const handleSingleStudent = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,11 +70,12 @@ const AddStudentsModal = ({
               description: response.data.message,
               className: "text-start capitalize",
             });
+            fetchStudentData(id, setStoreStudentData);
           });
       } catch (error: any) {
         toast({
-          title: error.data.status,
-          description: error.data.message,
+          title: "Error Adding Students",
+          description: error?.data?.message,
           className: "text-start capitalize",
         });
         console.error("Error", error.message);
