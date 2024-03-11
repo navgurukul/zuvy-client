@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Karla } from "next/font/google";
 // import Navbar from "@/app/_components/Navbar";
 
 import { cn } from "@/lib/utils";
@@ -7,7 +7,7 @@ import { Toaster } from "@/components/ui/toaster";
 
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const karla = Karla({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Zuvy LMS",
@@ -26,12 +26,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang='en' className='light'>
+    <html lang="en" className="light">
       <body
-        className={cn(
-          "min-h-screen text-center font-sans antialiased",
-          inter.className
-        )}
+        className={cn("min-h-screen text-center antialiased", karla.className)}
       >
         {/* <Navbar /> */}
         {children}
