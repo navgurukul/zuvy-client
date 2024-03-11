@@ -5,7 +5,7 @@ import { CircularProgress } from "@nextui-org/react";
 export default function CircularLoader() {
   return (
     <CircularProgress
-      size="md"
+      size="sm"
       value={90}
       color="warning"
       showValueLabel={true}

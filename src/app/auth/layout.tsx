@@ -12,12 +12,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div
-      className={cn(
-        "min-h-screen font-sans antialiased grainy ",
-        karla.className
-      )}
-    >
+    <div className={cn("min-h-screen  antialiased grainy ", karla.className)}>
       <Navbar />
       {children}
     </div>

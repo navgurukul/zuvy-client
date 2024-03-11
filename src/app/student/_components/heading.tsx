@@ -11,7 +11,7 @@ function Heading() {
 
   return (
     <div className="flex align-center justify-between text-start my-2 flex-wrap">
-      <h1 className="text-3xl font-semibold tracking-tight m-0">
+      <h1 className="text-3xl font-bold tracking-tight m-0">
         Welcome back, <span className="text-secondary"> {newUserName}!</span>
       </h1>
       {/* <div className="text-sm font-medium tracking-tight sm:text-end max-sm:mt-2 text-start">

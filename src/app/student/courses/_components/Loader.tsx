@@ -9,7 +9,7 @@ type Props = {
 
 // Default value 0 if progress prop is not provided
 function Loader({ progress = 0 }: Props) {
-  return <Progress value={progress} className="w-[100%] h-1 bg-gray-500" />;
+  return <Progress value={progress} className="w-[100%] h-1 bg-muted" />;
 }
 
 export default Loader;

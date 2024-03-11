@@ -8,6 +8,8 @@ import {
   BookOpenText,
   Calendar,
   CalendarClock,
+  ChevronRight,
+  Clock3,
   GraduationCap,
   PlaySquare,
   SwitchCamera,
@@ -19,6 +21,9 @@ import { useLazyLoadedStudentData } from "@/store/store";
 import Link from "next/link";
 import Moment from "react-moment";
 import { divider } from "@nextui-org/react";
+import { Badge } from "@/components/ui/badge";
+import ClassCard from "@/app/admin/courses/[courseId]/_components/classCard";
+import Image from "next/image";
 interface ResumeCourse {
   bootcamp_name?: string;
   module_name?: string;
@@ -85,81 +90,44 @@ function Schedule({ className, ...props }: ScheduleProps) {
   }, [userID]);
   return (
     <>
-      <div className="">
-        <Card className={cn("text-start w-full my-2", className)} {...props}>
-          {/* {ongoingClasses && ongoingClasses.length > 0 && ( */}
-          <CardHeader className="bg-muted">
-            <CardTitle>Ongoing Sessions</CardTitle>
-          </CardHeader>
-          {/* )} */}
-          <CardContent className="grid p-3 gap-4">
-            {ongoingClasses?.length > 0 ? (
-              ongoingClasses.map((event: any, index) => (
-                <div className="grid p-3 gap-4" key={event.id}>
-                  <div className="flex flex-wrap justify-between items-center p-4">
-                    <div>
-                      <div className="flex items-center">
-                        <PlaySquare />
-                        <p className="text-sm ml-2 font-medium leading-none">
-                          {event.title}
-                        </p>
-                      </div>
-                      <div className="flex items-center mt-2">
-                        <CalendarClock />
-                        <p className="text-sm ml-2">
-                          <Moment format="DD MMM">{event.startTime}</Moment>,
-                          <Moment format="hh:mm">{event.startTime}</Moment>
-                        </p>
-                      </div>
-                    </div>
-                    <Link target="_blank" href={event.hangoutLink}>
-                      <Button>Join Now</Button>
-                    </Link>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="p-4">No ongoing classes</div>
-            )}
-          </CardContent>
-        </Card>
+      <div>
+        {ongoingClasses?.length > 0 || upcomingClasses?.length > 0 ? (
+          <div className="flex left-0  ">
+            <p className="text-lg p-1 font-bold">Upcoming Classes</p>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center mt-12">
+            <Image
+              src={"/no-class.svg"}
+              alt="party popper"
+              width={"240"}
+              height={"240"}
+            />
+            <p className="text-lg mt-3">There are no upcoming classes</p>
+          </div>
+        )}
 
-        <Card className={cn("text-start w-full", className)} {...props}>
-          <CardHeader className="bg-muted">
-            <CardTitle>Upcoming Sessions</CardTitle>
-          </CardHeader>
-          <CardContent className="grid p-3 gap-4">
-            {upcomingClasses && upcomingClasses.length > 0 ? (
-              upcomingClasses.map((event: any, index) => (
-                <div className="grid p-3 gap-4" key={event.id}>
-                  <div className="flex flex-wrap justify-between items-center p-4">
-                    <div>
-                      <div className="flex items-center">
-                        <PlaySquare />
-                        <p className="text-sm ml-2 font-medium leading-none">
-                          {event.title}
-                        </p>
-                      </div>
-                      <div className="flex items-center mt-2">
-                        <CalendarClock />
-                        <p className="text-sm ml-2">
-                          <Moment format="DD MMM">{event.startTime}</Moment>,
-                          <Moment format="hh:mm">{event.startTime}</Moment>
-                        </p>
-                      </div>
-                    </div>
-                    <Link target="_blank" href={event.hangoutLink}>
-                      <Button>Join Now</Button>
-                    </Link>
-                  </div>
-                </div>
+        <div className="w-[720px]">
+          {ongoingClasses?.length > 0
+            ? ongoingClasses.map((classObj, index) => (
+                <ClassCard
+                  classData={classObj}
+                  key={index}
+                  classType="ongoing"
+                />
               ))
-            ) : (
-              <p>No upcoming classes found</p>
-            )}
-          </CardContent>
-        </Card>
+            : null}
 
+          {upcomingClasses?.length > 0
+            ? upcomingClasses.map((classObj, index) => (
+                <ClassCard
+                  classData={classObj}
+                  key={index}
+                  classType="Upcoming"
+                />
+              ))
+            : null}
+        </div>
         {courseStarted ? (
           <Card className={cn(" text-start w-full mt-3", className)} {...props}>
             <CardHeader className="bg-muted">

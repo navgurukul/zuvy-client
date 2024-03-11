@@ -24,6 +24,7 @@ interface CourseProgress {
 }
 
 import ClassCard from "@/app/admin/courses/[courseId]/_components/classCard";
+import CourseCard from "@/app/_components/courseCard";
 type PageProps = {
   params: {
     viewcourses: string;
@@ -112,39 +113,64 @@ function Page({
 
       <div className="md:grid grid-cols-2 lg:grid-cols-3 gap-10  my-10">
         <div className="lg:col-span-2">
-          <div className="flex flex-col items-start mb-10">
-            <div className="block gap-y-4 mt-4   ">
-              <div className="flex items-center justify-center gap-3  ">
-                <div>
-                  <BookMinus size={40} />
-                </div>
-                <div className="flex items-center justify-center flex-col  ">
-                  <div className="">
-                    <h1> {courseProgress?.info?.bootcamp_name}</h1>
-                  </div>
-                  <Loader progress={courseProgress?.info?.progress} />
-                </div>
-              </div>
+          <div className="flex items-center gap-3 mt-2 mb-10">
+            <div>
+              <Image
+                src={"/course.svg"}
+                alt="Course"
+                width={"50"}
+                height={"50"}
+              />
+            </div>
+            <div className="grow text-start">
+              <p className="text-xl font-bold mb-2">
+                {courseProgress?.info?.bootcamp_name}
+              </p>
+              <Loader progress={courseProgress?.info?.progress} />
             </div>
           </div>
+
           <div className="gap-y-3 flex flex-col">
-            <div className="flex flex-start">
-              <h1 className="text-lg p-1 font-semibold">Upcoming Classes</h1>
+            <div className="flex left-0  ">
+              <p className="text-lg p-1 font-bold">Upcoming Classes</p>
             </div>
-
-
-            {upcomingClasses?.length > 0 ? (
-              upcomingClasses.map((classObj, index) => (
-                <ClassCard classData={classObj} key={index} classType="Upcoming" />
-              ))
-            ) : (
-              <p>No upcoming classes found</p>
+            {ongoingClasses?.length > 0 ||
+            upcomingClasses?.length > 0 ? null : (
+              <div className="flex flex-col items-center mt-12">
+                <Image
+                  src={"/no-class.svg"}
+                  alt="party popper"
+                  width={"240"}
+                  height={"240"}
+                />
+                <p className="text-lg mt-3">There are no upcoming classes</p>
+              </div>
             )}
 
-            <div className="flex flex-start">
+            {ongoingClasses?.length > 0
+              ? ongoingClasses.map((classObj, index) => (
+                  <ClassCard
+                    classData={classObj}
+                    key={index}
+                    classType="ongoing"
+                  />
+                ))
+              : null}
+
+            {upcomingClasses?.length > 0
+              ? upcomingClasses.map((classObj, index) => (
+                  <ClassCard
+                    classData={classObj}
+                    key={index}
+                    classType="Upcoming"
+                  />
+                ))
+              : null}
+
+            <div className="flex justify-center mt-3">
               <Link href={`/student/courses/${params.viewcourses}/recordings`}>
-                <div className="flex items-center">
-                  <h1 className="text-lg p-1 font-semibold">
+                <div className="flex items-center border rounded-md border-secondary px-3 py-1 text-secondary">
+                  <h1 className="text-lg p-1 font-bold">
                     See All Classes and Recording
                   </h1>
                   <ChevronRight size={20} />
@@ -155,7 +181,7 @@ function Page({
 
           <div className="mt-10">
             <div className="flex flex-start">
-              <h1 className="text-lg p-1 font-semibold">Course Modules</h1>
+              <p className="text-lg p-1 font-bold">Course Modules</p>
             </div>
 
             {modulesProgress?.length > 0 ? (
@@ -171,45 +197,13 @@ function Page({
                   lock: boolean;
                   progress: number;
                 }) => (
-                  <Link
-                    key={id}
-                    href={`/student/courses/${params.viewcourses}/modules/${id}`}
-                    className={
-                      lock
-                        ? "bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl "
-                        : "bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl pointer-events-none opacity-50"
-                    }
-                  >
-                    <div className="w-full flex items-center justify-between gap-y-2  ">
-                      <div className="flex gap-y-2 flex-col p-2  ">
-                        <div className="flex items-center justify-start  ">
-                          <div className="text-md font-semibold capitalize text-black">
-                            {name}
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-start  ">
-                          <p className="text-md font-semibold capitalize text-gray-600">
-                            Time Commitment: 2weeks
-                          </p>
-                        </div>
-                      </div>
-
-                      {lock ? (
-                        <div key={id} className="">
-                          <CircularProgress
-                            size="md"
-                            value={progress}
-                            color="warning"
-                            showValueLabel={true}
-                          />
-                        </div>
-                      ) : (
-                        <>
-                          <Lock opacity={50} width={35} height={20} />
-                        </>
-                      )}
-                    </div>
-                  </Link>
+                  <CourseCard
+                    param={params.viewcourses}
+                    name={name}
+                    id={id}
+                    lock={lock}
+                    progress={progress}
+                  />
                 )
               )
             ) : (

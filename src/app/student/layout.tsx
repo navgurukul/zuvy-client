@@ -11,7 +11,7 @@ export default function RootLayout({
   return (
     <div
     // className={cn(
-    //   "min-h-screen text-center font-sans antialiased",
+    //   "min-h-screen text-center antialiased",
     //   karla.className
     // )}
     >

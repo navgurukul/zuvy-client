@@ -28,10 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="light">
       <body
-        className={cn(
-          "min-h-screen text-center font-sans antialiased",
-          karla.className
-        )}
+        className={cn("min-h-screen text-center antialiased", karla.className)}
       >
         {/* <Navbar /> */}
         {children}

@@ -23,7 +23,7 @@ const config = {
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
+        foreground: "#4A4A4A",
         primary: {
           DEFAULT: "#2f433a",
           // foreground: "hsl(var(--primary-foreground))",
@@ -31,7 +31,7 @@ const config = {
         },
         secondary: {
           DEFAULT: "#518672",
-          foreground: "hsl(var(--secondary-foreground))",
+          foreground: "#4A4A4A",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
@@ -53,6 +53,9 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        yellow:{
+          DEFAULT: "#FEE8B0"
+        }
       },
       borderRadius: {
         lg: "var(--radius)",

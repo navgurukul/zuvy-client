@@ -1,15 +1,25 @@
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Clock3 } from "lucide-react";
 import React from "react";
-import Moment from 'react-moment';
+import Moment from "react-moment";
 import { toast } from "@/components/ui/use-toast";
-function ClassCard({ classData, classType }: { classData: any; classType: any }) {
-  const isVideo = classData.s3link 
+import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+function ClassCard({
+  classData,
+  classType,
+}: {
+  classData: any;
+  classType: any;
+}) {
+  const isVideo = classData.s3link;
 
   const handleViewRecording = () => {
     if (isVideo) {
-      window.open(classData.s3link, '_blank');
-    } 
-    else{
+      window.open(classData.s3link, "_blank");
+    } else {
       toast({
         title: "Recording not yet updated",
         variant: "default",
@@ -19,44 +29,54 @@ function ClassCard({ classData, classType }: { classData: any; classType: any })
   };
 
   return (
-    <div className="bg-gradient-to-bl p-3 from-blue-50 to-violet-50 flex rounded-xl">
-      <div className="px-1 py-4 flex items-start">
-        <div className="text-gray-900 text-base flex">
-          <div className="flex flex-col items-center justify-center">
-            <span className="text-xl"><Moment format="DD">{classData.startTime}</Moment></span>
-            <span className="text-xl"><Moment format="MMM">{classData.startTime}</Moment></span>
+    <Card className="w-full p-6" key={classData.id}>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <div className="font-bold text-lg flex flex-col">
+            <Moment format="DD">{classData.startTime}</Moment>{" "}
+            <Moment format="MMM">{classData.startTime}</Moment>
           </div>
-          <div className="bg-gray-500 w-[2px] h-15 mx-2" />
+          <Separator
+            orientation="vertical"
+            className="bg-foreground h-[90px]"
+          />
+          <div className="text-start">
+            {classType === "ongoing" ? (
+              <Badge variant="yellow" className="mb-3">
+                Ongoing
+              </Badge>
+            ) : null}
+            <h3 className="text-xl font-bold mb-3">{classData.title}</h3>
+            <div className="text-md flex font-semibold capitalize items-center">
+              <Clock3 className="mr-2" width={20} height={20} />
+              <Moment format="hh:mm A">{classData.startTime}</Moment>
+              <p className="mx-2">-</p>
+              <Moment format="hh:mm A">{classData.endTime}</Moment>
+            </div>
+          </div>
         </div>
-      </div>
-      <div className="w-full flex items-center justify-between gap-y-2">
-        <div>
-          <div className="flex items-center justify-start">
-            <div className="text-md font-semibold capitalize text-black">{classData.title}</div>
-          </div>
-          <div className="flex items-center justify-start">
-            <p className="text-md font-semibold capitalize text-gray-600">
-              <Moment format="hh:mm">{classData.startTime}</Moment> - <Moment format="hh:mm">{classData.endTime}</Moment>
-            </p>
-          </div>
-          {classType === "complete" && (
-            <div>
-              <button onClick={handleViewRecording} className="text-blue-500 underline cursor-pointer focus:outline-none">
-                View Recording
-              </button>
+        <p className="flex items-center text-lg font-bold">
+          {classType !== "complete" ? (
+            <Link
+              target="_blank"
+              href={classData.hangoutLink}
+              className="gap-3 flex items-center text-secondary"
+            >
+              <p>Join Class</p>
+              <ChevronRight size={15} />
+            </Link>
+          ) : (
+            <div
+              onClick={handleViewRecording}
+              className="gap-3 flex items-center text-secondary cursor-pointer"
+            >
+              <p>Watch</p>
+              <ChevronRight size={15} />
             </div>
           )}
-        </div>
-        <div className="flex items-center">
-          {classType !== "complete" && (
-            <>
-              <a href={classData.hangoutLink} target="_blank">Join Class</a>
-              <ChevronRight size={20} />
-            </>
-          )}
-        </div>
+        </p>
       </div>
-    </div>
+    </Card>
   );
 }
 
