@@ -36,7 +36,6 @@
     margin-bottom: 24px;
     display: flex;
     align-items: center;
-    font-family: "Inter", sans-serif;
     padding: 8px 16px;
     display: flex;
     align-items: center;
@@ -67,6 +66,5 @@
     background: #b1b1b1;
     border-radius: 10px;
     margin-bottom: 50px;
-    font-family: "Inter", sans-serif;
     overflow:hidden;
 } */
