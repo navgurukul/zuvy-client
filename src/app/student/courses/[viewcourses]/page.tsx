@@ -198,6 +198,7 @@ function Page({
                   progress: number;
                 }) => (
                   <CourseCard
+                    key={id}
                     param={params.viewcourses}
                     name={name}
                     id={id}
