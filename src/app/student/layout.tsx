@@ -1,11 +1,7 @@
-import { Inter } from "next/font/google";
-
-import "../globals.css";
-import StudentSidebar from "@/app/_components/sidebar";
 import StudentNavbar from "@/app/_components/navbar";
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 
-const inter = Inter({ subsets: ["latin"] });
+import "../globals.css";
 
 export default function RootLayout({
   children,
@@ -15,8 +11,8 @@ export default function RootLayout({
   return (
     <div
     // className={cn(
-    //   "min-h-screen text-center font-sans antialiased",
-    //   inter.className
+    //   "min-h-screen text-center antialiased",
+    //   karla.className
     // )}
     >
       <StudentNavbar />
