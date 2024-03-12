@@ -21,7 +21,7 @@
 }
 
 .newCourseBtn {
-  background: #F4F4F4;
+  background: #f4f4f4;
 }
 
 .contentContainer {
@@ -47,14 +47,14 @@
 }
 
 .content span.active {
-  background: #E2E2E2;
+  background: #e2e2e2;
   font-family: "Inter", sans-serif;
 }
 
 .filterDropdown {
   display: flex;
   align-items: center;
-  background: #E2E2E2;
+  background: #e2e2e2;
   padding: 8px;
   border-radius: 8px;
   font-family: "Inter", sans-serif;
@@ -103,8 +103,7 @@
 }
 
 .newCourseBtn {
-
-  background-color: #F4F4F4;
+  background-color: #f4f4f4;
   padding: 8px 16px;
   cursor: pointer;
 }
@@ -127,7 +126,7 @@
   cursor: pointer;
   border-radius: 4px;
 }
-.createCourseBtnDialog{
+.createCourseBtnDialog {
   background-color: #dedede61;
   color: black;
   border: none;
@@ -138,17 +137,14 @@
   border-radius: 4px;
   float: right;
 }
-.dialogCourseName{
+.dialogCourseName {
   color: #000;
   margin-bottom: 20px;
   margin-top: 10px;
- 
 }
-.newCourse{
+.newCourse {
   margin-bottom: 20px;
 }
-
-
 
 .hrLine {
   width: 100%;
@@ -157,14 +153,11 @@
   border: 1px solid #ccc;
 }
 
-
-
 .courseImage {
   width: auto;
   height: 200px;
   border-radius: 8px;
   margin-bottom: 10px;
-
 }
 
 .uploadImageButton {
@@ -212,7 +205,6 @@
   background-color: #dedede61;
   cursor: pointer;
   border-radius: 5px;
-
 }
 
 .durationButton.active {
@@ -232,8 +224,6 @@
   background-color: #dedede61;
   cursor: pointer;
   margin-right: 15px;
-
-
 }
 
 .languageButton.active {
@@ -271,7 +261,7 @@
 
 .needHelpText {
   margin-bottom: 15px;
-  font-size: small;
-  /* font-weight: 400; */
+  font-size: medium;
 
+  /* font-weight: 400; */
 }

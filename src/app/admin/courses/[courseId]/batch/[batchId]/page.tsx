@@ -4,7 +4,11 @@ import StudentsBatchTable from "./studentsBatchDataTable";
 import { columns } from "./column";
 import api from "@/utils/axios.config";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useStudentData } from "@/store/store";
+import {
+  getDeleteStudentStore,
+  getStoreStudentData,
+  useStudentData,
+} from "@/store/store";
 import { Input } from "@/components/ui/input";
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 import { Trash2 } from "lucide-react";
@@ -59,6 +63,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import DeleteConfirmationModal from "../../_components/deleteModal";
 
 const BatchesInfo = ({
   params,
@@ -70,6 +75,9 @@ const BatchesInfo = ({
   //   const pathname = usePathname();
   //   const matches = pathname.match(/\/(\d+)\/(\d+)\/(\d+)/);
   const [studentsData, setStudentData] = useState<StudentData[]>([]);
+  const [bootcamp, setBootcamp] = useState<any>([]);
+  const { setDeleteModalOpen, isDeleteModalOpen } = getDeleteStudentStore();
+  const { setStoreStudentData } = getStoreStudentData();
   //   const today = new Date();
   //   const year = today.getFullYear();
   //   const month = String(today.getMonth() + 1).padStart(2, "0"); // Months are zero-based
@@ -81,7 +89,7 @@ const BatchesInfo = ({
       href: `/admin/courses`,
     },
     {
-      crumb: `Batch`,
+      crumb: `${bootcamp?.name}`,
       href: `/admin/courses/${
         studentsData.length > 0 ? studentsData[0].bootcampId : ""
       }`,
@@ -195,30 +203,39 @@ const BatchesInfo = ({
       });
     }
   };
+  useEffect(() => {
+    const getBootCamp = async () => {
+      const response = await api
+        .get(`/bootcamp/${params.courseId}`)
+        .then((response) => setBootcamp(response.data.bootcamp));
+    };
+    getBootCamp();
+  }, []);
+
   return (
     <>
       <Breadcrumb crumbs={crumbs} />
-      <MaxWidthWrapper className="p-4">
-        <div className="flex justify-between">
-          <div className="w-1/2 flex flex-col items-start ">
-            <div className="">
-              <h1 className="capitalize text-start text-[30px] font-semibold">
+      <MaxWidthWrapper className='p-4'>
+        <div className='flex justify-between'>
+          <div className='w-1/2 flex flex-col items-start '>
+            <div className=''>
+              <h1 className='capitalize text-start text-[30px] font-semibold'>
                 {studentsData.length > 0 ? studentsData[0].batchName : ""}
               </h1>
             </div>
             <Input
-              type="search"
-              placeholder="Student Name, Email"
-              className="w-1/2 my-12"
+              type='search'
+              placeholder='Student Name, Email'
+              className='w-1/2 my-12'
               disabled
             />
           </div>
-          <div className="flex m-4">
-            <div className="flex items-center mx-4 text-sm">
+          <div className='flex m-4'>
+            <div className='flex items-center mx-4 text-sm'>
               <Dialog>
                 <DialogTrigger asChild>
-                  <button className="flex ">
-                    <Pencil size={18} className="mx-4" />
+                  <button className='flex '>
+                    <Pencil size={18} className='mx-4' />
                     Edit Batch
                   </button>
                 </DialogTrigger>
@@ -229,16 +246,16 @@ const BatchesInfo = ({
                     <Form {...form}>
                       <form
                         onSubmit={form.handleSubmit(onSubmit)}
-                        className="space-y-8"
+                        className='space-y-8'
                       >
                         <FormField
                           control={form.control}
-                          name="name"
+                          name='name'
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Batch Name</FormLabel>
                               <FormControl>
-                                <Input placeholder="Batch Name" {...field} />
+                                <Input placeholder='Batch Name' {...field} />
                               </FormControl>
 
                               <FormMessage />
@@ -247,14 +264,14 @@ const BatchesInfo = ({
                         />
                         <FormField
                           control={form.control}
-                          name="instructorId"
+                          name='instructorId'
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Instructor Id</FormLabel>
                               <FormControl>
                                 <Input
-                                  placeholder="20230"
-                                  type="name"
+                                  placeholder='20230'
+                                  type='name'
                                   {...field}
                                 />
                               </FormControl>
@@ -264,14 +281,14 @@ const BatchesInfo = ({
                         />
                         <FormField
                           control={form.control}
-                          name="capEnrollment"
+                          name='capEnrollment'
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Cap Enrollment</FormLabel>
                               <FormControl>
                                 <Input
-                                  placeholder="Cap Enrollment"
-                                  type="number"
+                                  placeholder='Cap Enrollment'
+                                  type='number'
                                   {...field}
                                 />
                               </FormControl>
@@ -282,9 +299,9 @@ const BatchesInfo = ({
                         <FormDescription>
                           This form will Update the batch info
                         </FormDescription>
-                        <div className="w-full flex flex-col items-end gap-y-5 ">
+                        <div className='w-full flex flex-col items-end gap-y-5 '>
                           <DialogClose asChild>
-                            <Button className="w-1/2" type="submit">
+                            <Button className='w-1/2' type='submit'>
                               Update batch
                             </Button>
                           </DialogClose>
@@ -295,33 +312,29 @@ const BatchesInfo = ({
                 </DialogContent>
               </Dialog>
             </div>
-            <div className="flex items-center text-sm">
-              <AlertDialog>
-                <AlertDialogTrigger className="flex">
-                  <Trash2 size={20} className="text-red-500 mx-4" />
-                  <p className="text-red-500">Delete</p>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      Are you absolutely sure?
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete
-                      this batch
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={batchDeleteHandler}
-                      className="bg-red-500"
-                    >
-                      Continue
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+            <div className='flex items-center text-sm'>
+              <Trash2
+                onClick={() => setDeleteModalOpen(true)}
+                className='text-red-600 cursor-pointer'
+                size={20}
+              ></Trash2>
+              <span
+                onClick={() => setDeleteModalOpen(true)}
+                className=' cursor-pointer ml-2'
+              >
+                Delete
+              </span>
+
+              <DeleteConfirmationModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setDeleteModalOpen(false)}
+                onConfirm={batchDeleteHandler}
+                modalText='Please confirm the deletion by typing the below sentence'
+                modalText2='I give confirmation to delete '
+                input={true}
+                buttonText='Delete Batch'
+                batchName={studentsData[0]?.batchName}
+              />
             </div>
           </div>
         </div>

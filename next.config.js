@@ -28,6 +28,11 @@ const nextConfig = {
         hostname: "avatar.iran.liara.run",
         // Optional: Define a pathname pattern if needed
       },
+      {
+        hostname: "placehold.co",
+      },
+      { hostname: "www.google.com" },
+      { hostname: "plus.unsplash.com" },
     ],
   },
 };

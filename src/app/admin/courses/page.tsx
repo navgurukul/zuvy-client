@@ -85,18 +85,18 @@ const Courses: React.FC = () => {
       <div>
         <div className={styles.searchContainer}>
           <Input
-            type="text"
-            placeholder="Search"
+            type='text'
+            placeholder='Search'
             // className={styles.searchInput}
-            className="max-w-[500px]"
+            className='max-w-[500px]'
             value={searchQuery}
             onChange={handleSearchChange}
             disabled
           />
           <Dialog>
             <DialogTrigger asChild>
-              <Button className="text-white bg-secondary">
-                <Plus className="w-5 mr-2" />
+              <Button className='text-white bg-secondary'>
+                <Plus className='w-5 mr-2' />
                 <p>New Course</p>
               </Button>
             </DialogTrigger>
@@ -108,7 +108,7 @@ const Courses: React.FC = () => {
             />
           </Dialog>
         </div>
-        <div className="flex mt-5 mb-10">
+        <div className='flex mt-5 mb-10'>
           {/* <div className="flex mr-2">
             {COURSE_FILTER.map((filter: any) => (
               <p
@@ -132,16 +132,16 @@ const Courses: React.FC = () => {
             </p>
           </div> */}
         </div>
-        <div className="my-5 flex justify-center items-center">
+        <div className='my-5 flex justify-center items-center'>
           {courses.length === 0 ? (
-            <div className="mt-24">
+            <div className='mt-24'>
               <h4 className={styles.firstCourseText}>
                 Create your first course and share with students
               </h4>
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button className="text-white bg-secondary">
-                    <Plus className="w-5 mr-2" />
+                  <Button className='text-white bg-secondary'>
+                    <Plus className='w-5 mr-2' />
                     <p>New Course</p>
                   </Button>
                 </DialogTrigger>
@@ -158,27 +158,27 @@ const Courses: React.FC = () => {
               </p>
             </div>
           ) : (
-            <div className="flex flex-wrap justify-center gap-3">
+            <div className='flex flex-wrap justify-center gap-3'>
               {courses.map((course, index) => (
                 <Card
                   key={index}
-                  className="h-max w-[400px] cursor-pointer"
+                  className='h-max w-[400px] cursor-pointer'
                   onClick={() => handleCardClick(course.id.toString())}
                 >
-                  <div className="bg-muted flex justify-center h-[200px] relative overflow-hidden rounded-sm">
+                  <div className='bg-muted flex justify-center h-[200px] relative overflow-hidden rounded-sm'>
                     <OptimizedImageWithFallback
                       src={course.coverImage}
                       alt={course.name}
                       fallBackSrc={"/logo_white.png"}
                     />
                   </div>
-                  <div className="text-start px-4 py-3 bg-muted">
-                    <p className="capitalize mb-2 font-semibold">
+                  <div className='text-start px-4 py-3 bg-muted'>
+                    <p className='capitalize mb-2 font-semibold'>
                       {course.name}
                     </p>
-                    <div className="flex gap-2 items-center">
+                    <div className='flex gap-2 items-center'>
                       <GraduationCap width={20} />
-                      <span className="text-sm font-semibold">
+                      <span className='text-sm font-semibold'>
                         {course.students_in_bootcamp} Learners
                       </span>
                       {/* <span>{course.date}</span> */}
