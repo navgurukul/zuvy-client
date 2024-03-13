@@ -253,7 +253,6 @@ const Batches = ({
       );
     }
   };
-  console.log(batches);
   return (
     <div>
       <div className=' relative flex items-center justify-between mb-6'>
