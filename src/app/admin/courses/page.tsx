@@ -48,7 +48,7 @@ const Courses: React.FC = () => {
 
   const getBootcamp = () => {
     try {
-      api.get("/bootcamp").then((response) => setCourses(response.data));
+      api.get("/bootcamp").then((response) => setCourses(response.data.data));
     } catch (error) {
       console.error("Error fetching courses:", error);
     }
