@@ -61,7 +61,7 @@ const Batches = ({
     const fetchBatches = async () => {
       try {
         const response = await api.get(`/bootcamp/batches/${courseID}`);
-        setBatches(response.data);
+        setBatches(response.data.data);
       } catch (error: any) {
         console.log(error.message);
       }
