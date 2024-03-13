@@ -26,6 +26,13 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
   input,
   modalText2,
 }) => {
+  const [inputValue, setInputValue] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setInputValue(value);
+  };
+
   return (
     <Transition.Root show={isOpen} as={Fragment}>
       <Dialog
@@ -79,7 +86,17 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                     </p>
                   </div>
                 </div>
-                {input && <Input placeholder='Type Here' className='p-3' />}
+                {input && (
+                  <div>
+                    <Input
+                      placeholder='Type Batch Name'
+                      className='p-3'
+                      onChange={handleInputChange}
+                      value={inputValue}
+                    />
+                    {<p style={{ color: "red" }}>{error}</p>}
+                  </div>
+                )}
               </div>
               <div className='mt-5 sm:mt-6 flex justify-end gap-2'>
                 <Button

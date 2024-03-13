@@ -32,7 +32,7 @@ const nextConfig = {
         hostname: "placehold.co",
       },
       { hostname: "www.google.com" },
-      { hostname: "plus.unsplash.com" },
+      { hostname: "images.unsplash.com" },
     ],
   },
 };

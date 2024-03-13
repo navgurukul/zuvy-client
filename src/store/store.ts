@@ -19,10 +19,10 @@ type CounterStore = {
 type deleteStudentStore = {
   isDeleteModalOpen: boolean;
   setDeleteModalOpen: (newValue: boolean) => void;
-}
+};
 
 export const getDeleteStudentStore = create<deleteStudentStore>((set) => ({
-  isDeleteModalOpen: false, 
+  isDeleteModalOpen: false,
   setDeleteModalOpen: (newValue: boolean) => {
     set({ isDeleteModalOpen: newValue });
   },
@@ -32,10 +32,10 @@ export const getDeleteStudentStore = create<deleteStudentStore>((set) => ({
 type storeStudentData = {
   studentsData: any[];
   setStoreStudentData: (newValue: any[]) => void;
-}
+};
 
 export const getStoreStudentData = create<storeStudentData>((set) => ({
-  studentsData: [], 
+  studentsData: [],
   setStoreStudentData: (newValue: any[]) => {
     set({ studentsData: newValue });
   },

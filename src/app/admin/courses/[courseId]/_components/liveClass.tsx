@@ -18,8 +18,17 @@ function LiveClass({ courseId }: { courseId: string }) {
   const [upcomingClasses, setUpcomingClasses] = useState([]);
   const [ongoingClasses, setOngoingClasses] = useState([]);
   const [completedClasses, setCompletedClasses] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(null);
 
   // func
+
+  const handleDateChange = (date: any) => {
+    setSelectedDate(date);
+  };
+  const isFutureDate = (date: any) => {
+    const currentDate = new Date();
+    return date >= currentDate;
+  };
 
   const handleClassType = (
     type: string | "active" | "complete" | "upcoming"
@@ -435,7 +444,7 @@ function LiveClass({ courseId }: { courseId: string }) {
           <Dialog>
             <DialogTrigger asChild>
               <Button className='text-white bg-secondary'>
-                <p>+ Create Session</p>
+                <span>+ Create Session</span>
               </Button>
             </DialogTrigger>
             <DialogOverlay />

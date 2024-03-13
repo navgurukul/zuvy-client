@@ -61,7 +61,7 @@ const Batches = ({
     const fetchBatches = async () => {
       try {
         const response = await api.get(`/bootcamp/batches/${courseID}`);
-        setBatches(response.data);
+        setBatches(response.data.batchesWithEnrollment);
       } catch (error: any) {
         console.log(error.message);
       }
@@ -253,7 +253,7 @@ const Batches = ({
       );
     }
   };
-
+  console.log(batches);
   return (
     <div>
       <div className=' relative flex items-center justify-between mb-6'>
@@ -293,7 +293,7 @@ const Batches = ({
               fill='none'
               xmlns='http://www.w3.org/2000/svg'
             >
-              <g clip-path='url(#clip0_20571_2947)'>
+              <g clipPath='url(#clip0_20571_2947)'>
                 <path
                   d='M252.805 86.9175H30.6217C27.6436 86.9175 25.2207 84.4871 25.2207 81.4994V5.41776C25.2207 2.43039 27.6436 0 30.6217 0H252.805C255.784 0 258.207 2.43039 258.207 5.41776V81.4994C258.207 84.4871 255.784 86.9175 252.805 86.9175ZM30.6217 0.645917C27.9987 0.645917 25.8646 2.78662 25.8646 5.41776V81.4994C25.8646 84.1307 27.9987 86.2716 30.6217 86.2716H252.805C255.428 86.2716 257.563 84.1307 257.563 81.4994V5.41776C257.563 2.78662 255.428 0.645917 252.805 0.645917H30.6217Z'
                   fill='#3F3D56'

@@ -15,6 +15,8 @@ import OptimizedImageWithFallback from "@/components/ImageWithFallback";
 
 import styles from "./_components/cources.module.css";
 import { COURSE_FILTER } from "@/utils/constant";
+import Link from "next/link";
+import Image from "next/image";
 
 interface Course {
   name: string;
@@ -48,7 +50,7 @@ const Courses: React.FC = () => {
 
   const getBootcamp = () => {
     try {
-      api.get("/bootcamp").then((response) => setCourses(response.data));
+      api.get("/bootcamp").then((response) => setCourses(response.data.data));
     } catch (error) {
       console.error("Error fetching courses:", error);
     }
@@ -78,6 +80,8 @@ const Courses: React.FC = () => {
   useEffect(() => {
     getBootcamp();
   }, []);
+
+  console.log(courses);
 
   return (
     <div>
@@ -156,6 +160,27 @@ const Courses: React.FC = () => {
               <p className={styles.needHelpText}>
                 Need help getting started? Checkout the tutorials below
               </p>
+              <div className=' m-0 flex items-center justify-center'>
+                <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4'>
+                  <Link href={""}>
+                    <div className='bg-white rounded-lg border p-4'>
+                      <Image
+                        src='https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Ym9va3N8ZW58MHx8MHx8fDA%3D'
+                        alt='Placeholder Image'
+                        className=' object-contain'
+                        height={48}
+                        width={300}
+                      />
+                      <div className='px-1 py-4'>
+                        <div className='font-semibold text-xl mb-2'>
+                          {" "}
+                          How to create a new course
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                </div>
+              </div>
             </div>
           ) : (
             <div className='flex flex-wrap justify-center gap-3'>

@@ -7,7 +7,8 @@ import api from "@/utils/axios.config";
 import { DropdownMenuDemo } from "./DropdownMenu";
 import { Toast } from "@/components/ui/toast";
 import { toast } from "@/components/ui/use-toast";
-
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 const Settings = ({ courseId }: { courseId: string }) => {
   // misc
   const router = useRouter();
@@ -35,6 +36,39 @@ const Settings = ({ courseId }: { courseId: string }) => {
   return (
     <div>
       <div className=' w-full text-start mb-5'>
+        <div>
+          <h1 className='text-lg font-semibold'>Course Type</h1>
+          <div className='flex mt-2 flex-col gap-y-3 items-start'>
+            <div className='flex items-center space-x-2'>
+              <RadioGroup
+                className='flex flex-col justify-start items-start '
+                defaultValue='comfortable'
+              >
+                <div className='flex flex-col   space-x-2'>
+                  <div className='flex gap-x-3'>
+                    <RadioGroupItem value='comfortable' id='r2' />
+                    <Label htmlFor='r2'>Invite Only</Label>
+                  </div>
+                  <p>
+                    The students will need to be added to the invite only
+                    courses. They have access the courses without enrollement.
+                  </p>
+                </div>
+                <div className='flex flex-col  space-x-2'>
+                  <div className='flex gap-x-3'>
+                    <RadioGroupItem value='compact' id='r3' />
+                    <Label htmlFor='r3'>Open</Label>
+                  </div>
+                  <p>
+                    The students will need to be added to the invite only
+                    courses. They have access the courses without enrollement.
+                  </p>
+                </div>
+              </RadioGroup>
+            </div>
+          </div>
+        </div>
+
         <h1 className='text-lg font-semibold'>Course Status</h1>
         <p>
           This course has not been published yet. You will able to unpublish it
@@ -62,8 +96,8 @@ const Settings = ({ courseId }: { courseId: string }) => {
           modalText='Are you sure you want to delete this Bootcamp?'
           buttonText='Delete Course'
           input={false}
-          modalText2=""
-          batchName=""
+          modalText2=''
+          batchName=''
         />
       </div>
     </div>
