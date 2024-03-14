@@ -6,11 +6,33 @@ import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import api from "@/utils/axios.config";
 import ClassCard from "@/app/admin/courses/[courseId]/_components/classCard";
+import { useLazyLoadedStudentData } from "@/store/store";
 type PageProps = {
   params: {
     viewcourses: string;
   };
 };
+
+interface Bootcamp {
+  id: number;
+  name: string;
+  coverImage: string;
+  bootcampTopic: string;
+  startTime: string;
+  duration: string;
+  language: string;
+  createdAt: string;
+  updatedAt: string;
+  students_in_bootcamp: number;
+  unassigned_students: number;
+}
+
+interface BootcampData {
+  status: string;
+  message: string;
+  code: number;
+  bootcamp: Bootcamp;
+}
 
 function Page({
   params,
@@ -20,10 +42,13 @@ function Page({
   const [upcomingClasses, setUpcomingClasses] = useState([]);
   const [ongoingClasses, setOngoingClasses] = useState([]);
   const [completedClasses, setCompletedClasses] = useState([]);
+  const { studentData } = useLazyLoadedStudentData();
+  const [bootcampData, setBootcampData] = useState({} as BootcampData);
+  const userID = studentData?.id && studentData?.id;
   const crumbs = [
     { crumb: "My Courses", href: "/student/courses" },
     {
-      crumb: "AFE + Navgurukul Coding Bootcamp",
+      crumb: `${bootcampData?.bootcamp?.name}` || `Bootcamp name`,
       href: `/student/courses/${params.viewcourses}`,
     },
     {
@@ -32,12 +57,10 @@ function Page({
     },
   ];
   useEffect(() => {
-    const userIdLocal = JSON.parse(localStorage.getItem("AUTH") || "");
-
     api
       .get(`/bootcamp/studentClasses/${params.viewcourses}`, {
         params: {
-          userId: userIdLocal.id,
+          userId: userID,
         },
       })
       .then((response) => {
@@ -49,6 +72,17 @@ function Page({
       })
       .catch((error) => {
         console.log("Error fetching classes:", error);
+      });
+  }, [userID]);
+
+  useEffect(() => {
+    api
+      .get(`/bootcamp/${params.viewcourses}`)
+      .then((response) => {
+        setBootcampData(response.data);
+      })
+      .catch((error) => {
+        console.log("Error fetching bootcamp data:", error);
       });
   }, []);
 

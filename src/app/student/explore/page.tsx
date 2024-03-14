@@ -105,9 +105,18 @@ const ExploreCourses = () => {
       ? searchedCourses.slice(indexOfFirstItem, indexOfLastItem)
       : allPublicCourses.slice(indexOfFirstItem, indexOfLastItem);
 
-  const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleItemsPerPageChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     setItemsPerPage(Number(e.target.value));
-    setCurrentPage(1); // reset to first page when items per page changes
+    const newTotalPages = Math.ceil(
+      allPublicCourses.length / Number(e.target.value)
+    );
+    if (currentPage > newTotalPages) {
+      setCurrentPage(newTotalPages);
+    } else {
+      setCurrentPage(1); // reset to first page when items per page changes
+    }
   };
 
   return (
@@ -203,10 +212,7 @@ const ExploreCourses = () => {
               />
             </PaginationItem>
             <PaginationItem>
-              <select
-                onChange={(e) => setItemsPerPage(parseInt(e.target.value))}
-                value={itemsPerPage}
-              >
+              <select onChange={handleItemsPerPageChange} value={itemsPerPage}>
                 <option value="1">1</option>
                 <option value="20">20</option>
                 <option value="30">30</option>
