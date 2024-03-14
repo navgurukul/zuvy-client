@@ -1,15 +1,23 @@
-import axios from 'axios';
+'use client';
 
-const baseURL= process.env.NEXT_PUBLIC_MAIN_URL;
+import axios, { AxiosRequestConfig } from 'axios';
 
-const token = localStorage.getItem("token");
+const baseURL = process.env.NEXT_PUBLIC_MAIN_URL;
+
+let headers: AxiosRequestConfig['headers'] = {
+  'Content-Type': 'application/json'
+};
+
+if (typeof window !== 'undefined') {
+  const token = localStorage.getItem("token");
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+}
 
 const api = axios.create({
   baseURL,
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
-  },
+  headers
 });
 
 export default api;
