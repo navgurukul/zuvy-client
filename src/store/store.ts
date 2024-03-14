@@ -13,16 +13,17 @@ type CounterStore = {
   setStudentsInfo: (newStudentsInfo: any[]) => void;
   anotherStudentState: any[]; // Add another state
   setAnotherStudentState: (newValue: any[]) => void;
+  token: any;
 };
 
 // ------------------------------
 type deleteStudentStore = {
   isDeleteModalOpen: boolean;
   setDeleteModalOpen: (newValue: boolean) => void;
-}
+};
 
 export const getDeleteStudentStore = create<deleteStudentStore>((set) => ({
-  isDeleteModalOpen: false, 
+  isDeleteModalOpen: false,
   setDeleteModalOpen: (newValue: boolean) => {
     set({ isDeleteModalOpen: newValue });
   },
@@ -32,10 +33,10 @@ export const getDeleteStudentStore = create<deleteStudentStore>((set) => ({
 type storeStudentData = {
   studentsData: any[];
   setStoreStudentData: (newValue: any[]) => void;
-}
+};
 
 export const getStoreStudentData = create<storeStudentData>((set) => ({
-  studentsData: [], 
+  studentsData: [],
   setStoreStudentData: (newValue: any[]) => {
     set({ studentsData: newValue });
   },
@@ -46,6 +47,7 @@ export const getStoreStudentData = create<storeStudentData>((set) => ({
 export const useStudentData = create<CounterStore>((set) => ({
   studentData: null,
   studentsInfo: [],
+  token: null,
   setStudentsInfo: (newStudentsInfo: any[]) => {
     set({ studentsInfo: newStudentsInfo });
   },
@@ -58,16 +60,22 @@ export const useStudentData = create<CounterStore>((set) => ({
 export const initializeStudentData = () => {
   if (typeof window !== "undefined") {
     const storedData = localStorage.getItem("AUTH");
-    return JSON.parse(storedData || "{}");
+    const token = localStorage.getItem("token");
+
+    return {
+      studentData: JSON.parse(storedData || "{}"),
+      token: token || null,
+    };
   }
 
-  return null;
+  return { studentData: null, token: null };
 };
 
 export const useLazyLoadedStudentData = () => {
   const {
     studentData,
     studentsInfo,
+    token,
     setStudentsInfo,
     anotherStudentState,
     setAnotherStudentState,
@@ -75,8 +83,11 @@ export const useLazyLoadedStudentData = () => {
 
   useEffect(() => {
     const initializeData = async () => {
-      const initializedData = initializeStudentData();
+      const { studentData: initializedData, token } = initializeStudentData();
       useStudentData.setState({ studentData: initializedData });
+
+      // Now you have access to the token and can use it as needed
+      console.log("Token:", token);
     };
 
     initializeData();

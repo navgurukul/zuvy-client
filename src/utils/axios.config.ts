@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import axios, { AxiosRequestConfig } from 'axios';
+import axios, { AxiosRequestConfig } from "axios";
 
 const baseURL = process.env.NEXT_PUBLIC_MAIN_URL;
 
-let headers: AxiosRequestConfig['headers'] = {
-  'Content-Type': 'application/json'
+let headers: AxiosRequestConfig["headers"] = {
+  "Content-Type": "application/json",
 };
 
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   const token = localStorage.getItem("token");
   if (token) {
     headers.Authorization = `Bearer ${token}`;
@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
 
 const api = axios.create({
   baseURL,
-  headers
+  headers,
 });
 
 export default api;
