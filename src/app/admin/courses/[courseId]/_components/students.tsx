@@ -107,7 +107,7 @@ export async function deleteStudentHandler(
 
 const Students = ({ id }: Props) => {
   const [pageSize, setPageSize] = useState<string>("10");
-  const [position, setPosition] = useState("");
+  const [position, setPosition] = useState("10");
   const { studentsData, setStoreStudentData } = getStoreStudentData();
   const [bootcampData, setBootcampData] = useState<bootcampData>();
   const [paginateStudentData, setPaginatedStudentData] = useState<any>([]);
@@ -120,10 +120,10 @@ const Students = ({ id }: Props) => {
   const debouncedSearch = useDebounce(search, 1000);
 
   const nextPageHandler = () => {
-    setOffset((prevState) => +pageSize + offset);
+    setOffset((prevState) => +position + offset);
   };
   const prevPageHandler = () => {
-    setOffset((prevState) => Math.max(0, prevState - +pageSize));
+    setOffset((prevState) => Math.max(0, prevState - +position));
   };
   useEffect(() => {
     api
@@ -145,7 +145,7 @@ const Students = ({ id }: Props) => {
   const fetchStudentData = async () => {
     try {
       await api
-        .get(`/bootcamp/students/${id}?limit=${pageSize}&offset=${offset}`)
+        .get(`/bootcamp/students/${id}?limit=${position}&offset=${offset}`)
         .then((response) => {
           setPaginatedStudentData(response.data.studentsEmails);
           setPages(response.data.totalPages);
@@ -157,7 +157,7 @@ const Students = ({ id }: Props) => {
   };
   useEffect(() => {
     fetchStudentData();
-  }, [offset, pageSize]);
+  }, [offset, position]);
 
   useEffect(() => {
     //Search The Api
@@ -176,10 +176,8 @@ const Students = ({ id }: Props) => {
   const handleSetsearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
   };
-  const pageSizeHandler = () => {
-    setPageSize(position);
-  };
 
+  // console.log(position);
   return (
     <div>
       {studentsData.length > 0 && (
@@ -209,7 +207,7 @@ const Students = ({ id }: Props) => {
             data={paginateStudentData}
           />
           <div className='flex flex-row justify-end items-center w-full gap-x-2 '>
-            <span>Rows per page: {10}</span>
+            <span>Rows per page: {position}</span>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant='outline'>
@@ -232,7 +230,6 @@ const Students = ({ id }: Props) => {
                 <DropdownMenuRadioGroup
                   value={position}
                   onValueChange={setPosition}
-                  onChange={pageSizeHandler}
                 >
                   {ROWS_PER_PAGE.map((rowItem) => {
                     return (
