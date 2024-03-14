@@ -1,9 +1,19 @@
-import { useLazyLoadedStudentData } from "@/store/store";
-import axios from "axios";
+"use client";
+
+import axios, { AxiosRequestConfig } from "axios";
 
 const baseURL = process.env.NEXT_PUBLIC_MAIN_URL;
 
-const token = localStorage.getItem("token");
+let headers: AxiosRequestConfig["headers"] = {
+  "Content-Type": "application/json",
+};
+
+if (typeof window !== "undefined") {
+  const token = localStorage.getItem("token");
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+}
 
 // const AuthTokenData = () => {
 //   const { token }: any = useLazyLoadedStudentData();
@@ -12,10 +22,7 @@ const token = localStorage.getItem("token");
 // console.log(AuthTokenData());
 const api = axios.create({
   baseURL,
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`,
-  },
+  headers,
 });
 
 export default api;
