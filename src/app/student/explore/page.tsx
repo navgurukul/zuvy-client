@@ -58,7 +58,7 @@ const ExploreCourses = () => {
     []
   );
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   let totalPages = Math.ceil(allPublicCourses.length / itemsPerPage);
 
@@ -112,11 +112,18 @@ const ExploreCourses = () => {
 
   return (
     <>
-      <div className={styles.searchContainer + `flex items-center`}>
+      <div
+        className={styles.searchContainer}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "600px",
+        }}
+      >
         <Input
           type="text"
           placeholder="Search for Courses - Eg. Python"
-          className={styles.searchInput}
           value={searchTerm}
           onChange={(e) => {
             setSearchTerm(e.target.value);
@@ -125,7 +132,9 @@ const ExploreCourses = () => {
             }
           }}
         />
-        <button onClick={getSearchedCourses}>Search</button>
+        <Button className="mt-2 ml-2" onClick={getSearchedCourses}>
+          Search
+        </Button>
       </div>
 
       <div className="flex">
@@ -184,36 +193,7 @@ const ExploreCourses = () => {
                 </PaginationLink>
               </PaginationItem>
             ))}
-            <PaginationItem>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline">Items per page</Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-80">
-                  <div className="grid gap-4">
-                    <div className="space-y-2">
-                      <h4 className="font-medium leading-none">
-                        Select number of items per page
-                      </h4>
-                      <p className="text-sm text-muted-foreground">
-                        Choose how many items you want to see on each page.
-                      </p>
-                    </div>
-                    <div className="grid gap-2">
-                      <div className="grid grid-cols-3 items-center gap-4">
-                        <Label htmlFor="itemsPerPage">Items per page</Label>
-                        <Input
-                          id="itemsPerPage"
-                          defaultValue={itemsPerPage}
-                          onChange={handleItemsPerPageChange}
-                          className="col-span-2 h-8"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </PaginationItem>
+
             <PaginationItem>
               <PaginationNext
                 href="#"
@@ -221,6 +201,18 @@ const ExploreCourses = () => {
                   currentPage < totalPages && setCurrentPage(currentPage + 1)
                 }
               />
+            </PaginationItem>
+            <PaginationItem>
+              <select
+                onChange={(e) => setItemsPerPage(parseInt(e.target.value))}
+                value={itemsPerPage}
+              >
+                <option value="1">1</option>
+                <option value="20">20</option>
+                <option value="30">30</option>
+                <option value="40">40</option>
+                <option value="50">50</option>
+              </select>
             </PaginationItem>
           </PaginationContent>
         </Pagination>
