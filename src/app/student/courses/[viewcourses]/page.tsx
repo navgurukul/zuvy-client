@@ -53,12 +53,12 @@ function Page({
     },
   ];
   useEffect(() => {
-    const userIdLocal = JSON.parse(localStorage.getItem("AUTH") || "");
+    // const userIdLocal = JSON.parse(localStorage.getItem("AUTH") || "");
 
     api
       .get(`/bootcamp/studentClasses/${params.viewcourses}`, {
         params: {
-          userId: userIdLocal.id,
+          userId: userID,
         },
       })
       .then((response) => {
@@ -71,7 +71,7 @@ function Page({
       .catch((error) => {
         console.log("Error fetching classes:", error);
       });
-  }, []);
+  }, [userID]);
 
   useEffect(() => {
     console.log(upcomingClasses, ongoingClasses, completedClasses);

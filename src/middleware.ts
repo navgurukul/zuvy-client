@@ -14,12 +14,25 @@ export function middleware(request: NextRequest) {
   }
   const matcher = ["/", "/student", "/admin", "/volunteer"];
 
-  if (user === "student") {
+  if (user !== "student") {
     if (
-      request.nextUrl.pathname.startsWith("/admin") &&
-      request.nextUrl.pathname !== "/student"
+      request.nextUrl.pathname.startsWith("/student")
     ) {
-      return NextResponse.redirect(new URL("/student", request.url));
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+  if (user !== "admin") {
+    if (
+      request.nextUrl.pathname.startsWith("/admin")
+    ) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+  if (user !== "volunteer") {
+    if (
+      request.nextUrl.pathname.startsWith("/volunteer")
+    ) {
+      return NextResponse.redirect(new URL("/", request.url));
     }
   }
 

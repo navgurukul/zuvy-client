@@ -41,14 +41,14 @@ function Schedule({ className, ...props }: ScheduleProps) {
   const [ongoingClasses, setOngoingClasses] = useState([]);
   const [completedClasses, setCompletedClasses] = useState([]);
   useEffect(() => {
-    const userIdLocal = JSON.parse(localStorage.getItem("AUTH") || "");
+    // const userIdLocal = JSON.parse(localStorage.getItem("AUTH") || "");
     api
-      .get(`/student/${userIdLocal.id}`)
+      .get(`/student/${userID}`)
       .then((res) => {
         api
           .get(`/bootcamp/studentClasses/${res.data[0].id}`, {
             params: {
-              userId: userIdLocal.id,
+              userId: userID,
             },
           })
           .then((response) => {

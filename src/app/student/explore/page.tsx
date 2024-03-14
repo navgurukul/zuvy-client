@@ -1,0 +1,232 @@
+"use client";
+
+import { Input } from "@/components/ui/input";
+import api from "@/utils/axios.config";
+import React, { useEffect, useState } from "react";
+import styles from "./../../admin/courses/_components/cources.module.css";
+import { Card } from "@/components/ui/card";
+import { GraduationCap } from "lucide-react";
+import OptimizedImageWithFallback from "@/components/ImageWithFallback";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+
+interface Bootcamp {
+  id: number;
+  name: string;
+  coverImage: string;
+  bootcampTopic: string;
+  startTime: string;
+  duration: string;
+  language: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface BootcampType {
+  id: number;
+  bootcampId: number;
+  type: string;
+}
+
+interface Course {
+  zuvy_bootcamps: Bootcamp;
+  zuvy_bootcamp_type: BootcampType;
+  students_in_bootcamp: number;
+  unassigned_students: number;
+}
+
+type searchedCourses = Course[];
+type allPublicCourses = Course[];
+
+const ExploreCourses = () => {
+  const [searchedCourses, setSearchedCourses] = useState<searchedCourses>([]);
+  const [allPublicCourses, setAllPublicCourses] = useState<allPublicCourses>(
+    []
+  );
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [searchTerm, setSearchTerm] = useState("");
+  let totalPages = Math.ceil(allPublicCourses.length / itemsPerPage);
+
+  useEffect(() => {
+    const getAllPublicCourses = async () => {
+      try {
+        const response = await api.get(`/student/bootcamp/public`);
+        setAllPublicCourses(response.data);
+        console.log("All public courses:", response.data);
+      } catch (error) {
+        console.error("Error getting all public courses:", error);
+      }
+    };
+
+    getAllPublicCourses();
+  }, []);
+
+  const getSearchedCourses = async () => {
+    try {
+      const response = await api.get(
+        `/student/bootcamp/search?searchTerm=${searchTerm}`
+      );
+      setSearchedCourses(response.data);
+    } catch (error) {
+      console.error("Error getting searched courses:", error);
+    }
+  };
+
+  totalPages = Math.ceil(
+    (searchTerm ? searchedCourses.length : allPublicCourses.length) /
+      itemsPerPage
+  );
+
+  const pageNumbers = [];
+  for (let i = 1; i <= totalPages; i++) {
+    pageNumbers.push(i);
+  }
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+
+  const currentItems =
+    searchTerm && searchedCourses.length > 0
+      ? searchedCourses.slice(indexOfFirstItem, indexOfLastItem)
+      : allPublicCourses.slice(indexOfFirstItem, indexOfLastItem);
+
+  const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setItemsPerPage(Number(e.target.value));
+    setCurrentPage(1); // reset to first page when items per page changes
+  };
+
+  return (
+    <>
+      <div className={styles.searchContainer + `flex items-center`}>
+        <Input
+          type="text"
+          placeholder="Search for Courses - Eg. Python"
+          className={styles.searchInput}
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            if (searchTerm.trim().length === 0) {
+              setSearchedCourses([]);
+            }
+          }}
+        />
+        <button onClick={getSearchedCourses}>Search</button>
+      </div>
+
+      <div className="flex">
+        {currentItems.map((course) => (
+          <div key={course.zuvy_bootcamps.id}>
+            <Card
+              key={course.zuvy_bootcamps.id}
+              className="h-max w-[400px] cursor-pointer mt-5 mr-10"
+            >
+              <div className="bg-muted flex justify-center h-[200px] relative overflow-hidden rounded-sm">
+                <OptimizedImageWithFallback
+                  src={course.zuvy_bootcamps.coverImage ?? ""}
+                  alt={course.zuvy_bootcamps.name}
+                  fallBackSrc={"/logo_white.png"}
+                />
+              </div>
+              <div className="text-start px-4 py-3 bg-muted">
+                <p className="capitalize mb-2 font-semibold">
+                  {course.zuvy_bootcamps.name}
+                </p>
+                <div className="flex gap-2 items-center">
+                  <GraduationCap width={20} />
+                  <div className="text-sm font-semibold">
+                    {course.students_in_bootcamp} Learners
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex items-center justify-center pt-5">
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={() =>
+                  currentPage > 1 && setCurrentPage(currentPage - 1)
+                }
+              />
+            </PaginationItem>
+            {pageNumbers.map((number) => (
+              <PaginationItem key={number}>
+                <PaginationLink
+                  href="#"
+                  onClick={() => setCurrentPage(number)}
+                  className={
+                    number === currentPage
+                      ? "bg-green-600 text-white"
+                      : "bg-secondary text-white"
+                  }
+                >
+                  {number}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            <PaginationItem>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline">Items per page</Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80">
+                  <div className="grid gap-4">
+                    <div className="space-y-2">
+                      <h4 className="font-medium leading-none">
+                        Select number of items per page
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        Choose how many items you want to see on each page.
+                      </p>
+                    </div>
+                    <div className="grid gap-2">
+                      <div className="grid grid-cols-3 items-center gap-4">
+                        <Label htmlFor="itemsPerPage">Items per page</Label>
+                        <Input
+                          id="itemsPerPage"
+                          defaultValue={itemsPerPage}
+                          onChange={handleItemsPerPageChange}
+                          className="col-span-2 h-8"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={() =>
+                  currentPage < totalPages && setCurrentPage(currentPage + 1)
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
+    </>
+  );
+};
+
+export default ExploreCourses;
