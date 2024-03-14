@@ -15,6 +15,34 @@ type CounterStore = {
   setAnotherStudentState: (newValue: any[]) => void;
 };
 
+// ------------------------------
+type deleteStudentStore = {
+  isDeleteModalOpen: boolean;
+  setDeleteModalOpen: (newValue: boolean) => void;
+}
+
+export const getDeleteStudentStore = create<deleteStudentStore>((set) => ({
+  isDeleteModalOpen: false, 
+  setDeleteModalOpen: (newValue: boolean) => {
+    set({ isDeleteModalOpen: newValue });
+  },
+}));
+// ------------------------------
+
+type storeStudentData = {
+  studentsData: any[];
+  setStoreStudentData: (newValue: any[]) => void;
+}
+
+export const getStoreStudentData = create<storeStudentData>((set) => ({
+  studentsData: [], 
+  setStoreStudentData: (newValue: any[]) => {
+    set({ studentsData: newValue });
+  },
+}));
+
+// ------------------------------
+
 export const useStudentData = create<CounterStore>((set) => ({
   studentData: null,
   studentsInfo: [],
@@ -54,7 +82,6 @@ export const useLazyLoadedStudentData = () => {
     initializeData();
   }, []); // Empty dependency array ensures useEffect runs only once when the component mounts
 
-  console.log(studentsInfo);
   return {
     studentData,
     studentsInfo,

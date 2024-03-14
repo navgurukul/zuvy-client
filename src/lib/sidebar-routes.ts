@@ -14,6 +14,8 @@ import {
   User,
   Cog,
   HelpCircle,
+  BookOpen,
+  Video,
 } from "lucide-react";
 
 const guestRoutes = [
@@ -26,6 +28,11 @@ const guestRoutes = [
     icon: Compass,
     label: "Browse",
     href: "/student/courses",
+  },
+  {
+    icon: Compass,
+    label: "Explore",
+    href: "/student/explore",
   },
   // {
   //   icon: Code,
@@ -48,17 +55,27 @@ const teacherRoutes = [
   {
     icon: List,
     label: "Courses",
-    href: "/teacher/courses",
+    href: "/instructor/courses",
+  },
+  {
+    icon: Video,
+    label: "Recording",
+    href: "/instructor/recording",
+  },
+  {
+    icon: BookOpen,
+    label: "Curricullum",
+    href: "/instructor/curricullum",
   },
   {
     icon: BarChart,
     label: "Analytics",
-    href: "/teacher/analytics",
+    href: "/instructor/analytics",
   },
 ];
 
 const adminRoutes = [
-  { label: "Home", icon: Home,  href: "/admin" },
+  { label: "Home", icon: Home, href: "/admin" },
   { label: "Courses", icon: Book, href: "/admin/courses" },
   // { label: "Notifications", icon: Bell, href: "/admin/home" },
   // { label: "Resource Bank", icon: Database, href: "/admin/resource" },

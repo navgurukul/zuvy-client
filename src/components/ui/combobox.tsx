@@ -22,30 +22,36 @@ export interface ComboboxProps {
   data: any;
   title: string;
   onChange: (selectedValue: string) => void;
+  initialValue?: string;
 }
 
-export function Combobox({ data, title, onChange }: ComboboxProps) {
+export function Combobox({
+  data,
+  title,
+  onChange,
+  initialValue,
+}: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("");
+  const [value, setValue] = React.useState(initialValue || "");
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant='outline'
-          role='combobox'
+          variant="outline"
+          role="combobox"
           aria-expanded={open}
-          className='w-full justify-between'
+          className="w-full justify-between"
         >
           {value
             ? data.find((framework: any) => framework.value === value)?.label
             : ` ${title}...`}
-          <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className='w-[200px] p-0'>
+      <PopoverContent className="w-[200px] p-0">
         <Command>
-          <CommandInput placeholder='Search framework...' />
+          <CommandInput placeholder="Search..." />
           <CommandEmpty>No framework found.</CommandEmpty>
           <CommandGroup>
             {data.map((framework: any) => (

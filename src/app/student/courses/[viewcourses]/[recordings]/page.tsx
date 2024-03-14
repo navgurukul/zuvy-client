@@ -3,9 +3,9 @@ import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 import Breadcrumb from "@/components/ui/breadcrumb";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
-import React,{useState,useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import api from "@/utils/axios.config";
-import ClassCard from '@/app/admin/courses/[courseId]/_components/classCard'
+import ClassCard from "@/app/admin/courses/[courseId]/_components/classCard";
 type PageProps = {
   params: {
     viewcourses: string;
@@ -34,66 +34,57 @@ function Page({
   useEffect(() => {
     const userIdLocal = JSON.parse(localStorage.getItem("AUTH") || "");
 
-    api.get(`/bootcamp/studentClasses/${params.viewcourses}`, {
+    api
+      .get(`/bootcamp/studentClasses/${params.viewcourses}`, {
         params: {
-            userId: userIdLocal.id
-        }
-    })  
-    .then((response) => {
-        const { upcomingClasses, ongoingClasses, completedClasses } = response.data;
+          userId: userIdLocal.id,
+        },
+      })
+      .then((response) => {
+        const { upcomingClasses, ongoingClasses, completedClasses } =
+          response.data;
         setUpcomingClasses(upcomingClasses);
         setOngoingClasses(ongoingClasses);
         setCompletedClasses(completedClasses);
-       
-    })
-    .catch((error) => {
+      })
+      .catch((error) => {
         console.log("Error fetching classes:", error);
-    });
-}, []);
+      });
+  }, []);
 
-useEffect(() => {
-   
-}, [upcomingClasses, ongoingClasses, completedClasses]);
-
+  useEffect(() => {}, [upcomingClasses, ongoingClasses, completedClasses]);
 
   return (
     <MaxWidthWrapper>
       <Breadcrumb crumbs={crumbs} />
-      
-      {  ongoingClasses?.length>0?
-      <div className="gap-y-3 flex flex-col items-center mx-4 my-10">
-        <div className="flex left-0  ">
-          <h1 className="text-lg p-1 font-semibold">Ongoing Class</h1>
-        </div>
-         {ongoingClasses.map((classObj, index) => (
-    
-    <ClassCard classData={classObj} key={index} classType="active"/>
-  ))}
-      
-      </div>:null}
-      <div className="gap-y-3 flex flex-col items-center mx-4 my-10">
-        <div className="flex left-0  ">
+      <div className="gap-y-3 flex flex-col items-center mx-4 my-10 w-[720px]">
+        <div className="flex left-0">
           <h1 className="text-lg p-1 font-semibold">Upcoming Classes</h1>
         </div>
+        {ongoingClasses?.length > 0
+          ? ongoingClasses.map((classObj, index) => (
+              <ClassCard classData={classObj} key={index} classType="ongoing" />
+            ))
+          : null}
         {upcomingClasses?.length > 0 ? (
-              upcomingClasses.map((classObj, index) => (
-                <ClassCard classData={classObj} key={index} classType="Upcoming" />
-              ))
-            ) : (
-              <p>No upcoming classes found</p>
-            )}
+          upcomingClasses.map((classObj, index) => (
+            <ClassCard classData={classObj} key={index} classType="Upcoming" />
+          ))
+        ) : (
+          <p>No upcoming classes found</p>
+        )}
       </div>
-      <div className="gap-y-3 flex flex-col items-center mx-4 ">
+      <div className="gap-y-3 flex flex-col items-center mx-4 w-[720px]">
         <div className="">
           <h1 className="text-lg p-1 font-semibold">Past Class Recordings</h1>
         </div>
         {completedClasses?.length > 0 ? (
-              completedClasses.map((classObj, index) => (
-                <ClassCard classData={classObj} key={index} classType="complete" />
-              ))
-            ) : (
-              <p>No past classes found</p>
-            )}
+          completedClasses.map((classObj, index) => (
+            <ClassCard classData={classObj} key={index} classType="complete" />
+          ))
+        ) : (
+          <p>No past classes found</p>
+        )}
       </div>
     </MaxWidthWrapper>
   );

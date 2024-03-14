@@ -1,0 +1,20 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M47.4004 11.9H17.4004V43.7L19.1004 46.3H47.4004V11.9Z" fill="#939598"/>
+<path d="M45.3004 46.1H19.1004L17.4004 44.8V40H45.3004V46.1Z" fill="#F1F2F2"/>
+<path d="M46.3004 11.9H17.4004V42L19.1004 40.1H46.3004V11.9Z" fill="#D1D3D4"/>
+<path d="M44.8002 52H15.2002V48.9H44.7002L48.6002 50.4C48.7002 50.4 48.7002 50.5 48.6002 50.6L44.8002 52Z" fill="white"/>
+<path d="M44.7002 48.9H15.2002V52H44.7002V48.9Z" fill="#36D7B7"/>
+<path d="M44.7002 48.9H15.2002V50.5H44.7002V48.9Z" fill="#86E7D4"/>
+<path d="M18.9002 48.8H15.2002V52.1H18.9002V48.8Z" fill="white"/>
+<path d="M44.8002 52H15.2002V48.9H44.7002L48.6002 50.4C48.7002 50.4 48.7002 50.5 48.6002 50.6L44.8002 52Z" stroke="#414042" stroke-miterlimit="10"/>
+<path d="M18.9004 48.9V51.6" stroke="#414042" stroke-miterlimit="10"/>
+<path d="M44.8003 49.1V51.8" stroke="#414042" stroke-miterlimit="10"/>
+<path d="M47.8003 46.1H20.2003C18.6003 46.1 17.3003 45.2 17.3003 44.2V41.9C17.3003 40.9 18.6003 40 20.2003 40H46.7003" stroke="#414042" stroke-miterlimit="10"/>
+<path d="M17.4004 41.9V11.9H26.8004" stroke="#414042" stroke-miterlimit="10"/>
+<path d="M27.4004 44.8L25.4004 43.9L23.4004 44.8V41H27.4004V44.8Z" fill="#F5AB35"/>
+<path d="M28.8003 11.9H36.3003" stroke="#414042" stroke-miterlimit="10"/>
+<path d="M22.6001 21.4H42.6001" stroke="#414042" stroke-miterlimit="10"/>
+<path d="M22.6001 24.6H42.6001" stroke="#414042" stroke-miterlimit="10"/>
+<path d="M22.6001 24.6H42.6001" stroke="#414042" stroke-miterlimit="10"/>
+<path d="M28.4004 27.7H36.3004" stroke="#414042" stroke-miterlimit="10"/>
+</svg>

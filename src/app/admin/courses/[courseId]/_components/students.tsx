@@ -7,9 +7,10 @@ import AddStudentsModal from "./addStudentsmodal";
 import { Dialog, DialogOverlay, DialogTrigger } from "@/components/ui/dialog";
 import api from "@/utils/axios.config";
 import StudentsDataTable from "./dataTable";
-import { columns } from "./columns";
 import { Input } from "@/components/ui/input";
-import { useStudentData } from "@/store/store";
+import { toast } from "@/components/ui/use-toast";
+import { studentColumns } from "./_my_components/studentColumns";
+import { getStoreStudentData } from "@/store/store";
 
 type Props = {
   id: string;
@@ -24,35 +25,110 @@ export type StudentData = {
   progress: number;
   profilePicture: string;
 };
-export const fetchStudentData = async (id: string, setStudentData: any) => {
+
+type bootcampData = {
+  value: string;
+  label: string;
+};
+
+export const fetchStudentData = async (
+  id: string,
+  setStoreStudentData: any
+) => {
   try {
     const response = await api.get(`/bootcamp/students/${id}`);
     const data = response.data;
-    setStudentData(data.studentsEmails);
+    setStoreStudentData(data.studentsEmails);
   } catch (error) {
     // Handle error appropriately
     console.error("Error fetching student data:", error);
   }
 };
 
+export async function onBatchChange(
+  selectedvalue: any,
+  rowData: any,
+  student: any
+) {
+  await api
+    .post(
+      `/bootcamp/students/${student.bootcampId}?batch_id=${selectedvalue}`,
+      {
+        students: [
+          {
+            email: student.email,
+            name: student.name,
+          },
+        ],
+      }
+    )
+    .then((res) => {
+      toast({
+        title: "Students Batch Updated Succesfully",
+        className: "text-start capitalize",
+      });
+    });
+}
+
+export async function deleteStudentHandler(
+  userId: any,
+  bootcampId: any,
+  setDeleteModalOpen: any,
+  setStudentData: any
+) {
+  try {
+    await api.delete(`/student/${userId}/${bootcampId}`).then((res) => {
+      toast({
+        title: res.data.status,
+        description: res.data.message,
+        className: "text-start capitalize",
+      });
+      fetchStudentData(bootcampId, setStudentData);
+    });
+  } catch (error) {
+    toast({
+      title: "Failed",
+      variant: "destructive",
+    });
+  }
+  setDeleteModalOpen(false);
+}
+
 const Students = ({ id }: Props) => {
-  const [studentsData, setStudentData] = useState<StudentData[]>([]);
-  const { anotherStudentState, setAnotherStudentState } = useStudentData();
+  const { studentsData, setStoreStudentData } = getStoreStudentData();
+  const [bootcampData, setBootcampData] = useState<bootcampData>();
+
+  useEffect(() => {
+    api
+      .get(`/bootcamp/batches/${id}`)
+      .then((response) => {
+        const transformedData = response.data.map(
+          (item: { id: any; name: any }) => ({
+            value: item.id.toString(),
+            label: item.name,
+          })
+        );
+
+        setBootcampData(transformedData);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  }, []);
 
   useEffect(() => {
     const fetchStudentData = async () => {
       try {
         const response = await api.get(`/bootcamp/students/${id}`);
         const data = response.data;
-        setStudentData(data.studentsEmails);
-        setAnotherStudentState(data.studentsEmails);
+        setStoreStudentData(data.studentsEmails);
       } catch (error) {
-        // Handle error appropriately
         console.error("Error fetching student data:", error);
       }
     };
     fetchStudentData();
   }, []);
+
   return (
     <div>
       {studentsData.length > 0 && (
@@ -70,8 +146,12 @@ const Students = ({ id }: Props) => {
         </div>
       )}
 
-      {studentsData.length > 0 && (
-        <StudentsDataTable columns={columns} data={anotherStudentState} />
+      {studentsData.length > 0 && bootcampData && (
+        // <StudentsDataTable columns={columns} data={studentsData} />
+        <StudentsDataTable
+          columns={studentColumns(bootcampData)}
+          data={studentsData}
+        />
       )}
       {studentsData.length <= 0 && (
         <div className="flex  flex-col items-center justify-center py-12">
