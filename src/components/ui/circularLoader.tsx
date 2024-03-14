@@ -6,7 +6,7 @@ export default function CircularLoader() {
   return (
     <CircularProgress
       size="sm"
-      value={90}
+      // value={90}
       color="warning"
       showValueLabel={true}
     />

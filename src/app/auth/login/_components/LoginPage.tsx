@@ -30,15 +30,6 @@ function LoginPage({}: Props) {
   const router = useRouter();
 
   useEffect(() => {
-    console.log(window.location.origin);
-    console.log(loginUrl);
-
-    // window.location.origin == "https://app.zuvy.org"
-    //   ? setLoginUrl(
-    //       "https://zuvy-login.dcckrjm3h0sxm.amplifyapp.com/?loggedOut=true"
-    //     )
-    //   : setLoginUrl("https://dev.dcckrjm3h0sxm.amplifyapp.com/?loggedOut=true");
-
     const urlParams = new URLSearchParams(window.location.search);
     const tokenVal = urlParams.get("token");
     const loggedOutToken = urlParams.get("loggedOutToken");

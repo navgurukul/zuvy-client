@@ -74,10 +74,6 @@ function Page({
   }, [userID]);
 
   useEffect(() => {
-    console.log(upcomingClasses, ongoingClasses, completedClasses);
-  }, [upcomingClasses, ongoingClasses, completedClasses]);
-
-  useEffect(() => {
     const getModulesProgress = async () => {
       try {
         const response = await api.get(

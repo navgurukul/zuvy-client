@@ -87,7 +87,6 @@ export const useLazyLoadedStudentData = () => {
       useStudentData.setState({ studentData: initializedData });
 
       // Now you have access to the token and can use it as needed
-      console.log("Token:", token);
     };
 
     initializeData();
