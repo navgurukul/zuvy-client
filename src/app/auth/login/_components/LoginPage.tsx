@@ -16,8 +16,12 @@ function LoginPage({}: Props) {
   function reverseJwtBody(jwt: string): string {
     const [header, body, signature] = jwt.split(".");
     const reversedBody = body.split("").reverse().join("");
+
     return [header, reversedBody, signature].join(".");
   }
+  // const [loginUrl, setLoginUrl] = useState("");
+
+  const loginUrl = process.env.NEXT_PUBLIC_ZUVY_LOGIN_URL;
 
   const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -26,6 +30,15 @@ function LoginPage({}: Props) {
   const router = useRouter();
 
   useEffect(() => {
+    console.log(window.location.origin);
+    console.log(loginUrl);
+
+    // window.location.origin == "https://app.zuvy.org"
+    //   ? setLoginUrl(
+    //       "https://zuvy-login.dcckrjm3h0sxm.amplifyapp.com/?loggedOut=true"
+    //     )
+    //   : setLoginUrl("https://dev.dcckrjm3h0sxm.amplifyapp.com/?loggedOut=true");
+
     const urlParams = new URLSearchParams(window.location.search);
     const tokenVal = urlParams.get("token");
     const loggedOutToken = urlParams.get("loggedOutToken");
@@ -109,7 +122,7 @@ function LoginPage({}: Props) {
               Journey Today!
             </p>
             <Button className="bg-[#2f433a] p-4 mt-3 h-30 w-70 w-[250px]">
-              <a href="https://dev.dcckrjm3h0sxm.amplifyapp.com/?loggedOut=true">
+              <a href={loginUrl}>
                 <span className="text-lg">Login to Zuvy</span>
               </a>
             </Button>
