@@ -13,6 +13,16 @@ import { studentColumns } from "./_my_components/studentColumns";
 import { getStoreStudentData } from "@/store/store";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import useDebounce from "@/hooks/useDebounce";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ROWS_PER_PAGE } from "@/utils/constant";
 type Props = {
   id: string;
 };
@@ -96,7 +106,8 @@ export async function deleteStudentHandler(
 }
 
 const Students = ({ id }: Props) => {
-  let pageSize = 10;
+  const [pageSize, setPageSize] = useState<string>("10");
+  const [position, setPosition] = useState("");
   const { studentsData, setStoreStudentData } = getStoreStudentData();
   const [bootcampData, setBootcampData] = useState<bootcampData>();
   const [paginateStudentData, setPaginatedStudentData] = useState<any>([]);
@@ -107,26 +118,12 @@ const Students = ({ id }: Props) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [searchdata, setSearchData] = useState([]);
   const debouncedSearch = useDebounce(search, 1000);
-  useEffect(() => {
-    const fetchPaginatedData = async () => {
-      const response = await api
-        .get(`/bootcamp/students/${id}?limit=${pageSize}&offset=${offset}`)
-        .then((res) => {
-          setPaginatedStudentData(res.data.studentsEmails);
-          setPages(res.data.totalPages);
-        });
-    };
-
-    fetchPaginatedData();
-  }, [offset]);
 
   const nextPageHandler = () => {
-    console.log(offset);
-    setOffset((prevState) => pageSize + offset);
+    setOffset((prevState) => +pageSize + offset);
   };
   const prevPageHandler = () => {
-    console.log(offset);
-    setOffset((prevState) => Math.max(0, prevState - pageSize));
+    setOffset((prevState) => Math.max(0, prevState - +pageSize));
   };
   useEffect(() => {
     api
@@ -145,24 +142,28 @@ const Students = ({ id }: Props) => {
       });
   }, []);
 
+  const fetchStudentData = async () => {
+    try {
+      await api
+        .get(`/bootcamp/students/${id}?limit=${pageSize}&offset=${offset}`)
+        .then((response) => {
+          setPaginatedStudentData(response.data.studentsEmails);
+          setPages(response.data.totalPages);
+          setStoreStudentData(response.data.studentsEmails);
+        });
+    } catch (error) {
+      console.error("Error fetching student data:", error);
+    }
+  };
   useEffect(() => {
-    const fetchStudentData = async () => {
-      try {
-        const response = await api.get(`/bootcamp/students/${id}`);
-        const data = response.data;
-        setStoreStudentData(data.studentsEmails);
-      } catch (error) {
-        console.error("Error fetching student data:", error);
-      }
-    };
     fetchStudentData();
-  }, []);
+  }, [offset, pageSize]);
 
   useEffect(() => {
     //Search The Api
     const searchStudentsDataHandler = async () => {
       setLoading(true);
-      const response = await api
+      await api
         .get(`/bootcamp/studentSearch/${id}?searchTerm=${debouncedSearch}`)
         .then((res) => {
           setPaginatedStudentData(res.data.data[1].studentsEmails);
@@ -170,12 +171,13 @@ const Students = ({ id }: Props) => {
         });
     };
     if (debouncedSearch) searchStudentsDataHandler();
-  }, [debouncedSearch]);
-
-  console.log(searchdata);
+  }, [debouncedSearch, id]);
 
   const handleSetsearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
+  };
+  const pageSizeHandler = () => {
+    setPageSize(position);
   };
 
   return (
@@ -206,22 +208,46 @@ const Students = ({ id }: Props) => {
             columns={studentColumns(bootcampData)}
             data={paginateStudentData}
           />
-          <div className='flex flex-row justify-end w-full gap-x-4 '>
+          <div className='flex flex-row justify-end items-center w-full gap-x-2 '>
             <span>Rows per page: {10}</span>
-            <svg
-              width='24'
-              height='24'
-              viewBox='0 0 24 24'
-              fill='none'
-              xmlns='http://www.w3.org/2000/svg'
-            >
-              <path
-                d='M8.70663 11.4137L11.2966 14.0037C11.6866 14.3937 12.3166 14.3937 12.7066 14.0037L15.2966 11.4137C15.9266 10.7837 15.4766 9.70374 14.5866 9.70374H9.40663C8.51663 9.70374 8.07663 10.7837 8.70663 11.4137Z'
-                fill='#6D6D6D'
-              />
-            </svg>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant='outline'>
+                  <svg
+                    width='24'
+                    height='24'
+                    viewBox='0 0 24 24'
+                    fill='none'
+                    xmlns='http://www.w3.org/2000/svg'
+                  >
+                    <path
+                      d='M8.70663 11.4137L11.2966 14.0037C11.6866 14.3937 12.3166 14.3937 12.7066 14.0037L15.2966 11.4137C15.9266 10.7837 15.4766 9.70374 14.5866 9.70374H9.40663C8.51663 9.70374 8.07663 10.7837 8.70663 11.4137Z'
+                      fill='#6D6D6D'
+                    />
+                  </svg>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className='w-full'>
+                <DropdownMenuSeparator />
+                <DropdownMenuRadioGroup
+                  value={position}
+                  onValueChange={setPosition}
+                  onChange={pageSizeHandler}
+                >
+                  {ROWS_PER_PAGE.map((rowItem) => {
+                    return (
+                      <DropdownMenuRadioItem key={rowItem} value={rowItem}>
+                        {rowItem}
+                      </DropdownMenuRadioItem>
+                    );
+                  })}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-            <span>1-{pages}</span>
+            <span>
+              1-{pages} of {pages}{" "}
+            </span>
             <ChevronLeft
               onClick={prevPageHandler}
               size={20}

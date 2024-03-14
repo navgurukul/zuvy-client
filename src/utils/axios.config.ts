@@ -15,11 +15,6 @@ if (typeof window !== "undefined") {
   }
 }
 
-// const AuthTokenData = () => {
-//   const { token }: any = useLazyLoadedStudentData();
-//   return token;
-// };
-// console.log(AuthTokenData());
 const api = axios.create({
   baseURL,
   headers,
