@@ -12,6 +12,7 @@ import { toast } from "@/components/ui/use-toast";
 import { studentColumns } from "./_my_components/studentColumns";
 import { getStoreStudentData } from "@/store/store";
 import { ChevronRight, ChevronLeft } from "lucide-react";
+import useDebounce from "@/hooks/useDebounce";
 type Props = {
   id: string;
 };
@@ -95,50 +96,48 @@ export async function deleteStudentHandler(
 }
 
 const Students = ({ id }: Props) => {
+  let pageSize = 10;
   const { studentsData, setStoreStudentData } = getStoreStudentData();
   const [bootcampData, setBootcampData] = useState<bootcampData>();
-  const [paginateStudentData, setPaginatedStuedntData] = useState<any>([]);
+  const [paginateStudentData, setPaginatedStudentData] = useState<any>([]);
   const [pages, setPages] = useState<number>();
-
+  const [offset, setOffset] = useState<number>(0);
+  const [currentPage, setCurrentPag] = useState();
+  const [search, setSearch] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [searchdata, setSearchData] = useState([]);
+  const debouncedSearch = useDebounce(search, 1000);
   useEffect(() => {
     const fetchPaginatedData = async () => {
       const response = await api
-        .get(`/bootcamp/students/50?limit=${10}&offset=${0}`)
+        .get(`/bootcamp/students/${id}?limit=${pageSize}&offset=${offset}`)
         .then((res) => {
-          setPaginatedStuedntData(res.data.studentsEmails);
+          setPaginatedStudentData(res.data.studentsEmails);
           setPages(res.data.totalPages);
         });
     };
 
     fetchPaginatedData();
-  }, []);
+  }, [offset]);
 
   const nextPageHandler = () => {
-    let limit = 10;
-    let offset = 0 + limit;
-    const fetchPaginatedData = async () => {
-      const response = await api
-        .get(`/bootcamp/students/50?limit=${limit}&offset=${offset}`)
-        .then((res) => {
-          setPaginatedStuedntData(res.data.studentsEmails);
-          setPages(res.data.totalPages);
-        });
-    };
-
-    fetchPaginatedData();
+    console.log(offset);
+    setOffset((prevState) => pageSize + offset);
   };
-
+  const prevPageHandler = () => {
+    console.log(offset);
+    setOffset((prevState) => Math.max(0, prevState - pageSize));
+  };
   useEffect(() => {
     api
       .get(`/bootcamp/batches/${id}`)
       .then((response) => {
-        const transformedData = response.data.batchesWithEnrollment.map(
+        const transformedData = response.data.data.map(
           (item: { id: any; name: any }) => ({
             value: item.id.toString(),
             label: item.name,
           })
         );
-
         setBootcampData(transformedData);
       })
       .catch((error) => {
@@ -159,11 +158,36 @@ const Students = ({ id }: Props) => {
     fetchStudentData();
   }, []);
 
+  useEffect(() => {
+    //Search The Api
+    const searchStudentsDataHandler = async () => {
+      setLoading(true);
+      const response = await api
+        .get(`/bootcamp/studentSearch/${id}?searchTerm=${debouncedSearch}`)
+        .then((res) => {
+          setPaginatedStudentData(res.data.data[1].studentsEmails);
+          setLoading(false);
+        });
+    };
+    if (debouncedSearch) searchStudentsDataHandler();
+  }, [debouncedSearch]);
+
+  console.log(searchdata);
+
+  const handleSetsearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
+  };
+
   return (
     <div>
       {studentsData.length > 0 && (
         <div className='py-2 my-2 flex items-center justify-between w-full'>
-          <Input type='search' placeholder='search' className='w-1/3' />
+          <Input
+            type='search'
+            placeholder='search'
+            className='w-1/3'
+            onChange={handleSetsearch}
+          />
           <Dialog>
             <DialogTrigger asChild>
               <Button className='w-1/6 gap-x-2 '>
@@ -175,7 +199,6 @@ const Students = ({ id }: Props) => {
           </Dialog>
         </div>
       )}
-
       {studentsData.length > 0 && bootcampData && (
         // <StudentsDataTable columns={columns} data={studentsData} />
         <>
@@ -199,10 +222,14 @@ const Students = ({ id }: Props) => {
             </svg>
 
             <span>1-{pages}</span>
-            <ChevronLeft size={20} className='cursor-pointer' />
+            <ChevronLeft
+              onClick={prevPageHandler}
+              size={20}
+              className='cursor-pointer hover:bg-gray-300 rounded-md '
+            />
             <ChevronRight
               size={20}
-              className='cursor-pointer'
+              className='cursor-pointer hover:bg-gray-300 rounded-md '
               onClick={nextPageHandler}
             />
           </div>

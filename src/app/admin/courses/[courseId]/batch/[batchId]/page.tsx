@@ -11,7 +11,7 @@ import {
 } from "@/store/store";
 import { Input } from "@/components/ui/input";
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
-import { Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 import { Pencil } from "lucide-react";
 import { CalendarDays } from "lucide-react";
 import { Hand } from "lucide-react";
@@ -74,11 +74,17 @@ const BatchesInfo = ({
   const { studentsInfo, setStudentsInfo } = useStudentData();
   //   const pathname = usePathname();
   //   const matches = pathname.match(/\/(\d+)\/(\d+)\/(\d+)/);
+  let pageSize = 10;
+
   const [studentsData, setStudentData] = useState<StudentData[]>([]);
   const [bootcamp, setBootcamp] = useState<any>([]);
   const { setDeleteModalOpen, isDeleteModalOpen } = getDeleteStudentStore();
   const { setStoreStudentData } = getStoreStudentData();
   const [instructorsInfo, setInstructorInfo] = useState<any>([]);
+  const [paginateStudentData, setPaginatedStuedntData] = useState<any>([]);
+  const [pages, setPages] = useState<number>();
+  const [offset, setOffset] = useState<number>(0);
+  const [currentPage, setCurrentPag] = useState();
 
   const crumbs = [
     {
@@ -224,7 +230,29 @@ const BatchesInfo = ({
     };
     getBootCamp();
   }, []);
+  useEffect(() => {
+    const fetchPaginatedData = async () => {
+      const response = await api
+        .get(
+          `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}&limit=${pageSize}&offset=${offset}`
+        )
+        .then((res) => {
+          setPaginatedStuedntData(res.data.studentsEmails);
+          setPages(res.data.totalPages);
+        });
+    };
 
+    fetchPaginatedData();
+  }, [offset]);
+
+  const nextPageHandler = () => {
+    console.log(offset);
+    setOffset((prevState) => pageSize + offset);
+  };
+  const prevPageHandler = () => {
+    console.log(offset);
+    setOffset((prevState) => Math.max(0, prevState - pageSize));
+  };
   return (
     <>
       <Breadcrumb crumbs={crumbs} />
@@ -532,7 +560,34 @@ const BatchesInfo = ({
             </div>
           </div>
         </div>
-        <StudentsBatchTable columns={columns} data={studentsInfo} />
+        <StudentsBatchTable columns={columns} data={paginateStudentData} />
+        <div className='flex flex-row justify-end w-full gap-x-4 '>
+          <span>Rows per page: {10}</span>
+          <svg
+            width='24'
+            height='24'
+            viewBox='0 0 24 24'
+            fill='none'
+            xmlns='http://www.w3.org/2000/svg'
+          >
+            <path
+              d='M8.70663 11.4137L11.2966 14.0037C11.6866 14.3937 12.3166 14.3937 12.7066 14.0037L15.2966 11.4137C15.9266 10.7837 15.4766 9.70374 14.5866 9.70374H9.40663C8.51663 9.70374 8.07663 10.7837 8.70663 11.4137Z'
+              fill='#6D6D6D'
+            />
+          </svg>
+
+          <span>1-{pages}</span>
+          <ChevronLeft
+            onClick={prevPageHandler}
+            size={20}
+            className='cursor-pointer hover:bg-gray-300 rounded-md '
+          />
+          <ChevronRight
+            size={20}
+            className='cursor-pointer hover:bg-gray-300 rounded-md '
+            onClick={nextPageHandler}
+          />
+        </div>
       </MaxWidthWrapper>
     </>
   );

@@ -127,7 +127,6 @@ export const studentColumns = (
               ></circle>
             </g>
           </svg>
-
           <div className='absolute top-1/2 start-1/2 transform -translate-y-1/2 -translate-x-1/2'>
             <span className='text-center text-md font-bold text-gray-800 dark:text-white'>
               {student.progress}
