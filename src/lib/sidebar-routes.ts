@@ -29,6 +29,11 @@ const guestRoutes = [
     label: "Browse",
     href: "/student/courses",
   },
+  {
+    icon: Compass,
+    label: "Explore",
+    href: "/student/explore",
+  },
   // {
   //   icon: Code,
   //   label: "Playground",
