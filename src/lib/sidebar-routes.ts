@@ -29,11 +29,11 @@ const guestRoutes = [
     label: "My Courses",
     href: "/student/courses",
   },
-  {
-    icon: Compass,
-    label: "Explore",
-    href: "/student/explore",
-  },
+  // {
+  //   icon: Compass,
+  //   label: "Explore",
+  //   href: "/student/explore",
+  // },
   // {
   //   icon: Code,
   //   label: "Playground",

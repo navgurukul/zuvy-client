@@ -96,18 +96,22 @@ function Schedule({ className, ...props }: ScheduleProps) {
             <p className="text-lg p-1 font-bold">Upcoming Classes</p>
           </div>
         ) : (
-          <div className="flex flex-col items-center mt-12">
-            <Image
-              src={"/no-class.svg"}
-              alt="party popper"
-              width={"240"}
-              height={"240"}
-            />
-            <p className="text-lg mt-3">There are no upcoming classes</p>
-          </div>
+          <>
+            <div className="flex justify-center mt-12">
+              <Image
+                src={"/no-class.svg"}
+                alt="party popper"
+                width={"240"}
+                height={"240"}
+              />
+            </div>
+            <p className="text-lg mt-3 text-center">
+              There are no upcoming classes
+            </p>
+          </>
         )}
 
-        <div className="w-[720px]">
+        <div className="md:w-[720px]">
           {ongoingClasses?.length > 0
             ? ongoingClasses.map((classObj, index) => (
                 <ClassCard

@@ -74,51 +74,49 @@ const Page: React.FC<pageProps> = () => {
         <h1 className="p-1  text-xl font-semibold">My Courses</h1>
       </div>
       <div className="px-2 py-2 md:px-6 md:py-10 ">
-        {enrolledCourse.length > 0 && courseStarted ? (
-          <div className="flex items-center justify-start">
-            <h1 className="text-lg font-semibold mb-2">
-              Start from where you left
-            </h1>
-          </div>
-        ) : (
-          <></>
-        )}
+        {/* {enrolledCourse.length > 0 && courseStarted ? (
+          <div className="flex items-center justify-start"></div>
+        ) : null} */}
 
         {/* If Course Already Started then Below Message will be displayed: */}
         {enrolledCourse?.length > 0 && courseStarted ? (
-          <div className="bg-gradient-to-bl from-blue-50 to-violet-50 rounded-xl  sm:w-full md:w-1/2 lg:w=1/3 p-2 mb-10">
-            <div className="px-1 py-4 flex items-start">
-              <p className="text-gray-900 text-base">
-                {resumeCourse?.bootcamp_name}
-              </p>
-            </div>
-            <div className=" flex flex-col ">
-              <div className="flex items-center justify-start">
-                <span className=" rounded-full bg-gray-100 p-3 text-black">
-                  <Video size={15} />
-                </span>
-                <Link
-                  href={`/student/courses/${resumeCourse?.bootcampId}`}
-                  className="text-lg capitalize text-black"
-                >
-                  {resumeCourse?.module_name}
-                </Link>
+          <>
+            <h1 className="text-lg text-start font-semibold mb-2">
+              Start from where you left
+            </h1>
+            <div className="bg-gradient-to-bl from-blue-50 to-violet-50 rounded-xl  sm:w-full md:w-1/2 lg:w=1/3 p-2 mb-10">
+              <div className="px-1 py-4 flex items-start">
+                <p className="text-gray-900 text-base">
+                  {resumeCourse?.bootcamp_name}
+                </p>
               </div>
-              <div className="flex p-2 items-center justify-end">
-                <Link
-                  href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`}
-                  className="text-lg capitalize "
-                >
-                  Resume Learning
-                </Link>
-                <ChevronRight size={20} />
+              <div className=" flex flex-col ">
+                <div className="flex items-center justify-start">
+                  <span className=" rounded-full bg-gray-100 p-3 text-black">
+                    <Video size={15} />
+                  </span>
+                  <Link
+                    href={`/student/courses/${resumeCourse?.bootcampId}`}
+                    className="text-lg capitalize text-black"
+                  >
+                    {resumeCourse?.module_name}
+                  </Link>
+                </div>
+                <div className="flex p-2 items-center justify-end">
+                  <Link
+                    href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`}
+                    className="text-lg capitalize "
+                  >
+                    Resume Learning
+                  </Link>
+                  <ChevronRight size={20} />
+                </div>
               </div>
             </div>
-          </div>
-        ) : (
-          // If No Course Started then Below Message will be displayed:
-          <></>
-        )}
+          </>
+        ) : // If No Course Started then Below Message will be displayed:
+        null}
+
         <div className=" flex flex-col items-center justify-center">
           <div className="x-5 flex items-center justify-start w-full">
             <h1 className="p-1 mx-4 text-xl font-semibold ">

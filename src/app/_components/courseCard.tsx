@@ -42,8 +42,6 @@ function CourseCard({
                       color="secondary"
                       size="md"
                       value={progress}
-                      showValueLabel={true}
-                      style={{ width: "30px", height: "30px", fontSize: "0" }}
                     />
                     <div
                       className={`ml-2 ${

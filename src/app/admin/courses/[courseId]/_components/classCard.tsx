@@ -55,7 +55,7 @@ function ClassCard({
             </div>
           </div>
         </div>
-        <p className="flex items-center text-lg font-bold">
+        <div className="flex items-center text-lg font-bold">
           {classType !== "complete" ? (
             <Link
               target="_blank"
@@ -74,7 +74,7 @@ function ClassCard({
               <ChevronRight size={15} />
             </div>
           )}
-        </p>
+        </div>
       </div>
     </Card>
   );
