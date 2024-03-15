@@ -7,6 +7,8 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import api from "@/utils/axios.config";
+
 function ClassCard({
   classData,
   classType,
@@ -22,6 +24,28 @@ function ClassCard({
     } else {
       toast({
         title: "Recording not yet updated",
+        variant: "default",
+        className: "text-start capitalize",
+      });
+    }
+  };
+
+  const handleAttendance = async () => {
+    try {
+      const response = await api.get(`/classes/getAttendance/${classData.meetingid}`);
+      const attendanceData = response.data.attendanceSheet;
+      const csvContent = "data:text/csv;charset=utf-8," + attendanceData.map((row: any[])=> row.join(",")).join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "attendance.csv");
+      document.body.appendChild(link);
+      link.click();
+    } catch (error) {
+      console.error("Error fetching or processing attendance data:", error);
+  
+      toast({
+        title: "Error fetching attendance data",
         variant: "default",
         className: "text-start capitalize",
       });
@@ -66,12 +90,17 @@ function ClassCard({
               <ChevronRight size={15} />
             </Link>
           ) : (
-            <div
-              onClick={handleViewRecording}
-              className="gap-3 flex items-center text-secondary cursor-pointer"
-            >
-              <p>Watch</p>
-              <ChevronRight size={15} />
+            <div>
+              <div
+                onClick={handleViewRecording}
+                className="gap-3 flex items-center text-secondary cursor-pointer"
+              >
+                <p>Watch</p>
+                <ChevronRight size={15} />
+              </div>
+              <div onClick={handleAttendance}>
+                <p>ATTENDANCE</p>
+              </div>
             </div>
           )}
         </div>
