@@ -34,24 +34,28 @@ function ClassCard({
     try {
       const response = await api.get(`/classes/getAttendance/${classData.meetingid}`);
       const attendanceData = response.data.attendanceSheet;
-      const csvContent = "data:text/csv;charset=utf-8," + attendanceData.map((row: any[])=> row.join(",")).join("\n");
+      if (!Array.isArray(attendanceData) || attendanceData.length === 0) {
+        throw new Error('Attendance data is not in the expected format or is empty.');
+      }
+      const headers = Object.keys(attendanceData[0]);
+      const csvContent = `${headers.join(',')}\n${attendanceData.map(row => headers.map(header => row[header]).join(',')).join('\n')}`;
       const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", "attendance.csv");
+      const link = document.createElement('a');
+      link.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodedUri);
+      link.setAttribute('download', `${classData.title}_attendance.csv`);
       document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
     } catch (error) {
-      console.error("Error fetching or processing attendance data:", error);
-  
+      console.error('Error fetching or processing attendance data:', error);
       toast({
-        title: "Error fetching attendance data",
-        variant: "default",
-        className: "text-start capitalize",
+        title: 'Error fetching attendance data',
+        variant: 'default',
+        className: 'text-start capitalize',
       });
     }
   };
-
+  
   return (
     <Card className="w-full p-6" key={classData.id}>
       <div className="flex items-center justify-between">
@@ -99,7 +103,7 @@ function ClassCard({
                 <ChevronRight size={15} />
               </div>
               <div onClick={handleAttendance}>
-                <p>ATTENDANCE</p>
+                <Button>ATTENDANCE</Button>
               </div>
             </div>
           )}
