@@ -171,6 +171,7 @@ const Students = ({ id }: Props) => {
         });
     };
     if (debouncedSearch) searchStudentsDataHandler();
+    if (debouncedSearch?.trim()?.length === 0) fetchStudentData();
   }, [debouncedSearch, id]);
 
   const handleSetsearch = (e: React.ChangeEvent<HTMLInputElement>) => {

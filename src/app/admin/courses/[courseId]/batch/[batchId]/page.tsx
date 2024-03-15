@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { InputHTMLAttributes, useEffect, useState } from "react";
 import StudentsBatchTable from "./studentsBatchDataTable";
 import { columns } from "./column";
 import api from "@/utils/axios.config";
@@ -64,6 +64,17 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import DeleteConfirmationModal from "../../_components/deleteModal";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ROWS_PER_PAGE } from "@/utils/constant";
+import useDebounce from "@/hooks/useDebounce";
 
 const BatchesInfo = ({
   params,
@@ -78,14 +89,16 @@ const BatchesInfo = ({
 
   const [studentsData, setStudentData] = useState<StudentData[]>([]);
   const [bootcamp, setBootcamp] = useState<any>([]);
+  const [search, setSearch] = useState("");
   const { setDeleteModalOpen, isDeleteModalOpen } = getDeleteStudentStore();
   const { setStoreStudentData } = getStoreStudentData();
   const [instructorsInfo, setInstructorInfo] = useState<any>([]);
   const [paginateStudentData, setPaginatedStuedntData] = useState<any>([]);
   const [pages, setPages] = useState<number>();
+  const [position, setPosition] = useState("10");
   const [offset, setOffset] = useState<number>(0);
   const [currentPage, setCurrentPag] = useState();
-
+  const debouncedValue = useDebounce(search, 1000);
   const crumbs = [
     {
       crumb: "My Courses",
@@ -120,22 +133,6 @@ const BatchesInfo = ({
       }
     };
     fetchInstructorInfo();
-  }, []);
-
-  useEffect(() => {
-    const fetchBatchesInfo = async () => {
-      try {
-        // if (matches) {
-        // const [bootcampId, batchId] = matches;
-        const response = await api.get(
-          `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}`
-        );
-        setStudentData(response.data.studentsEmails);
-        setStudentsInfo(response.data.studentsEmails);
-        // }
-      } catch (error) {}
-    };
-    fetchBatchesInfo();
   }, []);
 
   const batchDeleteHandler = async () => {
@@ -234,16 +231,23 @@ const BatchesInfo = ({
     const fetchPaginatedData = async () => {
       const response = await api
         .get(
-          `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}&limit=${pageSize}&offset=${offset}`
+          `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}&limit=${position}&offset=${offset}`
         )
-        .then((res) => {
-          setPaginatedStuedntData(res.data.studentsEmails);
-          setPages(res.data.totalPages);
+        .then((response) => {
+          setStudentData(response.data.studentsEmails);
+          setStudentsInfo(response.data.studentsEmails);
+          setPaginatedStuedntData(response.data.studentsEmails);
+          setPages(response.data.totalPages);
         });
     };
 
     fetchPaginatedData();
-  }, [offset]);
+  }, [offset, position]);
+  useEffect(() => {
+    const searchBatchStudentsHandler = () => {};
+
+    searchBatchStudentsHandler();
+  }, []);
 
   const nextPageHandler = () => {
     console.log(offset);
@@ -252,6 +256,10 @@ const BatchesInfo = ({
   const prevPageHandler = () => {
     console.log(offset);
     setOffset((prevState) => Math.max(0, prevState - pageSize));
+  };
+
+  const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
   };
   return (
     <>
@@ -449,7 +457,7 @@ const BatchesInfo = ({
               type='search'
               placeholder='Student Name, Email'
               className='w-1/2 my-12'
-              disabled
+              onChange={handleSetSearch}
             />
           </div>
           <div className='flex m-4'>
@@ -561,22 +569,45 @@ const BatchesInfo = ({
           </div>
         </div>
         <StudentsBatchTable columns={columns} data={paginateStudentData} />
-        <div className='flex flex-row justify-end w-full gap-x-4 '>
-          <span>Rows per page: {10}</span>
-          <svg
-            width='24'
-            height='24'
-            viewBox='0 0 24 24'
-            fill='none'
-            xmlns='http://www.w3.org/2000/svg'
-          >
-            <path
-              d='M8.70663 11.4137L11.2966 14.0037C11.6866 14.3937 12.3166 14.3937 12.7066 14.0037L15.2966 11.4137C15.9266 10.7837 15.4766 9.70374 14.5866 9.70374H9.40663C8.51663 9.70374 8.07663 10.7837 8.70663 11.4137Z'
-              fill='#6D6D6D'
-            />
-          </svg>
+        <div className='flex flex-row justify-end items-center w-full gap-x-2 '>
+          <span>Rows per page: {position}</span>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant='outline'>
+                <svg
+                  width='24'
+                  height='24'
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  xmlns='http://www.w3.org/2000/svg'
+                >
+                  <path
+                    d='M8.70663 11.4137L11.2966 14.0037C11.6866 14.3937 12.3166 14.3937 12.7066 14.0037L15.2966 11.4137C15.9266 10.7837 15.4766 9.70374 14.5866 9.70374H9.40663C8.51663 9.70374 8.07663 10.7837 8.70663 11.4137Z'
+                    fill='#6D6D6D'
+                  />
+                </svg>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className='w-full'>
+              <DropdownMenuSeparator />
+              <DropdownMenuRadioGroup
+                value={position}
+                onValueChange={setPosition}
+              >
+                {ROWS_PER_PAGE.map((rowItem) => {
+                  return (
+                    <DropdownMenuRadioItem key={rowItem} value={rowItem}>
+                      {rowItem}
+                    </DropdownMenuRadioItem>
+                  );
+                })}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-          <span>1-{pages}</span>
+          <span>
+            1-{pages} of {pages}{" "}
+          </span>
           <ChevronLeft
             onClick={prevPageHandler}
             size={20}
