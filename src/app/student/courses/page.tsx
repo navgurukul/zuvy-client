@@ -29,7 +29,7 @@ const Page: React.FC<pageProps> = () => {
   const { studentData } = useLazyLoadedStudentData();
   const [enrolledCourse, setEnrolledCourse] = useState<EnrolledCourse[]>([]);
   const [resumeCourse, setResumeCourse] = useState<ResumeCourse>({});
-  const [courseStarted, setCourseStarted] = useState<boolean>(true);
+  const [courseStarted, setCourseStarted] = useState<boolean>(false);
   const userID = studentData?.id && studentData?.id;
 
   useEffect(() => {
