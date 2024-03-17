@@ -31,17 +31,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 type Props = {};
-export type StudentData = {
-  email: string;
-  name: string;
-  userId: string;
-  bootcampId: number;
-  batchName: string;
-  batchId: number;
-  progress: number;
-  profilePicture: string;
-  id: string;
-};
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -64,6 +54,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import DeleteConfirmationModal from "../../_components/deleteModal";
+import { StudentData } from "../../(courseTabs)/students/page";
 
 const BatchesInfo = ({
   params,

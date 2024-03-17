@@ -31,10 +31,9 @@ import {
 import api from "@/utils/axios.config";
 import AddStudentsModal from "../../_components/addStudentsmodal";
 import { toast } from "@/components/ui/use-toast";
-import { Card as card, CardDescription, CardTitle } from "@/components/ui/card";
+import { CardDescription, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
-import { getCourseData, useStudentData } from "@/store/store";
-import { fetchStudentData } from "../../_components/students";
+import { getCourseData } from "@/store/store";
 import Image from "next/image";
 
 const page = ({}: {}) => {
@@ -45,42 +44,46 @@ const page = ({}: {}) => {
   );
   const [courses, setCourses] = useState([]);
   const [batches, setBatches] = useState([]);
-  const getBootcamp = () => {
-    try {
-      api.get("/bootcamp").then((response) => setCourses(response.data));
-    } catch (error) {
-      console.error("Error fetching courses:", error);
+  // const getBootcamp = () => {
+  //   try {
+  //     api.get("/bootcamp").then((response) => setCourses(response.data));
+  //   } catch (error) {
+  //     console.error("Error fetching courses:", error);
+  //   }
+  // };
+  // useEffect(() => {
+  //   getBootcamp();
+  // }, []);
+
+  useEffect(() => {
+    if (courseData?.id) {
+      const fetchBatches = async () => {
+        try {
+          const response = await api.get(`/bootcamp/batches/${courseData?.id}`);
+          setBatches(response.data.data);
+        } catch (error: any) {
+          console.log(error.message);
+        }
+      };
+
+      fetchBatches();
     }
-  };
-  useEffect(() => {
-    getBootcamp();
-  }, []);
-
-  useEffect(() => {
-    const fetchBatches = async () => {
-      try {
-        const response = await api.get(`/bootcamp/batches/${courseData?.id}`);
-        setBatches(response.data.data);
-      } catch (error: any) {
-        console.log(error.message);
-      }
-    };
-
-    fetchBatches();
   }, [courseData]);
 
-  useEffect(() => {
-    const fetchCourseDetails = async () => {
-      try {
-        const response = await api.get(`/bootcamp/${courseData?.id}`);
-        const data = response.data;
-      } catch (error) {
-        console.error("Error fetching course details:", error);
-      }
-    };
+  // useEffect(() => {
+  //   if (courseData?.id) {
+  //     const fetchCourseDetails = async () => {
+  //       try {
+  //         const response = await api.get(`/bootcamp/${courseData?.id}`);
+  //         const data = response.data;
+  //       } catch (error) {
+  //         console.error("Error fetching course details:", error);
+  //       }
+  //     };
 
-    fetchCourseDetails();
-  }, [courseData, unassignedStudents]);
+  //     fetchCourseDetails();
+  //   }
+  // }, [courseData, unassignedStudents]);
 
   const formSchema = z.object({
     name: z.string().min(2, {

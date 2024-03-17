@@ -1,11 +1,5 @@
 "use client";
 import { ColumnDef } from "@tanstack/react-table";
-import {
-  StudentData,
-  deleteStudentHandler,
-  fetchStudentData,
-} from "./students";
-import { onBatchChange } from "./students";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import api from "@/utils/axios.config";
@@ -16,6 +10,8 @@ import DeleteConfirmationModal from "./deleteModal";
 import { Combobox } from "@/components/ui/combobox";
 import { select } from "@nextui-org/react";
 import { getDeleteStudentStore, getStoreStudentData } from "@/store/store";
+import { StudentData } from "../(courseTabs)/students/page";
+import { deleteStudentHandler, onBatchChange } from "@/utils/students";
 
 interface Props {
   studentsData: StudentData[];
