@@ -42,8 +42,7 @@ type bootcampData = {
   label: string;
 };
 
-const page = () => {
-  const [pageSize, setPageSize] = useState<string>("10");
+const Page = () => {
   const [position, setPosition] = useState("10");
   const { studentsData, setStoreStudentData } = getStoreStudentData();
   const [bootcampData, setBootcampData] = useState<bootcampData>();
@@ -420,4 +419,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

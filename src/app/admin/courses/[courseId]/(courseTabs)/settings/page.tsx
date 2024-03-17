@@ -12,7 +12,7 @@ import { toast } from "@/components/ui/use-toast";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { getCourseData } from "@/store/store";
-const page = () => {
+const Page = () => {
   // misc
   const router = useRouter();
   const { courseData } = getCourseData();
@@ -110,4 +110,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

@@ -53,7 +53,7 @@ interface CourseData {
   unassigned_students: number; // Change the type to number
 }
 
-function page() {
+function Page() {
   const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
   const { courseData, setCourseData } = getCourseData();
@@ -347,4 +347,4 @@ function page() {
   );
 }
 
-export default page;
+export default Page;

@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { useEffect } from "react";
-import Students from "@/app/admin/courses/[courseId]/_components/students";
 import api from "@/utils/axios.config";
 
 type CounterStore = {

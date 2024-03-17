@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { getCourseData } from "@/store/store";
 
-function page() {
+function Page() {
   // state and variables
   const [classType, setClassType] = useState("upcoming");
   const [allClasses, setAllClasses] = useState([]);
@@ -469,4 +469,4 @@ function page() {
   );
 }
 
-export default page;
+export default Page;

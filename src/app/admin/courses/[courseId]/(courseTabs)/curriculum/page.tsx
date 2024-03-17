@@ -6,7 +6,7 @@ import api from "@/utils/axios.config";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
-function page() {
+function Page() {
   // state and variables
   const [curriculum, setCurriculum] = useState([]);
   const { courseData } = getCourseData();
@@ -231,4 +231,4 @@ function page() {
   );
 }
 
-export default page;
+export default Page;

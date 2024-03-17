@@ -1,11 +1,12 @@
 "use client";
+import { useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { StudentData } from "../../_components/students";
-import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import { Trash2 } from "lucide-react";
+
 import api from "@/utils/axios.config";
 import { toast } from "@/components/ui/use-toast";
-import { useEffect, useState } from "react";
+import { StudentData } from "../../(courseTabs)/students/page";
 import { useStudentData } from "@/store/store";
 import {
   AlertDialog,
@@ -18,8 +19,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-
-import Image from "next/image";
 
 const GetdataHandler = (id: number) => {
   const { studentsInfo, setStudentsInfo } = useStudentData();

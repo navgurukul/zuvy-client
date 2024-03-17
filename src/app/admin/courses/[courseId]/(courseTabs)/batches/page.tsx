@@ -36,7 +36,7 @@ import Link from "next/link";
 import { getCourseData } from "@/store/store";
 import Image from "next/image";
 
-const page = ({}: {}) => {
+const Page = ({}: {}) => {
   const { courseData } = getCourseData();
 
   const [unassignedStudents, setUnassignedStudents] = useState(
@@ -310,4 +310,4 @@ const page = ({}: {}) => {
   );
 };
 
-export default page;
+export default Page;
