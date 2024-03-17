@@ -1,12 +1,20 @@
 import { ChevronRight, Clock3 } from "lucide-react";
-import React from "react";
 import Moment from "react-moment";
+import Link from "next/link";
+
 import { toast } from "@/components/ui/use-toast";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import api from "@/utils/axios.config";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
 function ClassCard({
   classData,
   classType,
@@ -14,14 +22,48 @@ function ClassCard({
   classData: any;
   classType: any;
 }) {
+  // misc
   const isVideo = classData.s3link;
 
+  // func
   const handleViewRecording = () => {
     if (isVideo) {
       window.open(classData.s3link, "_blank");
     } else {
       toast({
         title: "Recording not yet updated",
+        variant: "default",
+        className: "text-start capitalize",
+      });
+    }
+  };
+
+  const handleAttendance = async () => {
+    try {
+      const response = await api.get(
+        `/classes/getAttendance/${classData.meetingid}`
+      );
+      const attendanceData = response.data.attendanceSheet;
+      if (!Array.isArray(attendanceData) || attendanceData.length === 0) {
+        throw new Error(
+          "Attendance data is not in the expected format or is empty."
+        );
+      }
+      const headers = Object.keys(attendanceData[0]);
+      const csvContent = `${headers.join(",")}\n${attendanceData
+        .map((row) => headers.map((header) => row[header]).join(","))
+        .join("\n")}`;
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", "data:text/csv;charset=utf-8," + encodedUri);
+      link.setAttribute("download", `${classData.title}_attendance.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error fetching or processing attendance data:", error);
+      toast({
+        title: "Error fetching attendance data",
         variant: "default",
         className: "text-start capitalize",
       });
@@ -46,7 +88,16 @@ function ClassCard({
                 Ongoing
               </Badge>
             ) : null}
-            <h3 className="text-xl font-bold mb-3">{classData.title}</h3>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <h3 className="truncate text-xl font-bold mb-3 sm: max-w-24 md:max-w-sm lg:max-w-md xl:max-w-lg">
+                    {classData.title}
+                  </h3>
+                </TooltipTrigger>
+                <TooltipContent>{classData.title}</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <div className="text-md flex font-semibold capitalize items-center">
               <Clock3 className="mr-2" width={20} height={20} />
               <Moment format="hh:mm A">{classData.startTime}</Moment>
@@ -66,12 +117,17 @@ function ClassCard({
               <ChevronRight size={15} />
             </Link>
           ) : (
-            <div
-              onClick={handleViewRecording}
-              className="gap-3 flex items-center text-secondary cursor-pointer"
-            >
-              <p>Watch</p>
-              <ChevronRight size={15} />
+            <div>
+              <div
+                onClick={handleViewRecording}
+                className="gap-3 flex items-center text-secondary cursor-pointer"
+              >
+                <p>Watch</p>
+                <ChevronRight size={15} />
+              </div>
+              <div onClick={handleAttendance}>
+                <Button>ATTENDANCE</Button>
+              </div>
             </div>
           )}
         </div>
