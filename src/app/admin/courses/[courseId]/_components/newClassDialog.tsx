@@ -89,32 +89,40 @@ function DateTimePicker({
   );
 }
 
-const NewClassDialog = ({ courseId }: { courseId: string }) => {
+const NewClassDialog = ({
+  courseId,
+  bootcampData,
+}: {
+  courseId: string;
+  bootcampData: Object;
+}) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [startDateTime, setStartDateTime] = useState(new Date());
   const [endDateTime, setEndDateTime] = useState(new Date());
   const [batchId, setBatchId] = useState("");
   const [attendeesInput, setAttendeesInput] = useState("");
-  const [bootcampData, setBootcampData] = useState([]);
+  // const [bootcampData, setBootcampData] = useState([]);
   const [isDialogOpen, setDialogOpen] = useState(true);
 
-  useEffect(() => {
-    api
-      .get(`/bootcamp/batches/${courseId}`)
-      .then((response) => {
-        const transformedData = response.data.map(
-          (item: { id: any; name: any }) => ({
-            value: item.id.toString(),
-            label: item.name,
-          })
-        );
-        setBootcampData(transformedData);
-      })
-      .catch((error) => {
-        console.log("Error fetching data:", error);
-      });
-  }, [courseId]);
+  // useEffect(() => {
+  //   api
+  //     .get(`/bootcamp/batches/${courseId}`)
+  //     .then((response) => {
+  //       const transformedData = response.data.map(
+  //         (item: { id: any; name: any }) => ({
+  //           value: item.id.toString(),
+  //           label: item.name,
+  //         })
+  //       );
+  //       setBootcampData(transformedData);
+  //     })
+  //     .catch((error) => {
+  //       console.log("Error fetching data:", error);
+  //     });
+  // }, [courseId]);
+
+  console.log("COMBO", bootcampData);
 
   const handleComboboxChange = (value: string) => {
     setBatchId(value);
