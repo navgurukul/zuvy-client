@@ -22,7 +22,6 @@ export const SidebarItem = ({ icon: Icon, label, href }: SidebarItemProps) => {
 
   const onClick = () => {
     if (label === "Logout") {
-      console.log("Logout");
       Logout();
     } else {
       router.push(href);
