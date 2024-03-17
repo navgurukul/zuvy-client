@@ -8,18 +8,20 @@ import { Tabs, TabsList } from "@/components/ui/tabs";
 import styles from "../../_components/cources.module.css";
 import TabItem from "./TabItem";
 import { getCourseData } from "@/store/store";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 function CourseBreadcrumb() {
   const { courseData } = getCourseData();
   const [courseId, setCourseId] = useState<string>("");
 
-  const crumbs = [
-    { crumb: "My Courses", href: "/admin/courses" },
-    {
-      crumb: "",
-      href: "/",
-    },
-  ];
+  // const crumbs = [
+  //   { crumb: "My Courses", href: "/admin/courses" },
+  //   {
+  //     crumb: "",
+  //     href: "My",
+  //   },
+  // ];
 
   const courseMenu = [
     {
@@ -63,8 +65,14 @@ function CourseBreadcrumb() {
   }, []);
 
   return (
-    <div>
-      <Breadcrumb crumbs={crumbs} />
+    <>
+      {/* <Breadcrumb crumbs={crumbs} /> */}
+      <Link href={"/admin/courses"} className="flex space-x-2">
+        <ArrowLeft size={20} />
+        <p className="ml-1 inline-flex text-sm font-medium text-gray-800 md:ml-2">
+          My Courses
+        </p>
+      </Link>
       <h1 className="text-3xl text-start font-bold my-6">{courseData?.name}</h1>
       <div className={styles.contentContainer}>
         <Tabs defaultValue="generalDetails" className="w-full">
@@ -77,7 +85,7 @@ function CourseBreadcrumb() {
           </div>
         </Tabs>
       </div>
-    </div>
+    </>
   );
 }
 

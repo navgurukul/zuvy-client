@@ -1,5 +1,6 @@
 import Breadcrumb from "@/components/ui/breadcrumb";
-import CourseBreadcrumb from "./_components/CourseLayout";
+import CourseBreadcrumb from "../_components/CourseLayout";
+import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 
 export default function RootLayout({
   children,
@@ -10,7 +11,7 @@ export default function RootLayout({
     <div>
       <CourseBreadcrumb />
 
-      {children}
+      <MaxWidthWrapper>{children}</MaxWidthWrapper>
     </div>
   );
 }
