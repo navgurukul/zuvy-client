@@ -1,6 +1,5 @@
 "use client";
 
-import React, { useEffect } from "react";
 import ClassCard from "@/app/admin/courses/[courseId]/_components/classCard";
 
 function Recordings({ completedClasses }: { completedClasses: any }) {

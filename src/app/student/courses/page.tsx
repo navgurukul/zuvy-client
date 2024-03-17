@@ -1,13 +1,13 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ChevronRight, Video } from "lucide-react";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
-import { Video } from "lucide-react";
-import Loader from "./_components/Loader";
 import Image from "next/image";
-import api from "@/utils/axios.config";
+
 import { useLazyLoadedStudentData } from "@/store/store";
+import Loader from "./_components/Loader";
+import api from "@/utils/axios.config";
 
 interface EnrolledCourse {
   name: string;
@@ -26,12 +26,16 @@ interface ResumeCourse {
 type pageProps = {};
 
 const Page: React.FC<pageProps> = () => {
+  // misc
   const { studentData } = useLazyLoadedStudentData();
+
+  // state and variables
   const [enrolledCourse, setEnrolledCourse] = useState<EnrolledCourse[]>([]);
   const [resumeCourse, setResumeCourse] = useState<ResumeCourse>({});
   const [courseStarted, setCourseStarted] = useState<boolean>(false);
   const userID = studentData?.id && studentData?.id;
 
+  // async
   useEffect(() => {
     const getEnrolledCourses = async () => {
       try {
@@ -68,16 +72,11 @@ const Page: React.FC<pageProps> = () => {
   }, [userID]);
 
   return (
-    // <MaxWidthWrapper className=" flex flex-col ">
     <>
       <div className="mx-2 p-5 flex  items-center justify-between bg-gradient-to-bl from-blue-50 to-violet-50 rounded-lg">
         <h1 className="p-1  text-xl font-semibold">My Courses</h1>
       </div>
       <div className="px-2 py-2 md:px-6 md:py-10 ">
-        {/* {enrolledCourse.length > 0 && courseStarted ? (
-          <div className="flex items-center justify-start"></div>
-        ) : null} */}
-
         {/* If Course Already Started then Below Message will be displayed: */}
         {enrolledCourse?.length > 0 && courseStarted ? (
           <>
@@ -165,7 +164,6 @@ const Page: React.FC<pageProps> = () => {
         </div>
       </div>
     </>
-    // </MaxWidthWrapper>
   );
 };
 export default Page;

@@ -1,14 +1,13 @@
 import { ChevronRight, Clock3 } from "lucide-react";
 import Moment from "react-moment";
+import Link from "next/link";
+
 import { toast } from "@/components/ui/use-toast";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import api from "@/utils/axios.config";
-import React, { useRef, useState, useEffect } from "react";
-
 import {
   Tooltip,
   TooltipContent,
@@ -23,8 +22,10 @@ function ClassCard({
   classData: any;
   classType: any;
 }) {
+  // misc
   const isVideo = classData.s3link;
 
+  // func
   const handleViewRecording = () => {
     if (isVideo) {
       window.open(classData.s3link, "_blank");
