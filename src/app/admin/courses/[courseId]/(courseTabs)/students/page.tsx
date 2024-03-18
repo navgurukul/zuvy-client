@@ -154,7 +154,7 @@ const Page = () => {
             columns={studentColumns(bootcampData)}
             data={paginateStudentData}
           /> */}
-          <div className="flex flex-row justify-end items-center w-full gap-x-2 ">
+          {/* <div className="flex flex-row justify-end items-center w-full gap-x-2 ">
             <span>Rows per page: {position}</span>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -203,7 +203,7 @@ const Page = () => {
               className="cursor-pointer hover:bg-gray-300 rounded-md "
               onClick={nextPageHandler}
             />
-          </div>
+          </div> */}
         </>
       )}
       {studentsData.length <= 0 && (
