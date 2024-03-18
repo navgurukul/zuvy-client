@@ -170,36 +170,36 @@ const BatchesInfo = ({
       capEnrollment: +values.capEnrollment,
     };
     setOldData(convertedData);
-    // try {
-    //   //   if (matches) {
-    //   //   const [firstValue, bootcampId, batchId] = matches;
+    try {
+      //   if (matches) {
+      //   const [firstValue, bootcampId, batchId] = matches;
 
-    //   const response = await api
-    //     .patch(`/batch/${params.batchId}`, convertedData)
-    //     .then((res) => {
-    //       toast({
-    //         title: "Batches Updated Succesfully",
-    //       });
-    //       const fetchBatchesInfo = async () => {
-    //         try {
-    //           //   if (matches) {
-    //           //   const [firstValue, bootcampId, batchId] = matches;
-    //           const response = await api.get(
-    //             `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}`
-    //           );
-    //           setStudentData(response.data.studentsEmails);
-    //           setStudentsInfo(response.data.studentsEmails);
-    //           //   }
-    //         } catch (error) {}
-    //       };
-    //       fetchBatchesInfo();
-    //     });
-    //   //   }
-    // } catch (error) {
-    //   toast({
-    //     title: "Batches Didn't Succesfully",
-    //   });
-    // }
+      const response = await api
+        .patch(`/batch/${params.batchId}`, convertedData)
+        .then((res) => {
+          toast({
+            title: "Batches Updated Succesfully",
+          });
+          const fetchBatchesInfo = async () => {
+            try {
+              //   if (matches) {
+              //   const [firstValue, bootcampId, batchId] = matches;
+              const response = await api.get(
+                `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}`
+              );
+              setStudentData(response.data.studentsEmails);
+              setStudentsInfo(response.data.studentsEmails);
+              //   }
+            } catch (error) {}
+          };
+          fetchBatchesInfo();
+        });
+      //   }
+    } catch (error) {
+      toast({
+        title: "Batches Didn't Succesfully",
+      });
+    }
   };
   useEffect(() => {
     const getBootCamp = async () => {

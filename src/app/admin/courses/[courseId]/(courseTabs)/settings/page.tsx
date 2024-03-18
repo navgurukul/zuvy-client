@@ -23,17 +23,20 @@ const Page = () => {
   // async
   const handleDelete = async () => {
     try {
-      const response = await api
-        .delete(`/bootcamp/${courseData?.id}`)
-        .then((res) => {
-          toast({
-            title: res.data.status,
-            description: res.data.message,
-            className: "text-start capitalize",
-          });
+      await api.delete(`/bootcamp/${courseData?.id}`).then((res) => {
+        toast({
+          title: res.data.status,
+          description: res.data.message,
+          className: "text-start capitalize",
         });
+      });
       router.push("/admin/courses");
-    } catch (error) {
+    } catch (error: any) {
+      toast({
+        title: error.data.status,
+        description: error.data.message,
+        className: "text-start capitalize",
+      });
       console.error("Error deleting:", error);
     }
     setDeleteModalOpen(false);

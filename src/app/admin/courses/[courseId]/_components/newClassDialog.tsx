@@ -123,8 +123,6 @@ const NewClassDialog = ({
   //     });
   // }, [courseId]);
 
-  console.log("COMBO", bootcampData);
-
   const handleComboboxChange = (value: string) => {
     setBatchId(value);
   };
