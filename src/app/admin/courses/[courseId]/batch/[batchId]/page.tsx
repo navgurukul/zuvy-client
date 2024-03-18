@@ -1,37 +1,13 @@
 "use client";
-import React, { InputHTMLAttributes, useEffect, useState } from "react";
-import StudentsBatchTable from "./studentsBatchDataTable";
-import { columns } from "./column";
-import api from "@/utils/axios.config";
-import { usePathname, useSearchParams } from "next/navigation";
-import {
-  getDeleteStudentStore,
-  getStoreStudentData,
-  useStudentData,
-} from "@/store/store";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
 import { Input } from "@/components/ui/input";
-import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 import { ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 import { Pencil } from "lucide-react";
-import { CalendarDays } from "lucide-react";
-import { Hand } from "lucide-react";
+
 import Breadcrumb from "@/components/ui/breadcrumb";
-import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/use-toast";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-
-type Props = {};
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -53,7 +29,17 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { columns } from "./column";
+
+import {
+  getDeleteStudentStore,
+  getStoreStudentData,
+  useStudentData,
+} from "@/store/store";
+import MaxWidthWrapper from "@/components/MaxWidthWrapper";
+import StudentsBatchTable from "./studentsBatchDataTable";
 import DeleteConfirmationModal from "../../_components/deleteModal";
+import api from "@/utils/axios.config";
 import { StudentData } from "../../(courseTabs)/students/page";
 import useDebounce from "@/hooks/useDebounce";
 
@@ -63,10 +49,8 @@ const BatchesInfo = ({
   params: { courseId: string; batchId: string };
 }) => {
   const router = useRouter();
-  const { studentsInfo, setStudentsInfo } = useStudentData();
-  //   const pathname = usePathname();
-  //   const matches = pathname.match(/\/(\d+)\/(\d+)\/(\d+)/);
   let pageSize = 10;
+  const { studentsInfo, setStudentsInfo } = useStudentData();
 
   const [studentsData, setStudentData] = useState<StudentData[]>([]);
   const [bootcamp, setBootcamp] = useState<any>([]);
@@ -79,6 +63,7 @@ const BatchesInfo = ({
   const [position, setPosition] = useState("10");
   const [offset, setOffset] = useState<number>(0);
   const [currentPage, setCurrentPag] = useState();
+
   const debouncedValue = useDebounce(search, 1000);
   const [oldData, setOldData] = useState<any>();
   const crumbs = [

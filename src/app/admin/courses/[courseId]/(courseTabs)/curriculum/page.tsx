@@ -1,12 +1,13 @@
 "use client";
-
-import { Button } from "@/components/ui/button";
-import { getCourseData } from "@/store/store";
-import api from "@/utils/axios.config";
-import Link from "next/link";
 import React, { useEffect, useState } from "react";
-import { Clock, Clock1, Copy, FileText } from "lucide-react";
-import Image from "next/image";
+import Link from "next/link";
+
+import api from "@/utils/axios.config";
+import { getCourseData } from "@/store/store";
+
+import { Clock1, Copy, FileText } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import CurricullumCard from "../../_components/curricullumCard";
 
 function Page() {
   // state and variables
@@ -53,42 +54,7 @@ function Page() {
               href={`/admin/courses/${courseData?.id}/module/${id}`}
               className='bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl  '
             >
-              <div className='w-full flex items-center justify-between gap-y-2  '>
-                <div className='flex gap-y-2 flex-col p-2  '>
-                  <div className='flex items-center justify-start  '>
-                    <div className='text-md font-semibold capitalize text-black'>
-                      {`Module ${index + 1}`} : {name}
-                    </div>
-                  </div>
-                  <p>
-                    Students learn basic concepts of programming and create
-                    their first program
-                  </p>
-                  <div className='flex  gap-x-4'>
-                    <div className='flex   items-center justify-start gap-x-2 '>
-                      <Clock1 size={15} />
-                      <p className='text-md font-semibold capitalize text-gray-600'>
-                        2 weeks
-                      </p>
-                    </div>
-                    <div className='flex  items-center justify-start gap-x-2 '>
-                      <Copy size={15} />
-                      <p className='text-md font-semibold capitalize text-gray-600'>
-                        4 assignments
-                      </p>
-                    </div>{" "}
-                    <div className='flex  items-center justify-start gap-x-2 '>
-                      <FileText size={15} />
-                      <p className='text-md font-semibold capitalize text-gray-600'>
-                        1 Quiz
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                {/* <div className="">
-                <CircularLoader />
-              </div> */}
-              </div>
+              <CurricullumCard name={name} index={index} />
             </Link>
           </div>
         ))
