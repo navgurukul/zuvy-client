@@ -23,6 +23,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ROWS_PER_PAGE } from "@/utils/constant";
+import { DataTable } from "@/app/_components/datatable/data-table";
+import { columns } from "@/app/_components/datatable/columns";
 type Props = {
   id: string;
 };
@@ -147,10 +149,11 @@ const Page = () => {
       {studentsData.length > 0 && bootcampData && (
         // <StudentsDataTable columns={columns} data={studentsData} />
         <>
-          <StudentsDataTable
+          <DataTable data={paginateStudentData} columns={columns} />
+          {/* <StudentsDataTable
             columns={studentColumns(bootcampData)}
             data={paginateStudentData}
-          />
+          /> */}
           <div className="flex flex-row justify-end items-center w-full gap-x-2 ">
             <span>Rows per page: {position}</span>
             <DropdownMenu>
