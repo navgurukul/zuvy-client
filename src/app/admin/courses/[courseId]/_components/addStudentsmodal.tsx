@@ -22,9 +22,11 @@ import { getStoreStudentData } from "@/store/store";
 import { fetchStudentData } from "@/utils/students";
 
 const AddStudentsModal = ({
+  setPaginatedStudentData,
   id,
   message,
 }: {
+  setPaginatedStudentData?: any;
   id: string;
   message: boolean;
 }) => {
@@ -70,7 +72,7 @@ const AddStudentsModal = ({
               description: response.data.message,
               className: "text-start capitalize",
             });
-            fetchStudentData(id, setStoreStudentData);
+            fetchStudentData(id, setPaginatedStudentData);
           });
       } catch (error: any) {
         toast({

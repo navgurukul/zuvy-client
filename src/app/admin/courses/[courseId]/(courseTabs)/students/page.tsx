@@ -140,7 +140,11 @@ const Page = () => {
               </Button>
             </DialogTrigger>
             <DialogOverlay />
-            <AddStudentsModal message={false} id={courseData?.id || ""} />
+            <AddStudentsModal
+              setPaginatedStudentData={setPaginatedStudentData}
+              message={false}
+              id={courseData?.id || ""}
+            />
           </Dialog>
         </div>
       )}
@@ -148,7 +152,7 @@ const Page = () => {
         // <StudentsDataTable columns={columns} data={studentsData} />
         <>
           <StudentsDataTable
-            columns={studentColumns(bootcampData)}
+            columns={studentColumns(bootcampData, setPaginatedStudentData)}
             data={paginateStudentData}
           />
           <div className="flex flex-row justify-end items-center w-full gap-x-2 ">
@@ -410,7 +414,11 @@ const Page = () => {
                 </Button>
               </DialogTrigger>
               <DialogOverlay />
-              <AddStudentsModal message={false} id={courseData?.id || ""} />
+              <AddStudentsModal
+                setPaginatedStudentData={setPaginatedStudentData}
+                message={false}
+                id={courseData?.id || ""}
+              />
             </Dialog>
           </div>
         </div>

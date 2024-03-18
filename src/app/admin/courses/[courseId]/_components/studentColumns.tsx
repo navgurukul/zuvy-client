@@ -16,6 +16,7 @@ import { deleteStudentHandler, onBatchChange } from "@/utils/students";
 interface Props {
   studentsData: StudentData[];
   bootcampData: bootcampData;
+  paginateStudentData: any;
 }
 
 type bootcampData = {
@@ -24,7 +25,8 @@ type bootcampData = {
 };
 
 export const studentColumns = (
-  bootcampData: bootcampData
+  bootcampData: bootcampData,
+  setPaginatedStudentData: any
 ): ColumnDef<StudentData>[] => [
   {
     header: "Students Name",
@@ -137,14 +139,24 @@ export const studentColumns = (
     cell: ({ row }) => {
       const student = row.original;
       const { userId, bootcampId } = student;
-      // const { onDeleteHandler } = GetdataHandler(bootcampId);
-      const { setDeleteModalOpen, isDeleteModalOpen } = getDeleteStudentStore();
+      const {
+        setDeleteModalOpen,
+        isDeleteModalOpen,
+        deleteStudentId,
+        setDeleteStudentId,
+        deleteStudentName,
+        setDeleteStudentName,
+      } = getDeleteStudentStore();
       const { setStoreStudentData } = getStoreStudentData();
 
       return (
         <>
           <Trash2
-            onClick={() => setDeleteModalOpen(true)}
+            onClick={() => {
+              setDeleteModalOpen(true);
+              setDeleteStudentId(userId);
+              setDeleteStudentName(student.name);
+            }}
             className="text-red-600 cursor-pointer"
             size={20}
           />
@@ -153,14 +165,13 @@ export const studentColumns = (
             onClose={() => setDeleteModalOpen(false)}
             onConfirm={() => {
               deleteStudentHandler(
-                userId,
+                deleteStudentId,
                 bootcampId,
                 setDeleteModalOpen,
-                setStoreStudentData
+                setPaginatedStudentData
               );
             }}
-            modalText="This action cannot be undone. This will permanently delete the
-              student from this bootcamp"
+            modalText={`This action cannot be undone. This will permanently delete ${deleteStudentName} from this bootcamp`}
             buttonText="Delete Student"
             input={false}
             modalText2=""

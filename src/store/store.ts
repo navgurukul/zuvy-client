@@ -62,12 +62,24 @@ export const getCourseData = create<StoreCourseData>((set) => ({
 type deleteStudentStore = {
   isDeleteModalOpen: boolean;
   setDeleteModalOpen: (newValue: boolean) => void;
+  deleteStudentId: any;
+  setDeleteStudentId: (newValue: any) => void;
+  deleteStudentName: string;
+  setDeleteStudentName: (newValue: string) => void;
 };
 
 export const getDeleteStudentStore = create<deleteStudentStore>((set) => ({
   isDeleteModalOpen: false,
   setDeleteModalOpen: (newValue: boolean) => {
     set({ isDeleteModalOpen: newValue });
+  },
+  deleteStudentId: null,
+  setDeleteStudentId: (newValue: any) => {
+    set({ deleteStudentId: newValue });
+  },
+  deleteStudentName: '',
+  setDeleteStudentName: (newValue: string) => {
+    set({ deleteStudentName: newValue });
   },
 }));
 // ------------------------------
