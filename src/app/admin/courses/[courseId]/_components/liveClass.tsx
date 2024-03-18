@@ -9,6 +9,7 @@ import api from "@/utils/axios.config";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import LiveClassEmptyState from "../../../../../../public/emptyStates/liveClassEmptyState";
+import Image from "next/image";
 
 function LiveClass({ courseId }: { courseId: string }) {
   // state and variables
@@ -167,7 +168,12 @@ function LiveClass({ courseId }: { courseId: string }) {
         </div>
       ) : (
         <div className='w-full flex mb-10 items-center flex-col gap-y-3 justify-center  absolute text-center mt-2'>
-          <LiveClassEmptyState />
+          <Image
+            src={"/emptyStates/undraw_online_learning_re_qw08.svg"}
+            height={200}
+            width={200}
+            alt='batchEmpty State'
+          />
           <p>
             Create a session to start engagement with the learners for course
             lessons or doubts

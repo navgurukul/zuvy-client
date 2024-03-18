@@ -32,6 +32,29 @@ const Settings = ({ courseId }: { courseId: string }) => {
     }
     setDeleteModalOpen(false);
   };
+  const handlePrivate = async (e: any) => {
+    const transFormedObj = {
+      type: `${e.target.value}`,
+    };
+    console.log(transFormedObj);
+    try {
+      await api
+        .put(`/bootcamp/bootcampSetting/${courseId}`, transFormedObj)
+        .then((res) => {
+          toast({
+            title: res.data.status,
+            description: res.data.message,
+            className: "text-start capitalize",
+          });
+        });
+    } catch (error: any) {
+      toast({
+        title: error.data.status,
+        description: error.data.message,
+        className: "text-start capitalize",
+      });
+    }
+  };
 
   return (
     <div>
@@ -46,7 +69,11 @@ const Settings = ({ courseId }: { courseId: string }) => {
               >
                 <div className='flex flex-col   space-x-2'>
                   <div className='flex gap-x-3'>
-                    <RadioGroupItem value='comfortable' id='r2' />
+                    <RadioGroupItem
+                      value='Private'
+                      id='r2'
+                      onClick={handlePrivate}
+                    />
                     <Label htmlFor='r2'>Invite Only</Label>
                   </div>
                   <p>
@@ -56,7 +83,11 @@ const Settings = ({ courseId }: { courseId: string }) => {
                 </div>
                 <div className='flex flex-col  space-x-2'>
                   <div className='flex gap-x-3'>
-                    <RadioGroupItem value='compact' id='r3' />
+                    <RadioGroupItem
+                      value='Public'
+                      id='r3'
+                      onClick={handlePrivate}
+                    />
                     <Label htmlFor='r3'>Open</Label>
                   </div>
                   <p>

@@ -1,8 +1,4 @@
-import React from "react";
-
-const BatchEmptyState = () => {
-  return (
-    <svg
+<svg
       width='274'
       height='180'
       viewBox='0 0 274 180'
@@ -269,7 +265,3 @@ const BatchEmptyState = () => {
         </clipPath>
       </defs>
     </svg>
-  );
-};
-
-export default BatchEmptyState;

@@ -36,7 +36,7 @@ import Link from "next/link";
 import { useStudentData } from "@/store/store";
 import { fetchStudentData } from "./students";
 import useDebounce from "@/hooks/useDebounce";
-import BatchEmptyState from "../../../../../../public/emptyStates/batchEmptyState";
+import Image from "next/image";
 const Batches = ({
   courseID,
   unassigned_students,
@@ -307,7 +307,12 @@ const Batches = ({
           ))
         ) : (
           <div className='w-full flex flex-col items-center justify-center gap-y-3 absolute'>
-            <BatchEmptyState />
+            <Image
+              src={"/emptyStates/undraw_educator_re_ju47.svg"}
+              height={200}
+              width={200}
+              alt='batchEmpty State'
+            />
             <p>
               Start by creating the first batch for the course. Learners will
               get added automatically based on enrollment cap

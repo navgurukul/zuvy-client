@@ -99,6 +99,7 @@ const BatchesInfo = ({
   const [offset, setOffset] = useState<number>(0);
   const [currentPage, setCurrentPag] = useState();
   const debouncedValue = useDebounce(search, 1000);
+  const [oldData, setOldData] = useState<any>();
   const crumbs = [
     {
       crumb: "My Courses",
@@ -177,9 +178,9 @@ const BatchesInfo = ({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      instructorId: "",
-      capEnrollment: "",
+      name: oldData?.name || "",
+      instructorId: oldData?.instructorId || "",
+      capEnrollment: oldData?.capEnrollment || "",
     },
   });
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -188,36 +189,37 @@ const BatchesInfo = ({
       instructorId: +values.instructorId,
       capEnrollment: +values.capEnrollment,
     };
-    try {
-      //   if (matches) {
-      //   const [firstValue, bootcampId, batchId] = matches;
+    setOldData(convertedData);
+    // try {
+    //   //   if (matches) {
+    //   //   const [firstValue, bootcampId, batchId] = matches;
 
-      const response = await api
-        .patch(`/batch/${params.batchId}`, convertedData)
-        .then((res) => {
-          toast({
-            title: "Batches Updated Succesfully",
-          });
-          const fetchBatchesInfo = async () => {
-            try {
-              //   if (matches) {
-              //   const [firstValue, bootcampId, batchId] = matches;
-              const response = await api.get(
-                `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}`
-              );
-              setStudentData(response.data.studentsEmails);
-              setStudentsInfo(response.data.studentsEmails);
-              //   }
-            } catch (error) {}
-          };
-          fetchBatchesInfo();
-        });
-      //   }
-    } catch (error) {
-      toast({
-        title: "Batches Didn't Succesfully",
-      });
-    }
+    //   const response = await api
+    //     .patch(`/batch/${params.batchId}`, convertedData)
+    //     .then((res) => {
+    //       toast({
+    //         title: "Batches Updated Succesfully",
+    //       });
+    //       const fetchBatchesInfo = async () => {
+    //         try {
+    //           //   if (matches) {
+    //           //   const [firstValue, bootcampId, batchId] = matches;
+    //           const response = await api.get(
+    //             `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}`
+    //           );
+    //           setStudentData(response.data.studentsEmails);
+    //           setStudentsInfo(response.data.studentsEmails);
+    //           //   }
+    //         } catch (error) {}
+    //       };
+    //       fetchBatchesInfo();
+    //     });
+    //   //   }
+    // } catch (error) {
+    //   toast({
+    //     title: "Batches Didn't Succesfully",
+    //   });
+    // }
   };
   useEffect(() => {
     const getBootCamp = async () => {
@@ -227,27 +229,35 @@ const BatchesInfo = ({
     };
     getBootCamp();
   }, []);
+  const fetchPaginatedData = async () => {
+    const response = await api
+      .get(
+        `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}&limit=${position}&offset=${offset}`
+      )
+      .then((response) => {
+        setStudentData(response.data.studentsEmails);
+        setStudentsInfo(response.data.studentsEmails);
+        setPaginatedStuedntData(response.data.studentsEmails);
+        setPages(response.data.totalPages);
+      });
+  };
   useEffect(() => {
-    const fetchPaginatedData = async () => {
-      const response = await api
-        .get(
-          `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}&limit=${position}&offset=${offset}`
-        )
-        .then((response) => {
-          setStudentData(response.data.studentsEmails);
-          setStudentsInfo(response.data.studentsEmails);
-          setPaginatedStuedntData(response.data.studentsEmails);
-          setPages(response.data.totalPages);
-        });
-    };
-
     fetchPaginatedData();
   }, [offset, position]);
   useEffect(() => {
-    const searchBatchStudentsHandler = () => {};
+    const searchBatchStudentsHandler = async () => {
+      await api
+        .get(
+          `/bootcamp/studentSearch/${params.courseId}?batch_id=${params.batchId}&searchTerm=${debouncedValue}`
+        )
+        .then((res) => {
+          setPaginatedStuedntData(res.data.data[1].studentsEmails);
+        });
+    };
 
-    searchBatchStudentsHandler();
-  }, []);
+    if (debouncedValue) searchBatchStudentsHandler();
+    if (debouncedValue?.trim().length === 0) fetchPaginatedData();
+  }, [debouncedValue]);
 
   const nextPageHandler = () => {
     console.log(offset);
@@ -261,6 +271,59 @@ const BatchesInfo = ({
   const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
   };
+
+  <Form {...form}>
+    <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+      <FormField
+        control={form.control}
+        name='name'
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Batch Name</FormLabel>
+            <FormControl>
+              <Input placeholder='Batch Name' {...field} />
+            </FormControl>
+
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={form.control}
+        name='instructorId'
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Instructor Id</FormLabel>
+            <FormControl>
+              <Input placeholder='20230' type='name' {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={form.control}
+        name='capEnrollment'
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Cap Enrollment</FormLabel>
+            <FormControl>
+              <Input placeholder='Cap Enrollment' type='number' {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormDescription>This form will Update the batch info</FormDescription>
+      <div className='w-full flex flex-col items-end gap-y-5 '>
+        <DialogClose asChild>
+          <Button className='w-1/2' type='submit'>
+            Update batch
+          </Button>
+        </DialogClose>
+      </div>
+    </form>
+  </Form>;
   return (
     <>
       <Breadcrumb crumbs={crumbs} />
