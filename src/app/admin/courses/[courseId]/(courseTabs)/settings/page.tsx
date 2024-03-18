@@ -23,8 +23,32 @@ const Page = () => {
   // async
   const handleDelete = async () => {
     try {
-      const response = await api
-        .delete(`/bootcamp/${courseData?.id}`)
+      await api.delete(`/bootcamp/${courseData?.id}`).then((res) => {
+        toast({
+          title: res.data.status,
+          description: res.data.message,
+          className: "text-start capitalize",
+        });
+      });
+      router.push("/admin/courses");
+    } catch (error: any) {
+      toast({
+        title: error.data.status,
+        description: error.data.message,
+        className: "text-start capitalize",
+      });
+      console.error("Error deleting:", error);
+    }
+    setDeleteModalOpen(false);
+  };
+  const handlePrivate = async (e: any) => {
+    const transFormedObj = {
+      type: `${e.target.value}`,
+    };
+    console.log(transFormedObj);
+    try {
+      await api
+        .put(`/bootcamp/bootcampSetting/${courseData?.id}`, transFormedObj)
         .then((res) => {
           toast({
             title: res.data.status,
@@ -32,38 +56,48 @@ const Page = () => {
             className: "text-start capitalize",
           });
         });
-      router.push("/admin/courses");
-    } catch (error) {
-      console.error("Error deleting:", error);
+    } catch (error: any) {
+      toast({
+        title: error.data.status,
+        description: error.data.message,
+        className: "text-start capitalize",
+      });
     }
-    setDeleteModalOpen(false);
   };
 
   return (
     <div>
-      <div className=" w-full text-start mb-5">
+      <div className=' w-full text-start mb-5'>
         <div>
-          <h1 className="text-lg font-semibold">Course Type</h1>
-          <div className="flex mt-2 flex-col gap-y-3 items-start">
-            <div className="flex items-center space-x-2">
+          <h1 className='text-lg font-semibold'>Course Type</h1>
+          <div className='flex mt-2 flex-col gap-y-3 items-start'>
+            <div className='flex items-center space-x-2'>
               <RadioGroup
-                className="flex flex-col justify-start items-start "
-                defaultValue="comfortable"
+                className='flex flex-col justify-start items-start '
+                defaultValue='comfortable'
               >
-                <div className="flex flex-col   space-x-2">
-                  <div className="flex gap-x-3">
-                    <RadioGroupItem value="comfortable" id="r2" />
-                    <Label htmlFor="r2">Invite Only</Label>
+                <div className='flex flex-col   space-x-2'>
+                  <div className='flex gap-x-3'>
+                    <RadioGroupItem
+                      value='Private'
+                      id='r2'
+                      onClick={handlePrivate}
+                    />
+                    <Label htmlFor='r2'>Invite Only</Label>
                   </div>
                   <p>
                     The students will need to be added to the invite only
                     courses. They have access the courses without enrollement.
                   </p>
                 </div>
-                <div className="flex flex-col  space-x-2">
-                  <div className="flex gap-x-3">
-                    <RadioGroupItem value="compact" id="r3" />
-                    <Label htmlFor="r3">Open</Label>
+                <div className='flex flex-col  space-x-2'>
+                  <div className='flex gap-x-3'>
+                    <RadioGroupItem
+                      value='Public'
+                      id='r3'
+                      onClick={handlePrivate}
+                    />
+                    <Label htmlFor='r3'>Open</Label>
                   </div>
                   <p>
                     The students will need to be added to the invite only
@@ -75,15 +109,15 @@ const Page = () => {
           </div>
         </div>
 
-        <h1 className="text-lg font-semibold">Course Status</h1>
+        <h1 className='text-lg font-semibold'>Course Status</h1>
         <p>
           This course has not been published yet. You will able to unpublish it
           at any time if new enrollments have to be stopped
         </p>
       </div>
-      <div className="w-full text-start my-5">
-        <div className="mb-3 text-start">
-          <h1 className="text-lg font-semibold">Permanant Deletion</h1>
+      <div className='w-full text-start my-5'>
+        <div className='mb-3 text-start'>
+          <h1 className='text-lg font-semibold'>Permanant Deletion</h1>
           <p>
             Courses can only be deleted if they didn’t have any enrollment since
             the start
@@ -99,11 +133,11 @@ const Page = () => {
           isOpen={isDeleteModalOpen}
           onClose={() => setDeleteModalOpen(false)}
           onConfirm={handleDelete}
-          modalText="Are you sure you want to delete this Bootcamp?"
-          buttonText="Delete Course"
+          modalText='Are you sure you want to delete this Bootcamp?'
+          buttonText='Delete Course'
           input={false}
-          modalText2=""
-          batchName=""
+          modalText2=''
+          batchName=''
         />
       </div>
     </div>
