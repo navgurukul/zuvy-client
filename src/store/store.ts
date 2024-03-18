@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { useEffect } from "react";
-import Students from "@/app/admin/courses/[courseId]/_components/students";
+import api from "@/utils/axios.config";
 
 type CounterStore = {
   studentData: {
@@ -15,6 +15,48 @@ type CounterStore = {
   setAnotherStudentState: (newValue: any[]) => void;
   token: any;
 };
+
+interface CourseData {
+  id: string;
+  name: string;
+  bootcampTopic: string;
+  coverImage: string;
+  duration: string;
+  language: string;
+  startTime: string;
+  unassigned_students: number;
+}
+
+interface StoreCourseData {
+  courseData: CourseData | null;
+  setCourseData: (newValue: CourseData) => void;
+  fetchCourseDetails: (courseId: string) => void;
+}
+
+export const getCourseData = create<StoreCourseData>((set) => ({
+  courseData: {
+    id: "",
+    name: "",
+    bootcampTopic: "",
+    coverImage: "",
+    duration: "",
+    language: "string",
+    startTime:"",
+    unassigned_students:0
+  },
+  setCourseData: (newValue: CourseData) => {
+    set({ courseData: newValue });
+  },
+  fetchCourseDetails: async (courseId: string) => {
+    try {
+      const response = await api.get(`/bootcamp/${courseId}`);
+      const data = response.data;
+      set({ courseData: data.bootcamp });
+    } catch (error) {
+      console.error("Error fetching course details:", error);
+    }
+  },
+}));
 
 // ------------------------------
 type deleteStudentStore = {
@@ -87,7 +129,6 @@ export const useLazyLoadedStudentData = () => {
       useStudentData.setState({ studentData: initializedData });
 
       // Now you have access to the token and can use it as needed
-      console.log("Token:", token);
     };
 
     initializeData();

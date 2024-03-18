@@ -29,73 +29,61 @@ import {
 } from "@/components/ui/form";
 
 import api from "@/utils/axios.config";
-import AddStudentsModal from "./addStudentsmodal";
+import AddStudentsModal from "../../_components/addStudentsmodal";
 import { toast } from "@/components/ui/use-toast";
-import { Card as card, CardDescription, CardTitle } from "@/components/ui/card";
+import { CardDescription, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
-import { useStudentData } from "@/store/store";
-import { fetchStudentData } from "./students";
-import useDebounce from "@/hooks/useDebounce";
+import { getCourseData } from "@/store/store";
 import Image from "next/image";
-const Batches = ({
-  courseID,
-  unassigned_students,
-}: {
-  courseID: string;
-  unassigned_students: number;
-}) => {
-  const [unassignedStudents, setUnassignedStudents] =
-    useState(unassigned_students);
+
+const Page = ({}: {}) => {
+  const { courseData } = getCourseData();
+
+  const [unassignedStudents, setUnassignedStudents] = useState(
+    courseData?.unassigned_students
+  );
   const [courses, setCourses] = useState([]);
   const [batches, setBatches] = useState([]);
-  const [search, setSearch] = useState<any>();
-  const debouncedSearch = useDebounce(search, 1000);
-  const getBootcamp = () => {
-    try {
-      api.get("/bootcamp").then((response) => setCourses(response.data));
-    } catch (error) {
-      console.error("Error fetching courses:", error);
+  // const getBootcamp = () => {
+  //   try {
+  //     api.get("/bootcamp").then((response) => setCourses(response.data));
+  //   } catch (error) {
+  //     console.error("Error fetching courses:", error);
+  //   }
+  // };
+  // useEffect(() => {
+  //   getBootcamp();
+  // }, []);
+
+  useEffect(() => {
+    if (courseData?.id) {
+      const fetchBatches = async () => {
+        try {
+          const response = await api.get(`/bootcamp/batches/${courseData?.id}`);
+          setBatches(response.data.data);
+        } catch (error: any) {
+          console.log(error.message);
+        }
+      };
+
+      fetchBatches();
     }
-  };
-  useEffect(() => {
-    getBootcamp();
-  }, []);
+  }, [courseData]);
 
-  const fetchBatches = async () => {
-    try {
-      const response = await api.get(`/bootcamp/batches/${courseID}`);
-      setBatches(response.data.data);
-    } catch (error: any) {
-      console.log(error.message);
-    }
-  };
-  useEffect(() => {
-    fetchBatches();
-  }, [courseID]);
+  // useEffect(() => {
+  //   if (courseData?.id) {
+  //     const fetchCourseDetails = async () => {
+  //       try {
+  //         const response = await api.get(`/bootcamp/${courseData?.id}`);
+  //         const data = response.data;
+  //       } catch (error) {
+  //         console.error("Error fetching course details:", error);
+  //       }
+  //     };
 
-  useEffect(() => {
-    const fetchCourseDetails = async () => {
-      try {
-        const response = await api.get(`/bootcamp/${courseID}`);
-        const data = response.data;
-      } catch (error) {
-        console.error("Error fetching course details:", error);
-      }
-    };
-
-    fetchCourseDetails();
-  }, [courseID, unassignedStudents]);
-
-  useEffect(() => {
-    const batchSearchHandler = async () => {
-      const response = await api.get(
-        `/bootcamp/searchBatch/${courseID}?searchTerm=${debouncedSearch}`
-      );
-      setBatches(response.data);
-    };
-    if (debouncedSearch) batchSearchHandler();
-    if (debouncedSearch?.trim()?.length === 0) fetchBatches();
-  }, [debouncedSearch]);
+  //     fetchCourseDetails();
+  //   }
+  // }, [courseData, unassignedStudents]);
 
   const formSchema = z.object({
     name: z.string().min(2, {
@@ -121,7 +109,7 @@ const Batches = ({
     defaultValues: {
       name: "",
       instructorId: "",
-      bootcampId: courseID,
+      bootcampId: courseData?.id,
       capEnrollment: "",
     },
   });
@@ -142,7 +130,9 @@ const Batches = ({
         .then((response) => {
           const fetchBatches = async () => {
             try {
-              const response = await api.get(`/bootcamp/batches/${courseID}`);
+              const response = await api.get(
+                `/bootcamp/batches/${courseData?.id || ""}`
+              );
               setBatches(response.data);
             } catch (error: any) {
               console.log(error.message);
@@ -151,7 +141,9 @@ const Batches = ({
           fetchBatches();
           const fetchCourseDetails = async () => {
             try {
-              const response = await api.get(`/bootcamp/${courseID}`);
+              const response = await api.get(
+                `/bootcamp/${courseData?.id || ""}`
+              );
               const data = response.data;
               setUnassignedStudents(data.bootcamp.unassigned_students);
             } catch (error) {
@@ -178,9 +170,7 @@ const Batches = ({
       console.error("Error creating batch:", error);
     }
   };
-  const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearch(e.target.value);
-  };
+
   const renderModal = (emptyState: boolean) => {
     if (unassignedStudents === 0) {
       return (
@@ -189,7 +179,7 @@ const Batches = ({
             <Button>{emptyState ? "+ Create Batch" : "New Batch"}</Button>
           </DialogTrigger>
           <DialogOverlay />
-          <AddStudentsModal message={true} id={courseID} />
+          <AddStudentsModal message={true} id={courseData?.id || ""} />
         </Dialog>
       );
     } else {
@@ -201,20 +191,20 @@ const Batches = ({
           <DialogContent>
             <DialogHeader>
               <DialogTitle>New Batch</DialogTitle>
-              Unassigned Students in Records: {unassigned_students}
+              Unassigned Students in Records: {courseData?.unassigned_students}
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(onSubmit)}
-                  className='space-y-8'
+                  className="space-y-8"
                 >
                   <FormField
                     control={form.control}
-                    name='name'
+                    name="name"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Batch Name</FormLabel>
                         <FormControl>
-                          <Input placeholder='Batch Name' {...field} />
+                          <Input placeholder="Batch Name" {...field} />
                         </FormControl>
 
                         <FormMessage />
@@ -223,12 +213,12 @@ const Batches = ({
                   />
                   <FormField
                     control={form.control}
-                    name='instructorId'
+                    name="instructorId"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Instructor Id</FormLabel>
                         <FormControl>
-                          <Input placeholder='20230' type='name' {...field} />
+                          <Input placeholder="20230" type="name" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -236,14 +226,14 @@ const Batches = ({
                   />
                   <FormField
                     control={form.control}
-                    name='capEnrollment'
+                    name="capEnrollment"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Cap Enrollment</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder='Cap Enrollment'
-                            type='number'
+                            placeholder="Cap Enrollment"
+                            type="number"
                             {...field}
                           />
                         </FormControl>
@@ -255,9 +245,9 @@ const Batches = ({
                     {unassignedStudents} students will be added to this batch
                     (Maximum current availability)
                   </FormDescription>
-                  <div className='w-full flex flex-col items-end gap-y-5 '>
+                  <div className="w-full flex flex-col items-end gap-y-5 ">
                     <DialogClose asChild>
-                      <Button className='w-1/2' type='submit'>
+                      <Button className="w-1/2" type="submit">
                         Create batch
                       </Button>
                     </DialogClose>
@@ -272,32 +262,27 @@ const Batches = ({
   };
   return (
     <div>
-      <div className=' relative flex items-center justify-between mb-6'>
+      <div className=" relative flex items-center justify-between mb-6">
         {batches.length > 0 ? (
-          <Input
-            type='search'
-            placeholder='Search'
-            className='w-[400px]'
-            onChange={handleSetSearch}
-          />
+          <Input type="search" placeholder="Search" className="w-[400px]" />
         ) : null}
         {renderModal(false)}
       </div>
 
-      <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 mt-2'>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 mt-2">
         {batches.length > 0 ? (
           batches.map((batch: any, index: number) => (
             <Link
               key={batch.name}
-              href={`/admin/courses/${courseID}/batch/${batch.id}`}
+              href={`/admin/courses/${courseData?.id}/batch/${batch.id}`}
             >
-              <Card key={batch.id} className='text-gray-900 text-base'>
-                <div className='bg-white rounded-lg border p-4'>
-                  <div className='px-1 py-4 flex flex-col items-start'>
-                    <CardTitle className='font-semibold capitalize'>
+              <Card key={batch.id} className="text-gray-900 text-base">
+                <div className="bg-white rounded-lg border p-4">
+                  <div className="px-1 py-4 flex flex-col items-start">
+                    <CardTitle className="font-semibold capitalize">
                       {batch.name}
                     </CardTitle>
-                    <CardDescription className=' capitalize'>
+                    <CardDescription className=" capitalize">
                       {batch.students_enrolled} <span>Learners</span>
                     </CardDescription>
                   </div>
@@ -306,12 +291,12 @@ const Batches = ({
             </Link>
           ))
         ) : (
-          <div className='w-full flex flex-col items-center justify-center gap-y-3 absolute'>
+          <div className="w-full flex flex-col items-center justify-center gap-y-3 absolute">
             <Image
-              src={"/emptyStates/undraw_educator_re_ju47.svg"}
-              height={200}
-              width={200}
-              alt='batchEmpty State'
+              src="/batches.svg"
+              alt="create batch"
+              width={100}
+              height={100}
             />
             <p>
               Start by creating the first batch for the course. Learners will
@@ -325,4 +310,4 @@ const Batches = ({
   );
 };
 
-export default Batches;
+export default Page;

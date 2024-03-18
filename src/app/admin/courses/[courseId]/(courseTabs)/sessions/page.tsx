@@ -1,17 +1,19 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Combobox } from "@/components/ui/combobox";
-import ClassCard from "./classCard";
+import ClassCard from "../../_components/classCard";
 import { Dialog, DialogOverlay, DialogTrigger } from "@/components/ui/dialog";
-import NewClassDialog from "./newClassDialog";
+import NewClassDialog from "../../_components/newClassDialog";
 import api from "@/utils/axios.config";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import LiveClassEmptyState from "../../../../../../public/emptyStates/liveClassEmptyState";
 import Image from "next/image";
+import { getCourseData } from "@/store/store";
 
-function LiveClass({ courseId }: { courseId: string }) {
+function Page() {
   // state and variables
   const [classType, setClassType] = useState("upcoming");
   const [allClasses, setAllClasses] = useState([]);
@@ -22,8 +24,8 @@ function LiveClass({ courseId }: { courseId: string }) {
   const [completedClasses, setCompletedClasses] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
 
+  const { courseData } = getCourseData();
   // func
-
   const handleDateChange = (date: any) => {
     setSelectedDate(date);
   };
@@ -44,22 +46,24 @@ function LiveClass({ courseId }: { courseId: string }) {
 
   // async
   useEffect(() => {
-    api
-      .get(`/bootcamp/batches/${courseId}`)
-      .then((response) => {
-        const transformedData = response.data.map(
-          (item: { id: any; name: any }) => ({
-            value: item.id.toString(),
-            label: item.name,
-          })
-        );
+    if (courseData?.id) {
+      api
+        .get(`/bootcamp/batches/${courseData?.id}`)
+        .then((response) => {
+          const transformedData = response.data.data.map(
+            (item: { id: any; name: any }) => ({
+              value: item.id.toString(),
+              label: item.name,
+            })
+          );
 
-        setBootcampData(transformedData);
-      })
-      .catch((error) => {
-        console.log("Error fetching data:", error);
-      });
-  }, [courseId]);
+          setBootcampData(transformedData);
+        })
+        .catch((error) => {
+          console.log("Error fetching data:", error);
+        });
+    }
+  }, [courseData]);
 
   useEffect(() => {
     if (classType === "active") {
@@ -75,25 +79,27 @@ function LiveClass({ courseId }: { courseId: string }) {
     let fetchId;
     let fetchUrl;
     if (!batchId) {
-      fetchId = courseId;
+      fetchId = courseData?.id;
       fetchUrl = "getClassesByBootcampId";
     } else {
       fetchId = batchId;
       fetchUrl = "getClassesByBatchId";
     }
 
-    api
-      .get(`/classes/${fetchUrl}/${fetchId}`)
-      .then((response) => {
-        setUpcomingClasses(response.data.upcomingClasses);
-        setOngoingClasses(response.data.ongoingClasses);
-        setCompletedClasses(response.data.completedClasses);
-        handleClassType(classType);
-      })
-      .catch((error) => {
-        console.log("Error fetching classes:", error);
-      });
-  }, [courseId, batchId]);
+    if (courseData?.id) {
+      api
+        .get(`/classes/${fetchUrl}/${fetchId}`)
+        .then((response) => {
+          setUpcomingClasses(response.data.upcomingClasses);
+          setOngoingClasses(response.data.ongoingClasses);
+          setCompletedClasses(response.data.completedClasses);
+          handleClassType(classType);
+        })
+        .catch((error) => {
+          console.log("Error fetching classes:", error);
+        });
+    }
+  }, [courseData, batchId, classType]);
 
   return (
     <div>
@@ -130,7 +136,10 @@ function LiveClass({ courseId }: { courseId: string }) {
             </Button>
           </DialogTrigger>
           <DialogOverlay />
-          <NewClassDialog courseId={courseId} />
+          <NewClassDialog
+            courseId={courseData?.id || ""}
+            bootcampData={bootcampData}
+          />
         </Dialog>
       </div>
       <div className='flex justify-start gap-6 my-6'>
@@ -185,7 +194,10 @@ function LiveClass({ courseId }: { courseId: string }) {
               </Button>
             </DialogTrigger>
             <DialogOverlay />
-            <NewClassDialog courseId={courseId} />
+            <NewClassDialog
+              courseId={courseData?.id || ""}
+              bootcampData={bootcampData}
+            />
           </Dialog>
         </div>
       )}
@@ -193,4 +205,4 @@ function LiveClass({ courseId }: { courseId: string }) {
   );
 }
 
-export default LiveClass;
+export default Page;

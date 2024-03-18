@@ -1,17 +1,21 @@
+"use client";
+
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import DeleteConfirmationModal from "./deleteModal";
+import DeleteConfirmationModal from "../../_components/deleteModal";
 import { Button } from "@/components/ui/button";
 import api from "@/utils/axios.config";
-import { DropdownMenuDemo } from "./DropdownMenu";
+import { DropdownMenuDemo } from "../../_components/DropdownMenu";
 import { Toast } from "@/components/ui/toast";
 import { toast } from "@/components/ui/use-toast";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-const Settings = ({ courseId }: { courseId: string }) => {
+import { getCourseData } from "@/store/store";
+const Page = () => {
   // misc
   const router = useRouter();
+  const { courseData } = getCourseData();
 
   // state and variables
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -19,13 +23,15 @@ const Settings = ({ courseId }: { courseId: string }) => {
   // async
   const handleDelete = async () => {
     try {
-      const response = await api.delete(`/bootcamp/${courseId}`).then((res) => {
-        toast({
-          title: res.data.status,
-          description: res.data.message,
-          className: "text-start capitalize",
+      const response = await api
+        .delete(`/bootcamp/${courseData?.id}`)
+        .then((res) => {
+          toast({
+            title: res.data.status,
+            description: res.data.message,
+            className: "text-start capitalize",
+          });
         });
-      });
       router.push("/admin/courses");
     } catch (error) {
       console.error("Error deleting:", error);
@@ -39,7 +45,7 @@ const Settings = ({ courseId }: { courseId: string }) => {
     console.log(transFormedObj);
     try {
       await api
-        .put(`/bootcamp/bootcampSetting/${courseId}`, transFormedObj)
+        .put(`/bootcamp/bootcampSetting/${courseData?.id}`, transFormedObj)
         .then((res) => {
           toast({
             title: res.data.status,
@@ -135,4 +141,4 @@ const Settings = ({ courseId }: { courseId: string }) => {
   );
 };
 
-export default Settings;
+export default Page;

@@ -6,7 +6,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
 import { useLazyLoadedStudentData } from "@/store/store";
-import { ArrowBigLeft, CheckCircle2 } from "lucide-react";
+import { ArrowBigLeft, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 
@@ -116,8 +116,14 @@ function Page({
       {/* Sidebar with labels */}
 
       <div className="w-1/4 border-r-2 text-left p-4">
-        <button onClick={() => router.back()}>
-          <ArrowBigLeft className="text-[#518672]" />
+        <button
+          onClick={() => router.back()}
+          className="flex space-x-2 items-center"
+        >
+          <ArrowLeft size={20} />
+          <p className="ml-1 inline-flex text-sm font-medium text-gray-800 md:ml-2">
+            Curriculum
+          </p>
         </button>
 
         <h4 className="text-lg font-bold mb-2 mt-5">Chapter List</h4>

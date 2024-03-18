@@ -29,6 +29,7 @@ import { Calendar } from "@/components/ui/calendar";
 import OptimizedImageWithFallback from "@/components/ImageWithFallback";
 import { cn } from "@/lib/utils";
 import { LANGUAGES } from "@/utils/constant";
+import { getCourseData } from "@/store/store";
 import api from "@/utils/axios.config";
 
 const FormSchema = z.object({
@@ -48,55 +49,45 @@ interface CourseData {
   coverImage: string;
   duration: string;
   language: string;
-  // capEnrollment: number;
-  startTime: Date;
-  unassigned_students: number;
+  startTime: string;
+  unassigned_students: number; // Change the type to number
 }
 
-interface GeneralDetailsProps {
-  id: string;
-  courseData: CourseData;
-  setCourseData: React.Dispatch<React.SetStateAction<CourseData>>;
-}
-
-export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
-  id,
-  courseData,
-  setCourseData,
-}) => {
+function Page() {
   const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+  const { courseData, setCourseData } = getCourseData();
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      name: courseData.name,
-      bootcampTopic: courseData.bootcampTopic,
-      coverImage: courseData.coverImage,
-      duration: courseData.duration,
-      language: courseData.language,
-      // capEnrollment: courseData.capEnrollment,
-      startTime: new Date(courseData.startTime),
+      name: courseData?.name || "",
+      bootcampTopic: courseData?.bootcampTopic || "",
+      coverImage: courseData?.coverImage || "",
+      duration: courseData?.duration || "",
+      language: courseData?.language || "",
+      startTime: courseData?.startTime
+        ? new Date(courseData.startTime)
+        : undefined,
     },
     values: {
-      name: courseData.name ?? "",
-      bootcampTopic: courseData.bootcampTopic ?? "",
-      coverImage: courseData.coverImage ?? "",
-      duration: courseData.duration ?? "",
-      language: courseData.language ?? "",
-      // capEnrollment: courseData.capEnrollment,
-      startTime: new Date(courseData.startTime),
+      name: courseData?.name ?? "",
+      bootcampTopic: courseData?.bootcampTopic ?? "",
+      coverImage: courseData?.coverImage ?? "",
+      duration: courseData?.duration ?? "",
+      language: courseData?.language ?? "",
+      // capEnrollment: courseData?.capEnrollment,
+      startTime: courseData?.startTime
+        ? new Date(courseData.startTime)
+        : undefined,
     },
   });
-
-  // const handleImageChange=(e)=>{
-
-  // }
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     try {
       const response = await api
         .patch(
-          `/bootcamp/${id}`,
+          `/bootcamp/${courseData?.id}`,
           {
             ...data,
           },
@@ -168,7 +159,11 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
           })
           .then((res) => {
             const imageUrl = res.data.file.url;
-            setCourseData({ ...courseData, coverImage: imageUrl });
+            const updatedCourseData: CourseData = {
+              ...getCourseData.getState().courseData!,
+              coverImage: imageUrl,
+            };
+            setCourseData(updatedCourseData);
           });
       } catch (error) {
         console.error("Network error:", error);
@@ -182,8 +177,8 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="bg-muted flex justify-center rounded-sm my-3 overflow-hidden">
             <OptimizedImageWithFallback
-              src={courseData.coverImage}
-              alt={courseData.name}
+              src={courseData?.coverImage || ""}
+              alt={courseData?.name || ""}
               fallBackSrc={"/logo_white.png"}
               // className=""
             />
@@ -298,23 +293,23 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
             )}
           />
           {/* <FormField
-            control={form.control}
-            name="capEnrollment"
-            render={({ field }) => (
-              <FormItem className="text-start">
-                <FormLabel>Cap Enrollment at</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="Enter Bootcamp Enrollment Cap"
-                    {...field}
-                    value={field.value}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          /> */}
+        control={form.control}
+        name="capEnrollment"
+        render={({ field }) => (
+          <FormItem className="text-start">
+            <FormLabel>Cap Enrollment at</FormLabel>
+            <FormControl>
+              <Input
+                type="number"
+                placeholder="Enter Bootcamp Enrollment Cap"
+                {...field}
+                value={field.value}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      /> */}
           <FormField
             control={form.control}
             name="language"
@@ -350,4 +345,6 @@ export const GeneralDetails: React.FC<GeneralDetailsProps> = ({
       </Form>
     </div>
   );
-};
+}
+
+export default Page;

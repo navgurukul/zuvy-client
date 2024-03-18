@@ -25,10 +25,15 @@ const guestRoutes = [
     href: "/student",
   },
   {
-    icon: Compass,
-    label: "Browse",
+    icon: BookOpen,
+    label: "My Courses",
     href: "/student/courses",
   },
+  // {
+  //   icon: Compass,
+  //   label: "Explore",
+  //   href: "/student/explore",
+  // },
   // {
   //   icon: Code,
   //   label: "Playground",

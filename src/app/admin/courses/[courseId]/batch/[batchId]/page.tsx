@@ -31,17 +31,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 type Props = {};
-export type StudentData = {
-  email: string;
-  name: string;
-  userId: string;
-  bootcampId: number;
-  batchName: string;
-  batchId: number;
-  progress: number;
-  profilePicture: string;
-  id: string;
-};
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -64,16 +54,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import DeleteConfirmationModal from "../../_components/deleteModal";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ROWS_PER_PAGE } from "@/utils/constant";
+import { StudentData } from "../../(courseTabs)/students/page";
 import useDebounce from "@/hooks/useDebounce";
 
 const BatchesInfo = ({
@@ -109,14 +90,13 @@ const BatchesInfo = ({
       crumb: `${bootcamp?.name}`,
       href: `/admin/courses/${
         studentsData.length > 0 ? studentsData[0].bootcampId : ""
-      }`,
+      }/batches`,
     },
     {
       crumb: `${studentsData.length > 0 ? studentsData[0].batchName : ""}`,
       href: `/admin/courses/${
         studentsData.length > 0 ? studentsData[0].bootcampId : ""
-      }/${studentsData.length > 0 ? studentsData[0].batchId : ""}/${
-        studentsData.length > 0 ? studentsData[0].batchId : ""
+      }/batch/${studentsData.length > 0 ? studentsData[0]?.batchId : ""}
       }`,
     },
   ];
@@ -520,7 +500,7 @@ const BatchesInfo = ({
               type='search'
               placeholder='Student Name, Email'
               className='w-1/2 my-12'
-              onChange={handleSetSearch}
+              disabled
             />
           </div>
           <div className='flex m-4'>
@@ -632,41 +612,20 @@ const BatchesInfo = ({
           </div>
         </div>
         <StudentsBatchTable columns={columns} data={paginateStudentData} />
-        <div className='flex flex-row justify-end items-center w-full gap-x-2 '>
-          <span>Rows per page: {position}</span>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant='outline'>
-                <svg
-                  width='24'
-                  height='24'
-                  viewBox='0 0 24 24'
-                  fill='none'
-                  xmlns='http://www.w3.org/2000/svg'
-                >
-                  <path
-                    d='M8.70663 11.4137L11.2966 14.0037C11.6866 14.3937 12.3166 14.3937 12.7066 14.0037L15.2966 11.4137C15.9266 10.7837 15.4766 9.70374 14.5866 9.70374H9.40663C8.51663 9.70374 8.07663 10.7837 8.70663 11.4137Z'
-                    fill='#6D6D6D'
-                  />
-                </svg>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className='w-full'>
-              <DropdownMenuSeparator />
-              <DropdownMenuRadioGroup
-                value={position}
-                onValueChange={setPosition}
-              >
-                {ROWS_PER_PAGE.map((rowItem) => {
-                  return (
-                    <DropdownMenuRadioItem key={rowItem} value={rowItem}>
-                      {rowItem}
-                    </DropdownMenuRadioItem>
-                  );
-                })}
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
+        <div className='flex flex-row justify-end w-full gap-x-4 '>
+          <span>Rows per page: {10}</span>
+          <svg
+            width='24'
+            height='24'
+            viewBox='0 0 24 24'
+            fill='none'
+            xmlns='http://www.w3.org/2000/svg'
+          >
+            <path
+              d='M8.70663 11.4137L11.2966 14.0037C11.6866 14.3937 12.3166 14.3937 12.7066 14.0037L15.2966 11.4137C15.9266 10.7837 15.4766 9.70374 14.5866 9.70374H9.40663C8.51663 9.70374 8.07663 10.7837 8.70663 11.4137Z'
+              fill='#6D6D6D'
+            />
+          </svg>
 
           <span>
             1-{pages} of {pages}{" "}

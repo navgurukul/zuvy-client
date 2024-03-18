@@ -4,24 +4,11 @@ import { useEffect, useState } from "react";
 // import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import {
-  BookOpenText,
-  Calendar,
-  CalendarClock,
-  ChevronRight,
-  Clock3,
-  GraduationCap,
-  PlaySquare,
-  SwitchCamera,
-} from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { BookOpenText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import api from "@/utils/axios.config";
 import { useLazyLoadedStudentData } from "@/store/store";
 import Link from "next/link";
-import Moment from "react-moment";
-import { divider } from "@nextui-org/react";
-import { Badge } from "@/components/ui/badge";
 import ClassCard from "@/app/admin/courses/[courseId]/_components/classCard";
 import Image from "next/image";
 interface ResumeCourse {
@@ -35,37 +22,39 @@ type ScheduleProps = React.ComponentProps<typeof Card>;
 function Schedule({ className, ...props }: ScheduleProps) {
   const [courseStarted, setCourseStarted] = useState<boolean>(false);
   const { studentData } = useLazyLoadedStudentData();
+  console.log("STUDENT DATA", studentData);
   const userID = studentData?.id && studentData?.id;
   const [resumeCourse, setResumeCourse] = useState<ResumeCourse>({});
   const [upcomingClasses, setUpcomingClasses] = useState([]);
   const [ongoingClasses, setOngoingClasses] = useState([]);
   const [completedClasses, setCompletedClasses] = useState([]);
   useEffect(() => {
-    const userIdLocal = JSON.parse(localStorage.getItem("AUTH") || "");
-    api
-      .get(`/student/${userIdLocal.id}`)
-      .then((res) => {
-        api
-          .get(`/bootcamp/studentClasses/${res.data[0].id}`, {
-            params: {
-              userId: userIdLocal.id,
-            },
-          })
-          .then((response) => {
-            const { upcomingClasses, ongoingClasses, completedClasses } =
-              response.data;
-            setUpcomingClasses(upcomingClasses);
-            setOngoingClasses(ongoingClasses);
-            setCompletedClasses(completedClasses);
-          })
-          .catch((error) => {
-            console.log("Error fetching classes:", error);
-          });
-      })
-      .catch((error) => {
-        console.log("Error fetching classes:", error);
-      });
-  }, []);
+    if (userID) {
+      api
+        .get(`/student/${userID}`)
+        .then((res) => {
+          api
+            .get(`/bootcamp/studentClasses/${res.data[0].id}`, {
+              params: {
+                userId: userID,
+              },
+            })
+            .then((response) => {
+              const { upcomingClasses, ongoingClasses, completedClasses } =
+                response.data;
+              setUpcomingClasses(upcomingClasses);
+              setOngoingClasses(ongoingClasses);
+              setCompletedClasses(completedClasses);
+            })
+            .catch((error) => {
+              console.log("Error fetching classes:", error);
+            });
+        })
+        .catch((error) => {
+          console.log("Error fetching classes:", error);
+        });
+    }
+  }, [userID]);
 
   useEffect(() => {}, [upcomingClasses, ongoingClasses, completedClasses]);
 
@@ -96,18 +85,22 @@ function Schedule({ className, ...props }: ScheduleProps) {
             <p className="text-lg p-1 font-bold">Upcoming Classes</p>
           </div>
         ) : (
-          <div className="flex flex-col items-center mt-12">
-            <Image
-              src={"/no-class.svg"}
-              alt="party popper"
-              width={"240"}
-              height={"240"}
-            />
-            <p className="text-lg mt-3">There are no upcoming classes</p>
-          </div>
+          <>
+            <div className="flex justify-center mt-12">
+              <Image
+                src={"/no-class.svg"}
+                alt="party popper"
+                width={"240"}
+                height={"240"}
+              />
+            </div>
+            <p className="text-lg mt-3 text-center">
+              There are no upcoming classes
+            </p>
+          </>
         )}
 
-        <div className="w-[720px]">
+        <div className="md:w-[720px]">
           {ongoingClasses?.length > 0
             ? ongoingClasses.map((classObj, index) => (
                 <ClassCard

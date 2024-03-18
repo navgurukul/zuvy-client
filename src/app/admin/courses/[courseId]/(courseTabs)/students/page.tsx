@@ -3,14 +3,14 @@ import React, { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import AddStudentsModal from "./addStudentsmodal";
+import AddStudentsModal from "../../_components/addStudentsmodal";
 import { Dialog, DialogOverlay, DialogTrigger } from "@/components/ui/dialog";
 import api from "@/utils/axios.config";
-import StudentsDataTable from "./dataTable";
+import StudentsDataTable from "../../_components/dataTable";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
-import { studentColumns } from "./_my_components/studentColumns";
-import { getStoreStudentData } from "@/store/store";
+import { studentColumns } from "../../_components/studentColumns";
+import { getCourseData, getStoreStudentData } from "@/store/store";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import useDebounce from "@/hooks/useDebounce";
 import {
@@ -42,71 +42,7 @@ type bootcampData = {
   label: string;
 };
 
-export const fetchStudentData = async (
-  id: string,
-  setStoreStudentData: any
-) => {
-  try {
-    const response = await api.get(`/bootcamp/students/${id}`);
-    const data = response.data;
-    setStoreStudentData(data.studentsEmails);
-  } catch (error) {
-    // Handle error appropriately
-    console.error("Error fetching student data:", error);
-  }
-};
-
-export async function onBatchChange(
-  selectedvalue: any,
-  rowData: any,
-  student: any
-) {
-  await api
-    .post(
-      `/bootcamp/students/${student.bootcampId}?batch_id=${selectedvalue}`,
-      {
-        students: [
-          {
-            email: student.email,
-            name: student.name,
-          },
-        ],
-      }
-    )
-    .then((res) => {
-      toast({
-        title: "Students Batch Updated Succesfully",
-        className: "text-start capitalize",
-      });
-    });
-}
-
-export async function deleteStudentHandler(
-  userId: any,
-  bootcampId: any,
-  setDeleteModalOpen: any,
-  setStudentData: any
-) {
-  try {
-    await api.delete(`/student/${userId}/${bootcampId}`).then((res) => {
-      toast({
-        title: res.data.status,
-        description: res.data.message,
-        className: "text-start capitalize",
-      });
-      fetchStudentData(bootcampId, setStudentData);
-    });
-  } catch (error) {
-    toast({
-      title: "Failed",
-      variant: "destructive",
-    });
-  }
-  setDeleteModalOpen(false);
-}
-
-const Students = ({ id }: Props) => {
-  const [pageSize, setPageSize] = useState<string>("10");
+const Page = () => {
   const [position, setPosition] = useState("10");
   const { studentsData, setStoreStudentData } = getStoreStudentData();
   const [bootcampData, setBootcampData] = useState<bootcampData>();
@@ -119,6 +55,7 @@ const Students = ({ id }: Props) => {
   const [searchdata, setSearchData] = useState([]);
   const debouncedSearch = useDebounce(search, 1000);
 
+  const { courseData } = getCourseData();
   const nextPageHandler = () => {
     setOffset((prevState) => +position + offset);
   };
@@ -126,45 +63,53 @@ const Students = ({ id }: Props) => {
     setOffset((prevState) => Math.max(0, prevState - +position));
   };
   useEffect(() => {
-    api
-      .get(`/bootcamp/batches/${id}`)
-      .then((response) => {
-        const transformedData = response.data.data.map(
-          (item: { id: any; name: any }) => ({
-            value: item.id.toString(),
-            label: item.name,
-          })
-        );
-        setBootcampData(transformedData);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
-  }, []);
+    if (courseData?.id) {
+      api
+        .get(`/bootcamp/batches/${courseData?.id}`)
+        .then((response) => {
+          const transformedData = response.data.data.map(
+            (item: { id: any; name: any }) => ({
+              value: item.id.toString(),
+              label: item.name,
+            })
+          );
+          setBootcampData(transformedData);
+        })
+        .catch((error) => {
+          console.error("Error fetching data:", error);
+        });
+    }
+  }, [courseData]);
 
   const fetchStudentData = async () => {
-    try {
-      await api
-        .get(`/bootcamp/students/${id}?limit=${position}&offset=${offset}`)
-        .then((response) => {
-          setPaginatedStudentData(response.data.studentsEmails);
-          setPages(response.data.totalPages);
-          setStoreStudentData(response.data.studentsEmails);
-        });
-    } catch (error) {
-      console.error("Error fetching student data:", error);
+    if (courseData?.id) {
+      try {
+        await api
+          .get(
+            `/bootcamp/students/${courseData?.id}?limit=${position}&offset=${offset}`
+          )
+          .then((response) => {
+            setPaginatedStudentData(response.data.studentsEmails);
+            setPages(response.data.totalPages);
+            setStoreStudentData(response.data.studentsEmails);
+          });
+      } catch (error) {
+        console.error("Error fetching student data:", error);
+      }
     }
   };
   useEffect(() => {
     fetchStudentData();
-  }, [offset, position]);
+  }, [offset, position, courseData]);
 
   useEffect(() => {
     //Search The Api
     const searchStudentsDataHandler = async () => {
       setLoading(true);
       await api
-        .get(`/bootcamp/studentSearch/${id}?searchTerm=${debouncedSearch}`)
+        .get(
+          `/bootcamp/studentSearch/${courseData?.id}?searchTerm=${debouncedSearch}`
+        )
         .then((res) => {
           setPaginatedStudentData(res.data.data[1].studentsEmails);
           setLoading(false);
@@ -172,7 +117,7 @@ const Students = ({ id }: Props) => {
     };
     if (debouncedSearch) searchStudentsDataHandler();
     if (debouncedSearch?.trim()?.length === 0) fetchStudentData();
-  }, [debouncedSearch, id]);
+  }, [debouncedSearch, courseData]);
 
   const handleSetsearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
@@ -196,7 +141,7 @@ const Students = ({ id }: Props) => {
               </Button>
             </DialogTrigger>
             <DialogOverlay />
-            <AddStudentsModal message={false} id={id} />
+            <AddStudentsModal message={false} id={courseData?.id || ""} />
           </Dialog>
         </div>
       )}
@@ -466,7 +411,7 @@ const Students = ({ id }: Props) => {
                 </Button>
               </DialogTrigger>
               <DialogOverlay />
-              <AddStudentsModal message={false} id={id} />
+              <AddStudentsModal message={false} id={courseData?.id || ""} />
             </Dialog>
           </div>
         </div>
@@ -475,4 +420,4 @@ const Students = ({ id }: Props) => {
   );
 };
 
-export default Students;
+export default Page;

@@ -18,8 +18,8 @@ import {
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { STUDENT_ONBOARDING_TYPES } from "@/utils/constant";
-import { fetchStudentData } from "./students";
 import { getStoreStudentData } from "@/store/store";
+import { fetchStudentData } from "@/utils/students";
 
 const AddStudentsModal = ({
   id,
