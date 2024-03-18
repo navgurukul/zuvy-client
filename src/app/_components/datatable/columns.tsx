@@ -9,7 +9,14 @@ import { DataTableRowActions } from "./data-table-row-actions";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Combobox } from "@/components/ui/combobox";
-import { onBatchChange } from "@/utils/students";
+import { deleteStudentHandler, onBatchChange } from "@/utils/students";
+import {
+  getBatchData,
+  getDeleteStudentStore,
+  getStoreStudentData,
+} from "@/store/store";
+import { Trash2 } from "lucide-react";
+import DeleteConfirmationModal from "@/app/admin/courses/[courseId]/_components/deleteModal";
 
 export const columns: ColumnDef<Task>[] = [
   {
@@ -71,20 +78,29 @@ export const columns: ColumnDef<Task>[] = [
     cell: ({ row }) => {
       const student = row.original;
       const title = student.batchName;
+      const { batchData } = getBatchData();
+      const transformedData = batchData?.map(
+        (item: { id: any; name: any }) => ({
+          value: item.id.toString(),
+          label: item.name,
+        })
+      );
 
       return (
         <div className="flex text-start gap-6 my-6 max-w-[200px]">
-          {/* <Combobox
-            data={bootcampData}
+          <Combobox
+            data={transformedData}
             title={"Select Batch"}
             onChange={(selectedValue) => {
               onBatchChange(selectedValue, row.original, student);
             }}
             initialValue={row.original?.batchId?.toString() || ""}
-          /> */}
+          />
         </div>
       );
     },
+    enableSorting: false,
+    enableHiding: false,
   },
   {
     accessorKey: "progress",
@@ -115,6 +131,41 @@ export const columns: ColumnDef<Task>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => <DataTableRowActions row={row} />,
+    // cell: ({ row }) => <DataTableRowActions row={row} />,
+    cell: ({ row }) => {
+      const student = row.original;
+      const { userId, bootcampId } = student;
+      // const { onDeleteHandler } = GetdataHandler(bootcampId);
+      const { setDeleteModalOpen, isDeleteModalOpen } = getDeleteStudentStore();
+      const { setStoreStudentData } = getStoreStudentData();
+
+      return (
+        <>
+          <Trash2
+            onClick={() => setDeleteModalOpen(true)}
+            className="text-red-600 cursor-pointer"
+            size={20}
+          />
+          <DeleteConfirmationModal
+            isOpen={isDeleteModalOpen}
+            onClose={() => setDeleteModalOpen(false)}
+            onConfirm={() => {
+              deleteStudentHandler(
+                userId,
+                bootcampId,
+                setDeleteModalOpen,
+                setStoreStudentData
+              );
+            }}
+            modalText="This action cannot be undone. This will permanently delete the
+              student from this bootcamp"
+            buttonText="Delete Student"
+            input={false}
+            modalText2=""
+            batchName=""
+          />
+        </>
+      );
+    },
   },
 ];
