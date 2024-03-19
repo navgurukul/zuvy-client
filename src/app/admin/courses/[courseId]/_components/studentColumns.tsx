@@ -133,6 +133,10 @@ export const studentColumns = (
     },
   },
   {
+    header: "Attendence",
+    accessorKey: "attendence",
+  },
+  {
     id: "actions",
     cell: ({ row }) => {
       const student = row.original;

@@ -127,7 +127,7 @@ const Page = () => {
         });
     };
     if (debouncedSearch) searchStudentsDataHandler();
-    if (debouncedSearch?.trim().length === 0) fetchStudentData();
+    if (debouncedSearch?.trim()?.length === 0) fetchStudentData();
   }, [debouncedSearch, courseData]);
 
   const handleSetsearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -163,27 +163,27 @@ const Page = () => {
           {/* <StudentsDataTable
             columns={studentColumns(bootcampData)}
             data={paginateStudentData}
-          /> */}
-          {/* <div className="flex flex-row justify-end items-center w-full gap-x-2 ">
+          />
+          <div className='flex flex-row justify-end items-center w-full gap-x-2 '>
             <span>Rows per page: {position}</span>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline">
+                <Button variant='outline'>
                   <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
+                    width='24'
+                    height='24'
+                    viewBox='0 0 24 24'
+                    fill='none'
+                    xmlns='http://www.w3.org/2000/svg'
                   >
                     <path
-                      d="M8.70663 11.4137L11.2966 14.0037C11.6866 14.3937 12.3166 14.3937 12.7066 14.0037L15.2966 11.4137C15.9266 10.7837 15.4766 9.70374 14.5866 9.70374H9.40663C8.51663 9.70374 8.07663 10.7837 8.70663 11.4137Z"
-                      fill="#6D6D6D"
+                      d='M8.70663 11.4137L11.2966 14.0037C11.6866 14.3937 12.3166 14.3937 12.7066 14.0037L15.2966 11.4137C15.9266 10.7837 15.4766 9.70374 14.5866 9.70374H9.40663C8.51663 9.70374 8.07663 10.7837 8.70663 11.4137Z'
+                      fill='#6D6D6D'
                     />
                   </svg>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-full">
+              <DropdownMenuContent className='w-full'>
                 <DropdownMenuSeparator />
                 <DropdownMenuRadioGroup
                   value={position}
@@ -206,11 +206,11 @@ const Page = () => {
             <ChevronLeft
               onClick={prevPageHandler}
               size={20}
-              className="cursor-pointer hover:bg-gray-300 rounded-md "
+              className='cursor-pointer hover:bg-gray-300 rounded-md '
             />
             <ChevronRight
               size={20}
-              className="cursor-pointer hover:bg-gray-300 rounded-md "
+              className='cursor-pointer hover:bg-gray-300 rounded-md '
               onClick={nextPageHandler}
             />
           </div> */}
