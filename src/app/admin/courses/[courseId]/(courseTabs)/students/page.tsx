@@ -133,7 +133,16 @@ const Page = () => {
   const handleSetsearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
   };
+  // useEffect(() => {
+  //   const fetchAttendenceData = async () => {
+  //     const response = await api.get(
+  //       `classes/getBootcampAttendance/${courseData?.id}`
+  //     );
 
+  //     console.log(response.data);
+  //   };
+  //   fetchAttendenceData();
+  // }, []);
   // console.log(position);
   return (
     <div>

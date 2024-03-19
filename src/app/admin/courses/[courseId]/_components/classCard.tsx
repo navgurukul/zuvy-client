@@ -91,14 +91,14 @@ function ClassCard({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <h3 className='truncate text-xl font-bold mb-3 sm: max-w-24 md:max-w-sm lg:max-w-md xl:max-w-lg'>
-                    {classData.title}
-                  </h3>
+                  <h3 className='font-semibold'>{classData.title}</h3>
                 </TooltipTrigger>
-                <TooltipContent>{classData.title}</TooltipContent>
+                <TooltipContent className='font-semibold'>
+                  {classData.title}
+                </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            <div className='text-md flex font-semibold capitalize items-center'>
+            <div className='text-md flex w-[200px] font-semibold capitalize items-center'>
               <Clock3 className='mr-2' width={20} height={20} />
               <Moment format='hh:mm A'>{classData.startTime}</Moment>
               <p className='mx-2'>-</p>
@@ -106,18 +106,18 @@ function ClassCard({
             </div>
           </div>
         </div>
-        <div className='flex items-center text-lg font-bold'>
+        <div className='flex w-full items-center text-lg font-bold justify-center'>
           {classType !== "complete" ? (
             <Link
               target='_blank'
               href={classData.hangoutLink}
-              className='gap-3 flex items-center text-secondary'
+              className='gap-3 flex  items-center text-secondary'
             >
               <p>Join Class</p>
               <ChevronRight size={15} />
             </Link>
           ) : (
-            <div>
+            <div className='w-1/2'>
               <div
                 onClick={handleViewRecording}
                 className='gap-3 flex items-center text-secondary cursor-pointer'
