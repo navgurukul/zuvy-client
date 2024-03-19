@@ -485,7 +485,7 @@ const BatchesInfo = ({
               type='search'
               placeholder='Student Name, Email'
               className='w-1/2 my-12'
-              disabled
+              onChange={handleSetSearch}
             />
           </div>
           <div className='flex m-4'>

@@ -10,7 +10,11 @@ import StudentsDataTable from "../../_components/dataTable";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { studentColumns } from "../../_components/studentColumns";
-import { getCourseData, getStoreStudentData } from "@/store/store";
+import {
+  getBatchData,
+  getCourseData,
+  getStoreStudentData,
+} from "@/store/store";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import useDebounce from "@/hooks/useDebounce";
 import {
@@ -23,6 +27,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ROWS_PER_PAGE } from "@/utils/constant";
+import { DataTable } from "@/app/_components/datatable/data-table";
+import { columns } from "@/app/_components/datatable/columns";
 type Props = {
   id: string;
 };
@@ -45,7 +51,7 @@ type bootcampData = {
 const Page = () => {
   const [position, setPosition] = useState("10");
   const { studentsData, setStoreStudentData } = getStoreStudentData();
-  const [bootcampData, setBootcampData] = useState<bootcampData>();
+  // const [bootcampData, setBootcampData] = useState<bootcampData>();
   const [paginateStudentData, setPaginatedStudentData] = useState<any>([]);
   const [pages, setPages] = useState<number>();
   const [offset, setOffset] = useState<number>(0);
@@ -56,6 +62,8 @@ const Page = () => {
   const debouncedSearch = useDebounce(search, 1000);
 
   const { courseData } = getCourseData();
+  const { fetchBatches, batchData } = getBatchData();
+
   const nextPageHandler = () => {
     setOffset((prevState) => +position + offset);
   };
@@ -64,20 +72,23 @@ const Page = () => {
   };
   useEffect(() => {
     if (courseData?.id) {
-      api
-        .get(`/bootcamp/batches/${courseData?.id}`)
-        .then((response) => {
-          const transformedData = response.data.data.map(
-            (item: { id: any; name: any }) => ({
-              value: item.id.toString(),
-              label: item.name,
-            })
-          );
-          setBootcampData(transformedData);
-        })
-        .catch((error) => {
-          console.error("Error fetching data:", error);
-        });
+      fetchBatches(courseData?.id);
+      // api
+      //   .get(`/bootcamp/batches/${courseData?.id}`)
+      //   .then((response) => {
+      //     console.log("BATCH", response.data.data);
+      //     const transformedData = response.data.data.map(
+      //       (item: { id: any; name: any }) => ({
+      //         value: item.id.toString(),
+      //         label: item.name,
+      //       })
+      //     );
+
+      //     setBootcampData(transformedData);
+      //   })
+      //   .catch((error) => {
+      //     console.error("Error fetching data:", error);
+      //   });
     }
   }, [courseData]);
 
@@ -122,7 +133,16 @@ const Page = () => {
   const handleSetsearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
   };
+  // useEffect(() => {
+  //   const fetchAttendenceData = async () => {
+  //     const response = await api.get(
+  //       `classes/getBootcampAttendance/${courseData?.id}`
+  //     );
 
+  //     console.log(response.data);
+  //   };
+  //   fetchAttendenceData();
+  // }, []);
   // console.log(position);
   return (
     <div>
@@ -145,10 +165,11 @@ const Page = () => {
           </Dialog>
         </div>
       )}
-      {studentsData.length > 0 && bootcampData && (
+      {studentsData.length > 0 && batchData && (
         // <StudentsDataTable columns={columns} data={studentsData} />
         <>
-          <StudentsDataTable
+          <DataTable data={paginateStudentData} columns={columns} />
+          {/* <StudentsDataTable
             columns={studentColumns(bootcampData)}
             data={paginateStudentData}
           />
@@ -201,7 +222,7 @@ const Page = () => {
               className='cursor-pointer hover:bg-gray-300 rounded-md '
               onClick={nextPageHandler}
             />
-          </div>
+          </div> */}
         </>
       )}
       {studentsData.length <= 0 && (

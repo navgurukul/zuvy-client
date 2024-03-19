@@ -27,10 +27,28 @@ interface CourseData {
   unassigned_students: number;
 }
 
+interface BatchData {
+ 
+    id: string,
+    name: string,
+    bootcampId: string,
+    instructorId: number,
+    capEnrollment: number,
+    // createdAt: string,
+    // updatedAt: string,
+    students_enrolled: number
+}
+
 interface StoreCourseData {
   courseData: CourseData | null;
   setCourseData: (newValue: CourseData) => void;
   fetchCourseDetails: (courseId: string) => void;
+}
+
+interface StoreBatchData {
+  batchData: BatchData[] | null;
+  setBatchData: (newValue: BatchData[]) => void;
+  fetchBatches: (courseId: string) => void;
 }
 
 export const getCourseData = create<StoreCourseData>((set) => ({
@@ -54,6 +72,23 @@ export const getCourseData = create<StoreCourseData>((set) => ({
       set({ courseData: data.bootcamp });
     } catch (error) {
       console.error("Error fetching course details:", error);
+    }
+  },
+}));
+
+export const getBatchData = create<StoreBatchData>((set) => ({
+  batchData: [],
+  setBatchData: (newValue: BatchData[]) => {
+    set({ batchData: newValue });
+  },
+  fetchBatches: async (courseId: string) => {
+    try {
+      const response = await api.get(`/bootcamp/batches/${courseId}`)
+      const data = response.data;
+      console.log("first", data.data)
+      set({ batchData: data.data });
+    } catch (error) {
+      console.error("Error fetching batches", error);
     }
   },
 }));
