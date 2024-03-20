@@ -172,10 +172,10 @@ function Page() {
   };
 
   return (
-    <div className="max-w-[400px] m-auto">
+    <div className='max-w-[400px] m-auto'>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="bg-muted flex justify-center rounded-sm my-3 overflow-hidden">
+        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+          <div className='bg-muted flex justify-center rounded-sm my-3 overflow-hidden'>
             <OptimizedImageWithFallback
               src={courseData?.coverImage || ""}
               alt={courseData?.name || ""}
@@ -185,33 +185,32 @@ function Page() {
           </div>
           <div>
             <Input
-              id="picture"
-              type="file"
+              id='picture'
+              type='file'
               onChange={handleFileChange}
-              className="hidden"
+              className='hidden'
               ref={fileInputRef}
             />
             <Button
               variant={"outline"}
-              type="button"
+              type='button'
               onClick={handleButtonClick}
             >
               Upload course Image
             </Button>
           </div>
-
           <FormField
             control={form.control}
-            name="name"
+            name='name'
             render={({ field }) => (
-              <FormItem className="text-start">
+              <FormItem className='text-start'>
                 <FormLabel>Name</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="shadcn"
+                    placeholder='shadcn'
                     {...field}
                     value={field.value}
-                    className="capitalize"
+                    className='capitalize'
                   />
                 </FormControl>
                 <FormMessage />
@@ -220,13 +219,13 @@ function Page() {
           />
           <FormField
             control={form.control}
-            name="bootcampTopic"
+            name='bootcampTopic'
             render={({ field }) => (
-              <FormItem className="text-start">
+              <FormItem className='text-start'>
                 <FormLabel>Topic</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Enter Bootcamp Name"
+                    placeholder='Enter Bootcamp Name'
                     {...field}
                     value={field.value}
                   />
@@ -237,9 +236,9 @@ function Page() {
           />
           <FormField
             control={form.control}
-            name="startTime"
+            name='startTime'
             render={({ field }) => (
-              <FormItem className="flex flex-col text-start">
+              <FormItem className='flex flex-col text-start'>
                 <FormLabel>Date of Commencement</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
@@ -256,13 +255,13 @@ function Page() {
                         ) : (
                           <span>Pick a date</span>
                         )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className='w-auto p-0' align='start'>
                     <Calendar
-                      mode="single"
+                      mode='single'
                       selected={field.value}
                       onSelect={field.onChange}
                       disabled={(date) => date < new Date()}
@@ -276,14 +275,14 @@ function Page() {
           />
           <FormField
             control={form.control}
-            name="duration"
+            name='duration'
             render={({ field }) => (
-              <FormItem className="text-start">
+              <FormItem className='text-start'>
                 <FormLabel>Duration</FormLabel>
                 <FormControl>
                   <Input
-                    type="text"
-                    placeholder="Enter Bootcamp Duration"
+                    type='text'
+                    placeholder='Enter Bootcamp Duration'
                     {...field}
                     value={field.value}
                   />
@@ -312,25 +311,25 @@ function Page() {
       /> */}
           <FormField
             control={form.control}
-            name="language"
+            name='language'
             render={({ field }) => (
-              <FormItem className="space-y-3 text-start">
+              <FormItem className='space-y-3 text-start'>
                 <FormLabel>Language</FormLabel>
                 <FormControl>
                   <RadioGroup
                     onValueChange={field.onChange}
-                    className="flex"
+                    className='flex'
                     value={field.value}
                   >
                     {LANGUAGES.map((lang) => (
                       <FormItem
                         key={lang}
-                        className="flex items-center space-x-3 space-y-0"
+                        className='flex items-center space-x-3 space-y-0'
                       >
                         <FormControl>
                           <RadioGroupItem value={lang} />
                         </FormControl>
-                        <FormLabel className="font-normal">{lang}</FormLabel>
+                        <FormLabel className='font-normal'>{lang}</FormLabel>
                       </FormItem>
                     ))}
                   </RadioGroup>
@@ -340,7 +339,7 @@ function Page() {
             )}
           />
 
-          <Button type="submit">Submit</Button>
+          <Button type='submit'>Submit</Button>
         </form>
       </Form>
     </div>

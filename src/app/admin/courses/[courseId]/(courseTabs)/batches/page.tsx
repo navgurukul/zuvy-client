@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import * as z from "zod";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -46,23 +46,13 @@ const Page = ({}: {}) => {
     courseData?.unassigned_students
   );
 
-  // const getBootcamp = () => {
-  //   try {
-  //     api.get("/bootcamp").then((response) => setCourses(response.data));
-  //   } catch (error) {
-  //     console.error("Error fetching courses:", error);
-  //   }
-  // };
-  // useEffect(() => {
-  //   getBootcamp();
-  // }, []);
-
   useEffect(() => {
     if (courseData?.id) {
       const fetchBatches = async () => {
         try {
           const response = await api.get(`/bootcamp/batches/${courseData?.id}`);
           setBatches(response.data.data);
+          // setUnassignedStudents(data.bootcamp.unassigned_students);
         } catch (error: any) {
           console.log(error.message);
         }
@@ -72,20 +62,20 @@ const Page = ({}: {}) => {
     }
   }, [courseData]);
 
-  // useEffect(() => {
-  //   if (courseData?.id) {
-  //     const fetchCourseDetails = async () => {
-  //       try {
-  //         const response = await api.get(`/bootcamp/${courseData?.id}`);
-  //         const data = response.data;
-  //       } catch (error) {
-  //         console.error("Error fetching course details:", error);
-  //       }
-  //     };
+  useEffect(() => {
+    if (courseData?.id) {
+      const fetchCourseDetails = async () => {
+        try {
+          const response = await api.get(`/bootcamp/${courseData?.id}`);
+          setUnassignedStudents(response.data.bootcamp.unassigned_students);
+        } catch (error) {
+          console.error("Error fetching course details:", error);
+        }
+      };
 
-  //     fetchCourseDetails();
-  //   }
-  // }, [courseData, unassignedStudents]);
+      fetchCourseDetails();
+    }
+  }, [courseData?.id, setUnassignedStudents]);
 
   const formSchema = z.object({
     name: z.string().min(2, {
@@ -102,10 +92,6 @@ const Page = ({}: {}) => {
       }),
   });
 
-  const { handleSubmit, register } = useForm({
-    resolver: zodResolver(formSchema),
-  });
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -115,62 +101,51 @@ const Page = ({}: {}) => {
       capEnrollment: "",
     },
   });
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const convertedData = {
-      ...values,
-      instructorId: +values.instructorId,
-      bootcampId: +values.bootcampId,
-      capEnrollment: +values.capEnrollment,
-    };
-    try {
-      const response = await api
-        .post(`/batch`, convertedData, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-        .then((response) => {
-          const fetchBatches = async () => {
-            try {
-              const response = await api.get(
-                `/bootcamp/batches/${courseData?.id || ""}`
-              );
-              setBatches(response.data);
-            } catch (error: any) {
-              console.log(error.message);
-            }
-          };
-          fetchBatches();
-          const fetchCourseDetails = async () => {
-            try {
-              const response = await api.get(
-                `/bootcamp/${courseData?.id || ""}`
-              );
-              const data = response.data;
-              setUnassignedStudents(data.bootcamp.unassigned_students);
-            } catch (error) {
-              console.error("Error fetching course details:", error);
-            }
-          };
 
-          fetchCourseDetails();
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    console.log(values);
+    // const convertedData = {
+    //   ...values,
+    //   instructorId: +values.instructorId,
+    //   bootcampId: +values.bootcampId,
+    //   capEnrollment: +values.capEnrollment,
+    // };
+    // console.log(convertedData);
+    // try {
+    //   await api
+    //     .post(`/batch`, convertedData, {
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //       },
+    //     })
+    //     .then((response) => {
+    //       const fetchBatches = async () => {
+    //         try {
+    //           const response = await api.get(
+    //             `/bootcamp/batches/${courseData?.id || ""}`
+    //           );
+    //           setBatches(response.data);
+    //         } catch (error: any) {
+    //           console.log(error.message);
+    //         }
+    //       };
+    //       fetchBatches();
 
-          toast({
-            title: response.data.status,
-            description: response.data.message,
-            className: "text-start capitalize",
-          });
-        });
-      console.log("Batch created successfully");
-    } catch (error: any) {
-      toast({
-        title: "Failed",
-        description: error.data.message,
-        className: "text-start capitalize",
-        variant: "destructive",
-      });
-      console.error("Error creating batch:", error);
-    }
+    //       toast({
+    //         title: response.data.status,
+    //         description: response.data.message,
+    //         className: "text-start capitalize",
+    //       });
+    //     });
+    // } catch (error: any) {
+    //   toast({
+    //     title: "Failed",
+    //     description: error.data.message,
+    //     className: "text-start capitalize",
+    //     variant: "destructive",
+    //   });
+    //   console.error("Error creating batch:", error);
+    // }
   };
 
   const renderModal = (emptyState: boolean) => {
@@ -208,7 +183,6 @@ const Page = ({}: {}) => {
                         <FormControl>
                           <Input placeholder='Batch Name' {...field} />
                         </FormControl>
-
                         <FormMessage />
                       </FormItem>
                     )}
