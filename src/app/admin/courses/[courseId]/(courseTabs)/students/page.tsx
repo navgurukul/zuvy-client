@@ -1,6 +1,6 @@
 "use client";
 import React, { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, ArrowRight, Plus } from "lucide-react";
+import { ArrowLeft, ArrowRight, ChevronDown, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import AddStudentsModal from "../../_components/addStudentsmodal";
@@ -29,13 +29,6 @@ import {
 import { ROWS_PER_PAGE } from "@/utils/constant";
 import { DataTable } from "@/app/_components/datatable/data-table";
 import { columns } from "@/app/_components/datatable/columns";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 type Props = {
   id: string;
 };
@@ -101,10 +94,10 @@ const Page = () => {
           const response = await api.get(
             `/bootcamp/students/${courseData?.id}?limit=${position}&offset=${offset}`
           );
+          setStoreStudentData(response.data.studentsEmails);
           setPages(response.data.totalPages);
           setLastPage(response.data.totalPages);
           setStudents(response.data.totalStudents);
-          setStoreStudentData(response.data.studentsEmails);
         } catch (error) {
           console.error("Error fetching student data:", error);
         }
@@ -198,7 +191,31 @@ const Page = () => {
       {studentsData.length > 0 && batchData && (
         <>
           <DataTable data={studentsData} columns={columns} />
-          <div className='flex items-center justify-end px-2'>
+          <div className='flex items-center justify-end px-2 gap-x-2'>
+            <p className='text-sm font-medium'>Rows Per Page</p>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant='outline'>
+                  {position} <ChevronDown className='ml-2' size={15} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className='w-full'>
+                <DropdownMenuLabel>Rows</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuRadioGroup
+                  value={position}
+                  onValueChange={setPosition}
+                >
+                  {ROWS_PER_PAGE.map((rows) => {
+                    return (
+                      <DropdownMenuRadioItem key={rows} value={rows}>
+                        {rows}
+                      </DropdownMenuRadioItem>
+                    );
+                  })}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <div className='flex items-center space-x-6 lg:space-x-8'>
               <div className='flex w-[100px] items-center justify-center text-sm font-medium'>
                 Page {currentPage} of {pages}
