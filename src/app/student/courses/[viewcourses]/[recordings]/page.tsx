@@ -1,7 +1,13 @@
 "use client";
 
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
-import Breadcrumb from "@/components/ui/breadcrumb";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
@@ -108,7 +114,18 @@ function Page({
 
   return (
     <>
-      <Breadcrumb crumbs={crumbs} />
+      <Breadcrumb>
+        <BreadcrumbList>
+          {crumbs?.map((item, index) => (
+            <>
+              <BreadcrumbItem key={item.crumb}>
+                <BreadcrumbLink href={item.href}>{item.crumb}</BreadcrumbLink>
+              </BreadcrumbItem>
+              {index < crumbs.length - 1 && <BreadcrumbSeparator />}
+            </>
+          ))}
+        </BreadcrumbList>
+      </Breadcrumb>
       <Tabs defaultValue="upcomingClasses" className="w-full  mt-10">
         <div className="text-start border-b-2 border-muted">
           <TabsList className="rounded-none rounded-t-sm ">

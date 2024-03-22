@@ -1,4 +1,3 @@
-import Breadcrumb from "@/components/ui/breadcrumb";
 import CourseBreadcrumb from "../_components/CourseLayout";
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 
