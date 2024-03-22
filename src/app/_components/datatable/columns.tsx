@@ -79,7 +79,7 @@ export const columns: ColumnDef<Task>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Students Name' />
     ),
-    cell: ({ row }) => <div className='w-[80px]'>{row.getValue("name")}</div>,
+    cell: ({ row }) => <div className='w-[150px]'>{row.getValue("name")}</div>,
     enableSorting: false,
     enableHiding: false,
   },
