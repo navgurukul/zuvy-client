@@ -1,6 +1,6 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { Plus } from "lucide-react";
+import React, { useCallback, useEffect, useState } from "react";
+import { ArrowLeft, ArrowRight, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import AddStudentsModal from "../../_components/addStudentsmodal";
@@ -29,6 +29,13 @@ import {
 import { ROWS_PER_PAGE } from "@/utils/constant";
 import { DataTable } from "@/app/_components/datatable/data-table";
 import { columns } from "@/app/_components/datatable/columns";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 type Props = {
   id: string;
 };
@@ -55,21 +62,16 @@ const Page = () => {
   const [paginateStudentData, setPaginatedStudentData] = useState<any>([]);
   const [pages, setPages] = useState<number>();
   const [offset, setOffset] = useState<number>(0);
-  const [currentPage, setCurrentPag] = useState();
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [students, setStudents] = useState<number>(0);
   const [search, setSearch] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [searchdata, setSearchData] = useState([]);
   const debouncedSearch = useDebounce(search, 1000);
-
+  const [lastPage, setLastPage] = useState<number>(0);
   const { courseData } = getCourseData();
   const { fetchBatches, batchData } = getBatchData();
 
-  const nextPageHandler = () => {
-    setOffset((prevState) => +position + offset);
-  };
-  const prevPageHandler = () => {
-    setOffset((prevState) => Math.max(0, prevState - +position));
-  };
   useEffect(() => {
     if (courseData?.id) {
       fetchBatches(courseData?.id);
@@ -90,29 +92,68 @@ const Page = () => {
       //     console.error("Error fetching data:", error);
       //   });
     }
-  }, [courseData]);
+  }, [courseData, fetchBatches]);
 
-  const fetchStudentData = async () => {
-    if (courseData?.id) {
-      try {
-        await api
-          .get(
+  const fetchStudentData = useCallback(
+    async (offset: number) => {
+      if (courseData?.id) {
+        try {
+          const response = await api.get(
             `/bootcamp/students/${courseData?.id}?limit=${position}&offset=${offset}`
-          )
-          .then((response) => {
-            setPaginatedStudentData(response.data.studentsEmails);
-            setPages(response.data.totalPages);
-            setStoreStudentData(response.data.studentsEmails);
-          });
-      } catch (error) {
-        console.error("Error fetching student data:", error);
+          );
+          setPages(response.data.totalPages);
+          setLastPage(response.data.totalPages);
+          setStudents(response.data.totalStudents);
+          setStoreStudentData(response.data.studentsEmails);
+        } catch (error) {
+          console.error("Error fetching student data:", error);
+        }
       }
+    },
+    [courseData, position, setStoreStudentData]
+  );
+  useEffect(() => {
+    fetchStudentData(offset);
+  }, [offset, position, courseData, fetchStudentData]);
+  const lastPageOffset = () => {
+    const totalPages = Math.ceil(students / +position);
+    const lastPageOffset = (totalPages - 1) * +position;
+    return lastPageOffset;
+  };
+  const lastPageHandler = () => {
+    setCurrentPage(lastPage);
+    fetchStudentData(lastPageOffset());
+    setOffset(lastPageOffset());
+  };
+  const firstPagehandler = () => {
+    setCurrentPage(1);
+    fetchStudentData(0);
+    setOffset(0);
+  };
+  const nextPageHandler = () => {
+    console.log("Next");
+    setCurrentPage((prevState) => prevState + 1);
+    setOffset((prevState) => +position + prevState);
+  };
+  const prevPageHandler = () => {
+    console.log("Prev");
+    setCurrentPage((prevState) => prevState - 1);
+    setOffset((prevState) => Math.max(0, prevState - +position));
+  };
+  const previousDisabledHandler = () => {
+    if (currentPage === 1) {
+      return true;
+    } else {
+      return false;
     }
   };
-  useEffect(() => {
-    fetchStudentData();
-  }, [offset, position, courseData]);
-
+  const nextDisabledHandler = () => {
+    if (currentPage === pages) {
+      return true;
+    } else {
+      return false;
+    }
+  };
   useEffect(() => {
     //Search The Api
     const searchStudentsDataHandler = async () => {
@@ -122,28 +163,17 @@ const Page = () => {
           `/bootcamp/studentSearch/${courseData?.id}?searchTerm=${debouncedSearch}`
         )
         .then((res) => {
-          setPaginatedStudentData(res.data.data[1].studentsEmails);
+          setStoreStudentData(res.data.data[1].studentsEmails);
           setLoading(false);
         });
     };
     if (debouncedSearch) searchStudentsDataHandler();
-    if (debouncedSearch?.trim()?.length === 0) fetchStudentData();
-  }, [debouncedSearch, courseData]);
+    if (debouncedSearch?.trim()?.length === 0) fetchStudentData(0);
+  }, [debouncedSearch, courseData, setStoreStudentData, fetchStudentData]);
 
   const handleSetsearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
   };
-  // useEffect(() => {
-  //   const fetchAttendenceData = async () => {
-  //     const response = await api.get(
-  //       `classes/getBootcampAttendance/${courseData?.id}`
-  //     );
-
-  //     console.log(response.data);
-  //   };
-  //   fetchAttendenceData();
-  // }, []);
-  // console.log(position);
   return (
     <div>
       {studentsData.length > 0 && (
@@ -166,63 +196,53 @@ const Page = () => {
         </div>
       )}
       {studentsData.length > 0 && batchData && (
-        // <StudentsDataTable columns={columns} data={studentsData} />
         <>
-          <DataTable data={paginateStudentData} columns={columns} />
-          {/* <StudentsDataTable
-            columns={studentColumns(bootcampData)}
-            data={paginateStudentData}
-          />
-          <div className='flex flex-row justify-end items-center w-full gap-x-2 '>
-            <span>Rows per page: {position}</span>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant='outline'>
-                  <svg
-                    width='24'
-                    height='24'
-                    viewBox='0 0 24 24'
-                    fill='none'
-                    xmlns='http://www.w3.org/2000/svg'
-                  >
-                    <path
-                      d='M8.70663 11.4137L11.2966 14.0037C11.6866 14.3937 12.3166 14.3937 12.7066 14.0037L15.2966 11.4137C15.9266 10.7837 15.4766 9.70374 14.5866 9.70374H9.40663C8.51663 9.70374 8.07663 10.7837 8.70663 11.4137Z'
-                      fill='#6D6D6D'
-                    />
-                  </svg>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className='w-full'>
-                <DropdownMenuSeparator />
-                <DropdownMenuRadioGroup
-                  value={position}
-                  onValueChange={setPosition}
+          <DataTable data={studentsData} columns={columns} />
+          <div className='flex items-center justify-end px-2'>
+            <div className='flex items-center space-x-6 lg:space-x-8'>
+              <div className='flex w-[100px] items-center justify-center text-sm font-medium'>
+                Page {currentPage} of {pages}
+              </div>
+              <div className='flex items-center space-x-2'>
+                <Button
+                  variant='outline'
+                  className='hidden h-8 w-8 p-0 lg:flex'
+                  onClick={firstPagehandler}
+                  disabled={previousDisabledHandler()}
                 >
-                  {ROWS_PER_PAGE.map((rowItem) => {
-                    return (
-                      <DropdownMenuRadioItem key={rowItem} value={rowItem}>
-                        {rowItem}
-                      </DropdownMenuRadioItem>
-                    );
-                  })}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <span>
-              1-{pages} of {pages}{" "}
-            </span>
-            <ChevronLeft
-              onClick={prevPageHandler}
-              size={20}
-              className='cursor-pointer hover:bg-gray-300 rounded-md '
-            />
-            <ChevronRight
-              size={20}
-              className='cursor-pointer hover:bg-gray-300 rounded-md '
-              onClick={nextPageHandler}
-            />
-          </div> */}
+                  <span className='sr-only'>Go to first page</span>
+                  <ArrowLeft className='h-4 w-4' />
+                </Button>
+                <Button
+                  variant='outline'
+                  className='h-8 w-8 p-0'
+                  onClick={prevPageHandler}
+                  disabled={previousDisabledHandler()}
+                >
+                  <span className='sr-only'>Go to previous page</span>
+                  <ArrowLeft className='h-4 w-4' />
+                </Button>
+                <Button
+                  variant='outline'
+                  className='h-8 w-8 p-0'
+                  onClick={nextPageHandler}
+                  disabled={nextDisabledHandler()}
+                >
+                  <span className='sr-only'>Go to next page</span>
+                  <ArrowRight className='h-4 w-4' />
+                </Button>
+                <Button
+                  variant='outline'
+                  className='hidden h-8 w-8 p-0 lg:flex'
+                  onClick={lastPageHandler}
+                  disabled={nextDisabledHandler()}
+                >
+                  <span className='sr-only'>Go to last page</span>
+                  <ArrowRight className='h-4 w-4' />
+                </Button>
+              </div>
+            </div>
+          </div>
         </>
       )}
       {studentsData.length <= 0 && (
