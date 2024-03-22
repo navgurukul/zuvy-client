@@ -111,7 +111,13 @@ const Page = ({}: {}) => {
     defaultValues: {
       name: "",
       instructorId: "",
-      bootcampId: courseData?.id,
+      bootcampId: courseData?.id.toString() ?? "",
+      capEnrollment: "",
+    },
+    values: {
+      name: "",
+      instructorId: "",
+      bootcampId: courseData?.id.toString() ?? "",
       capEnrollment: "",
     },
   });
@@ -197,16 +203,17 @@ const Page = ({}: {}) => {
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(onSubmit)}
-                  className='space-y-8'
+                  onError={(e) => console.log(e, "error")}
+                  className="space-y-8"
                 >
                   <FormField
                     control={form.control}
-                    name='name'
+                    name="name"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Batch Name</FormLabel>
                         <FormControl>
-                          <Input placeholder='Batch Name' {...field} />
+                          <Input placeholder="Batch Name" {...field} />
                         </FormControl>
 
                         <FormMessage />
@@ -215,12 +222,12 @@ const Page = ({}: {}) => {
                   />
                   <FormField
                     control={form.control}
-                    name='instructorId'
+                    name="instructorId"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Instructor Id</FormLabel>
                         <FormControl>
-                          <Input placeholder='20230' type='name' {...field} />
+                          <Input placeholder="20230" type="name" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -228,14 +235,14 @@ const Page = ({}: {}) => {
                   />
                   <FormField
                     control={form.control}
-                    name='capEnrollment'
+                    name="capEnrollment"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Cap Enrollment</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder='Cap Enrollment'
-                            type='number'
+                            placeholder="Cap Enrollment"
+                            type="number"
                             {...field}
                           />
                         </FormControl>
@@ -247,9 +254,9 @@ const Page = ({}: {}) => {
                     {unassignedStudents} students will be added to this batch
                     (Maximum current availability)
                   </FormDescription>
-                  <div className='w-full flex flex-col items-end gap-y-5 '>
+                  <div className="w-full flex flex-col items-end gap-y-5 ">
                     <DialogClose asChild>
-                      <Button className='w-1/2' type='submit'>
+                      <Button className="w-1/2" type="submit">
                         Create batch
                       </Button>
                     </DialogClose>
@@ -264,27 +271,27 @@ const Page = ({}: {}) => {
   };
   return (
     <div>
-      <div className=' relative flex items-center justify-between mb-6'>
+      <div className=" relative flex items-center justify-between mb-6">
         {batches.length > 0 ? (
-          <Input type='search' placeholder='Search' className='w-[400px]' />
+          <Input type="search" placeholder="Search" className="w-[400px]" />
         ) : null}
         {renderModal(false)}
       </div>
 
-      <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 mt-2'>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 mt-2">
         {batches.length > 0 ? (
           batches.map((batch: any, index: number) => (
             <Link
               key={batch.name}
               href={`/admin/courses/${courseData?.id}/batch/${batch.id}`}
             >
-              <Card key={batch.id} className='text-gray-900 text-base'>
-                <div className='bg-white rounded-lg border p-4'>
-                  <div className='px-1 py-4 flex flex-col items-start'>
-                    <CardTitle className='font-semibold capitalize'>
+              <Card key={batch.id} className="text-gray-900 text-base">
+                <div className="bg-white rounded-lg border p-4">
+                  <div className="px-1 py-4 flex flex-col items-start">
+                    <CardTitle className="font-semibold capitalize">
                       {batch.name}
                     </CardTitle>
-                    <CardDescription className=' capitalize'>
+                    <CardDescription className=" capitalize">
                       {batch.students_enrolled} <span>Learners</span>
                     </CardDescription>
                   </div>
@@ -293,10 +300,10 @@ const Page = ({}: {}) => {
             </Link>
           ))
         ) : (
-          <div className='w-full flex flex-col items-center justify-center gap-y-3 absolute'>
+          <div className="w-full flex flex-col items-center justify-center gap-y-3 absolute">
             <Image
-              src='/batches.svg'
-              alt='create batch'
+              src="/batches.svg"
+              alt="create batch"
               width={100}
               height={100}
             />
