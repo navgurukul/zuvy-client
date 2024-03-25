@@ -10,6 +10,8 @@ import { ArrowBigLeft, CheckCircle2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { select } from "@nextui-org/react";
+import { set } from "date-fns";
+import parse from "html-react-parser";
 
 // Define the type for module data
 // index is a property coming from and not any index of an array/object
@@ -35,8 +37,51 @@ interface Option {
   number: number;
 }
 
+// -----------------------------------
+interface ChapterData {
+  name: string;
+  label: string;
+  index: number;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt: string;
+  time_limit: null | string;
+  zuvy_article_components: ZuvyArticleComponents;
+}
+
+interface ZuvyArticleComponents {
+  data: DataItem[];
+}
+
+interface DataItem {
+  id: number;
+  attributes: Attributes;
+}
+
+interface Attributes {
+  tag_name: string;
+  tag_value: string;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt: string | null;
+  name: string;
+}
+
+interface DynamicTagProps {
+  tagName: string;
+  tagValue: string;
+  name?: string;
+}
+
+// -----------------------------------
+
 // Create a component to render the HTML content with Tailwind CSS styles applied
-const ContentComponent: React.FC<{ content: any; isQuiz?: boolean }> = ({
+interface ContentComponentProps {
+  content: string;
+  isQuiz?: boolean;
+}
+
+const ContentComponent: React.FC<ContentComponentProps> = ({
   content,
   isQuiz,
 }) => {
@@ -47,12 +92,12 @@ const ContentComponent: React.FC<{ content: any; isQuiz?: boolean }> = ({
 
   return (
     <div
-      className={` text-start max-w-3xl mx-auto py-4 ${
+      className={`text-start max-w-3xl mx-auto py-4 ${
         isQuiz ? "text-black" : ""
       }`}
     >
       {/* Render the HTML content */}
-      <div dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
+      <div>{parse(sanitizedContent)}</div>
     </div>
   );
 };
@@ -75,10 +120,18 @@ function Page({
     id: null,
   });
 
+  const [chapterData, setChapterData] = useState<ChapterData | null>(null);
+
   const [assignmentLink, setAssignmentLink] = useState("");
   const [assignmentId, setAssignmentId] = useState(0);
   const [articleId, setArticleId] = useState(0);
   const [quizId, setQuizId] = useState(0);
+  const [articleCompleted, setArticleCompleted] = useState(false);
+  const [selectedChapterQuestions, setSelectedChapterQuestions] = useState<
+    Question[]
+  >([]);
+
+  const [selectedChapterLabel, setSelectedChapterLabel] = useState<string>("");
 
   const [selectedOptions, setSelectedOptions] = useState<{
     [key: number]: number;
@@ -101,6 +154,9 @@ function Page({
         // Set selectedChapterID to the ID of the first module
         if (data.length > 0) {
           setSelectedChapter({ index: data[0].index, id: data[0].id });
+          setArticleCompleted(data[0]?.completed || false);
+          setSelectedChapterQuestions(data[0]?.questions || []);
+          setSelectedChapterLabel(data[0]?.label);
         }
       } catch (error) {
         console.error("Error fetching module data:", error);
@@ -108,6 +164,26 @@ function Page({
     };
     if (userID) getModuleData();
   }, [moduleID, userID, articleId, assignmentId, quizId]);
+
+  useEffect(() => {
+    const getchapterData = async () => {
+      try {
+        const response = await fetch(
+          `https://merd-strapi.merakilearn.org/api/zuvy-articles/${selectedChapter.id}?populate=zuvy_article_components`
+        )
+          .then((res) => {
+            return res.json();
+          })
+          .then((data) => {
+            setChapterData(data.data.attributes);
+            console.log(data?.data?.attributes);
+          });
+      } catch (error) {
+        console.error("Error fetching chapter data:", error);
+      }
+    };
+    if (userID) getchapterData();
+  }, [selectedChapter]);
 
   const handleAssignmentLinkChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -254,6 +330,22 @@ function Page({
     }
   };
 
+  const DynamicTag: React.FC<DynamicTagProps> = ({
+    tagName,
+    tagValue,
+    name,
+  }) => {
+    switch (tagName) {
+      case "img":
+        const regex = /src="(.*?)"/;
+        const match = tagValue.match(regex);
+        const imgUrl = match ? match[1] : "";
+        return <img src={imgUrl} alt={name || "Image"} />;
+      default:
+        return parse(tagValue);
+    }
+  };
+
   return (
     <div className="flex">
       {/* Sidebar with labels */}
@@ -274,121 +366,141 @@ function Page({
               className={`flex justify-between cursor-pointer capitalize py-2 px-4 hover:bg-gray-300 ${
                 selectedChapter.index === item.index ? "font-bold" : ""
               }`}
-              onClick={() =>
-                setSelectedChapter({ index: item.index, id: item.id })
-              }
+              onClick={() => {
+                setSelectedChapter({ index: item.index, id: item.id });
+                setArticleCompleted(item?.completed || false);
+                setSelectedChapterQuestions(item?.questions || []);
+                setSelectedChapterLabel(item?.label);
+              }}
             >
-              {`${item.label}: ${item.name ? item.name : ""}`}{" "}
+              <div className="flex items-center">
+                {`${item.label}: ${item.name ? item.name : ""}`}
+                {/* Show number of questions for Quiz and MCQ */}
+                {["quiz"].includes(item.label) && (
+                  <span className="text-sm ml-2 text-gray-500">
+                    ({item.questions ? item.questions.length : 0} questions)
+                  </span>
+                )}
+              </div>
               {item.completed && (
                 <CheckCircle2 size={18} className="text-[#518672] ml-1 mt-1" />
-              )}
-              {/* Show number of questions for Quiz and MCQ */}
-              {["quiz"].includes(item.label) && (
-                <span className="text-sm ml-2 text-gray-500">
-                  ({item.questions ? item.questions.length : 0} questions)
-                </span>
               )}
             </li>
           ))}
         </ul>
       </div>
       {/* Right side content */}
-      <div className="w-3/4 p-4 flex items-end justify-start text">
-        {selectedChapter.index &&
+      <div className="w-2/4 m-10 flex flex-col text-left">
+        {chapterData?.label === "article" && selectedChapterLabel != "quiz" && (
+          <>
+            {chapterData?.zuvy_article_components?.data?.map((item, index) => (
+              <DynamicTag
+                key={index}
+                tagName={item.attributes.tag_name}
+                tagValue={item.attributes.tag_value}
+                name={item.attributes.name}
+              />
+            ))}
+
+            <Button
+              className="m-auto w-1/5"
+              disabled={articleCompleted}
+              onClick={() => {
+                handleArticleComplete();
+              }}
+            >
+              Complete
+            </Button>
+          </>
+        )}
+
+        {chapterData?.label === "assignment" &&
+          selectedChapterLabel != "quiz" && (
+            <div>
+              {chapterData?.zuvy_article_components?.data?.map(
+                (item, index) => (
+                  <DynamicTag
+                    key={index}
+                    tagName={item.attributes.tag_name}
+                    tagValue={item.attributes.tag_value}
+                    name={item.attributes.name}
+                  />
+                )
+              )}
+
+              {/* Only render form if label is "assignment" */}
+              <form className="mt-5">
+                {/* Form input fields */}
+                <input
+                  type="text"
+                  placeholder="Assignment Link"
+                  value={assignmentLink}
+                  onChange={handleAssignmentLinkChange}
+                  disabled={articleCompleted}
+                  className="border border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md px-4 py-2 outline-none"
+                />
+                {/* Submit button */}
+                <Button
+                  disabled={articleCompleted}
+                  onClick={handleAssignmentSubmit}
+                  type="button"
+                >
+                  Submit
+                </Button>
+              </form>
+            </div>
+          )}
+
+        {selectedChapterLabel === "quiz" &&
           moduleData
             .filter((item) => item.index === selectedChapter.index)
             .map((item, index) => (
               <div key={index}>
-                {/* Render different types of content based on label */}
-                {item.label === "article" && item.content && (
-                  <>
-                    <ContentComponent content={item.content} />
-                    <Button
-                      disabled={item?.completed}
-                      onClick={() => {
-                        handleArticleComplete();
-                      }}
-                    >
-                      Complete
-                    </Button>
-                  </>
-                )}
+                <ul>
+                  {item.questions &&
+                    item.questions.map((question) => (
+                      <li key={question.id}>
+                        <ContentComponent
+                          content={question.question}
+                          isQuiz={true}
+                        />
 
-                {item.label === "assignment" && (
-                  <div>
-                    <ContentComponent content={item.content} />
-                    {/* Only render form if label is "assignment" */}
-                    <form>
-                      {/* Form input fields */}
-                      <input
-                        type="text"
-                        placeholder="Assignment Link"
-                        value={assignmentLink}
-                        onChange={handleAssignmentLinkChange}
-                        disabled={item?.completed}
-                        className="border border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md px-4 py-2 outline-none"
-                      />
-                      {/* Submit button */}
-                      <Button
-                        disabled={item?.completed}
-                        onClick={handleAssignmentSubmit}
-                        type="button"
-                      >
-                        Submit
-                      </Button>
-                    </form>
-                  </div>
-                )}
-                {item.label === "quiz" && (
-                  <div>
-                    {/* <h3 className="font-semibold">Quiz</h3> */}
-                    <ul>
-                      {item.questions &&
-                        item.questions.map((question) => (
-                          <li key={question.id}>
-                            <ContentComponent
-                              content={question.question}
-                              isQuiz={true}
-                            />
-
-                            <div className="flex justify-start  ">
-                              <RadioGroup
-                                onValueChange={(value) =>
-                                  setSelectedOptions((prev) => ({
-                                    ...prev,
-                                    [question.id]:
-                                      typeof value === "string"
-                                        ? parseInt(value, 10)
-                                        : value,
-                                  }))
-                                }
-                                className="flex"
-                                value={selectedOptions[question.id]?.toString()}
-                              >
-                                {question.options.map((option) => (
-                                  <p key={option.number}>
-                                    <RadioGroupItem
-                                      value={option.number.toString()}
-                                      className="mr-2"
-                                    />
-                                    <label>{option.text}</label>
-                                  </p>
-                                ))}
-                              </RadioGroup>
-                            </div>
-                          </li>
-                        ))}
-                    </ul>
-                    {/* Submit button for quiz */}
-                    <Button
-                      disabled={item?.completed}
-                      className="mt-5"
-                      onClick={handleQuizSubmit}
-                    >
-                      Submit Quiz
-                    </Button>
-                  </div>
-                )}
+                        <div className="flex justify-start  ">
+                          <RadioGroup
+                            onValueChange={(value) =>
+                              setSelectedOptions((prev) => ({
+                                ...prev,
+                                [question.id]:
+                                  typeof value === "string"
+                                    ? parseInt(value, 10)
+                                    : value,
+                              }))
+                            }
+                            className="flex"
+                            value={selectedOptions[question.id]?.toString()}
+                          >
+                            {question.options.map((option) => (
+                              <p key={option.number}>
+                                <RadioGroupItem
+                                  value={option.number.toString()}
+                                  className="mr-2"
+                                />
+                                <label>{option.text}</label>
+                              </p>
+                            ))}
+                          </RadioGroup>
+                        </div>
+                      </li>
+                    ))}
+                </ul>
+                {/* Submit button for quiz */}
+                <Button
+                  disabled={item?.completed}
+                  className="mt-5"
+                  onClick={handleQuizSubmit}
+                >
+                  Submit Quiz
+                </Button>
               </div>
             ))}
       </div>
