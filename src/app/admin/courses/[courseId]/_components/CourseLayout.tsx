@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 
-import Breadcrumb from "@/components/ui/breadcrumb";
 import { Tabs, TabsList } from "@/components/ui/tabs";
 
 import styles from "../../_components/cources.module.css";
@@ -60,7 +59,7 @@ function CourseBreadcrumb() {
     const storedCourseId = localStorage.getItem("courseId");
     if (storedCourseId) {
       setCourseId(storedCourseId);
-      getCourseData.getState().fetchCourseDetails(storedCourseId);
+      getCourseData.getState().fetchCourseDetails(parseInt(storedCourseId));
     }
   }, []);
 

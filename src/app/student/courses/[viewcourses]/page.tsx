@@ -4,9 +4,14 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { BookMinus, ChevronRight, Lock } from "lucide-react";
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
-import Breadcrumb from "@/components/ui/breadcrumb";
+import {
+  Breadcrumb,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { useLazyLoadedStudentData } from "@/store/store";
-import { CircularProgress } from "@nextui-org/react";
+import { BreadcrumbItem, CircularProgress } from "@nextui-org/react";
 import Loader from "../_components/Loader";
 import Image from "next/image";
 import api from "@/utils/axios.config";
@@ -105,7 +110,18 @@ function Page({
 
   return (
     <MaxWidthWrapper>
-      <Breadcrumb crumbs={crumbs} />
+      <Breadcrumb>
+        <BreadcrumbList>
+          {crumbs?.map((item, index) => (
+            <>
+              <BreadcrumbItem key={item.crumb}>
+                <BreadcrumbLink href={item.href}>{item.crumb}</BreadcrumbLink>
+              </BreadcrumbItem>
+              {index < crumbs.length - 1 && <BreadcrumbSeparator />}
+            </>
+          ))}
+        </BreadcrumbList>
+      </Breadcrumb>
 
       <div className="md:grid grid-cols-2 lg:grid-cols-3 gap-10  my-10">
         <div className="lg:col-span-2">

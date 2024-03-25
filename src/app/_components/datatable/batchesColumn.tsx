@@ -1,14 +1,10 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-
-import { labels, priorities, statuses } from "@/utils/data/data";
 import { Task } from "@/utils/data/schema";
 import { DataTableColumnHeader } from "./data-table-column-header";
-import { DataTableRowActions } from "./data-table-row-actions";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import { Combobox } from "@/components/ui/combobox";
+
 import { deleteStudentHandler, onBatchChange } from "@/utils/students";
 import {
   getBatchData,
@@ -19,7 +15,7 @@ import { Trash2 } from "lucide-react";
 import DeleteConfirmationModal from "@/app/admin/courses/[courseId]/_components/deleteModal";
 import Image from "next/image";
 
-export const columns: ColumnDef<Task>[] = [
+export const batchesColumn: ColumnDef<Task>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -100,38 +96,6 @@ export const columns: ColumnDef<Task>[] = [
         </div>
       );
     },
-  },
-  {
-    accessorKey: "batchName",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Batch Assigned To' />
-    ),
-    cell: ({ row }) => {
-      const student = row.original;
-      const title = student.batchName;
-      const { batchData } = getBatchData();
-      const transformedData = batchData?.map(
-        (item: { id: any; name: any }) => ({
-          value: item.id.toString(),
-          label: item.name,
-        })
-      );
-
-      return (
-        <div className='flex text-start gap-6 my-6 max-w-[200px]'>
-          <Combobox
-            data={transformedData}
-            title={"Select Batch"}
-            onChange={(selectedValue) => {
-              onBatchChange(selectedValue, row.original, student);
-            }}
-            initialValue={row.original?.batchId?.toString() || ""}
-          />
-        </div>
-      );
-    },
-    enableSorting: false,
-    enableHiding: false,
   },
   {
     accessorKey: "progress",

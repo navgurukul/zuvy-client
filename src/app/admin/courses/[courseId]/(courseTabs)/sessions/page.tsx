@@ -18,7 +18,7 @@ function Page() {
   const [classType, setClassType] = useState("upcoming");
   const [allClasses, setAllClasses] = useState([]);
   const [bootcampData, setBootcampData] = useState([]);
-  const [batchId, setBatchId] = useState("");
+  const [batchId, setBatchId] = useState(0);
   const [upcomingClasses, setUpcomingClasses] = useState([]);
   const [ongoingClasses, setOngoingClasses] = useState([]);
   const [completedClasses, setCompletedClasses] = useState([]);
@@ -41,7 +41,9 @@ function Page() {
   };
 
   const handleComboboxChange = (value: string) => {
-    setBatchId((prevBatchId: string) => (prevBatchId === value ? "" : value));
+    setBatchId((prevBatchId: number) =>
+      prevBatchId.toString() === value ? 0 : parseInt(value)
+    );
   };
 
   // async
@@ -103,7 +105,7 @@ function Page() {
 
   return (
     <div>
-      <div className=' relative flex text-start gap-6 my-6 max-w-[800px]'>
+      <div className=" relative flex text-start gap-6 my-6 max-w-[800px]">
         <Combobox
           data={bootcampData}
           title={"Select Batch"}
@@ -117,13 +119,13 @@ function Page() {
           }}
         />
       </div>
-      <div className='flex justify-between'>
-        <div className='w-[400px] pr-3'>
+      <div className="flex justify-between">
+        <div className="w-[400px] pr-3">
           <Input
-            type='text'
-            placeholder='Search Classes'
+            type="text"
+            placeholder="Search Classes"
             // className={styles.searchInput}
-            className='max-w-[500px]'
+            className="max-w-[500px]"
             disabled
             //  value={searchQuery}
             //  onChange={handleSearchChange}
@@ -131,42 +133,42 @@ function Page() {
         </div>
         <Dialog>
           <DialogTrigger asChild>
-            <Button className='text-white bg-secondary'>
+            <Button className="text-white bg-secondary">
               <p>Create New Class</p>
             </Button>
           </DialogTrigger>
           <DialogOverlay />
           <NewClassDialog
-            courseId={courseData?.id || ""}
+            courseId={courseData?.id || 0}
             bootcampData={bootcampData}
           />
         </Dialog>
       </div>
-      <div className='flex justify-start gap-6 my-6'>
+      <div className="flex justify-start gap-6 my-6">
         <Badge
           variant={classType === "active" ? "default" : "outline"}
           onClick={() => handleClassType("active")}
-          className='rounded-md'
+          className="rounded-md"
         >
           Active Classes
         </Badge>
         <Badge
           variant={classType === "upcoming" ? "default" : "outline"}
           onClick={() => handleClassType("upcoming")}
-          className='rounded-md'
+          className="rounded-md"
         >
           Upcoming Classes
         </Badge>
         <Badge
           variant={classType === "complete" ? "default" : "outline"}
           onClick={() => handleClassType("complete")}
-          className='rounded-md'
+          className="rounded-md"
         >
           Completed Classes
         </Badge>
       </div>
       {allClasses && allClasses.length > 0 ? (
-        <div className='grid grid-cols-3 gap-6'>
+        <div className="grid grid-cols-3 gap-6">
           {allClasses.map((classData: any, index: any) => (
             <ClassCard
               classData={classData}
@@ -176,12 +178,12 @@ function Page() {
           ))}
         </div>
       ) : (
-        <div className='w-full flex mb-10 items-center flex-col gap-y-3 justify-center  absolute text-center mt-2'>
+        <div className="w-full flex mb-10 items-center flex-col gap-y-3 justify-center  absolute text-center mt-2">
           <Image
             src={"/emptyStates/undraw_online_learning_re_qw08.svg"}
             height={200}
             width={200}
-            alt='batchEmpty State'
+            alt="batchEmpty State"
           />
           <p>
             Create a session to start engagement with the learners for course
@@ -189,13 +191,13 @@ function Page() {
           </p>
           <Dialog>
             <DialogTrigger asChild>
-              <Button className='text-white bg-secondary'>
+              <Button className="text-white bg-secondary">
                 <span>+ Create Session</span>
               </Button>
             </DialogTrigger>
             <DialogOverlay />
             <NewClassDialog
-              courseId={courseData?.id || ""}
+              courseId={courseData?.id || 0}
               bootcampData={bootcampData}
             />
           </Dialog>

@@ -1,12 +1,25 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Input } from "@/components/ui/input";
-import { ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Trash2,
+} from "lucide-react";
 import { Pencil } from "lucide-react";
 
-import Breadcrumb from "@/components/ui/breadcrumb";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { toast } from "@/components/ui/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -37,11 +50,22 @@ import {
   useStudentData,
 } from "@/store/store";
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
-import StudentsBatchTable from "./studentsBatchDataTable";
 import DeleteConfirmationModal from "../../_components/deleteModal";
 import api from "@/utils/axios.config";
 import { StudentData } from "../../(courseTabs)/students/page";
 import useDebounce from "@/hooks/useDebounce";
+import { batchesColumn } from "@/app/_components/datatable/batchesColumn";
+import { DataTable } from "@/app/_components/datatable/data-table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ROWS_PER_PAGE } from "@/utils/constant";
 
 const BatchesInfo = ({
   params,
@@ -50,19 +74,18 @@ const BatchesInfo = ({
 }) => {
   const router = useRouter();
   let pageSize = 10;
-  const { studentsInfo, setStudentsInfo } = useStudentData();
-
-  const [studentsData, setStudentData] = useState<StudentData[]>([]);
+  const { studentsData, setStoreStudentData } = getStoreStudentData();
+  const [studentData, setStudentData] = useState<StudentData[]>([]);
   const [bootcamp, setBootcamp] = useState<any>([]);
   const [search, setSearch] = useState("");
   const { setDeleteModalOpen, isDeleteModalOpen } = getDeleteStudentStore();
-  const { setStoreStudentData } = getStoreStudentData();
   const [instructorsInfo, setInstructorInfo] = useState<any>([]);
-  const [paginateStudentData, setPaginatedStuedntData] = useState<any>([]);
   const [pages, setPages] = useState<number>();
   const [position, setPosition] = useState("10");
   const [offset, setOffset] = useState<number>(0);
-  const [currentPage, setCurrentPag] = useState();
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [students, setStudents] = useState<number>(0);
+  const [lastPage, setLastPage] = useState<number>(0);
 
   const debouncedValue = useDebounce(search, 1000);
   const [oldData, setOldData] = useState<any>();
@@ -74,14 +97,14 @@ const BatchesInfo = ({
     {
       crumb: `${bootcamp?.name}`,
       href: `/admin/courses/${
-        studentsData.length > 0 ? studentsData[0].bootcampId : ""
+        studentData.length > 0 ? studentData[0].bootcampId : ""
       }/batches`,
     },
     {
-      crumb: `${studentsData.length > 0 ? studentsData[0].batchName : ""}`,
+      crumb: `${studentData.length > 0 ? studentData[0].batchName : ""}`,
       href: `/admin/courses/${
-        studentsData.length > 0 ? studentsData[0].bootcampId : ""
-      }/batch/${studentsData.length > 0 ? studentsData[0]?.batchId : ""}
+        studentData.length > 0 ? studentData[0].bootcampId : ""
+      }/batch/${studentData.length > 0 ? studentData[0]?.batchId : ""}
       }`,
     },
   ];
@@ -99,11 +122,9 @@ const BatchesInfo = ({
       }
     };
     fetchInstructorInfo();
-  }, []);
+  }, [params.batchId]);
 
   const batchDeleteHandler = async () => {
-    // if (matches) {
-    //   const [firstValue, bootcampId, batchId] = matches;
     try {
       await api.delete(`/batch/${params.batchId}`).then(() => {
         toast({
@@ -156,9 +177,6 @@ const BatchesInfo = ({
     };
     setOldData(convertedData);
     try {
-      //   if (matches) {
-      //   const [firstValue, bootcampId, batchId] = matches;
-
       const response = await api
         .patch(`/batch/${params.batchId}`, convertedData)
         .then((res) => {
@@ -173,7 +191,6 @@ const BatchesInfo = ({
                 `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}`
               );
               setStudentData(response.data.studentsEmails);
-              setStudentsInfo(response.data.studentsEmails);
               //   }
             } catch (error) {}
           };
@@ -193,22 +210,34 @@ const BatchesInfo = ({
         .then((response) => setBootcamp(response.data.bootcamp));
     };
     getBootCamp();
-  }, []);
-  const fetchPaginatedData = async () => {
-    const response = await api
-      .get(
-        `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}&limit=${position}&offset=${offset}`
-      )
-      .then((response) => {
-        setStudentData(response.data.studentsEmails);
-        setStudentsInfo(response.data.studentsEmails);
-        setPaginatedStuedntData(response.data.studentsEmails);
-        setPages(response.data.totalPages);
-      });
-  };
+  }, [params.courseId]);
+  const fetchPaginatedData = useCallback(
+    async (offset: number) => {
+      const response = await api
+        .get(
+          `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}&limit=${position}&offset=${offset}`
+        )
+        .then((response) => {
+          setStudentData(response.data.studentsEmails);
+          setStoreStudentData(response.data.studentsEmails);
+          setLastPage(response.data.totalPages);
+          setPages(response.data.totalPages);
+          setStudents(response.data.totalStudents);
+        });
+    },
+    [
+      params,
+      position,
+      setStudentData,
+      setStoreStudentData,
+      setLastPage,
+      setPages,
+      setStudents,
+    ]
+  );
   useEffect(() => {
-    fetchPaginatedData();
-  }, [offset, position]);
+    fetchPaginatedData(offset);
+  }, [offset, position, fetchPaginatedData]);
   useEffect(() => {
     const searchBatchStudentsHandler = async () => {
       await api
@@ -216,23 +245,59 @@ const BatchesInfo = ({
           `/bootcamp/studentSearch/${params.courseId}?batch_id=${params.batchId}&searchTerm=${debouncedValue}`
         )
         .then((res) => {
-          setPaginatedStuedntData(res.data.data[1].studentsEmails);
+          setStoreStudentData(res.data.data[1].studentsEmails);
         });
     };
 
     if (debouncedValue) searchBatchStudentsHandler();
-    if (debouncedValue?.trim().length === 0) fetchPaginatedData();
-  }, [debouncedValue]);
-
+    if (debouncedValue?.trim().length === 0) fetchPaginatedData(0);
+  }, [
+    debouncedValue,
+    fetchPaginatedData,
+    params.batchId,
+    params.courseId,
+    setStoreStudentData,
+  ]);
+  const previousDisabledHandler = () => {
+    if (currentPage === 1) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+  const nextDisabledHandler = () => {
+    if (currentPage === pages) {
+      return true;
+    } else {
+      return false;
+    }
+  };
   const nextPageHandler = () => {
-    console.log(offset);
-    setOffset((prevState) => pageSize + offset);
+    // console.log("Next");
+    setCurrentPage((prevState) => prevState + 1);
+    setOffset((prevState) => +position + prevState);
   };
   const prevPageHandler = () => {
-    console.log(offset);
-    setOffset((prevState) => Math.max(0, prevState - pageSize));
+    // console.log("Prev");
+    setCurrentPage((prevState) => prevState - 1);
+    setOffset((prevState) => Math.max(0, prevState - +position));
   };
-
+  const lastPageOffset = () => {
+    const totalPages = Math.ceil(students / +position);
+    const lastPageOffset = (totalPages - 1) * +position;
+    return lastPageOffset;
+  };
+  const lastPageHandler = () => {
+    setCurrentPage(lastPage);
+    fetchPaginatedData(lastPageOffset());
+    setOffset(lastPageOffset());
+  };
+  const firstPagehandler = () => {
+    setCurrentPage(1);
+    fetchPaginatedData(0);
+    setOffset(0);
+  };
+  // console.log(students);
   const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
   };
@@ -291,13 +356,25 @@ const BatchesInfo = ({
   </Form>;
   return (
     <>
-      <Breadcrumb crumbs={crumbs} />
+      <Breadcrumb>
+        <BreadcrumbList>
+          {crumbs?.map((item, index) => (
+            <>
+              <BreadcrumbItem key={item.crumb}>
+                <BreadcrumbLink href={item.href}>{item.crumb}</BreadcrumbLink>
+              </BreadcrumbItem>
+              {index < crumbs.length - 1 && <BreadcrumbSeparator />}
+            </>
+          ))}
+        </BreadcrumbList>
+      </Breadcrumb>
+
       <MaxWidthWrapper className='p-4'>
         <div className='flex justify-between'>
           <div className='w-1/2 flex flex-col items-start '>
             <div className=' flex flex-col '>
               <h1 className='capitalize text-start text-[30px] font-semibold'>
-                {studentsData.length > 0 ? studentsData[0].batchName : ""}
+                {studentData.length > 0 ? studentData[0].batchName : ""}
               </h1>
               <div className='flex gap-x-2'>
                 <svg
@@ -591,40 +668,80 @@ const BatchesInfo = ({
                 modalText2='I give confirmation to delete '
                 input={true}
                 buttonText='Delete Batch'
-                batchName={studentsData[0]?.batchName}
+                batchName={studentData[0]?.batchName}
               />
             </div>
           </div>
         </div>
-        <StudentsBatchTable columns={columns} data={paginateStudentData} />
-        <div className='flex flex-row justify-end w-full gap-x-4 '>
-          <span>Rows per page: {10}</span>
-          <svg
-            width='24'
-            height='24'
-            viewBox='0 0 24 24'
-            fill='none'
-            xmlns='http://www.w3.org/2000/svg'
-          >
-            <path
-              d='M8.70663 11.4137L11.2966 14.0037C11.6866 14.3937 12.3166 14.3937 12.7066 14.0037L15.2966 11.4137C15.9266 10.7837 15.4766 9.70374 14.5866 9.70374H9.40663C8.51663 9.70374 8.07663 10.7837 8.70663 11.4137Z'
-              fill='#6D6D6D'
-            />
-          </svg>
-
-          <span>
-            1-{pages} of {pages}{" "}
-          </span>
-          <ChevronLeft
-            onClick={prevPageHandler}
-            size={20}
-            className='cursor-pointer hover:bg-gray-300 rounded-md '
-          />
-          <ChevronRight
-            size={20}
-            className='cursor-pointer hover:bg-gray-300 rounded-md '
-            onClick={nextPageHandler}
-          />
+        <DataTable columns={batchesColumn} data={studentsData} />
+        <div className='flex items-center justify-end px-2 gap-x-2'>
+          <p className='text-sm font-medium'>Rows Per Page</p>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant='outline'>
+                {position} <ChevronDown className='ml-2' size={15} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className='w-full'>
+              <DropdownMenuLabel>Rows</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuRadioGroup
+                value={position}
+                onValueChange={setPosition}
+              >
+                {ROWS_PER_PAGE.map((rows) => {
+                  return (
+                    <DropdownMenuRadioItem key={rows} value={rows}>
+                      {rows}
+                    </DropdownMenuRadioItem>
+                  );
+                })}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <div className='flex items-center justify-end space-x-6 lg:space-x-8'>
+            <div className='flex w-[100px] items-center justify-center text-sm font-medium'>
+              Page {currentPage} of {pages}
+            </div>
+            <div className='flex items-center space-x-2'>
+              <Button
+                variant='outline'
+                className='hidden h-8 w-8 p-0 lg:flex'
+                onClick={firstPagehandler}
+                disabled={previousDisabledHandler()}
+              >
+                <span className='sr-only'>Go to first page</span>
+                <ArrowLeft className='h-4 w-4' />
+              </Button>
+              <Button
+                variant='outline'
+                className='h-8 w-8 p-0'
+                onClick={prevPageHandler}
+                disabled={previousDisabledHandler()}
+              >
+                <span className='sr-only'>Go to previous page</span>
+                <ArrowLeft className='h-4 w-4' />
+              </Button>
+              <Button
+                variant='outline'
+                className='h-8 w-8 p-0'
+                onClick={nextPageHandler}
+                disabled={nextDisabledHandler()}
+              >
+                <span className='sr-only'>Go to next page</span>
+                <ArrowRight className='h-4 w-4' />
+              </Button>
+              <Button
+                variant='outline'
+                className='hidden h-8 w-8 p-0 lg:flex'
+                onClick={lastPageHandler}
+                disabled={nextDisabledHandler()}
+              >
+                <span className='sr-only'>Go to last page</span>
+                <ArrowRight className='h-4 w-4' />
+              </Button>
+            </div>
+          </div>
         </div>
       </MaxWidthWrapper>
     </>
