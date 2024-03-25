@@ -10,17 +10,9 @@ import { getCourseData } from "@/store/store";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-function CourseBreadcrumb() {
+function CourseLayout() {
   const { courseData } = getCourseData();
   const [courseId, setCourseId] = useState<string>("");
-
-  // const crumbs = [
-  //   { crumb: "My Courses", href: "/admin/courses" },
-  //   {
-  //     crumb: "",
-  //     href: "My",
-  //   },
-  // ];
 
   const courseMenu = [
     {
@@ -52,6 +44,11 @@ function CourseBreadcrumb() {
       title: "Students",
       value: "students",
       href: `/admin/courses/${courseId}/students`,
+    },
+    {
+      title: "Submissions",
+      value: "submissions",
+      href: `/admin/courses/${courseId}/submissions`,
     },
   ];
 
@@ -88,4 +85,4 @@ function CourseBreadcrumb() {
   );
 }
 
-export default CourseBreadcrumb;
+export default CourseLayout;
