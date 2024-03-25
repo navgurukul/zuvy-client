@@ -15,7 +15,6 @@ import {
   getCourseData,
   getStoreStudentData,
 } from "@/store/store";
-import { ChevronRight, ChevronLeft } from "lucide-react";
 import useDebounce from "@/hooks/useDebounce";
 import {
   DropdownMenu,
@@ -52,7 +51,6 @@ const Page = () => {
   const [position, setPosition] = useState("10");
   const { studentsData, setStoreStudentData } = getStoreStudentData();
   // const [bootcampData, setBootcampData] = useState<bootcampData>();
-  const [paginateStudentData, setPaginatedStudentData] = useState<any>([]);
   const [pages, setPages] = useState<number>();
   const [offset, setOffset] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -64,28 +62,6 @@ const Page = () => {
   const [lastPage, setLastPage] = useState<number>(0);
   const { courseData } = getCourseData();
   const { fetchBatches, batchData } = getBatchData();
-
-  useEffect(() => {
-    if (courseData?.id) {
-      fetchBatches(courseData?.id);
-      // api
-      //   .get(`/bootcamp/batches/${courseData?.id}`)
-      //   .then((response) => {
-      //     console.log("BATCH", response.data.data);
-      //     const transformedData = response.data.data.map(
-      //       (item: { id: any; name: any }) => ({
-      //         value: item.id.toString(),
-      //         label: item.name,
-      //       })
-      //     );
-
-      //     setBootcampData(transformedData);
-      //   })
-      //   .catch((error) => {
-      //     console.error("Error fetching data:", error);
-      //   });
-    }
-  }, [courseData, fetchBatches]);
 
   const fetchStudentData = useCallback(
     async (offset: number) => {
