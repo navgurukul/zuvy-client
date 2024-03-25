@@ -17,7 +17,7 @@ type CounterStore = {
 };
 
 interface CourseData {
-  id: string;
+  id: number;
   name: string;
   bootcampTopic: string;
   coverImage: string;
@@ -28,44 +28,43 @@ interface CourseData {
 }
 
 interface BatchData {
- 
-    id: string,
-    name: string,
-    bootcampId: string,
-    instructorId: number,
-    capEnrollment: number,
-    // createdAt: string,
-    // updatedAt: string,
-    students_enrolled: number
+  id: number;
+  name: string;
+  bootcampId: number;
+  instructorId: number;
+  capEnrollment: number;
+  // createdAt: string,
+  // updatedAt: string,
+  students_enrolled: number;
 }
 
 interface StoreCourseData {
   courseData: CourseData | null;
   setCourseData: (newValue: CourseData) => void;
-  fetchCourseDetails: (courseId: string) => void;
+  fetchCourseDetails: (courseId: number) => void;
 }
 
 interface StoreBatchData {
   batchData: BatchData[] | null;
   setBatchData: (newValue: BatchData[]) => void;
-  fetchBatches: (courseId: string) => void;
+  fetchBatches: (courseId: number) => void;
 }
 
 export const getCourseData = create<StoreCourseData>((set) => ({
   courseData: {
-    id: "",
+    id: 0,
     name: "",
     bootcampTopic: "",
     coverImage: "",
     duration: "",
     language: "string",
-    startTime:"",
-    unassigned_students:0
+    startTime: "",
+    unassigned_students: 0,
   },
   setCourseData: (newValue: CourseData) => {
     set({ courseData: newValue });
   },
-  fetchCourseDetails: async (courseId: string) => {
+  fetchCourseDetails: async (courseId: number) => {
     try {
       const response = await api.get(`/bootcamp/${courseId}`);
       const data = response.data;
@@ -81,11 +80,11 @@ export const getBatchData = create<StoreBatchData>((set) => ({
   setBatchData: (newValue: BatchData[]) => {
     set({ batchData: newValue });
   },
-  fetchBatches: async (courseId: string) => {
+  fetchBatches: async (courseId: number) => {
     try {
-      const response = await api.get(`/bootcamp/batches/${courseId}`)
+      const response = await api.get(`/bootcamp/batches/${courseId}`);
       const data = response.data;
-      console.log("first", data.data)
+      console.log("first", data.data);
       set({ batchData: data.data });
     } catch (error) {
       console.error("Error fetching batches", error);

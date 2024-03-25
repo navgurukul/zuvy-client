@@ -25,7 +25,7 @@ const AddStudentsModal = ({
   id,
   message,
 }: {
-  id: string;
+  id: number;
   message: boolean;
 }) => {
   // misc

@@ -43,7 +43,7 @@ const FormSchema = z.object({
 });
 
 interface CourseData {
-  id: string;
+  id: number;
   name: string;
   bootcampTopic: string;
   coverImage: string;
