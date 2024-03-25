@@ -59,7 +59,7 @@ function CourseBreadcrumb() {
     const storedCourseId = localStorage.getItem("courseId");
     if (storedCourseId) {
       setCourseId(storedCourseId);
-      getCourseData.getState().fetchCourseDetails(storedCourseId);
+      getCourseData.getState().fetchCourseDetails(parseInt(storedCourseId));
     }
   }, []);
 
