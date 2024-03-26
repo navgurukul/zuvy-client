@@ -1,12 +1,14 @@
 import { toast } from "@/components/ui/use-toast";
 import api from "./axios.config";
+import { OFFSET, POSITION } from "./constant";
+
 
 export const fetchStudentData = async (
   id: number,
   setStoreStudentData: any
 ) => {
   try {
-    const response = await api.get(`/bootcamp/students/${id}`);
+    const response = await api.get(`/bootcamp/students/${id}/?limit=${POSITION}&offset=${OFFSET}`);
     const data = response.data;
     setStoreStudentData(data.studentsEmails);
   } catch (error) {
@@ -46,6 +48,7 @@ export async function deleteStudentHandler(
   setDeleteModalOpen: any,
   setStudentData: any
 ) {
+
   try {
     await api.delete(`/student/${userId}/${bootcampId}`).then((res) => {
       toast({
