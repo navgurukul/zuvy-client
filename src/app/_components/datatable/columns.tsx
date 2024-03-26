@@ -115,7 +115,6 @@ export const columns: ColumnDef<Task>[] = [
           label: item.name,
         })
       );
-      console.log(batchData);
 
       return (
         <div className='flex text-start gap-6 my-6 max-w-[200px]'>

@@ -123,7 +123,7 @@ const Page = ({}: {}) => {
 
       const fetchBatches = async () => {
         try {
-          const response = await api.get<any>(
+          const response = await api.get(
             `/bootcamp/batches/${courseData?.id || ""}`
           );
           setBatches(response.data.data);
@@ -131,7 +131,7 @@ const Page = ({}: {}) => {
           console.log(error.message);
         }
       };
-      await api.post<any>(`/batch`, convertedData).then((res) => {
+      await api.post(`/batch`, convertedData).then((res) => {
         toast({
           title: res.data.status,
           description: res.data.message,
@@ -174,7 +174,12 @@ const Page = ({}: {}) => {
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(onSubmit)}
-                  onError={(e) => console.log(e, "error")}
+                  onError={(e) =>
+                    toast({
+                      title: "Failed",
+                      description: "Entered Corect values",
+                    })
+                  }
                   className='space-y-8'
                 >
                   <FormField
