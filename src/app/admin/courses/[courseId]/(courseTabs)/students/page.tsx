@@ -25,9 +25,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ROWS_PER_PAGE } from "@/utils/constant";
+import { OFFSET, POSITION, ROWS_PER_PAGE } from "@/utils/constant";
 import { DataTable } from "@/app/_components/datatable/data-table";
 import { columns } from "@/app/_components/datatable/columns";
+import { DataTablePagination } from "@/app/_components/datatable/data-table-pagination";
 type Props = {
   id: string;
 };
@@ -48,13 +49,13 @@ type bootcampData = {
 };
 
 const Page = () => {
-  const [position, setPosition] = useState("10");
+  const [position, setPosition] = useState(POSITION);
   const { studentsData, setStoreStudentData } = getStoreStudentData();
   // const [bootcampData, setBootcampData] = useState<bootcampData>();
   const [pages, setPages] = useState<number>();
-  const [offset, setOffset] = useState<number>(0);
+  const [offset, setOffset] = useState<number>(OFFSET);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [students, setStudents] = useState<number>(0);
+  const [totalStudents, setTotalStudents] = useState<number>(0);
   const [search, setSearch] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [searchdata, setSearchData] = useState([]);
@@ -73,7 +74,7 @@ const Page = () => {
           setStoreStudentData(response.data.studentsEmails);
           setPages(response.data.totalPages);
           setLastPage(response.data.totalPages);
-          setStudents(response.data.totalStudents);
+          setTotalStudents(response.data.totalStudents);
         } catch (error) {
           console.error("Error fetching student data:", error);
         }
@@ -84,45 +85,7 @@ const Page = () => {
   useEffect(() => {
     fetchStudentData(offset);
   }, [offset, position, courseData, fetchStudentData]);
-  const lastPageOffset = () => {
-    const totalPages = Math.ceil(students / +position);
-    const lastPageOffset = (totalPages - 1) * +position;
-    return lastPageOffset;
-  };
-  const lastPageHandler = () => {
-    setCurrentPage(lastPage);
-    fetchStudentData(lastPageOffset());
-    setOffset(lastPageOffset());
-  };
-  const firstPagehandler = () => {
-    setCurrentPage(1);
-    fetchStudentData(0);
-    setOffset(0);
-  };
-  const nextPageHandler = () => {
-    console.log("Next");
-    setCurrentPage((prevState) => prevState + 1);
-    setOffset((prevState) => +position + prevState);
-  };
-  const prevPageHandler = () => {
-    console.log("Prev");
-    setCurrentPage((prevState) => prevState - 1);
-    setOffset((prevState) => Math.max(0, prevState - +position));
-  };
-  const previousDisabledHandler = () => {
-    if (currentPage === 1) {
-      return true;
-    } else {
-      return false;
-    }
-  };
-  const nextDisabledHandler = () => {
-    if (currentPage === pages) {
-      return true;
-    } else {
-      return false;
-    }
-  };
+
   useEffect(() => {
     //Search The Api
     const searchStudentsDataHandler = async () => {
@@ -167,75 +130,18 @@ const Page = () => {
       {studentsData.length > 0 && batchData && (
         <>
           <DataTable data={studentsData} columns={columns} />
-          <div className='flex items-center justify-end px-2 gap-x-2'>
-            <p className='text-sm font-medium'>Rows Per Page</p>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant='outline'>
-                  {position} <ChevronDown className='ml-2' size={15} />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className='w-full'>
-                <DropdownMenuLabel>Rows</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuRadioGroup
-                  value={position}
-                  onValueChange={setPosition}
-                >
-                  {ROWS_PER_PAGE.map((rows) => {
-                    return (
-                      <DropdownMenuRadioItem key={rows} value={rows}>
-                        {rows}
-                      </DropdownMenuRadioItem>
-                    );
-                  })}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <div className='flex items-center space-x-6 lg:space-x-8'>
-              <div className='flex w-[100px] items-center justify-center text-sm font-medium'>
-                Page {currentPage} of {pages}
-              </div>
-              <div className='flex items-center space-x-2'>
-                <Button
-                  variant='outline'
-                  className='hidden h-8 w-8 p-0 lg:flex'
-                  onClick={firstPagehandler}
-                  disabled={previousDisabledHandler()}
-                >
-                  <span className='sr-only'>Go to first page</span>
-                  <ArrowLeft className='h-4 w-4' />
-                </Button>
-                <Button
-                  variant='outline'
-                  className='h-8 w-8 p-0'
-                  onClick={prevPageHandler}
-                  disabled={previousDisabledHandler()}
-                >
-                  <span className='sr-only'>Go to previous page</span>
-                  <ArrowLeft className='h-4 w-4' />
-                </Button>
-                <Button
-                  variant='outline'
-                  className='h-8 w-8 p-0'
-                  onClick={nextPageHandler}
-                  disabled={nextDisabledHandler()}
-                >
-                  <span className='sr-only'>Go to next page</span>
-                  <ArrowRight className='h-4 w-4' />
-                </Button>
-                <Button
-                  variant='outline'
-                  className='hidden h-8 w-8 p-0 lg:flex'
-                  onClick={lastPageHandler}
-                  disabled={nextDisabledHandler()}
-                >
-                  <span className='sr-only'>Go to last page</span>
-                  <ArrowRight className='h-4 w-4' />
-                </Button>
-              </div>
-            </div>
-          </div>
+
+          <DataTablePagination
+            totalStudents={totalStudents}
+            position={position}
+            setPosition={setPosition}
+            pages={pages}
+            lastPage={lastPage}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            fetchStudentData={fetchStudentData}
+            setOffset={setOffset}
+          />
         </>
       )}
       {studentsData.length <= 0 && (
