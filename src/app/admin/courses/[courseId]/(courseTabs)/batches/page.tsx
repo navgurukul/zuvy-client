@@ -93,11 +93,15 @@ const Page = ({}: {}) => {
         bootcampId: z
             .string()
             .refine((bootcampId) => !isNaN(parseInt(bootcampId))),
-        capEnrollment: z
-            .string()
-            .refine((capEnrollment) => !isNaN(parseInt(capEnrollment)), {
-                message: 'A cap enrollment is required',
-            }),
+        capEnrollment: z.string().refine(
+            (capEnrollment) => {
+                const parsedValue = parseInt(capEnrollment)
+                return !isNaN(parsedValue) && parsedValue >= 0
+            },
+            {
+                message: 'Cap enrollment must be a non-negative number',
+            }
+        ),
     })
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -116,48 +120,42 @@ const Page = ({}: {}) => {
         },
     })
 
-    const onSubmit = (values: z.infer<typeof formSchema>) => {
-        // const convertedData = {
-        //   ...values,
-        //   instructorId: +values.instructorId,
-        //   bootcampId: +values.bootcampId,
-        //   capEnrollment: +values.capEnrollment,
-        // };
-        // console.log(convertedData);
-        // try {
-        //   await api
-        //     .post(`/batch`, convertedData, {
-        //       headers: {
-        //         "Content-Type": "application/json",
-        //       },
-        //     })
-        //     .then((response) => {
-        //       const fetchBatches = async () => {
-        //         try {
-        //           const response = await api.get(
-        //             `/bootcamp/batches/${courseData?.id || ""}`
-        //           );
-        //           setBatches(response.data);
-        //         } catch (error: any) {
-        //           console.log(error.message);
-        //         }
-        //       };
-        //       fetchBatches();
-        //       toast({
-        //         title: response.data.status,
-        //         description: response.data.message,
-        //         className: "text-start capitalize",
-        //       });
-        //     });
-        // } catch (error: any) {
-        //   toast({
-        //     title: "Failed",
-        //     description: error.data.message,
-        //     className: "text-start capitalize",
-        //     variant: "destructive",
-        //   });
-        //   console.error("Error creating batch:", error);
-        // }
+    const onSubmit = async (values: z.infer<typeof formSchema>) => {
+        try {
+            const convertedData = {
+                ...values,
+                instructorId: +values.instructorId,
+                bootcampId: +values.bootcampId,
+                capEnrollment: +values.capEnrollment,
+            }
+
+            const fetchBatches = async () => {
+                try {
+                    const response = await api.get(
+                        `/bootcamp/batches/${courseData?.id || ''}`
+                    )
+                    setBatches(response.data.data)
+                } catch (error: any) {
+                    console.log(error.message)
+                }
+            }
+            await api.post(`/batch`, convertedData).then((res) => {
+                toast({
+                    title: res.data.status,
+                    description: res.data.message,
+                    className: 'text-start capitalize',
+                })
+                fetchBatches()
+            })
+        } catch (error: any) {
+            toast({
+                title: 'Failed',
+                description: error.response.data.message,
+                className: 'text-start capitalize',
+                variant: 'destructive',
+            })
+            console.error('Error creating batch:', error)
+        }
     }
 
     const renderModal = (emptyState: boolean) => {
@@ -189,7 +187,13 @@ const Page = ({}: {}) => {
                             <Form {...form}>
                                 <form
                                     onSubmit={form.handleSubmit(onSubmit)}
-                                    onError={(e) => console.log(e, 'error')}
+                                    onError={(e) =>
+                                        toast({
+                                            title: 'Failed',
+                                            description:
+                                                'Entered Corect values',
+                                        })
+                                    }
                                     className="space-y-8"
                                 >
                                     <FormField
@@ -240,7 +244,7 @@ const Page = ({}: {}) => {
                                                 <FormControl>
                                                     <Input
                                                         placeholder="Cap Enrollment"
-                                                        type="number"
+                                                        type="name"
                                                         {...field}
                                                     />
                                                 </FormControl>

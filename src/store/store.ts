@@ -90,7 +90,6 @@ export const getBatchData = create<StoreBatchData>((set) => ({
     }
   },
 }));
-
 // ------------------------------
 type deleteStudentStore = {
   isDeleteModalOpen: boolean;
