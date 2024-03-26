@@ -166,7 +166,7 @@ const Page = ({}: {}) => {
             <Button>{emptyState ? "+ Create Batch" : "New Batch"}</Button>
           </DialogTrigger>
           <DialogOverlay />
-          <AddStudentsModal message={true} id={courseData?.id || ""} />
+          <AddStudentsModal message={true} id={courseData?.id || 0} />
         </Dialog>
       );
     } else {

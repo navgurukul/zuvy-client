@@ -1,10 +1,8 @@
 import { toast } from "@/components/ui/use-toast";
 import api from "./axios.config";
 
-
-
 export const fetchStudentData = async (
-  id: string,
+  id: number,
   setStoreStudentData: any
 ) => {
   try {

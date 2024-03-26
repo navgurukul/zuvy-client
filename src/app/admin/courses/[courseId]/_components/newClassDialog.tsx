@@ -71,17 +71,17 @@ function DateTimePicker({
   };
   const currentDate = new Date().toISOString().split("T")[0];
   return (
-    <div className='my-6'>
+    <div className="my-6">
       <Label htmlFor={`${label}DateTime`}>{label}:</Label>
-      <div className='flex'>
+      <div className="flex">
         <input
-          type='date'
+          type="date"
           value={dateTime.toISOString().split("T")[0]}
           onChange={handleDateChange}
           min={currentDate}
         />
         <input
-          type='time'
+          type="time"
           value={dateTime.toISOString().split("T")[1].slice(0, 5)}
           onChange={handleTimeChange}
         />
@@ -94,7 +94,7 @@ const NewClassDialog = ({
   courseId,
   bootcampData,
 }: {
-  courseId: string;
+  courseId: number;
   bootcampData: Object;
 }) => {
   const [title, setTitle] = useState("");
@@ -170,44 +170,44 @@ const NewClassDialog = ({
     <DialogContent>
       <DialogHeader>
         <DialogTitle className={styles.newCourse}>New Class</DialogTitle>
-        <DialogDescription className='text-start'>
-          <div className='my-6'>
-            <Label htmlFor='name'>Class Title</Label>
+        <DialogDescription className="text-start">
+          <div className="my-6">
+            <Label htmlFor="name">Class Title</Label>
             <Input
-              type='text'
-              id='name'
-              placeholder='Enter Class title'
+              type="text"
+              id="name"
+              placeholder="Enter Class title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
           </div>
-          <div className='my-6'>
-            <Label htmlFor='description'>Description:</Label>
+          <div className="my-6">
+            <Label htmlFor="description">Description:</Label>
             <Input
-              type='text'
-              id='description'
-              placeholder='Enter course description'
+              type="text"
+              id="description"
+              placeholder="Enter course description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
-          <div className='my-6'>
+          <div className="my-6">
             <DateTimePicker
-              label='Start Date'
+              label="Start Date"
               dateTime={startDateTime}
               setDateTime={setStartDateTime}
             />
           </div>
-          <div className='my-6'>
+          <div className="my-6">
             <DateTimePicker
-              label='End Date'
+              label="End Date"
               dateTime={endDateTime}
               setDateTime={setEndDateTime}
             />
           </div>
 
-          <div className='my-6'>
-            <Label htmlFor='batchId'>Batch:</Label>
+          <div className="my-6">
+            <Label htmlFor="batchId">Batch:</Label>
             <Combobox
               data={bootcampData}
               title={"Select Batch"}
@@ -215,7 +215,7 @@ const NewClassDialog = ({
             />
           </div>
           <DialogClose asChild>
-            <div className='text-end'>
+            <div className="text-end">
               <Button onClick={handleCreateCourse}>Create Class</Button>
             </div>
           </DialogClose>

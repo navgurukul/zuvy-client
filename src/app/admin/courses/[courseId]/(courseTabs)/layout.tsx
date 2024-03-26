@@ -1,4 +1,4 @@
-import CourseBreadcrumb from "../_components/CourseLayout";
+import CourseLayout from "../_components/CourseLayout";
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 
 export default function RootLayout({
@@ -8,7 +8,7 @@ export default function RootLayout({
 }) {
   return (
     <div>
-      <CourseBreadcrumb />
+      <CourseLayout />
 
       <MaxWidthWrapper>{children}</MaxWidthWrapper>
     </div>
