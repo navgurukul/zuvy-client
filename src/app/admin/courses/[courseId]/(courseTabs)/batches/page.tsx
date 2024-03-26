@@ -112,50 +112,42 @@ const Page = ({}: {}) => {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
-    // const convertedData = {
-    //   ...values,
-    //   instructorId: +values.instructorId,
-    //   bootcampId: +values.bootcampId,
-    //   capEnrollment: +values.capEnrollment,
-    // };
-    // console.log(convertedData);
-    // try {
-    //   await api
-    //     .post(`/batch`, convertedData, {
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //       },
-    //     })
-    //     .then((response) => {
-    //       const fetchBatches = async () => {
-    //         try {
-    //           const response = await api.get(
-    //             `/bootcamp/batches/${courseData?.id || ""}`
-    //           );
-    //           setBatches(response.data);
-    //         } catch (error: any) {
-    //           console.log(error.message);
-    //         }
-    //       };
-    //       fetchBatches();
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      const convertedData = {
+        ...values,
+        instructorId: +values.instructorId,
+        bootcampId: +values.bootcampId,
+        capEnrollment: +values.capEnrollment,
+      };
 
-    //       toast({
-    //         title: response.data.status,
-    //         description: response.data.message,
-    //         className: "text-start capitalize",
-    //       });
-    //     });
-    // } catch (error: any) {
-    //   toast({
-    //     title: "Failed",
-    //     description: error.data.message,
-    //     className: "text-start capitalize",
-    //     variant: "destructive",
-    //   });
-    //   console.error("Error creating batch:", error);
-    // }
+      const fetchBatches = async () => {
+        try {
+          const response = await api.get<any>(
+            `/bootcamp/batches/${courseData?.id || ""}`
+          );
+          setBatches(response.data.data);
+        } catch (error: any) {
+          console.log(error.message);
+        }
+      };
+      await api.post<any>(`/batch`, convertedData).then((res) => {
+        toast({
+          title: res.data.status,
+          description: res.data.message,
+          className: "text-start capitalize",
+        });
+        fetchBatches();
+      });
+    } catch (error: any) {
+      toast({
+        title: "Failed",
+        description: error.response.data.message,
+        className: "text-start capitalize",
+        variant: "destructive",
+      });
+      console.error("Error creating batch:", error);
+    }
   };
 
   const renderModal = (emptyState: boolean) => {
