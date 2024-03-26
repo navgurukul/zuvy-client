@@ -62,7 +62,6 @@ const Page = () => {
   const [lastPage, setLastPage] = useState<number>(0);
   const { courseData } = getCourseData();
   const { fetchBatches, batchData } = getBatchData();
-
   const fetchStudentData = useCallback(
     async (offset: number) => {
       if (courseData?.id) {

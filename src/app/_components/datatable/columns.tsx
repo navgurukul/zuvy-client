@@ -108,7 +108,6 @@ export const columns: ColumnDef<Task>[] = [
     ),
     cell: ({ row }) => {
       const student = row.original;
-      const title = student.batchName;
       const { batchData } = getBatchData();
       const transformedData = batchData?.map(
         (item: { id: any; name: any }) => ({
@@ -116,6 +115,7 @@ export const columns: ColumnDef<Task>[] = [
           label: item.name,
         })
       );
+      console.log(batchData);
 
       return (
         <div className='flex text-start gap-6 my-6 max-w-[200px]'>

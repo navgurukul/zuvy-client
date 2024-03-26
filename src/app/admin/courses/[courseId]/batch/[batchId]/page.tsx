@@ -73,7 +73,6 @@ const BatchesInfo = ({
   params: { courseId: string; batchId: string };
 }) => {
   const router = useRouter();
-  let pageSize = 10;
   const { studentsData, setStoreStudentData } = getStoreStudentData();
   const [studentData, setStudentData] = useState<StudentData[]>([]);
   const [bootcamp, setBootcamp] = useState<any>([]);

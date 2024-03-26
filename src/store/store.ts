@@ -28,15 +28,14 @@ interface CourseData {
 }
 
 interface BatchData {
- 
-    id: string,
-    name: string,
-    bootcampId: string,
-    instructorId: number,
-    capEnrollment: number,
-    // createdAt: string,
-    // updatedAt: string,
-    students_enrolled: number
+  id: string;
+  name: string;
+  bootcampId: string;
+  instructorId: number;
+  capEnrollment: number;
+  // createdAt: string,
+  // updatedAt: string,
+  students_enrolled: number;
 }
 
 interface StoreCourseData {
@@ -59,8 +58,8 @@ export const getCourseData = create<StoreCourseData>((set) => ({
     coverImage: "",
     duration: "",
     language: "string",
-    startTime:"",
-    unassigned_students:0
+    startTime: "",
+    unassigned_students: 0,
   },
   setCourseData: (newValue: CourseData) => {
     set({ courseData: newValue });
@@ -83,16 +82,15 @@ export const getBatchData = create<StoreBatchData>((set) => ({
   },
   fetchBatches: async (courseId: string) => {
     try {
-      const response = await api.get(`/bootcamp/batches/${courseId}`)
+      const response = await api.get(`/bootcamp/batches/${courseId}`);
       const data = response.data;
-      console.log("first", data.data)
+      console.log("first", data.data);
       set({ batchData: data.data });
     } catch (error) {
       console.error("Error fetching batches", error);
     }
   },
 }));
-
 // ------------------------------
 type deleteStudentStore = {
   isDeleteModalOpen: boolean;
