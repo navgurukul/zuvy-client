@@ -84,14 +84,12 @@ export const getBatchData = create<StoreBatchData>((set) => ({
     try {
       const response = await api.get(`/bootcamp/batches/${courseId}`);
       const data = response.data;
-      console.log("first", data.data);
       set({ batchData: data.data });
     } catch (error) {
       console.error("Error fetching batches", error);
     }
   },
 }));
-
 // ------------------------------
 type deleteStudentStore = {
   isDeleteModalOpen: boolean;

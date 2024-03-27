@@ -108,7 +108,6 @@ export const columns: ColumnDef<Task>[] = [
     ),
     cell: ({ row }) => {
       const student = row.original;
-      const title = student.batchName;
       const { batchData } = getBatchData();
       const transformedData = batchData?.map(
         (item: { id: any; name: any }) => ({
