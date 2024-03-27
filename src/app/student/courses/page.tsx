@@ -8,6 +8,7 @@ import Image from 'next/image'
 import { useLazyLoadedStudentData } from '@/store/store'
 import Loader from './_components/Loader'
 import api from '@/utils/axios.config'
+import OptimizedImageWithFallback from '@/components/ImageWithFallback'
 
 interface EnrolledCourse {
     name: string
@@ -141,19 +142,22 @@ const Page: React.FC<pageProps> = () => {
                                             href={`courses/${id}`}
                                             className="text-gray-900 text-base"
                                         >
-                                            <div className="bg-white rounded-lg border p-4">
-                                                <Image
+                                            <div className="bg-muted flex justify-center h-[200px] relative overflow-hidden rounded-sm">
+                                                <OptimizedImageWithFallback
                                                     src={coverImage}
                                                     alt="Placeholder Image"
-                                                    className="rounded-md object-cover"
-                                                    width={300}
-                                                    height={48}
+                                                    // className="rounded-md object-cover"
+                                                    // width={300}
+                                                    // height={48}
+                                                    fallBackSrc={
+                                                        '/logo_white.png'
+                                                    }
                                                 />
-                                                <div className="px-1 py-4">
-                                                    {name}
-                                                </div>
-                                                <Loader progress={progress} />
                                             </div>
+                                            <div className="px-1 py-4">
+                                                {name}
+                                            </div>
+                                            <Loader progress={progress} />
                                         </Link>
                                     )
                                 )
