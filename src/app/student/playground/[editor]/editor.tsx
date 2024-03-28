@@ -5,7 +5,7 @@ import api from '@/utils/axios.config'
 import Editor from '@monaco-editor/react'
 import { useState } from 'react'
 
-export default function IDE() {
+export default function IDE({ params }: { params: { editor: string } }) {
     const [currentCode, setCurrentCode] = useState('')
     const [result, setResult] = useState('')
     const [languageId, setLanguageId] = useState(48)

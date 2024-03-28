@@ -21,67 +21,67 @@ import { Input } from '@/components/ui/input'
 
 const CodingPlayground = () => {
     const [searchTerm, setSearchTerm] = useState('')
-    const [selectedTopic, setSelectedTopic] = useState('All Topics')
+    const [selectedTopic, setSelectedTopic] = useState('')
     const problems = [
         {
             title: 'Invert a Linked List in Python and pass the two tests',
             difficulty: 'Medium',
             status: 'Not Attempted Yet',
-            link: '/student/playground/editor',
+            link: '/student/playground/1',
         },
         {
             title: 'Invert a Linked List in Python and pass the two tests',
             difficulty: 'Medium',
             status: 'Not Attempted Yet',
-            link: '/student/playground/editor',
+            link: '/student/playground/2',
         },
         {
             title: 'Invert a Linked List in Python and pass the two tests',
             difficulty: 'Easy',
             status: 'Needs to Attempt',
-            link: '/student/playground/editor',
+            link: '/student/playground/3',
         },
         {
             title: 'Invert a Linked List in Python and pass the two tests',
             difficulty: 'Easy',
             status: 'Not Attempted Yet',
-            link: '/problems/4',
+            link: '/student/playground/4',
         },
         {
             title: 'Invert a Linked List in Python and pass the two tests',
             difficulty: 'Medium',
             status: 'Accepted',
-            link: '/student/playground/editor',
+            link: '/student/playground/5',
         },
         {
             title: 'Invert a Linked List in Python and pass the two tests',
             difficulty: 'Hard',
             status: 'Not Attempted Yet',
-            link: '/student/playground/editor',
+            link: '/student/playground/6',
         },
         {
             title: 'Invert a Linked List in Python and pass the two tests',
             difficulty: 'Hard',
             status: 'Not Attempted Yet',
-            link: '/problems/7',
+            link: '/student/playground/7',
         },
         {
             title: 'Invert a Linked List in Python and pass the two tests',
             difficulty: 'Hard',
             status: 'Not Attempted Yet',
-            link: '/student/playground/editor',
+            link: '/student/playground/8',
         },
         {
             title: 'Invert a Linked List in Python and pass the two tests',
             difficulty: 'Hard',
             status: 'Not Attempted Yet',
-            link: '/student/playground/editor',
+            link: '/student/playground/9',
         },
         {
             title: 'Invert a Linked List in Python and pass the two tests',
             difficulty: 'Hard',
             status: 'Not Attempted Yet',
-            link: '/student/playground/editor',
+            link: '/student/playground/10',
         },
     ]
     const difficultyColors = {
@@ -109,58 +109,56 @@ const CodingPlayground = () => {
     const [filteredProblems, setFilteredProblems] = useState(filterProblems())
 
     return (
-        <div className="p-4">
+        <div className="p-4 text-left">
             <h1 className="text-2xl font-bold mb-4">Coding Playground</h1>
             <p className="mb-4">
                 Practice problems for AFE + NavGurukul Python Course
             </p>
-            <div className="flex mb-4">
+            <div className="flex mb-4 w-1/4">
                 <Input
                     type="text"
                     placeholder="Problem Name..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
+            </div>
+            <div className="w-1/12">
                 <Select value={selectedTopic} onValueChange={setSelectedTopic}>
-                    <SelectTrigger className="border border-gray-300">
-                        <SelectValue placeholder="All Topics" />
+                    <SelectTrigger className="border border-secondary w-[180px]">
+                        <SelectValue placeholder="Difficulty" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="All Topics">All Topics</SelectItem>
-                        <SelectItem value="Arrays">Arrays</SelectItem>
-                        <SelectItem value="Linked Lists">
-                            Linked Lists
-                        </SelectItem>
+                        <SelectItem value="Easy">Easy</SelectItem>
+                        <SelectItem value="Medium">Medium</SelectItem>
+                        <SelectItem value="Hard">Hard</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
-            {typeof window !== 'undefined' && (
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Problem Title</TableHead>
-                            <TableHead>Difficulty</TableHead>
-                            <TableHead>Solution Status</TableHead>
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Problem Title</TableHead>
+                        <TableHead>Difficulty</TableHead>
+                        <TableHead>Solution Status</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody className="w-full max-w-4xl">
+                    {filteredProblems.map((problem, index) => (
+                        <TableRow
+                            key={index}
+                            className="w-full max-w-4xl cursor-pointer hover:bg-background "
+                        >
+                            <TableCell>
+                                <Link href={problem.link} passHref>
+                                    {problem.title}
+                                </Link>
+                            </TableCell>
+                            <TableCell>{problem.difficulty}</TableCell>
+                            <TableCell>{problem.status}</TableCell>
                         </TableRow>
-                    </TableHeader>
-                    <TableBody className="w-full max-w-4xl">
-                        {filteredProblems.map((problem, index) => (
-                            <TableRow
-                                key={index}
-                                className="w-full max-w-4xl cursor-pointer hover:bg-background"
-                            >
-                                <TableCell>
-                                    <Link href={problem.link} passHref>
-                                        {problem.title}
-                                    </Link>
-                                </TableCell>
-                                <TableCell>{problem.difficulty}</TableCell>
-                                <TableCell>{problem.status}</TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            )}
+                    ))}
+                </TableBody>
+            </Table>
         </div>
     )
 }
