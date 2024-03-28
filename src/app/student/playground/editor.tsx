@@ -10,6 +10,8 @@ export default function IDE() {
     const [result, setResult] = useState('')
     const [languageId, setLanguageId] = useState(48)
     const [codeError, setCodeError] = useState('')
+    const [language, setLanguage] = useState('c')
+
     const editorLanguages = [
         { lang: 'java', id: 91 },
         { lang: 'python', id: 71 },
@@ -17,19 +19,38 @@ export default function IDE() {
         { lang: 'cpp', id: 52 },
         { lang: 'c', id: 48 },
     ]
-    const [language, setLanguage] = useState('c')
+
     const handleLanguageChange = (lang: string) => {
         setLanguage(lang)
         const langID = getDataFromField(editorLanguages, lang, 'lang', 'id')
         setLanguageId(langID)
     }
 
-    const encodeToBase64 = (str: string) => {
-        return btoa(str)
+    // Encoding UTF-8 ⇢ base64
+
+    function b64EncodeUnicode(str: string) {
+        return btoa(
+            encodeURIComponent(str).replace(
+                /%([0-9A-F]{2})/g,
+                function (match, p1) {
+                    return String.fromCharCode(parseInt(p1, 16))
+                }
+            )
+        )
     }
-    const decodeFromBase64 = (str: string) => {
-        return window.atob(str)
+
+    // Decoding base64 ⇢ UTF-8
+
+    function b64DecodeUnicode(str: string) {
+        return decodeURIComponent(
+            Array.prototype.map
+                .call(atob(str), function (c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+                })
+                .join('')
+        )
     }
+
     const getDataFromField = (
         array: any[],
         searchValue: any,
@@ -55,11 +76,9 @@ export default function IDE() {
                     'lang',
                     'id'
                 ),
-                sourceCode: encodeToBase64(currentCode),
+                sourceCode: b64EncodeUnicode(currentCode),
                 stdInput: 'aGVsbG8gd29ybGQ=',
             })
-
-            console.log(response.data)
             if (
                 response.data.stderr ||
                 response.data.compile_output ||
@@ -69,22 +88,20 @@ export default function IDE() {
                     response.data.stderr?.replaceAll('\n', '') ||
                     response.data.compile_output?.replaceAll('\n', '') ||
                     response.data.stdout?.replaceAll('\n', '')
-                console.log(compileOutput, 'compiled')
-                setResult(decodeFromBase64(compileOutput))
+                setResult(b64DecodeUnicode(compileOutput))
             }
-            console.log('decoded', result)
             setCodeError('')
         } catch (error: any) {
             setResult('')
             console.error('Error getting modules progress', error)
             setCodeError(error?.message)
         }
-        console.log('Code Submitted')
     }
+
     function handleEditorChange(value: any) {
         setCurrentCode(value)
-        console.log(currentCode)
     }
+
     return (
         <div className="grid grid-cols-2 ">
             <div className="w-full max-w-4xl p-2 border bg-muted rounded-md">
@@ -139,7 +156,6 @@ export default function IDE() {
                     <div className="text-xl">Output Window</div>
                     <div className="h-40 p-2 bg-accent text-white overflow-y-auto">
                         {result}
-                        <div className="text-destructive">{codeError}</div>
                     </div>
                 </div>
             </div>
