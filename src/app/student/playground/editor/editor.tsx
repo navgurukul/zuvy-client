@@ -155,7 +155,7 @@ export default function IDE() {
                 <div className="w-full max-w-4xl p-2 mt-2 border bg-muted rounded-md ">
                     <div className="text-xl">Output Window</div>
                     <div className="h-40 p-2 bg-accent text-white overflow-y-auto">
-                        {result}
+                        <pre>{result}</pre>
                     </div>
                 </div>
             </div>
