@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 import DeleteConfirmationModal from '../../_components/deleteModal'
@@ -12,14 +12,13 @@ import { toast } from '@/components/ui/use-toast'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { getCourseData } from '@/store/store'
-const Page = () => {
+const Page = ({ params }: { params: any }) => {
     // misc
     const router = useRouter()
     const { courseData } = getCourseData()
-
     // state and variables
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
-
+    const [bootcampSettings, setBootcampSettings] = useState('')
     // async
     const handleDelete = async () => {
         try {
@@ -65,8 +64,25 @@ const Page = () => {
                 className: 'text-start capitalize',
             })
         }
+        setTimeout(() => {
+            window.location.reload()
+        }, 1000)
     }
 
+    useEffect(() => {
+        const fetchBootCampSettings = async () => {
+            try {
+                const response = await api.get(
+                    `/bootcamp/bootcampSetting/${params.courseId}`
+                )
+                setBootcampSettings(response.data.bootcampSetting[0].type)
+            } catch (error) {
+                console.error('Error fetching boot camp settings:', error)
+            }
+        }
+
+        fetchBootCampSettings()
+    }, [bootcampSettings, params.courseId])
     return (
         <div>
             <div className=" w-full text-start mb-5">
@@ -76,7 +92,8 @@ const Page = () => {
                         <div className="flex items-center space-x-2">
                             <RadioGroup
                                 className="flex flex-col justify-start items-start "
-                                defaultValue="comfortable"
+                                // defaultValue={bootcampSettings}
+                                value={bootcampSettings}
                             >
                                 <div className="flex flex-col   space-x-2">
                                     <div className="flex gap-x-3">

@@ -93,10 +93,6 @@ const BatchesInfo = ({
         },
         {
             crumb: `${studentData.length > 0 ? studentData[0].batchName : ''}`,
-            href: `/admin/courses/${
-                studentData.length > 0 ? studentData[0].bootcampId : ''
-            }/batch/${studentData.length > 0 ? studentData[0]?.batchId : ''}
-      }`,
         },
     ]
 
@@ -155,24 +151,26 @@ const BatchesInfo = ({
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            name: oldData?.name || '',
-            instructorId: oldData?.instructorId || '',
-            capEnrollment: oldData?.capEnrollment || '',
+            name: instructorsInfo.name,
+            instructorId: instructorsInfo.instructorId,
+            capEnrollment: instructorsInfo.capEnrollment,
         },
     })
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         const convertedData = {
             ...values,
+            name: values.name,
             instructorId: +values.instructorId,
             capEnrollment: +values.capEnrollment,
         }
         setOldData(convertedData)
         try {
-            const response = await api
+            await api
                 .patch(`/batch/${params.batchId}`, convertedData)
                 .then((res) => {
                     toast({
-                        title: 'Batches Updated Succesfully',
+                        title: res.data.title,
+                        description: res.data.description,
                     })
                     const fetchBatchesInfo = async () => {
                         try {
@@ -190,7 +188,7 @@ const BatchesInfo = ({
             //   }
         } catch (error) {
             toast({
-                title: "Batches Didn't Succesfully",
+                title: "Batches Didn't Update Succesfully",
             })
         }
     }
@@ -254,79 +252,81 @@ const BatchesInfo = ({
         setSearch(e.target.value)
     }
 
-    ;<Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Batch Name</FormLabel>
-                        <FormControl>
-                            <Input placeholder="Batch Name" {...field} />
-                        </FormControl>
+    // ;<Form {...form}>
+    //     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+    //         <FormField
+    //             control={form.control}
+    //             name="name"
+    //             render={({ field }) => (
+    //                 <FormItem>
+    //                     <FormLabel>Batch Name</FormLabel>
+    //                     <FormControl>
+    //                         <Input placeholder="Batch Name" {...field} />
+    //                     </FormControl>
 
-                        <FormMessage />
-                    </FormItem>
-                )}
-            />
-            <FormField
-                control={form.control}
-                name="instructorId"
-                render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Instructor Id</FormLabel>
-                        <FormControl>
-                            <Input placeholder="20230" type="name" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                )}
-            />
-            <FormField
-                control={form.control}
-                name="capEnrollment"
-                render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Cap Enrollment</FormLabel>
-                        <FormControl>
-                            <Input
-                                placeholder="Cap Enrollment"
-                                type="number"
-                                {...field}
-                            />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                )}
-            />
-            <FormDescription>
-                This form will Update the batch info
-            </FormDescription>
-            <div className="w-full flex flex-col items-end gap-y-5 ">
-                <DialogClose asChild>
-                    <Button className="w-1/2" type="submit">
-                        Update batch
-                    </Button>
-                </DialogClose>
-            </div>
-        </form>
-    </Form>
+    //                     <FormMessage />
+    //                 </FormItem>
+    //             )}
+    //         />
+    //         <FormField
+    //             control={form.control}
+    //             name="instructorId"
+    //             render={({ field }) => (
+    //                 <FormItem>
+    //                     <FormLabel>Instructor Id</FormLabel>
+    //                     <FormControl>
+    //                         <Input placeholder="20230" type="name" {...field} />
+    //                     </FormControl>
+    //                     <FormMessage />
+    //                 </FormItem>
+    //             )}
+    //         />
+    //         <FormField
+    //             control={form.control}
+    //             name="capEnrollment"
+    //             render={({ field }) => (
+    //                 <FormItem>
+    //                     <FormLabel>Cap Enrollment</FormLabel>
+    //                     <FormControl>
+    //                         <Input
+    //                             placeholder="Cap Enrollment"
+    //                             type="number"
+    //                             {...field}
+    //                         />
+    //                     </FormControl>
+    //                     <FormMessage />
+    //                 </FormItem>
+    //             )}
+    //         />
+    //         <FormDescription>
+    //             This form will Update the batch info
+    //         </FormDescription>
+    //         <div className="w-full flex flex-col items-end gap-y-5 ">
+    //             <DialogClose asChild>
+    //                 <Button className="w-1/2" type="submit">
+    //                     Update batch
+    //                 </Button>
+    //             </DialogClose>
+    //         </div>
+    //     </form>
+    // </Form>
     return (
         <>
             <Breadcrumb>
                 <BreadcrumbList>
                     {crumbs?.map((item, index) => (
-                        <>
-                            <BreadcrumbItem key={item.crumb}>
+                        <React.Fragment key={index}>
+                            <BreadcrumbItem>
                                 <BreadcrumbLink href={item.href}>
                                     {item.crumb}
                                 </BreadcrumbLink>
                             </BreadcrumbItem>
                             {index < crumbs.length - 1 && (
-                                <BreadcrumbSeparator />
+                                <BreadcrumbSeparator
+                                    key={`separator-${index}`}
+                                />
                             )}
-                        </>
+                        </React.Fragment>
                     ))}
                 </BreadcrumbList>
             </Breadcrumb>
@@ -559,8 +559,13 @@ const BatchesInfo = ({
                                                             </FormLabel>
                                                             <FormControl>
                                                                 <Input
-                                                                    placeholder="Batch Name"
+                                                                    placeholder={
+                                                                        'Batch Name'
+                                                                    }
                                                                     {...field}
+                                                                    defaultValue={
+                                                                        instructorsInfo.name
+                                                                    }
                                                                 />
                                                             </FormControl>
 
@@ -578,9 +583,12 @@ const BatchesInfo = ({
                                                             </FormLabel>
                                                             <FormControl>
                                                                 <Input
-                                                                    placeholder="20230"
+                                                                    placeholder="Instructor Id"
                                                                     type="name"
                                                                     {...field}
+                                                                    defaultValue={
+                                                                        instructorsInfo.instructorId
+                                                                    }
                                                                 />
                                                             </FormControl>
                                                             <FormMessage />
@@ -600,6 +608,9 @@ const BatchesInfo = ({
                                                                     placeholder="Cap Enrollment"
                                                                     type="number"
                                                                     {...field}
+                                                                    defaultValue={
+                                                                        instructorsInfo.capEnrollment
+                                                                    }
                                                                 />
                                                             </FormControl>
                                                             <FormMessage />
