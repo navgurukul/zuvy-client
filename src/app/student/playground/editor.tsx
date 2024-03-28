@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button'
 import api from '@/utils/axios.config'
 import Editor from '@monaco-editor/react'
-import { SetStateAction, useState } from 'react'
+import { useState } from 'react'
 
 export default function IDE() {
     const [currentCode, setCurrentCode] = useState('')
@@ -26,6 +26,9 @@ export default function IDE() {
 
     const encodeToBase64 = (str: string) => {
         return btoa(str)
+    }
+    const decodeFromBase64 = (str: string) => {
+        return window.atob(str)
     }
     const getDataFromField = (
         array: any[],
@@ -57,7 +60,19 @@ export default function IDE() {
             })
 
             console.log(response.data)
-            setResult(response.data.stdout)
+            if (
+                response.data.stderr ||
+                response.data.compile_output ||
+                response.data.stdout
+            ) {
+                let compileOutput =
+                    response.data.stderr?.replaceAll('\n', '') ||
+                    response.data.compile_output?.replaceAll('\n', '') ||
+                    response.data.stdout?.replaceAll('\n', '')
+                console.log(compileOutput, 'compiled')
+                setResult(decodeFromBase64(compileOutput))
+            }
+            console.log('decoded', result)
             setCodeError('')
         } catch (error: any) {
             setResult('')
@@ -73,19 +88,21 @@ export default function IDE() {
     return (
         <div className="grid grid-cols-2 ">
             <div className="w-full max-w-4xl p-2 border bg-muted rounded-md">
-                <h1>Add Two Numbers</h1>
-                You are given two non-empty linked lists representing two
-                non-negative integers. The digits are stored in reverse order,
-                and each of their nodes contains a single digit. Add the two
-                numbers and return the sum as a linked list. You may assume the
-                two numbers do not contain any leading zero, except the number 0
-                itself.
+                <h1 className="text-xl">Add Two Numbers</h1>
+                <div>
+                    You are given two non-empty linked lists representing two
+                    non-negative integers. The digits are stored in reverse
+                    order, and each of their nodes contains a single digit. Add
+                    the two numbers and return the sum as a linked list. You may
+                    assume the two numbers do not contain any leading zero,
+                    except the number 0 itself.
+                </div>
             </div>
             <div className="flex-none justify-end items-start h-full ">
                 <div className="w-full max-w-4xl p-2 border bg-muted rounded-md">
                     <form onSubmit={handleSubmit}>
                         <div>
-                            <h6>Add your code</h6>
+                            <div className="text-xl">Add your code</div>
                             <select
                                 value={language}
                                 onChange={(e) =>
@@ -111,14 +128,16 @@ export default function IDE() {
                         <div className="flex justify-between pt-2">
                             <div className="flex items-center space-x-5"></div>
                             <div className="flex-shrink-0">
-                                <Button type="submit">Run</Button>
+                                <Button type="submit" size="sm">
+                                    Run
+                                </Button>
                             </div>
                         </div>
                     </form>
                 </div>
-                <div className="w-full max-w-4xl p-2 mt-2 border bg-muted rounded-md">
-                    <div>Output Window</div>
-                    <div className="h-40 p-2 bg-accent text-white">
+                <div className="w-full max-w-4xl p-2 mt-2 border bg-muted rounded-md ">
+                    <div className="text-xl">Output Window</div>
+                    <div className="h-40 p-2 bg-accent text-white overflow-y-auto">
                         {result}
                         <div className="text-destructive">{codeError}</div>
                     </div>
