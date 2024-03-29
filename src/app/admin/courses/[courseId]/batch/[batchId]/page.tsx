@@ -493,7 +493,6 @@ const BatchesInfo = ({
                                 <DialogContent>
                                     <DialogHeader>
                                         <DialogTitle>Update Batch</DialogTitle>
-
                                         <Form {...form}>
                                             <form
                                                 onSubmit={form.handleSubmit(
