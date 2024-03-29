@@ -1,23 +1,21 @@
 'use client'
+import Image from 'next/image'
 
 import { ColumnDef } from '@tanstack/react-table'
 
-import { labels, priorities, statuses } from '@/utils/data/data'
-import { Task } from '@/utils/data/schema'
+import { Trash2 } from 'lucide-react'
 import { DataTableColumnHeader } from '../../../../../_components/datatable/data-table-column-header'
-import { DataTableRowActions } from '../../../../../_components/datatable/data-table-row-actions'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Badge } from '@/components/ui/badge'
 import { Combobox } from '@/components/ui/combobox'
+
+import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
 import { deleteStudentHandler, onBatchChange } from '@/utils/students'
+import { Task } from '@/utils/data/schema'
 import {
     getBatchData,
     getDeleteStudentStore,
     getStoreStudentData,
 } from '@/store/store'
-import { Trash2 } from 'lucide-react'
-import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
-import Image from 'next/image'
 import { getAttendanceColorClass } from '@/utils/students'
 export const columns: ColumnDef<Task>[] = [
     {
