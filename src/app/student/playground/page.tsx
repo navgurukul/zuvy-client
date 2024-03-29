@@ -18,6 +18,7 @@ import {
     SelectItem,
 } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 
 const CodingPlayground = () => {
     const [searchTerm, setSearchTerm] = useState('')
@@ -122,7 +123,7 @@ const CodingPlayground = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
             </div>
-            <div className="w-1/12">
+            <div className="flex mb-2">
                 <Select value={selectedTopic} onValueChange={setSelectedTopic}>
                     <SelectTrigger className="border border-secondary w-[180px]">
                         <SelectValue placeholder="Difficulty" />
@@ -133,6 +134,23 @@ const CodingPlayground = () => {
                         <SelectItem value="Hard">Hard</SelectItem>
                     </SelectContent>
                 </Select>
+                <ToggleGroup type="multiple" className="mx-2">
+                    <ToggleGroupItem
+                        value="All Topics"
+                        aria-label="Toggle All Topics"
+                    >
+                        All Topics
+                    </ToggleGroupItem>
+                    <ToggleGroupItem value="Arrays" aria-label="Toggle Arrays">
+                        Arrays
+                    </ToggleGroupItem>
+                    <ToggleGroupItem
+                        value="Linked Lists"
+                        aria-label="Toggle Linked Lists"
+                    >
+                        Linked Lists
+                    </ToggleGroupItem>
+                </ToggleGroup>
             </div>
             <Table>
                 <TableHeader>

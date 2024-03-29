@@ -3,6 +3,8 @@
 import { Button } from '@/components/ui/button'
 import api from '@/utils/axios.config'
 import Editor from '@monaco-editor/react'
+import { ArrowBigLeft, ArrowLeft } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 export default function IDE({ params }: { params: { editor: string } }) {
@@ -11,6 +13,7 @@ export default function IDE({ params }: { params: { editor: string } }) {
     const [languageId, setLanguageId] = useState(48)
     const [codeError, setCodeError] = useState('')
     const [language, setLanguage] = useState('c')
+    const router = useRouter()
 
     const editorLanguages = [
         { lang: 'java', id: 91 },
@@ -102,11 +105,19 @@ export default function IDE({ params }: { params: { editor: string } }) {
         setCurrentCode(value)
     }
 
+    const handleBack = () => {
+        router.back()
+    }
     return (
         <div className="grid grid-cols-2 gap-2">
-            <div className="w-full max-w-4xl p-2 border bg-muted rounded-md">
-                <h1 className="text-xl">Add Two Numbers</h1>
-                <div>
+            <div className="w-full max-w-4xl p-2 border bg-muted rounded-md text-left">
+                <div className="flex items-center ">
+                    <Button variant="ghost" size="icon" onClick={handleBack}>
+                        <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                    <h1 className="text-2xl p-2">Add Two Numbers</h1>
+                </div>
+                <div className="px-2">
                     You are given two non-empty linked lists representing two
                     non-negative integers. The digits are stored in reverse
                     order, and each of their nodes contains a single digit. Add
@@ -119,7 +130,7 @@ export default function IDE({ params }: { params: { editor: string } }) {
                 <div className="w-full max-w-4xl p-2 border bg-muted rounded-md">
                     <form onSubmit={handleSubmit}>
                         <div>
-                            <div className="text-xl">Add your code</div>
+                            <div className="text-2xl">Add your code</div>
                             <select
                                 value={language}
                                 onChange={(e) =>
