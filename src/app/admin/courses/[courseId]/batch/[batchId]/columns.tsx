@@ -1,14 +1,10 @@
 'use client'
 
 import { ColumnDef } from '@tanstack/react-table'
-
-import { labels, priorities, statuses } from '@/utils/data/data'
 import { Task } from '@/utils/data/schema'
-import { DataTableColumnHeader } from './data-table-column-header'
-import { DataTableRowActions } from './data-table-row-actions'
+import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Badge } from '@/components/ui/badge'
-import { Combobox } from '@/components/ui/combobox'
+
 import { deleteStudentHandler, onBatchChange } from '@/utils/students'
 import {
     getBatchData,
@@ -108,37 +104,6 @@ export const columns: ColumnDef<Task>[] = [
         },
     },
     {
-        accessorKey: 'batchName',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Batch Assigned To" />
-        ),
-        cell: ({ row }) => {
-            const student = row.original
-            const { batchData } = getBatchData()
-            const transformedData = batchData?.map(
-                (item: { id: any; name: any }) => ({
-                    value: item.id.toString(),
-                    label: item.name,
-                })
-            )
-
-            return (
-                <div className="flex text-start gap-6 my-6 max-w-[200px]">
-                    <Combobox
-                        data={transformedData}
-                        title={'Batch'}
-                        onChange={(selectedValue) => {
-                            onBatchChange(selectedValue, student)
-                        }}
-                        initialValue={row.original?.batchId?.toString() || ''}
-                    />
-                </div>
-            )
-        },
-        enableSorting: false,
-        enableHiding: false,
-    },
-    {
         accessorKey: 'progress',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Progress" />
@@ -213,28 +178,15 @@ export const columns: ColumnDef<Task>[] = [
             const student = row.original
             const { userId, bootcampId } = student
             // const { onDeleteHandler } = GetdataHandler(bootcampId);
-            const {
-                setDeleteModalOpen,
-                isDeleteModalOpen,
-                deleteStudentId,
-                setDeleteStudentId,
-            } = getDeleteStudentStore()
+            const { setDeleteModalOpen, isDeleteModalOpen } =
+                getDeleteStudentStore()
             const { setStoreStudentData } = getStoreStudentData()
-
-            let deleteUser = null
-
-            const handleTrashClick = () => {
-                setDeleteModalOpen(true)
-                setDeleteStudentId(userId)
-            }
 
             return (
                 <>
                     <Trash2
-                        onClick={() => {
-                            handleTrashClick()
-                        }}
-                        className="text-red-600 cursor-pointer"
+                        onClick={() => setDeleteModalOpen(true)}
+                        className="text-destructive cursor-pointer"
                         size={20}
                     />
                     <DeleteConfirmationModal
@@ -242,7 +194,7 @@ export const columns: ColumnDef<Task>[] = [
                         onClose={() => setDeleteModalOpen(false)}
                         onConfirm={() => {
                             deleteStudentHandler(
-                                deleteStudentId,
+                                userId,
                                 bootcampId,
                                 setDeleteModalOpen,
                                 setStoreStudentData
