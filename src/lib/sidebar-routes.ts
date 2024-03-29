@@ -27,7 +27,7 @@ const guestRoutes = [
     {
         icon: MonitorPlay,
         label: 'Class Recordings',
-        href: '/student/classRecordings',
+        href: '/student/recordings',
     },
     {
         icon: Code,

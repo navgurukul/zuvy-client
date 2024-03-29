@@ -3,6 +3,15 @@ import React, { useState, useEffect } from 'react'
 import api from '@/utils/axios.config'
 import { useLazyLoadedStudentData } from '@/store/store'
 import Recordings from '../courses/[viewcourses]/[recordings]/_components/Recordings'
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
 
 interface Bootcamp {
     id: number
@@ -92,17 +101,24 @@ function Page({
     return (
         <>
             <div className="flex text-start">
-                <select
-                    value={selectedCourse?.id}
-                    onChange={handleCourseChange}
-                    className="border border-[#518672] text-[#518672] rounded-md p-2 w-auto mt-10"
-                >
-                    {enrolledCourse.map((course) => (
-                        <option key={course.id} value={course.id}>
-                            {course.name}
-                        </option>
-                    ))}
-                </select>
+                <Select>
+                    <SelectTrigger className="w-[300px]">
+                        <SelectValue placeholder="Select a course" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                            <SelectLabel>Courses</SelectLabel>
+                            {enrolledCourse.map((course) => (
+                                <SelectItem
+                                    key={course.id}
+                                    value={String(course.id)}
+                                >
+                                    {course.name}
+                                </SelectItem>
+                            ))}
+                        </SelectGroup>
+                    </SelectContent>
+                </Select>
             </div>
 
             <div className=" mt-10 ">

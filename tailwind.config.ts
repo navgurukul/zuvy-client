@@ -56,6 +56,7 @@ const config = {
                 yellow: {
                     DEFAULT: '#FEE8B0',
                     foreground: '#eab308',
+                    dark:"#f59e0b"
                 },
             },
             borderRadius: {
