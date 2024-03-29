@@ -33,10 +33,8 @@ export function Combobox({
 }: ComboboxProps) {
     const [open, setOpen] = React.useState(false)
     const [value, setValue] = React.useState(initialValue || '')
-    console.log('first', value)
 
-    const found = data.find((item: any) => item.value)
-    console.log('first', found)
+    // const found = data.find((item: any) => item.value)
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>

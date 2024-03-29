@@ -126,7 +126,7 @@ export const columns: ColumnDef<Task>[] = [
                 <div className="flex text-start gap-6 my-6 max-w-[200px]">
                     <Combobox
                         data={transformedData}
-                        title={'Select Batch'}
+                        title={'Batch'}
                         onChange={(selectedValue) => {
                             onBatchChange(selectedValue, student)
                         }}

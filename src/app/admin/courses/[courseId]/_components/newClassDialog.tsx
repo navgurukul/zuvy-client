@@ -194,7 +194,7 @@ const NewClassDialog = ({
                         <Label htmlFor="batchId">Batch:</Label>
                         <Combobox
                             data={bootcampData}
-                            title={'Select Batch'}
+                            title={'Batch'}
                             onChange={handleComboboxChange}
                         />
                     </div>
