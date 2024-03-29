@@ -126,9 +126,9 @@ export const columns: ColumnDef<Task>[] = [
                 <div className="flex text-start gap-6 my-6 max-w-[200px]">
                     <Combobox
                         data={transformedData}
-                        title={'Select Batch'}
+                        title={'Batch'}
                         onChange={(selectedValue) => {
-                            onBatchChange(selectedValue, row.original, student)
+                            onBatchChange(selectedValue, student)
                         }}
                         initialValue={row.original?.batchId?.toString() || ''}
                     />
@@ -196,31 +196,33 @@ export const columns: ColumnDef<Task>[] = [
         },
     },
     {
-        accessorKey: 'attendence',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Attendence" />
-        ),
-        cell: ({ row }) => {
-            const attendance =
-                row.original.attendance === null ? 0 : row.original.attendance
-            return <div className="pr-12 h-full w-full">{attendance}%</div>
-        },
-    },
-    {
         id: 'actions',
         // cell: ({ row }) => <DataTableRowActions row={row} />,
         cell: ({ row }) => {
             const student = row.original
             const { userId, bootcampId } = student
             // const { onDeleteHandler } = GetdataHandler(bootcampId);
-            const { setDeleteModalOpen, isDeleteModalOpen } =
-                getDeleteStudentStore()
+            const {
+                setDeleteModalOpen,
+                isDeleteModalOpen,
+                deleteStudentId,
+                setDeleteStudentId,
+            } = getDeleteStudentStore()
             const { setStoreStudentData } = getStoreStudentData()
+
+            let deleteUser = null
+
+            const handleTrashClick = () => {
+                setDeleteModalOpen(true)
+                setDeleteStudentId(userId)
+            }
 
             return (
                 <>
                     <Trash2
-                        onClick={() => setDeleteModalOpen(true)}
+                        onClick={() => {
+                            handleTrashClick()
+                        }}
                         className="text-red-600 cursor-pointer"
                         size={20}
                     />
@@ -229,7 +231,7 @@ export const columns: ColumnDef<Task>[] = [
                         onClose={() => setDeleteModalOpen(false)}
                         onConfirm={() => {
                             deleteStudentHandler(
-                                userId,
+                                deleteStudentId,
                                 bootcampId,
                                 setDeleteModalOpen,
                                 setStoreStudentData
