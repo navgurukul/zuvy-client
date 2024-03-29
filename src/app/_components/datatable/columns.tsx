@@ -196,6 +196,17 @@ export const columns: ColumnDef<Task>[] = [
         },
     },
     {
+        accessorKey: 'attendence',
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Attendence" />
+        ),
+        cell: ({ row }) => {
+            const attendance =
+                row.original.attendance === null ? 0 : row.original.attendance
+            return <div className="pr-12 h-full w-full">{attendance}%</div>
+        },
+    },
+    {
         id: 'actions',
         // cell: ({ row }) => <DataTableRowActions row={row} />,
         cell: ({ row }) => {
