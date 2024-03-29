@@ -8,7 +8,10 @@ import {
     Book,
     BookOpen,
     Video,
+    MonitorPlay
 } from 'lucide-react'
+
+
 
 const guestRoutes = [
     {
@@ -20,6 +23,11 @@ const guestRoutes = [
         icon: BookOpen,
         label: 'My Courses',
         href: '/student/courses',
+    },
+    {
+        icon: MonitorPlay,
+        label: 'Class Recordings',
+        href: '/student/classRecordings',
     },
     {
         icon: Code,
