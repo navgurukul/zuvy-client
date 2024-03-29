@@ -103,7 +103,7 @@ export default function IDE({ params }: { params: { editor: string } }) {
     }
 
     return (
-        <div className="grid grid-cols-2 ">
+        <div className="grid grid-cols-2 gap-2">
             <div className="w-full max-w-4xl p-2 border bg-muted rounded-md">
                 <h1 className="text-xl">Add Two Numbers</h1>
                 <div>
@@ -134,7 +134,7 @@ export default function IDE({ params }: { params: { editor: string } }) {
                                 ))}
                             </select>
                             <Editor
-                                height="50vh"
+                                height="45vh"
                                 language={language}
                                 // defaultValue='console.log("Zuvy");'
                                 theme="vs-dark"
@@ -154,7 +154,7 @@ export default function IDE({ params }: { params: { editor: string } }) {
                 </div>
                 <div className="w-full max-w-4xl p-2 mt-2 border bg-muted rounded-md ">
                     <div className="text-xl">Output Window</div>
-                    <div className="h-40 p-2 bg-accent text-white overflow-y-auto">
+                    <div className="h-[20vh] p-2 bg-accent text-white overflow-y-auto">
                         <pre>{result}</pre>
                     </div>
                 </div>

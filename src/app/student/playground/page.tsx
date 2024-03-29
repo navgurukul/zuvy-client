@@ -114,7 +114,7 @@ const CodingPlayground = () => {
             <p className="mb-4">
                 Practice problems for AFE + NavGurukul Python Course
             </p>
-            <div className="flex mb-4 w-1/4">
+            <div className="flex mb-2 w-1/4">
                 <Input
                     type="text"
                     placeholder="Problem Name..."
@@ -137,16 +137,22 @@ const CodingPlayground = () => {
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Problem Title</TableHead>
-                        <TableHead>Difficulty</TableHead>
-                        <TableHead>Solution Status</TableHead>
+                        <TableHead className="font-bold text-black">
+                            Problem Title
+                        </TableHead>
+                        <TableHead className="font-bold text-black">
+                            Difficulty
+                        </TableHead>
+                        <TableHead className="font-bold text-black">
+                            Solution Status
+                        </TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody className="w-full max-w-4xl">
                     {filteredProblems.map((problem, index) => (
                         <TableRow
                             key={index}
-                            className="w-full max-w-4xl cursor-pointer hover:bg-background "
+                            className="w-full max-w-4xl cursor-pointer hover:bg-secondary/20 "
                         >
                             <TableCell>
                                 <Link href={problem.link} passHref>
