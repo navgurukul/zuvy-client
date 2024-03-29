@@ -4,8 +4,8 @@ import { ColumnDef } from '@tanstack/react-table'
 
 import { labels, priorities, statuses } from '@/utils/data/data'
 import { Task } from '@/utils/data/schema'
-import { DataTableColumnHeader } from './data-table-column-header'
-import { DataTableRowActions } from './data-table-row-actions'
+import { DataTableColumnHeader } from '../../../../../_components/datatable/data-table-column-header'
+import { DataTableRowActions } from '../../../../../_components/datatable/data-table-row-actions'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
 import { Combobox } from '@/components/ui/combobox'
@@ -275,7 +275,7 @@ export const columns: ColumnDef<Task>[] = [
                         onClick={() => {
                             handleTrashClick()
                         }}
-                        className="text-red-600 cursor-pointer"
+                        className="text-destructive cursor-pointer"
                         size={20}
                     />
                     <DeleteConfirmationModal

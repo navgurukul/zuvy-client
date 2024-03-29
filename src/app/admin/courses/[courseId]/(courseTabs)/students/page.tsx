@@ -12,7 +12,7 @@ import useDebounce from '@/hooks/useDebounce'
 
 import { OFFSET, POSITION } from '@/utils/constant'
 import { DataTable } from '@/app/_components/datatable/data-table'
-import { columns } from '@/app/_components/datatable/columns'
+import { columns } from '@/app/admin/courses/[courseId]/(courseTabs)/batches/columns'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 
 export type StudentData = {

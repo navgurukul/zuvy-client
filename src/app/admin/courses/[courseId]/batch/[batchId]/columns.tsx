@@ -2,7 +2,7 @@
 
 import { ColumnDef } from '@tanstack/react-table'
 import { Task } from '@/utils/data/schema'
-import { DataTableColumnHeader } from './data-table-column-header'
+import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 import { Checkbox } from '@/components/ui/checkbox'
 
 import {
@@ -19,7 +19,7 @@ import { Trash2 } from 'lucide-react'
 import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
 import Image from 'next/image'
 
-export const batchesColumn: ColumnDef<Task>[] = [
+export const columns: ColumnDef<Task>[] = [
     {
         id: 'select',
         header: ({ table }) => (
@@ -229,7 +229,7 @@ export const batchesColumn: ColumnDef<Task>[] = [
                 <>
                     <Trash2
                         onClick={() => setDeleteModalOpen(true)}
-                        className="text-red-600 cursor-pointer"
+                        className="text-destructive cursor-pointer"
                         size={20}
                     />
                     <DeleteConfirmationModal
