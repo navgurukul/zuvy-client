@@ -63,7 +63,7 @@ const Page = () => {
         if (courseData?.id) {
             fetchBatches(courseData?.id)
         }
-    }, [courseData])
+    }, [courseData, fetchBatches])
 
     useEffect(() => {
         fetchStudentData(offset)
@@ -91,7 +91,7 @@ const Page = () => {
     }
     return (
         <div>
-            {studentsData.length > 0 && (
+            {
                 <div className="py-2 my-2 flex items-center justify-between w-full">
                     <Input
                         type="search"
@@ -112,8 +112,8 @@ const Page = () => {
                         />
                     </Dialog>
                 </div>
-            )}
-            {studentsData.length > 0 && batchData && (
+            }
+            {batchData && (
                 <>
                     <DataTable data={studentsData} columns={columns} />
 
@@ -130,7 +130,7 @@ const Page = () => {
                     />
                 </>
             )}
-            {studentsData.length <= 0 && (
+            {/* {studentsData.length <= 0 && (
                 <div className="flex  flex-col items-center justify-center py-12">
                     <div>
                         <svg
@@ -344,7 +344,7 @@ const Page = () => {
                         </Dialog>
                     </div>
                 </div>
-            )}
+            )} */}
         </div>
     )
 }

@@ -18,7 +18,7 @@ import {
 import { Trash2 } from 'lucide-react'
 import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
 import Image from 'next/image'
-
+import { getAttendanceColorClass } from '@/utils/students'
 export const columns: ColumnDef<Task>[] = [
     {
         id: 'select',
@@ -145,6 +145,8 @@ export const columns: ColumnDef<Task>[] = [
         ),
         cell: ({ row }) => {
             const progress = row.original.progress
+            const circleColorClass = getAttendanceColorClass(progress)
+
             // const priority = priorities.find(
             //   (priority) => priority.value === row.getValue("progress")
             // );
@@ -176,7 +178,7 @@ export const columns: ColumnDef<Task>[] = [
                                 cy="18"
                                 r="16"
                                 fill="none"
-                                className="stroke-current text-secondary dark:text-red-400"
+                                className={`stroke-current ${circleColorClass}`}
                                 strokeWidth="2"
                                 strokeDasharray="100"
                                 strokeDashoffset={`${100 - progress}`}
@@ -203,7 +205,46 @@ export const columns: ColumnDef<Task>[] = [
         cell: ({ row }) => {
             const attendance =
                 row.original.attendance === null ? 0 : row.original.attendance
-            return <div className="pr-12 h-full w-full">{attendance}%</div>
+
+            const circleColorClass = getAttendanceColorClass(attendance)
+
+            return (
+                <div className="relative size-9">
+                    <svg
+                        className="size-full"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 36 36"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <circle
+                            cx="18"
+                            cy="18"
+                            r="16"
+                            fill="none"
+                            className="stroke-current text-gray-200 dark:text-gray-700"
+                            strokeWidth="2"
+                        ></circle>
+                        <g className="origin-center -rotate-90 transform">
+                            <circle
+                                cx="18"
+                                cy="18"
+                                r="16"
+                                fill="none"
+                                className={`stroke-current ${circleColorClass}`}
+                                strokeWidth="2"
+                                strokeDasharray="100"
+                                strokeDashoffset={`${100 - attendance}`}
+                            ></circle>
+                        </g>
+                    </svg>
+                    <div className="absolute top-1/2 start-1/2 transform -translate-y-1/2 -translate-x-1/2">
+                        <span className="text-center text-md font-bold text-gray-800 dark:text-white">
+                            {attendance}
+                        </span>
+                    </div>
+                </div>
+            )
         },
     },
     {
