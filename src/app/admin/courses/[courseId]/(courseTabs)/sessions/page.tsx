@@ -14,7 +14,6 @@ import Image from "next/image";
 import { getCourseData } from "@/store/store";
 
 function Page() {
-  // state and variables
   const [classType, setClassType] = useState("upcoming");
   const [allClasses, setAllClasses] = useState([]);
   const [bootcampData, setBootcampData] = useState([]);
@@ -23,9 +22,11 @@ function Page() {
   const [ongoingClasses, setOngoingClasses] = useState([]);
   const [completedClasses, setCompletedClasses] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [limit, setLimit] = useState(6);
+  const [offset, setOffset] = useState(1);
 
   const { courseData } = getCourseData();
-  // func
+
   const handleDateChange = (date: any) => {
     setSelectedDate(date);
   };
@@ -34,9 +35,13 @@ function Page() {
     return date >= currentDate;
   };
 
-  const handleClassType = (
-    type: string | "active" | "complete" | "upcoming"
-  ) => {
+  const handleClassType = (type: string | "active" | "complete" | "upcoming") => {
+    if (classType == type) {
+      setOffset(offset)
+    }
+    else {
+      setOffset(1)
+    }
     setClassType(type);
   };
 
@@ -46,7 +51,8 @@ function Page() {
     );
   };
 
-  // async
+ 
+
   useEffect(() => {
     if (courseData?.id) {
       api
@@ -90,7 +96,7 @@ function Page() {
 
     if (courseData?.id) {
       api
-        .get(`/classes/${fetchUrl}/${fetchId}`)
+        .get(`/classes/${fetchUrl}/${fetchId}?offset=${offset}&limit=${limit}`)
         .then((response) => {
           setUpcomingClasses(response.data.upcomingClasses);
           setOngoingClasses(response.data.ongoingClasses);
@@ -101,7 +107,7 @@ function Page() {
           console.log("Error fetching classes:", error);
         });
     }
-  }, [courseData, batchId, classType]);
+  }, [courseData, batchId, classType, offset, limit]);
 
   return (
     <div>
@@ -124,11 +130,8 @@ function Page() {
           <Input
             type="text"
             placeholder="Search Classes"
-            // className={styles.searchInput}
             className="max-w-[500px]"
             disabled
-            //  value={searchQuery}
-            //  onChange={handleSearchChange}
           />
         </div>
         <Dialog>
@@ -138,10 +141,7 @@ function Page() {
             </Button>
           </DialogTrigger>
           <DialogOverlay />
-          <NewClassDialog
-            courseId={courseData?.id || 0}
-            bootcampData={bootcampData}
-          />
+          <NewClassDialog courseId={courseData?.id || 0} bootcampData={bootcampData} />
         </Dialog>
       </div>
       <div className="flex justify-start gap-6 my-6">
@@ -168,15 +168,20 @@ function Page() {
         </Badge>
       </div>
       {allClasses && allClasses.length > 0 ? (
-        <div className="grid grid-cols-3 gap-6">
-          {allClasses.map((classData: any, index: any) => (
-            <ClassCard
-              classData={classData}
-              key={index}
-              classType={classType}
-            />
-          ))}
-        </div>
+  <div className="grid grid-cols-3 gap-6">
+    {allClasses.map((classData: any, index: any) => (
+      <ClassCard
+        classData={classData}
+        key={index}
+        classType={classType}
+      />
+    ))}
+   <div className="flex justify-center items-center my-4 col-span-3">
+      <Button onClick={() => { setOffset(offset - 1) }} disabled={offset === 1}>Previous</Button>
+      <h1 className="mx-4">{offset}</h1>
+      <Button onClick={() => { setOffset(offset + 1) }} disabled={allClasses.length < limit}>Next</Button>
+    </div>
+  </div>
       ) : (
         <div className="w-full flex mb-10 items-center flex-col gap-y-3 justify-center  absolute text-center mt-2">
           <Image

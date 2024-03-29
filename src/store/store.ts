@@ -90,17 +90,21 @@ export const getBatchData = create<StoreBatchData>((set) => ({
     }
   },
 }));
-
 // ------------------------------
 type deleteStudentStore = {
   isDeleteModalOpen: boolean;
   setDeleteModalOpen: (newValue: boolean) => void;
+  deleteStudentId: any;
+  setDeleteStudentId: (newValue: any) => void;
 };
 
 export const getDeleteStudentStore = create<deleteStudentStore>((set) => ({
   isDeleteModalOpen: false,
   setDeleteModalOpen: (newValue: boolean) => {
-    set({ isDeleteModalOpen: newValue });
+    set({ isDeleteModalOpen: newValue })
+  }, deleteStudentId: null,
+  setDeleteStudentId: (newValue: any) => {
+    set({ deleteStudentId: newValue });
   },
 }));
 // ------------------------------
