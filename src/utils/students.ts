@@ -19,7 +19,6 @@ export const fetchStudentData = async (
 
 export async function onBatchChange(
   selectedvalue: any,
-  rowData: any,
   student: any
 ) {
   await api

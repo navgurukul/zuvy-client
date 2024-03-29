@@ -126,11 +126,11 @@ export const columns: ColumnDef<Task>[] = [
                 <div className="flex text-start gap-6 my-6 max-w-[200px]">
                     <Combobox
                         data={transformedData}
-                        title={'Select Batch'}
+                        title={'Batch'}
                         onChange={(selectedValue) => {
-                            onBatchChange(selectedValue, row.original, student)
+                            onBatchChange(selectedValue, student)
                         }}
-                        initialValue={row.original?.batchId?.toString() || ''}
+                        initialValue={student?.batchId?.toString() || ''}
                     />
                 </div>
             )
@@ -202,27 +202,14 @@ export const columns: ColumnDef<Task>[] = [
             const student = row.original
             const { userId, bootcampId } = student
             // const { onDeleteHandler } = GetdataHandler(bootcampId);
-            const {
-                setDeleteModalOpen,
-                isDeleteModalOpen,
-                deleteStudentId,
-                setDeleteStudentId,
-            } = getDeleteStudentStore()
+            const { setDeleteModalOpen, isDeleteModalOpen } =
+                getDeleteStudentStore()
             const { setStoreStudentData } = getStoreStudentData()
-
-            let deleteUser = null
-
-            const handleTrashClick = () => {
-                setDeleteModalOpen(true)
-                setDeleteStudentId(userId)
-            }
 
             return (
                 <>
                     <Trash2
-                        onClick={() => {
-                            handleTrashClick()
-                        }}
+                        onClick={() => setDeleteModalOpen(true)}
                         className="text-red-600 cursor-pointer"
                         size={20}
                     />
@@ -231,7 +218,7 @@ export const columns: ColumnDef<Task>[] = [
                         onClose={() => setDeleteModalOpen(false)}
                         onConfirm={() => {
                             deleteStudentHandler(
-                                deleteStudentId,
+                                userId,
                                 bootcampId,
                                 setDeleteModalOpen,
                                 setStoreStudentData

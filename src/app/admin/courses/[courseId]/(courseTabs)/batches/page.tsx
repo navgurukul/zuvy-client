@@ -35,32 +35,21 @@ import { toast } from '@/components/ui/use-toast'
 
 import AddStudentsModal from '../../_components/addStudentsmodal'
 import api from '@/utils/axios.config'
-import { getCourseData } from '@/store/store'
+import { getBatchData, getCourseData } from '@/store/store'
 
 const Page = ({}: {}) => {
     const [courses, setCourses] = useState([])
     const [batches, setBatches] = useState([])
 
     const { courseData } = getCourseData()
+    const { fetchBatches } = getBatchData()
     const [unassignedStudents, setUnassignedStudents] = useState(
         courseData?.unassigned_students
     )
 
     useEffect(() => {
         if (courseData?.id) {
-            const fetchBatches = async () => {
-                try {
-                    const response = await api.get(
-                        `/bootcamp/batches/${courseData?.id}`
-                    )
-                    setBatches(response.data.data)
-                    // setUnassignedStudents(data.bootcamp.unassigned_students);
-                } catch (error: any) {
-                    console.log(error.message)
-                }
-            }
-
-            fetchBatches()
+            fetchBatches(courseData?.id)
         }
     }, [courseData])
 
