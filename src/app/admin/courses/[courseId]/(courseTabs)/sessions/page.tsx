@@ -108,6 +108,23 @@ function Page() {
         }
     }, [courseData, batchId, classType, offset, limit])
 
+    const CreateSession = () => {
+        return (
+            <Dialog>
+                <DialogTrigger asChild>
+                    <Button className="text-white bg-secondary">
+                        <span>Create Session</span>
+                    </Button>
+                </DialogTrigger>
+                <DialogOverlay />
+                <NewClassDialog
+                    courseId={courseData?.id || 0}
+                    bootcampData={bootcampData}
+                />
+            </Dialog>
+        )
+    }
+
     return (
         <div>
             <div className=" relative flex text-start gap-6 my-6 max-w-[800px]">
@@ -122,6 +139,7 @@ function Page() {
                     onChange={function (selectedValue: string): void {
                         throw new Error('Function not implemented.')
                     }}
+                    isDisabled
                 />
             </div>
             <div className="flex justify-between">
@@ -133,38 +151,27 @@ function Page() {
                         disabled
                     />
                 </div>
-                <Dialog>
-                    <DialogTrigger asChild>
-                        <Button className="text-white bg-secondary">
-                            <span>Create Session</span>
-                        </Button>
-                    </DialogTrigger>
-                    <DialogOverlay />
-                    <NewClassDialog
-                        courseId={courseData?.id || 0}
-                        bootcampData={bootcampData}
-                    />
-                </Dialog>
+                <CreateSession />
             </div>
             <div className="flex justify-start gap-6 my-6">
                 <Badge
                     variant={classType === 'active' ? 'default' : 'outline'}
                     onClick={() => handleClassType('active')}
-                    className="rounded-md"
+                    className="rounded-md cursor-pointer"
                 >
                     Active Classes
                 </Badge>
                 <Badge
                     variant={classType === 'upcoming' ? 'default' : 'outline'}
                     onClick={() => handleClassType('upcoming')}
-                    className="rounded-md"
+                    className="rounded-md cursor-pointer"
                 >
                     Upcoming Classes
                 </Badge>
                 <Badge
                     variant={classType === 'complete' ? 'default' : 'outline'}
                     onClick={() => handleClassType('complete')}
-                    className="rounded-md"
+                    className="rounded-md cursor-pointer"
                 >
                     Completed Classes
                 </Badge>
@@ -210,18 +217,7 @@ function Page() {
                         Create a session to start engagement with the learners
                         for course lessons or doubts
                     </p>
-                    <Dialog>
-                        <DialogTrigger asChild>
-                            <Button className="text-white bg-secondary">
-                                <span>Create Session</span>
-                            </Button>
-                        </DialogTrigger>
-                        <DialogOverlay />
-                        <NewClassDialog
-                            courseId={courseData?.id || 0}
-                            bootcampData={bootcampData}
-                        />
-                    </Dialog>
+                    <CreateSession />
                 </div>
             )}
         </div>
