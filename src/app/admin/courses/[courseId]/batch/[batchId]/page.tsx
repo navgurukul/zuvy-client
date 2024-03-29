@@ -76,9 +76,9 @@ const BatchesInfo = ({
     const [currentPage, setCurrentPage] = useState<number>(1)
     const [totalStudents, setTotalStudents] = useState<number>(0)
     const [lastPage, setLastPage] = useState<number>(0)
+    const [batchName, setBatchName] = useState('')
 
     const debouncedValue = useDebounce(search, 1000)
-    const [oldData, setOldData] = useState<any>()
     const crumbs = [
         {
             crumb: 'My Courses',
@@ -87,14 +87,19 @@ const BatchesInfo = ({
         {
             crumb: `${bootcamp?.name}`,
             href: `/admin/courses/${
-                studentData.length > 0 ? studentData[0].bootcampId : ''
+                studentData.length > 0
+                    ? studentData[0].bootcampId
+                    : params.batchId
             }/batches`,
         },
         {
-            crumb: `${studentData.length > 0 ? studentData[0].batchName : ''}`,
+            crumb: `${
+                studentData.length > 0
+                    ? studentData[0].batchName
+                    : instructorsInfo.name
+            }`,
         },
     ]
-
     useEffect(() => {
         const fetchInstructorInfo = async () => {
             try {
@@ -127,7 +132,6 @@ const BatchesInfo = ({
         }
         // }
     }
-
     const formSchema = z.object({
         name: z.string().min(2, {
             message: 'Batch name must be at least 2 characters.',
@@ -135,12 +139,19 @@ const BatchesInfo = ({
         instructorId: z
             .string()
             .refine((instructorId) => !isNaN(parseInt(instructorId))),
-        // bootcampId: z.string().refine((bootcampId) => !isNaN(parseInt(bootcampId))),
-        capEnrollment: z
-            .string()
-            .refine((capEnrollment) => !isNaN(parseInt(capEnrollment)), {
-                message: 'A cap enrollment is required',
-            }),
+        capEnrollment: z.string().refine(
+            (capEnrollment) => {
+                const capEnrollmentValue = parseInt(capEnrollment)
+                return (
+                    !isNaN(capEnrollmentValue) &&
+                    capEnrollmentValue >= studentsData.length
+                )
+            },
+            {
+                message:
+                    'The cap enrollment must be greater than or equal to the number of students.',
+            }
+        ),
     })
 
     const { handleSubmit, register } = useForm({
@@ -162,14 +173,14 @@ const BatchesInfo = ({
             instructorId: +values.instructorId,
             capEnrollment: +values.capEnrollment,
         }
-        setOldData(convertedData)
+
         try {
             await api
                 .patch(`/batch/${params.batchId}`, convertedData)
                 .then((res) => {
                     toast({
-                        title: res.data.title,
-                        description: res.data.description,
+                        title: 'Success',
+                        description: 'Batch Updated Successfully',
                     })
                     const fetchBatchesInfo = async () => {
                         try {
@@ -482,7 +493,6 @@ const BatchesInfo = ({
                                 <DialogContent>
                                     <DialogHeader>
                                         <DialogTitle>Update Batch</DialogTitle>
-
                                         <Form {...form}>
                                             <form
                                                 onSubmit={form.handleSubmit(
