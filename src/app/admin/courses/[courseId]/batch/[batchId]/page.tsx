@@ -42,7 +42,7 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { columns } from './column'
+import { columns } from './columns'
 
 import {
     getDeleteStudentStore,
@@ -54,7 +54,6 @@ import DeleteConfirmationModal from '../../_components/deleteModal'
 import api from '@/utils/axios.config'
 import { StudentData } from '../../(courseTabs)/students/page'
 import useDebounce from '@/hooks/useDebounce'
-import { batchesColumn } from '@/app/_components/datatable/batchesColumn'
 import { DataTable } from '@/app/_components/datatable/data-table'
 
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
@@ -252,64 +251,6 @@ const BatchesInfo = ({
         setSearch(e.target.value)
     }
 
-    // ;<Form {...form}>
-    //     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-    //         <FormField
-    //             control={form.control}
-    //             name="name"
-    //             render={({ field }) => (
-    //                 <FormItem>
-    //                     <FormLabel>Batch Name</FormLabel>
-    //                     <FormControl>
-    //                         <Input placeholder="Batch Name" {...field} />
-    //                     </FormControl>
-
-    //                     <FormMessage />
-    //                 </FormItem>
-    //             )}
-    //         />
-    //         <FormField
-    //             control={form.control}
-    //             name="instructorId"
-    //             render={({ field }) => (
-    //                 <FormItem>
-    //                     <FormLabel>Instructor Id</FormLabel>
-    //                     <FormControl>
-    //                         <Input placeholder="20230" type="name" {...field} />
-    //                     </FormControl>
-    //                     <FormMessage />
-    //                 </FormItem>
-    //             )}
-    //         />
-    //         <FormField
-    //             control={form.control}
-    //             name="capEnrollment"
-    //             render={({ field }) => (
-    //                 <FormItem>
-    //                     <FormLabel>Cap Enrollment</FormLabel>
-    //                     <FormControl>
-    //                         <Input
-    //                             placeholder="Cap Enrollment"
-    //                             type="number"
-    //                             {...field}
-    //                         />
-    //                     </FormControl>
-    //                     <FormMessage />
-    //                 </FormItem>
-    //             )}
-    //         />
-    //         <FormDescription>
-    //             This form will Update the batch info
-    //         </FormDescription>
-    //         <div className="w-full flex flex-col items-end gap-y-5 ">
-    //             <DialogClose asChild>
-    //                 <Button className="w-1/2" type="submit">
-    //                     Update batch
-    //                 </Button>
-    //             </DialogClose>
-    //         </div>
-    //     </form>
-    // </Form>
     return (
         <>
             <Breadcrumb>
@@ -331,7 +272,7 @@ const BatchesInfo = ({
                 </BreadcrumbList>
             </Breadcrumb>
 
-            <MaxWidthWrapper className="p-4">
+            <MaxWidthWrapper className="p-4 ">
                 <div className="flex justify-between">
                     <div className="w-1/2 flex flex-col items-start ">
                         <div className=" flex flex-col ">
@@ -640,7 +581,7 @@ const BatchesInfo = ({
                         <div className="flex items-center text-sm">
                             <Trash2
                                 onClick={() => setDeleteModalOpen(true)}
-                                className="text-red-600 cursor-pointer"
+                                className="text-destructive cursor-pointer"
                                 size={20}
                             ></Trash2>
                             <span
@@ -663,7 +604,7 @@ const BatchesInfo = ({
                         </div>
                     </div>
                 </div>
-                <DataTable columns={batchesColumn} data={studentsData} />
+                <DataTable columns={columns} data={studentsData} />
                 {/* <div className='flex items-center justify-end px-2 gap-x-2'>
           <p className='text-sm font-medium'>Rows Per Page</p>
           <DropdownMenu>

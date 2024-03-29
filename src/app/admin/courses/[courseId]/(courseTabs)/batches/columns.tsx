@@ -1,10 +1,14 @@
 'use client'
 
 import { ColumnDef } from '@tanstack/react-table'
-import { Task } from '@/utils/data/schema'
-import { DataTableColumnHeader } from './data-table-column-header'
-import { Checkbox } from '@/components/ui/checkbox'
 
+import { labels, priorities, statuses } from '@/utils/data/data'
+import { Task } from '@/utils/data/schema'
+import { DataTableColumnHeader } from '../../../../../_components/datatable/data-table-column-header'
+import { DataTableRowActions } from '../../../../../_components/datatable/data-table-row-actions'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Badge } from '@/components/ui/badge'
+import { Combobox } from '@/components/ui/combobox'
 import { deleteStudentHandler, onBatchChange } from '@/utils/students'
 import {
     getBatchData,
@@ -15,7 +19,7 @@ import { Trash2 } from 'lucide-react'
 import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
 import Image from 'next/image'
 
-export const batchesColumn: ColumnDef<Task>[] = [
+export const columns: ColumnDef<Task>[] = [
     {
         id: 'select',
         header: ({ table }) => (
@@ -104,6 +108,37 @@ export const batchesColumn: ColumnDef<Task>[] = [
         },
     },
     {
+        accessorKey: 'batchName',
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Batch Assigned To" />
+        ),
+        cell: ({ row }) => {
+            const student = row.original
+            const { batchData } = getBatchData()
+            const transformedData = batchData?.map(
+                (item: { id: any; name: any }) => ({
+                    value: item.id.toString(),
+                    label: item.name,
+                })
+            )
+
+            return (
+                <div className="flex text-start gap-6 my-6 max-w-[200px]">
+                    <Combobox
+                        data={transformedData}
+                        title={'Batch'}
+                        onChange={(selectedValue) => {
+                            onBatchChange(selectedValue, student)
+                        }}
+                        initialValue={row.original?.batchId?.toString() || ''}
+                    />
+                </div>
+            )
+        },
+        enableSorting: false,
+        enableHiding: false,
+    },
+    {
         accessorKey: 'progress',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Progress" />
@@ -141,7 +176,7 @@ export const batchesColumn: ColumnDef<Task>[] = [
                                 cy="18"
                                 r="16"
                                 fill="none"
-                                className="stroke-current text-secondary dark:text-red-400"
+                                className="stroke-current text-secondary dark:text-destructive"
                                 strokeWidth="2"
                                 strokeDasharray="100"
                                 strokeDashoffset={`${100 - progress}`}
@@ -178,15 +213,28 @@ export const batchesColumn: ColumnDef<Task>[] = [
             const student = row.original
             const { userId, bootcampId } = student
             // const { onDeleteHandler } = GetdataHandler(bootcampId);
-            const { setDeleteModalOpen, isDeleteModalOpen } =
-                getDeleteStudentStore()
+            const {
+                setDeleteModalOpen,
+                isDeleteModalOpen,
+                deleteStudentId,
+                setDeleteStudentId,
+            } = getDeleteStudentStore()
             const { setStoreStudentData } = getStoreStudentData()
+
+            let deleteUser = null
+
+            const handleTrashClick = () => {
+                setDeleteModalOpen(true)
+                setDeleteStudentId(userId)
+            }
 
             return (
                 <>
                     <Trash2
-                        onClick={() => setDeleteModalOpen(true)}
-                        className="text-red-600 cursor-pointer"
+                        onClick={() => {
+                            handleTrashClick()
+                        }}
+                        className="text-destructive cursor-pointer"
                         size={20}
                     />
                     <DeleteConfirmationModal
@@ -194,7 +242,7 @@ export const batchesColumn: ColumnDef<Task>[] = [
                         onClose={() => setDeleteModalOpen(false)}
                         onConfirm={() => {
                             deleteStudentHandler(
-                                userId,
+                                deleteStudentId,
                                 bootcampId,
                                 setDeleteModalOpen,
                                 setStoreStudentData
