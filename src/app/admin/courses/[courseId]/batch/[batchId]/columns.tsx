@@ -1,23 +1,23 @@
 'use client'
+import Image from 'next/image'
 
+import { Trash2 } from 'lucide-react'
 import { ColumnDef } from '@tanstack/react-table'
-
-import { labels, priorities, statuses } from '@/utils/data/data'
-import { Task } from '@/utils/data/schema'
-import { DataTableColumnHeader } from './data-table-column-header'
-import { DataTableRowActions } from './data-table-row-actions'
+import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Badge } from '@/components/ui/badge'
-import { Combobox } from '@/components/ui/combobox'
-import { deleteStudentHandler, onBatchChange } from '@/utils/students'
+
+import { Task } from '@/utils/data/schema'
+import {
+    deleteStudentHandler,
+    getAttendanceColorClass,
+    onBatchChange,
+} from '@/utils/students'
 import {
     getBatchData,
     getDeleteStudentStore,
     getStoreStudentData,
 } from '@/store/store'
-import { Trash2 } from 'lucide-react'
 import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
-import Image from 'next/image'
 
 export const columns: ColumnDef<Task>[] = [
     {
@@ -108,43 +108,13 @@ export const columns: ColumnDef<Task>[] = [
         },
     },
     {
-        accessorKey: 'batchName',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Batch Assigned To" />
-        ),
-        cell: ({ row }) => {
-            const student = row.original
-            const { batchData } = getBatchData()
-            const transformedData = batchData?.map(
-                (item: { id: any; name: any }) => ({
-                    value: item.id.toString(),
-                    label: item.name,
-                })
-            )
-
-            return (
-                <div className="flex text-start gap-6 my-6 max-w-[200px]">
-                    <Combobox
-                        data={transformedData}
-                        title={'Batch'}
-                        onChange={(selectedValue) => {
-                            onBatchChange(selectedValue, student)
-                        }}
-                        initialValue={row.original?.batchId?.toString() || ''}
-                    />
-                </div>
-            )
-        },
-        enableSorting: false,
-        enableHiding: false,
-    },
-    {
         accessorKey: 'progress',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Progress" />
         ),
         cell: ({ row }) => {
             const progress = row.original.progress
+            const circleColorClass = getAttendanceColorClass(progress)
             // const priority = priorities.find(
             //   (priority) => priority.value === row.getValue("progress")
             // );
@@ -176,7 +146,7 @@ export const columns: ColumnDef<Task>[] = [
                                 cy="18"
                                 r="16"
                                 fill="none"
-                                className="stroke-current text-secondary dark:text-red-400"
+                                className={`stroke-current ${circleColorClass}`}
                                 strokeWidth="2"
                                 strokeDasharray="100"
                                 strokeDashoffset={`${100 - progress}`}
@@ -203,7 +173,45 @@ export const columns: ColumnDef<Task>[] = [
         cell: ({ row }) => {
             const attendance =
                 row.original.attendance === null ? 0 : row.original.attendance
-            return <div className="pr-12 h-full w-full">{attendance}%</div>
+            const circleColorClass = getAttendanceColorClass(attendance)
+
+            return (
+                <div className="relative size-9">
+                    <svg
+                        className="size-full"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 36 36"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <circle
+                            cx="18"
+                            cy="18"
+                            r="16"
+                            fill="none"
+                            className="stroke-current text-gray-200 dark:text-gray-700"
+                            strokeWidth="2"
+                        ></circle>
+                        <g className="origin-center -rotate-90 transform">
+                            <circle
+                                cx="18"
+                                cy="18"
+                                r="16"
+                                fill="none"
+                                className={`stroke-current ${circleColorClass}`}
+                                strokeWidth="2"
+                                strokeDasharray="100"
+                                strokeDashoffset={`${100 - attendance}`}
+                            ></circle>
+                        </g>
+                    </svg>
+                    <div className="absolute top-1/2 start-1/2 transform -translate-y-1/2 -translate-x-1/2">
+                        <span className="text-center text-md font-bold text-gray-800 dark:text-white">
+                            {attendance}
+                        </span>
+                    </div>
+                </div>
+            )
         },
     },
     {
@@ -213,28 +221,15 @@ export const columns: ColumnDef<Task>[] = [
             const student = row.original
             const { userId, bootcampId } = student
             // const { onDeleteHandler } = GetdataHandler(bootcampId);
-            const {
-                setDeleteModalOpen,
-                isDeleteModalOpen,
-                deleteStudentId,
-                setDeleteStudentId,
-            } = getDeleteStudentStore()
+            const { setDeleteModalOpen, isDeleteModalOpen } =
+                getDeleteStudentStore()
             const { setStoreStudentData } = getStoreStudentData()
-
-            let deleteUser = null
-
-            const handleTrashClick = () => {
-                setDeleteModalOpen(true)
-                setDeleteStudentId(userId)
-            }
 
             return (
                 <>
                     <Trash2
-                        onClick={() => {
-                            handleTrashClick()
-                        }}
-                        className="text-red-600 cursor-pointer"
+                        onClick={() => setDeleteModalOpen(true)}
+                        className="text-destructive cursor-pointer"
                         size={20}
                     />
                     <DeleteConfirmationModal
@@ -242,7 +237,7 @@ export const columns: ColumnDef<Task>[] = [
                         onClose={() => setDeleteModalOpen(false)}
                         onConfirm={() => {
                             deleteStudentHandler(
-                                deleteStudentId,
+                                userId,
                                 bootcampId,
                                 setDeleteModalOpen,
                                 setStoreStudentData

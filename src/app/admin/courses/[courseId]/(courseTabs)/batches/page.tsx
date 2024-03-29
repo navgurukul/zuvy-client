@@ -51,7 +51,7 @@ const Page = ({}: {}) => {
             fetchBatches(courseData?.id)
             // setBatches(batchData)
         }
-    }, [courseData])
+    }, [courseData, fetchBatches])
 
     useEffect(() => {
         if (courseData?.id) {

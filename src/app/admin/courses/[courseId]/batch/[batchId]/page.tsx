@@ -42,7 +42,7 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { columns } from './column'
+import { columns } from './columns'
 
 import {
     getDeleteStudentStore,
@@ -54,7 +54,6 @@ import DeleteConfirmationModal from '../../_components/deleteModal'
 import api from '@/utils/axios.config'
 import { StudentData } from '../../(courseTabs)/students/page'
 import useDebounce from '@/hooks/useDebounce'
-import { batchesColumn } from '@/app/_components/datatable/batchesColumn'
 import { DataTable } from '@/app/_components/datatable/data-table'
 
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
@@ -77,9 +76,9 @@ const BatchesInfo = ({
     const [currentPage, setCurrentPage] = useState<number>(1)
     const [totalStudents, setTotalStudents] = useState<number>(0)
     const [lastPage, setLastPage] = useState<number>(0)
+    const [batchName, setBatchName] = useState('')
 
     const debouncedValue = useDebounce(search, 1000)
-    const [oldData, setOldData] = useState<any>()
     const crumbs = [
         {
             crumb: 'My Courses',
@@ -88,14 +87,19 @@ const BatchesInfo = ({
         {
             crumb: `${bootcamp?.name}`,
             href: `/admin/courses/${
-                studentData.length > 0 ? studentData[0].bootcampId : ''
+                studentData.length > 0
+                    ? studentData[0].bootcampId
+                    : params.batchId
             }/batches`,
         },
         {
-            crumb: `${studentData.length > 0 ? studentData[0].batchName : ''}`,
+            crumb: `${
+                studentData.length > 0
+                    ? studentData[0].batchName
+                    : instructorsInfo.name
+            }`,
         },
     ]
-
     useEffect(() => {
         const fetchInstructorInfo = async () => {
             try {
@@ -128,7 +132,6 @@ const BatchesInfo = ({
         }
         // }
     }
-
     const formSchema = z.object({
         name: z.string().min(2, {
             message: 'Batch name must be at least 2 characters.',
@@ -136,12 +139,19 @@ const BatchesInfo = ({
         instructorId: z
             .string()
             .refine((instructorId) => !isNaN(parseInt(instructorId))),
-        // bootcampId: z.string().refine((bootcampId) => !isNaN(parseInt(bootcampId))),
-        capEnrollment: z
-            .string()
-            .refine((capEnrollment) => !isNaN(parseInt(capEnrollment)), {
-                message: 'A cap enrollment is required',
-            }),
+        capEnrollment: z.string().refine(
+            (capEnrollment) => {
+                const capEnrollmentValue = parseInt(capEnrollment)
+                return (
+                    !isNaN(capEnrollmentValue) &&
+                    capEnrollmentValue >= studentsData.length
+                )
+            },
+            {
+                message:
+                    'The cap enrollment must be greater than or equal to the number of students.',
+            }
+        ),
     })
 
     const { handleSubmit, register } = useForm({
@@ -163,14 +173,14 @@ const BatchesInfo = ({
             instructorId: +values.instructorId,
             capEnrollment: +values.capEnrollment,
         }
-        setOldData(convertedData)
+
         try {
             await api
                 .patch(`/batch/${params.batchId}`, convertedData)
                 .then((res) => {
                     toast({
-                        title: res.data.title,
-                        description: res.data.description,
+                        title: 'Success',
+                        description: 'Batch Updated Successfully',
                     })
                     const fetchBatchesInfo = async () => {
                         try {
@@ -252,64 +262,6 @@ const BatchesInfo = ({
         setSearch(e.target.value)
     }
 
-    // ;<Form {...form}>
-    //     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-    //         <FormField
-    //             control={form.control}
-    //             name="name"
-    //             render={({ field }) => (
-    //                 <FormItem>
-    //                     <FormLabel>Batch Name</FormLabel>
-    //                     <FormControl>
-    //                         <Input placeholder="Batch Name" {...field} />
-    //                     </FormControl>
-
-    //                     <FormMessage />
-    //                 </FormItem>
-    //             )}
-    //         />
-    //         <FormField
-    //             control={form.control}
-    //             name="instructorId"
-    //             render={({ field }) => (
-    //                 <FormItem>
-    //                     <FormLabel>Instructor Id</FormLabel>
-    //                     <FormControl>
-    //                         <Input placeholder="20230" type="name" {...field} />
-    //                     </FormControl>
-    //                     <FormMessage />
-    //                 </FormItem>
-    //             )}
-    //         />
-    //         <FormField
-    //             control={form.control}
-    //             name="capEnrollment"
-    //             render={({ field }) => (
-    //                 <FormItem>
-    //                     <FormLabel>Cap Enrollment</FormLabel>
-    //                     <FormControl>
-    //                         <Input
-    //                             placeholder="Cap Enrollment"
-    //                             type="number"
-    //                             {...field}
-    //                         />
-    //                     </FormControl>
-    //                     <FormMessage />
-    //                 </FormItem>
-    //             )}
-    //         />
-    //         <FormDescription>
-    //             This form will Update the batch info
-    //         </FormDescription>
-    //         <div className="w-full flex flex-col items-end gap-y-5 ">
-    //             <DialogClose asChild>
-    //                 <Button className="w-1/2" type="submit">
-    //                     Update batch
-    //                 </Button>
-    //             </DialogClose>
-    //         </div>
-    //     </form>
-    // </Form>
     return (
         <>
             <Breadcrumb>
@@ -331,7 +283,7 @@ const BatchesInfo = ({
                 </BreadcrumbList>
             </Breadcrumb>
 
-            <MaxWidthWrapper className="p-4">
+            <MaxWidthWrapper className="p-4 ">
                 <div className="flex justify-between">
                     <div className="w-1/2 flex flex-col items-start ">
                         <div className=" flex flex-col ">
@@ -541,7 +493,6 @@ const BatchesInfo = ({
                                 <DialogContent>
                                     <DialogHeader>
                                         <DialogTitle>Update Batch</DialogTitle>
-
                                         <Form {...form}>
                                             <form
                                                 onSubmit={form.handleSubmit(
@@ -640,7 +591,7 @@ const BatchesInfo = ({
                         <div className="flex items-center text-sm">
                             <Trash2
                                 onClick={() => setDeleteModalOpen(true)}
-                                className="text-red-600 cursor-pointer"
+                                className="text-destructive cursor-pointer"
                                 size={20}
                             ></Trash2>
                             <span
@@ -663,7 +614,7 @@ const BatchesInfo = ({
                         </div>
                     </div>
                 </div>
-                <DataTable columns={batchesColumn} data={studentsData} />
+                <DataTable columns={columns} data={studentsData} />
                 {/* <div className='flex items-center justify-end px-2 gap-x-2'>
           <p className='text-sm font-medium'>Rows Per Page</p>
           <DropdownMenu>

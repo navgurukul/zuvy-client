@@ -214,8 +214,8 @@ function Page({
                                                                                     value={option.number.toString()}
                                                                                     className={`mr-2 ${
                                                                                         option.correct
-                                                                                            ? 'text-green-500'
-                                                                                            : 'text-red-500'
+                                                                                            ? 'text-secondary'
+                                                                                            : 'text-destructive'
                                                                                     }`}
                                                                                 />
                                                                                 <label>
