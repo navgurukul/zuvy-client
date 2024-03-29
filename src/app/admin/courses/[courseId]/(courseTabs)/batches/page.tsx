@@ -182,8 +182,7 @@ const Page = ({}: {}) => {
                     <DialogContent>
                         <DialogHeader>
                             <DialogTitle>New Batch</DialogTitle>
-                            Unassigned Students in Records:{' '}
-                            {courseData?.unassigned_students}
+                            Unassigned Students in Records: {unassignedStudents}
                             <Form {...form}>
                                 <form
                                     onSubmit={form.handleSubmit(onSubmit)}
