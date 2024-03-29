@@ -38,11 +38,10 @@ import api from '@/utils/axios.config'
 import { getBatchData, getCourseData } from '@/store/store'
 
 const Page = ({}: {}) => {
-    const [courses, setCourses] = useState([])
     const [batches, setBatches] = useState([])
 
     const { courseData } = getCourseData()
-    const { fetchBatches } = getBatchData()
+    const { fetchBatches, batchData } = getBatchData()
     const [unassignedStudents, setUnassignedStudents] = useState(
         courseData?.unassigned_students
     )
@@ -50,6 +49,7 @@ const Page = ({}: {}) => {
     useEffect(() => {
         if (courseData?.id) {
             fetchBatches(courseData?.id)
+            // setBatches(batchData)
         }
     }, [courseData])
 
@@ -171,8 +171,7 @@ const Page = ({}: {}) => {
                     <DialogContent>
                         <DialogHeader>
                             <DialogTitle>New Batch</DialogTitle>
-                            Unassigned Students in Records:{' '}
-                            {courseData?.unassigned_students}
+                            Unassigned Students in Records: {unassignedStudents}
                             <Form {...form}>
                                 <form
                                     onSubmit={form.handleSubmit(onSubmit)}
@@ -278,8 +277,8 @@ const Page = ({}: {}) => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 mt-2">
-                {batches.length > 0 ? (
-                    batches.map((batch: any, index: number) => (
+                {batchData?.length ?? 0 > 0 ? (
+                    batchData?.map((batch: any, index: number) => (
                         <Link
                             key={batch.name}
                             href={`/admin/courses/${courseData?.id}/batch/${batch.id}`}

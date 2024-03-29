@@ -23,6 +23,7 @@ export interface ComboboxProps {
     title: string
     onChange: (selectedValue: string) => void
     initialValue?: string
+    isDisabled?: boolean
 }
 
 export function Combobox({
@@ -30,13 +31,12 @@ export function Combobox({
     title,
     onChange,
     initialValue,
+    isDisabled = false,
 }: ComboboxProps) {
     const [open, setOpen] = React.useState(false)
     const [value, setValue] = React.useState(initialValue || '')
-    console.log('first', value)
 
-    const found = data.find((item: any) => item.value)
-    console.log('first', found)
+    // const found = data.find((item: any) => item.value)
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
@@ -45,6 +45,7 @@ export function Combobox({
                     role="combobox"
                     aria-expanded={open}
                     className="w-full justify-between"
+                    disabled={isDisabled}
                 >
                     {value
                         ? data.find((item: any) => item.value === value)?.label
