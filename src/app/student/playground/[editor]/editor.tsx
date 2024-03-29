@@ -1,13 +1,26 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
+import {
+    ResizablePanelGroup,
+    ResizablePanel,
+    ResizableHandle,
+} from '@/components/ui/resizable'
 import api from '@/utils/axios.config'
 import Editor from '@monaco-editor/react'
 import { ArrowBigLeft, ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
+interface questionDetails {
+    title: string
+    description: string
+}
 export default function IDE({ params }: { params: { editor: string } }) {
+    const [questionDetails, setQuestionDetails] = useState<questionDetails>({
+        title: '',
+        description: '',
+    })
     const [currentCode, setCurrentCode] = useState('')
     const [result, setResult] = useState('')
     const [languageId, setLanguageId] = useState(48)
@@ -104,72 +117,114 @@ export default function IDE({ params }: { params: { editor: string } }) {
     function handleEditorChange(value: any) {
         setCurrentCode(value)
     }
+    const getQuestionDetails = async () => {
+        try {
+            await api
+                .get(`/codingPlatform/questionById/${params.editor}`)
+                .then((response) => {
+                    setQuestionDetails(response.data[0])
+                    console.log('details', response.data[0])
+                })
+        } catch (error) {
+            console.error('Error fetching courses:', error)
+        }
+    }
 
+    useEffect(() => {
+        getQuestionDetails()
+    }, [])
     const handleBack = () => {
         router.back()
     }
     return (
-        <div className="grid grid-cols-2 gap-2">
-            <div className="w-full max-w-4xl p-2 border bg-muted rounded-md text-left">
-                <div className="flex items-center ">
-                    <Button variant="ghost" size="icon" onClick={handleBack}>
-                        <ArrowLeft className="h-4 w-4" />
-                    </Button>
-                    <h1 className="text-2xl p-2">Add Two Numbers</h1>
-                </div>
-                <div className="px-2">
-                    You are given two non-empty linked lists representing two
-                    non-negative integers. The digits are stored in reverse
-                    order, and each of their nodes contains a single digit. Add
-                    the two numbers and return the sum as a linked list. You may
-                    assume the two numbers do not contain any leading zero,
-                    except the number 0 itself.
-                </div>
-            </div>
-            <div className="flex-none justify-end items-start h-full ">
-                <div className="w-full max-w-4xl p-2 border bg-muted rounded-md">
-                    <form onSubmit={handleSubmit}>
-                        <div>
-                            <div className="text-2xl">Add your code</div>
-                            <select
-                                value={language}
-                                onChange={(e) =>
-                                    handleLanguageChange(e.target.value)
-                                }
-                                className="p-1 m-2 rounded-md"
-                            >
-                                {editorLanguages.map((lang) => (
-                                    <option key={lang.id} value={lang.lang}>
-                                        {lang.lang}
-                                    </option>
-                                ))}
-                            </select>
-                            <Editor
-                                height="45vh"
-                                language={language}
-                                // defaultValue='console.log("Zuvy");'
-                                theme="vs-dark"
-                                value={currentCode}
-                                onChange={handleEditorChange}
-                            />
-                        </div>
-                        <div className="flex justify-between pt-2">
-                            <div className="flex items-center space-x-5"></div>
-                            <div className="flex-shrink-0">
-                                <Button type="submit" size="sm">
-                                    Run
+        questionDetails && (
+            <ResizablePanelGroup
+                direction="horizontal"
+                className="w-full max-w-12xl rounded-lg border"
+            >
+                <ResizablePanel defaultSize={50}>
+                    <div className="flex h-[90vh]">
+                        <div className="w-full max-w-12xl p-2 border bg-muted rounded-md text-left">
+                            <div className="flex items-center ">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={handleBack}
+                                >
+                                    <ArrowLeft className="h-4 w-4" />
                                 </Button>
+                                <h1 className="text-2xl p-2">
+                                    {questionDetails?.title}
+                                </h1>
+                            </div>
+                            <div className="px-2">
+                                {questionDetails?.description}
                             </div>
                         </div>
-                    </form>
-                </div>
-                <div className="w-full max-w-4xl p-2 mt-2 border bg-muted rounded-md ">
-                    <div className="text-xl">Output Window</div>
-                    <div className="h-[20vh] p-2 bg-accent text-white overflow-y-auto">
-                        <pre>{result}</pre>
                     </div>
-                </div>
-            </div>
-        </div>
+                </ResizablePanel>
+                <ResizableHandle />
+                <ResizablePanel defaultSize={50}>
+                    <ResizablePanelGroup direction="vertical">
+                        <ResizablePanel defaultSize={75}>
+                            <div className="flex h-full">
+                                <div className="w-full max-w-5xl bg-muted rounded-md">
+                                    <form onSubmit={handleSubmit}>
+                                        <div>
+                                            <div className="text-2xl">
+                                                Add your code
+                                            </div>
+                                            <select
+                                                value={language}
+                                                onChange={(e) =>
+                                                    handleLanguageChange(
+                                                        e.target.value
+                                                    )
+                                                }
+                                                className="p-1 m-2 rounded-md"
+                                            >
+                                                {editorLanguages.map((lang) => (
+                                                    <option
+                                                        key={lang.id}
+                                                        value={lang.lang}
+                                                    >
+                                                        {lang.lang}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <Editor
+                                                height="52vh"
+                                                language={language}
+                                                // defaultValue='console.log("Zuvy");'
+                                                theme="vs-dark"
+                                                value={currentCode}
+                                                onChange={handleEditorChange}
+                                                className="p-2"
+                                            />
+                                        </div>
+                                        <div className="flex justify-end px-2">
+                                            <Button type="submit" size="sm">
+                                                Run
+                                            </Button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </ResizablePanel>
+                        <ResizableHandle />
+                        <ResizablePanel defaultSize={25}>
+                            <div className="flex h-full ">
+                                <div className="w-full max-w-5xl  p-2 border bg-muted rounded-md ">
+                                    <div className="text-xl">Output Window</div>
+                                    <div className="h-[20vh] max-h-[90vh] p-2 bg-accent text-white overflow-y-auto">
+                                        <pre>{result}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </ResizablePanel>
+                    </ResizablePanelGroup>
+                </ResizablePanel>
+            </ResizablePanelGroup>
+        )
     )
 }

@@ -19,72 +19,21 @@ import {
 } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { useLazyLoadedStudentData } from '@/store/store'
+import api from '@/utils/axios.config'
+
+interface Question {
+    title: string
+    status: string
+    difficulty: string // URL for the course image
+    id: string
+}
 
 const CodingPlayground = () => {
     const [searchTerm, setSearchTerm] = useState('')
     const [selectedTopic, setSelectedTopic] = useState('')
-    const problems = [
-        {
-            title: 'Invert a Linked List in Python and pass the two tests',
-            difficulty: 'Medium',
-            status: 'Not Attempted Yet',
-            link: '/student/playground/1',
-        },
-        {
-            title: 'Invert a Linked List in Python and pass the two tests',
-            difficulty: 'Medium',
-            status: 'Not Attempted Yet',
-            link: '/student/playground/2',
-        },
-        {
-            title: 'Invert a Linked List in Python and pass the two tests',
-            difficulty: 'Easy',
-            status: 'Needs to Attempt',
-            link: '/student/playground/3',
-        },
-        {
-            title: 'Invert a Linked List in Python and pass the two tests',
-            difficulty: 'Easy',
-            status: 'Not Attempted Yet',
-            link: '/student/playground/4',
-        },
-        {
-            title: 'Invert a Linked List in Python and pass the two tests',
-            difficulty: 'Medium',
-            status: 'Accepted',
-            link: '/student/playground/5',
-        },
-        {
-            title: 'Invert a Linked List in Python and pass the two tests',
-            difficulty: 'Hard',
-            status: 'Not Attempted Yet',
-            link: '/student/playground/6',
-        },
-        {
-            title: 'Invert a Linked List in Python and pass the two tests',
-            difficulty: 'Hard',
-            status: 'Not Attempted Yet',
-            link: '/student/playground/7',
-        },
-        {
-            title: 'Invert a Linked List in Python and pass the two tests',
-            difficulty: 'Hard',
-            status: 'Not Attempted Yet',
-            link: '/student/playground/8',
-        },
-        {
-            title: 'Invert a Linked List in Python and pass the two tests',
-            difficulty: 'Hard',
-            status: 'Not Attempted Yet',
-            link: '/student/playground/9',
-        },
-        {
-            title: 'Invert a Linked List in Python and pass the two tests',
-            difficulty: 'Hard',
-            status: 'Not Attempted Yet',
-            link: '/student/playground/10',
-        },
-    ]
+    const [questions, setQuestions] = useState<Question[]>([])
+
     const difficultyColors = {
         Easy: 'bg-green-200',
         Medium: 'bg-yellow-200',
@@ -97,18 +46,37 @@ const CodingPlayground = () => {
     }
 
     const filterProblems = () => {
-        return problems.filter((problem) =>
-            problem.title.toLowerCase().includes(searchTerm.toLowerCase())
+        return questions.filter((question) =>
+            question.title.toLowerCase().includes(searchTerm.toLowerCase())
         )
     }
+    const { studentData } = useLazyLoadedStudentData()
+    const userID = studentData?.id && studentData?.id
 
     useEffect(() => {
         const filtered = filterProblems()
         setFilteredProblems(filtered)
-    }, [searchTerm])
+    }, [searchTerm, questions])
 
     const [filteredProblems, setFilteredProblems] = useState(filterProblems())
 
+    const getQuestions = async () => {
+        try {
+            await api
+                .get(`/codingPlatform/allQuestions/${userID}`)
+                .then((response) => {
+                    setQuestions(response.data)
+                    console.log(response.data)
+                })
+        } catch (error) {
+            console.error('Error fetching courses:', error)
+        }
+    }
+
+    useEffect(() => {
+        console.log('id', userID)
+        getQuestions()
+    }, [userID])
     return (
         <div className="p-4 text-left">
             <h1 className="text-2xl font-bold mb-4">Coding Playground</h1>
@@ -167,20 +135,28 @@ const CodingPlayground = () => {
                     </TableRow>
                 </TableHeader>
                 <TableBody className="w-full max-w-4xl">
-                    {filteredProblems.map((problem, index) => (
-                        <TableRow
-                            key={index}
-                            className="w-full max-w-4xl cursor-pointer hover:bg-secondary/20 "
-                        >
-                            <TableCell>
-                                <Link href={problem.link} passHref>
-                                    {problem.title}
-                                </Link>
-                            </TableCell>
-                            <TableCell>{problem.difficulty}</TableCell>
-                            <TableCell>{problem.status}</TableCell>
-                        </TableRow>
-                    ))}
+                    {questions &&
+                        filteredProblems.map((question, index) => (
+                            <TableRow
+                                key={index}
+                                className="w-full max-w-4xl cursor-pointer hover:bg-secondary/20 "
+                            >
+                                <TableCell>
+                                    <Link
+                                        href={`/student/playground/${question.id}`}
+                                        passHref
+                                    >
+                                        {question.title}
+                                    </Link>
+                                </TableCell>
+                                <TableCell>{question.difficulty}</TableCell>
+                                <TableCell>
+                                    {question.status
+                                        ? question.status
+                                        : 'Not Appeared Yet'}
+                                </TableCell>
+                            </TableRow>
+                        ))}
                 </TableBody>
             </Table>
         </div>
