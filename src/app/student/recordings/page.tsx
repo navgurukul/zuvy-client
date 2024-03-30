@@ -13,7 +13,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 
-// Interfaces:
+// Interfaces:-
 interface Bootcamp {
     id: number
     name: string
