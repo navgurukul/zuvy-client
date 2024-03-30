@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import Image from 'next/image'
 import { getCourseData } from '@/store/store'
+import RecordingCard from '@/app/student/courses/[viewcourses]/[recordings]/_components/RecordingCard'
 
 function Page() {
     const [classType, setClassType] = useState('upcoming')
@@ -177,15 +178,23 @@ function Page() {
                 </Badge>
             </div>
             {allClasses && allClasses.length > 0 ? (
-                <div className="grid grid-cols-3 gap-6">
-                    {allClasses.map((classData: any, index: any) => (
-                        <ClassCard
-                            classData={classData}
-                            key={index}
-                            classType={classType}
-                        />
-                    ))}
-                    <div className="flex justify-center items-center my-4 col-span-3">
+                <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
+                    {allClasses.map((classData: any, index: any) =>
+                        classType === 'complete' ? (
+                            <RecordingCard
+                                classData={classData}
+                                key={index}
+                                classType={classType}
+                            />
+                        ) : (
+                            <ClassCard
+                                classData={classData}
+                                key={index}
+                                classType={classType}
+                            />
+                        )
+                    )}
+                    {/* <div className="flex justify-center items-center my-4 col-span-3">
                         <Button
                             onClick={() => {
                                 setOffset(offset - 1)
@@ -203,7 +212,7 @@ function Page() {
                         >
                             Next
                         </Button>
-                    </div>
+                    </div> */}
                 </div>
             ) : (
                 <div className="w-full flex mb-10 items-center flex-col gap-y-3 justify-center  absolute text-center mt-2">

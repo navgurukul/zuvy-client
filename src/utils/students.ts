@@ -65,10 +65,10 @@ export async function deleteStudentHandler(
 
 export const getAttendanceColorClass = (attendance: number) => {
     if (attendance < 50) {
-        return 'text-red-400' // Red color for attendance < 50%
+        return 'text-destructive' // Red color for attendance < 50%
     } else if (attendance >= 50 && attendance < 75) {
-        return 'text-yellow-400' // Yellow color for attendance between 50% and 75%
+        return 'text-yellow-dark' // Yellow color for attendance between 50% and 75%
     } else {
-        return 'text-green-400' // Green color for attendance >= 75%
+        return 'text-secondary' // Green color for attendance >= 75%
     }
 }

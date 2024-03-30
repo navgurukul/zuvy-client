@@ -57,6 +57,7 @@ import useDebounce from '@/hooks/useDebounce'
 import { DataTable } from '@/app/_components/datatable/data-table'
 
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
+import BreadcrumbCmponent from '@/app/_components/breadcrumbCmponent'
 
 const BatchesInfo = ({
     params,
@@ -83,6 +84,7 @@ const BatchesInfo = ({
         {
             crumb: 'My Courses',
             href: `/admin/courses`,
+            isLast: false,
         },
         {
             crumb: `${bootcamp?.name}`,
@@ -91,6 +93,7 @@ const BatchesInfo = ({
                     ? studentData[0].bootcampId
                     : params.batchId
             }/batches`,
+            isLast: false,
         },
         {
             crumb: `${
@@ -98,6 +101,7 @@ const BatchesInfo = ({
                     ? studentData[0].batchName
                     : instructorsInfo.name
             }`,
+            isLast: true,
         },
     ]
     useEffect(() => {
@@ -152,10 +156,6 @@ const BatchesInfo = ({
                     'The cap enrollment must be greater than or equal to the number of students.',
             }
         ),
-    })
-
-    const { handleSubmit, register } = useForm({
-        resolver: zodResolver(formSchema),
     })
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -264,24 +264,7 @@ const BatchesInfo = ({
 
     return (
         <>
-            <Breadcrumb>
-                <BreadcrumbList>
-                    {crumbs?.map((item, index) => (
-                        <React.Fragment key={index}>
-                            <BreadcrumbItem>
-                                <BreadcrumbLink href={item.href}>
-                                    {item.crumb}
-                                </BreadcrumbLink>
-                            </BreadcrumbItem>
-                            {index < crumbs.length - 1 && (
-                                <BreadcrumbSeparator
-                                    key={`separator-${index}`}
-                                />
-                            )}
-                        </React.Fragment>
-                    ))}
-                </BreadcrumbList>
-            </Breadcrumb>
+            <BreadcrumbCmponent crumbs={crumbs} />
 
             <MaxWidthWrapper className="p-4 ">
                 <div className="flex justify-between">

@@ -1,6 +1,5 @@
 'use client'
 
-import ClassCard from '@/app/admin/courses/[courseId]/_components/classCard'
 import RecordingCard from './RecordingCard'
 
 function Recordings({ completedClasses }: { completedClasses: any }) {
