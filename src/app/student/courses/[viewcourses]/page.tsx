@@ -30,11 +30,7 @@ interface CourseProgress {
 
 import ClassCard from '@/app/admin/courses/[courseId]/_components/classCard'
 import CourseCard from '@/app/_components/courseCard'
-type PageProps = {
-    params: {
-        viewcourses: string
-    }
-}
+import BreadcrumbCmponent from '@/app/_components/breadcrumbCmponent'
 
 function Page({
     params,
@@ -49,32 +45,33 @@ function Page({
     )
     const [upcomingClasses, setUpcomingClasses] = useState([])
     const [ongoingClasses, setOngoingClasses] = useState([])
-    const [completedClasses, setCompletedClasses] = useState([])
+    // const [completedClasses, setCompletedClasses] = useState([])
     const crumbs = [
-        { crumb: 'My Courses', href: '/student/courses' },
+        { crumb: 'My Courses', href: '/student/courses', isLast: false },
         {
             crumb: courseProgress?.info?.bootcamp_name || 'Course',
-            href: `/student/courses/${params.viewcourses}`,
+            // href: `/student/courses/${params.viewcourses}`,
+            isLast: true,
         },
     ]
     useEffect(() => {
         // const userIdLocal = JSON.parse(localStorage.getItem("AUTH") || "");
-
-        api.get(`/bootcamp/studentClasses/${params.viewcourses}`, {
-            params: {
-                userId: userID,
-            },
-        })
-            .then((response) => {
-                const { upcomingClasses, ongoingClasses, completedClasses } =
-                    response.data
-                setUpcomingClasses(upcomingClasses)
-                setOngoingClasses(ongoingClasses)
-                setCompletedClasses(completedClasses)
+        if (userID) {
+            api.get(`/bootcamp/studentClasses/${params.viewcourses}`, {
+                params: {
+                    userId: userID,
+                },
             })
-            .catch((error) => {
-                console.log('Error fetching classes:', error)
-            })
+                .then((response) => {
+                    const { upcomingClasses, ongoingClasses } = response.data
+                    setUpcomingClasses(upcomingClasses)
+                    setOngoingClasses(ongoingClasses)
+                    // setCompletedClasses(completedClasses)
+                })
+                .catch((error) => {
+                    console.log('Error fetching classes:', error)
+                })
+        }
     }, [userID])
 
     useEffect(() => {
@@ -109,22 +106,7 @@ function Page({
 
     return (
         <MaxWidthWrapper>
-            <Breadcrumb>
-                <BreadcrumbList>
-                    {crumbs?.map((item, index) => (
-                        <>
-                            <BreadcrumbItem key={item.crumb}>
-                                <BreadcrumbLink href={item.href}>
-                                    {item.crumb}
-                                </BreadcrumbLink>
-                            </BreadcrumbItem>
-                            {index < crumbs.length - 1 && (
-                                <BreadcrumbSeparator />
-                            )}
-                        </>
-                    ))}
-                </BreadcrumbList>
-            </Breadcrumb>
+            <BreadcrumbCmponent crumbs={crumbs} />
 
             <div className="md:grid grid-cols-2 lg:grid-cols-3 gap-10  my-10">
                 <div className="lg:col-span-2">
@@ -147,7 +129,12 @@ function Page({
 
                     <div className="gap-y-3 flex flex-col">
                         <div className="flex left-0  ">
-                            <p className="text-lg p-1 font-bold">
+                            <p
+                                className="text-lg p-1 font-bold"
+                                onClick={() =>
+                                    console.log('first', upcomingClasses)
+                                }
+                            >
                                 Upcoming Classes
                             </p>
                         </div>
@@ -192,7 +179,7 @@ function Page({
                             >
                                 <div className="flex items-center border rounded-md border-secondary px-3 py-1 text-secondary">
                                     <h1 className="text-lg p-1 font-bold">
-                                        See All Classes and Recording
+                                        See All Classes
                                     </h1>
                                     <ChevronRight size={20} />
                                 </div>
