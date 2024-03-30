@@ -6,6 +6,7 @@ import {
     ResizablePanel,
     ResizableHandle,
 } from '@/components/ui/resizable'
+import { useLazyLoadedStudentData } from '@/store/store'
 import api from '@/utils/axios.config'
 import Editor from '@monaco-editor/react'
 import { ArrowBigLeft, ArrowLeft } from 'lucide-react'
@@ -27,6 +28,9 @@ export default function IDE({ params }: { params: { editor: string } }) {
     const [codeError, setCodeError] = useState('')
     const [language, setLanguage] = useState('c')
     const router = useRouter()
+
+    const { studentData } = useLazyLoadedStudentData()
+    const userID = studentData?.id && studentData?.id
 
     const editorLanguages = [
         { lang: 'java', id: 91 },
@@ -85,16 +89,19 @@ export default function IDE({ params }: { params: { editor: string } }) {
     const handleSubmit = async (e: { preventDefault: () => void }) => {
         e.preventDefault()
         try {
-            const response = await api.post(`/codingPlatform/submit`, {
-                languageId: getDataFromField(
-                    editorLanguages,
-                    languageId,
-                    'lang',
-                    'id'
-                ),
-                sourceCode: b64EncodeUnicode(currentCode),
-                stdInput: 'aGVsbG8gd29ybGQ=',
-            })
+            const response = await api.post(
+                `/codingPlatform/submit?userId=${userID}&questionId=${params.editor}`,
+                {
+                    languageId: getDataFromField(
+                        editorLanguages,
+                        languageId,
+                        'lang',
+                        'id'
+                    ),
+                    sourceCode: b64EncodeUnicode(currentCode),
+                    stdInput: 'aGVsbG8gd29ybGQ=',
+                }
+            )
             if (
                 response.data.stderr ||
                 response.data.compile_output ||
