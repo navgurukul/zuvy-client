@@ -13,6 +13,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 
+// Interfaces:-
 interface Bootcamp {
     id: number
     name: string
@@ -47,71 +48,87 @@ interface EnrolledCourse {
     progress: number
 }
 
-function Page({
-    params,
-}: {
-    params: { viewcourses: string; moduleID: string }
-}) {
+// Component:-
+function Page() {
+    // states:-
     const [completedClasses, setCompletedClasses] = useState([])
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
     const [enrolledCourse, setEnrolledCourse] = useState<EnrolledCourse[]>([])
     const [selectedCourse, setSelectedCourse] = useState<EnrolledCourse | null>(
-        null
+        enrolledCourse[0]
     )
 
-    useEffect(() => {
-        const getEnrolledCourses = async () => {
+    // functions:-
+    const fetchRecordings = async (courseId: any) => {
+        if (userID) {
             try {
-                const response = await api.get(`/student/${userID}`)
-                setEnrolledCourse(response.data)
-                setSelectedCourse(response.data[0]) // Preselect the first course
+                const response = await api.get(
+                    `/bootcamp/studentClasses/${courseId}`,
+                    { params: { userId: userID } }
+                )
+                setCompletedClasses(response.data.completedClasses)
             } catch (error) {
-                console.error('Error getting enrolled courses:', error)
+                console.error('Error getting completed classes:', error)
             }
         }
-        if (userID) getEnrolledCourses()
-    }, [userID])
+    }
 
-    const handleCourseChange = (event: any) => {
-        const selectedCourseId = Number(event.target.value)
+    const getEnrolledCourses = async () => {
+        try {
+            const response = await api.get(`/student/${userID}`)
+            setEnrolledCourse(response.data)
+            setSelectedCourse(response.data[0]) // Preselect the first course
+        } catch (error) {
+            console.error('Error getting enrolled courses:', error)
+        }
+    }
+
+    const handleCourseChange = (selectedCourseId: any) => {
+        console.log('selectedCourseId:', selectedCourseId)
         const newSelectedCourse: any = enrolledCourse.find(
             (course) => course.id === selectedCourseId
         )
         setSelectedCourse(newSelectedCourse)
+        fetchRecordings(selectedCourseId)
     }
 
+    // use effects:-
     useEffect(() => {
         if (userID) {
-            api.get(`/bootcamp/studentClasses/${selectedCourse?.id}`, {
-                params: {
-                    userId: userID,
-                },
-            })
-                .then((response) => {
-                    const { completedClasses } = response.data
-                    setCompletedClasses(completedClasses)
-                })
-                .catch((error) => {
-                    console.log('Error fetching classes:', error)
-                })
+            getEnrolledCourses()
         }
-    }, [userID, selectedCourse?.id])
+    }, [userID])
 
+    useEffect(() => {
+        if (selectedCourse?.id) {
+            fetchRecordings(selectedCourse.id)
+        }
+    }, [selectedCourse?.id, userID])
+
+    // JSX render:-
     return (
         <>
             <div className="flex text-start">
-                <Select>
+                <Select
+                    onValueChange={(e) => {
+                        handleCourseChange(e)
+                    }}
+                >
                     <SelectTrigger className="w-[300px]">
-                        <SelectValue placeholder="Select a course" />
+                        <SelectValue
+                            placeholder={
+                                selectedCourse?.name || 'Select a course'
+                            }
+                        />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectGroup>
-                            <SelectLabel>Courses</SelectLabel>
+                            {/* <SelectLabel>Courses</SelectLabel> */}
                             {enrolledCourse.map((course) => (
                                 <SelectItem
                                     key={course.id}
-                                    value={String(course.id)}
+                                    value={course.id.toString()}
                                 >
                                     {course.name}
                                 </SelectItem>
