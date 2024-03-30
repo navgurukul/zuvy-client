@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import './styles/login.css'
 
 import { toast } from '@/components/ui/use-toast'
+import Link from 'next/link'
 
 type Props = {}
 
@@ -117,11 +118,11 @@ function LoginPage({}: Props) {
                             The Future of Learning Begins with a Simple Sign-in.
                             Start Your Journey Today!
                         </p>
-                        <Button className="bg-[#2f433a] p-4 mt-3 h-30 w-70 w-[250px]">
-                            <a href={loginUrl}>
+                        <Link href={loginUrl || 'defaultUrl'}>
+                            <Button className="bg-[#2f433a] p-4 mt-3 h-30 w-70 w-[250px]">
                                 <span className="text-lg">Login to Zuvy</span>
-                            </a>
-                        </Button>
+                            </Button>
+                        </Link>
                     </div>
                     <div className="">
                         <div className="top-70 isolate">
