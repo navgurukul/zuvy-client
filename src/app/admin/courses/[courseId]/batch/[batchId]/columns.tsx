@@ -214,44 +214,44 @@ export const columns: ColumnDef<Task>[] = [
             )
         },
     },
-    {
-        id: 'actions',
-        // cell: ({ row }) => <DataTableRowActions row={row} />,
-        cell: ({ row }) => {
-            const student = row.original
-            const { userId, bootcampId } = student
-            // const { onDeleteHandler } = GetdataHandler(bootcampId);
-            const { setDeleteModalOpen, isDeleteModalOpen } =
-                getDeleteStudentStore()
-            const { setStoreStudentData } = getStoreStudentData()
+    // {
+    //     id: 'actions',
+    //     // cell: ({ row }) => <DataTableRowActions row={row} />,
+    //     cell: ({ row }) => {
+    //         const student = row.original
+    //         const { userId, bootcampId } = student
+    //         // const { onDeleteHandler } = GetdataHandler(bootcampId);
+    //         const { setDeleteModalOpen, isDeleteModalOpen } =
+    //             getDeleteStudentStore()
+    //         const { setStoreStudentData } = getStoreStudentData()
 
-            return (
-                <>
-                    <Trash2
-                        onClick={() => setDeleteModalOpen(true)}
-                        className="text-destructive cursor-pointer"
-                        size={20}
-                    />
-                    <DeleteConfirmationModal
-                        isOpen={isDeleteModalOpen}
-                        onClose={() => setDeleteModalOpen(false)}
-                        onConfirm={() => {
-                            deleteStudentHandler(
-                                userId,
-                                bootcampId,
-                                setDeleteModalOpen,
-                                setStoreStudentData
-                            )
-                        }}
-                        modalText="This action cannot be undone. This will permanently delete the
-              student from this bootcamp"
-                        buttonText="Delete Student"
-                        input={false}
-                        modalText2=""
-                        batchName=""
-                    />
-                </>
-            )
-        },
-    },
+    //         return (
+    //             <>
+    //                 <Trash2
+    //                     onClick={() => setDeleteModalOpen(true)}
+    //                     className="text-destructive cursor-pointer"
+    //                     size={20}
+    //                 />
+    //                 <DeleteConfirmationModal
+    //                     isOpen={isDeleteModalOpen}
+    //                     onClose={() => setDeleteModalOpen(false)}
+    //                     onConfirm={() => {
+    //                         deleteStudentHandler(
+    //                             userId,
+    //                             bootcampId,
+    //                             setDeleteModalOpen,
+    //                             setStoreStudentData
+    //                         )
+    //                     }}
+    //                     modalText="This action cannot be undone. This will permanently delete the
+    //           student from this bootcamp"
+    //                     buttonText="Delete Student"
+    //                     input={false}
+    //                     modalText2=""
+    //                     batchName=""
+    //                 />
+    //             </>
+    //         )
+    //     },
+    // },
 ]
