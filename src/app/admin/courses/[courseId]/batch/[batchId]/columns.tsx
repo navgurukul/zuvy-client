@@ -84,7 +84,7 @@ export const columns: ColumnDef<Task>[] = [
             <DataTableColumnHeader column={column} title="Students Name" />
         ),
         cell: ({ row }) => (
-            <div className="w-[150px]">{row.getValue('name')}</div>
+            <div className="w-[180px] text-start">{row.getValue('name')}</div>
         ),
         enableSorting: false,
         enableHiding: false,
@@ -100,7 +100,7 @@ export const columns: ColumnDef<Task>[] = [
             return (
                 <div className="flex space-x-2">
                     {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
-                    <span className="max-w-[500px] truncate font-medium">
+                    <span className="max-w-[500px] truncate">
                         {row.getValue('email')}
                     </span>
                 </div>
@@ -168,7 +168,7 @@ export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'attendence',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Attendence" />
+            <DataTableColumnHeader column={column} title="Attendance" />
         ),
         cell: ({ row }) => {
             const attendance =

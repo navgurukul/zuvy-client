@@ -104,7 +104,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                     </>
                 )}
 
-                <div className="md:w-[720px]">
+                <div className="md:w-[720px] flex flex-col gap-y-3">
                     {ongoingClasses?.length > 0
                         ? ongoingClasses.map((classObj, index) => (
                               <ClassCard

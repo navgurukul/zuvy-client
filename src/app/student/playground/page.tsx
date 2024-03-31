@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import Link from 'next/link'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+
 import {
     TableHead,
     TableHeader,
@@ -30,35 +31,31 @@ interface Question {
 }
 
 const CodingPlayground = () => {
-    const [searchTerm, setSearchTerm] = useState('')
-    const [selectedTopic, setSelectedTopic] = useState('')
-    const [questions, setQuestions] = useState<Question[]>([])
-
-    const difficultyColors = {
-        Easy: 'bg-green-200',
-        Medium: 'bg-yellow-200',
-        Hard: 'bg-red-200',
-    }
-    const statusColors = {
-        'Not Attempted Yet': 'bg-gray-300',
-        'Needs to Attempt': 'bg-orange-300',
-        Accepted: 'bg-green-400',
-    }
-
-    const filterProblems = () => {
-        return questions.filter((question) =>
-            question.title.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-    }
+    // misc
+    const router = useRouter()
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
 
-    useEffect(() => {
-        const filtered = filterProblems()
-        setFilteredProblems(filtered)
-    }, [searchTerm, questions])
+    // state and variables
+    const [searchTerm, setSearchTerm] = useState('')
+    const [selectedTopic, setSelectedTopic] = useState('')
+    const [questions, setQuestions] = useState([])
 
-    const [filteredProblems, setFilteredProblems] = useState(filterProblems())
+    const difficultyColors = {
+        Easy: 'secondary',
+        Medium: 'yellow-dark',
+        Hard: 'destructive',
+    }
+    const statusColors = {
+        null: 'gray-300',
+        'Needs to Attempt': 'destructive',
+        Accepted: 'secondary',
+    }
+
+    // func
+    const handleQuestionRoute = (id: string) => {
+        router.push(`/student/playground/${id}  `)
+    }
 
     const getQuestions = async () => {
         try {
@@ -66,17 +63,19 @@ const CodingPlayground = () => {
                 .get(`/codingPlatform/allQuestions/${userID}`)
                 .then((response) => {
                     setQuestions(response.data)
-                    console.log(response.data)
                 })
         } catch (error) {
             console.error('Error fetching courses:', error)
         }
     }
 
+    // async
     useEffect(() => {
-        console.log('id', userID)
-        getQuestions()
+        if (userID) {
+            getQuestions()
+        }
     }, [userID])
+
     return (
         <div className="p-4 text-left">
             <h1 className="text-2xl font-bold mb-4">Coding Playground</h1>
@@ -120,45 +119,53 @@ const CodingPlayground = () => {
                     </ToggleGroupItem>
                 </ToggleGroup>
             </div>
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead className="font-bold text-black">
-                            Problem Title
-                        </TableHead>
-                        <TableHead className="font-bold text-black">
-                            Difficulty
-                        </TableHead>
-                        <TableHead className="font-bold text-black">
-                            Solution Status
-                        </TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody className="w-full max-w-4xl">
-                    {questions &&
-                        filteredProblems.map((question, index) => (
-                            <TableRow
-                                key={index}
-                                className="w-full max-w-4xl cursor-pointer hover:bg-secondary/20 "
-                            >
-                                <TableCell>
-                                    <Link
-                                        href={`/student/playground/${question.id}`}
-                                        passHref
+            <div className="mt-10">
+                <Table>
+                    <TableHeader className="bg-muted">
+                        <TableRow>
+                            <TableHead className="font-bold text-black">
+                                ID
+                            </TableHead>
+                            <TableHead className="font-bold text-black">
+                                Problem Title
+                            </TableHead>
+                            <TableHead className="font-bold text-black">
+                                Difficulty
+                            </TableHead>
+                            <TableHead className="font-bold text-black">
+                                Solution Status
+                            </TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody className="w-full max-w-4xl">
+                        {questions &&
+                            questions.map(
+                                ({ id, title, difficulty, status }) => (
+                                    <TableRow
+                                        key={id}
+                                        className={`w-full max-w-4xl cursor-pointer font-medium hover:bg-secondary/20 `}
+                                        onClick={() => handleQuestionRoute(id)}
                                     >
-                                        {question.title}
-                                    </Link>
-                                </TableCell>
-                                <TableCell>{question.difficulty}</TableCell>
-                                <TableCell>
-                                    {question.status
-                                        ? question.status
-                                        : 'Not Appeared Yet'}
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                </TableBody>
-            </Table>
+                                        <TableCell>{id}</TableCell>
+                                        <TableCell>{title}</TableCell>
+                                        <TableCell
+                                            className={`text-${difficultyColors[difficulty]}`}
+                                        >
+                                            {difficulty}
+                                        </TableCell>
+                                        <TableCell
+                                            className={`text-${statusColors[status]}`}
+                                        >
+                                            {status
+                                                ? status
+                                                : 'Not Appeared Yet'}
+                                        </TableCell>
+                                    </TableRow>
+                                )
+                            )}
+                    </TableBody>
+                </Table>
+            </div>
         </div>
     )
 }
