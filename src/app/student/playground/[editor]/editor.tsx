@@ -1,17 +1,28 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
+import { Card, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog'
 import {
     ResizablePanelGroup,
     ResizablePanel,
     ResizableHandle,
 } from '@/components/ui/resizable'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Lock } from 'lucide-react'
 import { useLazyLoadedStudentData } from '@/store/store'
 import api from '@/utils/axios.config'
 import Editor from '@monaco-editor/react'
-import { ArrowBigLeft, ArrowLeft } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { useToast } from '@/components/ui/use-toast'
 
 interface questionDetails {
     title: string
@@ -27,7 +38,9 @@ export default function IDE({ params }: { params: { editor: string } }) {
     const [languageId, setLanguageId] = useState(48)
     const [codeError, setCodeError] = useState('')
     const [language, setLanguage] = useState('c')
+    const [testCases, setTestCases] = useState<any>([])
     const router = useRouter()
+    const { toast } = useToast()
 
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
@@ -87,6 +100,7 @@ export default function IDE({ params }: { params: { editor: string } }) {
     }
 
     const handleSubmit = async (e: { preventDefault: () => void }) => {
+        let expectedOutput = b64EncodeUnicode(testCases.output)
         e.preventDefault()
         try {
             const response = await api.post(
@@ -99,7 +113,8 @@ export default function IDE({ params }: { params: { editor: string } }) {
                         'id'
                     ),
                     sourceCode: b64EncodeUnicode(currentCode),
-                    stdInput: 'aGVsbG8gd29ybGQ=',
+                    stdInput: b64EncodeUnicode(testCases.input.join('\n')),
+                    expectedOutput: expectedOutput,
                 }
             )
             if (
@@ -112,6 +127,21 @@ export default function IDE({ params }: { params: { editor: string } }) {
                     response.data.compile_output?.replaceAll('\n', '') ||
                     response.data.stdout?.replaceAll('\n', '')
                 setResult(b64DecodeUnicode(compileOutput))
+            }
+            let stdOut = b64DecodeUnicode(
+                response.data.stdout?.replaceAll('\n', '')
+            ).replaceAll('\n', '')
+            if (stdOut == testCases.output) {
+                toast({
+                    title: 'Test Cases Passed',
+                    description: 'Friday, February 10, 2023 at 5:57 PM',
+                })
+            } else {
+                toast({
+                    title: 'Test Cases Failed',
+                    description: 'Friday, February 10, 2023 at 5:57 PM',
+                    variant: 'destructive',
+                })
             }
             setCodeError('')
         } catch (error: any) {
@@ -130,7 +160,7 @@ export default function IDE({ params }: { params: { editor: string } }) {
                 .get(`/codingPlatform/questionById/${params.editor}`)
                 .then((response) => {
                     setQuestionDetails(response.data[0])
-                    console.log('details', response.data[0])
+                    setTestCases(response.data[0].testCases[0])
                 })
         } catch (error) {
             console.error('Error fetching courses:', error)
@@ -158,9 +188,9 @@ export default function IDE({ params }: { params: { editor: string } }) {
                                     size="icon"
                                     onClick={handleBack}
                                 >
-                                    <ArrowLeft className="h-4 w-4" />
+                                    <ArrowLeft className="h-5 w-5" />
                                 </Button>
-                                <h1 className="text-2xl p-2">
+                                <h1 className="text-2xl">
                                     {questionDetails?.title}
                                 </h1>
                             </div>
@@ -173,32 +203,38 @@ export default function IDE({ params }: { params: { editor: string } }) {
                 <ResizableHandle />
                 <ResizablePanel defaultSize={50}>
                     <ResizablePanelGroup direction="vertical">
-                        <ResizablePanel defaultSize={75}>
+                        <ResizablePanel defaultSize={70}>
                             <div className="flex h-full">
-                                <div className="w-full max-w-5xl bg-muted rounded-md">
+                                <div className="w-full max-w-5xl bg-muted rounded-md p-2">
                                     <form onSubmit={handleSubmit}>
                                         <div>
-                                            <div className="text-2xl">
-                                                Add your code
+                                            <div className="flex justify-between p-2">
+                                                <p className="text-2xl">
+                                                    Editor
+                                                </p>
+                                                <select
+                                                    value={language}
+                                                    onChange={(e) =>
+                                                        handleLanguageChange(
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    className=" rounded-md"
+                                                >
+                                                    {editorLanguages.map(
+                                                        (lang) => (
+                                                            <option
+                                                                key={lang.id}
+                                                                value={
+                                                                    lang.lang
+                                                                }
+                                                            >
+                                                                {lang.lang}
+                                                            </option>
+                                                        )
+                                                    )}
+                                                </select>
                                             </div>
-                                            <select
-                                                value={language}
-                                                onChange={(e) =>
-                                                    handleLanguageChange(
-                                                        e.target.value
-                                                    )
-                                                }
-                                                className="p-1 m-2 rounded-md"
-                                            >
-                                                {editorLanguages.map((lang) => (
-                                                    <option
-                                                        key={lang.id}
-                                                        value={lang.lang}
-                                                    >
-                                                        {lang.lang}
-                                                    </option>
-                                                ))}
-                                            </select>
                                             <Editor
                                                 height="52vh"
                                                 language={language}
@@ -219,10 +255,92 @@ export default function IDE({ params }: { params: { editor: string } }) {
                             </div>
                         </ResizablePanel>
                         <ResizableHandle />
-                        <ResizablePanel defaultSize={25}>
+                        <ResizablePanel defaultSize={30}>
                             <div className="flex h-full ">
                                 <div className="w-full max-w-5xl  p-2 border bg-muted rounded-md ">
-                                    <div className="text-xl">Output Window</div>
+                                    <div className="flex justify-between p-2">
+                                        <div className="text-xl">
+                                            Output Window
+                                        </div>
+                                        <div>
+                                            <Dialog>
+                                                <DialogTrigger asChild>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                    >
+                                                        Test Cases
+                                                    </Button>
+                                                </DialogTrigger>
+                                                <DialogContent className="sm:max-w-[465px]">
+                                                    <DialogHeader>
+                                                        <DialogTitle>
+                                                            <Tabs
+                                                                defaultValue="Test Case 1"
+                                                                className="w-[400px]"
+                                                            >
+                                                                <TabsList className="grid w-full grid-cols-3">
+                                                                    <TabsTrigger value="test case 1">
+                                                                        Test
+                                                                        Case 1
+                                                                    </TabsTrigger>
+                                                                    <TabsTrigger value="test case 2">
+                                                                        Test
+                                                                        Case 2
+                                                                    </TabsTrigger>
+                                                                    <TabsTrigger value="test case 3">
+                                                                        Test
+                                                                        Case 3
+                                                                    </TabsTrigger>
+                                                                </TabsList>
+                                                                <TabsContent value="test case 1">
+                                                                    <Card>
+                                                                        <CardHeader>
+                                                                            <CardTitle>
+                                                                                Input
+                                                                                -
+                                                                                [
+                                                                                {testCases.input?.join(
+                                                                                    ','
+                                                                                )}
+                                                                                ];
+                                                                                Output
+                                                                                -
+                                                                                [
+                                                                                {
+                                                                                    testCases.output
+                                                                                }
+
+                                                                                ]
+                                                                            </CardTitle>
+                                                                        </CardHeader>
+                                                                    </Card>
+                                                                </TabsContent>
+                                                                <TabsContent value="test case 2">
+                                                                    <Card>
+                                                                        <CardHeader>
+                                                                            <CardTitle>
+                                                                                <Lock />
+                                                                            </CardTitle>
+                                                                        </CardHeader>
+                                                                    </Card>
+                                                                </TabsContent>
+                                                                <TabsContent value="test case 3">
+                                                                    <Card>
+                                                                        <CardHeader>
+                                                                            <CardTitle>
+                                                                                <Lock />
+                                                                            </CardTitle>
+                                                                        </CardHeader>
+                                                                    </Card>
+                                                                </TabsContent>
+                                                            </Tabs>
+                                                        </DialogTitle>
+                                                    </DialogHeader>
+                                                </DialogContent>
+                                            </Dialog>
+                                        </div>
+                                    </div>
                                     <div className="h-[20vh] max-h-[90vh] p-2 bg-accent text-white overflow-y-auto">
                                         <pre>{result}</pre>
                                     </div>
