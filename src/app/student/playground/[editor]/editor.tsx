@@ -134,12 +134,12 @@ export default function IDE({ params }: { params: { editor: string } }) {
             if (stdOut == testCases.output) {
                 toast({
                     title: 'Test Cases Passed',
-                    description: 'Friday, February 10, 2023 at 5:57 PM',
+                    description: Date.now(),
                 })
             } else {
                 toast({
                     title: 'Test Cases Failed',
-                    description: 'Friday, February 10, 2023 at 5:57 PM',
+                    description: Date.now(),
                     variant: 'destructive',
                 })
             }
