@@ -15,7 +15,7 @@ import {
     ResizableHandle,
 } from '@/components/ui/resizable'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Lock } from 'lucide-react'
+import { Code, Lock, Play } from 'lucide-react'
 import { useLazyLoadedStudentData } from '@/store/store'
 import api from '@/utils/axios.config'
 import Editor from '@monaco-editor/react'
@@ -23,6 +23,13 @@ import { ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useToast } from '@/components/ui/use-toast'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
 
 interface questionDetails {
     title: string
@@ -123,10 +130,12 @@ export default function IDE({ params }: { params: { editor: string } }) {
                 response.data.stdout
             ) {
                 let compileOutput =
-                    response.data.stderr?.replaceAll('\n', '') ||
                     response.data.compile_output?.replaceAll('\n', '') ||
+                    response.data.stderr?.replaceAll('\n', '') ||
                     response.data.stdout?.replaceAll('\n', '')
-                setResult(b64DecodeUnicode(compileOutput))
+
+                const encodedResult = b64DecodeUnicode(compileOutput)
+                setResult(encodedResult)
             }
             let stdOut = b64DecodeUnicode(
                 response.data.stdout?.replaceAll('\n', '')
@@ -134,18 +143,18 @@ export default function IDE({ params }: { params: { editor: string } }) {
             if (stdOut == testCases.output) {
                 toast({
                     title: 'Test Cases Passed',
-                    description: Date.now(),
+                    // description: Date.now(),
                 })
             } else {
                 toast({
                     title: 'Test Cases Failed',
-                    description: Date.now(),
+                    // description: Date.now(),
                     variant: 'destructive',
                 })
             }
             setCodeError('')
         } catch (error: any) {
-            setResult('')
+            // setResult('')
             console.error('Error getting modules progress', error)
             setCodeError(error?.message)
         }
@@ -173,183 +182,205 @@ export default function IDE({ params }: { params: { editor: string } }) {
     const handleBack = () => {
         router.back()
     }
+
     return (
-        questionDetails && (
-            <ResizablePanelGroup
-                direction="horizontal"
-                className="w-full max-w-12xl rounded-lg border"
-            >
-                <ResizablePanel defaultSize={50}>
-                    <div className="flex h-[90vh]">
-                        <div className="w-full max-w-12xl p-2 border bg-muted rounded-md text-left">
-                            <div className="flex items-center ">
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={handleBack}
-                                >
-                                    <ArrowLeft className="h-5 w-5" />
-                                </Button>
-                                <h1 className="text-2xl">
-                                    {questionDetails?.title}
-                                </h1>
-                            </div>
-                            <div className="px-2">
-                                {questionDetails?.description}
+        <div>
+            <div className="flex justify-between mb-2">
+                <Button variant="ghost" size="icon" onClick={handleBack}>
+                    <ArrowLeft className="h-5 w-5" />
+                </Button>
+                <Button
+                    // type="submit"
+                    onClick={handleSubmit}
+                    size="sm"
+                >
+                    <Play size={20} />
+                    <span className="ml-2 text-lg font-bold">Run</span>
+                </Button>
+            </div>
+
+            {questionDetails && (
+                <ResizablePanelGroup
+                    direction="horizontal"
+                    className="w-full max-w-12xl rounded-lg "
+                >
+                    <ResizablePanel defaultSize={50}>
+                        <div className="flex h-[90vh]">
+                            <div className="w-full max-w-12xl p-2  bg-muted text-left">
+                                <div className="p-2">
+                                    <h1 className="text-xl">
+                                        {questionDetails?.title}
+                                    </h1>
+                                    <p>{questionDetails?.description}</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </ResizablePanel>
-                <ResizableHandle />
-                <ResizablePanel defaultSize={50}>
-                    <ResizablePanelGroup direction="vertical">
-                        <ResizablePanel defaultSize={70}>
-                            <div className="flex h-full">
-                                <div className="w-full max-w-5xl bg-muted rounded-md p-2">
-                                    <form onSubmit={handleSubmit}>
-                                        <div>
-                                            <div className="flex justify-between p-2">
-                                                <p className="text-2xl">
-                                                    Editor
-                                                </p>
-                                                <select
-                                                    value={language}
-                                                    onChange={(e) =>
-                                                        handleLanguageChange(
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                    className=" rounded-md"
-                                                >
-                                                    {editorLanguages.map(
-                                                        (lang) => (
-                                                            <option
-                                                                key={lang.id}
-                                                                value={
-                                                                    lang.lang
-                                                                }
-                                                            >
-                                                                {lang.lang}
-                                                            </option>
-                                                        )
-                                                    )}
-                                                </select>
-                                            </div>
-                                            <Editor
-                                                height="52vh"
-                                                language={language}
-                                                // defaultValue='console.log("Zuvy");'
-                                                theme="vs-dark"
-                                                value={currentCode}
-                                                onChange={handleEditorChange}
-                                                className="p-2"
-                                            />
-                                        </div>
-                                        <div className="flex justify-end px-2">
-                                            <Button type="submit" size="sm">
-                                                Run
-                                            </Button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </ResizablePanel>
-                        <ResizableHandle />
-                        <ResizablePanel defaultSize={30}>
-                            <div className="flex h-full ">
-                                <div className="w-full max-w-5xl  p-2 border bg-muted rounded-md ">
-                                    <div className="flex justify-between p-2">
-                                        <div className="text-xl">
-                                            Output Window
-                                        </div>
-                                        <div>
-                                            <Dialog>
-                                                <DialogTrigger asChild>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                    >
-                                                        Test Cases
-                                                    </Button>
-                                                </DialogTrigger>
-                                                <DialogContent className="sm:max-w-[465px]">
-                                                    <DialogHeader>
-                                                        <DialogTitle>
-                                                            <Tabs
-                                                                defaultValue="Test Case 1"
-                                                                className="w-[400px]"
-                                                            >
-                                                                <TabsList className="grid w-full grid-cols-3">
-                                                                    <TabsTrigger value="test case 1">
-                                                                        Test
-                                                                        Case 1
-                                                                    </TabsTrigger>
-                                                                    <TabsTrigger value="test case 2">
-                                                                        Test
-                                                                        Case 2
-                                                                    </TabsTrigger>
-                                                                    <TabsTrigger value="test case 3">
-                                                                        Test
-                                                                        Case 3
-                                                                    </TabsTrigger>
-                                                                </TabsList>
-                                                                <TabsContent value="test case 1">
-                                                                    <Card>
-                                                                        <CardHeader>
-                                                                            <CardTitle>
-                                                                                Input
-                                                                                -
-                                                                                [
-                                                                                {testCases.input?.join(
-                                                                                    ','
-                                                                                )}
-                                                                                ];
-                                                                                Output
-                                                                                -
-                                                                                [
-                                                                                {
-                                                                                    testCases.output
-                                                                                }
+                    </ResizablePanel>
+                    <ResizableHandle />
+                    <ResizablePanel defaultSize={50}>
+                        <ResizablePanelGroup direction="vertical">
+                            <ResizablePanel defaultSize={70}>
+                                <div className="flex">
+                                    <div className="w-full max-w-5xl bg-muted p-2">
+                                        <form>
+                                            <div>
+                                                <div className="flex justify-between p-2">
+                                                    <div className="flex gap-2 items-center">
+                                                        <Code size={20} />
+                                                        <p className="text-lg">
+                                                            Code
+                                                        </p>
+                                                    </div>
 
-                                                                                ]
-                                                                            </CardTitle>
-                                                                        </CardHeader>
-                                                                    </Card>
-                                                                </TabsContent>
-                                                                <TabsContent value="test case 2">
-                                                                    <Card>
-                                                                        <CardHeader>
-                                                                            <CardTitle>
-                                                                                <Lock />
-                                                                            </CardTitle>
-                                                                        </CardHeader>
-                                                                    </Card>
-                                                                </TabsContent>
-                                                                <TabsContent value="test case 3">
-                                                                    <Card>
-                                                                        <CardHeader>
-                                                                            <CardTitle>
-                                                                                <Lock />
-                                                                            </CardTitle>
-                                                                        </CardHeader>
-                                                                    </Card>
-                                                                </TabsContent>
-                                                            </Tabs>
-                                                        </DialogTitle>
-                                                    </DialogHeader>
-                                                </DialogContent>
-                                            </Dialog>
-                                        </div>
-                                    </div>
-                                    <div className="h-[20vh] max-h-[90vh] p-2 bg-accent text-white overflow-y-auto">
-                                        <pre>{result}</pre>
+                                                    <Select
+                                                        value={language}
+                                                        onValueChange={(
+                                                            e: any
+                                                        ) =>
+                                                            handleLanguageChange(
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                    >
+                                                        <SelectTrigger className="border border-secondary w-[180px]">
+                                                            <SelectValue placeholder="Difficulty" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {editorLanguages.map(
+                                                                (lang) => (
+                                                                    <SelectItem
+                                                                        key={
+                                                                            lang.id
+                                                                        }
+                                                                        value={
+                                                                            lang.lang
+                                                                        }
+                                                                    >
+                                                                        {
+                                                                            lang.lang
+                                                                        }
+                                                                    </SelectItem>
+                                                                )
+                                                            )}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                                <Editor
+                                                    height="52vh"
+                                                    language={language}
+                                                    // defaultValue='console.log("Zuvy");'
+                                                    theme="vs-dark"
+                                                    value={currentCode}
+                                                    onChange={
+                                                        handleEditorChange
+                                                    }
+                                                    className="p-2"
+                                                />
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
-                            </div>
-                        </ResizablePanel>
-                    </ResizablePanelGroup>
-                </ResizablePanel>
-            </ResizablePanelGroup>
-        )
+                            </ResizablePanel>
+                            <ResizableHandle />
+                            <ResizablePanel defaultSize={30}>
+                                <div className="flex h-full ">
+                                    <div className="w-full max-w-5xl  p-2  bg-muted rounded-md ">
+                                        <div className="flex justify-between p-2">
+                                            <div className="text-xl">
+                                                Output Window
+                                            </div>
+                                            <div>
+                                                <Dialog>
+                                                    <DialogTrigger asChild>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                        >
+                                                            Test Cases
+                                                        </Button>
+                                                    </DialogTrigger>
+                                                    <DialogContent className="sm:max-w-[465px]">
+                                                        <DialogHeader>
+                                                            <DialogTitle>
+                                                                <Tabs
+                                                                    defaultValue="Test Case 1"
+                                                                    className="w-[400px]"
+                                                                >
+                                                                    <TabsList className="grid w-full grid-cols-3">
+                                                                        <TabsTrigger value="test case 1">
+                                                                            Test
+                                                                            Case
+                                                                            1
+                                                                        </TabsTrigger>
+                                                                        <TabsTrigger value="test case 2">
+                                                                            Test
+                                                                            Case
+                                                                            2
+                                                                        </TabsTrigger>
+                                                                        <TabsTrigger value="test case 3">
+                                                                            Test
+                                                                            Case
+                                                                            3
+                                                                        </TabsTrigger>
+                                                                    </TabsList>
+                                                                    <TabsContent value="test case 1">
+                                                                        <Card>
+                                                                            <CardHeader>
+                                                                                <CardTitle>
+                                                                                    Input
+                                                                                    -
+                                                                                    [
+                                                                                    {testCases.input?.join(
+                                                                                        ','
+                                                                                    )}
+                                                                                    ];
+                                                                                    Output
+                                                                                    -
+                                                                                    [
+                                                                                    {
+                                                                                        testCases.output
+                                                                                    }
+
+                                                                                    ]
+                                                                                </CardTitle>
+                                                                            </CardHeader>
+                                                                        </Card>
+                                                                    </TabsContent>
+                                                                    <TabsContent value="test case 2">
+                                                                        <Card>
+                                                                            <CardHeader>
+                                                                                <CardTitle>
+                                                                                    <Lock />
+                                                                                </CardTitle>
+                                                                            </CardHeader>
+                                                                        </Card>
+                                                                    </TabsContent>
+                                                                    <TabsContent value="test case 3">
+                                                                        <Card>
+                                                                            <CardHeader>
+                                                                                <CardTitle>
+                                                                                    <Lock />
+                                                                                </CardTitle>
+                                                                            </CardHeader>
+                                                                        </Card>
+                                                                    </TabsContent>
+                                                                </Tabs>
+                                                            </DialogTitle>
+                                                        </DialogHeader>
+                                                    </DialogContent>
+                                                </Dialog>
+                                            </div>
+                                        </div>
+                                        <div className="h-[20vh] max-h-[90vh] p-2 bg-accent text-white overflow-y-auto">
+                                            <pre>{result}</pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ResizablePanel>
+                        </ResizablePanelGroup>
+                    </ResizablePanel>
+                </ResizablePanelGroup>
+            )}
+        </div>
     )
 }
