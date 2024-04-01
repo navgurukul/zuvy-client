@@ -40,6 +40,7 @@ const CodingPlayground = () => {
     const [searchTerm, setSearchTerm] = useState('')
     const [selectedTopic, setSelectedTopic] = useState('')
     const [questions, setQuestions] = useState([])
+    const [filteredQuestions, setFilteredQuestions] = useState([])
 
     const difficultyColors = {
         Easy: 'secondary',
@@ -75,6 +76,24 @@ const CodingPlayground = () => {
             getQuestions()
         }
     }, [userID])
+
+    useEffect(() => {
+        const filterQuestions = () => {
+            setFilteredQuestions(
+                questions.filter((question: Question) =>
+                    question.title
+                        .toLowerCase()
+                        .includes(searchTerm.toLowerCase())
+                )
+            )
+        }
+
+        filterQuestions()
+
+        return () => {
+            setFilteredQuestions([])
+        }
+    }, [questions, searchTerm])
 
     return (
         <div className="p-4 text-left">
@@ -138,8 +157,8 @@ const CodingPlayground = () => {
                         </TableRow>
                     </TableHeader>
                     <TableBody className="w-full max-w-4xl">
-                        {questions &&
-                            questions.map(
+                        {filteredQuestions &&
+                            filteredQuestions.map(
                                 ({ id, title, difficulty, status }) => (
                                     <TableRow
                                         key={id}
