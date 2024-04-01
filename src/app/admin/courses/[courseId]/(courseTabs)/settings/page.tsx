@@ -1,17 +1,15 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 
-import DeleteConfirmationModal from '../../_components/deleteModal'
 import { Button } from '@/components/ui/button'
-import api from '@/utils/axios.config'
-import { DropdownMenuDemo } from '../../_components/DropdownMenu'
-import { Toast } from '@/components/ui/toast'
 import { toast } from '@/components/ui/use-toast'
-import { Label } from '@/components/ui/label'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+
+import api from '@/utils/axios.config'
+import DeleteConfirmationModal from '../../_components/deleteModal'
 import { getCourseData } from '@/store/store'
+import ToggleSwitch from '../../_components/SwitchSettings'
 const Page = ({ params }: { params: any }) => {
     // misc
     const router = useRouter()
@@ -19,7 +17,40 @@ const Page = ({ params }: { params: any }) => {
     // state and variables
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
     const [bootcampSettings, setBootcampSettings] = useState('')
+    const [isChecked, setIsChecked] = useState<boolean>(
+        bootcampSettings === 'Public' ? true : false
+    )
+
     // async
+    const fetchBootCampSettings = useCallback(async () => {
+        try {
+            const response = await api.get(
+                `/bootcamp/bootcampSetting/${params.courseId}`
+            )
+            const type = response.data.bootcampSetting[0].type
+            setBootcampSettings(type)
+            setIsChecked(type === 'Public')
+        } catch (error) {
+            console.error('Error fetching boot camp settings:', error)
+        }
+    }, [params.courseId])
+
+    const handleToggle = async (checked: boolean) => {
+        const type = checked ? 'Public' : 'Private'
+        const convertedData = {
+            type,
+        }
+        // console.log(convertedData)
+        await api
+            .put(`/bootcamp/bootcampSetting/${params.courseId}`, convertedData)
+            .then((res) => {
+                toast({
+                    title: res.data.status,
+                    description: `Bootcamp type updated to ${type}`,
+                    className: 'text-start capitalize',
+                })
+            })
+    }
     const handleDelete = async () => {
         try {
             await api.delete(`/bootcamp/${courseData?.id}`).then((res) => {
@@ -40,92 +71,24 @@ const Page = ({ params }: { params: any }) => {
         }
         setDeleteModalOpen(false)
     }
-    const handlePrivate = async (e: any) => {
-        const transFormedObj = {
-            type: `${e.target.value}`,
-        }
-        try {
-            await api
-                .put(
-                    `/bootcamp/bootcampSetting/${courseData?.id}`,
-                    transFormedObj
-                )
-                .then((res) => {
-                    toast({
-                        title: res.data.status,
-                        description: res.data.message,
-                        className: 'text-start capitalize',
-                    })
-                })
-        } catch (error: any) {
-            toast({
-                title: error.data.status,
-                description: error.data.message,
-                className: 'text-start capitalize',
-            })
-        }
-        setTimeout(() => {
-            window.location.reload()
-        }, 1000)
-    }
 
     useEffect(() => {
-        const fetchBootCampSettings = async () => {
-            try {
-                const response = await api.get(
-                    `/bootcamp/bootcampSetting/${params.courseId}`
-                )
-                setBootcampSettings(response.data.bootcampSetting[0].type)
-            } catch (error) {
-                console.error('Error fetching boot camp settings:', error)
-            }
-        }
-
         fetchBootCampSettings()
-    }, [bootcampSettings, params.courseId])
+    }, [params.courseId, fetchBootCampSettings])
+
     return (
         <div>
             <div className=" w-full text-start mb-5">
                 <div>
                     <h1 className="text-lg font-semibold">Course Type</h1>
                     <div className="flex mt-2 flex-col gap-y-3 items-start">
-                        <div className="flex items-center space-x-2">
-                            <RadioGroup
-                                className="flex flex-col justify-start items-start "
-                                // defaultValue={bootcampSettings}
-                                value={bootcampSettings}
-                            >
-                                <div className="flex flex-col   space-x-2">
-                                    <div className="flex gap-x-3">
-                                        <RadioGroupItem
-                                            value="Private"
-                                            id="r2"
-                                            onClick={handlePrivate}
-                                        />
-                                        <Label htmlFor="r2">Invite Only</Label>
-                                    </div>
-                                    <p>
-                                        The students will need to be added to
-                                        the invite only courses. They have
-                                        access the courses without enrollement.
-                                    </p>
-                                </div>
-                                <div className="flex flex-col  space-x-2">
-                                    <div className="flex gap-x-3">
-                                        <RadioGroupItem
-                                            value="Public"
-                                            id="r3"
-                                            onClick={handlePrivate}
-                                        />
-                                        <Label htmlFor="r3">Open</Label>
-                                    </div>
-                                    <p>
-                                        The students will need to be added to
-                                        the invite only courses. They have
-                                        access the courses without enrollement.
-                                    </p>
-                                </div>
-                            </RadioGroup>
+                        <div className="flex items-center  w-1/2 space-x-4  ">
+                            {/* <SwitchForm bootcampId={params.courseId} /> */}
+                            <ToggleSwitch
+                                // isChecked={isChecked}
+                                onToggle={handleToggle}
+                                bootcampId={params.courseId}
+                            />{' '}
                         </div>
                     </div>
                 </div>

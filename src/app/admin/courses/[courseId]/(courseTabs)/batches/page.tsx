@@ -41,7 +41,7 @@ const Page = ({}: {}) => {
     const [batches, setBatches] = useState([])
 
     const { courseData } = getCourseData()
-    const { fetchBatches, batchData } = getBatchData()
+    const { fetchBatches, batchData, setBatchData } = getBatchData()
     const [unassignedStudents, setUnassignedStudents] = useState(
         courseData?.unassigned_students
     )
@@ -85,7 +85,7 @@ const Page = ({}: {}) => {
         capEnrollment: z.string().refine(
             (capEnrollment) => {
                 const parsedValue = parseInt(capEnrollment)
-                return !isNaN(parsedValue) && parsedValue >= 0
+                return !isNaN(parsedValue) && parsedValue > 0
             },
             {
                 message: 'Cap enrollment must be a non-negative number',
@@ -118,23 +118,18 @@ const Page = ({}: {}) => {
                 capEnrollment: +values.capEnrollment,
             }
 
-            const fetchBatches = async () => {
-                try {
-                    const response = await api.get(
-                        `/bootcamp/batches/${courseData?.id || ''}`
-                    )
-                    setBatches(response.data.data)
-                } catch (error: any) {
-                    console.log(error.message)
-                }
-            }
             await api.post(`/batch`, convertedData).then((res) => {
+                // fetchBatches()
+                // fetchBatches()
+                if (courseData?.id) {
+                    fetchBatches(courseData?.id)
+                }
+
                 toast({
                     title: res.data.status,
                     description: res.data.message,
                     className: 'text-start capitalize',
                 })
-                fetchBatches()
             })
         } catch (error: any) {
             toast({
@@ -146,7 +141,7 @@ const Page = ({}: {}) => {
             console.error('Error creating batch:', error)
         }
     }
-
+    // console.log(batches)
     const renderModal = (emptyState: boolean) => {
         if (unassignedStudents === 0) {
             return (
@@ -232,7 +227,7 @@ const Page = ({}: {}) => {
                                                 <FormControl>
                                                     <Input
                                                         placeholder="Cap Enrollment"
-                                                        type="name"
+                                                        type="number"
                                                         {...field}
                                                     />
                                                 </FormControl>
@@ -263,63 +258,65 @@ const Page = ({}: {}) => {
             )
         }
     }
-    return (
-        <div>
-            <div className=" relative flex items-center justify-between mb-6">
-                {batches.length > 0 ? (
-                    <Input
-                        type="search"
-                        placeholder="Search"
-                        className="w-[400px]"
-                    />
-                ) : null}
-                {renderModal(false)}
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 mt-2">
-                {batchData?.length ?? 0 > 0 ? (
-                    batchData?.map((batch: any, index: number) => (
-                        <Link
-                            key={batch.name}
-                            href={`/admin/courses/${courseData?.id}/batch/${batch.id}`}
-                        >
-                            <Card
-                                key={batch.id}
-                                className="text-gray-900 text-base"
-                            >
-                                <div className="bg-white rounded-lg border p-4">
-                                    <div className="px-1 py-4 flex flex-col items-start">
-                                        <CardTitle className="font-semibold capitalize">
-                                            {batch.name}
-                                        </CardTitle>
-                                        <CardDescription className=" capitalize">
-                                            {batch.students_enrolled}{' '}
-                                            <span>Learners</span>
-                                        </CardDescription>
-                                    </div>
-                                </div>
-                            </Card>
-                        </Link>
-                    ))
-                ) : (
-                    <div className="w-full flex flex-col items-center justify-center gap-y-3 absolute">
-                        <Image
-                            src="/batches.svg"
-                            alt="create batch"
-                            width={100}
-                            height={100}
+    if (courseData?.id) {
+        return (
+            <div>
+                <div className=" relative flex items-center justify-between mb-6">
+                    {batchData?.length ?? 0 > 0 ? (
+                        <Input
+                            type="search"
+                            placeholder="Search"
+                            className="w-[400px]"
                         />
-                        <p>
-                            Start by creating the first batch for the course.
-                            Learners will get added automatically based on
-                            enrollment cap
-                        </p>
-                        {renderModal(true)}
-                    </div>
-                )}
+                    ) : null}
+                    {renderModal(false)}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 mt-2">
+                    {batchData?.length ?? 0 > 0 ? (
+                        batchData?.map((batch: any, index: number) => (
+                            <Link
+                                key={batch.name}
+                                href={`/admin/courses/${courseData?.id}/batch/${batch.id}`}
+                            >
+                                <Card
+                                    key={batch.id}
+                                    className="text-gray-900 text-base"
+                                >
+                                    <div className="bg-white rounded-lg border p-4">
+                                        <div className="px-1 py-4 flex flex-col items-start">
+                                            <CardTitle className="font-semibold capitalize">
+                                                {batch.name}
+                                            </CardTitle>
+                                            <CardDescription className="capitalize">
+                                                {batch.students_enrolled}{' '}
+                                                <span>Learners</span>
+                                            </CardDescription>
+                                        </div>
+                                    </div>
+                                </Card>
+                            </Link>
+                        ))
+                    ) : (
+                        <div className="w-full flex flex-col items-center justify-center gap-y-3 absolute">
+                            <Image
+                                src="/batches.svg"
+                                alt="create batch"
+                                width={100}
+                                height={100}
+                            />
+                            <p>
+                                Start by creating the first batch for the
+                                course. Learners will get added automatically
+                                based on enrollment cap
+                            </p>
+                            {renderModal(true)}
+                        </div>
+                    )}
+                </div>
             </div>
-        </div>
-    )
+        )
+    }
 }
 
 export default Page

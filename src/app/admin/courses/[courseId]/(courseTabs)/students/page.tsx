@@ -116,7 +116,6 @@ const Page = () => {
             {batchData && (
                 <>
                     <DataTable data={studentsData} columns={columns} />
-
                     <DataTablePagination
                         totalStudents={totalStudents}
                         position={position}

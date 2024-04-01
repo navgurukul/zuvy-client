@@ -127,7 +127,7 @@ const BatchesInfo = ({
                     className: 'text-start capitalize',
                 })
             })
-            router.push(`/admin/courses/${params.courseId}`)
+            router.push(`/admin/courses/${params.courseId}/batches`)
         } catch (error) {
             toast({
                 title: 'Batch not Deleted ',
