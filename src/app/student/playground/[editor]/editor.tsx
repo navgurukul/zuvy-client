@@ -216,11 +216,11 @@ export default function IDE({ params }: { params: { editor: string } }) {
                             </div>
                         </div>
                     </ResizablePanel>
-                    <ResizableHandle />
+                    <ResizableHandle withHandle />
                     <ResizablePanel defaultSize={50}>
                         <ResizablePanelGroup direction="vertical">
                             <ResizablePanel defaultSize={70}>
-                                <div className="flex">
+                                <div className="flex h-full">
                                     <div className="w-full max-w-5xl bg-muted p-2">
                                         <form>
                                             <div>
@@ -238,7 +238,7 @@ export default function IDE({ params }: { params: { editor: string } }) {
                                                             e: any
                                                         ) =>
                                                             handleLanguageChange(
-                                                                e.target.value
+                                                                e
                                                             )
                                                         }
                                                     >
@@ -281,14 +281,14 @@ export default function IDE({ params }: { params: { editor: string } }) {
                                     </div>
                                 </div>
                             </ResizablePanel>
-                            <ResizableHandle />
+                            <ResizableHandle withHandle />
                             <ResizablePanel defaultSize={30}>
                                 <div className="flex h-full ">
-                                    <div className="w-full max-w-5xl  p-2  bg-muted rounded-md ">
+                                    <div className="w-full max-w-5xl  p-2  bg-muted  ">
                                         <div className="flex justify-between p-2">
-                                            <div className="text-xl">
+                                            <p className="text-lg">
                                                 Output Window
-                                            </div>
+                                            </p>
                                             <div>
                                                 <Dialog>
                                                     <DialogTrigger asChild>
@@ -371,7 +371,7 @@ export default function IDE({ params }: { params: { editor: string } }) {
                                                 </Dialog>
                                             </div>
                                         </div>
-                                        <div className="h-[20vh] max-h-[90vh] p-2 bg-accent text-white overflow-y-auto">
+                                        <div className="h-full p-2 bg-accent text-white overflow-y-auto">
                                             <pre>{result}</pre>
                                         </div>
                                     </div>
