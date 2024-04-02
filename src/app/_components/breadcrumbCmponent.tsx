@@ -1,3 +1,4 @@
+import React from 'react'
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -5,18 +6,17 @@ import {
     BreadcrumbList,
     BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
-import React from 'react'
 
-function BreadcrumbCmponent({
+function BreadcrumbComponent({
     crumbs,
 }: {
-    crumbs: { crumb: string; href?: string; isLast: Boolean }[]
+    crumbs: { crumb: string; href?: string; isLast: boolean }[]
 }) {
     return (
         <Breadcrumb>
             <BreadcrumbList>
                 {crumbs?.map((item, index) => (
-                    <>
+                    <React.Fragment key={index}>
                         <BreadcrumbItem
                             key={item.crumb}
                             className={`${
@@ -27,12 +27,14 @@ function BreadcrumbCmponent({
                                 {item.crumb}
                             </BreadcrumbLink>
                         </BreadcrumbItem>
-                        {index < crumbs.length - 1 && <BreadcrumbSeparator />}
-                    </>
+                        {index < crumbs.length - 1 && (
+                            <BreadcrumbSeparator key={`separator-${index}`} />
+                        )}
+                    </React.Fragment>
                 ))}
             </BreadcrumbList>
         </Breadcrumb>
     )
 }
 
-export default BreadcrumbCmponent
+export default BreadcrumbComponent

@@ -33,8 +33,24 @@ export async function onBatchChange(selectedvalue: any, student: any) {
         )
         .then((res) => {
             toast({
-                title: 'Students Batch Updated Succesfully',
-                className: 'text-start capitalize',
+                title: 'Success',
+                description: res.data.students_enrolled[0].message,
+            })
+        })
+        .catch((error) => {
+            let errorMessage = 'Failed to update students batch'
+            if (
+                error.response &&
+                error.response.data &&
+                error.response.data.message
+            ) {
+                errorMessage = error.response.data.message
+            }
+
+            console.error('Error updating students batch:', errorMessage)
+            toast({
+                title: 'Error',
+                description: errorMessage,
             })
         })
 }
