@@ -34,11 +34,16 @@ import {
 interface questionDetails {
     title: string
     description: string
+    examples: { input: number[]; output: number }
 }
 export default function IDE({ params }: { params: { editor: string } }) {
     const [questionDetails, setQuestionDetails] = useState<questionDetails>({
         title: '',
         description: '',
+        examples: {
+            input: [],
+            output: 0,
+        },
     })
     const [currentCode, setCurrentCode] = useState('')
     const [result, setResult] = useState('')
@@ -212,6 +217,14 @@ export default function IDE({ params }: { params: { editor: string } }) {
                                         {questionDetails?.title}
                                     </h1>
                                     <p>{questionDetails?.description}</p>
+                                    <p>
+                                        Examples : Input -{' '}
+                                        {questionDetails?.examples?.input.join(
+                                            ','
+                                        )}{' '}
+                                        ; Output :{' '}
+                                        {questionDetails?.examples?.output}
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -312,12 +325,18 @@ export default function IDE({ params }: { params: { editor: string } }) {
                                                                             Case
                                                                             1
                                                                         </TabsTrigger>
-                                                                        <TabsTrigger value="test case 2">
+                                                                        <TabsTrigger
+                                                                            value="test case 2"
+                                                                            disabled
+                                                                        >
                                                                             Test
                                                                             Case
                                                                             2
                                                                         </TabsTrigger>
-                                                                        <TabsTrigger value="test case 3">
+                                                                        <TabsTrigger
+                                                                            value="test case 3"
+                                                                            disabled
+                                                                        >
                                                                             Test
                                                                             Case
                                                                             3
