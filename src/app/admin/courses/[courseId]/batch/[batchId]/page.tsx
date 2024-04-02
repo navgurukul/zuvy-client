@@ -1,25 +1,12 @@
 'use client'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import ErrorPage from 'next/error'
 
 import { Input } from '@/components/ui/input'
-import {
-    ArrowLeft,
-    ArrowRight,
-    ChevronDown,
-    ChevronLeft,
-    ChevronRight,
-    Trash2,
-} from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 import { Pencil } from 'lucide-react'
 
-import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
 import { toast } from '@/components/ui/use-toast'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
@@ -127,6 +114,7 @@ const BatchesInfo = ({
                     className: 'text-start capitalize',
                 })
             })
+            setDeleteModalOpen(false)
             router.push(`/admin/courses/${params.courseId}/batches`)
         } catch (error) {
             toast({
@@ -157,7 +145,7 @@ const BatchesInfo = ({
             }
         ),
     })
-
+    console.log(studentsData)
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -498,7 +486,8 @@ const BatchesInfo = ({
                                                                     }
                                                                     {...field}
                                                                     defaultValue={
-                                                                        instructorsInfo.name
+                                                                        instructorsInfo.name ||
+                                                                        ''
                                                                     }
                                                                 />
                                                             </FormControl>
@@ -521,7 +510,8 @@ const BatchesInfo = ({
                                                                     type="name"
                                                                     {...field}
                                                                     defaultValue={
-                                                                        instructorsInfo.instructorId
+                                                                        instructorsInfo.instructorId ||
+                                                                        ''
                                                                     }
                                                                 />
                                                             </FormControl>
@@ -543,7 +533,8 @@ const BatchesInfo = ({
                                                                     type="number"
                                                                     {...field}
                                                                     defaultValue={
-                                                                        instructorsInfo.capEnrollment
+                                                                        instructorsInfo.capEnrollment ||
+                                                                        ''
                                                                     }
                                                                 />
                                                             </FormControl>
@@ -589,7 +580,7 @@ const BatchesInfo = ({
                                 onClose={() => setDeleteModalOpen(false)}
                                 onConfirm={batchDeleteHandler}
                                 modalText="Please confirm the deletion by typing the below sentence"
-                                modalText2="I give confirmation to delete "
+                                modalText2="Type"
                                 input={true}
                                 buttonText="Delete Batch"
                                 batchName={studentData[0]?.batchName}

@@ -120,14 +120,14 @@ const AddStudentsModal = ({
                         <Input
                             id="name"
                             name="name"
-                            value={studentData.name}
+                            value={studentData.name || ''}
                             onChange={handleSingleStudent}
                         />
                         <Label htmlFor="email">Email</Label>
                         <Input
                             id="email"
                             name="email"
-                            value={studentData.email}
+                            value={studentData.email || ''}
                             onChange={handleSingleStudent}
                         />
                     </div>

@@ -36,23 +36,23 @@ import { toast } from '@/components/ui/use-toast'
 import AddStudentsModal from '../../_components/addStudentsmodal'
 import api from '@/utils/axios.config'
 import { getBatchData, getCourseData } from '@/store/store'
+import useDebounce from '@/hooks/useDebounce'
 
-const Page = ({}: {}) => {
-    const [batches, setBatches] = useState([])
-
+const Page = ({ params }: { params: any }) => {
     const { courseData } = getCourseData()
     const { fetchBatches, batchData, setBatchData } = getBatchData()
     const [unassignedStudents, setUnassignedStudents] = useState(
         courseData?.unassigned_students
     )
-
+    const [search, setSearch] = useState<string>('')
+    const debouncedSearch = useDebounce(search, 1000)
     useEffect(() => {
         if (courseData?.id) {
             fetchBatches(courseData?.id)
             // setBatches(batchData)
         }
     }, [courseData, fetchBatches])
-
+    console.log(params.courseId)
     useEffect(() => {
         if (courseData?.id) {
             const fetchCourseDetails = async () => {
@@ -141,7 +141,26 @@ const Page = ({}: {}) => {
             console.error('Error creating batch:', error)
         }
     }
-    // console.log(batches)
+
+    useEffect(() => {
+        const searchBatchHandler = async () => {
+            await api
+                .get(
+                    `/bootcamp/searchBatch/${params.courseId}?searchTerm=${debouncedSearch}`
+                )
+                .then((res) => {
+                    setBatchData(res.data)
+                })
+        }
+        if (debouncedSearch) searchBatchHandler()
+        if (debouncedSearch.trim()?.length === 0) fetchBatches(params.courseId)
+    }, [params.courseId, debouncedSearch, fetchBatches, setBatchData])
+
+    const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearch(e.target.value)
+    }
+
+    console.log(search)
     const renderModal = (emptyState: boolean) => {
         if (unassignedStudents === 0) {
             return (
@@ -267,6 +286,8 @@ const Page = ({}: {}) => {
                             type="search"
                             placeholder="Search"
                             className="w-[400px]"
+                            value={search}
+                            onChange={handleSetSearch}
                         />
                     ) : null}
                     {renderModal(false)}
