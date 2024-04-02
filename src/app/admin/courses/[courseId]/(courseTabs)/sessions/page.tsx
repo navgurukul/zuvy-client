@@ -26,6 +26,8 @@ function Page() {
     const [limit, setLimit] = useState(6)
     const [offset, setOffset] = useState(1)
 
+
+
     const { courseData } = getCourseData()
 
     const handleDateChange = (date: any) => {
@@ -110,9 +112,30 @@ function Page() {
     }, [courseData, batchId, classType, offset, limit])
 
     const CreateSession = () => {
+        const [title, setTitle] = useState("");
+        const [description, setDescription] = useState("");
+        const [startDateTimeState, setStartDateTime] = useState(new Date());
+        const [endDateTimeState, setEndDateTime] = useState(new Date());
+        const [batchId, setBatchId] = useState("");
+    
+        const handleDialogOpenChange = () => {
+            setTitle("");
+            setDescription("");
+            const startDateTime = new Date();
+            startDateTime.setHours(startDateTime.getHours() + 5);
+            startDateTime.setMinutes(startDateTime.getMinutes() + 30);
+            setStartDateTime(startDateTime);
+            const endDateTime = new Date();
+            endDateTime.setHours(endDateTime.getHours() + 5);
+            endDateTime.setMinutes(endDateTime.getMinutes() + 30);
+            setEndDateTime(endDateTime);
+    
+            setBatchId("");
+        };
+    
         return (
-            <Dialog>
-                <DialogTrigger asChild>
+            <Dialog onOpenChange={handleDialogOpenChange}>
+                <DialogTrigger>
                     <Button className="text-white bg-secondary">
                         <span>Create Session</span>
                     </Button>
@@ -121,6 +144,16 @@ function Page() {
                 <NewClassDialog
                     courseId={courseData?.id || 0}
                     bootcampData={bootcampData}
+                    title={title}
+                    setTitle={setTitle}
+                    description={description}
+                    setDescription={setDescription}
+                    startDateTime={startDateTimeState}
+                    setStartDateTime={setStartDateTime}
+                    endDateTime={endDateTimeState}
+                    setEndDateTime={setEndDateTime}
+                    batchId={batchId}
+                    setBatchId={setBatchId}
                 />
             </Dialog>
         )

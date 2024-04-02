@@ -93,17 +93,36 @@ function DateTimePicker({
 const NewClassDialog = ({
     courseId,
     bootcampData,
+    title,
+    setTitle,
+    description,
+    setDescription,
+    startDateTime,
+    setStartDateTime,
+    endDateTime,
+    setEndDateTime,
+    batchId,
+    setBatchId
 }: {
     courseId: number
     bootcampData: Object
+    title:string
+    setTitle:any
+    description:string
+    setDescription:any
+    startDateTime:Date,
+    setStartDateTime:any
+    endDateTime:Date
+    setEndDateTime:any
+    batchId:any
+    setBatchId:any
+
+
 }) => {
-    const [title, setTitle] = useState('')
-    const [description, setDescription] = useState('')
-    const [startDateTime, setStartDateTime] = useState(new Date())
-    const [endDateTime, setEndDateTime] = useState(new Date())
-    const [batchId, setBatchId] = useState('')
+    // const [title, setTitle] = useState('')
+    
     const [attendeesInput, setAttendeesInput] = useState('')
-    const [isDialogOpen, setDialogOpen] = useState(true)
+
 
     const handleComboboxChange = (value: string) => {
         setBatchId(value)
@@ -134,7 +153,6 @@ const NewClassDialog = ({
                     variant: 'default',
                     className: 'text-start capitalize',
                 })
-                setDialogOpen(false)
             }
 
             return postClass
@@ -152,15 +170,15 @@ const NewClassDialog = ({
         <DialogContent>
             <DialogHeader>
                 <DialogTitle className={styles.newCourse}>
-                    New Class
+                    New Session
                 </DialogTitle>
                 <DialogDescription className="text-start">
                     <div className="my-6">
-                        <Label htmlFor="name">Class Title</Label>
+                        <Label htmlFor="name">Session Title</Label>
                         <Input
                             type="text"
                             id="name"
-                            placeholder="Enter Class title"
+                            placeholder="Enter session title"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                         />
