@@ -11,9 +11,9 @@ interface DeleteConfirmationModalProps {
     onConfirm: () => void
     modalText?: string
     buttonText?: string
-    batchName: string
     input: boolean
     modalText2: string
+    instructorInfo: any
 }
 
 const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
@@ -22,9 +22,9 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
     onConfirm,
     modalText,
     buttonText,
-    batchName,
     input,
     modalText2,
+    instructorInfo,
 }) => {
     const [inputValue, setInputValue] = useState<string>('')
     const [error, setError] = useState<string | null>(null)
@@ -33,7 +33,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
         setInputValue(value)
     }
     const handleConfirm = () => {
-        if (inputValue === batchName) {
+        if (inputValue === instructorInfo.name) {
             setError(null)
             onConfirm()
         } else {
@@ -92,8 +92,11 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                         <p className="text-sm text-gray-700 my-2 ">
                                             {modalText}
                                         </p>
-                                        <p className="text-sm text-black font-semibold my-2 mb-2 ">
-                                            {modalText2} {batchName}
+                                        <p className="text-sm flex gap-x-2 text-black font-semibold my-2 mb-2 ">
+                                            <p className="text-black font-normal">
+                                                {modalText2}:-
+                                            </p>
+                                            {instructorInfo?.name}
                                         </p>
                                     </div>
                                 </div>

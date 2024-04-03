@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -52,25 +52,19 @@ const Page = ({ params }: { params: any }) => {
             // setBatches(batchData)
         }
     }, [courseData, fetchBatches])
-    console.log(params.courseId)
+    const fetchCourseDetails = useCallback(async () => {
+        try {
+            const response = await api.get(`/bootcamp/${courseData?.id}`)
+            setUnassignedStudents(response.data.bootcamp.unassigned_students)
+        } catch (error) {
+            console.error('Error fetching course details:', error)
+        }
+    }, [courseData?.id])
     useEffect(() => {
         if (courseData?.id) {
-            const fetchCourseDetails = async () => {
-                try {
-                    const response = await api.get(
-                        `/bootcamp/${courseData?.id}`
-                    )
-                    setUnassignedStudents(
-                        response.data.bootcamp.unassigned_students
-                    )
-                } catch (error) {
-                    console.error('Error fetching course details:', error)
-                }
-            }
-
             fetchCourseDetails()
         }
-    }, [courseData?.id, setUnassignedStudents])
+    }, [courseData?.id, setUnassignedStudents, fetchCourseDetails])
 
     const formSchema = z.object({
         name: z.string().min(2, {
@@ -88,7 +82,8 @@ const Page = ({ params }: { params: any }) => {
                 return !isNaN(parsedValue) && parsedValue > 0
             },
             {
-                message: 'Cap enrollment must be a non-negative number',
+                message:
+                    'Cap Enrollment must be a POSITIVE INTEGER (or a POSITIVE WHOLE NUMBER or should be greater than 0)',
             }
         ),
     })
@@ -107,6 +102,7 @@ const Page = ({ params }: { params: any }) => {
             bootcampId: courseData?.id.toString() ?? '',
             capEnrollment: '',
         },
+        mode: 'onChange',
     })
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -119,12 +115,10 @@ const Page = ({ params }: { params: any }) => {
             }
 
             await api.post(`/batch`, convertedData).then((res) => {
-                // fetchBatches()
-                // fetchBatches()
                 if (courseData?.id) {
                     fetchBatches(courseData?.id)
                 }
-
+                fetchCourseDetails()
                 toast({
                     title: res.data.status,
                     description: res.data.message,
@@ -246,7 +240,7 @@ const Page = ({ params }: { params: any }) => {
                                                 <FormControl>
                                                     <Input
                                                         placeholder="Cap Enrollment"
-                                                        type="number"
+                                                        type="name"
                                                         {...field}
                                                     />
                                                 </FormControl>

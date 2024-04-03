@@ -64,7 +64,7 @@ const BatchesInfo = ({
     const [currentPage, setCurrentPage] = useState<number>(1)
     const [totalStudents, setTotalStudents] = useState<number>(0)
     const [lastPage, setLastPage] = useState<number>(0)
-    const [batchName, setBatchName] = useState('')
+    const [formstudentData, setFormStudentData] = useState<any>({})
 
     const debouncedValue = useDebounce(search, 1000)
     const crumbs = [
@@ -91,14 +91,18 @@ const BatchesInfo = ({
             isLast: true,
         },
     ]
+    console.log(formstudentData)
     useEffect(() => {
         const fetchInstructorInfo = async () => {
             try {
-                const response = await api
-                    .get(`/batch/${params.batchId}`)
-                    .then((res) => {
-                        setInstructorInfo(res.data.batch)
+                await api.get(`/batch/${params.batchId}`).then((res) => {
+                    setInstructorInfo(res.data.batch)
+                    setFormStudentData({
+                        name: res.data.batch.name,
+                        instructorId: res.data.batch.instructorId,
+                        capEnrollment: res.data.batch.capEnrollment,
                     })
+                })
             } catch (error: any) {
                 console.log(error.message)
             }
@@ -128,9 +132,7 @@ const BatchesInfo = ({
         name: z.string().min(2, {
             message: 'Batch name must be at least 2 characters.',
         }),
-        instructorId: z
-            .string()
-            .refine((instructorId) => !isNaN(parseInt(instructorId))),
+        instructorId: z.string(),
         capEnrollment: z.string().refine(
             (capEnrollment) => {
                 const capEnrollmentValue = parseInt(capEnrollment)
@@ -140,19 +142,23 @@ const BatchesInfo = ({
                 )
             },
             {
-                message:
-                    'The cap enrollment must be greater than or equal to the number of students.',
+                message: `The cap enrollment must be greater than or equal to the number of students inside a batch there are currently ${studentsData.length} students  .`,
             }
         ),
     })
-    console.log(studentsData)
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            name: instructorsInfo.name,
-            instructorId: instructorsInfo.instructorId,
-            capEnrollment: instructorsInfo.capEnrollment,
+            name: instructorsInfo.name || '',
+            instructorId: instructorsInfo.instructorId || '',
+            capEnrollment: instructorsInfo.capEnrollment || '',
         },
+        values: {
+            name: instructorsInfo.name || '',
+            instructorId: instructorsInfo.instructorId || '',
+            capEnrollment: instructorsInfo.capEnrollment || '',
+        },
+        mode: 'onChange',
     })
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         const convertedData = {
@@ -167,13 +173,11 @@ const BatchesInfo = ({
                 .patch(`/batch/${params.batchId}`, convertedData)
                 .then((res) => {
                     toast({
-                        title: 'Success',
-                        description: 'Batch Updated Successfully',
+                        title: res.data.status,
+                        description: res.data.message,
                     })
                     const fetchBatchesInfo = async () => {
                         try {
-                            //   if (matches) {
-                            //   const [firstValue, bootcampId, batchId] = matches;
                             const response = await api.get(
                                 `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}`
                             )
@@ -192,7 +196,7 @@ const BatchesInfo = ({
     }
     useEffect(() => {
         const getBootCamp = async () => {
-            const response = await api
+            await api
                 .get(`/bootcamp/${params.courseId}`)
                 .then((response) => setBootcamp(response.data.bootcamp))
         }
@@ -200,7 +204,7 @@ const BatchesInfo = ({
     }, [params.courseId])
     const fetchStudentData = useCallback(
         async (offset: number) => {
-            const response = await api
+            await api
                 .get(
                     `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}&limit=${position}&offset=${offset}`
                 )
@@ -481,14 +485,8 @@ const BatchesInfo = ({
                                                             </FormLabel>
                                                             <FormControl>
                                                                 <Input
-                                                                    placeholder={
-                                                                        'Batch Name'
-                                                                    }
+                                                                    placeholder="Batch Name"
                                                                     {...field}
-                                                                    defaultValue={
-                                                                        instructorsInfo.name ||
-                                                                        ''
-                                                                    }
                                                                 />
                                                             </FormControl>
 
@@ -507,12 +505,8 @@ const BatchesInfo = ({
                                                             <FormControl>
                                                                 <Input
                                                                     placeholder="Instructor Id"
-                                                                    type="name"
+                                                                    type="text"
                                                                     {...field}
-                                                                    defaultValue={
-                                                                        instructorsInfo.instructorId ||
-                                                                        ''
-                                                                    }
                                                                 />
                                                             </FormControl>
                                                             <FormMessage />
@@ -532,10 +526,6 @@ const BatchesInfo = ({
                                                                     placeholder="Cap Enrollment"
                                                                     type="number"
                                                                     {...field}
-                                                                    defaultValue={
-                                                                        instructorsInfo.capEnrollment ||
-                                                                        ''
-                                                                    }
                                                                 />
                                                             </FormControl>
                                                             <FormMessage />
@@ -579,11 +569,11 @@ const BatchesInfo = ({
                                 isOpen={isDeleteModalOpen}
                                 onClose={() => setDeleteModalOpen(false)}
                                 onConfirm={batchDeleteHandler}
-                                modalText="Please confirm the deletion by typing the below sentence"
-                                modalText2="Type"
+                                modalText="Type the batch name to confirm deletion"
+                                modalText2="Batch Name"
                                 input={true}
                                 buttonText="Delete Batch"
-                                batchName={studentData[0]?.batchName}
+                                instructorInfo={instructorsInfo}
                             />
                         </div>
                     </div>
