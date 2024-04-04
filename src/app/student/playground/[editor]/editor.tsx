@@ -15,7 +15,7 @@ import {
     ResizableHandle,
 } from '@/components/ui/resizable'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Code, Lock, Play } from 'lucide-react'
+import { Code, Lock, Play, Upload } from 'lucide-react'
 import { useLazyLoadedStudentData } from '@/store/store'
 import api from '@/utils/axios.config'
 import Editor from '@monaco-editor/react'
@@ -34,11 +34,16 @@ import {
 interface questionDetails {
     title: string
     description: string
+    examples: { input: number[]; output: number }
 }
 export default function IDE({ params }: { params: { editor: string } }) {
     const [questionDetails, setQuestionDetails] = useState<questionDetails>({
         title: '',
         description: '',
+        examples: {
+            input: [],
+            output: 0,
+        },
     })
     const [currentCode, setCurrentCode] = useState('')
     const [result, setResult] = useState('')
@@ -72,7 +77,7 @@ export default function IDE({ params }: { params: { editor: string } }) {
         return btoa(
             encodeURIComponent(str).replace(
                 /%([0-9A-F]{2})/g,
-                function (match, p1) {
+                function (_match, p1) {
                     return String.fromCharCode(parseInt(p1, 16))
                 }
             )
@@ -106,12 +111,14 @@ export default function IDE({ params }: { params: { editor: string } }) {
         return result
     }
 
-    const handleSubmit = async (e: { preventDefault: () => void }) => {
-        let expectedOutput = b64EncodeUnicode(testCases.output)
+    const handleSubmit = async (
+        e: { preventDefault: () => void },
+        action: string
+    ) => {
         e.preventDefault()
         try {
             const response = await api.post(
-                `/codingPlatform/submit?userId=${userID}&questionId=${params.editor}`,
+                `/codingPlatform/submit?userId=${userID}&questionId=${params.editor}&action=${action}`,
                 {
                     languageId: getDataFromField(
                         editorLanguages,
@@ -120,8 +127,6 @@ export default function IDE({ params }: { params: { editor: string } }) {
                         'id'
                     ),
                     sourceCode: b64EncodeUnicode(currentCode),
-                    stdInput: b64EncodeUnicode(testCases.input.join('\n')),
-                    expectedOutput: expectedOutput,
                 }
             )
             if (
@@ -137,24 +142,20 @@ export default function IDE({ params }: { params: { editor: string } }) {
                 const encodedResult = b64DecodeUnicode(compileOutput)
                 setResult(encodedResult)
             }
-            let stdOut = b64DecodeUnicode(
-                response.data.stdout?.replaceAll('\n', '')
-            ).replaceAll('\n', '')
-            if (stdOut == testCases.output) {
+            if (response.data.status_id === 3) {
                 toast({
-                    title: 'Test Cases Passed',
-                    // description: Date.now(),
+                    title: `Test Cases Passed ${
+                        action === 'submit' ? ', Solution submitted' : ''
+                    }`,
                 })
             } else {
                 toast({
                     title: 'Test Cases Failed',
-                    // description: Date.now(),
                     variant: 'destructive',
                 })
             }
             setCodeError('')
         } catch (error: any) {
-            // setResult('')
             console.error('Error getting modules progress', error)
             setCodeError(error?.message)
         }
@@ -189,14 +190,23 @@ export default function IDE({ params }: { params: { editor: string } }) {
                 <Button variant="ghost" size="icon" onClick={handleBack}>
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
-                <Button
-                    // type="submit"
-                    onClick={handleSubmit}
-                    size="sm"
-                >
-                    <Play size={20} />
-                    <span className="ml-2 text-lg font-bold">Run</span>
-                </Button>
+                <div>
+                    <Button
+                        onClick={(e) => handleSubmit(e, 'run')}
+                        size="sm"
+                        className="mr-2"
+                    >
+                        <Play size={20} />
+                        <span className="ml-2 text-lg font-bold">Run</span>
+                    </Button>
+                    <Button
+                        onClick={(e) => handleSubmit(e, 'submit')}
+                        size="sm"
+                    >
+                        <Upload size={20} />
+                        <span className="ml-2 text-lg font-bold">Submit</span>
+                    </Button>
+                </div>
             </div>
 
             {questionDetails && (
@@ -212,6 +222,14 @@ export default function IDE({ params }: { params: { editor: string } }) {
                                         {questionDetails?.title}
                                     </h1>
                                     <p>{questionDetails?.description}</p>
+                                    <p>
+                                        Examples : Input -{' '}
+                                        {questionDetails?.examples?.input.join(
+                                            ','
+                                        )}{' '}
+                                        ; Output :{' '}
+                                        {questionDetails?.examples?.output}
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -312,12 +330,18 @@ export default function IDE({ params }: { params: { editor: string } }) {
                                                                             Case
                                                                             1
                                                                         </TabsTrigger>
-                                                                        <TabsTrigger value="test case 2">
+                                                                        <TabsTrigger
+                                                                            value="test case 2"
+                                                                            disabled
+                                                                        >
                                                                             Test
                                                                             Case
                                                                             2
                                                                         </TabsTrigger>
-                                                                        <TabsTrigger value="test case 3">
+                                                                        <TabsTrigger
+                                                                            value="test case 3"
+                                                                            disabled
+                                                                        >
                                                                             Test
                                                                             Case
                                                                             3

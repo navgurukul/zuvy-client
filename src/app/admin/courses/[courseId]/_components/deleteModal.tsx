@@ -11,9 +11,9 @@ interface DeleteConfirmationModalProps {
     onConfirm: () => void
     modalText?: string
     buttonText?: string
-    batchName: string
     input: boolean
     modalText2: string
+    instructorInfo: any
 }
 
 const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
@@ -22,9 +22,9 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
     onConfirm,
     modalText,
     buttonText,
-    batchName,
     input,
     modalText2,
+    instructorInfo,
 }) => {
     const [inputValue, setInputValue] = useState<string>('')
     const [error, setError] = useState<string | null>(null)
@@ -32,7 +32,14 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
         const value = e.target.value
         setInputValue(value)
     }
-
+    const handleConfirm = () => {
+        if (inputValue === instructorInfo.name) {
+            setError(null)
+            onConfirm()
+        } else {
+            setError('Batch name does not match')
+        }
+    }
     return (
         <Transition.Root show={isOpen} as={Fragment}>
             <Dialog
@@ -85,8 +92,11 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                         <p className="text-sm text-gray-700 my-2 ">
                                             {modalText}
                                         </p>
-                                        <p className="text-sm text-black font-semibold my-2 mb-2 ">
-                                            {modalText2} {batchName}
+                                        <p className="text-sm flex gap-x-2 text-black font-semibold my-2 mb-2 ">
+                                            <p className="text-black font-normal">
+                                                {modalText2}:-
+                                            </p>
+                                            {instructorInfo?.name}
                                         </p>
                                     </div>
                                 </div>
@@ -113,13 +123,13 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                     className=" p-2 inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4  bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
                                     onClick={onClose}
                                 >
-                                    {input ? 'Take Me Back' : 'Cancel'}
+                                    {input ? 'Cancel' : 'Cancel'}
                                 </Button>
                                 <Button
                                     variant={'destructive'}
                                     type="button"
                                     className=" p-2 inline-flex justify-center  rounded-md border border-transparent shadow-sm px-4  bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm"
-                                    onClick={onConfirm}
+                                    onClick={handleConfirm}
                                 >
                                     {buttonText}
                                 </Button>

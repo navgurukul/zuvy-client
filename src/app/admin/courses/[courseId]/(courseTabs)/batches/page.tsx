@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -36,41 +36,35 @@ import { toast } from '@/components/ui/use-toast'
 import AddStudentsModal from '../../_components/addStudentsmodal'
 import api from '@/utils/axios.config'
 import { getBatchData, getCourseData } from '@/store/store'
+import useDebounce from '@/hooks/useDebounce'
 
-const Page = ({}: {}) => {
-    const [batches, setBatches] = useState([])
-
+const Page = ({ params }: { params: any }) => {
     const { courseData } = getCourseData()
     const { fetchBatches, batchData, setBatchData } = getBatchData()
     const [unassignedStudents, setUnassignedStudents] = useState(
         courseData?.unassigned_students
     )
-
+    const [search, setSearch] = useState<string>('')
+    const debouncedSearch = useDebounce(search, 1000)
     useEffect(() => {
         if (courseData?.id) {
             fetchBatches(courseData?.id)
             // setBatches(batchData)
         }
     }, [courseData, fetchBatches])
-
+    const fetchCourseDetails = useCallback(async () => {
+        try {
+            const response = await api.get(`/bootcamp/${courseData?.id}`)
+            setUnassignedStudents(response.data.bootcamp.unassigned_students)
+        } catch (error) {
+            console.error('Error fetching course details:', error)
+        }
+    }, [courseData?.id])
     useEffect(() => {
         if (courseData?.id) {
-            const fetchCourseDetails = async () => {
-                try {
-                    const response = await api.get(
-                        `/bootcamp/${courseData?.id}`
-                    )
-                    setUnassignedStudents(
-                        response.data.bootcamp.unassigned_students
-                    )
-                } catch (error) {
-                    console.error('Error fetching course details:', error)
-                }
-            }
-
             fetchCourseDetails()
         }
-    }, [courseData?.id, setUnassignedStudents])
+    }, [courseData?.id, setUnassignedStudents, fetchCourseDetails])
 
     const formSchema = z.object({
         name: z.string().min(2, {
@@ -88,7 +82,8 @@ const Page = ({}: {}) => {
                 return !isNaN(parsedValue) && parsedValue > 0
             },
             {
-                message: 'Cap enrollment must be a non-negative number',
+                message:
+                    'Cap Enrollment must be a POSITIVE INTEGER (or a POSITIVE WHOLE NUMBER or should be greater than 0)',
             }
         ),
     })
@@ -107,6 +102,7 @@ const Page = ({}: {}) => {
             bootcampId: courseData?.id.toString() ?? '',
             capEnrollment: '',
         },
+        mode: 'onChange',
     })
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -119,12 +115,10 @@ const Page = ({}: {}) => {
             }
 
             await api.post(`/batch`, convertedData).then((res) => {
-                // fetchBatches()
-                // fetchBatches()
                 if (courseData?.id) {
                     fetchBatches(courseData?.id)
                 }
-
+                fetchCourseDetails()
                 toast({
                     title: res.data.status,
                     description: res.data.message,
@@ -141,7 +135,26 @@ const Page = ({}: {}) => {
             console.error('Error creating batch:', error)
         }
     }
-    // console.log(batches)
+
+    useEffect(() => {
+        const searchBatchHandler = async () => {
+            await api
+                .get(
+                    `/bootcamp/searchBatch/${params.courseId}?searchTerm=${debouncedSearch}`
+                )
+                .then((res) => {
+                    setBatchData(res.data)
+                })
+        }
+        if (debouncedSearch) searchBatchHandler()
+        if (debouncedSearch.trim()?.length === 0) fetchBatches(params.courseId)
+    }, [params.courseId, debouncedSearch, fetchBatches, setBatchData])
+
+    const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearch(e.target.value)
+    }
+
+    console.log(search)
     const renderModal = (emptyState: boolean) => {
         if (unassignedStudents === 0) {
             return (
@@ -227,7 +240,7 @@ const Page = ({}: {}) => {
                                                 <FormControl>
                                                     <Input
                                                         placeholder="Cap Enrollment"
-                                                        type="number"
+                                                        type="name"
                                                         {...field}
                                                     />
                                                 </FormControl>
@@ -267,6 +280,8 @@ const Page = ({}: {}) => {
                             type="search"
                             placeholder="Search"
                             className="w-[400px]"
+                            value={search}
+                            onChange={handleSetSearch}
                         />
                     ) : null}
                     {renderModal(false)}
