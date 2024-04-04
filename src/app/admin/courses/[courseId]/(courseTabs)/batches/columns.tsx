@@ -292,7 +292,7 @@ export const columns: ColumnDef<Task>[] = [
                         buttonText="Delete Student"
                         input={false}
                         modalText2=""
-                        batchName=""
+                        instructorInfo={{}}
                     />
                 </>
             )

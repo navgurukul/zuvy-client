@@ -1,6 +1,6 @@
 'use client'
 import React, { useCallback, useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useParams, useRouter, usePathname, notFound } from 'next/navigation'
 import ErrorPage from 'next/error'
 
 import { Input } from '@/components/ui/input'
@@ -52,6 +52,9 @@ const BatchesInfo = ({
     params: { courseId: string; batchId: string }
 }) => {
     const router = useRouter()
+    const param = useParams()
+    const location = usePathname()
+
     const { studentsData, setStoreStudentData } = getStoreStudentData()
     const [studentData, setStudentData] = useState<StudentData[]>([])
     const [bootcamp, setBootcamp] = useState<any>([])
@@ -65,8 +68,10 @@ const BatchesInfo = ({
     const [totalStudents, setTotalStudents] = useState<number>(0)
     const [lastPage, setLastPage] = useState<number>(0)
     const [formstudentData, setFormStudentData] = useState<any>({})
-
+    const paramBatchId = parseInt(params.batchId)
+    const [firstBatchStudentId, setFirstBatchStudentId] = useState<any>()
     const debouncedValue = useDebounce(search, 1000)
+
     const crumbs = [
         {
             crumb: 'My Courses',
@@ -91,42 +96,57 @@ const BatchesInfo = ({
             isLast: true,
         },
     ]
-    console.log(formstudentData)
+    // useEffect(() => {
+    //     console.log('Params:', params.batchId)
+
+    //     if (params.batchId && studentsData.length > 0) {
+    //         const paramsBatchId = params.batchId.toString()
+    //         const firstStudentBatchId = studentsData[0]?.batchId?.toString()
+
+    //         if (firstStudentBatchId && paramsBatchId !== firstStudentBatchId) {
+    //             console.log('Redirecting to /not-found')
+    //             router.push('/not-found')
+    //         }
+    //     }
+    // }, [params.batchId, studentsData, router])
+
     useEffect(() => {
         const fetchInstructorInfo = async () => {
             try {
-                await api.get(`/batch/${params.batchId}`).then((res) => {
-                    setInstructorInfo(res.data.batch)
-                    setFormStudentData({
-                        name: res.data.batch.name,
-                        instructorId: res.data.batch.instructorId,
-                        capEnrollment: res.data.batch.capEnrollment,
-                    })
+                const response = await api.get(`/batch/${params.batchId}`)
+                const batchData = response.data.batch
+                setInstructorInfo(batchData)
+                setFirstBatchStudentId(batchData.id)
+                setFormStudentData({
+                    name: batchData.name,
+                    instructorId: batchData.instructorId,
+                    capEnrollment: batchData.capEnrollment,
                 })
             } catch (error: any) {
-                console.log(error.message)
+                console.log('Error fetching instructor info:', error.message)
             }
         }
-        fetchInstructorInfo()
-    }, [params.batchId])
 
+        if (params.batchId) {
+            fetchInstructorInfo()
+        }
+    }, [params.batchId])
     const batchDeleteHandler = async () => {
         try {
-            await api.delete(`/batch/${params.batchId}`).then(() => {
-                toast({
-                    title: 'Batch Deleted Succesfully',
-                    className: 'text-start capitalize',
-                })
+            await api.delete(`/batch/${params.batchId}`)
+            toast({
+                title: 'Batch Deleted Successfully',
+                className: 'text-start capitalize',
             })
             setDeleteModalOpen(false)
             router.push(`/admin/courses/${params.courseId}/batches`)
         } catch (error) {
             toast({
-                title: 'Batch not Deleted ',
+                title: 'Batch not Deleted',
                 className: 'text-start capitalize',
             })
+            console.error('Error deleting batch:', error)
         }
-        // }
     }
     const formSchema = z.object({
         name: z.string().min(2, {
@@ -253,7 +273,14 @@ const BatchesInfo = ({
     const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value)
     }
-
+    if (
+        params.batchId &&
+        isNaN(parseInt(params.batchId)) &&
+        params.batchId.match(/[a-zA-Z]/) &&
+        parseInt(params.batchId) > 1000
+    ) {
+        notFound()
+    }
     return (
         <>
             <BreadcrumbCmponent crumbs={crumbs} />
@@ -579,75 +606,7 @@ const BatchesInfo = ({
                     </div>
                 </div>
                 <DataTable columns={columns} data={studentsData} />
-                {/* <div className='flex items-center justify-end px-2 gap-x-2'>
-          <p className='text-sm font-medium'>Rows Per Page</p>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant='outline'>
-                {position} <ChevronDown className='ml-2' size={15} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className='w-full'>
-              <DropdownMenuLabel>Rows</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuRadioGroup
-                value={position}
-                onValueChange={setPosition}
-              >
-                {ROWS_PER_PAGE.map((rows) => {
-                  return (
-                    <DropdownMenuRadioItem key={rows} value={rows}>
-                      {rows}
-                    </DropdownMenuRadioItem>
-                  );
-                })}
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <div className='flex items-center justify-end space-x-6 lg:space-x-8'>
-            <div className='flex w-[100px] items-center justify-center text-sm font-medium'>
-              Page {currentPage} of {pages}
-            </div>
-            <div className='flex items-center space-x-2'>
-              <Button
-                variant='outline'
-                className='hidden h-8 w-8 p-0 lg:flex'
-                onClick={firstPagehandler}
-                disabled={previousDisabledHandler()}
-              >
-                <span className='sr-only'>Go to first page</span>
-                <ArrowLeft className='h-4 w-4' />
-              </Button>
-              <Button
-                variant='outline'
-                className='h-8 w-8 p-0'
-                onClick={prevPageHandler}
-                disabled={previousDisabledHandler()}
-              >
-                <span className='sr-only'>Go to previous page</span>
-                <ArrowLeft className='h-4 w-4' />
-              </Button>
-              <Button
-                variant='outline'
-                className='h-8 w-8 p-0'
-                onClick={nextPageHandler}
-                disabled={nextDisabledHandler()}
-              >
-                <span className='sr-only'>Go to next page</span>
-                <ArrowRight className='h-4 w-4' />
-              </Button>
-              <Button
-                variant='outline'
-                className='hidden h-8 w-8 p-0 lg:flex'
-                onClick={lastPageHandler}
-                disabled={nextDisabledHandler()}
-              >
-                <span className='sr-only'>Go to last page</span>
-                <ArrowRight className='h-4 w-4' />
-              </Button>
-            </div>
-          </div>
-        </div> */}
+
                 <DataTablePagination
                     totalStudents={totalStudents}
                     position={position}

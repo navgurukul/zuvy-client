@@ -33,8 +33,10 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
         setInputValue(value)
     }
     const handleConfirm = () => {
-        if (inputValue === instructorInfo.name) {
+        if (inputValue === instructorInfo.name && input) {
             setError(null)
+            onConfirm()
+        } else if (!input) {
             onConfirm()
         } else {
             setError('Batch name does not match')
