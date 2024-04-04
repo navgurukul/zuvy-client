@@ -156,21 +156,21 @@ function Page() {
             </div>
             <div className="flex justify-start gap-6 my-6">
                 <Badge
-                    variant={classType === 'active' ? 'default' : 'outline'}
+                    variant={classType === 'active' ? 'secondary' : 'outline'}
                     onClick={() => handleClassType('active')}
                     className="rounded-md cursor-pointer"
                 >
                     Active Classes
                 </Badge>
                 <Badge
-                    variant={classType === 'upcoming' ? 'default' : 'outline'}
+                    variant={classType === 'upcoming' ? 'secondary' : 'outline'}
                     onClick={() => handleClassType('upcoming')}
                     className="rounded-md cursor-pointer"
                 >
                     Upcoming Classes
                 </Badge>
                 <Badge
-                    variant={classType === 'complete' ? 'default' : 'outline'}
+                    variant={classType === 'complete' ? 'secondary' : 'outline'}
                     onClick={() => handleClassType('complete')}
                     className="rounded-md cursor-pointer"
                 >
@@ -184,7 +184,8 @@ function Page() {
                             <RecordingCard
                                 classData={classData}
                                 key={index}
-                                classType={classType}
+                                // classType={classType}
+                                isAdmin
                             />
                         ) : (
                             <ClassCard
