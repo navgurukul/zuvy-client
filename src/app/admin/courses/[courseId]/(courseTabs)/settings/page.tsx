@@ -124,7 +124,7 @@ const Page = ({ params }: { params: any }) => {
                     buttonText="Delete Course"
                     input={false}
                     modalText2=""
-                    batchName=""
+                    instructorInfo={{}}
                 />
             </div>
         </div>
