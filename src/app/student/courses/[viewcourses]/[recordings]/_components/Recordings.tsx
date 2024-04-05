@@ -10,7 +10,8 @@ function Recordings({ completedClasses }: { completedClasses: any }) {
                     <RecordingCard
                         classData={classObj}
                         key={classObj.meetingid}
-                        classType="complete"
+                        // classType="complete"
+                        isAdmin={false}
                     />
                 ))
             ) : (
