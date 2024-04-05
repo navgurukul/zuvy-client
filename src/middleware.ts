@@ -46,22 +46,22 @@ export function middleware(request: NextRequest) {
       }
     } else if (user === "student") {
       if (
-        request.nextUrl.pathname.startsWith("/") &&
-        request.nextUrl.pathname !== "/student"
+        (request.nextUrl.pathname.startsWith("/") &&
+        request.nextUrl.pathname !== "/student")
       ) {
         return NextResponse.redirect(new URL("/student", request.url));
       }
     } else if (user === "admin") {
       if (
-        request.nextUrl.pathname.startsWith("/") &&
-        request.nextUrl.pathname !== "/admin"
+        (request.nextUrl.pathname.startsWith("/") &&
+        request.nextUrl.pathname !== "/admin")
       ) {
         return NextResponse.redirect(new URL("/admin", request.url));
       }
     } else if (user === "volunteer") {
       if (
-        request.nextUrl.pathname.startsWith("/") &&
-        request.nextUrl.pathname !== "/instructor"
+        (request.nextUrl.pathname.startsWith("/") &&
+        request.nextUrl.pathname !== "/instructor") 
       ) {
         return NextResponse.redirect(new URL("/instructor", request.url));
       }
