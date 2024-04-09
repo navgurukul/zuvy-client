@@ -62,7 +62,7 @@ const AddStudentsModal = ({
         if (transformedObject) {
             const requestBody = transformedObject
             try {
-                const response = await api
+                await api
                     .post(`/bootcamp/students/${id}`, requestBody)
                     .then((response) => {
                         toast({
