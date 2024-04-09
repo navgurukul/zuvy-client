@@ -38,7 +38,6 @@ export function DataTable<TData, TValue>({
     data,
 }: DataTableProps<TData, TValue>) {
     const [rowSelection, setRowSelection] = React.useState({})
-    const { fetchBatches, batchData } = getBatchData()
 
     const [columnVisibility, setColumnVisibility] =
         React.useState<VisibilityState>({})

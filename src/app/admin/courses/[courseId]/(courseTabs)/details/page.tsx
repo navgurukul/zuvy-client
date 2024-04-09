@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -29,8 +29,9 @@ import { Calendar } from '@/components/ui/calendar'
 import OptimizedImageWithFallback from '@/components/ImageWithFallback'
 import { cn } from '@/lib/utils'
 import { LANGUAGES } from '@/utils/constant'
-import { getCourseData } from '@/store/store'
+import { getCourseData, getStoreStudentData } from '@/store/store'
 import api from '@/utils/axios.config'
+import { fetchStudentData } from '@/utils/students'
 
 const FormSchema = z.object({
     name: z.string(),
@@ -53,10 +54,12 @@ interface CourseData {
     unassigned_students: number // Change the type to number
 }
 
-function Page() {
+function Page({ params }: { params: any }) {
     const BASE_URL = process.env.NEXT_PUBLIC_API_URL
+    // console.log(params.courseId)
 
     const { courseData, setCourseData } = getCourseData()
+    const { setStoreStudentData } = getStoreStudentData()
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
@@ -82,6 +85,9 @@ function Page() {
                 : undefined,
         },
     })
+    useEffect(() => {
+        fetchStudentData(params.courseId, setStoreStudentData)
+    }, [params.courseId, setStoreStudentData])
 
     async function onSubmit(data: z.infer<typeof FormSchema>) {
         try {

@@ -13,12 +13,24 @@ export const fetchStudentData = async (
         const data = response.data
         setStoreStudentData(data.studentsEmails)
     } catch (error) {
-        // Handle error appropriately
         console.error('Error fetching student data:', error)
     }
 }
 
-export async function onBatchChange(selectedvalue: any, student: any) {
+export async function onBatchChange(
+    selectedvalue: any,
+    student: any,
+    initialValue: any,
+    bootcampId: any,
+    setStoreStudentData: any,
+    fetchStudentData: any
+) {
+    if (initialValue === selectedvalue) {
+        toast({
+            title: 'Cannot Update the Batch',
+            description: 'Initial Batch And selected batch Are same',
+        })
+    }
     await api
         .post(
             `/bootcamp/students/${student.bootcampId}?batch_id=${selectedvalue}`,
@@ -32,6 +44,7 @@ export async function onBatchChange(selectedvalue: any, student: any) {
             }
         )
         .then((res) => {
+            fetchStudentData(bootcampId, setStoreStudentData)
             toast({
                 title: 'Success',
                 description: res.data.students_enrolled[0].message,
