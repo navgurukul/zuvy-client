@@ -26,8 +26,6 @@ function Page() {
     const [limit, setLimit] = useState(6)
     const [offset, setOffset] = useState(1)
 
-
-
     const { courseData } = getCourseData()
 
     const handleDateChange = (date: any) => {
@@ -112,32 +110,32 @@ function Page() {
     }, [courseData, batchId, classType, offset, limit])
 
     const CreateSession = () => {
-        const [title, setTitle] = useState("");
-        const [description, setDescription] = useState("");
-        const [startDateTimeState, setStartDateTime] = useState(new Date());
-        const [endDateTimeState, setEndDateTime] = useState(new Date());
-        const [batchId, setBatchId] = useState("");
-    
+        const [title, setTitle] = useState('')
+        const [description, setDescription] = useState('')
+        const [startDateTimeState, setStartDateTime] = useState(new Date())
+        const [endDateTimeState, setEndDateTime] = useState(new Date())
+        const [batchId, setBatchId] = useState('')
+
         const handleDialogOpenChange = () => {
-            setTitle("");
-            setDescription("");
-            const startDateTime = new Date();
-            startDateTime.setHours(startDateTime.getHours() + 5);
-            startDateTime.setMinutes(startDateTime.getMinutes() + 30);
-            setStartDateTime(startDateTime);
-            const endDateTime = new Date();
-            endDateTime.setHours(endDateTime.getHours() + 5);
-            endDateTime.setMinutes(endDateTime.getMinutes() + 30);
-            setEndDateTime(endDateTime);
-    
-            setBatchId("");
-        };
-    
+            setTitle('')
+            setDescription('')
+            const startDateTime = new Date()
+            startDateTime.setHours(startDateTime.getHours() + 5)
+            startDateTime.setMinutes(startDateTime.getMinutes() + 30)
+            setStartDateTime(startDateTime)
+            const endDateTime = new Date()
+            endDateTime.setHours(endDateTime.getHours() + 5)
+            endDateTime.setMinutes(endDateTime.getMinutes() + 30)
+            setEndDateTime(endDateTime)
+
+            setBatchId('')
+        }
+
         return (
             <Dialog onOpenChange={handleDialogOpenChange}>
-                <DialogTrigger>
+                <DialogTrigger asChild>
                     <Button className="text-white bg-secondary">
-                        <span>Create Session</span>
+                        Create Session
                     </Button>
                 </DialogTrigger>
                 <DialogOverlay />
@@ -189,21 +187,21 @@ function Page() {
             </div>
             <div className="flex justify-start gap-6 my-6">
                 <Badge
-                    variant={classType === 'active' ? 'default' : 'outline'}
+                    variant={classType === 'active' ? 'secondary' : 'outline'}
                     onClick={() => handleClassType('active')}
                     className="rounded-md cursor-pointer"
                 >
                     Active Classes
                 </Badge>
                 <Badge
-                    variant={classType === 'upcoming' ? 'default' : 'outline'}
+                    variant={classType === 'upcoming' ? 'secondary' : 'outline'}
                     onClick={() => handleClassType('upcoming')}
                     className="rounded-md cursor-pointer"
                 >
                     Upcoming Classes
                 </Badge>
                 <Badge
-                    variant={classType === 'complete' ? 'default' : 'outline'}
+                    variant={classType === 'complete' ? 'secondary' : 'outline'}
                     onClick={() => handleClassType('complete')}
                     className="rounded-md cursor-pointer"
                 >
@@ -217,7 +215,8 @@ function Page() {
                             <RecordingCard
                                 classData={classData}
                                 key={index}
-                                classType={classType}
+                                // classType={classType}
+                                isAdmin
                             />
                         ) : (
                             <ClassCard
