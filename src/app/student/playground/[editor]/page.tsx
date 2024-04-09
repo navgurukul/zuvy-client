@@ -2,7 +2,7 @@
 import { useEffect, useRef } from 'react'
 import IDE from './editor'
 
-export default function page({ params }: { params: { editor: string } }) {
+export default function Page({ params }: { params: { editor: string } }) {
     const section1Ref = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
