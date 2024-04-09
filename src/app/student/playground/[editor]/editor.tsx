@@ -30,6 +30,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import SubmissionsList from '../_components/submissions-list'
+import { b64DecodeUnicode, b64EncodeUnicode } from '@/utils/base64'
 
 interface questionDetails {
     title: string
@@ -69,31 +71,6 @@ export default function IDE({ params }: { params: { editor: string } }) {
         setLanguage(lang)
         const langID = getDataFromField(editorLanguages, lang, 'lang', 'id')
         setLanguageId(langID)
-    }
-
-    // Encoding UTF-8 ⇢ base64
-
-    function b64EncodeUnicode(str: string) {
-        return btoa(
-            encodeURIComponent(str).replace(
-                /%([0-9A-F]{2})/g,
-                function (_match, p1) {
-                    return String.fromCharCode(parseInt(p1, 16))
-                }
-            )
-        )
-    }
-
-    // Decoding base64 ⇢ UTF-8
-
-    function b64DecodeUnicode(str: string) {
-        return decodeURIComponent(
-            Array.prototype.map
-                .call(atob(str), function (c) {
-                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-                })
-                .join('')
-        )
     }
 
     const getDataFromField = (
@@ -187,9 +164,12 @@ export default function IDE({ params }: { params: { editor: string } }) {
     return (
         <div>
             <div className="flex justify-between mb-2">
-                <Button variant="ghost" size="icon" onClick={handleBack}>
-                    <ArrowLeft className="h-5 w-5" />
-                </Button>
+                <div>
+                    <Button variant="ghost" size="icon" onClick={handleBack}>
+                        <ArrowLeft className="h-5 w-5" />
+                    </Button>
+                    <SubmissionsList questionId={params.editor} />
+                </div>
                 <div>
                     <Button
                         onClick={(e) => handleSubmit(e, 'run')}
