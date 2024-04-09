@@ -35,15 +35,15 @@ import { toast } from '@/components/ui/use-toast'
 
 import AddStudentsModal from '../../_components/addStudentsmodal'
 import api from '@/utils/axios.config'
-import { getBatchData, getCourseData } from '@/store/store'
+import { getBatchData, getCourseData, getStoreStudentData } from '@/store/store'
 import useDebounce from '@/hooks/useDebounce'
+import { fetchStudentData } from '@/utils/students'
 
 const Page = ({ params }: { params: any }) => {
-    const { courseData } = getCourseData()
+    const { courseData, fetchCourseDetails } = getCourseData()
     const { fetchBatches, batchData, setBatchData } = getBatchData()
-    const [unassignedStudents, setUnassignedStudents] = useState(
-        courseData?.unassigned_students
-    )
+    const { setStoreStudentData } = getStoreStudentData()
+
     const [search, setSearch] = useState<string>('')
     const debouncedSearch = useDebounce(search, 1000)
     useEffect(() => {
@@ -52,19 +52,20 @@ const Page = ({ params }: { params: any }) => {
             // setBatches(batchData)
         }
     }, [courseData, fetchBatches])
-    const fetchCourseDetails = useCallback(async () => {
-        try {
-            const response = await api.get(`/bootcamp/${courseData?.id}`)
-            setUnassignedStudents(response.data.bootcamp.unassigned_students)
-        } catch (error) {
-            console.error('Error fetching course details:', error)
-        }
-    }, [courseData?.id])
+    // const fetchCourseDetails = useCallback(async () => {
+    //     try {
+    //         const response = await api.get(`/bootcamp/${courseData?.id}`)
+    //         setUnassignedStudents(response.data.bootcamp.unassigned_students)
+    //     } catch (error) {
+    //         console.error('Error fetching course details:', error)
+    //     }
+    // }, [courseData?.id])
+
     useEffect(() => {
-        if (courseData?.id) {
-            fetchCourseDetails()
+        if (params.courseId) {
+            fetchCourseDetails(params.courseId)
         }
-    }, [courseData?.id, setUnassignedStudents, fetchCourseDetails])
+    }, [params.courseId, fetchCourseDetails])
 
     const formSchema = z.object({
         name: z.string().min(2, {
@@ -115,10 +116,12 @@ const Page = ({ params }: { params: any }) => {
             }
 
             await api.post(`/batch`, convertedData).then((res) => {
-                if (courseData?.id) {
-                    fetchBatches(courseData?.id)
+                if (params.courseId) {
+                    fetchBatches(params.courseId)
+                    fetchStudentData(params.courseId, setStoreStudentData)
+                    fetchCourseDetails(params.courseId)
                 }
-                fetchCourseDetails()
+
                 toast({
                     title: res.data.status,
                     description: res.data.message,
@@ -154,9 +157,9 @@ const Page = ({ params }: { params: any }) => {
         setSearch(e.target.value)
     }
 
-    console.log(search)
+    // console.log(search)
     const renderModal = (emptyState: boolean) => {
-        if (unassignedStudents === 0) {
+        if (courseData?.unassigned_students === 0) {
             return (
                 <Dialog>
                     <DialogTrigger asChild>
@@ -179,7 +182,8 @@ const Page = ({ params }: { params: any }) => {
                     <DialogContent>
                         <DialogHeader>
                             <DialogTitle>New Batch</DialogTitle>
-                            Unassigned Students in Records: {unassignedStudents}
+                            Unassigned Students in Records:{' '}
+                            {courseData?.unassigned_students}
                             <Form {...form}>
                                 <form
                                     onSubmit={form.handleSubmit(onSubmit)}
@@ -249,9 +253,9 @@ const Page = ({ params }: { params: any }) => {
                                         )}
                                     />
                                     <FormDescription>
-                                        {unassignedStudents} students will be
-                                        added to this batch (Maximum current
-                                        availability)
+                                        {courseData?.unassigned_students}{' '}
+                                        students will be added to this batch
+                                        (Maximum current availability)
                                     </FormDescription>
                                     <div className="w-full flex flex-col items-end gap-y-5 ">
                                         <DialogClose asChild>

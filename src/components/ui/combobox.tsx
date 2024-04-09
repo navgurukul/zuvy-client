@@ -1,9 +1,5 @@
-'use client'
-
 import * as React from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
-
-import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
     Command,
@@ -34,9 +30,10 @@ export function Combobox({
     isDisabled = false,
 }: ComboboxProps) {
     const [open, setOpen] = React.useState(false)
-    const [value, setValue] = React.useState(initialValue || '')
+    const [value, setValue] = React.useState(initialValue)
 
-    // const found = data.find((item: any) => item.value)
+    // console.log(initialValue)
+
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
@@ -44,24 +41,30 @@ export function Combobox({
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
+                    aria-haspopup="listbox"
+                    aria-labelledby={`${title.toLowerCase()}-combobox-label`}
                     className="w-full justify-between"
                     disabled={isDisabled}
                 >
                     {value
                         ? data.find((item: any) => item.value === value)?.label
-                        : `Select ${title}...`}
+                        : `No Batch is Assigned`}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[200px] p-0">
                 <Command>
-                    <CommandInput placeholder="Search..." />
+                    <CommandInput
+                        placeholder={`Search ${title}...`}
+                        aria-labelledby={`${title.toLowerCase()}-combobox-label`}
+                    />
                     <CommandEmpty>No {title} found.</CommandEmpty>
                     <CommandGroup>
                         {data.map((item: any) => (
                             <CommandItem
                                 key={item.value}
                                 value={item.value}
+                                disabled={item.value === value}
                                 onSelect={(currentValue) => {
                                     setValue(
                                         currentValue === value
@@ -71,14 +74,15 @@ export function Combobox({
                                     setOpen(false)
                                     onChange(currentValue)
                                 }}
+                                aria-selected={value === item.value}
                             >
                                 <Check
-                                    className={cn(
-                                        'mr-2 h-4 w-4',
+                                    className={
                                         value === item.value
                                             ? 'opacity-100'
                                             : 'opacity-0'
-                                    )}
+                                    }
+                                    aria-hidden={!value === item.value}
                                 />
                                 {item.label}
                             </CommandItem>

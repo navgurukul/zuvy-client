@@ -68,8 +68,8 @@ const BatchesInfo = ({
     const [totalStudents, setTotalStudents] = useState<number>(0)
     const [lastPage, setLastPage] = useState<number>(0)
     const [formstudentData, setFormStudentData] = useState<any>({})
-    const paramBatchId = parseInt(params.batchId)
     const [firstBatchStudentId, setFirstBatchStudentId] = useState<any>()
+    const [isFormOpen, setIsFormOpen] = useState(false)
     const debouncedValue = useDebounce(search, 1000)
 
     const crumbs = [
@@ -96,58 +96,6 @@ const BatchesInfo = ({
             isLast: true,
         },
     ]
-    // useEffect(() => {
-    //     console.log('Params:', params.batchId)
-
-    //     if (params.batchId && studentsData.length > 0) {
-    //         const paramsBatchId = params.batchId.toString()
-    //         const firstStudentBatchId = studentsData[0]?.batchId?.toString()
-
-    //         if (firstStudentBatchId && paramsBatchId !== firstStudentBatchId) {
-    //             console.log('Redirecting to /not-found')
-    //             router.push('/not-found')
-    //         }
-    //     }
-    // }, [params.batchId, studentsData, router])
-
-    useEffect(() => {
-        const fetchInstructorInfo = async () => {
-            try {
-                const response = await api.get(`/batch/${params.batchId}`)
-                const batchData = response.data.batch
-                setInstructorInfo(batchData)
-                setFirstBatchStudentId(batchData.id)
-                setFormStudentData({
-                    name: batchData.name,
-                    instructorId: batchData.instructorId,
-                    capEnrollment: batchData.capEnrollment,
-                })
-            } catch (error: any) {
-                console.log('Error fetching instructor info:', error.message)
-            }
-        }
-
-        if (params.batchId) {
-            fetchInstructorInfo()
-        }
-    }, [params.batchId])
-    const batchDeleteHandler = async () => {
-        try {
-            await api.delete(`/batch/${params.batchId}`)
-            toast({
-                title: 'Batch Deleted Successfully',
-                className: 'text-start capitalize',
-            })
-            setDeleteModalOpen(false)
-            router.push(`/admin/courses/${params.courseId}/batches`)
-        } catch (error) {
-            toast({
-                title: 'Batch not Deleted',
-                className: 'text-start capitalize',
-            })
-            console.error('Error deleting batch:', error)
-        }
-    }
     const formSchema = z.object({
         name: z.string().min(2, {
             message: 'Batch name must be at least 2 characters.',
@@ -173,13 +121,68 @@ const BatchesInfo = ({
             instructorId: instructorsInfo.instructorId || '',
             capEnrollment: instructorsInfo.capEnrollment || '',
         },
-        values: {
-            name: instructorsInfo.name || '',
-            instructorId: instructorsInfo.instructorId || '',
-            capEnrollment: instructorsInfo.capEnrollment || '',
-        },
         mode: 'onChange',
     })
+    useEffect(() => {
+        form.setValue('name', instructorsInfo?.name || '')
+        form.setValue('instructorId', instructorsInfo?.instructorId || '')
+        form.setValue('capEnrollment', instructorsInfo?.capEnrollment || '')
+    }, [instructorsInfo, form])
+
+    const toggleForm = () => {
+        setIsFormOpen(!isFormOpen)
+    }
+
+    const fetchInstructorInfo = useCallback(
+        async (batchId: string) => {
+            if (batchId) {
+                try {
+                    const response = await api.get(`/batch/${batchId}`)
+                    const batchData = response.data.batch
+                    setInstructorInfo(batchData)
+                    setFirstBatchStudentId(batchData.id)
+                    setFormStudentData({
+                        name: batchData.name,
+                        instructorId: batchData.instructorId,
+                        capEnrollment: batchData.capEnrollment,
+                    })
+                } catch (error: any) {
+                    router.push('/not-found')
+                    console.log(
+                        'Error fetching instructor info:',
+                        error.message
+                    )
+                }
+            }
+        },
+        [setInstructorInfo, setFirstBatchStudentId, setFormStudentData, router]
+    )
+    useEffect(() => {
+        fetchInstructorInfo(params.batchId)
+    }, [isFormOpen, fetchInstructorInfo, params.batchId])
+    useEffect(() => {
+        if (params.batchId) {
+            fetchInstructorInfo(params.batchId)
+        }
+    }, [params.batchId, router, fetchInstructorInfo])
+    const batchDeleteHandler = async () => {
+        try {
+            await api.delete(`/batch/${params.batchId}`)
+            toast({
+                title: 'Batch Deleted Successfully',
+                className: 'text-start capitalize',
+            })
+            setDeleteModalOpen(false)
+            router.push(`/admin/courses/${params.courseId}/batches`)
+        } catch (error) {
+            toast({
+                title: 'Batch not Deleted',
+                className: 'text-start capitalize',
+            })
+            console.error('Error deleting batch:', error)
+        }
+    }
+
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         const convertedData = {
             ...values,
@@ -187,7 +190,6 @@ const BatchesInfo = ({
             instructorId: +values.instructorId,
             capEnrollment: +values.capEnrollment,
         }
-
         try {
             await api
                 .patch(`/batch/${params.batchId}`, convertedData)
@@ -222,6 +224,7 @@ const BatchesInfo = ({
         }
         getBootCamp()
     }, [params.courseId])
+
     const fetchStudentData = useCallback(
         async (offset: number) => {
             await api
@@ -273,14 +276,7 @@ const BatchesInfo = ({
     const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value)
     }
-    if (
-        params.batchId &&
-        isNaN(parseInt(params.batchId)) &&
-        params.batchId.match(/[a-zA-Z]/) &&
-        parseInt(params.batchId) > 1000
-    ) {
-        notFound()
-    }
+
     return (
         <>
             <BreadcrumbCmponent crumbs={crumbs} />
@@ -487,7 +483,10 @@ const BatchesInfo = ({
                         <div className="flex items-center mx-4 text-sm">
                             <Dialog>
                                 <DialogTrigger asChild>
-                                    <button className="flex ">
+                                    <button
+                                        className="flex"
+                                        onClick={toggleForm}
+                                    >
                                         <Pencil size={18} className="mx-4" />
                                         Edit Batch
                                     </button>
@@ -532,7 +531,7 @@ const BatchesInfo = ({
                                                             <FormControl>
                                                                 <Input
                                                                     placeholder="Instructor Id"
-                                                                    type="text"
+                                                                    type="name"
                                                                     {...field}
                                                                 />
                                                             </FormControl>
@@ -551,7 +550,7 @@ const BatchesInfo = ({
                                                             <FormControl>
                                                                 <Input
                                                                     placeholder="Cap Enrollment"
-                                                                    type="number"
+                                                                    type="name"
                                                                     {...field}
                                                                 />
                                                             </FormControl>

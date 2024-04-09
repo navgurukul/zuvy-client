@@ -1,6 +1,6 @@
 // components/DeleteConfirmationModal.tsx
 'use client'
-import { Fragment, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -42,6 +42,9 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
             setError('Batch name does not match')
         }
     }
+    useEffect(() => {
+        setInputValue('')
+    }, [isOpen])
     return (
         <Transition.Root show={isOpen} as={Fragment}>
             <Dialog

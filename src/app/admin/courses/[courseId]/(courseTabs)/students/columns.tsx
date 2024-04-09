@@ -9,7 +9,11 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Combobox } from '@/components/ui/combobox'
 
 import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
-import { deleteStudentHandler, onBatchChange } from '@/utils/students'
+import {
+    deleteStudentHandler,
+    fetchStudentData,
+    onBatchChange,
+} from '@/utils/students'
 import { Task } from '@/utils/data/schema'
 import {
     getBatchData,
@@ -18,32 +22,32 @@ import {
 } from '@/store/store'
 import { getAttendanceColorClass } from '@/utils/students'
 export const columns: ColumnDef<Task>[] = [
-    {
-        id: 'select',
-        header: ({ table }) => (
-            <Checkbox
-                checked={
-                    table.getIsAllPageRowsSelected() ||
-                    (table.getIsSomePageRowsSelected() && 'indeterminate')
-                }
-                onCheckedChange={(value) =>
-                    table.toggleAllPageRowsSelected(!!value)
-                }
-                aria-label="Select all"
-                className="translate-y-[2px]"
-            />
-        ),
-        cell: ({ row }) => (
-            <Checkbox
-                checked={row.getIsSelected()}
-                onCheckedChange={(value) => row.toggleSelected(!!value)}
-                aria-label="Select row"
-                className="translate-y-[2px]"
-            />
-        ),
-        enableSorting: false,
-        enableHiding: false,
-    },
+    // {
+    //     id: 'select',
+    //     header: ({ table }) => (
+    //         <Checkbox
+    //             checked={
+    //                 table.getIsAllPageRowsSelected() ||
+    //                 (table.getIsSomePageRowsSelected() && 'indeterminate')
+    //             }
+    //             onCheckedChange={(value) =>
+    //                 table.toggleAllPageRowsSelected(!!value)
+    //             }
+    //             aria-label="Select all"
+    //             className="translate-y-[2px]"
+    //         />
+    //     ),
+    //     cell: ({ row }) => (
+    //         <Checkbox
+    //             checked={row.getIsSelected()}
+    //             onCheckedChange={(value) => row.toggleSelected(!!value)}
+    //             aria-label="Select row"
+    //             className="translate-y-[2px]"
+    //         />
+    //     ),
+    //     enableSorting: false,
+    //     enableHiding: false,
+    // },
     {
         accessorKey: 'profilePicture',
         header: ({ column }) => (
@@ -75,6 +79,8 @@ export const columns: ColumnDef<Task>[] = [
             }
             return <div className="flex items-center">{ImageContainer()}</div>
         },
+        enableSorting: false,
+        enableHiding: false,
     },
     {
         accessorKey: 'name',
@@ -113,28 +119,46 @@ export const columns: ColumnDef<Task>[] = [
         cell: ({ row }) => {
             const student = row.original
             const { batchData } = getBatchData()
-            const transformedData = batchData?.map(
-                (item: { id: any; name: any }) => ({
-                    value: item.id.toString(),
-                    label: item.name,
-                })
+            const { studentsData, setStoreStudentData } = getStoreStudentData()
+            const bootcampId = batchData && batchData[0]?.bootcampId
+            const initialvalue = row.original?.batchId?.toString()
+            const transformedData = studentsData?.reduce(
+                (uniqueData: any[], item: { batchId: any; batchName: any }) => {
+                    const isUnique = !uniqueData.some(
+                        (uniqueItem) =>
+                            uniqueItem.value === item.batchId?.toString() &&
+                            uniqueItem.label === item.batchName
+                    )
+                    if (isUnique) {
+                        uniqueData.push({
+                            value: item.batchId?.toString(),
+                            label: item?.batchName,
+                        })
+                    }
+                    return uniqueData
+                },
+                []
             )
-
             return (
                 <div className="flex text-start gap-6 my-6 max-w-[200px]">
                     <Combobox
                         data={transformedData}
                         title={'Batch'}
                         onChange={(selectedValue) => {
-                            onBatchChange(selectedValue, student)
+                            onBatchChange(
+                                selectedValue,
+                                student,
+                                initialvalue,
+                                bootcampId,
+                                setStoreStudentData,
+                                fetchStudentData
+                            )
                         }}
-                        initialValue={row.original?.batchId?.toString() || ''}
+                        initialValue={initialvalue || ''}
                     />
                 </div>
             )
         },
-        enableSorting: false,
-        enableHiding: false,
     },
     {
         accessorKey: 'progress',
@@ -144,14 +168,6 @@ export const columns: ColumnDef<Task>[] = [
         cell: ({ row }) => {
             const progress = row.original.progress
             const circleColorClass = getAttendanceColorClass(progress)
-
-            // const priority = priorities.find(
-            //   (priority) => priority.value === row.getValue("progress")
-            // );
-
-            // if (!priority) {
-            //   return null;
-            // }
 
             return (
                 <div className="relative size-9">
