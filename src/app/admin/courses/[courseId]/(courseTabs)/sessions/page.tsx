@@ -37,7 +37,7 @@ function Page() {
     }
 
     const handleClassType = (
-        type: string | 'active' | 'complete' | 'upcoming'
+        type: string | 'ongoing' | 'complete' | 'upcoming'
     ) => {
         if (classType == type) {
             setOffset(offset)
@@ -73,7 +73,7 @@ function Page() {
     }, [courseData])
 
     useEffect(() => {
-        if (classType === 'active') {
+        if (classType === 'ongoing') {
             setAllClasses(ongoingClasses)
         } else if (classType === 'complete') {
             setAllClasses(completedClasses)
@@ -187,8 +187,8 @@ function Page() {
             </div>
             <div className="flex justify-start gap-6 my-6">
                 <Badge
-                    variant={classType === 'active' ? 'secondary' : 'outline'}
-                    onClick={() => handleClassType('active')}
+                    variant={classType === 'ongoing' ? 'secondary' : 'outline'}
+                    onClick={() => handleClassType('ongoing')}
                     className="rounded-md cursor-pointer"
                 >
                     Active Classes
