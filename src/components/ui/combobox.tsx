@@ -31,9 +31,7 @@ export function Combobox({
 }: ComboboxProps) {
     const [open, setOpen] = React.useState(false)
     const [value, setValue] = React.useState(initialValue)
-
-    // console.log(initialValue)
-
+    const length = data.length
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
@@ -46,8 +44,11 @@ export function Combobox({
                     className="w-full justify-between"
                     disabled={isDisabled}
                 >
-                    {value
-                        ? data.find((item: any) => item.value === value)?.label
+                    {length === 1
+                        ? data[0]?.label ?? 'No Batch is Assigned'
+                        : value
+                        ? data.find((item: any) => item.value === value)
+                              ?.label ?? 'No Batch is Assigned'
                         : `No Batch is Assigned`}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
