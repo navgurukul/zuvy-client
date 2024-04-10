@@ -39,7 +39,7 @@ const AddStudentsModal = ({
     // state and variables
     const [selectedOption, setSelectedOption] = useState('1')
     const [studentData, setStudentData] = useState<StudentDataState | any>({})
-    const { setStoreStudentData } = getStoreStudentData()
+    const { studentsData, setStoreStudentData } = getStoreStudentData()
 
     // func
     const handleSingleStudent = (e: React.ChangeEvent<HTMLInputElement>) => {

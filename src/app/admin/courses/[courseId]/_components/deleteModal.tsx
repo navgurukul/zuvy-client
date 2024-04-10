@@ -97,12 +97,12 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                         <p className="text-sm text-gray-700 my-2 ">
                                             {modalText}
                                         </p>
-                                        <p className="text-sm flex gap-x-2 text-black font-semibold my-2 mb-2 ">
+                                        <div className="text-sm flex gap-x-2 text-black font-semibold my-2 mb-2">
                                             <p className="text-black font-normal">
                                                 {modalText2}
                                             </p>
                                             {instructorInfo?.name}
-                                        </p>
+                                        </div>
                                     </div>
                                 </div>
                                 {input && (

@@ -62,32 +62,45 @@ const Courses: React.FC = () => {
             console.error('Error fetching courses:', error)
         }
     }
-
     const handleNewCourseNameChange = (
         event: React.ChangeEvent<HTMLInputElement>
     ) => {
         setNewCourseName(event.target.value)
     }
-
     const handleCreateCourse = async () => {
-        try {
-            const response = await api
-                .post('/bootcamp', { name: newCourseName })
-                .then((response) => {
-                    toast({
-                        title: response.data.status,
-                        description: response.data.message,
-                        className: 'text-start capitalize',
-                    })
-                })
-            getBootcamp()
-        } catch (error: any) {
+        const repeatedCourseName = newCourseName
+            .replace(/\s+/g, ' ')
+            .toLowerCase()
+            .trim()
+
+        const matchedCourseName = courses?.find(
+            (courseName) => courseName.name.toLowerCase() === repeatedCourseName
+        )
+        if (matchedCourseName) {
             toast({
-                title: error.data.status,
-                description: error.data.message,
-                className: 'text-start capitalize',
+                title: 'Cannot Create A New Course',
+                description: 'Course Name Already Exists',
             })
-            console.error('Error creating course:', error)
+        } else {
+            try {
+                const response = await api
+                    .post('/bootcamp', { name: newCourseName })
+                    .then((response) => {
+                        toast({
+                            title: response.data.status,
+                            description: response.data.message,
+                            className: 'text-start capitalize',
+                        })
+                    })
+                getBootcamp()
+            } catch (error: any) {
+                toast({
+                    title: error.data.status,
+                    description: error.data.message,
+                    className: 'text-start capitalize',
+                })
+                console.error('Error creating course:', error)
+            }
         }
     }
 

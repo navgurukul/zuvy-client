@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Combobox } from '@/components/ui/combobox'
@@ -36,16 +36,17 @@ function Page() {
         return date >= currentDate
     }
 
-    const handleClassType = (
-        type: string | 'active' | 'complete' | 'upcoming'
-    ) => {
-        if (classType == type) {
-            setOffset(offset)
-        } else {
-            setOffset(1)
-        }
-        setClassType(type)
-    }
+    const handleClassType = useCallback(
+        (type: string | 'active' | 'complete' | 'upcoming') => {
+            if (classType === type) {
+                setOffset(offset)
+            } else {
+                setOffset(1)
+            }
+            setClassType(type)
+        },
+        [classType, offset]
+    )
 
     const handleComboboxChange = (value: string) => {
         setBatchId((prevBatchId: number) =>
@@ -107,7 +108,7 @@ function Page() {
                     console.log('Error fetching classes:', error)
                 })
         }
-    }, [courseData, batchId, classType, offset, limit])
+    }, [courseData, batchId, classType, offset, limit, handleClassType])
 
     const CreateSession = () => {
         const [title, setTitle] = useState('')

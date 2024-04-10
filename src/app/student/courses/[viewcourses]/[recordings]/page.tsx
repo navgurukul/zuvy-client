@@ -80,7 +80,7 @@ function Page({
                     console.log('Error fetching classes:', error)
                 })
         }
-    }, [userID])
+    }, [userID, params.viewcourses])
 
     useEffect(() => {
         api.get(`/bootcamp/${params.viewcourses}`)
@@ -90,7 +90,7 @@ function Page({
             .catch((error) => {
                 console.log('Error fetching bootcamp data:', error)
             })
-    }, [])
+    }, [params.viewcourses])
 
     return (
         <>
