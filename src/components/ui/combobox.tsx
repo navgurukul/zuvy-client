@@ -31,7 +31,13 @@ export function Combobox({
 }: ComboboxProps) {
     const [open, setOpen] = React.useState(false)
     const [value, setValue] = React.useState(initialValue)
-    const length = data.length
+
+    const length = data ? data.length : 0
+
+    const filteredData = data
+        ? data.filter((item: any) => item.value !== null || item.label !== null)
+        : []
+
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
@@ -61,7 +67,7 @@ export function Combobox({
                     />
                     <CommandEmpty>No {title} found.</CommandEmpty>
                     <CommandGroup>
-                        {data.map((item: any) => (
+                        {filteredData?.map((item: any) => (
                             <CommandItem
                                 key={item.value}
                                 value={item.value}

@@ -119,31 +119,32 @@ export const columns: ColumnDef<Task>[] = [
         cell: ({ row }) => {
             const student = row.original
             const { studentsData, setStoreStudentData } = getStoreStudentData()
+            const { batchData } = getBatchData()
             const bootcampId = studentsData && studentsData[0]?.bootcampId
             const initialvalue = row.original?.batchId?.toString()
             const transformedData = studentsData?.reduce(
                 (uniqueData: any[], item: { batchId: any; batchName: any }) => {
-                    if (
-                        item.batchId !== undefined &&
-                        item.batchName !== undefined &&
-                        item.batchName !== null
-                    ) {
-                        const isUnique = !uniqueData.some(
-                            (uniqueItem) =>
-                                uniqueItem.value === item.batchId?.toString() &&
-                                uniqueItem.label === item.batchName
-                        )
-                        if (isUnique) {
-                            uniqueData.push({
-                                value: item.batchId?.toString(),
-                                label: item.batchName,
-                            })
-                        }
+                    const value = item.batchId?.toString() ?? 'Null'
+                    const label = item.batchName ?? 'Null'
+
+                    const isUnique = !uniqueData.some(
+                        (uniqueItem) =>
+                            uniqueItem.value === value &&
+                            uniqueItem.label === label
+                    )
+
+                    if (isUnique) {
+                        uniqueData.push({
+                            value,
+                            label,
+                        })
                     }
+
                     return uniqueData
                 },
                 []
             )
+
             return (
                 <div className="flex text-start gap-6 my-6 max-w-[200px]">
                     <Combobox
