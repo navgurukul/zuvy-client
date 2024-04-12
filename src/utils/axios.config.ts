@@ -3,7 +3,7 @@
 import axios, { AxiosRequestConfig } from "axios";
 
 const mainURL = process.env.NEXT_PUBLIC_MAIN_URL;
-const apiURL = process.env.NEXT_PUBLIC_MAIN_URL;
+const apiURL = process.env.NEXT_PUBLIC_API_URL;
 
 let headers: AxiosRequestConfig["headers"] = {
   "Content-Type": "application/json",
