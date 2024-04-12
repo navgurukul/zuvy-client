@@ -7,7 +7,7 @@ import {
     BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
 import React, { useState, useEffect } from 'react'
-import api from '@/utils/axios.config'
+import { api } from '@/utils/axios.config'
 import { useLazyLoadedStudentData } from '@/store/store'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import UpcomingClasses from './_components/UpcomingClasses'

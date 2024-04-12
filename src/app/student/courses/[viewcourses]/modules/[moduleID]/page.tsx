@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import api from '@/utils/axios.config'
+import { api } from '@/utils/axios.config'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { useRouter } from 'next/navigation'
 import Script from 'next/script'

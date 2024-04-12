@@ -3,25 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
-import {
-    TableHead,
-    TableHeader,
-    TableRow,
-    TableBody,
-    TableCell,
-    Table,
-} from '@/components/ui/table'
-import {
-    Select,
-    SelectTrigger,
-    SelectValue,
-    SelectContent,
-    SelectItem,
-} from '@/components/ui/select'
-import { Input } from '@/components/ui/input'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { useLazyLoadedStudentData } from '@/store/store'
-import api from '@/utils/axios.config'
+import { api } from '@/utils/axios.config'
 import Image from 'next/image'
 
 interface Question {

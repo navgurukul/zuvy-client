@@ -34,7 +34,7 @@ import { CardDescription, CardTitle } from '@/components/ui/card'
 import { toast } from '@/components/ui/use-toast'
 
 import AddStudentsModal from '../../_components/addStudentsmodal'
-import api from '@/utils/axios.config'
+import { api } from '@/utils/axios.config'
 import { getBatchData, getCourseData, getStoreStudentData } from '@/store/store'
 import useDebounce from '@/hooks/useDebounce'
 import { fetchStudentData } from '@/utils/students'

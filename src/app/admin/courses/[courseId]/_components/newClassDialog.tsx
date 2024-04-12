@@ -8,7 +8,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog'
-import api from '@/utils/axios.config'
+import { api } from '@/utils/axios.config'
 
 import styles from '../../_components/cources.module.css'
 import { Label } from '@/components/ui/label'
@@ -102,27 +102,24 @@ const NewClassDialog = ({
     endDateTime,
     setEndDateTime,
     batchId,
-    setBatchId
+    setBatchId,
 }: {
     courseId: number
     bootcampData: Object
-    title:string
-    setTitle:any
-    description:string
-    setDescription:any
-    startDateTime:Date,
-    setStartDateTime:any
-    endDateTime:Date
-    setEndDateTime:any
-    batchId:any
-    setBatchId:any
-
-
+    title: string
+    setTitle: any
+    description: string
+    setDescription: any
+    startDateTime: Date
+    setStartDateTime: any
+    endDateTime: Date
+    setEndDateTime: any
+    batchId: any
+    setBatchId: any
 }) => {
     // const [title, setTitle] = useState('')
-    
-    const [attendeesInput, setAttendeesInput] = useState('')
 
+    const [attendeesInput, setAttendeesInput] = useState('')
 
     const handleComboboxChange = (value: string) => {
         setBatchId(value)

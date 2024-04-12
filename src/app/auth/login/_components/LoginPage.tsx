@@ -10,6 +10,7 @@ import './styles/login.css'
 
 import { toast } from '@/components/ui/use-toast'
 import Link from 'next/link'
+import { apiMeraki } from '@/utils/axios.config'
 
 type Props = {}
 
@@ -24,8 +25,6 @@ function LoginPage({}: Props) {
 
     const loginUrl = process.env.NEXT_PUBLIC_ZUVY_LOGIN_URL
 
-    const BASE_URL = process.env.NEXT_PUBLIC_API_URL
-
     const [loading, setLoading] = useState(true)
 
     const router = useRouter()
@@ -37,7 +36,7 @@ function LoginPage({}: Props) {
 
         const sendGoogleUserData = async (token: any) => {
             try {
-                const resp = await axios.get(`${BASE_URL}/users/me`, {
+                const resp = await apiMeraki.get(`/users/me`, {
                     headers: {
                         accept: 'application/json',
                         Authorization: token,
@@ -92,7 +91,7 @@ function LoginPage({}: Props) {
         if (!localStorage.getItem('loggedOut')) {
             localStorage.setItem('loggedOut', String(false))
         }
-    }, [BASE_URL, router])
+    }, [router])
 
     return (
         <>

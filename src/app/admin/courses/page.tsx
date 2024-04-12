@@ -10,7 +10,7 @@ import { Card } from '@/components/ui/card'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import Heading from '../_components/header'
 import NewCourseDialog from './_components/newCourseDialog'
-import api from '@/utils/axios.config'
+import { api } from '@/utils/axios.config'
 import OptimizedImageWithFallback from '@/components/ImageWithFallback'
 
 import styles from './_components/cources.module.css'

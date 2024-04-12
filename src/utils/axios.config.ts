@@ -2,7 +2,8 @@
 
 import axios, { AxiosRequestConfig } from "axios";
 
-const baseURL = process.env.NEXT_PUBLIC_MAIN_URL;
+const mainURL = process.env.NEXT_PUBLIC_MAIN_URL;
+const apiURL = process.env.NEXT_PUBLIC_MAIN_URL;
 
 let headers: AxiosRequestConfig["headers"] = {
   "Content-Type": "application/json",
@@ -16,8 +17,13 @@ if (typeof window !== "undefined") {
 }
 
 const api = axios.create({
-  baseURL,
+  baseURL:mainURL,
   headers,
 });
 
-export default api;
+const apiMeraki = axios.create({
+  baseURL:apiURL,
+  headers,
+});
+
+export  {api, apiMeraki};

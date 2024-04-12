@@ -7,7 +7,7 @@ import Image from 'next/image'
 
 import { useLazyLoadedStudentData } from '@/store/store'
 import Loader from './_components/Loader'
-import api from '@/utils/axios.config'
+import { api } from '@/utils/axios.config'
 import OptimizedImageWithFallback from '@/components/ImageWithFallback'
 
 interface EnrolledCourse {

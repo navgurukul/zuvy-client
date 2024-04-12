@@ -7,7 +7,7 @@ import { Combobox } from '@/components/ui/combobox'
 import ClassCard from '../../_components/classCard'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import NewClassDialog from '../../_components/newClassDialog'
-import api from '@/utils/axios.config'
+import { api, apiMeraki } from '@/utils/axios.config'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import Image from 'next/image'
@@ -16,8 +16,6 @@ import RecordingCard from '@/app/student/courses/[viewcourses]/[recordings]/_com
 import axios from 'axios'
 
 function Page() {
-    const BASE_URL = process.env.NEXT_PUBLIC_API_URL
-
     const [classType, setClassType] = useState('upcoming')
     const [allClasses, setAllClasses] = useState([])
     const [bootcampData, setBootcampData] = useState([])
@@ -122,8 +120,8 @@ function Page() {
         const [open, setOpen] = useState(false)
 
         const handleDialogOpenChange = async () => {
-            await axios
-                .get(`${BASE_URL}/users/calendar/tokens`)
+            await apiMeraki
+                .get(`/users/calendar/tokens`)
                 .then((res) => {
                     setTitle('')
                     setDescription('')
@@ -138,11 +136,9 @@ function Page() {
                     setOpen(true)
                 })
                 .catch((error) => {
-                    axios
-                        .get(`${BASE_URL}/users/calendar/generateAuthURL`)
+                    api.get(`/classes`)
                         .then((res) => {
                             console.log('first', res)
-                            axios.put(`${BASE_URL}/users/calendar/tokens`, {})
                         })
                         .then((res) => {
                             setTitle('')

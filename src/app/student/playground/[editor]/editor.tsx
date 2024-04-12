@@ -17,7 +17,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Code, Lock, Play, Upload } from 'lucide-react'
 import { useLazyLoadedStudentData } from '@/store/store'
-import api from '@/utils/axios.config'
+import { api } from '@/utils/axios.config'
 import Editor from '@monaco-editor/react'
 import { ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'

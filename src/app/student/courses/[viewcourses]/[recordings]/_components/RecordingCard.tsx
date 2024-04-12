@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/sheet'
 
 import { ellipsis } from '@/lib/utils'
-import api from '@/utils/axios.config'
+import { api } from '@/utils/axios.config'
 import { Button } from '@/components/ui/button'
 
 function RecordingCard({

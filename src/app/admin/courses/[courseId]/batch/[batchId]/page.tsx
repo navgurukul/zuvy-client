@@ -38,7 +38,7 @@ import {
 } from '@/store/store'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import DeleteConfirmationModal from '../../_components/deleteModal'
-import api from '@/utils/axios.config'
+import { api } from '@/utils/axios.config'
 import { StudentData } from '../../(courseTabs)/students/page'
 import useDebounce from '@/hooks/useDebounce'
 import { DataTable } from '@/app/_components/datatable/data-table'

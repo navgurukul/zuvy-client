@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/components/ui/use-toast'
 
-import api from '@/utils/axios.config'
+import { api } from '@/utils/axios.config'
 import DeleteConfirmationModal from '../../_components/deleteModal'
 import { getCourseData } from '@/store/store'
 import ToggleSwitch from '../../_components/SwitchSettings'

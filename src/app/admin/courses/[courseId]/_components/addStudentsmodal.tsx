@@ -6,7 +6,7 @@ import Dropzone from './dropzone'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import api from '@/utils/axios.config'
+import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import {
     DialogClose,

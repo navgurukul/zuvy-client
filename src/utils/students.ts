@@ -1,5 +1,5 @@
 import { toast } from '@/components/ui/use-toast'
-import api from './axios.config'
+import {api} from './axios.config'
 import { OFFSET, POSITION } from './constant'
 
 export const fetchStudentData = async (

@@ -17,7 +17,7 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import { useLazyLoadedStudentData } from '@/store/store'
-import api from '@/utils/axios.config'
+import { api } from '@/utils/axios.config'
 import { b64DecodeUnicode } from '@/utils/base64'
 import { List } from 'lucide-react'
 import { useEffect, useState } from 'react'
