@@ -119,7 +119,6 @@ export const columns: ColumnDef<Task>[] = [
         cell: ({ row }) => {
             const student = row.original
             const { studentsData, setStoreStudentData } = getStoreStudentData()
-            const { batchData } = getBatchData()
             const bootcampId = studentsData && studentsData[0]?.bootcampId
             const initialvalue = row.original?.batchId?.toString()
             const transformedData = studentsData?.reduce(
