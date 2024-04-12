@@ -135,7 +135,7 @@ function Page() {
                     setEndDateTime(endDateTime)
                     setOpen(true)
                 })
-                .catch((error) => {
+                .then((res) => {
                     api.get(`/classes`)
                         .then((res) => {
                             console.log('first', res)
