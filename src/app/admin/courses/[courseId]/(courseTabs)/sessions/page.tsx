@@ -14,8 +14,11 @@ import Image from 'next/image'
 import { getCourseData } from '@/store/store'
 import RecordingCard from '@/app/student/courses/[viewcourses]/[recordings]/_components/RecordingCard'
 import axios from 'axios'
+import { useRouter } from 'next/navigation'
 
 function Page() {
+    const router = useRouter()
+    const NEXT_URL = process.env.NEXT_PUBLIC_MAIN_URL
     const [classType, setClassType] = useState('upcoming')
     const [allClasses, setAllClasses] = useState([])
     const [bootcampData, setBootcampData] = useState([])
@@ -136,27 +139,29 @@ function Page() {
                     setOpen(true)
                 })
                 .then((res) => {
-                    api.get(`/classes`)
-                        .then((res) => {
-                            console.log('first', res)
-                        })
-                        .then((res) => {
-                            setTitle('')
-                            setDescription('')
-                            const startDateTime = new Date()
-                            startDateTime.setHours(startDateTime.getHours() + 5)
-                            startDateTime.setMinutes(
-                                startDateTime.getMinutes() + 30
-                            )
-                            setStartDateTime(startDateTime)
-                            const endDateTime = new Date()
-                            endDateTime.setHours(endDateTime.getHours() + 5)
-                            endDateTime.setMinutes(
-                                endDateTime.getMinutes() + 30
-                            )
-                            setEndDateTime(endDateTime)
-                            setOpen(true)
-                        })
+                    console.log('first', res)
+                    router.push(`${NEXT_URL}/classes`)
+                    // api.get(`/classes`)
+                    //     .then((res) => {
+                    //         console.log('first', res)
+                    //     })
+                    //     .then((res) => {
+                    //         setTitle('')
+                    //         setDescription('')
+                    //         const startDateTime = new Date()
+                    //         startDateTime.setHours(startDateTime.getHours() + 5)
+                    //         startDateTime.setMinutes(
+                    //             startDateTime.getMinutes() + 30
+                    //         )
+                    //         setStartDateTime(startDateTime)
+                    //         const endDateTime = new Date()
+                    //         endDateTime.setHours(endDateTime.getHours() + 5)
+                    //         endDateTime.setMinutes(
+                    //             endDateTime.getMinutes() + 30
+                    //         )
+                    //         setEndDateTime(endDateTime)
+                    //         setOpen(true)
+                    //     })
                 })
 
             setBatchId('')
