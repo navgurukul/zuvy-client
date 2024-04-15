@@ -135,9 +135,9 @@ const Courses: React.FC = () => {
             const response = await apiMeraki.get('/users/calendar/tokens')
 
             if (!response.data.success) {
-                setHasAccess(true)
-            } else {
                 setHasAccess(false)
+            } else {
+                setHasAccess(true)
             }
         }
         getToken()
@@ -159,7 +159,7 @@ const Courses: React.FC = () => {
         <div>
             <Heading title={'Courses'} />
             <div>
-                {hasAccess ? (
+                {!hasAccess ? (
                     <Alert
                         variant="destructive"
                         className="flex justify-between mt-5 items-center"

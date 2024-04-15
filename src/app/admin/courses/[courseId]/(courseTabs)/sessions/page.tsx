@@ -7,13 +7,12 @@ import { Combobox } from '@/components/ui/combobox'
 import ClassCard from '../../_components/classCard'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import NewClassDialog from '../../_components/newClassDialog'
-import { api, apiMeraki } from '@/utils/axios.config'
+import { api } from '@/utils/axios.config'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import Image from 'next/image'
 import { getCourseData } from '@/store/store'
 import RecordingCard from '@/app/student/courses/[viewcourses]/[recordings]/_components/RecordingCard'
-import { useRouter } from 'next/navigation'
 
 function Page() {
     const [classType, setClassType] = useState('upcoming')
@@ -26,7 +25,6 @@ function Page() {
     const [selectedDate, setSelectedDate] = useState(null)
     const [limit, setLimit] = useState(6)
     const [offset, setOffset] = useState(1)
-    const [url, setUrl] = useState('')
 
     const { courseData } = getCourseData()
 
@@ -119,51 +117,20 @@ function Page() {
         const [endDateTimeState, setEndDateTime] = useState(new Date())
         const [batchId, setBatchId] = useState('')
 
-        const handleDialogOpenChange = async () => {
-            const response = await apiMeraki.get('/users/calendar/tokens')
-            if (response.data.success) {
-                setTitle('')
-                setDescription('')
-                const startDateTime = new Date()
-                startDateTime.setHours(startDateTime.getHours() + 5)
-                startDateTime.setMinutes(startDateTime.getMinutes() + 30)
-                setStartDateTime(startDateTime)
-                const endDateTime = new Date()
-                endDateTime.setHours(endDateTime.getHours() + 5)
-                endDateTime.setMinutes(endDateTime.getMinutes() + 30)
-                setEndDateTime(endDateTime)
+        const handleDialogOpenChange = () => {
+            setTitle('')
+            setDescription('')
+            const startDateTime = new Date()
+            startDateTime.setHours(startDateTime.getHours() + 5)
+            startDateTime.setMinutes(startDateTime.getMinutes() + 30)
+            setStartDateTime(startDateTime)
+            const endDateTime = new Date()
+            endDateTime.setHours(endDateTime.getHours() + 5)
+            endDateTime.setMinutes(endDateTime.getMinutes() + 30)
+            setEndDateTime(endDateTime)
 
-                setBatchId('')
-            } else {
-                api.get('/classes', {
-                    params: {
-                        userID: '45783',
-                        email: 'vaibhav@zuvy.org',
-                    },
-                }).then((response) => {
-                    setUrl(response.data.url)
-                    setTitle('')
-                    setDescription('')
-                    const startDateTime = new Date()
-                    startDateTime.setHours(startDateTime.getHours() + 5)
-                    startDateTime.setMinutes(startDateTime.getMinutes() + 30)
-                    setStartDateTime(startDateTime)
-                    const endDateTime = new Date()
-                    endDateTime.setHours(endDateTime.getHours() + 5)
-                    endDateTime.setMinutes(endDateTime.getMinutes() + 30)
-                    setEndDateTime(endDateTime)
-
-                    setBatchId('')
-                })
-            }
+            setBatchId('')
         }
-
-        const router = useRouter()
-        useEffect(() => {
-            if (url) {
-                router.push(url)
-            }
-        }, [url])
 
         return (
             <Dialog onOpenChange={handleDialogOpenChange}>
