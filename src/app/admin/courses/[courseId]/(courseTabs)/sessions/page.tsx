@@ -13,12 +13,9 @@ import { Input } from '@/components/ui/input'
 import Image from 'next/image'
 import { getCourseData } from '@/store/store'
 import RecordingCard from '@/app/student/courses/[viewcourses]/[recordings]/_components/RecordingCard'
-import axios from 'axios'
 import { useRouter } from 'next/navigation'
 
 function Page() {
-    const router = useRouter()
-    const NEXT_URL = process.env.NEXT_PUBLIC_MAIN_URL
     const [classType, setClassType] = useState('upcoming')
     const [allClasses, setAllClasses] = useState([])
     const [bootcampData, setBootcampData] = useState([])
@@ -29,6 +26,7 @@ function Page() {
     const [selectedDate, setSelectedDate] = useState(null)
     const [limit, setLimit] = useState(6)
     const [offset, setOffset] = useState(1)
+    const [url, setUrl] = useState('')
 
     const { courseData } = getCourseData()
 
@@ -120,12 +118,30 @@ function Page() {
         const [startDateTimeState, setStartDateTime] = useState(new Date())
         const [endDateTimeState, setEndDateTime] = useState(new Date())
         const [batchId, setBatchId] = useState('')
-        const [open, setOpen] = useState(false)
 
         const handleDialogOpenChange = async () => {
-            await apiMeraki
-                .get(`/users/calendar/tokens`)
-                .then((res) => {
+            const response = await apiMeraki.get('/users/calendar/tokens')
+            if (response.data.success) {
+                setTitle('')
+                setDescription('')
+                const startDateTime = new Date()
+                startDateTime.setHours(startDateTime.getHours() + 5)
+                startDateTime.setMinutes(startDateTime.getMinutes() + 30)
+                setStartDateTime(startDateTime)
+                const endDateTime = new Date()
+                endDateTime.setHours(endDateTime.getHours() + 5)
+                endDateTime.setMinutes(endDateTime.getMinutes() + 30)
+                setEndDateTime(endDateTime)
+
+                setBatchId('')
+            } else {
+                api.get('/classes', {
+                    params: {
+                        userID: '45783',
+                        email: 'vaibhav@zuvy.org',
+                    },
+                }).then((response) => {
+                    setUrl(response.data.url)
                     setTitle('')
                     setDescription('')
                     const startDateTime = new Date()
@@ -136,39 +152,21 @@ function Page() {
                     endDateTime.setHours(endDateTime.getHours() + 5)
                     endDateTime.setMinutes(endDateTime.getMinutes() + 30)
                     setEndDateTime(endDateTime)
-                    setOpen(true)
-                })
-                .then((res) => {
-                    console.log('first', res)
-                    router.push(`${NEXT_URL}/classes`)
-                    // api.get(`/classes`)
-                    //     .then((res) => {
-                    //         console.log('first', res)
-                    //     })
-                    //     .then((res) => {
-                    //         setTitle('')
-                    //         setDescription('')
-                    //         const startDateTime = new Date()
-                    //         startDateTime.setHours(startDateTime.getHours() + 5)
-                    //         startDateTime.setMinutes(
-                    //             startDateTime.getMinutes() + 30
-                    //         )
-                    //         setStartDateTime(startDateTime)
-                    //         const endDateTime = new Date()
-                    //         endDateTime.setHours(endDateTime.getHours() + 5)
-                    //         endDateTime.setMinutes(
-                    //             endDateTime.getMinutes() + 30
-                    //         )
-                    //         setEndDateTime(endDateTime)
-                    //         setOpen(true)
-                    //     })
-                })
 
-            setBatchId('')
+                    setBatchId('')
+                })
+            }
         }
 
+        const router = useRouter()
+        useEffect(() => {
+            if (url) {
+                router.push(url)
+            }
+        }, [url])
+
         return (
-            <Dialog open={open} onOpenChange={handleDialogOpenChange}>
+            <Dialog onOpenChange={handleDialogOpenChange}>
                 <DialogTrigger asChild>
                     <Button className="text-white bg-secondary">
                         Create Session
