@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { useEffect } from 'react'
-import api from '@/utils/axios.config'
+import {api} from '@/utils/axios.config'
 
 type CounterStore = {
     studentData: {

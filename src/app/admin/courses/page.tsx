@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { ChevronDown, GraduationCap, Plus } from 'lucide-react'
+import { AlertCircle, ChevronDown, GraduationCap, Plus } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 import { Input } from '@/components/ui/input'
@@ -10,7 +10,7 @@ import { Card } from '@/components/ui/card'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import Heading from '../_components/header'
 import NewCourseDialog from './_components/newCourseDialog'
-import api from '@/utils/axios.config'
+import { api, apiMeraki } from '@/utils/axios.config'
 import OptimizedImageWithFallback from '@/components/ImageWithFallback'
 
 import styles from './_components/cources.module.css'
@@ -19,6 +19,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { toast } from '@/components/ui/use-toast'
 import useDebounce from '@/hooks/useDebounce'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { useStudentData } from '@/store/store'
 
 interface Course {
     name: string
@@ -32,6 +34,7 @@ interface Course {
 const Courses: React.FC = () => {
     // misc
     const router = useRouter()
+    const { studentData } = useStudentData()
 
     // state and variables
     const [activeFilter, setActiveFilter] = useState<
@@ -43,6 +46,8 @@ const Courses: React.FC = () => {
     const [courses, setCourses] = useState<Course[]>([])
 
     const [newCourseName, setNewCourseName] = useState<string>('')
+
+    const [hasAccess, setHasAccess] = useState<boolean>(true)
 
     // func
     const handleFilterClick = (filter: 'all' | 'active' | 'completed') => {
@@ -62,32 +67,45 @@ const Courses: React.FC = () => {
             console.error('Error fetching courses:', error)
         }
     }
-
     const handleNewCourseNameChange = (
         event: React.ChangeEvent<HTMLInputElement>
     ) => {
         setNewCourseName(event.target.value)
     }
-
     const handleCreateCourse = async () => {
-        try {
-            const response = await api
-                .post('/bootcamp', { name: newCourseName })
-                .then((response) => {
-                    toast({
-                        title: response.data.status,
-                        description: response.data.message,
-                        className: 'text-start capitalize',
-                    })
-                })
-            getBootcamp()
-        } catch (error: any) {
+        const repeatedCourseName = newCourseName
+            .replace(/\s+/g, ' ')
+            .toLowerCase()
+            .trim()
+
+        const matchedCourseName = courses?.find(
+            (courseName) => courseName.name.toLowerCase() === repeatedCourseName
+        )
+        if (matchedCourseName) {
             toast({
-                title: error.data.status,
-                description: error.data.message,
-                className: 'text-start capitalize',
+                title: 'Cannot Create A New Course',
+                description: 'Course Name Already Exists',
             })
-            console.error('Error creating course:', error)
+        } else {
+            try {
+                const response = await api
+                    .post('/bootcamp', { name: newCourseName })
+                    .then((response) => {
+                        toast({
+                            title: response.data.status,
+                            description: response.data.message,
+                            className: 'text-start capitalize',
+                        })
+                    })
+                getBootcamp()
+            } catch (error: any) {
+                toast({
+                    title: error.data.status,
+                    description: error.data.message,
+                    className: 'text-start capitalize',
+                })
+                console.error('Error creating course:', error)
+            }
         }
     }
 
@@ -112,10 +130,49 @@ const Courses: React.FC = () => {
         getBootcamp()
     }, [])
 
+    useEffect(() => {
+        const getToken = async () => {
+            const response = await apiMeraki.get('/users/calendar/tokens')
+
+            if (!response.data.success) {
+                setHasAccess(false)
+            } else {
+                setHasAccess(true)
+            }
+        }
+        getToken()
+    })
+
+    const calendarAccess = () => {
+        api.get('/classes', {
+            params: {
+                userID: studentData?.id,
+                email: studentData?.email,
+            },
+        }).then((response) => {
+            // console.log(response.data.url)
+            router.push(response.data.url)
+        })
+    }
+
     return (
         <div>
             <Heading title={'Courses'} />
             <div>
+                {!hasAccess ? (
+                    <Alert
+                        variant="destructive"
+                        className="flex justify-between mt-5 items-center"
+                    >
+                        {/* <AlertCircle className="h-4 w-4" /> */}
+                        <AlertTitle>Error</AlertTitle>
+                        <AlertDescription>
+                            Your calendar access has expired. Please log in
+                            again to gain access to the courses
+                        </AlertDescription>
+                        <Button onClick={calendarAccess}>Give access</Button>
+                    </Alert>
+                ) : null}
                 <div className={styles.searchContainer}>
                     <Input
                         type="text"
@@ -141,30 +198,6 @@ const Courses: React.FC = () => {
                             handleCreateCourse={handleCreateCourse}
                         />
                     </Dialog>
-                </div>
-                <div className="flex mt-5 mb-10">
-                    {/* <div className="flex mr-2">
-            {COURSE_FILTER.map((filter: any) => (
-              <p
-                key={filter}
-                className={`${
-                  activeFilter === filter
-                    ? "bg-muted-foreground text-white"
-                    : ""
-                } capitalize mr-2 cursor-pointer py-1 px-2 rounded-md`}
-                onClick={() => handleFilterClick(filter)}
-              >
-                {filter}
-              </p>
-            ))}
-
-       
-          </div> */}
-                    {/* <div>
-            <p className="flex items-center bg-muted-foreground text-white py-1 px-2 rounded-md">
-              All Partners <ChevronDown />
-            </p>
-          </div> */}
                 </div>
                 <div className="my-5 flex justify-center items-center">
                     {courses.length === 0 ? (
@@ -220,8 +253,14 @@ const Courses: React.FC = () => {
                             {courses.map((course, index) => (
                                 <Card
                                     key={index}
-                                    className="h-max w-[400px] cursor-pointer"
-                                    onClick={() => handleCardClick(course.id)}
+                                    className={`h-max w-[400px] ${
+                                        hasAccess ? 'cursor-pointer' : ''
+                                    }`}
+                                    onClick={() =>
+                                        hasAccess
+                                            ? handleCardClick(course.id)
+                                            : null
+                                    }
                                 >
                                     <div className="bg-muted flex justify-center h-[200px] relative overflow-hidden rounded-sm">
                                         <OptimizedImageWithFallback

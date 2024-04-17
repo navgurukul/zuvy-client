@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import api from '@/utils/axios.config'
+import { api } from '@/utils/axios.config'
 import { useLazyLoadedStudentData } from '@/store/store'
 import Recordings from '../courses/[viewcourses]/[recordings]/_components/Recordings'
 import {

@@ -14,7 +14,7 @@ import { useLazyLoadedStudentData } from '@/store/store'
 import { BreadcrumbItem, CircularProgress } from '@nextui-org/react'
 import Loader from '../_components/Loader'
 import Image from 'next/image'
-import api from '@/utils/axios.config'
+import { api } from '@/utils/axios.config'
 import { Button } from '@/components/ui/button'
 
 interface CourseProgress {

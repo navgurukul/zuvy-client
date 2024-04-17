@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import api from '@/utils/axios.config'
+import { api } from '@/utils/axios.config'
 
 interface ToggleSwitchProps {
     onToggle: (isChecked: boolean) => void

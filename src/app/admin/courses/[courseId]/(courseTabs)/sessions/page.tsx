@@ -1,13 +1,13 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Combobox } from '@/components/ui/combobox'
 import ClassCard from '../../_components/classCard'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import NewClassDialog from '../../_components/newClassDialog'
-import api from '@/utils/axios.config'
+import { api } from '@/utils/axios.config'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import Image from 'next/image'
@@ -36,16 +36,17 @@ function Page() {
         return date >= currentDate
     }
 
-    const handleClassType = (
-        type: string | 'ongoing' | 'complete' | 'upcoming'
-    ) => {
-        if (classType == type) {
-            setOffset(offset)
-        } else {
-            setOffset(1)
-        }
-        setClassType(type)
-    }
+    const handleClassType = useCallback(
+        (type: string | 'active' | 'complete' | 'upcoming') => {
+            if (classType === type) {
+                setOffset(offset)
+            } else {
+                setOffset(1)
+            }
+            setClassType(type)
+        },
+        [classType, offset]
+    )
 
     const handleComboboxChange = (value: string) => {
         setBatchId((prevBatchId: number) =>
@@ -73,7 +74,7 @@ function Page() {
     }, [courseData])
 
     useEffect(() => {
-        if (classType === 'ongoing') {
+        if (classType === 'active') {
             setAllClasses(ongoingClasses)
         } else if (classType === 'complete') {
             setAllClasses(completedClasses)
@@ -95,7 +96,7 @@ function Page() {
 
         if (courseData?.id) {
             api.get(
-                `/classes/${fetchUrl}/${fetchId}?offset=${offset}&limit=${limit}`
+                `/classes/${fetchUrl}/${fetchId}?offset=${offset}&limit=${30}`
             )
                 .then((response) => {
                     setUpcomingClasses(response.data.upcomingClasses)
@@ -107,7 +108,7 @@ function Page() {
                     console.log('Error fetching classes:', error)
                 })
         }
-    }, [courseData, batchId, classType, offset, limit])
+    }, [courseData, batchId, classType, offset, limit, handleClassType])
 
     const CreateSession = () => {
         const [title, setTitle] = useState('')
@@ -187,8 +188,8 @@ function Page() {
             </div>
             <div className="flex justify-start gap-6 my-6">
                 <Badge
-                    variant={classType === 'ongoing' ? 'secondary' : 'outline'}
-                    onClick={() => handleClassType('ongoing')}
+                    variant={classType === 'active' ? 'secondary' : 'outline'}
+                    onClick={() => handleClassType('active')}
                     className="rounded-md cursor-pointer"
                 >
                     Active Classes

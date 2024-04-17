@@ -30,7 +30,7 @@ import OptimizedImageWithFallback from '@/components/ImageWithFallback'
 import { cn } from '@/lib/utils'
 import { LANGUAGES } from '@/utils/constant'
 import { getCourseData, getStoreStudentData } from '@/store/store'
-import api from '@/utils/axios.config'
+import { api, apiMeraki } from '@/utils/axios.config'
 import { fetchStudentData } from '@/utils/students'
 
 const FormSchema = z.object({
@@ -55,7 +55,6 @@ interface CourseData {
 }
 
 function Page({ params }: { params: any }) {
-    const BASE_URL = process.env.NEXT_PUBLIC_API_URL
     // console.log(params.courseId)
 
     const { courseData, setCourseData } = getCourseData()
@@ -157,8 +156,8 @@ function Page({ params }: { params: any }) {
             formData.append('image', file)
 
             try {
-                const response = await axios
-                    .post(`${BASE_URL}/courseEditor/ImageUploadS3`, formData, {
+                const response = await apiMeraki
+                    .post(`/courseEditor/ImageUploadS3`, formData, {
                         headers: {
                             'Content-Type': 'multipart/form-data',
                         },

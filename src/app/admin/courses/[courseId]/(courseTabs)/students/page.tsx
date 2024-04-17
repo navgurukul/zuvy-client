@@ -5,7 +5,7 @@ import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import AddStudentsModal from '../../_components/addStudentsmodal'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
-import api from '@/utils/axios.config'
+import { api } from '@/utils/axios.config'
 import { Input } from '@/components/ui/input'
 import { getBatchData, getCourseData, getStoreStudentData } from '@/store/store'
 import useDebounce from '@/hooks/useDebounce'
@@ -43,10 +43,10 @@ const Page = ({ params }: { params: any }) => {
 
     const fetchStudentData = useCallback(
         async (offset: number) => {
-            if (courseData?.id) {
+            if (params.courseId) {
                 try {
                     const response = await api.get(
-                        `/bootcamp/students/${courseData?.id}?limit=${position}&offset=${offset}`
+                        `/bootcamp/students/${params.courseId}?limit=${position}&offset=${offset}`
                     )
                     setStoreStudentData(response.data.studentsEmails)
                     setPages(response.data.totalPages)
@@ -57,12 +57,14 @@ const Page = ({ params }: { params: any }) => {
                 }
             }
         },
-        [courseData, position, setStoreStudentData]
+        [position, setStoreStudentData, params.courseId]
     )
+    console.log(params.courseId)
 
     useEffect(() => {
         fetchStudentData(offset)
-    }, [offset, fetchStudentData])
+        fetchBatches(params.courseId)
+    }, [offset, fetchStudentData, fetchBatches, params.courseId])
 
     useEffect(() => {
         fetchStudentData(offset)
@@ -73,7 +75,7 @@ const Page = ({ params }: { params: any }) => {
             setLoading(true)
             try {
                 const response = await api.get(
-                    `/bootcamp/studentSearch/${courseData?.id}?searchTerm=${debouncedSearch}`
+                    `/bootcamp/studentSearch/${params.courseId}?searchTerm=${debouncedSearch}`
                 )
                 setStoreStudentData(response.data.data[1].studentsEmails)
             } catch (error) {
@@ -88,7 +90,12 @@ const Page = ({ params }: { params: any }) => {
         } else {
             fetchStudentData(0)
         }
-    }, [debouncedSearch, courseData, setStoreStudentData, fetchStudentData])
+    }, [
+        debouncedSearch,
+        params.courseId,
+        setStoreStudentData,
+        fetchStudentData,
+    ])
 
     const handleSetsearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value)
@@ -112,7 +119,7 @@ const Page = ({ params }: { params: any }) => {
                         <DialogOverlay />
                         <AddStudentsModal
                             message={false}
-                            id={courseData?.id || 0}
+                            id={params.courseId || 0}
                         />
                     </Dialog>
                 </div>

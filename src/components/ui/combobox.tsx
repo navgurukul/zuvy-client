@@ -1,3 +1,4 @@
+'use client'
 import * as React from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -32,7 +33,11 @@ export function Combobox({
     const [open, setOpen] = React.useState(false)
     const [value, setValue] = React.useState(initialValue)
 
-    // console.log(initialValue)
+    const length = data ? data.length : 0
+
+    const filteredData = data
+        ? data.filter((item: any) => item.value !== null || item.label !== null)
+        : []
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
@@ -46,8 +51,11 @@ export function Combobox({
                     className="w-full justify-between"
                     disabled={isDisabled}
                 >
-                    {value
-                        ? data.find((item: any) => item.value === value)?.label
+                    {length === 1
+                        ? data[0]?.label ?? 'No Batch is Assigned'
+                        : value
+                        ? data.find((item: any) => item.value === value)
+                              ?.label ?? 'No Batch is Assigned'
                         : `No Batch is Assigned`}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
@@ -60,7 +68,7 @@ export function Combobox({
                     />
                     <CommandEmpty>No {title} found.</CommandEmpty>
                     <CommandGroup>
-                        {data.map((item: any) => (
+                        {filteredData?.map((item: any) => (
                             <CommandItem
                                 key={item.value}
                                 value={item.value}

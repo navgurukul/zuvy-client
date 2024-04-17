@@ -6,7 +6,7 @@ import Dropzone from './dropzone'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import api from '@/utils/axios.config'
+import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import {
     DialogClose,
@@ -39,7 +39,7 @@ const AddStudentsModal = ({
     // state and variables
     const [selectedOption, setSelectedOption] = useState('1')
     const [studentData, setStudentData] = useState<StudentDataState | any>({})
-    const { setStoreStudentData } = getStoreStudentData()
+    const { studentsData, setStoreStudentData } = getStoreStudentData()
 
     // func
     const handleSingleStudent = (e: React.ChangeEvent<HTMLInputElement>) => {

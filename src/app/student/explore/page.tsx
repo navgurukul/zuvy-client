@@ -1,7 +1,7 @@
 'use client'
 
 import { Input } from '@/components/ui/input'
-import api from '@/utils/axios.config'
+import { api } from '@/utils/axios.config'
 import React, { useEffect, useState } from 'react'
 import styles from './../../admin/courses/_components/cources.module.css'
 import { Card } from '@/components/ui/card'

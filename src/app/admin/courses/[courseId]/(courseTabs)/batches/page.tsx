@@ -34,7 +34,7 @@ import { CardDescription, CardTitle } from '@/components/ui/card'
 import { toast } from '@/components/ui/use-toast'
 
 import AddStudentsModal from '../../_components/addStudentsmodal'
-import api from '@/utils/axios.config'
+import { api } from '@/utils/axios.config'
 import { getBatchData, getCourseData, getStoreStudentData } from '@/store/store'
 import useDebounce from '@/hooks/useDebounce'
 import { fetchStudentData } from '@/utils/students'
@@ -105,7 +105,6 @@ const Page = ({ params }: { params: any }) => {
         },
         mode: 'onChange',
     })
-
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try {
             const convertedData = {
@@ -114,24 +113,39 @@ const Page = ({ params }: { params: any }) => {
                 bootcampId: +values.bootcampId,
                 capEnrollment: +values.capEnrollment,
             }
+            const convertedName: string = convertedData.name
+                .replace(/\s+/g, '') // Remove all whitespace characters
+                .toLowerCase()
+            const matchedBatchData = batchData?.find(
+                (batchDataItem) =>
+                    convertedName === batchDataItem.name.toLowerCase()
+            )
 
-            await api.post(`/batch`, convertedData).then((res) => {
+            console.log(convertedName)
+
+            if (matchedBatchData) {
+                toast({
+                    title: 'Cannot Create New Batch',
+                    description: 'This Batch Name Already Exists',
+                })
+            } else {
+                const res = await api.post(`/batch`, convertedData)
                 if (params.courseId) {
                     fetchBatches(params.courseId)
                     fetchStudentData(params.courseId, setStoreStudentData)
                     fetchCourseDetails(params.courseId)
                 }
-
                 toast({
                     title: res.data.status,
                     description: res.data.message,
                     className: 'text-start capitalize',
                 })
-            })
+            }
         } catch (error: any) {
             toast({
                 title: 'Failed',
-                description: error.response.data.message,
+                description:
+                    error.response?.data?.message || 'An error occurred.',
                 className: 'text-start capitalize',
                 variant: 'destructive',
             })
