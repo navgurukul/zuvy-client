@@ -47,7 +47,7 @@ const Courses: React.FC = () => {
 
     const [newCourseName, setNewCourseName] = useState<string>('')
 
-    const [hasAccess, setHasAccess] = useState<boolean>(false)
+    const [hasAccess, setHasAccess] = useState<boolean>(true)
 
     // func
     const handleFilterClick = (filter: 'all' | 'active' | 'completed') => {
