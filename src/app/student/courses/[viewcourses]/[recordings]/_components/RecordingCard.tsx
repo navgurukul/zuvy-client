@@ -85,7 +85,9 @@ function RecordingCard({
                     <p className="text-xl text-start">
                         {ellipsis(classData.title, 40)}
                     </p>
-                    <div className="text-md flex w-[200px] font-semibold capitalize items-center">
+                    <div className="text-md flex font-semibold capitalize items-center">
+                        <Moment format="D MMMM">{classData.startTime}</Moment>
+                        <p className="mr-2">,</p>
                         <Moment format="hh:mm A">{classData.startTime}</Moment>
                         <p className="mx-2">-</p>
                         <Moment format="hh:mm A">{classData.endTime}</Moment>

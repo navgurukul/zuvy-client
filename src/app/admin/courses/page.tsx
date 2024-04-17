@@ -170,13 +170,7 @@ const Courses: React.FC = () => {
                             Your calendar access has expired. Please log in
                             again to gain access to the courses
                         </AlertDescription>
-                        <Button
-                            // href={'https://dev.api.zuvy.org/classes'}
-                            // target="_blank"
-                            onClick={calendarAccess}
-                        >
-                            Give access
-                        </Button>
+                        <Button onClick={calendarAccess}>Give access</Button>
                     </Alert>
                 ) : null}
                 <div className={styles.searchContainer}>
