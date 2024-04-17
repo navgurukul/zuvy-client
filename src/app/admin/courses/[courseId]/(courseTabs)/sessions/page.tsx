@@ -96,7 +96,7 @@ function Page() {
 
         if (courseData?.id) {
             api.get(
-                `/classes/${fetchUrl}/${fetchId}?offset=${offset}&limit=${limit}`
+                `/classes/${fetchUrl}/${fetchId}?offset=${offset}&limit=${30}`
             )
                 .then((response) => {
                     setUpcomingClasses(response.data.upcomingClasses)
