@@ -118,32 +118,23 @@ export const columns: ColumnDef<Task>[] = [
         ),
         cell: ({ row }) => {
             const student = row.original
-            const { studentsData, setStoreStudentData } = getStoreStudentData()
-            const bootcampId = studentsData && studentsData[0]?.bootcampId
+            const { batchData } = getBatchData()
+            const { setStoreStudentData } = getStoreStudentData()
+            const bootcampId = batchData && batchData[0]?.bootcampId
             const initialvalue = row.original?.batchId?.toString()
-            const transformedData = studentsData?.reduce(
-                (uniqueData: any[], item: { batchId: any; batchName: any }) => {
-                    const value = item.batchId?.toString() ?? 'Null'
-                    const label = item.batchName ?? 'Null'
-
-                    const isUnique = !uniqueData.some(
-                        (uniqueItem) =>
-                            uniqueItem.value === value &&
-                            uniqueItem.label === label
-                    )
-
-                    if (isUnique) {
-                        uniqueData.push({
-                            value,
-                            label,
-                        })
-                    }
-
-                    return uniqueData
+            const transformedData = batchData?.reduce(
+                (transformedData: any[], item: { id: any; name: any }) => {
+                    transformedData.push({
+                        value: item.id?.toString(),
+                        label: item?.name,
+                    })
+                    return transformedData
                 },
                 []
             )
-
+            if (!batchData) {
+                return <div>Loading...</div>
+            }
             return (
                 <div className="flex text-start gap-6 my-6 max-w-[200px]">
                     <Combobox
@@ -160,6 +151,7 @@ export const columns: ColumnDef<Task>[] = [
                             )
                         }}
                         initialValue={initialvalue || ''}
+                        batch={true}
                     />
                 </div>
             )

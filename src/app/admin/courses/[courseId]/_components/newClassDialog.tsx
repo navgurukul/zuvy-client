@@ -8,7 +8,6 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog'
-import { api } from '@/utils/axios.config'
 
 import styles from '../../_components/cources.module.css'
 import { Label } from '@/components/ui/label'
@@ -18,6 +17,8 @@ import { ENROLLMENT_CAP } from '@/utils/constant'
 import { Input } from '@/components/ui/input'
 import CalendarInput from '@/app/_components/calendarInput'
 import { toast } from '@/components/ui/use-toast'
+
+import { api } from '@/utils/axios.config'
 
 // interface newClassDialogProps {
 //   newCourseName: string;
@@ -211,6 +212,7 @@ const NewClassDialog = ({
                             data={bootcampData}
                             title={'Batch'}
                             onChange={handleComboboxChange}
+                            batch={false}
                         />
                     </div>
                     <DialogClose asChild>

@@ -1,12 +1,15 @@
 'use client'
 import React, { useState } from 'react'
+
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { ArrowDownToLine, Search } from 'lucide-react'
+
 import PraticeProblems from '../../_components/PraticeProblems'
 import Assesments from '../../_components/Assesments'
 import Projects from '../../_components/Projects'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
 
-const Page = () => {
+const Page = ({ params }: { params: any }) => {
     const [activeTab, setActiveTab] = useState('practice')
 
     const handleTabChange = (tab: string) => {
@@ -48,18 +51,35 @@ const Page = () => {
                     Projects
                 </Button>
             </div>
-
-            <Input
-                type="name"
-                placeholder="Search By Name..."
-                className="w-1/3 ml-5 my-4"
-            />
+            <div className="flex justify-between">
+                <div className="relative w-full mr-2">
+                    <Input
+                        placeholder="Search for Name, Email"
+                        className="w-1/3 my-6 input-with-icon pl-8 "
+                    />
+                    <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                        <Search className="text-gray-400" size={20} />
+                    </div>
+                </div>
+                {activeTab === 'assessments' && (
+                    <Button>
+                        <ArrowDownToLine size={20} className="mr-2" /> Download
+                        Full Report
+                    </Button>
+                )}
+            </div>
             <div className="w-full">
                 {activeTab === 'practice' &&
                     moduleNumbers.map((moduleNo) => (
-                        <PraticeProblems key={moduleNo} moduleNo={moduleNo} />
+                        <PraticeProblems
+                            key={moduleNo}
+                            moduleNo={moduleNo}
+                            courseId={params.courseId}
+                        />
                     ))}
-                {activeTab === 'assessments' && <Assesments />}
+                {activeTab === 'assessments' && (
+                    <Assesments courseId={params.courseId} />
+                )}
                 {activeTab === 'projects' && <Projects />}
             </div>
         </div>

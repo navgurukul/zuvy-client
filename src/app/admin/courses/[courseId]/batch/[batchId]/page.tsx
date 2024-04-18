@@ -114,19 +114,23 @@ const BatchesInfo = ({
             }
         ),
     })
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             name: instructorsInfo.name || '',
-            instructorId: instructorsInfo.instructorId || '',
+            instructorId: (instructorsInfo.instructorId || '').toString(),
             capEnrollment: instructorsInfo.capEnrollment || '',
         },
         mode: 'onChange',
     })
     useEffect(() => {
         form.setValue('name', instructorsInfo?.name || '')
-        form.setValue('instructorId', instructorsInfo?.instructorId || '')
-        form.setValue('capEnrollment', instructorsInfo?.capEnrollment || '')
+        form.setValue('instructorId', `${instructorsInfo?.instructorId || ''}`)
+        form.setValue(
+            'capEnrollment',
+            `${instructorsInfo?.capEnrollment || ''}`
+        )
     }, [instructorsInfo, form])
 
     const toggleForm = () => {

@@ -5,6 +5,7 @@ import SubmissionComponent from './submissionComponent'
 
 type Props = {
     moduleNo: number
+    courseId: number
 }
 
 const PraticeProblems = (props: Props) => {
@@ -17,12 +18,14 @@ const PraticeProblems = (props: Props) => {
             <section className="bg-white dark:bg-gray-900">
                 <div className=" px-6 py-5 mx-auto">
                     <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-3">
-                        {arr.map((arrItem) => (
+                        {arr.map((arrItem, index) => (
                             <SubmissionComponent
+                                key={arrItem} // Use arrItem as the key
                                 title={'Invert a binary Tree with python'}
                                 totalSubmissions={50}
                                 studentsSubmitted={20}
-                                key={arrItem}
+                                index={index}
+                                courseId={props.courseId}
                             />
                         ))}
                     </div>

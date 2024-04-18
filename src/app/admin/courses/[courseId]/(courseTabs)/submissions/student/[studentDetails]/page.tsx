@@ -1,8 +1,7 @@
 import React from 'react'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import IndividualStudentAssesment from '../../../_components/individualStudentAssesment'
-import OverviewComponent from '../../../_components/OverviewComponent'
+
 import { ChevronDown } from 'lucide-react'
 import {
     Select,
@@ -13,10 +12,12 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import OverviewComponent from '../../../../_components/OverviewComponent'
+import IndividualStudentAssesment from '../../../../_components/individualStudentAssesment'
 
 type Props = {}
 
-const page = (props: Props) => {
+const Page = ({ params }: { params: any }) => {
     return (
         <div>
             <h1 className="text-start ml-6 font-bold text-xl mb-5">
@@ -80,4 +81,4 @@ const page = (props: Props) => {
     )
 }
 
-export default page
+export default Page
