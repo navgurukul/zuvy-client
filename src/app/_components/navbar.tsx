@@ -48,7 +48,16 @@ const Navbar = () => {
                                 <AvatarImage
                                     src={studentData?.profile_picture}
                                 />
-                                <AvatarFallback>NAME</AvatarFallback>
+                                <AvatarFallback>
+                                    {
+                                        <Image
+                                            src="https://avatar.iran.liara.run/public/boy?username=Ash"
+                                            alt="user_profile_pic"
+                                            width={30}
+                                            height={30}
+                                        />
+                                    }
+                                </AvatarFallback>
                             </Avatar>
                         </Link>
                     </div>
@@ -59,7 +68,16 @@ const Navbar = () => {
                                     <AvatarImage
                                         src={studentData?.profile_picture}
                                     />
-                                    <AvatarFallback>NAME</AvatarFallback>
+                                    <AvatarFallback>
+                                        {
+                                            <Image
+                                                src="https://avatar.iran.liara.run/public/boy?username=Ash"
+                                                alt="user_profile_pic"
+                                                width={30}
+                                                height={30}
+                                            />
+                                        }
+                                    </AvatarFallback>
                                 </Avatar>
                             </SheetTrigger>
                             <SheetContent

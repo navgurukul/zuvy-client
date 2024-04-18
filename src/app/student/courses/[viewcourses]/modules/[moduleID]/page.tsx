@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { select } from '@nextui-org/react'
 import { set } from 'date-fns'
 import parse from 'html-react-parser'
+import Link from 'next/link'
 
 // Define the type for module data
 // index is a property coming from and not any index of an array/object
@@ -345,6 +346,18 @@ function Page({
         }
     }
 
+    function openAssessmentTab() {
+        setSelectedChapterLabel('Assessment')
+        setChapterData(null)
+        setSelectedChapter({ index: null, id: null })
+    }
+
+    function startAssessment() {
+        router.push(
+            `/student/courses/${params.viewcourses}/modules/${moduleID}/assessment`
+        )
+    }
+
     return (
         <div className="flex">
             {/* Sidebar with labels */}
@@ -360,6 +373,18 @@ function Page({
                 </button>
 
                 <h4 className="text-lg font-bold mb-2 mt-5">Chapter List</h4>
+                <ul>
+                    <li
+                        className={`flex justify-between cursor-pointer capitalize py-2 px-4 hover:bg-gray-300 ${
+                            selectedChapterLabel === 'Assessment'
+                                ? 'font-bold'
+                                : ''
+                        }`}
+                        onClick={openAssessmentTab}
+                    >
+                        Assessment
+                    </li>
+                </ul>
                 <ul>
                     {moduleData.map((item, index) => (
                         <li
@@ -406,6 +431,21 @@ function Page({
             </div>
             {/* Right side content */}
             <div className="w-2/4 m-10 flex flex-col text-left">
+                {chapterData === null &&
+                    selectedChapterLabel === 'Assessment' && (
+                        <>
+                            <h1>Welcome to Assessment!</h1>
+                            <p>
+                                This is the assessment page. You can take the
+                                assessment here.
+                            </p>
+
+                            <Button onClick={startAssessment}>
+                                Start Assessment
+                            </Button>
+                        </>
+                    )}
+
                 {chapterData?.label === 'article' &&
                     selectedChapterLabel != 'quiz' && (
                         <>

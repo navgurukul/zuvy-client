@@ -7,18 +7,14 @@ import { Combobox } from '@/components/ui/combobox'
 import ClassCard from '../../_components/classCard'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import NewClassDialog from '../../_components/newClassDialog'
-import { api, apiMeraki } from '@/utils/axios.config'
+import { api } from '@/utils/axios.config'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import Image from 'next/image'
 import { getCourseData } from '@/store/store'
 import RecordingCard from '@/app/student/courses/[viewcourses]/[recordings]/_components/RecordingCard'
-import axios from 'axios'
-import { useRouter } from 'next/navigation'
 
 function Page() {
-    const router = useRouter()
-    const NEXT_URL = process.env.NEXT_PUBLIC_MAIN_URL
     const [classType, setClassType] = useState('upcoming')
     const [allClasses, setAllClasses] = useState([])
     const [bootcampData, setBootcampData] = useState([])
@@ -100,7 +96,7 @@ function Page() {
 
         if (courseData?.id) {
             api.get(
-                `/classes/${fetchUrl}/${fetchId}?offset=${offset}&limit=${limit}`
+                `/classes/${fetchUrl}/${fetchId}?offset=${offset}&limit=${30}`
             )
                 .then((response) => {
                     setUpcomingClasses(response.data.upcomingClasses)
@@ -120,55 +116,24 @@ function Page() {
         const [startDateTimeState, setStartDateTime] = useState(new Date())
         const [endDateTimeState, setEndDateTime] = useState(new Date())
         const [batchId, setBatchId] = useState('')
-        const [open, setOpen] = useState(false)
 
-        const handleDialogOpenChange = async () => {
-            await apiMeraki
-                .get(`/users/calendar/tokens`)
-                .then((res) => {
-                    setTitle('')
-                    setDescription('')
-                    const startDateTime = new Date()
-                    startDateTime.setHours(startDateTime.getHours() + 5)
-                    startDateTime.setMinutes(startDateTime.getMinutes() + 30)
-                    setStartDateTime(startDateTime)
-                    const endDateTime = new Date()
-                    endDateTime.setHours(endDateTime.getHours() + 5)
-                    endDateTime.setMinutes(endDateTime.getMinutes() + 30)
-                    setEndDateTime(endDateTime)
-                    setOpen(true)
-                })
-                .then((res) => {
-                    console.log('first', res)
-                    router.push(`${NEXT_URL}/classes`)
-                    // api.get(`/classes`)
-                    //     .then((res) => {
-                    //         console.log('first', res)
-                    //     })
-                    //     .then((res) => {
-                    //         setTitle('')
-                    //         setDescription('')
-                    //         const startDateTime = new Date()
-                    //         startDateTime.setHours(startDateTime.getHours() + 5)
-                    //         startDateTime.setMinutes(
-                    //             startDateTime.getMinutes() + 30
-                    //         )
-                    //         setStartDateTime(startDateTime)
-                    //         const endDateTime = new Date()
-                    //         endDateTime.setHours(endDateTime.getHours() + 5)
-                    //         endDateTime.setMinutes(
-                    //             endDateTime.getMinutes() + 30
-                    //         )
-                    //         setEndDateTime(endDateTime)
-                    //         setOpen(true)
-                    //     })
-                })
+        const handleDialogOpenChange = () => {
+            setTitle('')
+            setDescription('')
+            const startDateTime = new Date()
+            startDateTime.setHours(startDateTime.getHours() + 5)
+            startDateTime.setMinutes(startDateTime.getMinutes() + 30)
+            setStartDateTime(startDateTime)
+            const endDateTime = new Date()
+            endDateTime.setHours(endDateTime.getHours() + 5)
+            endDateTime.setMinutes(endDateTime.getMinutes() + 30)
+            setEndDateTime(endDateTime)
 
             setBatchId('')
         }
 
         return (
-            <Dialog open={open} onOpenChange={handleDialogOpenChange}>
+            <Dialog onOpenChange={handleDialogOpenChange}>
                 <DialogTrigger asChild>
                     <Button className="text-white bg-secondary">
                         Create Session
