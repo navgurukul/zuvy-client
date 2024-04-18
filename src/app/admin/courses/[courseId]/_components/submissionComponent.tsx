@@ -5,17 +5,25 @@ type Props = {
     title: string
     studentsSubmitted: number
     totalSubmissions: number
+    index: number
+    courseId: number
 }
 
 const SubmissionComponent = (props: Props) => {
     const [color, setColor] = useState('#ff0000')
+
     const handleClick = () => {
         const randomColor =
             '#' + Math.floor(Math.random() * 16777215).toString(16)
         setColor(randomColor)
     }
+
+    // console.log(props)
+
     return (
-        <div>
+        <Link
+            href={`/admin/courses/${props.courseId}/submissions/practiceProblems/${props.index}`}
+        >
             <div className="lg:flex h-[100px] shadow-md  rounded-md p-4">
                 <div className="flex flex-col justify-between py-2 lg:mx-2">
                     <h1 className="text-md font-semibold text-gray-800  dark:text-white ">
@@ -39,7 +47,7 @@ const SubmissionComponent = (props: Props) => {
                     </div>
                 </div>
             </div>
-        </div>
+        </Link>
     )
 }
 

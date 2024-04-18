@@ -32,8 +32,9 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
         const value = e.target.value
         setInputValue(value)
     }
+    console.log(instructorInfo?.name)
     const handleConfirm = () => {
-        if (inputValue === instructorInfo.name && input) {
+        if (inputValue === instructorInfo?.name && input) {
             setError(null)
             onConfirm()
         } else if (!input) {

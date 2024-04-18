@@ -165,6 +165,7 @@ function Page() {
                     data={bootcampData}
                     title={'Batch'}
                     onChange={handleComboboxChange}
+                    batch={false}
                 />
                 <Combobox
                     data={[]}
@@ -173,6 +174,7 @@ function Page() {
                         throw new Error('Function not implemented.')
                     }}
                     isDisabled
+                    batch={false}
                 />
             </div>
             <div className="flex justify-between">
