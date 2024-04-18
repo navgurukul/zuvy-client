@@ -1,8 +1,10 @@
-import { DataTable } from '@/app/_components/datatable/data-table'
+import React from 'react'
+
 import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
-import React from 'react'
+
 import { columns } from './columns'
+import { DataTable } from '@/app/_components/datatable/data-table'
 
 type Props = {}
 

@@ -2,26 +2,10 @@
 import Image from 'next/image'
 
 import { ColumnDef } from '@tanstack/react-table'
-
-import { Trash2 } from 'lucide-react'
-
-import { Checkbox } from '@/components/ui/checkbox'
-import { Combobox } from '@/components/ui/combobox'
-
-import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
-import {
-    deleteStudentHandler,
-    fetchStudentData,
-    onBatchChange,
-} from '@/utils/students'
-import { Task } from '@/utils/data/schema'
-import {
-    getBatchData,
-    getDeleteStudentStore,
-    getStoreStudentData,
-} from '@/store/store'
-import { getAttendanceColorClass } from '@/utils/students'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
+
+import { Task } from '@/utils/data/schema'
+
 export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'profilePicture',

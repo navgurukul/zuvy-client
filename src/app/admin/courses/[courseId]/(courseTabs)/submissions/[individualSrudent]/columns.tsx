@@ -1,28 +1,15 @@
 'use client'
+import Link from 'next/link'
 import Image from 'next/image'
 
-import { ColumnDef } from '@tanstack/react-table'
+import { FileText } from 'lucide-react'
 
-import { FileText, Trash2 } from 'lucide-react'
-
-import { Checkbox } from '@/components/ui/checkbox'
-import { Combobox } from '@/components/ui/combobox'
-
-import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
-import {
-    deleteStudentHandler,
-    fetchStudentData,
-    onBatchChange,
-} from '@/utils/students'
 import { Task } from '@/utils/data/schema'
-import {
-    getBatchData,
-    getDeleteStudentStore,
-    getStoreStudentData,
-} from '@/store/store'
-import { getAttendanceColorClass } from '@/utils/students'
+import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
-import Link from 'next/link'
+
+import { getDeleteStudentStore, getStoreStudentData } from '@/store/store'
+
 export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'profilePicture',
