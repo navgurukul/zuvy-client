@@ -135,6 +135,7 @@ const BatchesInfo = ({
 
     const toggleForm = () => {
         setIsFormOpen(!isFormOpen)
+        form.clearErrors()
     }
 
     const fetchInstructorInfo = useCallback(

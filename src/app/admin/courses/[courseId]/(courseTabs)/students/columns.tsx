@@ -21,6 +21,7 @@ import {
     getStoreStudentData,
 } from '@/store/store'
 import { getAttendanceColorClass } from '@/utils/students'
+import { trace } from 'console'
 export const columns: ColumnDef<Task>[] = [
     // {
     //     id: 'select',
@@ -119,19 +120,33 @@ export const columns: ColumnDef<Task>[] = [
         cell: ({ row }) => {
             const student = row.original
             const { batchData } = getBatchData()
-            const { setStoreStudentData } = getStoreStudentData()
+            const { studentsData, setStoreStudentData } = getStoreStudentData()
             const bootcampId = batchData && batchData[0]?.bootcampId
             const initialvalue = row.original?.batchId?.toString()
-            const transformedData = batchData?.reduce(
-                (transformedData: any[], item: { id: any; name: any }) => {
-                    transformedData.push({
-                        value: item.id?.toString(),
-                        label: item?.name,
-                    })
+            const transformedData = studentsData?.reduce(
+                (
+                    transformedData: any[],
+                    item: { batchId: any; batchName: any }
+                ) => {
+                    // Check if the current batchId is already present in transformedData
+                    const isUnique = !transformedData.some(
+                        (existingItem) =>
+                            existingItem.value === item.batchId?.toString()
+                    )
+
+                    // If the batchId is unique, add it to transformedData
+                    if (isUnique) {
+                        transformedData.push({
+                            value: item.batchId?.toString(),
+                            label: item?.batchName,
+                        })
+                    }
+
                     return transformedData
                 },
                 []
             )
+
             if (!batchData) {
                 return (
                     <div className="flex justify-center items-center h-[100vh]">
@@ -157,6 +172,7 @@ export const columns: ColumnDef<Task>[] = [
                     </div>
                 )
             }
+            console.log(transformedData)
             return (
                 <div className="flex text-start gap-6 my-6 max-w-[200px]">
                     <Combobox
