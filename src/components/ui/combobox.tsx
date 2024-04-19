@@ -34,13 +34,7 @@ export function Combobox({
     const [open, setOpen] = React.useState(false)
     const [value, setValue] = React.useState(initialValue)
 
-    let filteredData = data
-    if (batch) {
-        filteredData = data.filter(
-            (item: any) => item.value !== undefined || item.label !== null
-        )
-    }
-
+    console.log(data)
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
@@ -54,9 +48,9 @@ export function Combobox({
                     disabled={isDisabled}
                 >
                     {value
-                        ? filteredData.find((item: any) => item.value === value)
-                              ?.label
-                        : `No Batch is Assigned`}
+                        ? data.find((item: any) => item.value === value)
+                              ?.label ?? 'No Batch is Assigned'
+                        : 'No Batch is Assigned'}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
@@ -68,7 +62,7 @@ export function Combobox({
                     />
                     <CommandEmpty>No {title} found.</CommandEmpty>
                     <CommandGroup>
-                        {filteredData.map((item: any) => (
+                        {data.map((item: any) => (
                             <CommandItem
                                 key={item.value}
                                 value={item.value}
