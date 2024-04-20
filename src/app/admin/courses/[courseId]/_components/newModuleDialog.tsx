@@ -66,27 +66,40 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                     <Label>Time Alotted:</Label>
                     <div className="flex gap-2">
                         <Input
+                            className="no-spinners focus-visible:ring-muted"
                             type="number"
                             id="months"
                             name="months"
                             placeholder="Months"
-                            value={timeData?.months}
+                            value={
+                                timeData?.months > 0
+                                    ? timeData?.months
+                                    : undefined
+                            }
                             onChange={handleTimeAllotedChange}
                         />
                         <Input
+                            className="no-spinners focus-visible:ring-muted"
                             type="number"
                             id="weeks"
                             name="weeks"
                             placeholder="Weeks"
-                            value={timeData?.weeks}
+                            value={
+                                timeData?.weeks > 0
+                                    ? timeData?.weeks
+                                    : undefined
+                            }
                             onChange={handleTimeAllotedChange}
                         />
                         <Input
+                            className="no-spinners focus-visible:ring-muted"
                             type="number"
                             id="days"
                             name="days"
                             placeholder="Days"
-                            value={timeData?.days}
+                            value={
+                                timeData?.days > 0 ? timeData?.days : undefined
+                            }
                             onChange={handleTimeAllotedChange}
                         />
                     </div>

@@ -1,17 +1,17 @@
-import MaxWidthWrapper from "@/components/MaxWidthWrapper";
-import StudentNavbar from "../_components/navbar";
+import MaxWidthWrapper from '@/components/MaxWidthWrapper'
+import StudentNavbar from '../_components/navbar'
 
-import "../globals.css";
+import '../globals.css'
 
 export default function RootLayout({
-  children,
+    children,
 }: {
-  children: React.ReactNode;
+    children: React.ReactNode
 }) {
-  return (
-    <div>
-      <StudentNavbar />
-      <MaxWidthWrapper>{children}</MaxWidthWrapper>
-    </div>
-  );
+    return (
+        <div>
+            <StudentNavbar />
+            <MaxWidthWrapper>{children}</MaxWidthWrapper>
+        </div>
+    )
 }

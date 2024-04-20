@@ -12,18 +12,23 @@ function Quiz({ content }: QuizProps) {
                 (content as { question: string; options: string[] }[])?.map(
                     ({ question, options }, index) => {
                         return (
-                            <div className="text-start">
+                            <div key={index} className="text-start">
                                 <p>
                                     Q{index + 1}. {question}
                                 </p>
                                 <ul className="text-start">
-                                    {Object.values(options).map((option) => {
-                                        return (
-                                            <li className="bg-muted rounded-sm my-1 p-2">
-                                                {option}
-                                            </li>
-                                        )
-                                    })}
+                                    {Object.values(options).map(
+                                        (option, index) => {
+                                            return (
+                                                <li
+                                                    key={index}
+                                                    className="bg-muted rounded-sm my-1 p-2"
+                                                >
+                                                    {option}
+                                                </li>
+                                            )
+                                        }
+                                    )}
                                 </ul>
                             </div>
                         )

@@ -14,6 +14,7 @@ type Props = {
     description: string
     quizCount: number
     assignmentCount: number
+    timeAlloted: number
     codingProblemsCount: number
     articlesCount: number
 }
@@ -25,9 +26,13 @@ const CurricullumCard = ({
     description,
     quizCount,
     assignmentCount,
+    timeAlloted,
     codingProblemsCount,
     articlesCount,
 }: Props) => {
+    const timeAllotedInWeeks = Math.round(timeAlloted / 604800)
+    const timeAllotedInDays = Math.round(timeAlloted / 86400)
+
     return (
         <div className="w-full flex items-center justify-between gap-y-2  ">
             <div className="flex gap-y-2 flex-col p-2  ">
@@ -39,7 +44,15 @@ const CurricullumCard = ({
                     <div className="flex  items-center justify-start gap-x-2 ">
                         <Clock1 size={15} />
                         <p className="text-md font-semibold capitalize text-gray-600">
-                            2 weeks
+                            {timeAllotedInWeeks < 1
+                                ? `${timeAllotedInDays} ${
+                                      timeAllotedInDays === 1 ? 'day' : 'days'
+                                  }`
+                                : `${
+                                      timeAllotedInWeeks == 1
+                                          ? '1 week'
+                                          : `${timeAllotedInWeeks} weeks`
+                                  }`}
                         </p>
                     </div>
                     {articlesCount > 0 ? (

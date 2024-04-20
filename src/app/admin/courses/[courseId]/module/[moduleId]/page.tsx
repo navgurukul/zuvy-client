@@ -251,6 +251,16 @@ import Article from '../_components/Article'
 import CodeChallenge from '../_components/CodeChallenge'
 import Quiz from '../_components/Quiz'
 import Assignment from '../_components/Assignment'
+import { useParams } from 'next/navigation'
+import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
+
+type Chapter = {
+    chapterId: number
+    chapterTitle: string
+    order: number
+    topicId: number
+    topicName: string
+}
 
 function Page({
     params,
@@ -258,10 +268,23 @@ function Page({
     params: { viewcourses: string; moduleId: string }
 }) {
     // states and variables
-    const [moduleData, setModuleData] = useState([])
+    const [moduleData, setModuleData] = useState<Chapter[]>([])
     const [activeChapter, setActiveChapter] = useState(0)
     const [chapterContent, setChapterContent] = useState({})
     const [topicId, setTopicId] = useState(0)
+    const { courseId } = useParams()
+    const crumbs = [
+        {
+            crumb: 'Courses',
+            href: '/admin/courses',
+            isLast: false,
+        },
+        {
+            crumb: 'Curriculum',
+            href: '/admin/courses/${courseId}/curriculum',
+            isLast: false,
+        },
+    ]
     // func
     const fetchChapters = async () => {
         const response = await api.get(
@@ -303,30 +326,48 @@ function Page({
             fetchChapters()
         }
     }, [params])
+
+    useEffect(() => {
+        if (moduleData.length > 0) {
+            const firstChapterId = moduleData[0].chapterId
+            fetchChapterContent(firstChapterId)
+        }
+    }, [moduleData])
+
     return (
-        <div className="grid  grid-cols-4">
-            <div className="">
-                {moduleData &&
-                    moduleData?.map(
-                        ({ chapterId, chapterTitle, topicId, topicName }) => {
-                            return (
-                                <ChapterItem
-                                    key={chapterId}
-                                    chapterId={chapterId}
-                                    title={chapterTitle}
-                                    topicId={topicId}
-                                    topicName={topicName}
-                                    fetchChapterContent={fetchChapterContent}
-                                    activeChapter={activeChapter}
-                                />
-                            )
-                        }
-                    )}
+        <>
+            <BreadcrumbComponent crumbs={crumbs} />
+            <div className="grid  grid-cols-4 mt-5">
+                <div className="">
+                    {moduleData &&
+                        moduleData?.map(
+                            ({
+                                chapterId,
+                                chapterTitle,
+                                topicId,
+                                topicName,
+                            }) => {
+                                return (
+                                    <ChapterItem
+                                        key={chapterId}
+                                        chapterId={chapterId}
+                                        title={chapterTitle}
+                                        topicId={topicId}
+                                        topicName={topicName}
+                                        fetchChapterContent={
+                                            fetchChapterContent
+                                        }
+                                        activeChapter={activeChapter}
+                                    />
+                                )
+                            }
+                        )}
+                </div>
+                <div className="col-span-3 border-l-4">
+                    {renderChapterContent()}
+                </div>
             </div>
-            <div className="col-span-3 border-l-4">
-                {renderChapterContent()}
-            </div>
-        </div>
+        </>
     )
 }
 

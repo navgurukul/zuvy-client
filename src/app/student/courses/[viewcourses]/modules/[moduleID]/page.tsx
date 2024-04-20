@@ -357,6 +357,17 @@ function Page({
             `/student/courses/${params.viewcourses}/modules/${moduleID}/assessment`
         )
     }
+    function openPracticeProblem() {
+        setSelectedChapterLabel('practice problem')
+        setChapterData(null)
+        setSelectedChapter({ index: null, id: null })
+    }
+
+    function startPracticeProblem() {
+        router.push(
+            `/student/courses/${params.viewcourses}/modules/${moduleID}/practice`
+        )
+    }
 
     return (
         <div className="flex">
@@ -383,6 +394,16 @@ function Page({
                         onClick={openAssessmentTab}
                     >
                         Assessment
+                    </li>
+                    <li
+                        className={`flex justify-between cursor-pointer capitalize py-2 px-4 hover:bg-gray-300 ${
+                            selectedChapterLabel === 'practice problem'
+                                ? 'font-bold'
+                                : ''
+                        }`}
+                        onClick={openPracticeProblem}
+                    >
+                        Practice Problem
                     </li>
                 </ul>
                 <ul>
@@ -442,6 +463,20 @@ function Page({
 
                             <Button onClick={startAssessment}>
                                 Start Assessment
+                            </Button>
+                        </>
+                    )}
+                {chapterData === null &&
+                    selectedChapterLabel === 'practice problem' && (
+                        <>
+                            <h1>Welcome to Practice Problem!</h1>
+                            <p>
+                                This is the Practice Problem page. You can start
+                                solving the problem.
+                            </p>
+
+                            <Button onClick={startPracticeProblem}>
+                                Start Practice Problem
                             </Button>
                         </>
                     )}

@@ -109,6 +109,7 @@ function Page() {
                                 codingProblemsCount,
                                 articlesCount,
                                 order,
+                                timeAlloted,
                             },
                             index
                         ) => (
@@ -124,6 +125,7 @@ function Page() {
                                         index={index}
                                         quizCount={quizCount}
                                         assignmentCount={assignmentCount}
+                                        timeAlloted={timeAlloted}
                                         codingProblemsCount={
                                             codingProblemsCount
                                         }

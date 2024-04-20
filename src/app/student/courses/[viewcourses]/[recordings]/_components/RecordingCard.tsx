@@ -1,5 +1,8 @@
+'use client'
+
 import { ChevronRight, Clapperboard, Clock3, Download } from 'lucide-react'
 import Moment from 'react-moment'
+import Plyr from 'plyr'
 
 import { toast } from '@/components/ui/use-toast'
 import { Card } from '@/components/ui/card'
@@ -15,6 +18,7 @@ import {
 import { ellipsis } from '@/lib/utils'
 import { api } from '@/utils/axios.config'
 import { Button } from '@/components/ui/button'
+import { useEffect } from 'react'
 
 function RecordingCard({
     classData,
@@ -25,6 +29,17 @@ function RecordingCard({
 }) {
     // misc
     const isVideo = classData.s3link
+
+    let embedUrl = ''
+
+    // Check if classData.s3link is truthy
+    if (isVideo) {
+        // Extract video ID from classData.s3link
+        const videoId = classData.s3link.split('/d/')[1].split('/view')[0]
+
+        // Construct embeddable URL
+        embedUrl = `https://drive.google.com/file/d/${videoId}/preview`
+    }
 
     // func
     const handleViewRecording = () => {
@@ -112,16 +127,54 @@ function RecordingCard({
                         <SheetContent>
                             <SheetHeader>
                                 <SheetTitle>
-                                    <p className="text-xl text-start">
+                                    <h1 className="mb-10 text-xl text-start">
                                         {classData.title}
-                                    </p>
+                                    </h1>
                                 </SheetTitle>
                                 <SheetDescription>
-                                    <p>Session Recording</p>
+                                    <h2 className="mb-3 font-bold">
+                                        Session Recording
+                                    </h2>
+                                    {isVideo ? (
+                                        <div
+                                            className="plyr__video-embed"
+                                            id="player"
+                                        >
+                                            <iframe
+                                                src={embedUrl}
+                                                allowFullScreen
+                                                allowTransparency
+                                                allow="autoplay"
+                                            ></iframe>
+                                        </div>
+                                    ) : (
+                                        <p className="mb-5">
+                                            Video is under processing...Please
+                                            check after some time
+                                        </p>
+                                    )}
                                     <p className="text-md text-start">
                                         {classData.description}
                                     </p>
-                                    <p>Attendance Information</p>
+                                    <h3 className="mb-3 font-bold mt-3">
+                                        Attendance Information
+                                    </h3>
+                                    <div className="flex mb-5">
+                                        <div className="flex-grow basis-0">
+                                            <p>Total Students</p>
+                                            <p>50</p>
+                                        </div>
+                                        <div className="flex-grow basis-0">
+                                            <p>Present</p>
+                                            <p className="text-secondary">44</p>
+                                        </div>
+                                        <div className="flex-grow basis-0">
+                                            <p>Absent</p>
+                                            <p className="text-destructive">
+                                                6
+                                            </p>
+                                        </div>
+                                    </div>
                                     <Button
                                         className="flex gap-2 items-center"
                                         onClick={handleAttendance}
