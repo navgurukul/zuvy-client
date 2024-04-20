@@ -1,10 +1,11 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { useRouter } from 'next/navigation'
 import React, { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 const Page = () => {
+    // states and variables:-
     const router = useRouter()
     // Functions:-
 
@@ -58,7 +59,7 @@ const Page = () => {
     return (
         <>
             <h1 className="text-secondary text-5xl">
-                Assessment Page Under Construction
+                Practice Problem Page Under Construction
             </h1>
             <div className="mt-52 w-full flex justify-center items-center">
                 <div
@@ -71,17 +72,17 @@ const Page = () => {
                         // alert('Copying is not allowed')
                     }}
                 >
-                    <h1>Welcome to the Assessment Page</h1>
+                    <h1>
+                        Short description of the problem in one to two lines
+                        that is easy to read and understand
+                    </h1>
                     {/* <textarea cols={30} rows={10}></textarea> */}
                     <Button
                         onClick={() => {
                             requestFullScreen(document.documentElement)
-                            router.push(
-                                '/student/courses/[viewcourses]/modules/[moduleID]/assessment/testpage'
-                            )
                         }}
                     >
-                        Start Test
+                        Start Solving
                     </Button>
                 </div>
             </div>
