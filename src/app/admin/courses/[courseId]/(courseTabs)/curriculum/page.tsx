@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import moment from 'moment'
 
 import { api } from '@/utils/axios.config'
 import { getCourseData } from '@/store/store'
@@ -9,7 +10,6 @@ import { Button } from '@/components/ui/button'
 import CurricullumCard from '../../_components/curricullumCard'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import NewModuleDialog from '../../_components/newModuleDialog'
-import moment from 'moment'
 
 function Page() {
     // state and variables
@@ -26,8 +26,6 @@ function Page() {
         weeks: 0,
         days: 0,
     })
-
-    // const [timeAlloted, setTimeAlloted] = useState('')
 
     // func
 

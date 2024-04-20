@@ -298,7 +298,6 @@ function Page({
             `/Content/chapterDetailsById/${chapterId}`
         )
         setChapterContent(response.data.quizQuestionDetails)
-        console.log('first', response.data.quizQuestionDetails)
         setTopicId(response.data.topicId)
         setActiveChapter(chapterId)
     }
