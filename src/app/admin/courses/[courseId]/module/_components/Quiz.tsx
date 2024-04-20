@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils'
 import React from 'react'
 
 interface QuizProps {
@@ -5,7 +6,6 @@ interface QuizProps {
 }
 
 function Quiz({ content }: QuizProps) {
-    console.log('first', content)
     return (
         <div className="m-auto w-[300px]">
             {content &&
@@ -14,8 +14,9 @@ function Quiz({ content }: QuizProps) {
                         id: number
                         question: string
                         options: string[]
+                        correctOption: string
                     }[]
-                )?.map(({ id, question, options }, index) => {
+                )?.map(({ id, question, options, correctOption }, index) => {
                     return (
                         <div key={id} className="text-start mb-5">
                             <p>
@@ -26,7 +27,12 @@ function Quiz({ content }: QuizProps) {
                                     return (
                                         <li
                                             key={key}
-                                            className="bg-muted rounded-sm my-1 p-2"
+                                            className={cn(
+                                                'rounded-sm my-1 p-2',
+                                                correctOption === key.toString()
+                                                    ? 'bg-secondary text-white'
+                                                    : ''
+                                            )}
                                         >
                                             {value}
                                         </li>

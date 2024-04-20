@@ -253,6 +253,8 @@ import Quiz from '../_components/Quiz'
 import Assignment from '../_components/Assignment'
 import { useParams } from 'next/navigation'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
+import { Separator } from '@/components/ui/separator'
+import { Button } from '@/components/ui/button'
 
 type Chapter = {
     chapterId: number
@@ -281,8 +283,13 @@ function Page({
         },
         {
             crumb: 'Curriculum',
-            href: '/admin/courses/${courseId}/curriculum',
+            href: `/admin/courses/${courseId}/curriculum`,
             isLast: false,
+        },
+        {
+            crumb: 'Module Name',
+            // href: `/admin/courses/${courseId}/curriculum`,
+            isLast: true,
         },
     ]
     // func
@@ -290,6 +297,7 @@ function Page({
         const response = await api.get(
             `/Content/allChaptersOfModule/${params.moduleId}`
         )
+
         setModuleData(response.data)
     }
 
@@ -337,34 +345,43 @@ function Page({
         <>
             <BreadcrumbComponent crumbs={crumbs} />
             <div className="grid  grid-cols-4 mt-5">
-                <div className="">
-                    {moduleData &&
-                        moduleData?.map(
-                            ({
-                                chapterId,
-                                chapterTitle,
-                                topicId,
-                                topicName,
-                            }) => {
-                                return (
-                                    <ChapterItem
-                                        key={chapterId}
-                                        chapterId={chapterId}
-                                        title={chapterTitle}
-                                        topicId={topicId}
-                                        topicName={topicName}
-                                        fetchChapterContent={
-                                            fetchChapterContent
-                                        }
-                                        activeChapter={activeChapter}
-                                    />
-                                )
-                            }
-                        )}
+                <div className="col-span-1">
+                    <div>
+                        <div className="text-end mb-3">
+                            <Button className="py-2 px-2 h-full">
+                                Add Chapter
+                            </Button>
+                        </div>
+                        {moduleData &&
+                            moduleData?.map(
+                                ({
+                                    chapterId,
+                                    chapterTitle,
+                                    topicId,
+                                    topicName,
+                                }) => {
+                                    return (
+                                        <ChapterItem
+                                            key={chapterId}
+                                            chapterId={chapterId}
+                                            title={chapterTitle}
+                                            topicId={topicId}
+                                            topicName={topicName}
+                                            fetchChapterContent={
+                                                fetchChapterContent
+                                            }
+                                            activeChapter={activeChapter}
+                                        />
+                                    )
+                                }
+                            )}
+                    </div>
                 </div>
-                <div className="col-span-3 border-l-4">
-                    {renderChapterContent()}
-                </div>
+                <Separator
+                    orientation="vertical"
+                    className="mx-4 w-1 rounded"
+                />
+                <div className="">{renderChapterContent()}</div>
             </div>
         </>
     )

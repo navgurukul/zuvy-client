@@ -2,6 +2,7 @@ import {
     Clock1,
     Code,
     FileQuestion,
+    GripVertical,
     PencilLine,
     ScrollText,
 } from 'lucide-react'
@@ -35,11 +36,14 @@ const CurricullumCard = ({
 
     return (
         <div className="w-full flex items-center justify-between gap-y-2  ">
-            <div className="flex gap-y-2 flex-col p-2  ">
-                <div className="text-md font-semibold capitalize text-black text-start">
-                    {`Module ${order}`} : {name}
+            <div className="w-full p-2">
+                <div className="flex mb-2 w-full justify-between">
+                    <p className="text-md font-semibold capitalize text-black text-start">
+                        {`Module ${order}`} : {name}
+                    </p>
+                    <GripVertical />
                 </div>
-                <p className="text-start">{description}</p>
+                <p className="text-start mb-2">{description}</p>
                 <div className="flex flex-wrap justify-start  gap-x-4">
                     <div className="flex  items-center justify-start gap-x-2 ">
                         <Clock1 size={15} />
