@@ -10,6 +10,7 @@ import React from 'react'
 type Props = {
     index: number
     name: string
+    order: number
     description: string
     quizCount: number
     assignmentCount: number
@@ -20,6 +21,7 @@ type Props = {
 const CurricullumCard = ({
     index,
     name,
+    order,
     description,
     quizCount,
     assignmentCount,
@@ -30,7 +32,7 @@ const CurricullumCard = ({
         <div className="w-full flex items-center justify-between gap-y-2  ">
             <div className="flex gap-y-2 flex-col p-2  ">
                 <div className="text-md font-semibold capitalize text-black text-start">
-                    {`Module ${index + 1}`} : {name}
+                    {`Module ${order}`} : {name}
                 </div>
                 <p className="text-start">{description}</p>
                 <div className="flex flex-wrap justify-start  gap-x-4">

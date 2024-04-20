@@ -246,6 +246,11 @@
 import { api } from '@/utils/axios.config'
 import React, { useEffect, useState } from 'react'
 import ChapterItem from '../../_components/ChapterItem'
+import Video from '../_components/Video'
+import Article from '../_components/Article'
+import CodeChallenge from '../_components/CodeChallenge'
+import Quiz from '../_components/Quiz'
+import Assignment from '../_components/Assignment'
 
 function Page({
     params,
@@ -255,6 +260,8 @@ function Page({
     // states and variables
     const [moduleData, setModuleData] = useState([])
     const [activeChapter, setActiveChapter] = useState(0)
+    const [chapterContent, setChapterContent] = useState({})
+    const [topicId, setTopicId] = useState(0)
     // func
     const fetchChapters = async () => {
         const response = await api.get(
@@ -267,8 +274,27 @@ function Page({
         const response = await api.get(
             `/Content/chapterDetailsById/${chapterId}`
         )
+        setChapterContent(response.data.quizQuestionDetails)
+        console.log('first', response.data.quizQuestionDetails)
+        setTopicId(response.data.topicId)
         setActiveChapter(chapterId)
-        console.log(response.data)
+    }
+
+    const renderChapterContent = () => {
+        switch (topicId) {
+            case 1:
+                return <Video content={chapterContent} />
+            case 2:
+                return <Article content={chapterContent} />
+            case 3:
+                return <CodeChallenge content={chapterContent} />
+            case 4:
+                return <Quiz content={chapterContent} />
+            case 5:
+                return <Assignment content={chapterContent} />
+            default:
+                return <h1>StickyNote</h1>
+        }
     }
 
     // async
@@ -297,7 +323,9 @@ function Page({
                         }
                     )}
             </div>
-            <div className="col-span-3 border-l-4">Page</div>
+            <div className="col-span-3 border-l-4">
+                {renderChapterContent()}
+            </div>
         </div>
     )
 }

@@ -1,4 +1,3 @@
-import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import {
     Code,
@@ -8,7 +7,6 @@ import {
     StickyNote,
     Video,
 } from 'lucide-react'
-import React from 'react'
 
 function ChapterItem({
     title,
@@ -60,7 +58,6 @@ function ChapterItem({
                 <p>{setTopicIcon()} </p>
                 <p>{title}</p>
             </div>
-            {/* <Separator /> */}
         </>
     )
 }

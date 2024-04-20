@@ -108,6 +108,7 @@ function Page() {
                                 assignmentCount,
                                 codingProblemsCount,
                                 articlesCount,
+                                order,
                             },
                             index
                         ) => (
@@ -117,6 +118,7 @@ function Page() {
                                     className="bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl  "
                                 >
                                     <CurricullumCard
+                                        order={order}
                                         name={name}
                                         description={description}
                                         index={index}
