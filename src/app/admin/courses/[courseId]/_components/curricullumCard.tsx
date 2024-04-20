@@ -1,51 +1,84 @@
-import { Clock1, Copy, FileText } from "lucide-react";
-import Link from "next/link";
-import React from "react";
+import {
+    Clock1,
+    Code,
+    FileQuestion,
+    PencilLine,
+    ScrollText,
+} from 'lucide-react'
+import React from 'react'
 
 type Props = {
-  index: number;
-  name: string;
-};
+    index: number
+    name: string
+    description: string
+    quizCount: number
+    assignmentCount: number
+    codingProblemsCount: number
+    articlesCount: number
+}
 
-const CurricullumCard = ({ index, name }: Props) => {
-  return (
-    <div className='w-full flex items-center justify-between gap-y-2  '>
-      <div className='flex gap-y-2 flex-col p-2  '>
-        <div className='flex items-center justify-start  '>
-          <div className='text-md font-semibold capitalize text-black'>
-            {`Module ${index + 1}`} : {name}
-          </div>
-        </div>
-        <p>
-          Students learn basic concepts of programming and create their first
-          program
-        </p>
-        <div className='flex  gap-x-4'>
-          <div className='flex   items-center justify-start gap-x-2 '>
-            <Clock1 size={15} />
-            <p className='text-md font-semibold capitalize text-gray-600'>
-              2 weeks
-            </p>
-          </div>
-          <div className='flex  items-center justify-start gap-x-2 '>
-            <Copy size={15} />
-            <p className='text-md font-semibold capitalize text-gray-600'>
-              4 assignments
-            </p>
-          </div>{" "}
-          <div className='flex  items-center justify-start gap-x-2 '>
-            <FileText size={15} />
-            <p className='text-md font-semibold capitalize text-gray-600'>
-              1 Quiz
-            </p>
-          </div>
-        </div>
-      </div>
-      {/* <div className="">
+const CurricullumCard = ({
+    index,
+    name,
+    description,
+    quizCount,
+    assignmentCount,
+    codingProblemsCount,
+    articlesCount,
+}: Props) => {
+    return (
+        <div className="w-full flex items-center justify-between gap-y-2  ">
+            <div className="flex gap-y-2 flex-col p-2  ">
+                <div className="text-md font-semibold capitalize text-black text-start">
+                    {`Module ${index + 1}`} : {name}
+                </div>
+                <p className="text-start">{description}</p>
+                <div className="flex flex-wrap justify-start  gap-x-4">
+                    <div className="flex  items-center justify-start gap-x-2 ">
+                        <Clock1 size={15} />
+                        <p className="text-md font-semibold capitalize text-gray-600">
+                            2 weeks
+                        </p>
+                    </div>
+                    {articlesCount > 0 ? (
+                        <div className="flex  items-center justify-start gap-x-2 ">
+                            <ScrollText size={15} />
+                            <p className="text-md font-semibold capitalize text-gray-600">
+                                {articlesCount} articles
+                            </p>
+                        </div>
+                    ) : null}
+                    {assignmentCount > 0 ? (
+                        <div className="flex  items-center justify-start gap-x-2 ">
+                            <PencilLine size={15} />
+                            <p className="text-md font-semibold capitalize text-gray-600">
+                                {assignmentCount} assignments
+                            </p>
+                        </div>
+                    ) : null}
+                    {quizCount > 0 ? (
+                        <div className="flex  items-center justify-start gap-x-2 ">
+                            <FileQuestion size={15} />
+                            <p className="text-md font-semibold capitalize text-gray-600">
+                                {quizCount} Quiz
+                            </p>
+                        </div>
+                    ) : null}
+                    {codingProblemsCount > 0 ? (
+                        <div className="flex  items-center justify-start gap-x-2 ">
+                            <Code size={15} />
+                            <p className="text-md font-semibold capitalize text-gray-600">
+                                {codingProblemsCount} challenges
+                            </p>
+                        </div>
+                    ) : null}
+                </div>
+            </div>
+            {/* <div className="">
                 <CircularLoader />
               </div> */}
-    </div>
-  );
-};
+        </div>
+    )
+}
 
-export default CurricullumCard;
+export default CurricullumCard
