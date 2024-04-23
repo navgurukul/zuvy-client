@@ -43,8 +43,8 @@ function ChapterItem({
 
     const setActiveChapterItem = () => {
         return activeChapter === chapterId
-            ? 'bg-muted-foreground text-white'
-            : 'bg-muted text-black hover:bg-muted-foreground/50'
+            ? 'bg-secondary/50 text-primary'
+            : 'text-black hover:bg-secondary/20'
     }
 
     return (
