@@ -42,19 +42,25 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
     }
 
     const handleConfirm = () => {
-        if (
-            inputValue.replace(/\s/g, '') ===
-                instructorInfo?.name.replace(/\s/g, '') &&
-            input
-        ) {
-            setError(null)
-            onConfirm()
-        } else if (!input) {
-            onConfirm()
+        if (input) {
+            if (
+                inputValue.replace(/\s/g, '') ===
+                    instructorInfo?.name.replace(/\s/g, '') &&
+                input
+            ) {
+                setError(null)
+                onConfirm()
+            } else if (!input) {
+                console.log('HI')
+                onConfirm()
+            } else {
+                setError('Batch name does not match')
+            }
         } else {
-            setError('Batch name does not match')
+            onConfirm()
         }
     }
+
     useEffect(() => {
         setInputValue('')
     }, [isOpen])

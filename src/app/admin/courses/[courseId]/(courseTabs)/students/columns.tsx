@@ -128,13 +128,11 @@ export const columns: ColumnDef<Task>[] = [
                     transformedData: any[],
                     item: { batchId: any; batchName: any }
                 ) => {
-                    // Check if the current batchId is already present in transformedData
                     const isUnique = !transformedData.some(
                         (existingItem) =>
                             existingItem.value === item.batchId?.toString()
                     )
 
-                    // If the batchId is unique, add it to transformedData
                     if (isUnique) {
                         transformedData.push({
                             value: item.batchId?.toString(),

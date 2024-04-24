@@ -67,9 +67,8 @@ const BatchesInfo = ({
     const [currentPage, setCurrentPage] = useState<number>(1)
     const [totalStudents, setTotalStudents] = useState<number>(0)
     const [lastPage, setLastPage] = useState<number>(0)
-    const [formstudentData, setFormStudentData] = useState<any>({})
-    const [firstBatchStudentId, setFirstBatchStudentId] = useState<any>()
     const [isFormOpen, setIsFormOpen] = useState(false)
+    const [error, setError] = useState(true)
     const debouncedValue = useDebounce(search, 1000)
 
     const crumbs = [
@@ -100,7 +99,9 @@ const BatchesInfo = ({
         name: z.string().min(2, {
             message: 'Batch name must be at least 2 characters.',
         }),
-        instructorId: z.string(),
+        instructorId: z.string().min(2, {
+            message: 'Instructor ID must be at least 2 characters.',
+        }),
         capEnrollment: z.string().refine(
             (capEnrollment) => {
                 const capEnrollmentValue = parseInt(capEnrollment)
@@ -119,7 +120,7 @@ const BatchesInfo = ({
         resolver: zodResolver(formSchema),
         defaultValues: {
             name: instructorsInfo.name || '',
-            instructorId: (instructorsInfo.instructorId || '').toString(),
+            instructorId: instructorsInfo.instructorId || '',
             capEnrollment: instructorsInfo.capEnrollment || '',
         },
         mode: 'onChange',
@@ -137,6 +138,8 @@ const BatchesInfo = ({
         setIsFormOpen(!isFormOpen)
         form.clearErrors()
     }
+    const { formState } = form
+    const isValid = formState.isValid
 
     const fetchInstructorInfo = useCallback(
         async (batchId: string) => {
@@ -145,12 +148,6 @@ const BatchesInfo = ({
                     const response = await api.get(`/batch/${batchId}`)
                     const batchData = response.data.batch
                     setInstructorInfo(batchData)
-                    setFirstBatchStudentId(batchData.id)
-                    setFormStudentData({
-                        name: batchData.name,
-                        instructorId: batchData.instructorId,
-                        capEnrollment: batchData.capEnrollment,
-                    })
                 } catch (error: any) {
                     router.push('/not-found')
                     console.log(
@@ -160,7 +157,7 @@ const BatchesInfo = ({
                 }
             }
         },
-        [setInstructorInfo, setFirstBatchStudentId, setFormStudentData, router]
+        [setInstructorInfo, router]
     )
     useEffect(() => {
         fetchInstructorInfo(params.batchId)
@@ -285,7 +282,6 @@ const BatchesInfo = ({
     return (
         <>
             <BreadcrumbCmponent crumbs={crumbs} />
-
             <MaxWidthWrapper className="p-4 ">
                 <div className="flex justify-between">
                     <div className="w-1/2 flex flex-col items-start ">
@@ -520,7 +516,6 @@ const BatchesInfo = ({
                                                                     {...field}
                                                                 />
                                                             </FormControl>
-
                                                             <FormMessage />
                                                         </FormItem>
                                                     )}
