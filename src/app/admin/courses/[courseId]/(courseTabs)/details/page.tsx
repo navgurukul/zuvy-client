@@ -59,7 +59,6 @@ function Page({ params }: { params: any }) {
 
     const { courseData, setCourseData } = getCourseData()
     const { setStoreStudentData } = getStoreStudentData()
-
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
@@ -90,7 +89,7 @@ function Page({ params }: { params: any }) {
 
     async function onSubmit(data: z.infer<typeof FormSchema>) {
         try {
-            const response = await api
+            await api
                 .patch(
                     `/bootcamp/${courseData?.id}`,
                     {
@@ -277,7 +276,11 @@ function Page({ params }: { params: any }) {
                                             selected={field.value}
                                             onSelect={field.onChange}
                                             disabled={(date) =>
-                                                date < new Date()
+                                                date <
+                                                new Date(
+                                                    Date.now() -
+                                                        24 * 60 * 60 * 1000
+                                                )
                                             }
                                             initialFocus
                                         />
