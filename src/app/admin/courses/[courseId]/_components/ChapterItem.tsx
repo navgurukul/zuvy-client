@@ -5,6 +5,7 @@ import {
     PencilLine,
     ScrollText,
     StickyNote,
+    Trash2,
     Video,
 } from 'lucide-react'
 
@@ -42,21 +43,30 @@ function ChapterItem({
 
     const setActiveChapterItem = () => {
         return activeChapter === chapterId
-            ? 'bg-secondary text-white'
-            : 'bg-muted text-black'
+            ? 'bg-secondary/50 text-primary'
+            : 'text-black hover:bg-secondary/20'
     }
 
     return (
         <>
             <div
                 className={cn(
-                    'flex rounded-l-md p-2 gap-2 my-1 cursor-pointer',
+                    'flex rounded-md p-3  my-1 cursor-pointer justify-between items-center',
                     setActiveChapterItem()
                 )}
                 onClick={() => fetchChapterContent(chapterId)}
             >
-                <p>{setTopicIcon()} </p>
-                <p>{title}</p>
+                <div className="flex gap-2">
+                    <p>{setTopicIcon()} </p>
+                    <p>{title}</p>
+                </div>
+                <Trash2
+                    onClick={() => {
+                        // handleTrashClick()
+                    }}
+                    className="hover:text-destructive cursor-pointer"
+                    size={15}
+                />
             </div>
         </>
     )
