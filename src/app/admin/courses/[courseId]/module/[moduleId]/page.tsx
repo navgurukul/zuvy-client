@@ -1,57 +1,48 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { api } from '@/utils/axios.config'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { useRouter } from 'next/navigation'
-import Script from 'next/script'
-import { useLazyLoadedStudentData } from '@/store/store'
-import { ArrowBigLeft, ArrowLeft, CheckCircle2 } from 'lucide-react'
-import { toast } from '@/components/ui/use-toast'
+import {
+    Calculator,
+    Calendar,
+    Code,
+    CreditCard,
+    FileQuestion,
+    PencilLine,
+    ScrollText,
+    Video,
+    User,
+    BookOpenCheck,
+    Newspaper,
+} from 'lucide-react'
+
+import ChapterItem from '../../_components/ChapterItem'
+import VideoComponent from '../_components/Video'
+import Article from '../_components/Article'
+import CodeChallenge from '../_components/CodeChallenge'
+import Quiz from '../_components/Quiz'
+import Assignment from '../_components/Assignment'
+import { useParams } from 'next/navigation'
+import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
+import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
+import {
+    CommandDialog,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+    CommandSeparator,
+    CommandShortcut,
+} from '@/components/ui/command'
+import { api } from '@/utils/axios.config'
 
-// Define the type for module data
-interface ModuleDataItem {
-    id: number
-    label: string
-    name?: string
-    content?: string
-    questions?: Question[]
-    completed?: boolean
-}
-
-interface Question {
-    id: number
-    question: string
-    options: Option[]
-}
-
-interface Option {
-    text: string
-    correct: boolean
-    number: number
-}
-
-// Create a component to render the HTML content with Tailwind CSS styles applied
-const ContentComponent: React.FC<{ content: any; isQuiz?: boolean }> = ({
-    content,
-    isQuiz,
-}) => {
-    // Remove inline styles for quiz questions as it has text color white:-
-    const sanitizedContent = isQuiz
-        ? content.replace(/style=".*?"/g, '')
-        : content
-
-    return (
-        <div
-            className={` text-start max-w-3xl mx-auto py-4 ${
-                isQuiz ? 'text-black' : ''
-            }`}
-        >
-            {/* Render the HTML content */}
-            <div dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
-        </div>
-    )
+type Chapter = {
+    chapterId: number
+    chapterTitle: string
+    order: number
+    topicId: number
+    topicName: string
 }
 
 function Page({
@@ -59,185 +50,179 @@ function Page({
 }: {
     params: { viewcourses: string; moduleId: string }
 }) {
-    const { studentData } = useLazyLoadedStudentData()
-    const userID = studentData?.id && studentData?.id
-    const router = useRouter()
-    const moduleID = params.moduleId
-    const [moduleData, setModuleData] = useState<ModuleDataItem[]>([])
-    const [selectedModuleID, setSelectedModuleID] = useState<number | null>(
-        null
-    )
-    const [assignmentId, setAssignmentId] = useState(0)
-    const [articleId, setArticleId] = useState(0)
-    const [quizId, setQuizId] = useState(0)
-    const [selectedOptions, setSelectedOptions] = useState<{
-        [key: number]: number
-    }>({})
+    // states and variables
+    const [open, setOpen] = useState(false)
+    const [chapterData, setChapterData] = useState<Chapter[]>([])
+    const [assessmentData, setAssessmentData] = useState<Chapter[]>([])
+    const [moduleName, setModuleName] = useState('')
+    const [activeChapter, setActiveChapter] = useState(0)
+    const [chapterContent, setChapterContent] = useState({})
+    const [topicId, setTopicId] = useState(0)
+    const { courseId } = useParams()
+    const crumbs = [
+        {
+            crumb: 'Courses',
+            href: '/admin/courses',
+            isLast: false,
+        },
+        {
+            crumb: 'Curriculum',
+            href: `/admin/courses/${courseId}/curriculum`,
+            isLast: false,
+        },
+        {
+            crumb: moduleName,
+            // href: `/admin/courses/${courseId}/curriculum`,
+            isLast: true,
+        },
+    ]
+    // func
+    const fetchChapters = async () => {
+        const response = await api.get(
+            `/Content/allChaptersOfModule/${params.moduleId}`
+        )
+
+        setChapterData(response.data.chapterWithTopic)
+        setAssessmentData(response.data.assessment)
+        setModuleName(response.data.moduleName)
+    }
+
+    const fetchChapterContent = async (chapterId: number) => {
+        const response = await api.get(
+            `/Content/chapterDetailsById/${chapterId}`
+        )
+        setChapterContent(response.data.quizQuestionDetails)
+        setTopicId(response.data.topicId)
+        setActiveChapter(chapterId)
+    }
+
+    const renderChapterContent = () => {
+        switch (topicId) {
+            case 1:
+                return <VideoComponent content={chapterContent} />
+            case 2:
+                return <Article content={chapterContent} />
+            case 3:
+                return <CodeChallenge content={chapterContent} />
+            case 4:
+                return <Quiz content={chapterContent} />
+            case 5:
+                return <Assignment content={chapterContent} />
+            default:
+                return <h1>StickyNote</h1>
+        }
+    }
+
+    const handleAddChapter = () => {
+        setOpen(true)
+    }
+
+    // async
+    useEffect(() => {
+        if (params.moduleId) {
+            fetchChapters()
+        }
+    }, [params])
 
     useEffect(() => {
-        const getModuleData = async () => {
-            try {
-                const response = await api.get(`/Content/chapter/${moduleID}`)
-                const data: ModuleDataItem[] = response.data
-                const assignmentItem = data.find(
-                    (item: ModuleDataItem) => item.label === 'assignment'
-                )
-                if (assignmentItem) {
-                    setAssignmentId(assignmentItem.id)
-                }
-                const articleItem = data.find(
-                    (item: ModuleDataItem) => item.label === 'article'
-                )
-                if (articleItem) {
-                    setArticleId(articleItem.id)
-                }
-                const quizItem = data.find(
-                    (item: ModuleDataItem) => item.label === 'quiz'
-                )
-                if (quizItem) {
-                    setQuizId(quizItem.id)
-                }
-
-                setModuleData(data)
-
-                // Set selectedModuleID to the ID of the first module
-                if (data.length > 0) {
-                    setSelectedModuleID(data[0].id)
-                }
-            } catch (error) {
-                console.error('Error fetching module data:', error)
-            }
+        if (chapterData.length > 0) {
+            const firstChapterId = chapterData[0].chapterId
+            fetchChapterContent(firstChapterId)
         }
-        if (userID) getModuleData()
-    }, [moduleID, userID])
+    }, [chapterData])
 
     return (
-        <div className="flex">
-            {/* Sidebar with labels */}
-
-            <div className="w-1/4 border-r-2 text-left p-4">
-                <button
-                    onClick={() => router.back()}
-                    className="flex space-x-2 items-center"
-                >
-                    <ArrowLeft size={20} />
-                    <p className="ml-1 inline-flex text-sm font-medium text-gray-800 md:ml-2">
-                        Curriculum
-                    </p>
-                </button>
-
-                <h4 className="text-lg font-bold mb-2 mt-5">Chapter List</h4>
-                <ul>
-                    {moduleData.map((item, index) => (
-                        <li
-                            key={index}
-                            className={`flex cursor-pointer capitalize py-2 px-4 hover:bg-gray-300 ${
-                                selectedModuleID === item.id ? 'font-bold' : ''
-                            }`}
-                            onClick={() => setSelectedModuleID(item.id)}
+        <>
+            <BreadcrumbComponent crumbs={crumbs} />
+            <div className="grid  grid-cols-4 mt-5">
+                <div className="col-span-1 overflow-y-auto">
+                    <div>
+                        {chapterData &&
+                            chapterData?.map(
+                                ({
+                                    chapterId,
+                                    chapterTitle,
+                                    topicId,
+                                    topicName,
+                                }) => {
+                                    return (
+                                        <ChapterItem
+                                            key={chapterId}
+                                            chapterId={chapterId}
+                                            title={chapterTitle}
+                                            topicId={topicId}
+                                            topicName={topicName}
+                                            fetchChapterContent={
+                                                fetchChapterContent
+                                            }
+                                            activeChapter={activeChapter}
+                                        />
+                                    )
+                                }
+                            )}
+                    </div>
+                    <div className="mt-5">
+                        <Button
+                            variant="secondary"
+                            className="py-2 px-2 h-full w-full"
+                            onClick={handleAddChapter}
                         >
-                            {`${item.label}: ${item.name ? item.name : ''}`}{' '}
-                            {item.completed && (
-                                <CheckCircle2
-                                    size={18}
-                                    className="text-[#518672] ml-5 mt-1"
-                                />
-                            )}
-                            {/* Show number of questions for Quiz and MCQ */}
-                            {['quiz'].includes(item.label) && (
-                                <span className="text-sm ml-2 text-gray-500">
-                                    (
-                                    {item.questions ? item.questions.length : 0}{' '}
-                                    questions)
-                                </span>
-                            )}
-                        </li>
-                    ))}
-                </ul>
-            </div>
-            {/* Right side content */}
-            <div className="w-3/4 p-4 flex items-end justify-start text">
-                {selectedModuleID &&
-                    moduleData
-                        .filter((item) => item.id === selectedModuleID)
-                        .map((item, index) => (
-                            <div key={index}>
-                                {/* Render different types of content based on label */}
-                                {item.label === 'article' && item.content && (
-                                    <>
-                                        <ContentComponent
-                                            content={item.content}
-                                        />
-                                    </>
-                                )}
+                            Add Chapter
+                        </Button>
+                    </div>
+                </div>
+                <Separator
+                    orientation="vertical"
+                    className="mx-4 w-1 rounded"
+                />
+                <div className="">{renderChapterContent()}</div>
 
-                                {item.label === 'assignment' && (
-                                    <>
-                                        <ContentComponent
-                                            content={item.content}
-                                        />
-                                    </>
-                                )}
-                                {item.label === 'quiz' && (
-                                    <div>
-                                        <h3 className="font-semibold">Quiz</h3>
-                                        <ul>
-                                            {item.questions &&
-                                                item.questions.map(
-                                                    (question) => (
-                                                        <li key={question.id}>
-                                                            <ContentComponent
-                                                                content={
-                                                                    question.question
-                                                                }
-                                                                isQuiz={true}
-                                                            />
-
-                                                            <div className="flex justify-start  ">
-                                                                <RadioGroup
-                                                                    className="flex"
-                                                                    value={selectedOptions[
-                                                                        question
-                                                                            .id
-                                                                    ]?.toString()}
-                                                                >
-                                                                    {question.options.map(
-                                                                        (
-                                                                            option
-                                                                        ) => (
-                                                                            <p
-                                                                                key={
-                                                                                    option.number
-                                                                                }
-                                                                            >
-                                                                                <RadioGroupItem
-                                                                                    value={option.number.toString()}
-                                                                                    className={`mr-2 ${
-                                                                                        option.correct
-                                                                                            ? 'text-secondary'
-                                                                                            : 'text-destructive'
-                                                                                    }`}
-                                                                                />
-                                                                                <label>
-                                                                                    {
-                                                                                        option.text
-                                                                                    }
-                                                                                </label>
-                                                                            </p>
-                                                                        )
-                                                                    )}
-                                                                </RadioGroup>
-                                                            </div>
-                                                        </li>
-                                                    )
-                                                )}
-                                        </ul>
-                                    </div>
-                                )}
-                            </div>
-                        ))}
+                <CommandDialog open={open} onOpenChange={setOpen}>
+                    <CommandInput placeholder="Type a command or search..." />
+                    <CommandList>
+                        <CommandEmpty>No results found.</CommandEmpty>
+                        <CommandGroup heading="Chapters">
+                            <CommandItem>
+                                <ScrollText className="mr-2 h-4 w-4" />
+                                <span>Article</span>
+                            </CommandItem>
+                            <CommandItem>
+                                <Video className="mr-2 h-4 w-4" />
+                                <span>Video</span>
+                            </CommandItem>
+                            <CommandItem>
+                                <FileQuestion className="mr-2 h-4 w-4" />
+                                <span>Quiz</span>
+                            </CommandItem>
+                            <CommandItem>
+                                <PencilLine className="mr-2 h-4 w-4" />
+                                <span>Assignment</span>
+                            </CommandItem>
+                            <CommandItem>
+                                <Code className="mr-2 h-4 w-4" />
+                                <span>Coding Problem</span>
+                            </CommandItem>
+                        </CommandGroup>
+                        <CommandSeparator />
+                        <CommandGroup>
+                            <CommandItem>
+                                <BookOpenCheck className="mr-2 h-4 w-4" />
+                                <span>Assessment</span>
+                                {/* <CommandShortcut>⌘P</CommandShortcut> */}
+                            </CommandItem>
+                        </CommandGroup>
+                        <CommandSeparator />
+                        <CommandGroup>
+                            <CommandItem>
+                                <Newspaper className="mr-2 h-4 w-4" />
+                                <span>Form</span>
+                                {/* <CommandShortcut>⌘B</CommandShortcut> */}
+                            </CommandItem>
+                        </CommandGroup>
+                    </CommandList>
+                </CommandDialog>
             </div>
-        </div>
+        </>
     )
 }
 

@@ -29,7 +29,7 @@ const IndividualStudent = (props: Props) => {
                         </h1>
                         <Link
                             className=" flex items-center text-secondary font-bold"
-                            href={'/'}
+                            href={''}
                         >
                             See Solutions
                             <ChevronRight size={20} />

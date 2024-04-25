@@ -1,4 +1,3 @@
-'use client'
 import * as React from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -21,6 +20,7 @@ export interface ComboboxProps {
     onChange: (selectedValue: string) => void
     initialValue?: string
     isDisabled?: boolean
+    batch: boolean
 }
 
 export function Combobox({
@@ -29,16 +29,12 @@ export function Combobox({
     onChange,
     initialValue,
     isDisabled = false,
+    batch,
 }: ComboboxProps) {
     const [open, setOpen] = React.useState(false)
     const [value, setValue] = React.useState(initialValue)
 
-    const length = data ? data.length : 0
-
-    const filteredData = data
-        ? data.filter((item: any) => item.value !== null || item.label !== null)
-        : []
-
+    console.log(data)
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
@@ -51,12 +47,10 @@ export function Combobox({
                     className="w-full justify-between"
                     disabled={isDisabled}
                 >
-                    {length === 1
-                        ? data[0]?.label ?? 'No Batch is Assigned'
-                        : value
+                    {value
                         ? data.find((item: any) => item.value === value)
                               ?.label ?? 'No Batch is Assigned'
-                        : `No Batch is Assigned`}
+                        : 'No Batch is Assigned'}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
@@ -68,7 +62,7 @@ export function Combobox({
                     />
                     <CommandEmpty>No {title} found.</CommandEmpty>
                     <CommandGroup>
-                        {filteredData?.map((item: any) => (
+                        {data.map((item: any) => (
                             <CommandItem
                                 key={item.value}
                                 value={item.value}

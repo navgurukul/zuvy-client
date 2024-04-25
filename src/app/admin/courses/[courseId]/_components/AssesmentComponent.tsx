@@ -1,4 +1,5 @@
 'use client'
+import { Button } from '@/components/ui/button'
 import { ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import React, { useState } from 'react'
@@ -64,13 +65,10 @@ const AssesmentComponent = (props: Props) => {
                                 Submissions
                             </h3>
                         </div>
-                        <Link
-                            className=" flex items-center text-secondary font-bold"
-                            href={'/'}
-                        >
+                        <Button className=" flex items-center text-white font-bold">
                             View Submissions
                             <ChevronRight size={20} />
-                        </Link>
+                        </Button>
                     </div>
                 </div>
             </div>

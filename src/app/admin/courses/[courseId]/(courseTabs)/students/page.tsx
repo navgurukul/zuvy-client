@@ -9,7 +9,6 @@ import { api } from '@/utils/axios.config'
 import { Input } from '@/components/ui/input'
 import { getBatchData, getCourseData, getStoreStudentData } from '@/store/store'
 import useDebounce from '@/hooks/useDebounce'
-import { fetchStudentData as fetchdata } from '@/utils/students'
 
 import { OFFSET, POSITION } from '@/utils/constant'
 import { DataTable } from '@/app/_components/datatable/data-table'
@@ -59,7 +58,6 @@ const Page = ({ params }: { params: any }) => {
         },
         [position, setStoreStudentData, params.courseId]
     )
-    console.log(params.courseId)
 
     useEffect(() => {
         fetchStudentData(offset)

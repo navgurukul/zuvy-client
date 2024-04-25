@@ -21,6 +21,7 @@ import { toast } from '@/components/ui/use-toast'
 import useDebounce from '@/hooks/useDebounce'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useStudentData } from '@/store/store'
+import { Separator } from '@/components/ui/separator'
 
 interface Course {
     name: string
@@ -158,6 +159,7 @@ const Courses: React.FC = () => {
     return (
         <div>
             <Heading title={'Courses'} />
+            {/* <p className="text-3xl font-bold tracking-tight m-0">Courses</p> */}
             <div>
                 {!hasAccess ? (
                     <Alert
@@ -201,51 +203,82 @@ const Courses: React.FC = () => {
                 </div>
                 <div className="my-5 flex justify-center items-center">
                     {courses.length === 0 ? (
-                        <div className="mt-24">
-                            <h4 className={styles.firstCourseText}>
-                                Create your first course and share with students
-                            </h4>
-                            <Dialog>
-                                <DialogTrigger asChild>
-                                    <Button className="text-white bg-secondary">
-                                        <Plus className="w-5 mr-2" />
-                                        <p>New Course</p>
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogOverlay />
-                                <NewCourseDialog
-                                    newCourseName={newCourseName}
-                                    handleNewCourseNameChange={
-                                        handleNewCourseNameChange
-                                    }
-                                    handleCreateCourse={handleCreateCourse}
-                                />
-                            </Dialog>
-                            <hr className={styles.hrLine} />
+                        <div className="mt-24 ">
+                            <div>
+                                <h4 className={styles.firstCourseText}>
+                                    Create your first course and share with
+                                    students
+                                </h4>
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                        <Button className="text-white bg-secondary">
+                                            <Plus className="w-5 mr-2" />
+                                            <p>New Course</p>
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogOverlay />
+                                    <NewCourseDialog
+                                        newCourseName={newCourseName}
+                                        handleNewCourseNameChange={
+                                            handleNewCourseNameChange
+                                        }
+                                        handleCreateCourse={handleCreateCourse}
+                                    />
+                                </Dialog>
+                            </div>
+                            <div className="flex justify-center my-10">
+                                <Separator className="w-1/2" />
+                            </div>
                             <p className={styles.needHelpText}>
                                 Need help getting started? Checkout the
                                 tutorials below
                             </p>
-                            <div className=" m-0 flex items-center justify-center">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4">
-                                    <Link href={''}>
-                                        <div className="bg-white rounded-lg border p-4">
-                                            <Image
-                                                src="https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Ym9va3N8ZW58MHx8MHx8fDA%3D"
-                                                alt="Placeholder Image"
-                                                className=" object-contain"
-                                                height={48}
-                                                width={300}
-                                            />
-                                            <div className="px-1 py-4">
-                                                <div className="font-semibold text-xl mb-2">
-                                                    {' '}
-                                                    How to create a new course
-                                                </div>
-                                            </div>
+                            <div className=" m-0 flex items-center justify-center space-x-4">
+                                <Link href={''}>
+                                    <Image
+                                        src="https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Ym9va3N8ZW58MHx8MHx8fDA%3D"
+                                        alt="Placeholder Image"
+                                        className=" object-contain rounded-md"
+                                        height={48}
+                                        width={300}
+                                    />
+                                    <div className="px-1 py-4">
+                                        <div className="text-start mb-2">
+                                            {' '}
+                                            How to create a new course
                                         </div>
-                                    </Link>
-                                </div>
+                                    </div>
+                                </Link>
+                                <Link href={''}>
+                                    <Image
+                                        src="https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Ym9va3N8ZW58MHx8MHx8fDA%3D"
+                                        alt="Placeholder Image"
+                                        className=" object-contain rounded-md"
+                                        height={48}
+                                        width={300}
+                                    />
+                                    <div className="px-1 py-4">
+                                        <div className="text-start mb-2">
+                                            {' '}
+                                            Adding students in a course
+                                        </div>
+                                    </div>
+                                </Link>
+                                <Link href={''}>
+                                    <Image
+                                        src="https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Ym9va3N8ZW58MHx8MHx8fDA%3D"
+                                        alt="Placeholder Image"
+                                        className=" object-contain rounded-md"
+                                        height={48}
+                                        width={300}
+                                    />
+                                    <div className="px-1 py-4">
+                                        <div className="text-start mb-2">
+                                            {' '}
+                                            Check attendance of the classes
+                                        </div>
+                                    </div>
+                                </Link>
                             </div>
                         </div>
                     ) : (

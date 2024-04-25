@@ -8,12 +8,18 @@ import { X } from 'lucide-react'
 import Link from 'next/link'
 
 type Props = {
-    studentData: any
+    studentData?: any
     className: string
-    setStudentData: any
+    setStudentData?: any
+    acceptedFiles?: any
 }
 
-const Dropzone = ({ className, studentData, setStudentData }: Props) => {
+const Dropzone = ({
+    className,
+    studentData,
+    setStudentData,
+    acceptedFiles = 'text/csv',
+}: Props) => {
     // misc
 
     // state and variables
@@ -26,14 +32,14 @@ const Dropzone = ({ className, studentData, setStudentData }: Props) => {
                 (item: any) => item.email !== null && item.email !== undefined
             )
 
-            setStudentData(filteredArray)
+            acceptedFiles === 'text/csv' && setStudentData(filteredArray)
         },
         [setStudentData]
     )
 
     const removeFile = () => {
         setFileName('')
-        setStudentData({})
+        acceptedFiles === 'text/csv' && setStudentData({})
     }
 
     const onDrop = useCallback(
@@ -64,6 +70,7 @@ const Dropzone = ({ className, studentData, setStudentData }: Props) => {
     )
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
+        accept: acceptedFiles,
         onDrop,
     })
 
@@ -82,7 +89,6 @@ const Dropzone = ({ className, studentData, setStudentData }: Props) => {
                             Upload Or Drag File
                         </p>
                         <p className="text-gray-400">
-                            {' '}
                             .csv files are supported
                         </p>
                     </div>
@@ -99,28 +105,34 @@ const Dropzone = ({ className, studentData, setStudentData }: Props) => {
                             onClick={removeFile}
                         />
                     </div>
-                    <div className="text-start">
-                        <h3 className="mb-2 font-semibold">Upload Status</h3>
-                        <div className="flex items-center justify-start space-x-2">
-                            <div className="w-2 h-2 rounded-full bg-secondary" />
-                            <span className="text-black">
-                                {studentData.length} records uploaded
-                            </span>
+                    {acceptedFiles === 'text/csv' && (
+                        <div className="text-start">
+                            <h3 className="mb-2 font-semibold">
+                                Upload Status
+                            </h3>
+                            <div className="flex items-center justify-start space-x-2">
+                                <div className="w-2 h-2 rounded-full bg-secondary" />
+                                <span className="text-black">
+                                    {studentData?.length} records uploaded
+                                </span>
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             ) : (
-                <div className="flex pt-2 justify-between items-center">
-                    <p className="text-gray-400 text-xs">
-                        Format for student data:
-                        <Link
-                            href="https://www.dropbox.com/scl/fi/jmd558u9uvl6ehtwlfdgj/csvformatted-file.csv?rlkey=zb5jzu52m5i5jcyli02kyfien&dl=1"
-                            className="mx-2 text-xs font-semibold text-[#2F433A]"
-                        >
-                            Sample_Student_Data.csv
-                        </Link>
-                    </p>
-                </div>
+                acceptedFiles === 'text/csv' && (
+                    <div className="flex pt-2 justify-between items-center">
+                        <p className="text-gray-400 text-xs">
+                            Format for student data:
+                            <Link
+                                href="https://www.dropbox.com/scl/fi/jmd558u9uvl6ehtwlfdgj/csvformatted-file.csv?rlkey=zb5jzu52m5i5jcyli02kyfien&dl=1"
+                                className="mx-2 text-xs font-semibold text-[#2F433A]"
+                            >
+                                Sample_Student_Data.csv
+                            </Link>
+                        </p>
+                    </div>
+                )
             )}
         </>
     )
