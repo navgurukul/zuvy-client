@@ -37,12 +37,58 @@ import {
 } from '@/components/ui/command'
 import { api } from '@/utils/axios.config'
 
+// Interfaces:-
 type Chapter = {
     chapterId: number
     chapterTitle: string
     order: number
     topicId: number
     topicName: string
+}
+
+interface ExampleTestCase {
+    input: number[]
+    output: number[]
+}
+
+interface CodingQuestionDetails {
+    id: number
+    title: string
+    description: string
+    difficulty: string
+    tags: number
+    constraints: string
+    authorId: number
+    inputBase64: null | string
+    examples: ExampleTestCase[]
+    testCases: ExampleTestCase[]
+    expectedOutput: number[]
+    solution: string
+    createdAt: string
+    updatedAt: string
+}
+
+interface QuizOptions {
+    option1: string
+    option2: string
+    option3: string
+    option4: string
+}
+
+interface QuizQuestionDetails {
+    id: number
+    question: string
+    options: QuizOptions
+    correctOption: string
+    marks: null | number
+    difficulty: string
+    tagId: number
+}
+
+interface Module {
+    chapterId: number
+    topicName: string
+    // include other properties as needed
 }
 
 function Page({
@@ -59,6 +105,7 @@ function Page({
     const [chapterContent, setChapterContent] = useState({})
     const [topicId, setTopicId] = useState(0)
     const { courseId } = useParams()
+    const [moduleData, setModuleData] = useState<Module[]>([])
     const crumbs = [
         {
             crumb: 'Courses',
@@ -76,7 +123,7 @@ function Page({
             isLast: true,
         },
     ]
-    // func
+    // functions:-
     const fetchChapters = async () => {
         const response = await api.get(
             `/Content/allChaptersOfModule/${params.moduleId}`
@@ -85,13 +132,28 @@ function Page({
         setChapterData(response.data.chapterWithTopic)
         setAssessmentData(response.data.assessment)
         setModuleName(response.data.moduleName)
+        setModuleData(response.data.chapterWithTopic)
+        console.log(response.data)
     }
 
     const fetchChapterContent = async (chapterId: number) => {
         const response = await api.get(
             `/Content/chapterDetailsById/${chapterId}`
         )
-        setChapterContent(response.data.quizQuestionDetails)
+        const currentModule = moduleData.find(
+            (module: any) => module.chapterId == chapterId
+        )
+
+        if (currentModule?.topicName == 'Quiz') {
+            setChapterContent(
+                response.data.quizQuestionDetails as QuizQuestionDetails[]
+            )
+        } else if (currentModule?.topicName == 'Coding Question') {
+            setChapterContent(
+                response.data.codingQuestionDetails as CodingQuestionDetails[]
+            )
+        }
+
         setTopicId(response.data.topicId)
         setActiveChapter(chapterId)
     }
@@ -103,7 +165,7 @@ function Page({
             case 2:
                 return <Article content={chapterContent} />
             case 3:
-                return <CodeChallenge content={chapterContent} />
+                return <CodeChallenge content={[chapterContent]} />
             case 4:
                 return <Quiz content={chapterContent} />
             case 5:
