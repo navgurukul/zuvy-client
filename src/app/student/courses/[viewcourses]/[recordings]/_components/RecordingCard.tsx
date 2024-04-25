@@ -18,7 +18,19 @@ import {
 import { ellipsis } from '@/lib/utils'
 import { api } from '@/utils/axios.config'
 import { Button } from '@/components/ui/button'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+
+interface StudentsInfo {
+    total_students: number
+    present: number
+    s3link: string
+}
+
+interface DisplayAttendance {
+    status: string
+    message: string
+    studentsInfo: StudentsInfo
+}
 
 function RecordingCard({
     classData,
@@ -41,7 +53,28 @@ function RecordingCard({
         embedUrl = `https://drive.google.com/file/d/${videoId}/preview`
     }
 
+    const [displayAttendance, setDisplayAttendance] =
+        useState<DisplayAttendance | null>(null)
+
     // func
+
+    async function handleClassDetails() {
+        try {
+            const response = await api.get(
+                `/classes/analytics/${classData?.meetingId}`
+            )
+            setDisplayAttendance(response.data)
+        } catch (err) {
+            console.error(err)
+        }
+    }
+
+    const absentStudents =
+        (displayAttendance?.studentsInfo?.total_students ?? 0) -
+        (displayAttendance?.studentsInfo?.present ?? 0)
+
+    const presentStudents = displayAttendance?.studentsInfo?.present
+
     const handleViewRecording = () => {
         if (isVideo) {
             window.open(classData.s3link, '_blank')
@@ -57,7 +90,7 @@ function RecordingCard({
     const handleAttendance = async () => {
         try {
             const response = await api.get(
-                `/classes/getAttendance/${classData.meetingid}`
+                `/classes/getAttendance/${classData.meetingId}`
             )
             const attendanceData = response.data.attendanceSheet
             if (!Array.isArray(attendanceData) || attendanceData.length === 0) {
@@ -121,7 +154,9 @@ function RecordingCard({
                 ) : (
                     <Sheet>
                         <div className="flex items-center">
-                            <SheetTrigger>Class Details</SheetTrigger>
+                            <SheetTrigger onClick={() => handleClassDetails()}>
+                                Class Details
+                            </SheetTrigger>
                             <ChevronRight size={15} />
                         </div>
                         <SheetContent>
@@ -162,22 +197,33 @@ function RecordingCard({
                                     <div className="flex mb-5">
                                         <div className="flex-grow basis-0">
                                             <p>Total Students</p>
-                                            <p>50</p>
+                                            <p>
+                                                {' '}
+                                                {
+                                                    displayAttendance
+                                                        ?.studentsInfo
+                                                        ?.total_students
+                                                }
+                                            </p>
                                         </div>
                                         <div className="flex-grow basis-0">
                                             <p>Present</p>
-                                            <p className="text-secondary">44</p>
+                                            <p className="text-secondary">
+                                                {' '}
+                                                {presentStudents}
+                                            </p>
                                         </div>
                                         <div className="flex-grow basis-0">
                                             <p>Absent</p>
                                             <p className="text-destructive">
-                                                6
+                                                {absentStudents}
                                             </p>
                                         </div>
                                     </div>
                                     <Button
                                         className="flex gap-2 items-center"
                                         onClick={handleAttendance}
+                                        disabled={presentStudents === 0}
                                     >
                                         <p>Download Attendance Data</p>
                                         <Download size={20} />
