@@ -36,6 +36,7 @@ import {
     CommandShortcut,
 } from '@/components/ui/command'
 import { api } from '@/utils/axios.config'
+import Link from 'next/link'
 
 type Chapter = {
     chapterId: number
@@ -48,7 +49,7 @@ type Chapter = {
 function Page({
     params,
 }: {
-    params: { viewcourses: string; moduleId: string }
+    params: { viewcourses: string; moduleId: string; courseId: string }
 }) {
     // states and variables
     const [open, setOpen] = useState(false)
@@ -134,7 +135,7 @@ function Page({
     return (
         <>
             <BreadcrumbComponent crumbs={crumbs} />
-            <div className="grid  grid-cols-4 mt-5">
+            <div className="grid  grid-cols-6 mt-5">
                 <div className="col-span-1 overflow-y-auto">
                     <div>
                         {chapterData &&
@@ -161,7 +162,7 @@ function Page({
                                 }
                             )}
                     </div>
-                    <div className="mt-5">
+                    <div className="mt-5 flex">
                         <Button
                             variant="secondary"
                             className="py-2 px-2 h-full w-full"
@@ -171,11 +172,7 @@ function Page({
                         </Button>
                     </div>
                 </div>
-                <Separator
-                    orientation="vertical"
-                    className="mx-4 w-1 rounded"
-                />
-                <div className="">{renderChapterContent()}</div>
+                <div className="col-span-4 mx-4">{renderChapterContent()}</div>
 
                 <CommandDialog open={open} onOpenChange={setOpen}>
                     <CommandInput placeholder="Type a command or search..." />
@@ -188,11 +185,19 @@ function Page({
                             </CommandItem>
                             <CommandItem>
                                 <Video className="mr-2 h-4 w-4" />
-                                <span>Video</span>
+                                <Link
+                                    href={`/admin/courses/${courseId}/module/${params.moduleId}/video/${params.moduleId}`}
+                                >
+                                    Video
+                                </Link>
                             </CommandItem>
                             <CommandItem>
                                 <FileQuestion className="mr-2 h-4 w-4" />
-                                <span>Quiz</span>
+                                <Link
+                                    href={`/admin/courses/${courseId}/module/${params.moduleId}/quiz/${params.moduleId}`}
+                                >
+                                    Quiz
+                                </Link>
                             </CommandItem>
                             <CommandItem>
                                 <PencilLine className="mr-2 h-4 w-4" />
