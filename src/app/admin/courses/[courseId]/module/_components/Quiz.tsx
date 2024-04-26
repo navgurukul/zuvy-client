@@ -194,8 +194,8 @@ function Quiz({ content }: QuizProps) {
                         <h1 className="text-left font-semibold">
                             Question Text
                         </h1>
-                        <div className="flex">
-                            <div className="border-2 text-left border-gray-400 rounded-lg p-2">
+                        <div className="flex w-full">
+                            <div className="border-2 w-full text-left border-gray-400 rounded-lg p-2">
                                 <p>
                                     Using which block can we rotate the sprite ?
                                 </p>
