@@ -37,6 +37,7 @@ import {
 } from '@/components/ui/command'
 import { api } from '@/utils/axios.config'
 import Link from 'next/link'
+import AddVideo from '../_components/AddVideo'
 
 // Interfaces:-
 type Chapter = {
@@ -106,6 +107,7 @@ function Page({
     const [chapterContent, setChapterContent] = useState({})
     const [topicId, setTopicId] = useState(0)
     const { courseId } = useParams()
+    const [videoState, setVideoState] = useState<boolean>(false)
     const [moduleData, setModuleData] = useState<Module[]>([])
     const crumbs = [
         {
@@ -134,7 +136,6 @@ function Page({
         setAssessmentData(response.data.assessment)
         setModuleName(response.data.moduleName)
         setModuleData(response.data.chapterWithTopic)
-        console.log(response.data)
     }
 
     const fetchChapterContent = async (chapterId: number) => {
@@ -160,6 +161,9 @@ function Page({
     }
 
     const renderChapterContent = () => {
+        if (videoState) {
+            return <AddVideo moduleId={params.moduleId} />
+        }
         switch (topicId) {
             case 1:
                 return <VideoComponent content={chapterContent} />
@@ -197,8 +201,8 @@ function Page({
     return (
         <>
             <BreadcrumbComponent crumbs={crumbs} />
-            <div className="grid  grid-cols-6 mt-5">
-                <div className="col-span-1 overflow-y-auto">
+            <div className="grid  grid-cols-7 mt-5">
+                <div className="col-span-2 overflow-y-auto">
                     <div>
                         {chapterData &&
                             chapterData?.map(
@@ -218,6 +222,7 @@ function Page({
                                             fetchChapterContent={
                                                 fetchChapterContent
                                             }
+                                            setVideoState={setVideoState}
                                             activeChapter={activeChapter}
                                         />
                                     )
@@ -234,7 +239,7 @@ function Page({
                         </Button>
                     </div>
                 </div>
-                <div className="col-span-4 mx-4">{renderChapterContent()}</div>
+                <div className="col-span-5 mx-4">{renderChapterContent()}</div>
 
                 <CommandDialog open={open} onOpenChange={setOpen}>
                     <CommandInput placeholder="Type a command or search..." />
@@ -247,19 +252,13 @@ function Page({
                             </CommandItem>
                             <CommandItem>
                                 <Video className="mr-2 h-4 w-4" />
-                                <Link
-                                    href={`/admin/courses/${courseId}/module/${params.moduleId}/video/${params.moduleId}`}
-                                >
+                                <span onClick={() => setVideoState(true)}>
                                     Video
-                                </Link>
+                                </span>
                             </CommandItem>
                             <CommandItem>
                                 <FileQuestion className="mr-2 h-4 w-4" />
-                                <Link
-                                    href={`/admin/courses/${courseId}/module/${params.moduleId}/quiz/${params.moduleId}`}
-                                >
-                                    Quiz
-                                </Link>
+                                <span>Quiz</span>
                             </CommandItem>
                             <CommandItem>
                                 <PencilLine className="mr-2 h-4 w-4" />

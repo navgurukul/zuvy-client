@@ -19,22 +19,24 @@ import { Separator } from '@/components/ui/separator'
 import { Input } from '@/components/ui/input'
 import { FileUp } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea'
+import { api } from '@/utils/axios.config'
+import { toast } from '@/components/ui/use-toast'
 type Props = {}
 
 const formSchema = z.object({
     videoTitle: z.string().min(2, {
         message: 'Video Title must be at least 2 characters.',
     }),
-    inputVideoTitle: z.string().min(2, {
+    title: z.string().min(2, {
         message: 'Title must be at least 2 characters.',
     }),
     description: z.string().min(4, {
         message: 'Description must be at least 4 characters.',
     }),
-    link: z.string(),
+    links: z.string(),
 })
 
-const Video = (props: Props) => {
+const AddVideo = ({ moduleId }: { moduleId: string }) => {
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     const handleUploadClick = () => {
@@ -47,21 +49,41 @@ const Video = (props: Props) => {
         resolver: zodResolver(formSchema),
         defaultValues: {
             videoTitle: '',
-            inputVideoTitle: '',
+            title: '',
             description: '',
-            link: '',
+            links: '',
         },
     })
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values)
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        const convertedObj = {
+            title: values.title,
+            description: values.description,
+            links: [values.links],
+        }
+        console.log(convertedObj)
+        try {
+            await api
+                .post(`/Content/chapter/${moduleId}?topicId=1`, convertedObj)
+                .then((res) => {
+                    toast({
+                        title: res.data.status,
+                        description: res.data.message,
+                    })
+                })
+        } catch (error) {
+            toast({
+                title: 'Error',
+                description: "Couldn't Create the Chapter Module",
+            })
+        }
     }
 
     return (
-        <div className="flex flex-col gap-y-8 mx-auto">
+        <div className="flex flex-col gap-y-8 mx-auto items-center justify-center w-full">
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-8"
+                    className=" w-full items-center justify-center flex flex-col space-y-8"
                 >
                     <FormField
                         control={form.control}
@@ -72,7 +94,7 @@ const Video = (props: Props) => {
                                     <Input
                                         placeholder="Untitled Video"
                                         {...field}
-                                        className="w-2/5 text-3xl text-left font-semibold"
+                                        className="w-[450px] text-3xl text-left font-semibold"
                                     />
                                 </FormControl>
 
@@ -81,7 +103,7 @@ const Video = (props: Props) => {
                         )}
                     />
 
-                    <div className="rounded-lg p-5 w-2/5 py-20 border-dashed border-2 border-gray-500 flex flex-col items-center justify-center ">
+                    <div className="rounded-lg p-5 w-[450px] py-20 border-dashed border-2 border-gray-500 flex flex-col items-center justify-center ">
                         <input
                             ref={fileInputRef}
                             type="file"
@@ -105,17 +127,17 @@ const Video = (props: Props) => {
                     {/* <h1 >Title</h1> */}
                     <FormField
                         control={form.control}
-                        name="inputVideoTitle"
+                        name="title"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel className=" flex text-left text-xl font-semibold">
-                                    Username
+                                    Title
                                 </FormLabel>
                                 <FormControl>
                                     <Input
                                         placeholder="Title"
                                         {...field}
-                                        className="w-2/5 text-3xl text-left font-semibold"
+                                        className="w-[450px] text-3xl text-left font-semibold"
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -133,7 +155,7 @@ const Video = (props: Props) => {
                                 <FormControl>
                                     <Textarea
                                         {...field}
-                                        className="w-2/5 px-3 py-2 border rounded-md "
+                                        className="w-[450px] px-3 py-2 border rounded-md "
                                         placeholder="Type your message here."
                                     />
                                 </FormControl>
@@ -143,7 +165,7 @@ const Video = (props: Props) => {
                     />
                     <FormField
                         control={form.control}
-                        name="link"
+                        name="links"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel className=" flex text-left text-xl font-semibold">
@@ -152,7 +174,7 @@ const Video = (props: Props) => {
                                 <FormControl>
                                     <Input
                                         {...field}
-                                        className="w-2/5 px-3 py-2 border rounded-md "
+                                        className="w-[450px] px-3 py-2 border rounded-md "
                                         placeholder="Paste your link here "
                                     />
                                 </FormControl>
@@ -162,7 +184,7 @@ const Video = (props: Props) => {
                     />
                     <Button
                         type="submit"
-                        className=" flex flex-start  w-1/5  text-white font-bold py-2 px-4 rounded"
+                        className=" flex flex-start  w-[450px]  text-white font-bold py-2 px-4 rounded"
                     >
                         Embed Video
                     </Button>
@@ -172,4 +194,4 @@ const Video = (props: Props) => {
     )
 }
 
-export default Video
+export default AddVideo
