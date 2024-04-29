@@ -35,12 +35,12 @@ export type StudentData = {
 const Page = ({ params }: { params: any }) => {
     const [position, setPosition] = useState(POSITION)
     const { studentsData, setStoreStudentData } = getStoreStudentData()
+    const [isLoading, setLoading] = useState<boolean>(false)
     const [pages, setPages] = useState<number>()
     const [offset, setOffset] = useState<number>(OFFSET)
     const [currentPage, setCurrentPage] = useState<number>(1)
     const [totalStudents, setTotalStudents] = useState<number>(0)
     const [search, setSearch] = useState<string | null>(null)
-    const [loading, setLoading] = useState<boolean>(false)
     const [attendenceIds, setAttendenceIds] = useState<string[]>()
     const debouncedSearch = useDebounce(search, 1000)
     const [lastPage, setLastPage] = useState<number>(0)
@@ -59,16 +59,18 @@ const Page = ({ params }: { params: any }) => {
         }
     }
     const handleRefreshAttendence = async () => {
+        setLoading(true)
         const requestBody = {
             meetingIds: attendenceIds,
         }
 
         try {
-            api.post(`/classes/analytics/reload`, requestBody).then((res) => {
-                toast({ title: res.data.title, description: res.data.message })
-            })
+            const res = await api.post(`/classes/analytics/reload`, requestBody)
+            toast({ title: res.data.title, description: res.data.message })
         } catch (error: any) {
-            toast({ title: 'Error', description: 'Couldnot refresh' })
+            toast({ title: 'Error', description: 'Could not refresh' })
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -133,7 +135,9 @@ const Page = ({ params }: { params: any }) => {
     const handleSetsearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value)
     }
-
+    const handleClick = async () => {
+        await handleRefreshAttendence()
+    }
     return (
         <div>
             {
@@ -148,10 +152,39 @@ const Page = ({ params }: { params: any }) => {
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <RotateCcw
-                                        className="text-secondary"
-                                        onClick={handleRefreshAttendence}
-                                    />
+                                    <Button
+                                        onClick={handleClick}
+                                        className={`relative flex items-center justify-center   bg-white text-white rounded-md ${
+                                            isLoading
+                                                ? 'opacity-50 pointer-events-none'
+                                                : ''
+                                        }`}
+                                    >
+                                        {isLoading ? (
+                                            <svg
+                                                className="absolute animate-spin h-5 w-5 mr-5 text-secondary"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <circle
+                                                    className="opacity-25"
+                                                    cx="12"
+                                                    cy="12"
+                                                    r="10"
+                                                    stroke="currentColor"
+                                                    strokeWidth="4"
+                                                ></circle>
+                                                <path
+                                                    className="opacity-75"
+                                                    fill="currentColor"
+                                                    d="M4 12a8 8 0 018-8V2.5A1.5 1.5 0 0113.5 1h-3A1.5 1.5 0 019 2.5V4a8 8 0 014 6.93L13.93 11A2 2 0 0112 8V5"
+                                                ></path>
+                                            </svg>
+                                        ) : (
+                                            <RotateCcw className="text-secondary" />
+                                        )}
+                                    </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
                                     <p> Update Attendence</p>

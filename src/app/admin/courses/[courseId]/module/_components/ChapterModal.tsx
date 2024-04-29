@@ -22,10 +22,12 @@ import Link from 'next/link'
 function ChapterModal({
     open,
     setOpen,
+    setVideoState,
     params,
 }: {
     open: boolean
     setOpen: (open: boolean) => void
+    setVideoState: any
     params: { moduleId: string; courseId: string }
 }) {
     return (
@@ -40,19 +42,11 @@ function ChapterModal({
                     </CommandItem>
                     <CommandItem>
                         <Video className="mr-2 h-4 w-4" />
-                        <Link
-                            href={`/admin/courses/${params.courseId}/module/${params.moduleId}/video/${params.moduleId}`}
-                        >
-                            Video
-                        </Link>
+                        <span onClick={() => setVideoState(true)}>Video</span>
                     </CommandItem>
                     <CommandItem>
                         <FileQuestion className="mr-2 h-4 w-4" />
-                        <Link
-                            href={`/admin/courses/${params.courseId}/module/${params.moduleId}/quiz/${params.moduleId}`}
-                        >
-                            Quiz
-                        </Link>
+                        <span>Quiz</span>
                     </CommandItem>
                     <CommandItem>
                         <PencilLine className="mr-2 h-4 w-4" />

@@ -94,7 +94,7 @@ const AddVideo = ({ moduleId }: { moduleId: string }) => {
                                     <Input
                                         placeholder="Untitled Video"
                                         {...field}
-                                        className="w-[450px] text-3xl text-left font-semibold"
+                                        className="w-[450px] text-3xl text-left font-semibold outline-none border-none focus:ring-0"
                                     />
                                 </FormControl>
 
@@ -156,7 +156,7 @@ const AddVideo = ({ moduleId }: { moduleId: string }) => {
                                     <Textarea
                                         {...field}
                                         className="w-[450px] px-3 py-2 border rounded-md "
-                                        placeholder="Type your message here."
+                                        placeholder="Type your Description here."
                                     />
                                 </FormControl>
                                 <FormMessage />

@@ -219,7 +219,12 @@ function Page({
                 </div>
                 <div className="col-span-3 mx-4">{renderChapterContent()}</div>
 
-                <ChapterModal open={open} setOpen={setOpen} params={params} />
+                <ChapterModal
+                    open={open}
+                    setOpen={setOpen}
+                    params={params}
+                    setVideoState={setVideoState}
+                />
             </div>
         </>
     )
