@@ -1,42 +1,20 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
-import {
-    Calculator,
-    Calendar,
-    Code,
-    CreditCard,
-    FileQuestion,
-    PencilLine,
-    ScrollText,
-    Video,
-    User,
-    BookOpenCheck,
-    Newspaper,
-} from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 import ChapterItem from '../../_components/ChapterItem'
 import VideoComponent from '../_components/Video'
 import Article from '../_components/Article'
 import CodeChallenge from '../_components/CodeChallenge'
-import Quiz from '../_components/Quiz'
+import Quiz from '../_components/quiz/Quiz'
 import Assignment from '../_components/Assignment'
 import { useParams } from 'next/navigation'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
-import {
-    CommandDialog,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-    CommandSeparator,
-    CommandShortcut,
-} from '@/components/ui/command'
 import { api } from '@/utils/axios.config'
-import Link from 'next/link'
+import ChapterModal from '../_components/ChapterModal'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 // Interfaces:-
 type Chapter = {
@@ -134,7 +112,6 @@ function Page({
         setAssessmentData(response.data.assessment)
         setModuleName(response.data.moduleName)
         setModuleData(response.data.chapterWithTopic)
-        console.log(response.data)
     }
 
     const fetchChapterContent = async (chapterId: number) => {
@@ -197,9 +174,18 @@ function Page({
     return (
         <>
             <BreadcrumbComponent crumbs={crumbs} />
-            <div className="grid  grid-cols-6 mt-5">
-                <div className="col-span-1 overflow-y-auto">
-                    <div>
+            <div className="grid  grid-cols-4 mt-5">
+                <div className=" col-span-1">
+                    <div className="mb-5 flex">
+                        <Button
+                            variant="secondary"
+                            className="py-2 px-2 h-full w-full"
+                            onClick={handleAddChapter}
+                        >
+                            Add Chapter
+                        </Button>
+                    </div>
+                    <ScrollArea className="h-dvh pr-4">
                         {chapterData &&
                             chapterData?.map(
                                 ({
@@ -223,71 +209,11 @@ function Page({
                                     )
                                 }
                             )}
-                    </div>
-                    <div className="mt-5 flex">
-                        <Button
-                            variant="secondary"
-                            className="py-2 px-2 h-full w-full"
-                            onClick={handleAddChapter}
-                        >
-                            Add Chapter
-                        </Button>
-                    </div>
+                    </ScrollArea>
                 </div>
-                <div className="col-span-4 mx-4">{renderChapterContent()}</div>
+                <div className="col-span-3 mx-4">{renderChapterContent()}</div>
 
-                <CommandDialog open={open} onOpenChange={setOpen}>
-                    <CommandInput placeholder="Type a command or search..." />
-                    <CommandList>
-                        <CommandEmpty>No results found.</CommandEmpty>
-                        <CommandGroup heading="Chapters">
-                            <CommandItem>
-                                <ScrollText className="mr-2 h-4 w-4" />
-                                <span>Article</span>
-                            </CommandItem>
-                            <CommandItem>
-                                <Video className="mr-2 h-4 w-4" />
-                                <Link
-                                    href={`/admin/courses/${courseId}/module/${params.moduleId}/video/${params.moduleId}`}
-                                >
-                                    Video
-                                </Link>
-                            </CommandItem>
-                            <CommandItem>
-                                <FileQuestion className="mr-2 h-4 w-4" />
-                                <Link
-                                    href={`/admin/courses/${courseId}/module/${params.moduleId}/quiz/${params.moduleId}`}
-                                >
-                                    Quiz
-                                </Link>
-                            </CommandItem>
-                            <CommandItem>
-                                <PencilLine className="mr-2 h-4 w-4" />
-                                <span>Assignment</span>
-                            </CommandItem>
-                            <CommandItem>
-                                <Code className="mr-2 h-4 w-4" />
-                                <span>Coding Problem</span>
-                            </CommandItem>
-                        </CommandGroup>
-                        <CommandSeparator />
-                        <CommandGroup>
-                            <CommandItem>
-                                <BookOpenCheck className="mr-2 h-4 w-4" />
-                                <span>Assessment</span>
-                                {/* <CommandShortcut>⌘P</CommandShortcut> */}
-                            </CommandItem>
-                        </CommandGroup>
-                        <CommandSeparator />
-                        <CommandGroup>
-                            <CommandItem>
-                                <Newspaper className="mr-2 h-4 w-4" />
-                                <span>Form</span>
-                                {/* <CommandShortcut>⌘B</CommandShortcut> */}
-                            </CommandItem>
-                        </CommandGroup>
-                    </CommandList>
-                </CommandDialog>
+                <ChapterModal open={open} setOpen={setOpen} params={params} />
             </div>
         </>
     )
