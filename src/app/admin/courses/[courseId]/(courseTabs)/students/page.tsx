@@ -1,6 +1,6 @@
 'use client'
 import React, { useCallback, useEffect, useState } from 'react'
-import { Plus } from 'lucide-react'
+import { Plus, RefreshCcw, RotateCcw } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import AddStudentsModal from '../../_components/addStudentsmodal'
@@ -14,7 +14,13 @@ import { OFFSET, POSITION } from '@/utils/constant'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import { columns } from './columns'
-
+import { toast } from '@/components/ui/use-toast'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 export type StudentData = {
     email: string
     name: string
@@ -35,10 +41,36 @@ const Page = ({ params }: { params: any }) => {
     const [totalStudents, setTotalStudents] = useState<number>(0)
     const [search, setSearch] = useState<string | null>(null)
     const [loading, setLoading] = useState<boolean>(false)
+    const [attendenceIds, setAttendenceIds] = useState<string[]>()
     const debouncedSearch = useDebounce(search, 1000)
     const [lastPage, setLastPage] = useState<number>(0)
     const { courseData } = getCourseData()
     const { fetchBatches, batchData } = getBatchData()
+
+    const fetchClassesData = async (bootcampId: number) => {
+        try {
+            await api
+                .get(`/classes/meetings/{bootcampId}?bootcampId=${bootcampId}`)
+                .then((res) => {
+                    setAttendenceIds(res.data.unattendedClassIds)
+                })
+        } catch (error: any) {
+            console.log(error.message)
+        }
+    }
+    const handleRefreshAttendence = async () => {
+        const requestBody = {
+            meetingIds: attendenceIds,
+        }
+
+        try {
+            api.post(`/classes/analytics/reload`, requestBody).then((res) => {
+                toast({ title: res.data.title, description: res.data.message })
+            })
+        } catch (error: any) {
+            toast({ title: 'Error', description: 'Couldnot refresh' })
+        }
+    }
 
     const fetchStudentData = useCallback(
         async (offset: number) => {
@@ -58,6 +90,9 @@ const Page = ({ params }: { params: any }) => {
         },
         [position, setStoreStudentData, params.courseId]
     )
+    useEffect(() => {
+        fetchClassesData(params.courseId)
+    }, [params.courseId])
 
     useEffect(() => {
         fetchStudentData(offset)
@@ -98,6 +133,7 @@ const Page = ({ params }: { params: any }) => {
     const handleSetsearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value)
     }
+
     return (
         <div>
             {
@@ -108,18 +144,34 @@ const Page = ({ params }: { params: any }) => {
                         className="w-1/3"
                         onChange={handleSetsearch}
                     />
-                    <Dialog>
-                        <DialogTrigger asChild>
-                            <Button className="w-1/6 gap-x-2 ">
-                                <Plus /> Add Students
-                            </Button>
-                        </DialogTrigger>
-                        <DialogOverlay />
-                        <AddStudentsModal
-                            message={false}
-                            id={params.courseId || 0}
-                        />
-                    </Dialog>
+                    <div className="flex items-center gap-x-3">
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <RotateCcw
+                                        className="text-secondary"
+                                        onClick={handleRefreshAttendence}
+                                    />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p> Update Attendence</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button className=" gap-x-2 ">
+                                    <Plus /> Add Students
+                                </Button>
+                            </DialogTrigger>
+                            <DialogOverlay />
+                            <AddStudentsModal
+                                message={false}
+                                id={params.courseId || 0}
+                            />
+                        </Dialog>
+                    </div>
                 </div>
             }
             {batchData && (

@@ -173,7 +173,6 @@ export const columns: ColumnDef<Task>[] = [
                     </div>
                 )
             }
-            console.log(transformedData)
             return (
                 <div className="flex text-start gap-6 my-6 max-w-[200px]">
                     <Combobox
