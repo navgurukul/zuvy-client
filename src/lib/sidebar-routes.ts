@@ -8,10 +8,9 @@ import {
     Book,
     BookOpen,
     Video,
-    MonitorPlay
+    MonitorPlay,
+    Database,
 } from 'lucide-react'
-
-
 
 const guestRoutes = [
     {
@@ -83,7 +82,7 @@ const adminRoutes = [
     { label: 'Home', icon: Home, href: '/admin' },
     { label: 'Courses', icon: Book, href: '/admin/courses' },
     // { label: "Notifications", icon: Bell, href: "/admin/home" },
-    // { label: "Resource Bank", icon: Database, href: "/admin/resource" },
+    { label: 'Resource Library', icon: Database, href: '/admin/resource' },
     // { label: "Instructors", icon: User, href: "/admin/instructor" },
     // { label: "Reports", icon: BarChart, href: "/admin/reports" },
     // { label: "Settings", icon: Cog, href: "/admin/settings" },

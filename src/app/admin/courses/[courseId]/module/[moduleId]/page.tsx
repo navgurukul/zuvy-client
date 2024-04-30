@@ -1,10 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import ChapterItem from '../../_components/ChapterItem'
-import VideoComponent from '../_components/Video'
-import Article from '../_components/Article'
 import CodeChallenge from '../_components/CodeChallenge'
 import Quiz from '../_components/quiz/Quiz'
 import Assignment from '../_components/Assignment'
@@ -16,6 +14,8 @@ import { api } from '@/utils/axios.config'
 import AddVideo from '../_components/AddVideo'
 import ChapterModal from '../_components/ChapterModal'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import AddQuiz from '../_components/AddQuiz'
+import Article from '../_components/Article'
 
 // Interfaces:-
 type Chapter = {
@@ -85,7 +85,7 @@ function Page({
     const [chapterContent, setChapterContent] = useState({})
     const [topicId, setTopicId] = useState(0)
     const { courseId } = useParams()
-    const [videoState, setVideoState] = useState<boolean>(false)
+
     const [moduleData, setModuleData] = useState<Module[]>([])
     const crumbs = [
         {
@@ -105,46 +105,63 @@ function Page({
         },
     ]
     // functions:-
-    const fetchChapters = async () => {
-        const response = await api.get(
-            `/Content/allChaptersOfModule/${params.moduleId}`
-        )
-
-        setChapterData(response.data.chapterWithTopic)
-        setAssessmentData(response.data.assessment)
-        setModuleName(response.data.moduleName)
-        setModuleData(response.data.chapterWithTopic)
-    }
-
-    const fetchChapterContent = async (chapterId: number) => {
-        const response = await api.get(
-            `/Content/chapterDetailsById/${chapterId}`
-        )
-        const currentModule = moduleData.find(
-            (module: any) => module.chapterId == chapterId
-        )
-
-        if (currentModule?.topicName == 'Quiz') {
-            setChapterContent(
-                response.data.quizQuestionDetails as QuizQuestionDetails[]
+    const fetchChapters = useCallback(async () => {
+        try {
+            const response = await api.get(
+                `/Content/allChaptersOfModule/${params.moduleId}`
             )
-        } else if (currentModule?.topicName == 'Coding Question') {
-            setChapterContent(
-                response.data.codingQuestionDetails as CodingQuestionDetails[]
-            )
+            setChapterData(response.data.chapterWithTopic)
+            setAssessmentData(response.data.assessment)
+            setModuleName(response.data.moduleName)
+            setModuleData(response.data.chapterWithTopic)
+        } catch (error) {
+            console.error('Error fetching chapters:', error)
+            // Handle error as needed
         }
+    }, [params.moduleId])
 
-        setTopicId(response.data.topicId)
-        setActiveChapter(chapterId)
-    }
+    const fetchChapterContent = useCallback(
+        async (chapterId: number) => {
+            try {
+                const response = await api.get(
+                    `/Content/chapterDetailsById/${chapterId}`
+                )
+                const currentModule = moduleData.find(
+                    (module: any) => module.chapterId === chapterId
+                )
+
+                if (currentModule?.topicName === 'Quiz') {
+                    setChapterContent(
+                        response.data
+                            .quizQuestionDetails as QuizQuestionDetails[]
+                    )
+                } else if (currentModule?.topicName === 'Coding Question') {
+                    setChapterContent(
+                        response.data
+                            .codingQuestionDetails as CodingQuestionDetails[]
+                    )
+                }
+
+                setTopicId(response.data.topicId)
+                setActiveChapter(chapterId)
+            } catch (error) {
+                console.error('Error fetching chapter content:', error)
+            }
+        },
+        [moduleData]
+    )
+
+    const AddVideoChapTerHandler = () => {}
 
     const renderChapterContent = () => {
-        if (videoState) {
-            return <AddVideo moduleId={params.moduleId} />
-        }
         switch (topicId) {
             case 1:
-                return <VideoComponent content={chapterContent} />
+                return (
+                    <AddVideo
+                        moduleId={params.moduleId}
+                        content={chapterContent}
+                    />
+                )
             case 2:
                 return <Article content={chapterContent} />
             case 3:
@@ -167,14 +184,14 @@ function Page({
         if (params.moduleId) {
             fetchChapters()
         }
-    }, [params])
+    }, [params, fetchChapters])
 
     useEffect(() => {
         if (chapterData.length > 0) {
             const firstChapterId = chapterData[0].chapterId
             fetchChapterContent(firstChapterId)
         }
-    }, [chapterData])
+    }, [chapterData, fetchChapterContent])
 
     return (
         <>
@@ -209,7 +226,6 @@ function Page({
                                             fetchChapterContent={
                                                 fetchChapterContent
                                             }
-                                            setVideoState={setVideoState}
                                             activeChapter={activeChapter}
                                         />
                                     )
@@ -219,12 +235,7 @@ function Page({
                 </div>
                 <div className="col-span-3 mx-4">{renderChapterContent()}</div>
 
-                <ChapterModal
-                    open={open}
-                    setOpen={setOpen}
-                    params={params}
-                    setVideoState={setVideoState}
-                />
+                <ChapterModal open={open} setOpen={setOpen} params={params} />
             </div>
         </>
     )

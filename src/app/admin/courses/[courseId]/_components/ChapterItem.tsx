@@ -17,7 +17,6 @@ function ChapterItem({
     chapterId,
     activeChapter,
     fetchChapterContent,
-    setVideoState,
 }: {
     title: string
     topicId: number
@@ -25,7 +24,6 @@ function ChapterItem({
     chapterId: number
     activeChapter: number
     fetchChapterContent: (chapterId: number) => void
-    setVideoState: any
 }) {
     const setTopicIcon = () => {
         switch (topicId) {
@@ -51,7 +49,7 @@ function ChapterItem({
     }
 
     return (
-        <div onClick={() => setVideoState(false)}>
+        <div>
             <div
                 className={cn(
                     'flex rounded-md p-3  my-1 cursor-pointer justify-between items-center',

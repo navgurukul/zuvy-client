@@ -36,7 +36,13 @@ const formSchema = z.object({
     links: z.string(),
 })
 
-const AddVideo = ({ moduleId }: { moduleId: string }) => {
+const AddVideo = ({
+    moduleId,
+    content,
+}: {
+    content: Object
+    moduleId: string
+}) => {
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     const handleUploadClick = () => {
@@ -44,6 +50,7 @@ const AddVideo = ({ moduleId }: { moduleId: string }) => {
             fileInputRef.current.click()
         }
     }
+    console.log(content)
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),

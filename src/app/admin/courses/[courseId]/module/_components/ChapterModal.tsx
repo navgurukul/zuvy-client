@@ -22,14 +22,16 @@ import Link from 'next/link'
 function ChapterModal({
     open,
     setOpen,
-    setVideoState,
     params,
 }: {
     open: boolean
     setOpen: (open: boolean) => void
-    setVideoState: any
     params: { moduleId: string; courseId: string }
 }) {
+    const AddVideoChapterHandler = () => {
+        console.log('Hello')
+    }
+
     return (
         <CommandDialog open={open} onOpenChange={setOpen}>
             <CommandInput placeholder="Type a command or search..." />
@@ -42,7 +44,7 @@ function ChapterModal({
                     </CommandItem>
                     <CommandItem>
                         <Video className="mr-2 h-4 w-4" />
-                        <span onClick={() => setVideoState(true)}>Video</span>
+                        <span onClick={AddVideoChapterHandler}>Video</span>
                     </CommandItem>
                     <CommandItem>
                         <FileQuestion className="mr-2 h-4 w-4" />
