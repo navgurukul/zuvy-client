@@ -213,8 +213,8 @@ function Page() {
             </div>
             {allClasses && allClasses.length > 0 ? (
                 <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
-                    {allClasses.map((classData: any, index: any) =>
-                        classType === 'complete' ? (
+                    {allClasses.map((classData: any, index: any) => {
+                        return classType === 'complete' ? (
                             <RecordingCard
                                 classData={classData}
                                 key={index}
@@ -228,7 +228,7 @@ function Page() {
                                 classType={classType}
                             />
                         )
-                    )}
+                    })}
                     {/* <div className="flex justify-center items-center my-4 col-span-3">
                         <Button
                             onClick={() => {

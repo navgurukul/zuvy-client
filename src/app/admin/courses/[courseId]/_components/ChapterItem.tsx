@@ -55,7 +55,9 @@ function ChapterItem({
                     'flex rounded-md p-3  my-1 cursor-pointer justify-between items-center',
                     setActiveChapterItem()
                 )}
-                onClick={() => fetchChapterContent(chapterId)}
+                onClick={() => {
+                    fetchChapterContent(chapterId)
+                }}
             >
                 <div className="flex gap-2">
                     <p>{setTopicIcon()} </p>

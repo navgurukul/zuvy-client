@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 
 import ChapterItem from '../../_components/ChapterItem'
-import CodeChallenge from '../_components/CodeChallenge'
+
 import Quiz from '../_components/quiz/Quiz'
 import Assignment from '../_components/Assignment'
 import { useParams } from 'next/navigation'
@@ -17,6 +17,8 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import AddQuiz from '../_components/AddQuiz'
 import Article from '../_components/Article'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
+import CodingProblemList from '../_components/CodingProblemList'
+import AddArticle from '../_components/AddArticle'
 
 // Interfaces:-
 type Chapter = {
@@ -83,7 +85,7 @@ function Page({
     const [assessmentData, setAssessmentData] = useState<Chapter[]>([])
     const [moduleName, setModuleName] = useState('')
     const [activeChapter, setActiveChapter] = useState(0)
-    const [chapterContent, setChapterContent] = useState({})
+    const [chapterContent, setChapterContent] = useState<any>([])
     const [topicId, setTopicId] = useState(0)
     const { courseId } = useParams()
 
@@ -142,6 +144,8 @@ function Page({
                         response.data
                             .codingQuestionDetails as CodingQuestionDetails[]
                     )
+                } else {
+                    setChapterContent(response.data)
                 }
 
                 setTopicId(response.data.topicId)
@@ -154,6 +158,7 @@ function Page({
     )
 
     const renderChapterContent = () => {
+        console.log('chapter', chapterContent)
         switch (topicId) {
             case 1:
                 return (
@@ -163,9 +168,9 @@ function Page({
                     />
                 )
             case 2:
-                return <Article content={chapterContent} />
+                return <AddArticle content={chapterContent} />
             case 3:
-                return <CodeChallenge content={[chapterContent]} />
+                return <CodingProblemList content={chapterContent} />
             case 4:
                 return <Quiz content={chapterContent} />
             case 5:
