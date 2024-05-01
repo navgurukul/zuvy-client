@@ -16,6 +16,7 @@ import ChapterModal from '../_components/ChapterModal'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import AddQuiz from '../_components/AddQuiz'
 import Article from '../_components/Article'
+import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 
 // Interfaces:-
 type Chapter = {
@@ -104,7 +105,8 @@ function Page({
             isLast: true,
         },
     ]
-    // functions:-
+
+    // func
     const fetchChapters = useCallback(async () => {
         try {
             const response = await api.get(
@@ -150,8 +152,6 @@ function Page({
         },
         [moduleData]
     )
-
-    const AddVideoChapTerHandler = () => {}
 
     const renderChapterContent = () => {
         switch (topicId) {
@@ -199,13 +199,22 @@ function Page({
             <div className="grid  grid-cols-4 mt-5">
                 <div className=" col-span-1">
                     <div className="mb-5 flex">
-                        <Button
-                            variant="secondary"
-                            className="py-2 px-2 h-full w-full"
-                            onClick={handleAddChapter}
-                        >
-                            Add Chapter
-                        </Button>
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button
+                                    variant="secondary"
+                                    className="py-2 px-2 h-full w-full"
+                                    onClick={handleAddChapter}
+                                >
+                                    Add Chapter
+                                </Button>
+                            </DialogTrigger>
+                            <DialogOverlay />
+                            <ChapterModal
+                                params={params}
+                                fetchChapters={fetchChapters}
+                            />
+                        </Dialog>
                     </div>
                     <ScrollArea className="h-dvh pr-4">
                         {chapterData &&
@@ -234,8 +243,6 @@ function Page({
                     </ScrollArea>
                 </div>
                 <div className="col-span-3 mx-4">{renderChapterContent()}</div>
-
-                <ChapterModal open={open} setOpen={setOpen} params={params} />
             </div>
         </>
     )

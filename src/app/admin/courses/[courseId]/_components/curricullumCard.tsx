@@ -1,3 +1,4 @@
+import { isPlural } from '@/lib/utils'
 import {
     Clock1,
     Code,
@@ -63,7 +64,10 @@ const CurricullumCard = ({
                         <div className="flex  items-center justify-start gap-x-2 ">
                             <ScrollText size={15} />
                             <p className="text-md font-semibold capitalize text-gray-600">
-                                {articlesCount} articles
+                                {articlesCount}{' '}
+                                {isPlural(articlesCount)
+                                    ? 'Articles'
+                                    : 'Article'}
                             </p>
                         </div>
                     ) : null}
@@ -71,7 +75,10 @@ const CurricullumCard = ({
                         <div className="flex  items-center justify-start gap-x-2 ">
                             <PencilLine size={15} />
                             <p className="text-md font-semibold capitalize text-gray-600">
-                                {assignmentCount} assignments
+                                {assignmentCount}{' '}
+                                {isPlural(assignmentCount)
+                                    ? 'Assignments'
+                                    : 'Assignment'}
                             </p>
                         </div>
                     ) : null}
@@ -79,7 +86,8 @@ const CurricullumCard = ({
                         <div className="flex  items-center justify-start gap-x-2 ">
                             <FileQuestion size={15} />
                             <p className="text-md font-semibold capitalize text-gray-600">
-                                {quizCount} Quiz
+                                {quizCount}{' '}
+                                {isPlural(quizCount) ? 'Quizzes' : 'Quiz'}
                             </p>
                         </div>
                     ) : null}
@@ -87,7 +95,10 @@ const CurricullumCard = ({
                         <div className="flex  items-center justify-start gap-x-2 ">
                             <Code size={15} />
                             <p className="text-md font-semibold capitalize text-gray-600">
-                                {codingProblemsCount} challenges
+                                {codingProblemsCount}{' '}
+                                {isPlural(codingProblemsCount)
+                                    ? 'Coding Problems'
+                                    : 'Coding Problem'}
                             </p>
                         </div>
                     ) : null}
