@@ -11,3 +11,8 @@ export function ellipsis(text: string, maxLength: number): string {
   
   return text.slice(0, maxLength - 3) + '...';
 }
+
+
+export function isPlural(count: number): boolean {
+  return count !== 1
+}

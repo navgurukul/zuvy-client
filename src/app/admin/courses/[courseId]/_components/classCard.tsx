@@ -68,7 +68,7 @@ function ClassCard({
                 <Button
                     variant={'ghost'}
                     className="text-xl font-bold"
-                    disabled={classType === 'ongoing' ? false : true}
+                    // disabled={classType === 'ongoing' ? false : true}
                 >
                     <Link
                         target="_blank"

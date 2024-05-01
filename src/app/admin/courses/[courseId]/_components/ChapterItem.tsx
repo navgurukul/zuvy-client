@@ -8,6 +8,7 @@ import {
     Trash2,
     Video,
 } from 'lucide-react'
+import { boolean } from 'zod'
 
 function ChapterItem({
     title,
@@ -48,7 +49,7 @@ function ChapterItem({
     }
 
     return (
-        <>
+        <div>
             <div
                 className={cn(
                     'flex rounded-md p-3  my-1 cursor-pointer justify-between items-center',
@@ -68,7 +69,7 @@ function ChapterItem({
                     size={15}
                 />
             </div>
-        </>
+        </div>
     )
 }
 
