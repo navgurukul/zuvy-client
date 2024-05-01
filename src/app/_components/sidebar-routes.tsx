@@ -30,6 +30,7 @@ export const SidebarRoutes = () => {
                         icon={route.icon}
                         label={route.label}
                         href={route.href}
+                        subtabs={route.subtabs}
                     />
                 ))}
             </div>
@@ -40,6 +41,7 @@ export const SidebarRoutes = () => {
                         icon={route.icon}
                         label={route.label}
                         href={route.href}
+                        subtabs={route.subtabs}
                     />
                 ))}
             </div>
