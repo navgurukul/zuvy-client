@@ -28,14 +28,6 @@ function Page() {
 
     const { courseData } = getCourseData()
 
-    const handleDateChange = (date: any) => {
-        setSelectedDate(date)
-    }
-    const isFutureDate = (date: any) => {
-        const currentDate = new Date()
-        return date >= currentDate
-    }
-
     const handleClassType = useCallback(
         (type: string | 'active' | 'complete' | 'upcoming') => {
             if (classType === type) {
@@ -96,7 +88,7 @@ function Page() {
 
         if (courseData?.id) {
             api.get(
-                `/classes/${fetchUrl}/${fetchId}?offset=${offset}&limit=${30}`
+                `/classes/${fetchUrl}/${fetchId}?offset=${offset}&limit=${10}`
             )
                 .then((response) => {
                     setUpcomingClasses(response.data.upcomingClasses)

@@ -50,7 +50,6 @@ const AddVideo = ({
             fileInputRef.current.click()
         }
     }
-    console.log(content)
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
