@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 
-import ChapterItem from '../../_components/ChapterItem'
+import ChapterItem from '../_components/ChapterItem'
 
 import Quiz from '../_components/quiz/Quiz'
 import Assignment from '../_components/Assignment'
@@ -17,7 +17,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import AddQuiz from '../_components/AddQuiz'
 import Article from '../_components/Article'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
-import CodingProblemList from '../_components/CodingProblemList'
+import CodingProblemList from '../_components/codingChallenge/CodingProblemList'
 import AddArticle from '../_components/AddArticle'
 
 // Interfaces:-
@@ -158,7 +158,6 @@ function Page({
     )
 
     const renderChapterContent = () => {
-        console.log('chapter', chapterContent)
         switch (topicId) {
             case 1:
                 return (

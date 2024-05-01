@@ -1,6 +1,6 @@
 'use client'
 
-import { FolderSymlink, PlusCircle, XCircle, FolderCheck } from 'lucide-react'
+import { PlusCircle, XCircle, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 import React, { useState } from 'react'
 import {
@@ -13,6 +13,10 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
+import MaxWidthWrapper from '@/components/MaxWidthWrapper'
+import { Separator } from '@/components/ui/separator'
+import { cn, difficultyColor, ellipsis } from '@/lib/utils'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 interface Question {
     id: number
@@ -45,7 +49,8 @@ const questions: Question[] = [
     {
         id: 1,
         title: 'Power Calculator',
-        description: 'Power Calculator is a simple coding problem meant to....',
+        description:
+            'Power Calculator is a simple coding problem meant to calculate the power of a number',
         difficulty: 'Easy',
     },
     {
@@ -108,23 +113,27 @@ function CodingProblemList({ content }: CodingProblemProps) {
     const [selectedQuestions, setSelectedQuestions] = useState<Question[]>([])
 
     return (
-        <>
-            <div className="headingContainer flex ">
-                <h2 className="w-1/2 font-bold text-xl">
-                    Untitled Coding Problem
-                </h2>
-                <h6 className="mr-2">Preview</h6>
-                <FolderSymlink className="text-secondary" />
+        <MaxWidthWrapper>
+            <div className=" flex items-center mb-5">
+                <input
+                    placeholder="Untitled Video"
+                    className="text-3xl text-left font-semibold outline-none border-none focus:ring-0"
+                />
+
+                <div className="text-secondary flex font-semibold items-center">
+                    <h6 className="mr-2 text-sm">Preview</h6>
+                    <ExternalLink size={15} />
+                </div>
             </div>
-            <div className="container flex w-full">
-                <div className="leftSideContainer w-3/6">
-                    <div className="flex flex-col m-5">
+            <div className="grid grid-cols-2">
+                <div>
+                    <div className="flex flex-col mb-5">
                         <h2 className="text-left text-gray-700 font-semibold">
                             Coding Problem Library
                         </h2>
                         <Input
                             placeholder="Search By Name "
-                            className="w-full my-7 "
+                            className="w-full mb-2 "
                         />
                         <div className="dropDownsContainer flex gap-2">
                             <Select>
@@ -263,61 +272,96 @@ function CodingProblemList({ content }: CodingProblemProps) {
                             </Select>
                         </div>
                     </div>
-                    {questions.map((question) => {
-                        const isSelected = selectedQuestions.some(
-                            (selectedQuestion) =>
-                                selectedQuestion.id === question.id
-                        )
-                        return (
-                            <div
-                                key={question.id}
-                                className={`question mb-7 ${
-                                    isSelected ? 'bg-gray-200' : ''
-                                }`}
-                            >
-                                <div className="flex justify-between text-start">
-                                    <div>
-                                        <div className="flex items-center gap-2">
-                                            <h2 className="font-bold text-lg">
-                                                {question.title}
-                                            </h2>
-                                            <span className="font-semibold text-secondary">
-                                                {question.difficulty}
-                                            </span>
+                    <ScrollArea className="h-dvh pr-4">
+                        {questions.map((question) => {
+                            const isSelected = selectedQuestions.some(
+                                (selectedQuestion) =>
+                                    selectedQuestion.id === question.id
+                            )
+                            return (
+                                <>
+                                    <div
+                                        key={question.id}
+                                        className={`p-5 rounded-sm ${
+                                            isSelected ? 'bg-gray-200' : ''
+                                        }`}
+                                    >
+                                        <div className="flex justify-between text-start">
+                                            <div>
+                                                <div className="flex items-center gap-2">
+                                                    <h2 className="font-bold text-lg">
+                                                        {question.title}
+                                                    </h2>
+                                                    <span
+                                                        className={cn(
+                                                            `font-semibold text-secondary`,
+                                                            difficultyColor(
+                                                                question.difficulty
+                                                            )
+                                                        )}
+                                                    >
+                                                        {question.difficulty}
+                                                    </span>
+                                                </div>
+                                                <div className="w-full">
+                                                    <p className="text-gray-600 mt-1">
+                                                        {ellipsis(
+                                                            question.description,
+                                                            60
+                                                        )}
+                                                    </p>
+                                                </div>
+                                                <Link
+                                                    href={''}
+                                                    className="font-semibold text-sm mt-2 text-secondary"
+                                                >
+                                                    View Full Description
+                                                </Link>
+                                            </div>
+                                            {isSelected ? (
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width="20"
+                                                    height="20"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    stroke-width="2"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    className="lucide lucide-circle-check"
+                                                >
+                                                    <circle
+                                                        cx="12"
+                                                        cy="12"
+                                                        r="10"
+                                                    />
+                                                    <path d="m9 12 2 2 4-4" />
+                                                </svg>
+                                            ) : (
+                                                <PlusCircle
+                                                    onClick={() => {
+                                                        setSelectedQuestions([
+                                                            question,
+                                                        ])
+                                                    }}
+                                                    className="text-secondary cursor-pointer"
+                                                    size={20}
+                                                />
+                                            )}
                                         </div>
-                                        <div className="w-full">
-                                            <p className="description text-left font-semibold text-gray-600 mt-1">
-                                                {question.description}
-                                            </p>
-                                        </div>
-                                        <Link
-                                            href={''}
-                                            className="description font-semibold mt-2 text-secondary"
-                                        >
-                                            {`View Full Description`}
-                                        </Link>
                                     </div>
-                                    {isSelected ? (
-                                        <FolderCheck
-                                            className="text-primary"
-                                            size={16}
-                                        />
-                                    ) : (
-                                        <PlusCircle
-                                            onClick={() => {
-                                                setSelectedQuestions([question])
-                                            }}
-                                            className="text-secondary cursor-pointer"
-                                            size={16}
-                                        />
-                                    )}
-                                </div>
-                            </div>
-                        )
-                    })}
+                                    {/* {index !== questions.length - 1 && ( */}
+                                    <Separator className="my-3" />
+                                    {/* )} */}
+                                </>
+                            )
+                        })}
+                    </ScrollArea>
                 </div>
-                <div className="rightSideContainer ml-5 border-l-2 p-5 text-start">
-                    <h2 className="font-bold text-lg self-start mb-5">
+                {/* <Separator orientation="vertical" /> */}
+                <div className=" ml-5 pl-5 border-l-2 text-start">
+                    <h2 className="font-semibold mb-5">
                         Selected Coding Problems
                     </h2>
                     <div>
@@ -327,25 +371,30 @@ function CodingProblemList({ content }: CodingProblemProps) {
                                 className="flex justify-between items-start mb-7"
                             >
                                 <div>
-                                    <h3 className="font-bold text-lg">
-                                        {selectedQuestion.title}
-                                    </h3>
-                                    <span className="font-semibold text-secondary">
-                                        {selectedQuestion.difficulty}
-                                    </span>
-                                    <p className="description text-left font-semibold text-gray-600 mt-1">
-                                        {selectedQuestion.description}
+                                    <div className="flex items-center gap-2">
+                                        <h3 className="font-bold text-lg">
+                                            {selectedQuestion.title}
+                                        </h3>
+                                        <span className="font-semibold text-secondary">
+                                            {selectedQuestion.difficulty}
+                                        </span>
+                                    </div>
+                                    <p className=" text-gray-600 mt-1">
+                                        {ellipsis(
+                                            selectedQuestion.description,
+                                            50
+                                        )}
                                     </p>
                                     <Link
                                         href={''}
-                                        className="description font-semibold mt-1 text-secondary"
+                                        className="text-sm font-semibold mt-1 text-secondary"
                                     >
-                                        {`View Full Description`}
+                                        View Full Description
                                     </Link>
                                 </div>
                                 <XCircle
-                                    className="text-secondary ml-5 cursor-pointer"
-                                    size={16}
+                                    className="text-destructive ml-5 cursor-pointer"
+                                    size={20}
                                     onClick={() => {
                                         setSelectedQuestions([]) // Clear the selected questions when cross icon is clicked
                                     }}
@@ -355,7 +404,7 @@ function CodingProblemList({ content }: CodingProblemProps) {
                     </div>
                 </div>
             </div>
-        </>
+        </MaxWidthWrapper>
     )
 }
 
