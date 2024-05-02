@@ -113,7 +113,7 @@ function CodingProblemList({ content }: CodingProblemProps) {
     const [selectedQuestions, setSelectedQuestions] = useState<Question[]>([])
 
     return (
-        <MaxWidthWrapper>
+        <div>
             <div className=" flex items-center mb-5">
                 <input
                     placeholder="Untitled Video"
@@ -404,7 +404,7 @@ function CodingProblemList({ content }: CodingProblemProps) {
                     </div>
                 </div>
             </div>
-        </MaxWidthWrapper>
+        </div>
     )
 }
 

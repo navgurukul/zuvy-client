@@ -8,14 +8,11 @@ import Quiz from '../_components/quiz/Quiz'
 import Assignment from '../_components/Assignment'
 import { useParams } from 'next/navigation'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
-import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
 import { api } from '@/utils/axios.config'
 import AddVideo from '../_components/AddVideo'
 import ChapterModal from '../_components/ChapterModal'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import AddQuiz from '../_components/AddQuiz'
-import Article from '../_components/Article'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import CodingProblemList from '../_components/codingChallenge/CodingProblemList'
 import AddArticle from '../_components/AddArticle'
@@ -207,7 +204,7 @@ function Page({
                             <DialogTrigger asChild>
                                 <Button
                                     variant="secondary"
-                                    className="py-2 px-2 h-full w-full"
+                                    className="py-2 px-2 h-full w-full mr-4"
                                     onClick={handleAddChapter}
                                 >
                                     Add Chapter

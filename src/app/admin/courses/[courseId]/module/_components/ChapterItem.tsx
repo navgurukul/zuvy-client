@@ -1,9 +1,9 @@
 import { cn } from '@/lib/utils'
 import {
-    Code,
+    BookOpenText,
+    SquareCode,
     FileQuestion,
     PencilLine,
-    ScrollText,
     StickyNote,
     Trash2,
     Video,
@@ -30,9 +30,9 @@ function ChapterItem({
             case 1:
                 return <Video />
             case 2:
-                return <ScrollText />
+                return <BookOpenText />
             case 3:
-                return <Code />
+                return <SquareCode />
             case 4:
                 return <FileQuestion />
             case 5:

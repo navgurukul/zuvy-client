@@ -35,7 +35,7 @@ const AddArticle = ({ content }: ArticleProps) => {
     const { moduleId } = useParams()
 
     return (
-        <div className="mt-10">
+        <div>
             <Tiptap />
         </div>
     )
