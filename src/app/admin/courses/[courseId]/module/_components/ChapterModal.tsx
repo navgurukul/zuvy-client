@@ -1,8 +1,8 @@
 import {
-    Code,
+    SquareCode,
     FileQuestion,
     PencilLine,
-    ScrollText,
+    BookOpenText,
     Video,
     BookOpenCheck,
     Newspaper,
@@ -48,7 +48,7 @@ function ChapterModal({
                             className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
                             onClick={() => createChapter(2)}
                         >
-                            <ScrollText className="mr-2 h-6 w-6" />
+                            <BookOpenText className="mr-2 h-6 w-6" />
                             <span>Article</span>
                         </div>
                     </DialogClose>
@@ -84,7 +84,7 @@ function ChapterModal({
                             className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
                             onClick={() => createChapter(3)}
                         >
-                            <Code className="mr-2 h-6 w-6" />
+                            <SquareCode className="mr-2 h-6 w-6" />
                             <span>Coding Problem</span>
                         </div>
                     </DialogClose>
