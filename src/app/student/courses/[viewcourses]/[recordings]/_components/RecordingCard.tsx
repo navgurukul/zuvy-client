@@ -59,6 +59,7 @@ function RecordingCard({
     // func
 
     async function handleClassDetails() {
+        console.log(classData, 'meetingId adhsfkfhdskfhdkash')
         try {
             const response = await api.get(
                 `/classes/analytics/${classData?.meetingId}`
@@ -90,7 +91,7 @@ function RecordingCard({
     const handleAttendance = async () => {
         try {
             const response = await api.get(
-                `/classes/getAttendance/${classData.meetingId}`
+                `/classes/getAttendance/${classData.meetingid}`
             )
             const attendanceData = response.data.attendanceSheet
             if (!Array.isArray(attendanceData) || attendanceData.length === 0) {
@@ -154,7 +155,7 @@ function RecordingCard({
                 ) : (
                     <Sheet>
                         <div className="flex items-center">
-                            <SheetTrigger onClick={() => handleClassDetails()}>
+                            <SheetTrigger onClick={handleClassDetails}>
                                 Class Details
                             </SheetTrigger>
                             <ChevronRight size={15} />

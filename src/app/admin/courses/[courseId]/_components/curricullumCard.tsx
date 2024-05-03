@@ -1,11 +1,11 @@
 import { isPlural } from '@/lib/utils'
 import {
+    BookOpenText,
     Clock1,
-    Code,
+    SquareCode,
     FileQuestion,
     GripVertical,
     PencilLine,
-    ScrollText,
 } from 'lucide-react'
 import React from 'react'
 
@@ -62,7 +62,7 @@ const CurricullumCard = ({
                     </div>
                     {articlesCount > 0 ? (
                         <div className="flex  items-center justify-start gap-x-2 ">
-                            <ScrollText size={15} />
+                            <BookOpenText size={15} />
                             <p className="text-md font-semibold capitalize text-gray-600">
                                 {articlesCount}{' '}
                                 {isPlural(articlesCount)
@@ -93,7 +93,7 @@ const CurricullumCard = ({
                     ) : null}
                     {codingProblemsCount > 0 ? (
                         <div className="flex  items-center justify-start gap-x-2 ">
-                            <Code size={15} />
+                            <SquareCode size={15} />
                             <p className="text-md font-semibold capitalize text-gray-600">
                                 {codingProblemsCount}{' '}
                                 {isPlural(codingProblemsCount)
