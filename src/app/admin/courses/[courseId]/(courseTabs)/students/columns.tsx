@@ -128,15 +128,18 @@ export const columns: ColumnDef<Task>[] = [
                     transformedData: any[],
                     item: { batchId: any; batchName: any }
                 ) => {
-                    const isUnique = !transformedData.some(
-                        (existingItem) =>
-                            existingItem.value === item.batchId?.toString()
+                    const isUnique = !transformedData.some((existingItem) =>
+                        item.batchId
+                            ? existingItem.value === item.batchId.toString()
+                            : false
                     )
 
                     if (isUnique) {
                         transformedData.push({
-                            value: item.batchId?.toString(),
-                            label: item?.batchName,
+                            value: item.batchId
+                                ? item.batchId.toString()
+                                : null,
+                            label: item.batchName,
                         })
                     }
 
@@ -170,7 +173,6 @@ export const columns: ColumnDef<Task>[] = [
                     </div>
                 )
             }
-            console.log(transformedData)
             return (
                 <div className="flex text-start gap-6 my-6 max-w-[200px]">
                     <Combobox

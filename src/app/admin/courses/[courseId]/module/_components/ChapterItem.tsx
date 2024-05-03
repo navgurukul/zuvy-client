@@ -1,13 +1,14 @@
 import { cn } from '@/lib/utils'
 import {
-    Code,
+    BookOpenText,
+    SquareCode,
     FileQuestion,
     PencilLine,
-    ScrollText,
     StickyNote,
     Trash2,
     Video,
 } from 'lucide-react'
+import { boolean } from 'zod'
 
 function ChapterItem({
     title,
@@ -29,9 +30,9 @@ function ChapterItem({
             case 1:
                 return <Video />
             case 2:
-                return <ScrollText />
+                return <BookOpenText />
             case 3:
-                return <Code />
+                return <SquareCode />
             case 4:
                 return <FileQuestion />
             case 5:
@@ -48,13 +49,15 @@ function ChapterItem({
     }
 
     return (
-        <>
+        <div>
             <div
                 className={cn(
                     'flex rounded-md p-3  my-1 cursor-pointer justify-between items-center',
                     setActiveChapterItem()
                 )}
-                onClick={() => fetchChapterContent(chapterId)}
+                onClick={() => {
+                    fetchChapterContent(chapterId)
+                }}
             >
                 <div className="flex gap-2">
                     <p>{setTopicIcon()} </p>
@@ -68,7 +71,7 @@ function ChapterItem({
                     size={15}
                 />
             </div>
-        </>
+        </div>
     )
 }
 

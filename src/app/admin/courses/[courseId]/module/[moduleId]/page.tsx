@@ -1,41 +1,21 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
-import {
-    Calculator,
-    Calendar,
-    Code,
-    CreditCard,
-    FileQuestion,
-    PencilLine,
-    ScrollText,
-    Video,
-    User,
-    BookOpenCheck,
-    Newspaper,
-} from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
 
-import ChapterItem from '../../_components/ChapterItem'
-import VideoComponent from '../_components/Video'
-import Article from '../_components/Article'
-import CodeChallenge from '../_components/CodeChallenge'
-import Quiz from '../_components/Quiz'
+import ChapterItem from '../_components/ChapterItem'
+
+import Quiz from '../_components/quiz/Quiz'
 import Assignment from '../_components/Assignment'
 import { useParams } from 'next/navigation'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
-import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
-import {
-    CommandDialog,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-    CommandSeparator,
-    CommandShortcut,
-} from '@/components/ui/command'
 import { api } from '@/utils/axios.config'
+import AddVideo from '../_components/AddVideo'
+import ChapterModal from '../_components/ChapterModal'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
+import CodingProblemList from '../_components/codingChallenge/CodingProblemList'
+import AddArticle from '../_components/AddArticle'
 
 // Interfaces:-
 type Chapter = {
@@ -94,7 +74,7 @@ interface Module {
 function Page({
     params,
 }: {
-    params: { viewcourses: string; moduleId: string }
+    params: { viewcourses: string; moduleId: string; courseId: string }
 }) {
     // states and variables
     const [open, setOpen] = useState(false)
@@ -102,9 +82,10 @@ function Page({
     const [assessmentData, setAssessmentData] = useState<Chapter[]>([])
     const [moduleName, setModuleName] = useState('')
     const [activeChapter, setActiveChapter] = useState(0)
-    const [chapterContent, setChapterContent] = useState({})
+    const [chapterContent, setChapterContent] = useState<any>([])
     const [topicId, setTopicId] = useState(0)
     const { courseId } = useParams()
+
     const [moduleData, setModuleData] = useState<Module[]>([])
     const crumbs = [
         {
@@ -123,49 +104,69 @@ function Page({
             isLast: true,
         },
     ]
-    // functions:-
-    const fetchChapters = async () => {
-        const response = await api.get(
-            `/Content/allChaptersOfModule/${params.moduleId}`
-        )
 
-        setChapterData(response.data.chapterWithTopic)
-        setAssessmentData(response.data.assessment)
-        setModuleName(response.data.moduleName)
-        setModuleData(response.data.chapterWithTopic)
-        console.log(response.data)
-    }
-
-    const fetchChapterContent = async (chapterId: number) => {
-        const response = await api.get(
-            `/Content/chapterDetailsById/${chapterId}`
-        )
-        const currentModule = moduleData.find(
-            (module: any) => module.chapterId == chapterId
-        )
-
-        if (currentModule?.topicName == 'Quiz') {
-            setChapterContent(
-                response.data.quizQuestionDetails as QuizQuestionDetails[]
+    // func
+    const fetchChapters = useCallback(async () => {
+        try {
+            const response = await api.get(
+                `/Content/allChaptersOfModule/${params.moduleId}`
             )
-        } else if (currentModule?.topicName == 'Coding Question') {
-            setChapterContent(
-                response.data.codingQuestionDetails as CodingQuestionDetails[]
-            )
+            setChapterData(response.data.chapterWithTopic)
+            setAssessmentData(response.data.assessment)
+            setModuleName(response.data.moduleName)
+            setModuleData(response.data.chapterWithTopic)
+        } catch (error) {
+            console.error('Error fetching chapters:', error)
+            // Handle error as needed
         }
+    }, [params.moduleId])
 
-        setTopicId(response.data.topicId)
-        setActiveChapter(chapterId)
-    }
+    const fetchChapterContent = useCallback(
+        async (chapterId: number) => {
+            try {
+                const response = await api.get(
+                    `/Content/chapterDetailsById/${chapterId}`
+                )
+                const currentModule = moduleData.find(
+                    (module: any) => module.chapterId === chapterId
+                )
+
+                if (currentModule?.topicName === 'Quiz') {
+                    setChapterContent(
+                        response.data
+                            .quizQuestionDetails as QuizQuestionDetails[]
+                    )
+                } else if (currentModule?.topicName === 'Coding Question') {
+                    setChapterContent(
+                        response.data
+                            .codingQuestionDetails as CodingQuestionDetails[]
+                    )
+                } else {
+                    setChapterContent(response.data)
+                }
+
+                setTopicId(response.data.topicId)
+                setActiveChapter(chapterId)
+            } catch (error) {
+                console.error('Error fetching chapter content:', error)
+            }
+        },
+        [moduleData]
+    )
 
     const renderChapterContent = () => {
         switch (topicId) {
             case 1:
-                return <VideoComponent content={chapterContent} />
+                return (
+                    <AddVideo
+                        moduleId={params.moduleId}
+                        content={chapterContent}
+                    />
+                )
             case 2:
-                return <Article content={chapterContent} />
+                return <AddArticle content={chapterContent} />
             case 3:
-                return <CodeChallenge content={[chapterContent]} />
+                return <CodingProblemList content={chapterContent} />
             case 4:
                 return <Quiz content={chapterContent} />
             case 5:
@@ -184,21 +185,39 @@ function Page({
         if (params.moduleId) {
             fetchChapters()
         }
-    }, [params])
+    }, [params, fetchChapters])
 
     useEffect(() => {
         if (chapterData.length > 0) {
             const firstChapterId = chapterData[0].chapterId
             fetchChapterContent(firstChapterId)
         }
-    }, [chapterData])
+    }, [chapterData, fetchChapterContent])
 
     return (
         <>
             <BreadcrumbComponent crumbs={crumbs} />
             <div className="grid  grid-cols-4 mt-5">
-                <div className="col-span-1 overflow-y-auto">
-                    <div>
+                <div className=" col-span-1">
+                    <div className="mb-5 flex">
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button
+                                    variant="secondary"
+                                    className="py-2 px-2 h-full w-full mr-4"
+                                    onClick={handleAddChapter}
+                                >
+                                    Add Chapter
+                                </Button>
+                            </DialogTrigger>
+                            <DialogOverlay />
+                            <ChapterModal
+                                params={params}
+                                fetchChapters={fetchChapters}
+                            />
+                        </Dialog>
+                    </div>
+                    <ScrollArea className="h-dvh pr-4">
                         {chapterData &&
                             chapterData?.map(
                                 ({
@@ -222,67 +241,9 @@ function Page({
                                     )
                                 }
                             )}
-                    </div>
-                    <div className="mt-5">
-                        <Button
-                            variant="secondary"
-                            className="py-2 px-2 h-full w-full"
-                            onClick={handleAddChapter}
-                        >
-                            Add Chapter
-                        </Button>
-                    </div>
+                    </ScrollArea>
                 </div>
-                <Separator
-                    orientation="vertical"
-                    className="mx-4 w-1 rounded"
-                />
-                <div className="">{renderChapterContent()}</div>
-
-                <CommandDialog open={open} onOpenChange={setOpen}>
-                    <CommandInput placeholder="Type a command or search..." />
-                    <CommandList>
-                        <CommandEmpty>No results found.</CommandEmpty>
-                        <CommandGroup heading="Chapters">
-                            <CommandItem>
-                                <ScrollText className="mr-2 h-4 w-4" />
-                                <span>Article</span>
-                            </CommandItem>
-                            <CommandItem>
-                                <Video className="mr-2 h-4 w-4" />
-                                <span>Video</span>
-                            </CommandItem>
-                            <CommandItem>
-                                <FileQuestion className="mr-2 h-4 w-4" />
-                                <span>Quiz</span>
-                            </CommandItem>
-                            <CommandItem>
-                                <PencilLine className="mr-2 h-4 w-4" />
-                                <span>Assignment</span>
-                            </CommandItem>
-                            <CommandItem>
-                                <Code className="mr-2 h-4 w-4" />
-                                <span>Coding Problem</span>
-                            </CommandItem>
-                        </CommandGroup>
-                        <CommandSeparator />
-                        <CommandGroup>
-                            <CommandItem>
-                                <BookOpenCheck className="mr-2 h-4 w-4" />
-                                <span>Assessment</span>
-                                {/* <CommandShortcut>⌘P</CommandShortcut> */}
-                            </CommandItem>
-                        </CommandGroup>
-                        <CommandSeparator />
-                        <CommandGroup>
-                            <CommandItem>
-                                <Newspaper className="mr-2 h-4 w-4" />
-                                <span>Form</span>
-                                {/* <CommandShortcut>⌘B</CommandShortcut> */}
-                            </CommandItem>
-                        </CommandGroup>
-                    </CommandList>
-                </CommandDialog>
+                <div className="col-span-3 mx-4">{renderChapterContent()}</div>
             </div>
         </>
     )

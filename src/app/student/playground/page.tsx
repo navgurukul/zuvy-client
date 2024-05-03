@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useLazyLoadedStudentData } from '@/store/store'
 import { api } from '@/utils/axios.config'
 import Image from 'next/image'
+import { difficultyColor } from '@/lib/utils'
 
 interface Question {
     title: string
@@ -25,11 +26,11 @@ const CodingPlayground = () => {
     const [selectedTopic, setSelectedTopic] = useState('')
     const [questions, setQuestions] = useState([])
 
-    const difficultyColors = {
-        Easy: 'secondary',
-        Medium: 'yellow-dark',
-        Hard: 'destructive',
-    }
+    // const difficultyColors = {
+    //     Easy: 'secondary',
+    //     Medium: 'yellow-dark',
+    //     Hard: 'destructive',
+    // }
     const statusColors = {
         null: 'gray-300',
         'Needs to Attempt': 'destructive',
@@ -133,7 +134,7 @@ const CodingPlayground = () => {
         //                                 <TableCell>{id}</TableCell>
         //                                 <TableCell>{title}</TableCell>
         //                                 <TableCell
-        //                                     className={`text-${difficultyColors[difficulty]}`}
+        //                                     className={difficultyColors(difficulty)}
         //                                 >
         //                                     {difficulty}
         //                                 </TableCell>
