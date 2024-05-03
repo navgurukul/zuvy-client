@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Cross, Plus, X } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 
 const formSchema = z.object({
     title: z.string(),
@@ -97,24 +97,6 @@ export default function NewCodingProblemForm() {
                         onSubmit={form.handleSubmit(handleSubmit)}
                         className=" max-w-md w-full flex flex-col gap-4"
                     >
-                        <FormField
-                            control={form.control}
-                            name="title"
-                            render={({ field }) => {
-                                return (
-                                    <FormItem className="text-left">
-                                        <FormLabel>Title</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                placeholder="Title"
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )
-                            }}
-                        />
                         <FormField
                             control={form.control}
                             name="functionName"
@@ -243,66 +225,74 @@ export default function NewCodingProblemForm() {
                                 )
                             }}
                         />
-                        <FormField
-                            control={form.control}
-                            name="allowedLanguages"
-                            render={({ field }) => {
-                                return (
-                                    <FormItem className="text-left">
-                                        <FormLabel>Allowed Languages</FormLabel>
-                                        <Select onValueChange={field.onChange}>
-                                            <FormControl>
-                                                <SelectTrigger className="w-1/2">
-                                                    <SelectValue placeholder="Choose Language" />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent className="w-1/2">
-                                                <SelectItem value="All Languages">
-                                                    All Languages
-                                                </SelectItem>
-                                                <SelectItem value="C++">
-                                                    C++
-                                                </SelectItem>
-                                                <SelectItem value="Python">
-                                                    Python
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage />
-                                    </FormItem>
-                                )
-                            }}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="topics"
-                            render={({ field }) => {
-                                return (
-                                    <FormItem className="text-left">
-                                        <FormLabel>Topics</FormLabel>
-                                        <Select onValueChange={field.onChange}>
-                                            <FormControl>
-                                                <SelectTrigger className="w-1/2">
-                                                    <SelectValue placeholder="Choose Topic" />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent className="w-1/2">
-                                                <SelectItem value="DSA">
-                                                    DSA
-                                                </SelectItem>
-                                                <SelectItem value="Strings">
-                                                    Strings
-                                                </SelectItem>
-                                                <SelectItem value="Development">
-                                                    Development
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage />
-                                    </FormItem>
-                                )
-                            }}
-                        />
+                        <div className="flex justify-between w-full">
+                            <FormField
+                                control={form.control}
+                                name="allowedLanguages"
+                                render={({ field }) => {
+                                    return (
+                                        <FormItem className="text-left w-1/2 ">
+                                            <FormLabel>
+                                                Allowed Languages
+                                            </FormLabel>
+                                            <Select
+                                                onValueChange={field.onChange}
+                                            >
+                                                <FormControl>
+                                                    <SelectTrigger className="w-1/2">
+                                                        <SelectValue placeholder="Choose Language" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent className="w-1/2">
+                                                    <SelectItem value="All Languages">
+                                                        All Languages
+                                                    </SelectItem>
+                                                    <SelectItem value="C++">
+                                                        C++
+                                                    </SelectItem>
+                                                    <SelectItem value="Python">
+                                                        Python
+                                                    </SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )
+                                }}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="topics"
+                                render={({ field }) => {
+                                    return (
+                                        <FormItem className="text-left w-1/2">
+                                            <FormLabel>Topics</FormLabel>
+                                            <Select
+                                                onValueChange={field.onChange}
+                                            >
+                                                <FormControl>
+                                                    <SelectTrigger className="w-1/2">
+                                                        <SelectValue placeholder="Choose Topic" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent className="w-1/2">
+                                                    <SelectItem value="DSA">
+                                                        DSA
+                                                    </SelectItem>
+                                                    <SelectItem value="Strings">
+                                                        Strings
+                                                    </SelectItem>
+                                                    <SelectItem value="Development">
+                                                        Development
+                                                    </SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )
+                                }}
+                            />
+                        </div>
                         <div className="flex justify-between mr-12">
                             <FormField
                                 control={form.control}
@@ -370,10 +360,13 @@ export default function NewCodingProblemForm() {
                             />
                         </div>
                         <div className="flex flex-col gap-y-2">
+                            <div className="flex justify-start">
+                                <FormLabel>Test Cases</FormLabel>
+                            </div>
                             {testCases.map((testCase, index) => (
                                 <div
                                     key={index}
-                                    className="flex justify-between mr-12"
+                                    className="flex justify-between items-center mr-12 relative"
                                     onMouseEnter={() => setHoveredIndex(index)}
                                     onMouseLeave={() => setHoveredIndex(null)}
                                 >
@@ -382,9 +375,6 @@ export default function NewCodingProblemForm() {
                                         name={`testCaseInput`}
                                         render={({ field }) => (
                                             <FormItem className="text-left">
-                                                <FormLabel>
-                                                    Test Cases
-                                                </FormLabel>
                                                 <Input
                                                     placeholder="Input1"
                                                     {...field}
@@ -397,7 +387,7 @@ export default function NewCodingProblemForm() {
                                         control={form.control}
                                         name={`testCaseOutput`}
                                         render={({ field }) => (
-                                            <FormItem className="text-left mt-6">
+                                            <FormItem className="text-left ">
                                                 <Input
                                                     placeholder="Output"
                                                     {...field}
@@ -410,7 +400,7 @@ export default function NewCodingProblemForm() {
                                         {hoveredIndex === index &&
                                             testCases.length > 1 && (
                                                 <X
-                                                    className="cursor-pointer"
+                                                    className="cursor-pointer absolute top-0"
                                                     onClick={() =>
                                                         handleRemoveTestCase(
                                                             testCase.id

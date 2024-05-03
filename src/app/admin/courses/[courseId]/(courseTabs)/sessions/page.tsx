@@ -1,18 +1,22 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
+import Image from 'next/image'
+
+import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+
 import { Button } from '@/components/ui/button'
 import { Combobox } from '@/components/ui/combobox'
 import ClassCard from '../../_components/classCard'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import NewClassDialog from '../../_components/newClassDialog'
 import { api } from '@/utils/axios.config'
-import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
-import Image from 'next/image'
 import { getCourseData } from '@/store/store'
 import RecordingCard from '@/app/student/courses/[viewcourses]/[recordings]/_components/RecordingCard'
+import { OFFSET, POSITION } from '@/utils/constant'
+
+import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 
 function Page() {
     const [classType, setClassType] = useState('upcoming')
@@ -20,11 +24,15 @@ function Page() {
     const [bootcampData, setBootcampData] = useState([])
     const [batchId, setBatchId] = useState(0)
     const [upcomingClasses, setUpcomingClasses] = useState([])
+    const [pages, setPages] = useState<number>()
+    const [offset, setOffset] = useState<number>(OFFSET)
+    const [currentPage, setCurrentPage] = useState<number>(1)
+    const [totalStudents, setTotalStudents] = useState<number>(0)
     const [ongoingClasses, setOngoingClasses] = useState([])
     const [completedClasses, setCompletedClasses] = useState([])
     const [selectedDate, setSelectedDate] = useState(null)
+
     const [limit, setLimit] = useState(6)
-    const [offset, setOffset] = useState(1)
 
     const { courseData } = getCourseData()
 
@@ -256,6 +264,18 @@ function Page() {
                     <CreateSession />
                 </div>
             )}
+
+            {/* <DataTablePagination
+                totalStudents={totalStudents}
+                position={position}
+                setPosition={setPosition}
+                pages={pages}
+                lastPage={lastPage}
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+                fetchStudentData={fetchStudentData}
+                setOffset={setOffset} */}
+            {/* /> */}
         </div>
     )
 }
