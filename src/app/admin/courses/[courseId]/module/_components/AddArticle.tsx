@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
@@ -36,7 +36,7 @@ const AddArticle = ({ content }: ArticleProps) => {
 
     return (
         <div>
-            <Tiptap />
+            <Tiptap chapterContent={content} />
         </div>
     )
 }

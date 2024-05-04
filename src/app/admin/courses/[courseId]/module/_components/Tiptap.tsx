@@ -1,4 +1,6 @@
-import React, { useCallback } from 'react'
+'use client'
+
+import React, { useCallback, useEffect, useState } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import {
@@ -7,34 +9,59 @@ import {
     Italic,
     List,
     ListOrdered,
-    Heading2,
     Quote,
     Minus,
     Undo,
     Redo,
     Code,
-    Heading3Icon,
-    Heading2Icon,
     Heading1Icon,
-    Heading4Icon,
-    Heading5Icon,
-    Heading6Icon,
-    UnderlineIcon,
     LucideUnderline,
 } from 'lucide-react'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { FieldValues, FormProvider, useForm } from 'react-hook-form'
+import * as z from 'zod'
+import {
+    Form,
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import Underline from '@tiptap/extension-underline'
 import Heading from '@tiptap/extension-heading'
-import Blockquote from '@tiptap/extension-blockquote'
 import Link from '@tiptap/extension-link'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { api } from '@/utils/axios.config'
+import { Input } from '@/components/ui/input'
+import { toast } from '@/components/ui/use-toast'
+
+import ListItem from '@tiptap/extension-list-item'
+import BulletList from '@tiptap/extension-bullet-list'
+import OrderedList from '@tiptap/extension-ordered-list'
+import Text from '@tiptap/extension-text'
 
 const extensions = [
     StarterKit,
     Underline,
+    ListItem,
+    Text,
+    BulletList.configure({
+        itemTypeName: 'listItem',
+        HTMLAttributes: {
+            class: 'list-disc inline-block text-left',
+        },
+    }),
+    OrderedList.configure({
+        HTMLAttributes: {
+            class: 'list-decimal inline-block text-left',
+        },
+    }),
     Link.configure({
         openOnClick: true,
         autolink: true,
+        linkOnPaste: true,
         HTMLAttributes: {
             class: 'font-bold text-secondary',
         },
@@ -45,312 +72,267 @@ const extensions = [
             class: 'font-bold text-2xl',
         },
     }),
-    Blockquote.configure({
-        HTMLAttributes: {
-            class: '',
-        },
-    }),
 ]
 const content = `
-<h1>This is a 1st level heading</h1>
-<p>This is a paragraph</p>
-<blockquote>This is a blockquote</blockquote>
-Press enter after the link and it will be converted to a link:
-www.google.com 
+<h1>This is a heading</h1>
+<p>Press # and enter to create a heading:</p>
+<p>Press backspace to remove the heading:</p>
+<p>Press Enter/Space after a link and it will be converted to a link:</p>
+www.google.com
 `
+interface TiptapProps {
+    chapterContent: {
+        id: number
+        moduleId: number
+    }
+}
 
-const Tiptap = () => {
+const Tiptap = ({ chapterContent }: TiptapProps) => {
+    const [title, setTitle] = useState('')
+    const [isAlertOpen, setIsAlertOpen] = useState(false)
+    const { register } = useForm()
+
     const editor = useEditor({
         extensions,
         content,
     })
 
-    const isActive = 'bg-blue-700 text-black rounded-lg'
-    const notActive = 'hover:bg-blue-500 hover:text-blue-700 hover:rounded-lg'
+    const editArticleContent = async () => {
+        try {
+            const articleContent = [editor?.getJSON()]
+            const data = {
+                title,
+                articleContent,
+            }
 
-    // const setLink = useCallback(() => {
-    //     const previousUrl = editor.getAttributes('link').href
-    //     const url = window.prompt('URL', previousUrl)
-
-    //     // cancelled
-    //     if (url === null) {
-    //         return
-    //     }
-
-    //     // empty
-    //     if (url === '') {
-    //         editor.chain().focus().extendMarkRange('link').unsetLink().run()
-
-    //         return
-    //     }
-
-    //     // update link
-    //     editor
-    //         .chain()
-    //         .focus()
-    //         .extendMarkRange('link')
-    //         .setLink({ href: url })
-    //         .run()
-    // }, [editor])
-
-    if (!editor) {
-        return null
+            await api.put(
+                `/Content/editChapterOfModule/${chapterContent.moduleId}?chapterId=${chapterContent.id}`,
+                data
+            )
+            toast({
+                title: 'Success',
+                description: 'Article Chapter Edited Successfully',
+            })
+        } catch (error: any) {
+            toast({
+                title: 'Failed',
+                description:
+                    error.response?.data?.message || 'An error occurred.',
+                className: 'text-start capitalize',
+                variant: 'destructive',
+            })
+            console.error('Error creating batch:', error)
+        }
     }
 
-    const handleContent = () => {
-        console.log(editor.getJSON())
+    const getArticleContent = async () => {
+        try {
+            const response = await api.get(
+                `/Content/chapterDetailsById/${chapterContent.id}`
+            )
+            console.log(response)
+            // setTitle(response.data.title)
+            editor?.commands.setContent(response.data.contentDetails[0].content)
+        } catch (error) {
+            console.error('Error fetching article content:', error)
+        }
     }
+
+    useEffect(() => {
+        getArticleContent()
+    }, [chapterContent])
+
+    const activeButtonStyles =
+        'text-white flex items-center justify-center rounded-md  bg-green-900  focus:outline-none mr-2'
+
+    const inActiveBtnStyles =
+        'text-white flex items-center justify-center rounded-md  bg-secondary  focus:outline-none mr-2'
+
+    // Define your form schema
+    const formSchema = z.object({
+        title: z.string().min(2, {
+            message: 'Title must be at least 2 characters.',
+        }),
+        // Add more fields here
+    })
+
+    // Initialize your form
+    const form = useForm({
+        resolver: zodResolver(formSchema),
+        mode: 'onChange',
+    })
 
     return (
         <div>
-            <div className="toolbar-btns flex">
-                <ToggleGroup type="multiple">
-                    <ToggleGroupItem
-                        value="bold"
-                        aria-label="Toggle bold"
-                        onClick={() =>
-                            editor.chain().focus().toggleBold().run()
-                        }
-                        disabled={
-                            !editor.can().chain().focus().toggleBold().run()
-                        }
-                        // className={
-                        //     editor.isActive('bold') ? isActive : notActive
-                        // }
-                    >
-                        <Bold />
-                    </ToggleGroupItem>
-                    <ToggleGroupItem
-                        value="italic"
-                        aria-label="Toggle italic"
-                        onClick={() =>
-                            editor.chain().focus().toggleItalic().run()
-                        }
-                        // disabled={
-                        //     !editor.can().chain().focus().toggleItalic().run()
-                        // }
-                        // className={
-                        //     editor.isActive('italic') ? isActive : notActive
-                        // }
-                    >
-                        <Italic />
-                    </ToggleGroupItem>
-                    <ToggleGroupItem
-                        value="underline"
-                        aria-label="Toggle underline"
-                        onClick={() =>
-                            editor.chain().focus().toggleUnderline().run()
-                        }
-                        disabled={
-                            !editor
-                                .can()
-                                .chain()
-                                .focus()
-                                .toggleUnderline()
-                                .run()
-                        }
-                        // className={
-                        //     editor.isActive('strike') ? isActive : notActive
-                        // }
-                    >
-                        <LucideUnderline />
-                    </ToggleGroupItem>
-                    <ToggleGroupItem
-                        value="strikethrough"
-                        aria-label="Toggle underline"
-                        onClick={() =>
-                            editor.chain().focus().toggleStrike().run()
-                        }
-                        disabled={
-                            !editor.can().chain().focus().toggleStrike().run()
-                        }
-                        // className={
-                        //     editor.isActive('strike') ? isActive : notActive
-                        // }
-                    >
-                        <Strikethrough />
-                    </ToggleGroupItem>
-                    <ToggleGroupItem
-                        value="code"
-                        aria-label="Toggle code"
-                        onClick={() =>
-                            editor.chain().focus().toggleCode().run()
-                        }
-                        disabled={
-                            !editor.can().chain().focus().toggleCode().run()
-                        }
-                    >
-                        <Code />
-                    </ToggleGroupItem>
-                    <ToggleGroupItem
-                        value="heading1"
-                        aria-label="Toggle heading1"
-                        onClick={() =>
-                            editor
-                                .chain()
-                                .focus()
-                                .toggleHeading({ level: 1 })
-                                .run()
-                        }
-                        disabled={
-                            !editor
-                                .can()
-                                .chain()
-                                .focus()
-                                .toggleHeading({ level: 1 })
-                                .run()
-                        }
-                    >
-                        <Heading1Icon />
-                    </ToggleGroupItem>
-                    <ToggleGroupItem
-                        value="quote"
-                        aria-label="Toggle quote"
-                        onClick={() => {
-                            editor.chain().focus().toggleBlockquote().run()
-                        }}
-                        disabled={
-                            !editor
-                                .can()
-                                .chain()
-                                .focus()
-                                .toggleBlockquote()
-                                .run()
-                        }
-                    >
-                        <Quote />
-                    </ToggleGroupItem>
-                    <ToggleGroupItem
-                        value="list"
-                        aria-label="Toggle list"
-                        onClick={() => {
-                            editor.chain().focus().toggleBulletList().run()
-                        }}
-                        disabled={
-                            !editor
-                                .can()
-                                .chain()
-                                .focus()
-                                .toggleBulletList()
-                                .run()
-                        }
-                    >
-                        <List />
-                    </ToggleGroupItem>
-                    <ToggleGroupItem
-                        value="orderedList"
-                        aria-label="Toggle ordered list"
-                        onClick={() => {
-                            editor.chain().focus().toggleOrderedList().run()
-                        }}
-                        disabled={
-                            !editor
-                                .can()
-                                .chain()
-                                .focus()
-                                .toggleOrderedList()
-                                .run()
-                        }
-                    >
-                        <ListOrdered />
-                    </ToggleGroupItem>
-                    <ToggleGroupItem
-                        value="horizontalRule"
-                        aria-label="Toggle horizontal rule"
-                        onClick={() => {
-                            editor.chain().focus().setHorizontalRule().run()
-                        }}
-                        disabled={
-                            !editor
-                                .can()
-                                .chain()
-                                .focus()
-                                .setHorizontalRule()
-                                .run()
-                        }
-                    >
-                        <Minus />
-                    </ToggleGroupItem>
-                    <ToggleGroupItem
-                        value="undo"
-                        aria-label="Toggle undo"
-                        onClick={() => {
-                            editor.chain().focus().undo().run()
-                        }}
-                        disabled={!editor.can().chain().focus().undo().run()}
-                    >
-                        <Undo />
-                    </ToggleGroupItem>
-                    <ToggleGroupItem
-                        value="redo"
-                        aria-label="Toggle redo"
-                        onClick={() => {
-                            editor.chain().focus().redo().run()
-                        }}
-                        disabled={!editor.can().chain().focus().redo().run()}
-                    >
-                        <Redo />
-                    </ToggleGroupItem>
-                </ToggleGroup>
-
-                {/* 
-
-                
-
-              
-
-                
-
-                
-
-                
-
-                <div>
-                    <Undo
-                        onClick={(e) => {
-                            e.preventDefault()
-                            editor.chain().focus().undo().run()
-                        }}
-                        className={
-                            editor.isActive('undo') ? isActive : notActive
-                        }
-                    />
-                </div>
-
-                <div>
-                    <Redo
-                        onClick={(e) => {
-                            e.preventDefault()
-                            editor.chain().focus().redo().run()
-                        }}
-                        className={
-                            editor.isActive('redo') ? isActive : notActive
-                        }
-                    />
-                </div> */}
-            </div>
-
-            {/* <div>
-                <button
-                    onClick={setLink}
+            <div className="toolbar-btns flex justify-center">
+                <Button
+                    onClick={() => editor?.chain().focus().toggleBold().run()}
+                    disabled={!editor?.can().chain().focus().toggleBold().run()}
+                    className={`${
+                        editor?.isActive('bold')
+                            ? activeButtonStyles
+                            : inActiveBtnStyles
+                    }`}
+                >
+                    <Bold />
+                </Button>
+                <Button
+                    onClick={() => editor?.chain().focus().toggleItalic().run()}
+                    disabled={
+                        !editor?.can().chain().focus().toggleItalic().run()
+                    }
                     className={
-                        editor.isActive('link') ? 'is-active mr-10' : 'mr-10'
+                        editor?.isActive('italic')
+                            ? activeButtonStyles
+                            : inActiveBtnStyles
                     }
                 >
-                    setLink
-                </button>
-                <button
-                    onClick={() => editor.chain().focus().unsetLink().run()}
-                    disabled={!editor.isActive('link')}
+                    <Italic />
+                </Button>
+                <Button
+                    onClick={() => editor?.chain().focus().toggleStrike().run()}
+                    disabled={
+                        !editor?.can().chain().focus().toggleStrike().run()
+                    }
+                    className={
+                        editor?.isActive('strike')
+                            ? activeButtonStyles
+                            : inActiveBtnStyles
+                    }
                 >
-                    unsetLink
-                </button>
-            </div> */}
+                    <Strikethrough />
+                </Button>
+                <Button
+                    onClick={() =>
+                        editor?.chain().focus().toggleUnderline().run()
+                    }
+                    className={
+                        editor?.isActive('underline')
+                            ? activeButtonStyles
+                            : inActiveBtnStyles
+                    }
+                >
+                    <LucideUnderline />
+                </Button>
+                <Button
+                    onClick={() => editor?.chain().focus().toggleCode().run()}
+                    disabled={!editor?.can().chain().focus().toggleCode().run()}
+                    className={
+                        editor?.isActive('code')
+                            ? activeButtonStyles
+                            : inActiveBtnStyles
+                    }
+                >
+                    <Code />
+                </Button>
+
+                <Button
+                    onClick={() =>
+                        editor
+                            ?.chain()
+                            .focus()
+                            .toggleHeading({ level: 1 })
+                            .run()
+                    }
+                    className={
+                        editor?.isActive('heading', { level: 1 })
+                            ? activeButtonStyles
+                            : inActiveBtnStyles
+                    }
+                >
+                    <Heading1Icon />
+                </Button>
+
+                <Button
+                    onClick={() =>
+                        editor?.chain().focus().toggleBulletList().run()
+                    }
+                    className={
+                        editor?.isActive('bulletList')
+                            ? activeButtonStyles
+                            : inActiveBtnStyles
+                    }
+                >
+                    <List />
+                </Button>
+                <Button
+                    onClick={() =>
+                        editor?.chain().focus().toggleOrderedList().run()
+                    }
+                    className={
+                        editor?.isActive('orderedList')
+                            ? activeButtonStyles
+                            : inActiveBtnStyles
+                    }
+                >
+                    <ListOrdered />
+                </Button>
+
+                <Button
+                    onClick={() =>
+                        editor?.chain().focus().setHorizontalRule().run()
+                    }
+                    className="mr-2"
+                >
+                    <Minus />
+                </Button>
+                <Button
+                    onClick={() => editor?.chain().focus().setHardBreak().run()}
+                    className="mr-2"
+                >
+                    hard break
+                </Button>
+                <Button
+                    onClick={() => editor?.chain().focus().undo().run()}
+                    disabled={!editor?.can().chain().focus().undo().run()}
+                    className="mr-2"
+                >
+                    <Undo />
+                </Button>
+                <Button
+                    onClick={() => editor?.chain().focus().redo().run()}
+                    disabled={!editor?.can().chain().focus().redo().run()}
+                >
+                    <Redo />
+                </Button>
+            </div>
+            <div className="flex justify-center my-5">
+                <Form {...form}>
+                    <form
+                        id="myForm"
+                        onSubmit={form.handleSubmit(editArticleContent)}
+                        className="space-y-8"
+                    >
+                        <FormField
+                            control={form.control}
+                            name="title"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel></FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="Title"
+                                            className="w-full"
+                                            {...field}
+                                            {...form.register('title')}
+                                            onChange={(e) =>
+                                                setTitle(e.target.value)
+                                            }
+                                        />
+                                    </FormControl>
+                                    <FormMessage className="h-5" />
+                                </FormItem>
+                            )}
+                        />
+                    </form>
+                </Form>
+            </div>
+
             <div className="bg-muted/80 p-2 rounded-sm mt-4">
                 <EditorContent editor={editor} />
             </div>
-            <div className="text-end">
-                <Button onClick={handleContent} className="mt-5">
+            <div className="flex justify-end">
+                <Button type="submit" form="myForm">
                     Save
                 </Button>
             </div>
