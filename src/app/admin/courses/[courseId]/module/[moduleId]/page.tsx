@@ -1,9 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-
 import ChapterItem from '../_components/ChapterItem'
-
 import Quiz from '../_components/quiz/Quiz'
 import Assignment from '../_components/Assignment'
 import { useParams } from 'next/navigation'
@@ -14,8 +12,8 @@ import AddVideo from '../_components/AddVideo'
 import ChapterModal from '../_components/ChapterModal'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
-import CodingProblemList from '../_components/codingChallenge/CodingProblemList'
-import AddArticle from '../_components/AddArticle'
+import AddArticle from '../_components/Article/AddArticle'
+import Code from '../_components/codingChallenge/CodingChallenge'
 
 // Interfaces:-
 type Chapter = {
@@ -166,7 +164,7 @@ function Page({
             case 2:
                 return <AddArticle content={chapterContent} />
             case 3:
-                return <CodingProblemList content={chapterContent} />
+                return <Code content={chapterContent} />
             case 4:
                 return <Quiz content={chapterContent} />
             case 5:
