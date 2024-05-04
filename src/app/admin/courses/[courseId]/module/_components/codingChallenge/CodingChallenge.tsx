@@ -63,7 +63,7 @@ function CodingChallenge({ content }: CodeProps) {
             <div className="flex items-center mb-5">
                 <Input
                     placeholder="Untitled Coding Problem"
-                    className="text-3xl w-2/5 text-left font-semibold outline-none border-none focus:ring-0"
+                    className="p-0 text-3xl w-2/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize"
                 />
 
                 <div className="text-secondary flex font-semibold items-center">

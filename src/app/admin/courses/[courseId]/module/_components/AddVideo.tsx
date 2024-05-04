@@ -100,7 +100,7 @@ const AddVideo = ({
                                     <Input
                                         placeholder="Untitled Video"
                                         {...field}
-                                        className="w-[450px] text-3xl text-left font-semibold outline-none border-none focus:ring-0"
+                                        className="p-0 text-3xl text-left font-semibold outline-none border-none focus:ring-0 capitalize"
                                     />
                                 </FormControl>
 

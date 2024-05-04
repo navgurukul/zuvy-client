@@ -20,7 +20,7 @@ function Quiz({ content }: QuizProps) {
             <div className="flex items-center gap-x-6 mb-10">
                 <Input
                     placeholder="Untitled Quiz"
-                    className="w-2/5 text-2xl text-left font-semibold border-0 bg-gray-100 rounded-md py-2 px-4   focus:outline-none"
+                    className="p-0 text-3xl text-left font-semibold outline-none border-none focus:ring-0 capitalize"
                 />
                 <Link className="text-secondary font-semibold flex" href={''}>
                     Preview
