@@ -155,7 +155,7 @@ function Page({ params }: { params: any }) {
             formData.append('image', file)
 
             try {
-                const response = await apiMeraki
+                await apiMeraki
                     .post(`/courseEditor/ImageUploadS3`, formData, {
                         headers: {
                             'Content-Type': 'multipart/form-data',
