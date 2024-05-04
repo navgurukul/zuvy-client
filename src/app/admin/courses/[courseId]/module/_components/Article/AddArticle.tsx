@@ -1,11 +1,7 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
-import { useEditor, EditorContent } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
-import { Button } from '@/components/ui/button'
-import { api } from '@/utils/axios.config'
+import React from 'react'
+
 import Tiptap from './Tiptap'
 interface ContentDetail {
     title: string
@@ -28,12 +24,6 @@ interface ArticleProps {
 }
 
 const AddArticle = ({ content }: ArticleProps) => {
-    const [title, setTitle] = useState('')
-    const [description, setDescription] = useState('')
-    const { contentDetails } = content
-    const [showContent, setShowContent] = useState(false)
-    const { moduleId } = useParams()
-
     return (
         <div>
             <Tiptap chapterContent={content} />
