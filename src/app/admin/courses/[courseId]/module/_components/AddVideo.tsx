@@ -11,9 +11,10 @@ import {
 } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { FileUp } from 'lucide-react'
+import { FileUp, X } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
+import VideoEmbed from './video/VideoEmbedd'
 
 type Props = {
     moduleId: string
@@ -52,6 +53,7 @@ const formSchema = z.object({
 
 const AddVideo = ({ moduleId, content }: Props) => {
     const [chapterDetails, setChapterDetails] = useState<ChapterDetails>()
+    const [showVideo, setShowVideo] = useState(true)
 
     const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -95,6 +97,7 @@ const AddVideo = ({ moduleId, content }: Props) => {
 
     useEffect(() => {
         fetchChapterDetailsHandler()
+        setShowVideo(true)
     }, [content.id, fetchChapterDetailsHandler])
 
     console.log(chapterDetails)
@@ -124,12 +127,35 @@ const AddVideo = ({ moduleId, content }: Props) => {
 
     return (
         <div className="flex flex-col gap-y-8 mx-auto items-center justify-center w-full">
+            <div className=" flex justify-between items-start ">
+                {showVideo && (
+                    <>
+                        <div className="flex items-center justify-center ">
+                            <VideoEmbed
+                                title={chapterDetails?.title || ''}
+                                src={chapterDetails?.links[0] || ''}
+                            />
+                        </div>
+                        <X
+                            className="cursor-pointer"
+                            size={20}
+                            onClick={() => setShowVideo(false)}
+                        />
+                    </>
+                )}
+            </div>
+
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
                     className="w-full items-center justify-center flex flex-col space-y-8"
                 >
                     <FormItem>
+                        <div className="flex justify-start ">
+                            <FormLabel className="font-semibold text-4xl">
+                                Title
+                            </FormLabel>
+                        </div>
                         <FormControl>
                             <Input
                                 {...form.register('videoTitle')}
@@ -139,24 +165,31 @@ const AddVideo = ({ moduleId, content }: Props) => {
                         </FormControl>
                         <FormMessage />
                     </FormItem>
-                    <div className="rounded-lg p-5 w-[450px] py-20 border-dashed border-2 border-gray-500 flex flex-col items-center justify-center">
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            className="hidden"
-                        />
-                        <FileUp className="text-secondary" />
-                        <h1
-                            className="flex-start font-bold py-2 px-4 rounded text-secondary cursor-pointer"
-                            onClick={handleUploadClick}
-                        >
-                            Upload Video
-                        </h1>
-                        <p className="text-left text-gray-500">
-                            Supported File Types: .mp4, .mpg, .mkv, .avi
-                        </p>
-                    </div>
+                    {!showVideo && (
+                        <div className="rounded-lg p-5 w-[450px] py-20 border-dashed border-2 border-gray-500 flex flex-col items-center justify-center">
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                className="hidden"
+                            />
+                            <FileUp className="text-secondary" />
+                            <h1
+                                className="flex-start font-bold py-2 px-4 rounded text-secondary cursor-pointer"
+                                onClick={handleUploadClick}
+                            >
+                                Upload Video
+                            </h1>
+                            <p className="text-left text-gray-500">
+                                Supported File Types: .mp4, .mpg, .mkv, .avi
+                            </p>
+                        </div>
+                    )}
                     <FormItem>
+                        <div className="flex justify-start ">
+                            <FormLabel className="font-semibold text-2xl">
+                                Description
+                            </FormLabel>
+                        </div>
                         <FormControl>
                             <Input
                                 {...form.register('description')}
@@ -167,11 +200,16 @@ const AddVideo = ({ moduleId, content }: Props) => {
                         <FormMessage />
                     </FormItem>
                     <FormItem>
+                        <div className="flex justify-start font-semibold text-2xl">
+                            <FormLabel className="font-semibold text-2xl">
+                                Embed Link
+                            </FormLabel>
+                        </div>
                         <FormControl>
                             <Input
                                 {...form.register('links')}
                                 className="w-[450px] px-3 py-2 border rounded-md"
-                                placeholder="Paste your link here"
+                                placeholder="Paste your Embeddable link here"
                             />
                         </FormControl>
                         <FormMessage />

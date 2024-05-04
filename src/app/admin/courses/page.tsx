@@ -114,7 +114,7 @@ const Courses: React.FC = () => {
         router.push(`courses/${id}/details`)
         localStorage.setItem('courseId', id.toString())
     }
-
+    // console.log(courses)
     // async
     useEffect(() => {
         const searchBootcampHandler = async () => {
