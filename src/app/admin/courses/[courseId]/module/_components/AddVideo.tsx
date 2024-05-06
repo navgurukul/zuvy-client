@@ -90,44 +90,45 @@ const AddVideo = ({
             )
             const contentDetails = response.data.contentDetails
 
-            if (contentDetails) {
+            if (contentDetails && contentDetails.length > 0) {
                 const firstContentDetail = contentDetails[0]
 
                 if (firstContentDetail) {
                     const {
                         title = '',
                         description = '',
-                        links: [firstLink = ''] = [],
+                        links = [],
                     } = firstContentDetail
 
-                    console.log(title, description, firstLink)
+                    const firstLink = links && links.length > 0 ? links[0] : ''
 
                     setChapterDetails({
                         title,
                         description,
                         links: [firstLink],
                     })
+                    setShowVideo(!!firstLink)
                 } else {
                     console.log('No content details found')
                     setChapterDetails({
                         title: '',
                         description: '',
-                        links: [''], // or empty array, based on your preference
+                        links: [''],
                     })
+                    setShowVideo(false)
                 }
             } else {
                 console.log('Content details not available')
                 setChapterDetails({
                     title: '',
                     description: '',
-                    links: [''], // or empty array, based on your preference
+                    links: [''],
                 })
+                setShowVideo(false)
             }
         } catch (error) {
             console.error('Error fetching chapter details:', error)
         }
-
-        setShowVideo(true)
     }, [content.id])
 
     useEffect(() => {
@@ -189,6 +190,9 @@ const AddVideo = ({
                         name="videoTitle"
                         render={({ field }) => (
                             <FormItem>
+                                <FormLabel className=" flex text-left text-2xl font-semibold">
+                                    Title
+                                </FormLabel>
                                 <FormControl>
                                     <Input
                                         placeholder="Untitled Video"
@@ -203,28 +207,31 @@ const AddVideo = ({
                     />
 
                     {!showVideo && (
-                        <div className="rounded-lg p-5 w-[450px] py-20 border-dashed border-2 border-gray-500 flex flex-col items-center justify-center ">
-                            <input
-                                ref={fileInputRef}
-                                type="file"
-                                className="hidden"
-                            />
-                            <FileUp className="text-secondary" />
-                            <h1
-                                className="flex-start font-bold py-2 px-4 rounded text-secondary cursor-pointer"
-                                onClick={handleUploadClick}
-                            >
-                                Upload Video
-                            </h1>
-                            <p className="text-left text-gray-500">
-                                Supported File Types : .mp4, .mpg, .mkv, .avi
-                            </p>
-                        </div>
+                        <>
+                            <div className="rounded-lg p-5 w-[450px] py-20 border-dashed border-2 border-gray-500 flex flex-col items-center justify-center ">
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    className="hidden"
+                                />
+                                <FileUp className="text-secondary" />
+                                <h1
+                                    className="flex-start font-bold py-2 px-4 rounded text-secondary cursor-pointer"
+                                    onClick={handleUploadClick}
+                                >
+                                    Upload Video
+                                </h1>
+                                <p className="text-left text-gray-500">
+                                    Supported File Types : .mp4, .mpg, .mkv,
+                                    .avi
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-x-2">
+                                <Separator className="my-4 w-1/5" />
+                                or <Separator className="my-4 w-1/5" />
+                            </div>
+                        </>
                     )}
-                    <div className="flex items-center gap-x-2">
-                        <Separator className="my-4 w-1/5" />
-                        or <Separator className="my-4 w-1/5" />
-                    </div>
                     {/* <h1 >Title</h1> */}
 
                     <FormField

@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils'
+import { getDeleteStudentStore } from '@/store/store'
 import {
     BookOpenText,
     SquareCode,
@@ -25,6 +26,8 @@ function ChapterItem({
     activeChapter: number
     fetchChapterContent: (chapterId: number) => void
 }) {
+    const { setDeleteModalOpen, isDeleteModalOpen } = getDeleteStudentStore()
+
     const setTopicIcon = () => {
         switch (topicId) {
             case 1:
