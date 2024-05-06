@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils'
+import { api } from '@/utils/axios.config'
 import {
     BookOpenText,
     SquareCode,
@@ -8,7 +9,9 @@ import {
     Trash2,
     Video,
 } from 'lucide-react'
-import { boolean } from 'zod'
+import DeleteConfirmationModal from '../../_components/deleteModal'
+import { useState } from 'react'
+import { DELETE_CHAPTER_CONFIRMATION } from '@/utils/constant'
 
 function ChapterItem({
     title,
@@ -17,6 +20,8 @@ function ChapterItem({
     chapterId,
     activeChapter,
     fetchChapterContent,
+    fetchChapters,
+    moduleId,
 }: {
     title: string
     topicId: number
@@ -24,7 +29,13 @@ function ChapterItem({
     chapterId: number
     activeChapter: number
     fetchChapterContent: (chapterId: number) => void
+    fetchChapters: () => void
+    moduleId: string
 }) {
+    // states and variables
+    const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
+
+    // functions
     const setTopicIcon = () => {
         switch (topicId) {
             case 1:
@@ -48,6 +59,19 @@ function ChapterItem({
             : 'text-black hover:bg-secondary/20'
     }
 
+    const handleDeleteChapter = async () => {
+        const response = await api.delete(
+            `/content/deleteChapter/${moduleId}?chapterId=${chapterId}`
+        )
+        if (response.data) {
+            fetchChapters()
+        }
+    }
+
+    const handleDeleteModal = () => {
+        setDeleteModalOpen(true)
+    }
+
     return (
         <div>
             <div
@@ -59,18 +83,30 @@ function ChapterItem({
                     fetchChapterContent(chapterId)
                 }}
             >
-                <div className="flex gap-2">
+                <div className="flex gap-2 capitalize">
                     <p>{setTopicIcon()} </p>
                     <p>{title}</p>
                 </div>
                 <Trash2
-                    onClick={() => {
-                        // handleTrashClick()
+                    onClick={(e) => {
+                        e.stopPropagation()
+                        handleDeleteModal()
                     }}
                     className="hover:text-destructive cursor-pointer"
                     size={15}
                 />
             </div>
+            <DeleteConfirmationModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setDeleteModalOpen(false)}
+                onConfirm={() => {
+                    handleDeleteChapter()
+                    setDeleteModalOpen(false)
+                }}
+                modalText={DELETE_CHAPTER_CONFIRMATION}
+                buttonText="Delete Chapter"
+                input={false}
+            />
         </div>
     )
 }
