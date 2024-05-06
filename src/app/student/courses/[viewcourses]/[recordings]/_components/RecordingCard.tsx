@@ -62,7 +62,7 @@ function RecordingCard({
         console.log(classData, 'meetingId adhsfkfhdskfhdkash')
         try {
             const response = await api.get(
-                `/classes/analytics/${classData?.meetingId}`
+                `/classes/analytics/${classData?.meetingid}`
             )
             setDisplayAttendance(response.data)
         } catch (err) {
