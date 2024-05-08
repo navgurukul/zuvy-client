@@ -12,6 +12,7 @@ import {
 import DeleteConfirmationModal from '../../_components/deleteModal'
 import { useState } from 'react'
 import { DELETE_CHAPTER_CONFIRMATION } from '@/utils/constant'
+import { toast } from '@/components/ui/use-toast'
 
 function ChapterItem({
     title,
@@ -60,11 +61,26 @@ function ChapterItem({
     }
 
     const handleDeleteChapter = async () => {
-        const response = await api.delete(
-            `/content/deleteChapter/${moduleId}?chapterId=${chapterId}`
-        )
-        if (response.data) {
-            fetchChapters()
+        try {
+            await api
+                .delete(
+                    `/content/deleteChapter/${moduleId}?chapterId=${chapterId}`
+                )
+                .then((res) => {
+                    toast({
+                        title: res.data.title,
+                        description: res.data.message,
+                    })
+                    fetchChapters()
+                })
+                .catch((error) => {
+                    toast({
+                        title: error.data.title,
+                        description: error.data.message,
+                    })
+                })
+        } catch (error) {
+            console.error('Error handling delete chapter:', error)
         }
     }
 

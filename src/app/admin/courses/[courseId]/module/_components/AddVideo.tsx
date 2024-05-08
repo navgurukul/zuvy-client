@@ -175,6 +175,7 @@ const AddVideo = ({
                         title: res.data.status,
                         description: res.data.message,
                     })
+                    fetchChapterDetailsHandler()
                 })
         } catch (error) {
             toast({
