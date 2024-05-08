@@ -54,21 +54,21 @@ function Page() {
         })
     }
 
+    const fetchCourseModules = async () => {
+        try {
+            const response = await api.get(
+                `/content/allModules/${courseData?.id}`
+            )
+            const data = response.data
+            setCurriculum(data)
+        } catch (error) {
+            console.error('Error fetching course details:', error)
+        }
+    }
+
     //   async
     useEffect(() => {
         if (courseData?.id) {
-            const fetchCourseModules = async () => {
-                try {
-                    const response = await api.get(
-                        `/content/allModules/${courseData?.id}`
-                    )
-                    const data = response.data
-                    setCurriculum(data)
-                } catch (error) {
-                    console.error('Error fetching course details:', error)
-                }
-            }
-
             fetchCourseModules()
         }
     }, [courseData?.id])
@@ -111,12 +111,14 @@ function Page() {
                             },
                             index
                         ) => (
-                            <div key={id} className="w-1/2  ">
-                                <Link
-                                    href={`/admin/courses/${courseData?.id}/module/${id}`}
+                            <div key={id} className="w-1/2">
+                                <div
+                                    // href={`/admin/courses/${courseData?.id}/module/${id}`}
                                     className="bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl  "
                                 >
                                     <CurricullumCard
+                                        moduleId={id}
+                                        courseId={courseData?.id ?? 0}
                                         order={order}
                                         name={name}
                                         description={description}
@@ -128,8 +130,9 @@ function Page() {
                                             codingProblemsCount
                                         }
                                         articlesCount={articlesCount}
+                                        fetchCourseModules={fetchCourseModules}
                                     />
-                                </Link>
+                                </div>
                             </div>
                         )
                     )
