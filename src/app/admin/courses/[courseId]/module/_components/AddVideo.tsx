@@ -133,6 +133,10 @@ const AddVideo = ({
                 setShowVideo(false)
             }
         } catch (error) {
+            toast({
+                title: 'Error',
+                description: 'Error fetching chapter details:',
+            })
             console.error('Error fetching chapter details:', error)
         }
     }, [content.id])
