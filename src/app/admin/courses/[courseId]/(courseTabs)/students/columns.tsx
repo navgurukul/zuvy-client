@@ -123,24 +123,20 @@ export const columns: ColumnDef<Task>[] = [
             const { studentsData, setStoreStudentData } = getStoreStudentData()
             const bootcampId = batchData && batchData[0]?.bootcampId
             const initialvalue = row.original?.batchId?.toString()
-            const transformedData = studentsData?.reduce(
-                (
-                    transformedData: any[],
-                    item: { batchId: any; batchName: any }
-                ) => {
-                    const isUnique = !transformedData.some((existingItem) =>
-                        item.batchId
-                            ? existingItem.value === item.batchId.toString()
-                            : false
-                    )
+            const transformedData = batchData?.reduce(
+                (transformedData: any[], item: { id: any; name: any }) => {
+                    if (item.id != null) {
+                        const isUnique = !transformedData.some(
+                            (existingItem) =>
+                                existingItem.value === item.id.toString()
+                        )
 
-                    if (isUnique) {
-                        transformedData.push({
-                            value: item.batchId
-                                ? item.batchId.toString()
-                                : null,
-                            label: item.batchName,
-                        })
+                        if (isUnique) {
+                            transformedData.push({
+                                value: item.id.toString(),
+                                label: item.name,
+                            })
+                        }
                     }
 
                     return transformedData
@@ -148,6 +144,7 @@ export const columns: ColumnDef<Task>[] = [
                 []
             )
 
+            console.log(transformedData)
             if (!batchData) {
                 return (
                     <div className="flex justify-center items-center h-[100vh]">

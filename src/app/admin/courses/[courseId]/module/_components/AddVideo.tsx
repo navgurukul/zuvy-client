@@ -109,7 +109,10 @@ const AddVideo = ({
                     })
                     setShowVideo(!!firstLink)
                 } else {
-                    console.log('No content details found')
+                    toast({
+                        title: 'Error',
+                        description: 'No content details found',
+                    })
                     setChapterDetails({
                         title: '',
                         description: '',
@@ -118,7 +121,10 @@ const AddVideo = ({
                     setShowVideo(false)
                 }
             } else {
-                console.log('Content details not available')
+                toast({
+                    title: 'Error',
+                    description: 'Content details not available',
+                })
                 setChapterDetails({
                     title: '',
                     description: '',
@@ -160,6 +166,12 @@ const AddVideo = ({
             })
         }
     }
+    const handleClose = () => {
+        setShowVideo(false)
+        form.setValue('videoTitle', '')
+        form.setValue('description', '')
+        form.setValue('links', '')
+    }
 
     return (
         <div className="flex flex-col gap-y-8 mx-auto items-center justify-center w-full">
@@ -175,7 +187,7 @@ const AddVideo = ({
                         <X
                             className="cursor-pointer"
                             size={20}
-                            onClick={() => setShowVideo(false)}
+                            onClick={handleClose}
                         />
                     </>
                 )}
@@ -190,9 +202,6 @@ const AddVideo = ({
                         name="videoTitle"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel className=" flex text-left text-2xl font-semibold">
-                                    Title
-                                </FormLabel>
                                 <FormControl>
                                     <Input
                                         placeholder="Untitled Video"
@@ -205,7 +214,7 @@ const AddVideo = ({
                             </FormItem>
                         )}
                     />
-
+                    {/* 
                     {!showVideo && (
                         <>
                             <div className="rounded-lg p-5 w-[450px] py-20 border-dashed border-2 border-gray-500 flex flex-col items-center justify-center ">
@@ -231,7 +240,7 @@ const AddVideo = ({
                                 or <Separator className="my-4 w-1/5" />
                             </div>
                         </>
-                    )}
+                    )} */}
                     {/* <h1 >Title</h1> */}
 
                     <FormField
