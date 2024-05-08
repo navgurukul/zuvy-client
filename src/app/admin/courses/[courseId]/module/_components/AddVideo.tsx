@@ -24,6 +24,11 @@ import { toast } from '@/components/ui/use-toast'
 import VideoEmbed from './video/VideoEmbedd'
 type Props = {}
 
+const isLinkValid = (link: string) => {
+    const urlRegex = /^(https?:\/\/)?([\w-]+\.)*([\w-]+)(:\d{2,5})?(\/\S*)*$/
+    return urlRegex.test(link)
+}
+
 const formSchema = z.object({
     videoTitle: z.string().min(2, {
         message: 'Video Title must be at least 2 characters.',
@@ -32,7 +37,15 @@ const formSchema = z.object({
     description: z.string().min(4, {
         message: 'Description must be at least 4 characters.',
     }),
-    links: z.string(),
+    links: z.string().refine(
+        (value) => {
+            const links = value.split(',').map((link) => link.trim())
+            return links.every((link) => isLinkValid(link))
+        },
+        {
+            message: 'One or more links are invalid.',
+        }
+    ),
 })
 interface ContentDetail {
     title: string
