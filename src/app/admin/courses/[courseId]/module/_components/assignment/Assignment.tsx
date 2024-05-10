@@ -108,11 +108,11 @@ interface Content {
     contentDetails: ContentDetail[]
 }
 
-interface ArticleProps {
+interface AssignmentProps {
     content: Content
 }
 
-const AddArticle = ({ content }: ArticleProps) => {
+const AddAssignent = ({ content }: AssignmentProps) => {
     // misc
 
     const formSchema = z.object({
@@ -136,7 +136,7 @@ const AddArticle = ({ content }: ArticleProps) => {
         mode: 'onChange',
     })
 
-    const getArticleContent = async () => {
+    const getAssignmentContent = async () => {
         try {
             const response = await api.get(
                 `/Content/chapterDetailsById/${content.id}`
@@ -145,16 +145,16 @@ const AddArticle = ({ content }: ArticleProps) => {
             setTitle(contentDetails.title)
             editor?.commands.setContent(contentDetails.content)
         } catch (error) {
-            console.error('Error fetching article content:', error)
+            console.error('Error fetching assignment content:', error)
         }
     }
 
-    const editArticleContent = async () => {
+    const editAssignmentContent = async () => {
         try {
-            const articleContent = [editor?.getJSON()]
+            const assignmentContent = [editor?.getJSON()]
             const data = {
                 title,
-                articleContent,
+                assignmentContent,
             }
 
             await api.put(
@@ -179,7 +179,7 @@ const AddArticle = ({ content }: ArticleProps) => {
 
     // async
     useEffect(() => {
-        getArticleContent()
+        getAssignmentContent()
     }, [content])
 
     return (
@@ -188,7 +188,7 @@ const AddArticle = ({ content }: ArticleProps) => {
                 <Form {...form}>
                     <form
                         id="myForm"
-                        onSubmit={form.handleSubmit(editArticleContent)}
+                        onSubmit={form.handleSubmit(editAssignmentContent)}
                         className="space-y-8 mb-10"
                     >
                         <FormField
@@ -228,4 +228,4 @@ const AddArticle = ({ content }: ArticleProps) => {
     )
 }
 
-export default AddArticle
+export default AddAssignent

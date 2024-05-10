@@ -3,17 +3,18 @@
 import { useCallback, useEffect, useState } from 'react'
 import ChapterItem from '../_components/ChapterItem'
 import Quiz from '../_components/quiz/Quiz'
-import Assignment from '../_components/Assignment'
+import Assignment from '../_components/assignment/Assignment'
 import { useParams } from 'next/navigation'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import { Button } from '@/components/ui/button'
 import { api } from '@/utils/axios.config'
-import AddVideo from '../_components/AddVideo'
+import AddVideo from '../_components/video/AddVideo'
 import ChapterModal from '../_components/ChapterModal'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import AddArticle from '../_components/Article/AddArticle'
 import Code from '../_components/codingChallenge/CodingChallenge'
+import AssessmentItem from '../_components/AssessmentItem'
 
 // Interfaces:-
 type Chapter = {
@@ -216,31 +217,58 @@ function Page({
                         </Dialog>
                     </div>
                     <ScrollArea className="h-dvh pr-4">
-                        {chapterData &&
-                            chapterData?.map(
-                                ({
-                                    chapterId,
-                                    chapterTitle,
-                                    topicId,
-                                    topicName,
-                                }) => {
-                                    return (
-                                        <ChapterItem
-                                            key={chapterId}
-                                            chapterId={chapterId}
-                                            title={chapterTitle}
-                                            topicId={topicId}
-                                            topicName={topicName}
-                                            fetchChapterContent={
-                                                fetchChapterContent
-                                            }
-                                            fetchChapters={fetchChapters}
-                                            activeChapter={activeChapter}
-                                            moduleId={params.moduleId}
-                                        />
-                                    )
-                                }
-                            )}
+                        <>
+                            {chapterData &&
+                                chapterData?.map(
+                                    ({
+                                        chapterId,
+                                        chapterTitle,
+                                        topicId,
+                                        topicName,
+                                    }) => {
+                                        return (
+                                            <ChapterItem
+                                                key={chapterId}
+                                                chapterId={chapterId}
+                                                title={chapterTitle}
+                                                topicId={topicId}
+                                                topicName={topicName}
+                                                fetchChapterContent={
+                                                    fetchChapterContent
+                                                }
+                                                fetchChapters={fetchChapters}
+                                                activeChapter={activeChapter}
+                                                moduleId={params.moduleId}
+                                            />
+                                        )
+                                    }
+                                )}
+                            {assessmentData &&
+                                assessmentData?.map(
+                                    ({
+                                        chapterId,
+                                        chapterTitle,
+                                        topicId,
+                                        topicName,
+                                    }) => {
+                                        return (
+                                            <AssessmentItem
+                                                key={chapterId}
+                                                chapterId={chapterId}
+                                                title={chapterTitle}
+                                                topicId={topicId}
+                                                topicName={topicName}
+                                                fetchChapterContent={
+                                                    fetchChapterContent
+                                                }
+                                                fetchChapters={fetchChapters}
+                                                activeChapter={activeChapter}
+                                                moduleId={params.moduleId}
+                                            />
+                                        )
+                                    }
+                                )}
+                        </>
                     </ScrollArea>
                 </div>
                 <div className="col-span-3 mx-4">{renderChapterContent()}</div>
