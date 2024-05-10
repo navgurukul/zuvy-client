@@ -234,7 +234,9 @@ function Page({
                                             fetchChapterContent={
                                                 fetchChapterContent
                                             }
+                                            fetchChapters={fetchChapters}
                                             activeChapter={activeChapter}
+                                            moduleId={params.moduleId}
                                         />
                                     )
                                 }

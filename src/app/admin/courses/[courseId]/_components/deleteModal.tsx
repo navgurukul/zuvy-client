@@ -12,8 +12,8 @@ interface DeleteConfirmationModalProps {
     modalText?: string
     buttonText?: string
     input: boolean
-    modalText2: string
-    instructorInfo: any
+    modalText2?: string
+    instructorInfo?: any
 }
 
 const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
@@ -51,7 +51,6 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                 setError(null)
                 onConfirm()
             } else if (!input) {
-                console.log('HI')
                 onConfirm()
             } else {
                 setError('Batch name does not match')

@@ -17,3 +17,7 @@ export const ROWS_PER_PAGE = ["10", "20", "50"];
 
 export const POSITION = "10"
 export const OFFSET = 0
+
+export const DELETE_MODULE_CONFIRMATION="This action cannot be undone. This will permanently delete the module from this bootcamp"
+
+export const DELETE_CHAPTER_CONFIRMATION="This action cannot be undone. This will permanently delete the module from this bootcamp"
