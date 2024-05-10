@@ -170,7 +170,7 @@ function Page({
             case 5:
                 return <Assignment content={chapterContent} />
             default:
-                return <h1>StickyNote</h1>
+                return <h1>Create New Chapter</h1>
         }
     }
 
