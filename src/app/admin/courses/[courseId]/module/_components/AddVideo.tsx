@@ -273,6 +273,23 @@ const AddVideo = ({
                         </>
                     )} */}
                     {/* <h1 >Title</h1> */}
+                    <div className=" flex justify-between items-start ">
+                        {showVideo && (
+                            <>
+                                <div className="flex items-center justify-center ">
+                                    <VideoEmbed
+                                        title={chapterDetails?.title || ''}
+                                        src={chapterDetails?.links[0] || ''}
+                                    />
+                                </div>
+                                <X
+                                    className="cursor-pointer"
+                                    size={20}
+                                    onClick={handleClose}
+                                />
+                            </>
+                        )}
+                    </div>
 
                     <FormField
                         control={form.control}

@@ -71,6 +71,7 @@ const AddStudentsModal = ({
                             className: 'text-start capitalize',
                         })
                         fetchStudentData(id, setStoreStudentData)
+                        setStudentData({ name: '', email: '' })
                     })
             } catch (error: any) {
                 toast({

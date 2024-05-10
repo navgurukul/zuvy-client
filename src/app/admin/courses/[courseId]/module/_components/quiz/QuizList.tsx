@@ -1,17 +1,47 @@
-import { Plus } from 'lucide-react'
+import { Separator } from '@/components/ui/separator'
+import { Plus, PlusCircle, XCircle } from 'lucide-react'
 import React from 'react'
 
-function QuizList() {
+function QuizList({ questionData }: any) {
+    console.log(questionData)
+    function getColorByDifficulty(difficulty: string): string {
+        switch (difficulty) {
+            case 'Hard':
+                return 'text-red-600'
+            case 'Medium':
+                return 'text-yellow-600'
+            case 'Easy':
+                return 'text-secondary'
+            default:
+                return ''
+        }
+    }
     return (
-        <div className="flex justify-between">
-            <div className="flex gap-x-4 ">
-                <h1 className="text-left font-semibold text-gray-600 ">
-                    Using Which Block can we rotate the block ?
-                </h1>
-                <span className="font-semibold text-secondary">Easy</span>
-            </div>
-            <Plus className="text-secondary" />
-        </div>
+        <>
+            {questionData.map((question: any) => (
+                <div
+                    className="flex flex-col justify-between"
+                    key={question.id}
+                >
+                    <div className="flex w-full justify-between gap-x-4 my-4">
+                        <div className="flex justify-start items-center gap-x-5">
+                            <h1 className="scroll-m-20 text-4xl  font-semibold tracking-tight lg:text-lg">
+                                {question.question}
+                            </h1>
+                            <span
+                                className={`font-semibold ${getColorByDifficulty(
+                                    question.difficulty
+                                )}`}
+                            >
+                                {question.difficulty}
+                            </span>
+                        </div>
+                        <PlusCircle size={20} className="text-secondary" />
+                    </div>
+                    <Separator className="my-4" />
+                </div>
+            ))}
+        </>
     )
 }
 
