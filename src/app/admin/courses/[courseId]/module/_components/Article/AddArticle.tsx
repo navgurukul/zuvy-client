@@ -16,7 +16,7 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { useEditor, EditorContent } from '@tiptap/react'
+import { useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
 import Heading from '@tiptap/extension-heading'
@@ -189,7 +189,7 @@ const AddArticle = ({ content }: ArticleProps) => {
                     <form
                         id="myForm"
                         onSubmit={form.handleSubmit(editArticleContent)}
-                        className="space-y-8"
+                        className="space-y-8 mb-10"
                     >
                         <FormField
                             control={form.control}

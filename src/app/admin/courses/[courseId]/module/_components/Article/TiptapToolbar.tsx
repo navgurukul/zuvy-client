@@ -48,16 +48,16 @@ import {
 import { Input } from '@/components/ui/input'
 
 const activeButtonStyles =
-    'text-white flex rounded-md bg-secondary text-white focus:outline-none mr-2'
+    'text-white flex rounded-md bg-secondary text-white focus:outline-none mr-2 px-2 py-1'
 
 const inActiveBtnStyles =
-    'text-white flex rounded-md bg-white text-black focus:outline-none mr-2'
+    'text-white flex rounded-md bg-white text-black focus:outline-none mr-2 px-2 py-1'
 
 const activeHeadingButtonStyles =
-    'text-white flex rounded-md bg-secondary text-white focus:outline-none'
+    'text-white flex rounded-md bg-secondary text-white focus:outline-none px-2 py-1'
 
 const inActiveHeadingButtonStyles =
-    'text-white flex rounded-md bg-white text-black focus:outline-none'
+    'text-white flex rounded-md bg-white text-black focus:outline-none px-2 py-1'
 
 enum Level {
     Level1 = 1,
@@ -116,13 +116,13 @@ const TiptapToolbar = ({
             <div className="toolbar-btns flex">
                 <Button
                     onClick={addImage}
-                    className="mr-2 bg-white text-black hover:bg-secondary hover:text-white"
+                    className="mr-2 px-2 py-1 bg-white text-black hover:bg-secondary hover:text-white"
                 >
                     <ImageIcon />
                 </Button>
                 <Button
                     onClick={addYoutubeVideo}
-                    className="mr-2 bg-white text-black hover:bg-secondary hover:text-white"
+                    className="mr-2 px-2 py-1 bg-white text-black hover:bg-secondary hover:text-white"
                 >
                     <Video />
                 </Button>
@@ -313,7 +313,7 @@ const TiptapToolbar = ({
                     onClick={() =>
                         editor?.chain().focus().setHorizontalRule().run()
                     }
-                    className="mr-2 bg-white text-black hover:bg-secondary hover:text-white"
+                    className="mr-2 bg-white text-black hover:bg-secondary hover:text-white px-2 py-1"
                 >
                     <Minus />
                 </Button>
@@ -321,13 +321,14 @@ const TiptapToolbar = ({
                 <Button
                     onClick={() => editor?.chain().focus().undo().run()}
                     disabled={!editor?.can().chain().focus().undo().run()}
-                    className="mr-2"
+                    className="mr-2 px-2 py-1 bg-white text-black hover:bg-secondary hover:text-white"
                 >
                     <Undo />
                 </Button>
                 <Button
                     onClick={() => editor?.chain().focus().redo().run()}
                     disabled={!editor?.can().chain().focus().redo().run()}
+                    className="mr-2 px-2 py-1 bg-white text-black hover:bg-secondary hover:text-white"
                 >
                     <Redo />
                 </Button>

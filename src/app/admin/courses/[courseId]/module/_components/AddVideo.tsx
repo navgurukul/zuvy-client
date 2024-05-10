@@ -7,7 +7,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -15,14 +14,11 @@ import {
 } from '@/components/ui/form'
 
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 import { Input } from '@/components/ui/input'
-import { FileUp, X } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import VideoEmbed from './video/VideoEmbedd'
-type Props = {}
 
 const isLinkValid = (link: string) => {
     const urlRegex = /^(https?:\/\/)?([\w-]+\.)*([\w-]+)(:\d{2,5})?(\/\S*)*$/
@@ -207,7 +203,7 @@ const AddVideo = ({
                                     <Input
                                         placeholder="Untitled Video"
                                         {...field}
-                                        className="w-[450px] text-3xl text-left font-semibold outline-none border-none focus:ring-0"
+                                        className="w-[450px] p-0 text-3xl text-left font-semibold outline-none border-none focus:ring-0"
                                     />
                                 </FormControl>
 
@@ -215,6 +211,40 @@ const AddVideo = ({
                             </FormItem>
                         )}
                     />
+                    <div className=" flex justify-between items-start relative">
+                        {showVideo && (
+                            <>
+                                <div className="flex items-center justify-center ">
+                                    <VideoEmbed
+                                        title={chapterDetails?.title || ''}
+                                        src={chapterDetails?.links[0] || ''}
+                                    />
+                                </div>
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="3"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    className="lucide lucide-circle-x cursor-pointer absolute -right-3 -top-3  text-destructive"
+                                    onClick={handleClose}
+                                >
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="m15 9-6 6" />
+                                    <path d="m9 9 6 6" />
+                                </svg>
+                                {/* <CircleX
+                                    className="cursor-pointer text-destructive"
+                                    size={20}
+                                    onClick={handleClose}
+                                /> */}
+                            </>
+                        )}
+                    </div>
                     {/* 
                     {!showVideo && (
                         <>
