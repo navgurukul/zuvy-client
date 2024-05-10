@@ -14,14 +14,15 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import AddArticle from '../_components/Article/AddArticle'
 import Code from '../_components/codingChallenge/CodingChallenge'
+import { Reorder } from 'framer-motion'
 
 // Interfaces:-
 type Chapter = {
     chapterId: number
     chapterTitle: string
-    order: number
     topicId: number
     topicName: string
+    order: number
 }
 
 interface ExampleTestCase {
@@ -178,7 +179,6 @@ function Page({
         setOpen(true)
     }
 
-    // async
     useEffect(() => {
         if (params.moduleId) {
             fetchChapters()
@@ -191,6 +191,39 @@ function Page({
             fetchChapterContent(firstChapterId)
         }
     }, [chapterData, fetchChapterContent])
+
+    async function handleReorder(newOrderChapters: any) {
+        newOrderChapters = newOrderChapters.map((item: any, index: any) => ({
+            ...item,
+            order: index + 1,
+        }))
+
+        const oldOrder = chapterData.map((item: any) => item?.chapterId)
+        const movedItem = newOrderChapters.find(
+            (item: any, index: any) => item?.chapterId !== oldOrder[index]
+        )
+
+        if (!movedItem) {
+            return
+        }
+
+        try {
+            const response = await api.put(
+                `/Content/editChapterOfModule/${params.moduleId}?chapterId=${movedItem.chapterId}`,
+                {
+                    newOrder: movedItem.order,
+                }
+            )
+            if (response.data) {
+                console.log(movedItem.chapterId, 'movedItem.chapterId')
+                console.log(movedItem.order, 'movedItem.order')
+                console.log(newOrderChapters, 'newOrderChapters')
+                setChapterData(newOrderChapters)
+            }
+        } catch (error) {
+            console.error('Error updating module order:', error)
+        }
+    }
 
     return (
         <>
@@ -216,31 +249,36 @@ function Page({
                         </Dialog>
                     </div>
                     <ScrollArea className="h-dvh pr-4">
-                        {chapterData &&
-                            chapterData?.map(
-                                ({
-                                    chapterId,
-                                    chapterTitle,
-                                    topicId,
-                                    topicName,
-                                }) => {
+                        <Reorder.Group
+                            values={chapterData}
+                            onReorder={async (newOrderChapters: any) => {
+                                handleReorder(newOrderChapters)
+                            }}
+                        >
+                            {chapterData &&
+                                chapterData?.map((item: any, index: any) => {
                                     return (
-                                        <ChapterItem
-                                            key={chapterId}
-                                            chapterId={chapterId}
-                                            title={chapterTitle}
-                                            topicId={topicId}
-                                            topicName={topicName}
-                                            fetchChapterContent={
-                                                fetchChapterContent
-                                            }
-                                            fetchChapters={fetchChapters}
-                                            activeChapter={activeChapter}
-                                            moduleId={params.moduleId}
-                                        />
+                                        <Reorder.Item
+                                            value={item}
+                                            key={item.chapterId}
+                                        >
+                                            <ChapterItem
+                                                key={item.chapterId}
+                                                chapterId={item.chapterId}
+                                                title={item.chapterTitle}
+                                                topicId={item.topicId}
+                                                topicName={item.topicName}
+                                                fetchChapterContent={
+                                                    fetchChapterContent
+                                                }
+                                                fetchChapters={fetchChapters}
+                                                activeChapter={activeChapter}
+                                                moduleId={params.moduleId}
+                                            />
+                                        </Reorder.Item>
                                     )
-                                }
-                            )}
+                                })}
+                        </Reorder.Group>
                     </ScrollArea>
                 </div>
                 <div className="col-span-3 mx-4">{renderChapterContent()}</div>

@@ -83,19 +83,19 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
                             </SelectItem>
                             <SelectItem
                                 onClick={() => setSelectedDifficulty('Easy')}
-                                value="easy"
+                                value="Easy"
                             >
                                 Easy
                             </SelectItem>
                             <SelectItem
-                                onClick={() => setSelectedDifficulty('medium')}
-                                value="medium"
+                                onClick={() => setSelectedDifficulty('Medium')}
+                                value="Medium"
                             >
                                 Medium
                             </SelectItem>
                             <SelectItem
-                                onClick={() => setSelectedDifficulty('hard')}
-                                value="hard"
+                                onClick={() => setSelectedDifficulty('Hard')}
+                                value="Hard"
                             >
                                 Hard
                             </SelectItem>

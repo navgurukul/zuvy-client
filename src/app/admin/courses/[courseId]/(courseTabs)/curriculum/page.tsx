@@ -10,6 +10,19 @@ import { Button } from '@/components/ui/button'
 import CurricullumCard from '../../_components/curricullumCard'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import NewModuleDialog from '../../_components/newModuleDialog'
+import { Reorder } from 'framer-motion'
+
+interface CurriculumItem {
+    id: number
+    name: string
+    description: string
+    order: number
+    timeAlloted: number
+    quizCount: number
+    assignmentCount: number
+    codingProblemsCount: number
+    articlesCount: number
+}
 
 function Page() {
     // state and variables
@@ -59,8 +72,10 @@ function Page() {
             const response = await api.get(
                 `/content/allModules/${courseData?.id}`
             )
-            const data = response.data
-            setCurriculum(data)
+            const sortedData = response.data.sort(
+                (a: any, b: any) => a.order - b.order
+            )
+            setCurriculum(sortedData)
         } catch (error) {
             console.error('Error fetching course details:', error)
         }
@@ -72,6 +87,37 @@ function Page() {
             fetchCourseModules()
         }
     }, [courseData?.id])
+
+    async function handleReorder(newOrderModules: any) {
+        newOrderModules = newOrderModules.map((item: any, index: any) => ({
+            ...item,
+            order: index + 1,
+        }))
+        let newOrder
+        const oldOrder = curriculum.map((item: any) => item?.id)
+        setCurriculum(newOrderModules)
+        const movedItem = newOrderModules.find(
+            (item: any, index: any) => item?.id !== oldOrder[index]
+        )
+        if (movedItem) {
+            newOrder = newOrderModules.findIndex(
+                (item: any) => item.id === movedItem.id
+            )
+        }
+        try {
+            const response = await api.put(
+                `/Content/editModuleOfBootcamp/${courseData?.id}?moduleId=${movedItem.id}`,
+                {
+                    reOrderDto: { newOrder: newOrder + 1 },
+                }
+            )
+            if (response.data) {
+                console.log(newOrderModules)
+            }
+        } catch (error) {
+            console.error('Error updating module order:', error)
+        }
+    }
 
     return (
         <div>
@@ -96,46 +142,49 @@ function Page() {
             )}
             <div className="flex flex-col items-center justify-center">
                 {curriculum.length > 0 ? (
-                    curriculum.map(
-                        (
-                            {
-                                name,
-                                id,
-                                description,
-                                quizCount,
-                                assignmentCount,
-                                codingProblemsCount,
-                                articlesCount,
-                                order,
-                                timeAlloted,
-                            },
-                            index
-                        ) => (
-                            <div key={id} className="w-1/2">
-                                <div
-                                    // href={`/admin/courses/${courseData?.id}/module/${id}`}
-                                    className="bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl  "
-                                >
-                                    <CurricullumCard
-                                        moduleId={id}
-                                        courseId={courseData?.id ?? 0}
-                                        order={order}
-                                        name={name}
-                                        description={description}
-                                        index={index}
-                                        quizCount={quizCount}
-                                        assignmentCount={assignmentCount}
-                                        timeAlloted={timeAlloted}
-                                        codingProblemsCount={
-                                            codingProblemsCount
-                                        }
-                                        articlesCount={articlesCount}
-                                        fetchCourseModules={fetchCourseModules}
-                                    />
+                    <Reorder.Group
+                        className="w-1/2"
+                        values={curriculum}
+                        onReorder={async (newOrderModules: any) => {
+                            handleReorder(newOrderModules)
+                        }}
+                    >
+                        {curriculum.map(
+                            (item: CurriculumItem, index: number) => (
+                                <div key={item.id}>
+                                    <Reorder.Item value={item} key={item.id}>
+                                        <div
+                                            // href={`/admin/courses/${courseData?.id}/module/${id}`}
+                                            className="bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl  "
+                                        >
+                                            <CurricullumCard
+                                                moduleId={item.id}
+                                                courseId={courseData?.id ?? 0}
+                                                order={item.order}
+                                                name={item.name}
+                                                description={item.description}
+                                                index={index}
+                                                quizCount={item.quizCount}
+                                                assignmentCount={
+                                                    item.assignmentCount
+                                                }
+                                                timeAlloted={item.timeAlloted}
+                                                codingProblemsCount={
+                                                    item.codingProblemsCount
+                                                }
+                                                articlesCount={
+                                                    item.articlesCount
+                                                }
+                                                fetchCourseModules={
+                                                    fetchCourseModules
+                                                }
+                                            />
+                                        </div>
+                                    </Reorder.Item>
                                 </div>
-                            </div>
-                        )
-                    )
+                            )
+                        )}
+                    </Reorder.Group>
                 ) : (
                     <div className=" w-full flex flex-col gap-y-5 items-center justify-center">
                         <Image

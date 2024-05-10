@@ -3,21 +3,12 @@ import Link from 'next/link'
 import { XCircle } from 'lucide-react'
 import { ellipsis } from '@/lib/utils'
 
-interface Question {
-    id: number
-    title: string
-    difficulty: string
-    description: string
-}
-
-interface SelectedProblemsProps {
-    selectedQuestions: Question[]
-    setSelectedQuestions: React.Dispatch<React.SetStateAction<Question[]>>
-}
-
-const SelectedProblems: React.FC<SelectedProblemsProps> = ({
+const SelectedProblems = ({
     selectedQuestions,
     setSelectedQuestions,
+}: {
+    selectedQuestions: any
+    setSelectedQuestions: any
 }) => {
     return (
         <div className="ml-5 pl-5 border-l-2 text-start">
