@@ -193,23 +193,6 @@ const AddVideo = ({
 
     return (
         <div className="flex flex-col gap-y-8 mx-auto items-center justify-center w-full">
-            <div className=" flex justify-between items-start ">
-                {showVideo && (
-                    <>
-                        <div className="flex items-center justify-center ">
-                            <VideoEmbed
-                                title={chapterDetails?.title || ''}
-                                src={chapterDetails?.links[0] || ''}
-                            />
-                        </div>
-                        <X
-                            className="cursor-pointer"
-                            size={20}
-                            onClick={handleClose}
-                        />
-                    </>
-                )}
-            </div>
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
@@ -260,6 +243,23 @@ const AddVideo = ({
                         </>
                     )} */}
                     {/* <h1 >Title</h1> */}
+                    <div className=" flex justify-between items-start ">
+                        {showVideo && (
+                            <>
+                                <div className="flex items-center justify-center ">
+                                    <VideoEmbed
+                                        title={chapterDetails?.title || ''}
+                                        src={chapterDetails?.links[0] || ''}
+                                    />
+                                </div>
+                                <X
+                                    className="cursor-pointer"
+                                    size={20}
+                                    onClick={handleClose}
+                                />
+                            </>
+                        )}
+                    </div>
 
                     <FormField
                         control={form.control}

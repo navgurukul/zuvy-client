@@ -4,13 +4,14 @@ import axios, { AxiosRequestConfig } from 'axios'
 
 const mainURL = process.env.NEXT_PUBLIC_MAIN_URL
 const apiURL = process.env.NEXT_PUBLIC_API_URL
+const localURL = process.env.NEXT_PUBLIC_LOCAL_URL
 
 let headers: AxiosRequestConfig['headers'] = {
     'Content-Type': 'application/json',
 }
 
 const api = axios.create({
-    baseURL: mainURL,
+    baseURL: localURL,
     headers,
 })
 

@@ -27,9 +27,7 @@ function ChapterModal({
 }) {
     const createChapter = async (topicId: number) => {
         await api
-            .post(
-                `https://dev.api.zuvy.org/Content/chapter/${params.moduleId}?topicId=${topicId}`
-            )
+            .post(`/Content/chapter/${params.moduleId}?topicId=${topicId}`)
             .then((res) => {
                 toast({
                     title: res.data.message,
