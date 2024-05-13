@@ -11,7 +11,7 @@ let headers: AxiosRequestConfig['headers'] = {
 }
 
 const api = axios.create({
-    baseURL: mainURL,
+    baseURL: localURL,
     // baseUrl: localURL,
     headers,
 })

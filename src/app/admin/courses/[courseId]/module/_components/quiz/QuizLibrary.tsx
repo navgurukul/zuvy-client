@@ -34,9 +34,11 @@ export interface Options {
 function QuizLibrary({
     activeTab,
     setActiveTab,
+    sendDataforUpdating,
 }: {
     activeTab: string
     setActiveTab: (tab: string) => void
+    sendDataforUpdating: (isTrue: boolean) => void
 }) {
     const [search, setSearch] = useState<string>('')
     const debouncedSeatch = useDebounce(search, 1000)
@@ -53,6 +55,7 @@ function QuizLibrary({
     })
     const handleTabChange = (tab: string) => {
         setActiveTab(tab)
+        // setSearch(' ')
     }
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,7 +76,22 @@ function QuizLibrary({
                 }
 
                 const response = await api.get(endpoint)
-                console.log('res', response.data)
+                const allQuestions = response.data
+                const easyQuestions = allQuestions.filter(
+                    (question: any) => question.difficulty === 'Easy'
+                )
+                const mediumQuestions = allQuestions.filter(
+                    (question: any) => question.difficulty === 'Medium'
+                )
+                const hardQuestions = allQuestions.filter(
+                    (question: any) => question.difficulty === 'Hard'
+                )
+                setQuizData({
+                    allQuestions,
+                    easyQuestions,
+                    mediumQuestions,
+                    hardQuestions,
+                })
             } catch (error) {
                 console.error('Error searching quiz questions:', error)
             }
@@ -112,6 +130,7 @@ function QuizLibrary({
     useEffect(() => {
         questionSearchHandler(activeTab)
     }, [debouncedSeatch, questionSearchHandler, activeTab])
+
     return (
         <div className="w-1/2 flex flex-col gap-3">
             <h2 className="text-left text-gray-700 font-semibold">

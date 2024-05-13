@@ -3,7 +3,6 @@ import { Plus, PlusCircle, XCircle } from 'lucide-react'
 import React from 'react'
 
 function QuizList({ questionData }: any) {
-    console.log(questionData)
     function getColorByDifficulty(difficulty: string): string {
         switch (difficulty) {
             case 'Hard':
@@ -16,6 +15,7 @@ function QuizList({ questionData }: any) {
                 return ''
         }
     }
+
     return (
         <>
             {questionData.map((question: any) => (
@@ -36,7 +36,10 @@ function QuizList({ questionData }: any) {
                                 {question.difficulty}
                             </span>
                         </div>
-                        <PlusCircle size={20} className="text-secondary" />
+                        <PlusCircle
+                            size={20}
+                            className="text-secondary cursor-pointer "
+                        />
                     </div>
                     <Separator className="my-4" />
                 </div>

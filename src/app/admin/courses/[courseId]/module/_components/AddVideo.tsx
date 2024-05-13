@@ -14,11 +14,13 @@ import {
 } from '@/components/ui/form'
 
 import { Button } from '@/components/ui/button'
+import { X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+
+import VideoEmbed from './video/VideoEmbed'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
-import VideoEmbed from './video/VideoEmbedd'
 
 const isLinkValid = (link: string) => {
     const urlRegex = /^(https?:\/\/)?([\w-]+\.)*([\w-]+)(:\d{2,5})?(\/\S*)*$/

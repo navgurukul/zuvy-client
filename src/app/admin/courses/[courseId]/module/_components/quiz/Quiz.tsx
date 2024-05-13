@@ -6,7 +6,14 @@ import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 
 import { Separator } from '@/components/ui/separator'
-import { ArrowUpRight, GripVertical, X, Plus, ExternalLink } from 'lucide-react'
+import {
+    ArrowUpRight,
+    GripVertical,
+    X,
+    Plus,
+    ExternalLink,
+    PlusCircle,
+} from 'lucide-react'
 import QuizLibrary from './QuizLibrary'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -30,41 +37,41 @@ const FormSchema = z.object({
     type: z.enum(['option 1', 'option 2', 'option 3', 'option 4'], {
         required_error: 'You need to select a notification type.',
     }),
-    questionInput: z.string().min(2, {
-        message: 'Username must be at least 2 characters.',
+    questionInput: z.string().min(1, {
+        message: 'Username must be at least 1 characters.',
     }),
-    option1: z.string().min(2, {
-        message: 'Username must be at least 2 characters.',
-    }),
-    option2: z.string().min(2, {
-        message: 'Username must be at least 2 characters.',
-    }),
-    option3: z.string().min(2, {
-        message: 'Username must be at least 2 characters.',
-    }),
-    option4: z.string().min(2, {
-        message: 'Username must be at least 2 characters.',
+    options: z.array(z.string()).nonempty({
+        message: 'At least one option is required.',
     }),
 })
 function Quiz({ content }: QuizProps) {
     const [activeTab, setActiveTab] = useState('anydifficulty')
+    const [addQuestion, setAddQuestion] = useState<boolean>(false)
     const [search, setSearch] = useState<string>()
+    const [testCases, setTestCases] = useState([{ id: 1 }])
+
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
             questionInput: '',
-            option1: '',
-            option2: '',
-            option3: '',
-            option4: '',
+            options: [''],
         },
     })
-
-    console.log(search)
-
+    const handleAddOption = () => {
+        form.setValue('options', [...form.getValues('options'), ''])
+    }
+    const handleRemoveOption = (index: number) => {
+        const updatedOptions: any = [...form.getValues('options')]
+        updatedOptions.splice(index, 1)
+        form.setValue('options', updatedOptions)
+    }
     function onSubmit(data: z.infer<typeof FormSchema>) {
         console.log(data)
     }
+    const handleAddQuestion = (isTrue: boolean) => {
+        setAddQuestion(isTrue)
+    }
+    console.log(addQuestion)
     return (
         <>
             <div className="flex flex-row items-center justify-start gap-x-6 mb-10">
@@ -85,6 +92,7 @@ function Quiz({ content }: QuizProps) {
                 <QuizLibrary
                     activeTab={activeTab}
                     setActiveTab={setActiveTab}
+                    sendDataforUpdating={handleAddQuestion}
                 />
                 <Separator
                     orientation="vertical"
@@ -132,97 +140,70 @@ function Quiz({ content }: QuizProps) {
                                             defaultValue={field.value}
                                             className="flex flex-col space-y-1 w-full"
                                         >
-                                            <FormItem className="flex items-center space-x-3 space-y-0">
-                                                <FormControl>
-                                                    <RadioGroupItem value="option 1" />
-                                                </FormControl>
-                                                <FormField
-                                                    control={form.control}
-                                                    name="option1"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormControl>
-                                                                <Input
-                                                                    placeholder="Option 1"
-                                                                    className="w-[450px]"
-                                                                    {...field}
-                                                                />
-                                                            </FormControl>
-
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                            </FormItem>
-                                            <FormItem className="flex items-center space-x-3 space-y-0">
-                                                <FormControl>
-                                                    <RadioGroupItem value="option 2" />
-                                                </FormControl>
-                                                <FormField
-                                                    control={form.control}
-                                                    name="option2"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormControl>
-                                                                <Input
-                                                                    placeholder="Option 2"
-                                                                    className="w-[450px]"
-                                                                    {...field}
-                                                                />
-                                                            </FormControl>
-
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                            </FormItem>
-                                            <FormItem className="flex items-center space-x-3 space-y-0">
-                                                <FormControl>
-                                                    <RadioGroupItem value="option 3" />
-                                                </FormControl>
-                                                <FormField
-                                                    control={form.control}
-                                                    name="option3"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormControl>
-                                                                <Input
-                                                                    className="w-[450px]"
-                                                                    placeholder="Option 3"
-                                                                    {...field}
-                                                                />
-                                                            </FormControl>
-
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                            </FormItem>
-                                            <FormItem className="flex items-center space-x-3 space-y-0">
-                                                <FormControl>
-                                                    <RadioGroupItem value="option 4" />
-                                                </FormControl>
-                                                <FormField
-                                                    control={form.control}
-                                                    name="option4"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormControl>
-                                                                <Input
-                                                                    placeholder="Option 4"
-                                                                    className="w-[450px]"
-                                                                    {...field}
-                                                                />
-                                                            </FormControl>
-
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                            </FormItem>
+                                            {form
+                                                .getValues('options')
+                                                .map((option, index) => (
+                                                    <div
+                                                        key={index}
+                                                        className="flex items-center space-x-3 space-y-0"
+                                                    >
+                                                        <FormControl>
+                                                            <RadioGroupItem
+                                                                value={`option ${
+                                                                    index + 1
+                                                                }`}
+                                                            />
+                                                        </FormControl>
+                                                        <FormField
+                                                            control={
+                                                                form.control
+                                                            }
+                                                            name={`options.${index}`}
+                                                            render={({
+                                                                field,
+                                                            }) => (
+                                                                <FormItem className="w-[400px]">
+                                                                    <Input
+                                                                        placeholder={`Option ${
+                                                                            index +
+                                                                            1
+                                                                        }`}
+                                                                        {...field}
+                                                                    />
+                                                                    <FormMessage />
+                                                                </FormItem>
+                                                            )}
+                                                        />
+                                                        {index !== 0 && (
+                                                            <Button
+                                                                variant={
+                                                                    'outline'
+                                                                }
+                                                                onClick={() =>
+                                                                    handleRemoveOption(
+                                                                        index
+                                                                    )
+                                                                }
+                                                            >
+                                                                <X />
+                                                            </Button>
+                                                        )}
+                                                    </div>
+                                                ))}
                                         </RadioGroup>
                                     </FormControl>
                                     <FormMessage />
+                                    <Button
+                                        variant={'outline'}
+                                        onClick={handleAddOption}
+                                        className="flex justify-start text-secondary font-semibold "
+                                    >
+                                        <Plus
+                                            size={15}
+                                            className="text-secondary"
+                                        />
+                                        Add options
+                                    </Button>
                                 </FormItem>
                             )}
                         />
