@@ -2,7 +2,7 @@ import { Separator } from '@/components/ui/separator'
 import { Plus, PlusCircle, XCircle } from 'lucide-react'
 import React from 'react'
 
-function QuizList({ questionData }: any) {
+function QuizList({ questionData, addQuesiton = [], handleAddQuestion }: any) {
     function getColorByDifficulty(difficulty: string): string {
         switch (difficulty) {
             case 'Hard':
@@ -18,32 +18,44 @@ function QuizList({ questionData }: any) {
 
     return (
         <>
-            {questionData.map((question: any) => (
-                <div
-                    className="flex flex-col justify-between"
-                    key={question.id}
-                >
-                    <div className="flex w-full justify-between gap-x-4 my-4">
-                        <div className="flex justify-start items-center gap-x-5">
-                            <h1 className="scroll-m-20 text-4xl  font-semibold tracking-tight lg:text-lg">
-                                {question.question}
-                            </h1>
-                            <span
-                                className={`font-semibold ${getColorByDifficulty(
-                                    question.difficulty
-                                )}`}
-                            >
-                                {question.difficulty}
-                            </span>
+            {questionData.map((question: any) => {
+                const isSelected = addQuesiton.some(
+                    (quest: any) => quest?.id === question.id
+                )
+
+                const handleClick = () => {
+                    if (!isSelected) {
+                        handleAddQuestion([...addQuesiton, question])
+                    }
+                }
+                return (
+                    <div
+                        className="flex flex-col justify-between"
+                        key={question.id}
+                    >
+                        <div className="flex w-full justify-between gap-x-4 my-4">
+                            <div className="flex justify-start items-center gap-x-5">
+                                <h1 className="scroll-m-20 text-4xl  font-semibold tracking-tight lg:text-lg">
+                                    {question.question}
+                                </h1>
+                                <span
+                                    className={`font-semibold ${getColorByDifficulty(
+                                        question.difficulty
+                                    )}`}
+                                >
+                                    {question.difficulty}
+                                </span>
+                            </div>
+                            <PlusCircle
+                                size={20}
+                                className="text-secondary cursor-pointer "
+                                onClick={handleClick}
+                            />
                         </div>
-                        <PlusCircle
-                            size={20}
-                            className="text-secondary cursor-pointer "
-                        />
+                        <Separator className="my-4" />
                     </div>
-                    <Separator className="my-4" />
-                </div>
-            ))}
+                )
+            })}
         </>
     )
 }

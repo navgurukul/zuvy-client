@@ -144,7 +144,6 @@ export const columns: ColumnDef<Task>[] = [
                 []
             )
 
-            console.log(transformedData)
             if (!batchData) {
                 return (
                     <div className="flex justify-center items-center h-[100vh]">

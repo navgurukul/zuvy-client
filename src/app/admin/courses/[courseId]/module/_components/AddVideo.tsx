@@ -80,7 +80,6 @@ const AddVideo = ({
             fileInputRef.current.click()
         }
     }
-
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -229,9 +228,9 @@ const AddVideo = ({
                                     viewBox="0 0 24 24"
                                     fill="none"
                                     stroke="currentColor"
-                                    stroke-width="3"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
+                                    strokeWidth="3"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
                                     className="lucide lucide-circle-x cursor-pointer absolute -right-3 -top-3  text-destructive"
                                     onClick={handleClose}
                                 >

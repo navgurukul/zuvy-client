@@ -84,6 +84,7 @@ function Page({
     const [activeChapter, setActiveChapter] = useState(0)
     const [chapterContent, setChapterContent] = useState<any>([])
     const [topicId, setTopicId] = useState(0)
+    const [key, setKey] = useState(0)
     const { courseId } = useParams()
 
     const [moduleData, setModuleData] = useState<Module[]>([])
@@ -147,6 +148,7 @@ function Page({
 
                 setTopicId(response.data.topicId)
                 setActiveChapter(chapterId)
+                setKey((prevKey) => prevKey + 1)
             } catch (error) {
                 console.error('Error fetching chapter content:', error)
             }
@@ -161,6 +163,8 @@ function Page({
                     <AddVideo
                         moduleId={params.moduleId}
                         content={chapterContent}
+                        fetchChapterContent={fetchChapterContent}
+                        key={key}
                     />
                 )
             case 2:

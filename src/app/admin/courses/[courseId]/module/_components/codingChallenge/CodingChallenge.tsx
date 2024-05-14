@@ -99,7 +99,7 @@ function CodingChallenge({ content }: CodeProps) {
                     />
                     <ScrollArea className="h-dvh pr-4">
                         {allCodingQuestions?.map((question: any) => {
-                            const isSelected = selectedQuestions.some(
+                            const isSelected = selectedQuestions?.some(
                                 (selectedQuestion) =>
                                     selectedQuestion?.id === question.id
                             )

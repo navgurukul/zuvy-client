@@ -34,11 +34,13 @@ export interface Options {
 function QuizLibrary({
     activeTab,
     setActiveTab,
-    sendDataforUpdating,
+    addQuestion,
+    handleAddQuestion,
 }: {
     activeTab: string
     setActiveTab: (tab: string) => void
-    sendDataforUpdating: (isTrue: boolean) => void
+    addQuestion: any
+    handleAddQuestion: any
 }) {
     const [search, setSearch] = useState<string>('')
     const debouncedSeatch = useDebounce(search, 1000)
@@ -208,16 +210,32 @@ function QuizLibrary({
             </div>
             <div className="w-full h-max-content my-6">
                 {activeTab === 'anydifficulty' && (
-                    <QuizList questionData={quizData.allQuestions} />
+                    <QuizList
+                        addQuestion={addQuestion}
+                        handleAddQuestion={handleAddQuestion}
+                        questionData={quizData.allQuestions}
+                    />
                 )}
                 {activeTab === 'Easy' && (
-                    <QuizList questionData={quizData.easyQuestions} />
+                    <QuizList
+                        addQuestion={addQuestion}
+                        handleAddQuestion={handleAddQuestion}
+                        questionData={quizData.easyQuestions}
+                    />
                 )}
                 {activeTab === 'Medium' && (
-                    <QuizList questionData={quizData.mediumQuestions} />
+                    <QuizList
+                        addQuestion={addQuestion}
+                        handleAddQuestion={handleAddQuestion}
+                        questionData={quizData.mediumQuestions}
+                    />
                 )}
                 {activeTab === 'Hard' && (
-                    <QuizList questionData={quizData.hardQuestions} />
+                    <QuizList
+                        addQuestion={addQuestion}
+                        handleAddQuestion={handleAddQuestion}
+                        questionData={quizData.hardQuestions}
+                    />
                 )}
             </div>
         </div>
