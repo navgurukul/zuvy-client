@@ -93,17 +93,19 @@ const Page = ({ params }: { params: any }) => {
         [position, setStoreStudentData, params.courseId]
     )
     useEffect(() => {
-        fetchClassesData(params.courseId)
+        if (params.courseId) {
+            fetchClassesData(params.courseId)
+        }
     }, [params.courseId])
 
     useEffect(() => {
-        fetchStudentData(offset)
+        // fetchStudentData(offset)
         fetchBatches(params.courseId)
     }, [offset, fetchStudentData, fetchBatches, params.courseId])
 
-    useEffect(() => {
-        fetchStudentData(offset)
-    }, [offset, position, courseData, fetchStudentData])
+    // useEffect(() => {
+    //     fetchStudentData(offset)
+    // }, [offset, position, courseData, fetchStudentData])
 
     useEffect(() => {
         const searchStudentsDataHandler = async () => {

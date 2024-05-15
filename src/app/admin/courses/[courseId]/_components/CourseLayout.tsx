@@ -12,50 +12,50 @@ import Link from 'next/link'
 
 function CourseLayout() {
     const { courseData } = getCourseData()
-    const [courseId, setCourseId] = useState<string>('')
+    // const [courseId, setCourseId] = useState<string>('')
 
     const courseMenu = [
         {
             title: 'General Details',
             value: 'generalDetails',
-            href: `/admin/courses/${courseId}/details`,
+            href: `/admin/courses/${courseData?.id}/details`,
         },
         {
             title: 'Batches',
             value: 'batches',
-            href: `/admin/courses/${courseId}/batches`,
+            href: `/admin/courses/${courseData?.id}/batches`,
         },
         {
             title: 'Curriculum',
             value: 'curriculum',
-            href: `/admin/courses/${courseId}/curriculum`,
+            href: `/admin/courses/${courseData?.id}/curriculum`,
         },
         {
             title: 'Sessions',
             value: 'sessions',
-            href: `/admin/courses/${courseId}/sessions`,
+            href: `/admin/courses/${courseData?.id}/sessions`,
         },
         {
             title: 'Settings',
             value: 'settings',
-            href: `/admin/courses/${courseId}/settings`,
+            href: `/admin/courses/${courseData?.id}/settings`,
         },
         {
             title: 'Students',
             value: 'students',
-            href: `/admin/courses/${courseId}/students`,
+            href: `/admin/courses/${courseData?.id}/students`,
         },
         {
             title: 'Submissions',
             value: 'submissions',
-            href: `/admin/courses/${courseId}/submissions`,
+            href: `/admin/courses/${courseData?.id}/submissions`,
         },
     ]
 
     useEffect(() => {
         const storedCourseId = localStorage.getItem('courseId')
         if (storedCourseId) {
-            setCourseId(storedCourseId)
+            // setCourseId(storedCourseId)
             getCourseData
                 .getState()
                 .fetchCourseDetails(parseInt(storedCourseId))

@@ -31,7 +31,7 @@ import { cn } from '@/lib/utils'
 import { LANGUAGES } from '@/utils/constant'
 import { getCourseData, getStoreStudentData } from '@/store/store'
 import { api, apiMeraki } from '@/utils/axios.config'
-import { fetchStudentData } from '@/utils/students'
+// import { fetchStudentData } from '@/utils/students'
 
 const FormSchema = z.object({
     name: z.string(),
@@ -83,9 +83,9 @@ function Page({ params }: { params: any }) {
                 : undefined,
         },
     })
-    useEffect(() => {
-        fetchStudentData(params.courseId, setStoreStudentData)
-    }, [params.courseId, setStoreStudentData])
+    // useEffect(() => {
+    //     fetchStudentData(params.courseId, setStoreStudentData)
+    // }, [params.courseId, setStoreStudentData])
 
     async function onSubmit(data: z.infer<typeof FormSchema>) {
         try {
