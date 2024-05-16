@@ -1,28 +1,18 @@
-import { Separator } from '@/components/ui/separator'
-import { Plus, PlusCircle, XCircle } from 'lucide-react'
 import React from 'react'
 
-function QuizList({ questionData, addQuesiton = [], handleAddQuestion }: any) {
-    function getColorByDifficulty(difficulty: string): string {
-        switch (difficulty) {
-            case 'Hard':
-                return 'text-red-600'
-            case 'Medium':
-                return 'text-yellow-600'
-            case 'Easy':
-                return 'text-secondary'
-            default:
-                return ''
-        }
-    }
+import { Separator } from '@/components/ui/separator'
+import { PlusCircle } from 'lucide-react'
+import { difficultyColor } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 
+function QuizList({ questionData, addQuesiton = [], handleAddQuestion }: any) {
+    console.log(addQuesiton)
     return (
         <>
             {questionData.map((question: any) => {
-                const isSelected = addQuesiton.some(
+                const isSelected = addQuesiton?.some(
                     (quest: any) => quest?.id === question.id
                 )
-
                 const handleClick = () => {
                     if (!isSelected) {
                         handleAddQuestion([...addQuesiton, question])
@@ -39,18 +29,24 @@ function QuizList({ questionData, addQuesiton = [], handleAddQuestion }: any) {
                                     {question.question}
                                 </h1>
                                 <span
-                                    className={`font-semibold ${getColorByDifficulty(
+                                    className={`font-semibold ${difficultyColor(
                                         question.difficulty
                                     )}`}
                                 >
                                     {question.difficulty}
                                 </span>
                             </div>
-                            <PlusCircle
-                                size={20}
-                                className="text-secondary cursor-pointer "
-                                onClick={handleClick}
-                            />
+                            <Button
+                                className=""
+                                // disabled={}
+                                variant={'ghost'}
+                            >
+                                <PlusCircle
+                                    size={20}
+                                    className="text-secondary cursor-pointer "
+                                    onClick={handleClick}
+                                />
+                            </Button>
                         </div>
                         <Separator className="my-4" />
                     </div>

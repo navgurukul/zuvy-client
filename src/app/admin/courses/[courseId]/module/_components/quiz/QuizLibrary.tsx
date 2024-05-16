@@ -59,6 +59,7 @@ function QuizLibrary({
         setActiveTab(tab)
         // setSearch(' ')
     }
+    console.log(addQuestion)
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value)
