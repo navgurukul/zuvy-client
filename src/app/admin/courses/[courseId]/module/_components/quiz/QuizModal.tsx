@@ -1,8 +1,13 @@
+import React from 'react'
 import { Button } from '@/components/ui/button'
 import { difficultyColor } from '@/lib/utils'
-import { Edit, X, XCircle } from 'lucide-react'
-import React from 'react'
-
+import { Edit, XCircle } from 'lucide-react'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 type Props = {}
 
 const QuizModal = ({ data, removeQuestionById }: any) => {
