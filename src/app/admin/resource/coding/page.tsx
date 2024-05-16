@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -25,16 +25,68 @@ import { Separator } from '@/components/ui/separator'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { columns } from './column'
 import NewCodingProblemForm from '../_components/NewCodingProblemForm'
+import { api } from '@/utils/axios.config'
+import { toast } from '@/components/ui/use-toast'
+import * as z from 'zod'
 
 type Props = {}
 
 const CodingProblems = (props: Props) => {
     const arr = ['AllTopics', 'Arrays', 'Linked Lists', 'Databases']
     const [selectedTopic, setSelectedTopic] = useState('')
+    const [codingQuestions, setCodingQuestions] = useState([])
+    const [selectedDifficulty, setSelectedDifficulty] = useState('')
+    const [searchTerm, setSearchTerm] = useState('')
+    const [searchedQuestions, setSearchedQuestions] = useState([])
+    const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const [tags, setTags] = useState([])
 
     const handleTopicClick = (topic: any) => {
         setSelectedTopic(topic)
     }
+    async function getAllCodingQuestions() {
+        // fetch all Coding Questions
+        const response = await api.get('Content/allCodingQuestions')
+        setCodingQuestions(response.data)
+    }
+    async function getSearchQuestions() {
+        // fetch all Searched Coding Questions
+        if (selectedDifficulty !== 'any') {
+            const response = await api.get(
+                `Content/allCodingQuestions?difficulty=${selectedDifficulty}&searchTerm=${searchTerm}`
+            )
+            setSearchedQuestions(response.data)
+        } else {
+            const response = await api.get(
+                `Content/allCodingQuestions?searchTerm=${searchTerm}`
+            )
+            setSearchedQuestions(response.data)
+        }
+    }
+
+    async function getAllTags() {
+        const response = await api.get('Content/allTags')
+        if (response) {
+            setTags(response.data.allTags)
+        }
+    }
+
+    const filteredQuestions =
+        selectedDifficulty && selectedDifficulty !== 'any'
+            ? codingQuestions.filter(
+                  (question: any) => question.difficulty === selectedDifficulty
+              )
+            : codingQuestions
+
+    useEffect(() => {
+        getAllCodingQuestions()
+        getAllTags()
+    }, [])
+
+    useEffect(() => {
+        searchTerm.trim() !== '' && getSearchQuestions()
+    }, [searchTerm])
+
     return (
         <MaxWidthWrapper>
             <h1 className="text-left font-semibold text-2xl">
@@ -43,14 +95,16 @@ const CodingProblems = (props: Props) => {
             <div className="flex justify-between">
                 <div className="relative w-full">
                     <Input
-                        placeholder="Search for Name, Email"
-                        className="w-1/4 p-2 my-6 input-with-icon pl-8" // Add left padding for the icon
+                        placeholder="Problem Name..."
+                        className="w-1/4 p-2 my-6 input-with-icon pl-8"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
                     />
                     <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
                         <Search className="text-gray-400" size={20} />
                     </div>
                 </div>
-                <Dialog>
+                <Dialog onOpenChange={setIsDialogOpen} open={isDialogOpen}>
                     <DialogTrigger asChild>
                         <Button>+ Create Problems</Button>
                     </DialogTrigger>
@@ -59,21 +113,26 @@ const CodingProblems = (props: Props) => {
                             <DialogTitle>New Coding Problem</DialogTitle>
                         </DialogHeader>
                         <div className="w-full">
-                            <NewCodingProblemForm />
+                            <NewCodingProblemForm
+                                tags={tags}
+                                setIsDialogOpen={setIsDialogOpen}
+                                getAllCodingQuestions={getAllCodingQuestions}
+                            />
                         </div>
                     </DialogContent>
                 </Dialog>
             </div>
             <div className="flex items-center">
-                <Select>
+                <Select onValueChange={(value) => setSelectedDifficulty(value)}>
                     <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="DIfficulty" />
+                        <SelectValue placeholder="Difficulty" />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectGroup>
-                            <SelectItem value="apple">Easy</SelectItem>
-                            <SelectItem value="banana">Medium</SelectItem>
-                            <SelectItem value="blueberry">Hard</SelectItem>
+                            <SelectItem value="any">Any Difficulty</SelectItem>
+                            <SelectItem value="Easy">Easy</SelectItem>
+                            <SelectItem value="Medium">Medium</SelectItem>
+                            <SelectItem value="Hard">Hard</SelectItem>
                         </SelectGroup>
                     </SelectContent>
                 </Select>
@@ -95,17 +154,11 @@ const CodingProblems = (props: Props) => {
                     </Button>
                 ))}
             </div>
-            {/* <div>
-                {selectedTopic === 'All Topics' && (
-                    <div>All topics content</div>
-                )}
-                {selectedTopic === 'Arrays' && <div>Arrays content</div>}
-                {selectedTopic === 'Linked Lists' && (
-                    <div>Linked Lists content</div>
-                )}
-                {selectedTopic === 'Databases' && <div>Databases content</div>}
-            </div> */}
-            <DataTable data={[]} columns={columns} />
+
+            <DataTable
+                data={searchTerm ? searchedQuestions : filteredQuestions}
+                columns={columns}
+            />
         </MaxWidthWrapper>
     )
 }

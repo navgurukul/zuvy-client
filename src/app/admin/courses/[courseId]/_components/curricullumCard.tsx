@@ -13,6 +13,7 @@ import DeleteConfirmationModal from './deleteModal'
 import { api } from '@/utils/axios.config'
 import { useRouter } from 'next/navigation'
 import { DELETE_MODULE_CONFIRMATION } from '@/utils/constant'
+import { toast } from '@/components/ui/use-toast'
 
 type Props = {
     index: number
@@ -56,12 +57,16 @@ const CurricullumCard = ({
     }
 
     const handleDeleteModule = async () => {
-        const response = await api.delete(
-            `/content/deleteChapter/${courseId}?moduleId=${moduleId}`
-        )
-        if (response.data) {
-            fetchCourseModules()
-        }
+        const response = await api
+            .delete(`Content/deleteModule/${courseId}?moduleId=${moduleId}`)
+            .then((response) => {
+                toast({
+                    title: 'Success',
+                    description: 'Module Deleted Successfully',
+                    className: 'text-start capitalize',
+                })
+                fetchCourseModules()
+            })
     }
 
     const handleModuleRoute = () => {

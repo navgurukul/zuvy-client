@@ -11,6 +11,7 @@ import CurricullumCard from '../../_components/curricullumCard'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import NewModuleDialog from '../../_components/newModuleDialog'
 import { Reorder } from 'framer-motion'
+import { toast } from '@/components/ui/use-toast'
 
 interface CurriculumItem {
     id: number
@@ -64,6 +65,13 @@ function Page() {
         api.post(`/content/modules/${courseData?.id}`, {
             ...moduleData,
             timeAlloted: totalSeconds,
+        }).then((res) => {
+            toast({
+                title: 'Success',
+                description: 'Module Created Successfully',
+                className: 'text-start capitalize',
+            })
+            fetchCourseModules()
         })
     }
 
@@ -72,10 +80,8 @@ function Page() {
             const response = await api.get(
                 `/content/allModules/${courseData?.id}`
             )
-            const sortedData = response.data.sort(
-                (a: any, b: any) => a.order - b.order
-            )
-            setCurriculum(sortedData)
+
+            setCurriculum(response.data)
         } catch (error) {
             console.error('Error fetching course details:', error)
         }
@@ -153,10 +159,7 @@ function Page() {
                             (item: CurriculumItem, index: number) => (
                                 <div key={item.id}>
                                     <Reorder.Item value={item} key={item.id}>
-                                        <div
-                                            // href={`/admin/courses/${courseData?.id}/module/${id}`}
-                                            className="bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl  "
-                                        >
+                                        <div className="bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl  ">
                                             <CurricullumCard
                                                 moduleId={item.id}
                                                 courseId={courseData?.id ?? 0}

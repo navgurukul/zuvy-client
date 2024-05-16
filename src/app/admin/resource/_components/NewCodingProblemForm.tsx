@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import * as z from 'zod'
 import { useForm } from 'react-hook-form'
@@ -25,32 +25,40 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Plus, X } from 'lucide-react'
+import { api } from '@/utils/axios.config'
+import { toast } from '@/components/ui/use-toast'
 
 const formSchema = z.object({
     title: z.string(),
     description: z.string(),
     problemStatement: z.string(),
     constraints: z.string(),
-    difficulty: z.enum(['Easy', 'Medium', 'hard'], {
+    difficulty: z.enum(['Easy', 'Medium', 'Hard'], {
         required_error: 'You need to select a Difficulty  type.',
     }),
     // allowedLanguages: z.enum(['All Languages', 'C++', 'Python'], {
     //     required_error: 'You need to select a Language',
     // }),
-    topics: z.enum(['Strings', 'DSA', 'Development'], {
-        required_error: 'You need to select a Topic',
-    }),
+    topics: z.number().min(1, 'You need to select a Topic'),
     inputFormat: z.enum(['Strings', 'Number', 'Float'], {
-        required_error: 'You need to select a Input Format',
+        required_error: 'You need to select an Input Format',
     }),
     outputFormat: z.enum(['Strings', 'Number', 'Float'], {
-        required_error: 'You need to select a Output Format',
+        required_error: 'You need to select an Output Format',
     }),
     testCaseInput: z.string(),
     testCaseOutput: z.string(),
 })
 
-export default function NewCodingProblemForm() {
+export default function NewCodingProblemForm({
+    tags,
+    setIsDialogOpen,
+    getAllCodingQuestions,
+}: {
+    tags: any
+    setIsDialogOpen: any
+    getAllCodingQuestions: any
+}) {
     const [testCases, setTestCases] = useState([{ id: 1 }])
 
     const handleAddTestCase = () => {
@@ -72,7 +80,7 @@ export default function NewCodingProblemForm() {
             constraints: '',
             difficulty: 'Easy',
             // allowedLanguages: 'All Languages',
-            topics: 'DSA',
+            topics: 0,
             inputFormat: 'Number',
             outputFormat: 'Strings',
             testCaseInput: '',
@@ -80,11 +88,54 @@ export default function NewCodingProblemForm() {
         },
     })
 
-    // const accountType = form.watch('accountType')
+    async function createCodingQuestion(data: any) {
+        const response = await api.post(
+            `codingPlatform/createCodingQuestion`,
+            data
+        )
+        if (response) {
+            toast({
+                title: 'Success',
+                description: 'Question Created Successfully',
+                className: 'text-start capitalize',
+            })
+            setIsDialogOpen(false)
+        }
+    }
 
     const handleSubmit = (values: z.infer<typeof formSchema>) => {
-        console.log({ values })
+        console.log(values)
+        const formattedData = {
+            title: values.title,
+            description: values.problemStatement,
+            difficulty: values.difficulty,
+            tags: values.topics,
+            constraints: values.constraints,
+            authorId: 45499,
+            examples: [
+                {
+                    inputs: {
+                        input: [values.testCaseInput],
+                        output: [values.testCaseOutput],
+                    },
+                },
+            ],
+            testCases: [
+                {
+                    inputs: {
+                        input: [values.testCaseInput],
+                        output: [values.testCaseOutput],
+                    },
+                },
+            ],
+            expectedOutput: [values.testCaseOutput],
+            solution: 'solution of the coding question',
+        }
+        createCodingQuestion(formattedData)
+        getAllCodingQuestions()
     }
+
+    // const accountType = form.watch('accountType')
 
     return (
         <ScrollArea className="h-[calc(100vh-200px)] w-full rounded-md  ">
@@ -112,24 +163,7 @@ export default function NewCodingProblemForm() {
                                 )
                             }}
                         />
-                        <FormField
-                            control={form.control}
-                            name="description"
-                            render={({ field }) => {
-                                return (
-                                    <FormItem className="text-left">
-                                        <FormLabel>Description</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                placeholder="Description"
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )
-                            }}
-                        />
+
                         <FormField
                             control={form.control}
                             name="problemStatement"
@@ -265,7 +299,19 @@ export default function NewCodingProblemForm() {
                                         <FormItem className="text-left w-full">
                                             <FormLabel>Topics</FormLabel>
                                             <Select
-                                                onValueChange={field.onChange}
+                                                onValueChange={(value) => {
+                                                    const selectedTag =
+                                                        tags.find(
+                                                            (tag: any) =>
+                                                                tag.tagName ===
+                                                                value
+                                                        )
+                                                    if (selectedTag) {
+                                                        field.onChange(
+                                                            selectedTag.id
+                                                        )
+                                                    }
+                                                }}
                                             >
                                                 <FormControl>
                                                     <SelectTrigger>
@@ -273,15 +319,14 @@ export default function NewCodingProblemForm() {
                                                     </SelectTrigger>
                                                 </FormControl>
                                                 <SelectContent>
-                                                    <SelectItem value="DSA">
-                                                        DSA
-                                                    </SelectItem>
-                                                    <SelectItem value="Strings">
-                                                        Strings
-                                                    </SelectItem>
-                                                    <SelectItem value="Development">
-                                                        Development
-                                                    </SelectItem>
+                                                    {tags.map((tag: any) => (
+                                                        <SelectItem
+                                                            key={tag.id}
+                                                            value={tag.tagName}
+                                                        >
+                                                            {tag.tagName}
+                                                        </SelectItem>
+                                                    ))}
                                                 </SelectContent>
                                             </Select>
                                             <FormMessage />
@@ -291,7 +336,7 @@ export default function NewCodingProblemForm() {
                             />
                         </div>
                         <div className="flex justify-between gap-2">
-                            <FormField
+                            {/* <FormField
                                 control={form.control}
                                 name="inputFormat"
                                 render={({ field }) => {
@@ -354,7 +399,7 @@ export default function NewCodingProblemForm() {
                                         </FormItem>
                                     )
                                 }}
-                            />
+                            /> */}
                         </div>
                         <div className="text-left ">
                             {/* <div className="flex justify-start"> */}
@@ -401,16 +446,11 @@ export default function NewCodingProblemForm() {
                                             }
                                         />
                                     )}
-                                    {/* <div className="">
-                                        {hoveredIndex === index &&
-                                            testCases.length > 1 && (
-                                                
-                                            )}
-                                    </div> */}
                                 </div>
                             ))}
                             <Button
                                 variant={'outline'}
+                                type="button"
                                 className="mt-2"
                                 onClick={handleAddTestCase}
                             >
@@ -423,7 +463,7 @@ export default function NewCodingProblemForm() {
 
                         <div className="flex justify-end">
                             <Button type="submit" className="w-1/2 ">
-                                Create Problems
+                                Create Question
                             </Button>
                         </div>
                     </form>

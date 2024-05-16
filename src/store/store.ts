@@ -124,6 +124,21 @@ export const getStoreStudentData = create<storeStudentData>((set) => ({
 
 // ------------------------------
 
+
+type deleteCodingQuestion = {
+    isDeleteModalOpen: boolean
+    setDeleteModalOpen : (newValue: boolean) => void
+}
+
+export const getDeleteCodingQuestion = create<deleteCodingQuestion>((set) => ({
+    isDeleteModalOpen: false,
+    setDeleteModalOpen: (newValue: boolean) => {
+        set({ isDeleteModalOpen: newValue })
+    },
+}))
+
+// ------------------------------
+
 export const useStudentData = create<CounterStore>((set) => ({
     studentData: null,
     studentsInfo: [],

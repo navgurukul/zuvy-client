@@ -107,11 +107,8 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
             </DialogHeader>
             <DialogFooter className="sm:justify-end">
                 <DialogClose asChild>
-                    <Button
-                        onClick={() => createModule()}
-                        // className={styles.createCourseBtnDialog}
-                    >
-                        Create Course
+                    <Button onClick={() => createModule()}>
+                        Create Module
                     </Button>
                 </DialogClose>
             </DialogFooter>
