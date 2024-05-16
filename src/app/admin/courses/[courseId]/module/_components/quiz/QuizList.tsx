@@ -1,21 +1,26 @@
-import React from 'react'
-
 import { Separator } from '@/components/ui/separator'
 import { PlusCircle } from 'lucide-react'
 import { difficultyColor } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 
-function QuizList({ questionData, addQuesiton = [], handleAddQuestion }: any) {
-    console.log(addQuesiton)
+function QuizList({
+    questionData,
+    addQuestion = [],
+    handleAddQuestion,
+}: {
+    questionData: any[]
+    addQuestion: any[]
+    handleAddQuestion: (questions: any[]) => void
+}) {
     return (
         <>
             {questionData.map((question: any) => {
-                const isSelected = addQuesiton?.some(
+                const isSelected = addQuestion?.some(
                     (quest: any) => quest?.id === question.id
                 )
                 const handleClick = () => {
                     if (!isSelected) {
-                        handleAddQuestion([...addQuesiton, question])
+                        handleAddQuestion([...addQuestion, question])
                     }
                 }
                 return (
@@ -36,14 +41,10 @@ function QuizList({ questionData, addQuesiton = [], handleAddQuestion }: any) {
                                     {question.difficulty}
                                 </span>
                             </div>
-                            <Button
-                                className=""
-                                // disabled={}
-                                variant={'ghost'}
-                            >
+                            <Button className="" variant={'ghost'}>
                                 <PlusCircle
                                     size={20}
-                                    className="text-secondary cursor-pointer "
+                                    className="text-secondary cursor-pointer"
                                     onClick={handleClick}
                                 />
                             </Button>

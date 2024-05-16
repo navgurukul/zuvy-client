@@ -38,7 +38,6 @@ function Quiz({ content }: QuizProps) {
             prevQuestions.filter((question: any) => question.id !== questionId)
         )
     }
-    console.log(addQuestion)
     return (
         <>
             <div className="flex flex-row items-center justify-start gap-x-6 mb-10">
