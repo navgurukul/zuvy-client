@@ -31,7 +31,16 @@ const QuizModal = ({ data, removeQuestionById }: any) => {
                     className="flex w-1/3 text-secondary font-semibold text-md justify-start mr-10"
                     variant={'ghost'}
                 >
-                    <Edit size={15} />
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Edit size={15} />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Edit Quiz question</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                 </Button>
             </div>
             <XCircle
