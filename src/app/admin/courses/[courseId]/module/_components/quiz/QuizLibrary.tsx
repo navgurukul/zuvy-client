@@ -11,7 +11,9 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
+
 import QuizList from './QuizList'
+
 import { api } from '@/utils/axios.config'
 import useDebounce from '@/hooks/useDebounce'
 
@@ -57,9 +59,7 @@ function QuizLibrary({
     })
     const handleTabChange = (tab: string) => {
         setActiveTab(tab)
-        // setSearch(' ')
     }
-    console.log(addQuestion)
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) =>
         setSearch(e.target.value)

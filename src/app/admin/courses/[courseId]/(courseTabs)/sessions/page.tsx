@@ -1,59 +1,80 @@
 'use client'
-
 import React, { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
-
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-
 import { Button } from '@/components/ui/button'
 import { Combobox } from '@/components/ui/combobox'
 import ClassCard from '../../_components/classCard'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
-import NewClassDialog from '../../_components/newClassDialog'
+import CreateSession from './CreateSession'
 import { api } from '@/utils/axios.config'
 import { getCourseData } from '@/store/store'
 import RecordingCard from '@/app/student/courses/[viewcourses]/[recordings]/_components/RecordingCard'
 import { OFFSET, POSITION } from '@/utils/constant'
-
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 
+type ClassType = 'active' | 'upcoming' | 'complete'
+
+interface State {
+    classType: ClassType
+    position: typeof POSITION
+    allClasses: any[]
+    bootcampData: { value: string; label: string }[]
+    batchId: number
+    upcomingClasses: any[]
+    pages: number
+    offset: number
+    currentPage: number
+    totalStudents: number
+    ongoingClasses: any[]
+    completedClasses: any[]
+    selectedDate: Date | null
+    lastPage: number
+    limit: number
+}
+
 function Page() {
-    const [classType, setClassType] = useState('upcoming')
-    const [position, setPosition] = useState(POSITION)
-
-    const [allClasses, setAllClasses] = useState([])
-    const [bootcampData, setBootcampData] = useState([])
-    const [batchId, setBatchId] = useState(0)
-    const [upcomingClasses, setUpcomingClasses] = useState([])
-    const [pages, setPages] = useState<number>()
-    const [offset, setOffset] = useState<number>(OFFSET)
-    const [currentPage, setCurrentPage] = useState<number>(1)
-    const [totalStudents, setTotalStudents] = useState<number>(0)
-    const [ongoingClasses, setOngoingClasses] = useState([])
-    const [completedClasses, setCompletedClasses] = useState([])
-    const [selectedDate, setSelectedDate] = useState(null)
-
-    const [limit, setLimit] = useState(6)
+    const [state, setState] = useState<State>({
+        classType: 'upcoming',
+        position: POSITION,
+        allClasses: [],
+        bootcampData: [],
+        batchId: 0,
+        upcomingClasses: [],
+        pages: 0,
+        offset: OFFSET,
+        currentPage: 1,
+        totalStudents: 0,
+        ongoingClasses: [],
+        completedClasses: [],
+        selectedDate: null,
+        lastPage: 0,
+        limit: 6,
+    })
 
     const { courseData } = getCourseData()
 
-    const handleClassType = useCallback(
-        (type: string | 'active' | 'complete' | 'upcoming') => {
-            if (classType === type) {
-                setOffset(offset)
-            } else {
-                setOffset(1)
-            }
-            setClassType(type)
-        },
-        [classType, offset]
-    )
+    const classTypes: { type: ClassType; label: string }[] = [
+        { type: 'active', label: 'Active Classes' },
+        { type: 'upcoming', label: 'Upcoming Classes' },
+        { type: 'complete', label: 'Completed Classes' },
+    ]
+
+    const handleClassType = useCallback((type: ClassType) => {
+        setState((prevState) => ({
+            ...prevState,
+            classType: type,
+            offset: prevState.classType === type ? prevState.offset : 1,
+        }))
+    }, [])
 
     const handleComboboxChange = (value: string) => {
-        setBatchId((prevBatchId: number) =>
-            prevBatchId.toString() === value ? 0 : parseInt(value)
-        )
+        setState((prevState) => ({
+            ...prevState,
+            batchId:
+                prevState.batchId.toString() === value ? 0 : parseInt(value),
+        }))
     }
 
     useEffect(() => {
@@ -66,8 +87,10 @@ function Page() {
                             label: item.name,
                         })
                     )
-
-                    setBootcampData(transformedData)
+                    setState((prevState) => ({
+                        ...prevState,
+                        bootcampData: transformedData,
+                    }))
                 })
                 .catch((error) => {
                     console.log('Error fetching data:', error)
@@ -76,158 +99,66 @@ function Page() {
     }, [courseData])
 
     useEffect(() => {
-        if (classType === 'active') {
-            setAllClasses(ongoingClasses)
-        } else if (classType === 'complete') {
-            setAllClasses(completedClasses)
-        } else if (classType === 'upcoming') {
-            setAllClasses(upcomingClasses)
+        const { classType, ongoingClasses, completedClasses, upcomingClasses } =
+            state
+        const classes: Record<ClassType, any[]> = {
+            active: ongoingClasses,
+            complete: completedClasses,
+            upcoming: upcomingClasses,
         }
-    }, [classType, ongoingClasses, completedClasses, upcomingClasses])
-
-    const getFetchParameters = useCallback(() => {
-        if (!batchId) {
-            return {
-                fetchId: courseData?.id,
-                fetchUrl: 'getClassesByBootcampId',
-            }
-        } else {
-            return { fetchId: batchId, fetchUrl: 'getClassesByBatchId' }
-        }
-    }, [courseData, batchId])
-    const fetchClasses = useCallback(
-        async (
-            fetchUrl: string,
-            fetchId: number,
-            offset: number,
-            position: string
-        ) => {
-            const response = await api.get(
-                `/classes/${fetchUrl}/${fetchId}?offset=${offset}&limit=${position}`
-            )
-            return response.data
-        },
-        []
-    )
-    const handleFetchResponse = useCallback(
-        (data: any) => {
-            setUpcomingClasses(data.upcomingClasses)
-            setOngoingClasses(data.ongoingClasses)
-            setCompletedClasses(data.completedClasses)
-            handleClassType(classType)
-        },
-        [classType, handleClassType]
-    )
-    const handleFetchError = (error: any) => {
-        console.log('Error fetching classes:', error)
-    }
-    useEffect(() => {
-        const { fetchId, fetchUrl } = getFetchParameters()
-
-        if (fetchId) {
-            fetchClasses(fetchUrl, fetchId, offset, position)
-                .then(handleFetchResponse)
-                .catch(handleFetchError)
-        }
+        setState((prevState) => ({
+            ...prevState,
+            allClasses: classes[classType],
+        }))
     }, [
-        getFetchParameters,
-        fetchClasses,
-        classType,
-        offset,
-        limit,
-        handleClassType,
-        position,
-        handleFetchResponse,
+        state.classType,
+        state.ongoingClasses,
+        state.completedClasses,
+        state.upcomingClasses,
     ])
-    // useEffect(() => {
-    //     let fetchId
-    //     let fetchUrl
-    //     if (!batchId) {
-    //         fetchId = courseData?.id
-    //         fetchUrl = 'getClassesByBootcampId'
-    //     } else {
-    //         fetchId = batchId
-    //         fetchUrl = 'getClassesByBatchId'
-    //     }
 
-    //     if (courseData?.id) {
-    //         api.get(
-    //             `/classes/${fetchUrl}/${fetchId}?offset=${offset}&limit=${position}`
-    //         )
-    //             .then((response) => {
-    //                 setUpcomingClasses(response.data.upcomingClasses)
-    //                 setOngoingClasses(response.data.ongoingClasses)
-    //                 setCompletedClasses(response.data.completedClasses)
-    //                 handleClassType(classType)
-    //             })
-    //             .catch((error) => {
-    //                 console.log('Error fetching classes:', error)
-    //             })
-    //     }
-    // }, [
-    //     courseData,
-    //     batchId,
-    //     classType,
-    //     offset,
-    //     limit,
-    //     handleClassType,
-    //     position,
-    // ])
+    useEffect(() => {
+        const fetchClasses = async () => {
+            const { batchId, offset, position, classType } = state
+            const fetchId = batchId || courseData?.id
+            const fetchUrl = batchId
+                ? 'getClassesByBatchId'
+                : 'getClassesByBootcampId'
 
-    const CreateSession = () => {
-        const [title, setTitle] = useState('')
-        const [description, setDescription] = useState('')
-        const [startDateTimeState, setStartDateTime] = useState(new Date())
-        const [endDateTimeState, setEndDateTime] = useState(new Date())
-        const [batchId, setBatchId] = useState('')
-
-        const handleDialogOpenChange = () => {
-            setTitle('')
-            setDescription('')
-            const startDateTime = new Date()
-            startDateTime.setHours(startDateTime.getHours() + 5)
-            startDateTime.setMinutes(startDateTime.getMinutes() + 30)
-            setStartDateTime(startDateTime)
-            const endDateTime = new Date()
-            endDateTime.setHours(endDateTime.getHours() + 5)
-            endDateTime.setMinutes(endDateTime.getMinutes() + 30)
-            setEndDateTime(endDateTime)
-
-            setBatchId('')
+            if (fetchId) {
+                try {
+                    const response = await api.get(
+                        `/classes/${fetchUrl}/${fetchId}?offset=${offset}&limit=${position}`
+                    )
+                    setState((prevState) => ({
+                        ...prevState,
+                        upcomingClasses: response.data.upcomingClasses,
+                        ongoingClasses: response.data.ongoingClasses,
+                        completedClasses: response.data.completedClasses,
+                    }))
+                    handleClassType(classType)
+                } catch (error) {
+                    console.log('Error fetching classes:', error)
+                }
+            }
         }
 
-        return (
-            <Dialog onOpenChange={handleDialogOpenChange}>
-                <DialogTrigger asChild>
-                    <Button className="text-white bg-secondary">
-                        Create Session
-                    </Button>
-                </DialogTrigger>
-                <DialogOverlay />
-                <NewClassDialog
-                    courseId={courseData?.id || 0}
-                    bootcampData={bootcampData}
-                    title={title}
-                    setTitle={setTitle}
-                    description={description}
-                    setDescription={setDescription}
-                    startDateTime={startDateTimeState}
-                    setStartDateTime={setStartDateTime}
-                    endDateTime={endDateTimeState}
-                    setEndDateTime={setEndDateTime}
-                    batchId={batchId}
-                    setBatchId={setBatchId}
-                />
-            </Dialog>
-        )
-    }
+        fetchClasses()
+    }, [
+        courseData,
+        state.batchId,
+        state.classType,
+        state.offset,
+        state.position,
+        handleClassType,
+    ])
 
     return (
         <>
             <div>
-                <div className=" relative flex text-start gap-6 my-6 max-w-[800px]">
+                <div className="relative flex text-start gap-6 my-6 max-w-[800px]">
                     <Combobox
-                        data={bootcampData}
+                        data={state.bootcampData}
                         title={'Batch'}
                         onChange={handleComboboxChange}
                         batch={false}
@@ -235,9 +166,7 @@ function Page() {
                     <Combobox
                         data={[]}
                         title={'Module'}
-                        onChange={function (selectedValue: string): void {
-                            throw new Error('Function not implemented.')
-                        }}
+                        onChange={() => {}}
                         isDisabled
                         batch={false}
                     />
@@ -251,90 +180,47 @@ function Page() {
                             disabled
                         />
                     </div>
-                    <CreateSession />
+                    <CreateSession
+                        courseId={courseData?.id || 0}
+                        bootcampData={state.bootcampData}
+                    />
                 </div>
                 <div className="flex justify-start gap-6 my-6">
-                    <Badge
-                        variant={
-                            classType === 'active' ? 'secondary' : 'outline'
-                        }
-                        onClick={() => handleClassType('active')}
-                        className="rounded-md cursor-pointer"
-                    >
-                        Active Classes
-                    </Badge>
-                    <Badge
-                        variant={
-                            classType === 'upcoming' ? 'secondary' : 'outline'
-                        }
-                        onClick={() => handleClassType('upcoming')}
-                        className="rounded-md cursor-pointer"
-                    >
-                        Upcoming Classes
-                    </Badge>
-                    <Badge
-                        variant={
-                            classType === 'complete' ? 'secondary' : 'outline'
-                        }
-                        onClick={() => handleClassType('complete')}
-                        className="rounded-md cursor-pointer"
-                    >
-                        Completed Classes
-                    </Badge>
+                    {classTypes.map(({ type, label }) => (
+                        <Badge
+                            key={type}
+                            variant={
+                                state.classType === type
+                                    ? 'secondary'
+                                    : 'outline'
+                            }
+                            onClick={() => handleClassType(type)}
+                            className="rounded-md cursor-pointer"
+                        >
+                            {label}
+                        </Badge>
+                    ))}
                 </div>
-                {allClasses && allClasses.length > 0 ? (
+                {state.allClasses && state.allClasses.length > 0 ? (
                     <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
-                        {allClasses.map((classData: any, index: any) => {
-                            return classType === 'complete' ? (
+                        {state.allClasses.map((classData, index) =>
+                            state.classType === 'complete' ? (
                                 <RecordingCard
                                     classData={classData}
                                     key={index}
-                                    // classType={classType}
                                     isAdmin
                                 />
                             ) : (
                                 <ClassCard
                                     classData={classData}
                                     key={index}
-                                    classType={classType}
+                                    classType={state.classType}
                                 />
                             )
-                        })}
-                        {/* <div className="flex justify-center items-center my-4 col-span-3">
-                        <Button
-                            onClick={() => {
-                                setOffset(offset - 1)
-                            }}
-                            disabled={offset === 1}
-                        >
-                            Previous
-                        </Button>
-                        <h1 className="mx-4">{offset}</h1>
-                        <Button
-                            onClick={() => {
-                                setOffset(offset + 1)
-                            }}
-                            disabled={allClasses.length < limit}
-                        >
-                            Next
-                        </Button>
-                    </div> */}
-                        <div className="flex justify-end w-[1450px]">
-                            {/* <DataTablePagination
-                                totalStudents={totalStudents}
-                                position={position}
-                                setPosition={setPosition}
-                                pages={pages}
-                                // lastPage={lastPage}
-                                currentPage={currentPage}
-                                setCurrentPage={setCurrentPage}
-                                // fetchStudentData={fetchStudentData}
-                                setOffset={setOffset}
-                            /> */}
-                        </div>
+                        )}
                     </div>
                 ) : (
-                    <div className="w-full flex mb-10 items-center flex-col gap-y-3 justify-center  absolute text-center mt-2">
+                    <div className="w-full flex mb-10 items-center flex-col gap-y-3 justify-center absolute text-center mt-2">
                         <Image
                             src={
                                 '/emptyStates/undraw_online_learning_re_qw08.svg'
@@ -347,7 +233,10 @@ function Page() {
                             Create a session to start engagement with the
                             learners for course lessons or doubts
                         </p>
-                        <CreateSession />
+                        <CreateSession
+                            courseId={courseData?.id || 0}
+                            bootcampData={state.bootcampData}
+                        />
                     </div>
                 )}
             </div>
