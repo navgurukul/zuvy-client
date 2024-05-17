@@ -46,26 +46,19 @@ const Page = ({ params }: { params: any }) => {
 
     const [search, setSearch] = useState<string>('')
     const debouncedSearch = useDebounce(search, 1000)
-    useEffect(() => {
-        if (courseData?.id) {
-            fetchBatches(courseData?.id)
-            // setBatches(batchData)
-        }
-    }, [courseData, fetchBatches])
-    // const fetchCourseDetails = useCallback(async () => {
-    //     try {
-    //         const response = await api.get(`/bootcamp/${courseData?.id}`)
-    //         setUnassignedStudents(response.data.bootcamp.unassigned_students)
-    //     } catch (error) {
-    //         console.error('Error fetching course details:', error)
+    // useEffect(() => {
+    //     if (courseData?.id) {
+    //         console.log('first', courseData)
+    //         fetchBatches(courseData?.id)
+    //         // setBatches(batchData)
     //     }
-    // }, [courseData?.id])
+    // }, [courseData?.id, fetchBatches])
 
-    useEffect(() => {
-        if (params.courseId) {
-            fetchCourseDetails(params.courseId)
-        }
-    }, [params.courseId, fetchCourseDetails])
+    // useEffect(() => {
+    //     if (params.courseId) {
+    //         fetchCourseDetails(params.courseId)
+    //     }
+    // }, [params.courseId, fetchCourseDetails])
 
     const formSchema = z.object({
         name: z.string().min(2, {

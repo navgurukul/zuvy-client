@@ -8,14 +8,13 @@ import {
     StickyNote,
     Trash2,
     Video,
-    GripVertical,
 } from 'lucide-react'
 import DeleteConfirmationModal from '../../_components/deleteModal'
 import { useState } from 'react'
 import { DELETE_CHAPTER_CONFIRMATION } from '@/utils/constant'
 import { toast } from '@/components/ui/use-toast'
 
-function ChapterItem({
+function AssessmentItem({
     title,
     topicId,
     topicName,
@@ -104,17 +103,14 @@ function ChapterItem({
                     <p>{setTopicIcon()} </p>
                     <p>{title}</p>
                 </div>
-                <div className="flex">
-                    <Trash2
-                        onClick={(e) => {
-                            e.stopPropagation()
-                            handleDeleteModal()
-                        }}
-                        className="hover:text-destructive cursor-pointer"
-                        size={15}
-                    />
-                    <GripVertical size={15} />
-                </div>
+                <Trash2
+                    onClick={(e) => {
+                        e.stopPropagation()
+                        handleDeleteModal()
+                    }}
+                    className="hover:text-destructive cursor-pointer"
+                    size={15}
+                />
             </div>
             <DeleteConfirmationModal
                 isOpen={isDeleteModalOpen}
@@ -131,4 +127,4 @@ function ChapterItem({
     )
 }
 
-export default ChapterItem
+export default AssessmentItem

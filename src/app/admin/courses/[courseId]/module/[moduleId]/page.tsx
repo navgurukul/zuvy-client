@@ -3,25 +3,27 @@
 import { useCallback, useEffect, useState } from 'react'
 import ChapterItem from '../_components/ChapterItem'
 import Quiz from '../_components/quiz/Quiz'
-import Assignment from '../_components/Assignment'
+import Assignment from '../_components/assignment/Assignment'
 import { useParams } from 'next/navigation'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import { Button } from '@/components/ui/button'
 import { api } from '@/utils/axios.config'
-import AddVideo from '../_components/AddVideo'
+import AddVideo from '../_components/video/AddVideo'
 import ChapterModal from '../_components/ChapterModal'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import AddArticle from '../_components/Article/AddArticle'
 import Code from '../_components/codingChallenge/CodingChallenge'
+import AssessmentItem from '../_components/AssessmentItem'
+import { Reorder } from 'framer-motion'
 
 // Interfaces:-
 type Chapter = {
     chapterId: number
     chapterTitle: string
-    order: number
     topicId: number
     topicName: string
+    order: number
 }
 
 interface ExampleTestCase {
@@ -82,6 +84,7 @@ function Page({
     const [activeChapter, setActiveChapter] = useState(0)
     const [chapterContent, setChapterContent] = useState<any>([])
     const [topicId, setTopicId] = useState(0)
+    const [key, setKey] = useState(0)
     const { courseId } = useParams()
 
     const [moduleData, setModuleData] = useState<Module[]>([])
@@ -145,6 +148,7 @@ function Page({
 
                 setTopicId(response.data.topicId)
                 setActiveChapter(chapterId)
+                setKey((prevKey) => prevKey + 1)
             } catch (error) {
                 console.error('Error fetching chapter content:', error)
             }
@@ -159,6 +163,8 @@ function Page({
                     <AddVideo
                         moduleId={params.moduleId}
                         content={chapterContent}
+                        fetchChapterContent={fetchChapterContent}
+                        key={key}
                     />
                 )
             case 2:
@@ -170,7 +176,7 @@ function Page({
             case 5:
                 return <Assignment content={chapterContent} />
             default:
-                return <h1>StickyNote</h1>
+                return <h1>Create New Chapter</h1>
         }
     }
 
@@ -178,7 +184,6 @@ function Page({
         setOpen(true)
     }
 
-    // async
     useEffect(() => {
         if (params.moduleId) {
             fetchChapters()
@@ -191,6 +196,39 @@ function Page({
             fetchChapterContent(firstChapterId)
         }
     }, [chapterData, fetchChapterContent])
+
+    async function handleReorder(newOrderChapters: any) {
+        newOrderChapters = newOrderChapters.map((item: any, index: any) => ({
+            ...item,
+            order: index + 1,
+        }))
+
+        const oldOrder = chapterData.map((item: any) => item?.chapterId)
+        const movedItem = newOrderChapters.find(
+            (item: any, index: any) => item?.chapterId !== oldOrder[index]
+        )
+
+        if (!movedItem) {
+            return
+        }
+
+        try {
+            const response = await api.put(
+                `/Content/editChapterOfModule/${params.moduleId}?chapterId=${movedItem.chapterId}`,
+                {
+                    newOrder: movedItem.order,
+                }
+            )
+            if (response.data) {
+                console.log(movedItem.chapterId, 'movedItem.chapterId')
+                console.log(movedItem.order, 'movedItem.order')
+                console.log(newOrderChapters, 'newOrderChapters')
+                setChapterData(newOrderChapters)
+            }
+        } catch (error) {
+            console.error('Error updating module order:', error)
+        }
+    }
 
     return (
         <>
@@ -216,31 +254,36 @@ function Page({
                         </Dialog>
                     </div>
                     <ScrollArea className="h-dvh pr-4">
-                        {chapterData &&
-                            chapterData?.map(
-                                ({
-                                    chapterId,
-                                    chapterTitle,
-                                    topicId,
-                                    topicName,
-                                }) => {
+                        <Reorder.Group
+                            values={chapterData}
+                            onReorder={async (newOrderChapters: any) => {
+                                handleReorder(newOrderChapters)
+                            }}
+                        >
+                            {chapterData &&
+                                chapterData?.map((item: any, index: any) => {
                                     return (
-                                        <ChapterItem
-                                            key={chapterId}
-                                            chapterId={chapterId}
-                                            title={chapterTitle}
-                                            topicId={topicId}
-                                            topicName={topicName}
-                                            fetchChapterContent={
-                                                fetchChapterContent
-                                            }
-                                            fetchChapters={fetchChapters}
-                                            activeChapter={activeChapter}
-                                            moduleId={params.moduleId}
-                                        />
+                                        <Reorder.Item
+                                            value={item}
+                                            key={item.chapterId}
+                                        >
+                                            <ChapterItem
+                                                key={item.chapterId}
+                                                chapterId={item.chapterId}
+                                                title={item.chapterTitle}
+                                                topicId={item.topicId}
+                                                topicName={item.topicName}
+                                                fetchChapterContent={
+                                                    fetchChapterContent
+                                                }
+                                                fetchChapters={fetchChapters}
+                                                activeChapter={activeChapter}
+                                                moduleId={params.moduleId}
+                                            />
+                                        </Reorder.Item>
                                     )
-                                }
-                            )}
+                                })}
+                        </Reorder.Group>
                     </ScrollArea>
                 </div>
                 <div className="col-span-3 mx-4">{renderChapterContent()}</div>

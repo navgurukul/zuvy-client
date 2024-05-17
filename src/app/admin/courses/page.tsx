@@ -51,9 +51,9 @@ const Courses: React.FC = () => {
     const [hasAccess, setHasAccess] = useState<boolean>(true)
 
     // func
-    const handleFilterClick = (filter: 'all' | 'active' | 'completed') => {
-        setActiveFilter(filter)
-    }
+    // const handleFilterClick = (filter: 'all' | 'active' | 'completed') => {
+    //     setActiveFilter(filter)
+    // }
 
     const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearchQuery(event.target.value)
@@ -73,6 +73,7 @@ const Courses: React.FC = () => {
     ) => {
         setNewCourseName(event.target.value)
     }
+
     const handleCreateCourse = async () => {
         const repeatedCourseName = newCourseName
             .replace(/\s+/g, ' ')
@@ -126,9 +127,10 @@ const Courses: React.FC = () => {
         if (debouncedSearch) searchBootcampHandler()
         if (debouncedSearch.trim()?.length === 0) getBootcamp()
     }, [debouncedSearch])
-    useEffect(() => {
-        getBootcamp()
-    }, [])
+
+    // useEffect(() => {
+    //     getBootcamp()
+    // }, [])
 
     useEffect(() => {
         const getToken = async () => {
@@ -141,7 +143,7 @@ const Courses: React.FC = () => {
             }
         }
         getToken()
-    })
+    }, [])
 
     const calendarAccess = () => {
         api.get('/classes', {

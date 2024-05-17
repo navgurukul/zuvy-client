@@ -47,6 +47,7 @@ const Navbar = () => {
                             <Avatar>
                                 <AvatarImage
                                     src={studentData?.profile_picture}
+                                    alt="user profile pic"
                                 />
                                 <AvatarFallback>
                                     {

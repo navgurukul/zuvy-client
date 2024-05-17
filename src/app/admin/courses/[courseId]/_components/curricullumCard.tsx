@@ -16,7 +16,7 @@ import { DELETE_MODULE_CONFIRMATION } from '@/utils/constant'
 
 type Props = {
     index: number
-    moduleId: string
+    moduleId: any
     courseId: number
     name: string
     order: number

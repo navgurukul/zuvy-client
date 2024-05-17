@@ -6,25 +6,51 @@ import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 
 import { Separator } from '@/components/ui/separator'
-import { ArrowUpRight, GripVertical, X, Plus } from 'lucide-react'
+import { ExternalLink } from 'lucide-react'
 import QuizLibrary from './QuizLibrary'
+import { quizData, Options } from './QuizLibrary'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Button } from '@/components/ui/button'
+import QuizModal from './QuizModal'
+
 interface QuizProps {
     content: Object
 }
 
 function Quiz({ content }: QuizProps) {
     const [activeTab, setActiveTab] = useState('anydifficulty')
+    const [addQuestion, setAddQuestion] = useState<quizData[]>([])
 
+    const handleAddQuestion = (data: any) => {
+        const uniqueData = data.filter((question: quizData) => {
+            return !addQuestion.some(
+                (existingQuestion: quizData) =>
+                    existingQuestion.id === question.id
+            )
+        })
+        setAddQuestion((prevQuestions: quizData[]) => [
+            ...prevQuestions,
+            ...uniqueData,
+        ])
+    }
+    const removeQuestionById = (questionId: number) => {
+        setAddQuestion((prevQuestions: any) =>
+            prevQuestions.filter((question: any) => question.id !== questionId)
+        )
+    }
     return (
         <>
-            <div className="flex items-center gap-x-6 mb-10">
+            <div className="flex flex-row items-center justify-start gap-x-6 mb-10">
                 <Input
                     placeholder="Untitled Quiz"
-                    className="p-0 text-3xl text-left font-semibold outline-none border-none focus:ring-0 capitalize"
+                    className="p-0 text-3xl w-1/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize"
                 />
-                <Link className="text-secondary font-semibold flex" href={''}>
+                <Link
+                    className="text-secondary font-semibold flex mt-2"
+                    href={''}
+                >
                     Preview
-                    <ArrowUpRight />
+                    <ExternalLink size={20} />
                 </Link>
             </div>
 
@@ -32,31 +58,36 @@ function Quiz({ content }: QuizProps) {
                 <QuizLibrary
                     activeTab={activeTab}
                     setActiveTab={setActiveTab}
+                    addQuestion={addQuestion}
+                    handleAddQuestion={handleAddQuestion}
                 />
                 <Separator
                     orientation="vertical"
                     className="mx-4 w-[2px] h-screen rounded "
                 />
-                <div>
-                    <h1 className="text-left font-semibold">
-                        Selected Questions
-                    </h1>
-                    <div className="gap-y-4 flex flex-col ">
-                        <h1 className="text-left font-semibold">
-                            Question Text
-                        </h1>
-                        <div className="flex w-full">
-                            <div className="border-2 w-full text-left border-gray-400 rounded-lg p-2">
-                                <p>
-                                    Using which block can we rotate the sprite ?
-                                </p>
-                            </div>
-                            <div className="flex flex-col">
-                                <X className="text-gray-400" />
-                                <GripVertical className="text-gray-400" />
-                            </div>
-                        </div>
+                <ScrollArea className="h-screen w-full rounded-md ">
+                    <div className="flex flex-col gap-y-4">
+                        {addQuestion.map(
+                            (questions: quizData, index: number) => {
+                                return (
+                                    <QuizModal
+                                        key={index}
+                                        data={questions}
+                                        removeQuestionById={removeQuestionById}
+                                    />
+                                )
+                            }
+                        )}
+                        <Button
+                            variant={'outline'}
+                            className="text-secondary font-semibold"
+                        >
+                            Add Question
+                        </Button>
                     </div>
+                </ScrollArea>
+
+                <div>
                     <div className="w-full mt-6">
                         {' '}
                         {content &&

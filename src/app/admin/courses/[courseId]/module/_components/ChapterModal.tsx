@@ -27,13 +27,23 @@ function ChapterModal({
 }) {
     const createChapter = async (topicId: number) => {
         await api
-            .post(
-                `https://dev.api.zuvy.org/Content/chapter/${params.moduleId}?topicId=${topicId}`
-            )
+            .post(`/Content/chapter/${params.moduleId}?topicId=${topicId}`)
             .then((res) => {
                 toast({
                     title: res.data.message,
                     description: res.data.module[0].title,
+                })
+            })
+        fetchChapters()
+    }
+
+    const createAssessment = async () => {
+        await api
+            .post(`/content/createAssessment/${params.moduleId}`)
+            .then((res) => {
+                toast({
+                    title: res.data.message,
+                    description: res.data[0].title,
                 })
             })
         fetchChapters()
@@ -91,7 +101,7 @@ function ChapterModal({
                     <DialogClose asChild>
                         <div
                             className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
-                            // onClick={() => createChapter(2)}
+                            onClick={createAssessment}
                         >
                             <BookOpenCheck className="mr-2 h-6 w-6" />
                             <span>Assessment</span>

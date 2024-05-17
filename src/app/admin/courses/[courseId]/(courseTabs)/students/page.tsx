@@ -93,26 +93,29 @@ const Page = ({ params }: { params: any }) => {
         [position, setStoreStudentData, params.courseId]
     )
     useEffect(() => {
-        fetchClassesData(params.courseId)
+        if (params.courseId) {
+            fetchClassesData(params.courseId)
+        }
     }, [params.courseId])
 
     useEffect(() => {
-        fetchStudentData(offset)
+        // fetchStudentData(offset)
         fetchBatches(params.courseId)
     }, [offset, fetchStudentData, fetchBatches, params.courseId])
 
-    useEffect(() => {
-        fetchStudentData(offset)
-    }, [offset, position, courseData, fetchStudentData])
+    // useEffect(() => {
+    //     fetchStudentData(offset)
+    // }, [offset, position, courseData, fetchStudentData])
 
     useEffect(() => {
         const searchStudentsDataHandler = async () => {
             setLoading(true)
+            // /bootcamp/students/9?limit=10&searchTerm=souvik&offset=0
             try {
                 const response = await api.get(
-                    `/bootcamp/studentSearch/${params.courseId}?searchTerm=${debouncedSearch}`
+                    `/bootcamp/students/${params.courseId}?limit=${position}&searchTerm=${debouncedSearch}&offset=${offset}`
                 )
-                setStoreStudentData(response.data.data[1].studentsEmails)
+                setStoreStudentData(response.data.studentsEmails)
             } catch (error) {
                 console.error('Error searching students:', error)
             } finally {
@@ -130,6 +133,8 @@ const Page = ({ params }: { params: any }) => {
         params.courseId,
         setStoreStudentData,
         fetchStudentData,
+        offset,
+        position,
     ])
 
     const handleSetsearch = (e: React.ChangeEvent<HTMLInputElement>) => {

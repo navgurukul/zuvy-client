@@ -28,16 +28,15 @@ import { Plus, X } from 'lucide-react'
 
 const formSchema = z.object({
     title: z.string(),
-    functionName: z.string(),
-    shortDescriptionn: z.string(),
+    description: z.string(),
     problemStatement: z.string(),
     constraints: z.string(),
     difficulty: z.enum(['Easy', 'Medium', 'hard'], {
         required_error: 'You need to select a Difficulty  type.',
     }),
-    allowedLanguages: z.enum(['All Languages', 'C++', 'Python'], {
-        required_error: 'You need to select a Language',
-    }),
+    // allowedLanguages: z.enum(['All Languages', 'C++', 'Python'], {
+    //     required_error: 'You need to select a Language',
+    // }),
     topics: z.enum(['Strings', 'DSA', 'Development'], {
         required_error: 'You need to select a Topic',
     }),
@@ -53,7 +52,6 @@ const formSchema = z.object({
 
 export default function NewCodingProblemForm() {
     const [testCases, setTestCases] = useState([{ id: 1 }])
-    const [hoveredIndex, setHoveredIndex] = useState<number | null>(0)
 
     const handleAddTestCase = () => {
         const newTestCase = { id: testCases.length + 1 }
@@ -69,12 +67,11 @@ export default function NewCodingProblemForm() {
         resolver: zodResolver(formSchema),
         defaultValues: {
             title: '',
-            functionName: '',
-            shortDescriptionn: '',
+            description: '',
             problemStatement: '',
             constraints: '',
             difficulty: 'Easy',
-            allowedLanguages: 'All Languages',
+            // allowedLanguages: 'All Languages',
             topics: 'DSA',
             inputFormat: 'Number',
             outputFormat: 'Strings',
@@ -90,7 +87,7 @@ export default function NewCodingProblemForm() {
     }
 
     return (
-        <ScrollArea className="h-[600px] w-full rounded-md  ">
+        <ScrollArea className="h-[calc(100vh-200px)] w-full rounded-md  ">
             <main className="flex  flex-col p-3 ">
                 <Form {...form}>
                     <form
@@ -99,14 +96,14 @@ export default function NewCodingProblemForm() {
                     >
                         <FormField
                             control={form.control}
-                            name="functionName"
+                            name="title"
                             render={({ field }) => {
                                 return (
                                     <FormItem className="text-left">
-                                        <FormLabel>Function Name</FormLabel>
+                                        <FormLabel>Title</FormLabel>
                                         <FormControl>
                                             <Input
-                                                placeholder="Function Name"
+                                                placeholder="Title"
                                                 {...field}
                                             />
                                         </FormControl>
@@ -117,14 +114,14 @@ export default function NewCodingProblemForm() {
                         />
                         <FormField
                             control={form.control}
-                            name="shortDescriptionn"
+                            name="description"
                             render={({ field }) => {
                                 return (
                                     <FormItem className="text-left">
-                                        <FormLabel>Short Description</FormLabel>
+                                        <FormLabel>Description</FormLabel>
                                         <FormControl>
                                             <Input
-                                                placeholder="Short Description"
+                                                placeholder="Description"
                                                 {...field}
                                             />
                                         </FormControl>
@@ -225,13 +222,13 @@ export default function NewCodingProblemForm() {
                                 )
                             }}
                         />
-                        <div className="flex justify-between w-full">
-                            <FormField
+                        <div className="flex justify-between gap-2">
+                            {/* <FormField
                                 control={form.control}
                                 name="allowedLanguages"
                                 render={({ field }) => {
                                     return (
-                                        <FormItem className="text-left w-1/2 ">
+                                        <FormItem className="text-left w-full">
                                             <FormLabel>
                                                 Allowed Languages
                                             </FormLabel>
@@ -239,11 +236,11 @@ export default function NewCodingProblemForm() {
                                                 onValueChange={field.onChange}
                                             >
                                                 <FormControl>
-                                                    <SelectTrigger className="w-1/2">
+                                                    <SelectTrigger>
                                                         <SelectValue placeholder="Choose Language" />
                                                     </SelectTrigger>
                                                 </FormControl>
-                                                <SelectContent className="w-1/2">
+                                                <SelectContent>
                                                     <SelectItem value="All Languages">
                                                         All Languages
                                                     </SelectItem>
@@ -259,23 +256,23 @@ export default function NewCodingProblemForm() {
                                         </FormItem>
                                     )
                                 }}
-                            />
+                            /> */}
                             <FormField
                                 control={form.control}
                                 name="topics"
                                 render={({ field }) => {
                                     return (
-                                        <FormItem className="text-left w-1/2">
+                                        <FormItem className="text-left w-full">
                                             <FormLabel>Topics</FormLabel>
                                             <Select
                                                 onValueChange={field.onChange}
                                             >
                                                 <FormControl>
-                                                    <SelectTrigger className="w-1/2">
+                                                    <SelectTrigger>
                                                         <SelectValue placeholder="Choose Topic" />
                                                     </SelectTrigger>
                                                 </FormControl>
-                                                <SelectContent className="w-1/2">
+                                                <SelectContent>
                                                     <SelectItem value="DSA">
                                                         DSA
                                                     </SelectItem>
@@ -293,23 +290,23 @@ export default function NewCodingProblemForm() {
                                 }}
                             />
                         </div>
-                        <div className="flex justify-between mr-12">
+                        <div className="flex justify-between gap-2">
                             <FormField
                                 control={form.control}
                                 name="inputFormat"
                                 render={({ field }) => {
                                     return (
-                                        <FormItem className="text-left">
+                                        <FormItem className="text-left w-full">
                                             <FormLabel>Input format</FormLabel>
                                             <Select
                                                 onValueChange={field.onChange}
                                             >
                                                 <FormControl>
-                                                    <SelectTrigger className="w-full">
+                                                    <SelectTrigger>
                                                         <SelectValue placeholder="Choose Input Format" />
                                                     </SelectTrigger>
                                                 </FormControl>
-                                                <SelectContent className="w-full">
+                                                <SelectContent>
                                                     <SelectItem value="String">
                                                         String
                                                     </SelectItem>
@@ -331,17 +328,17 @@ export default function NewCodingProblemForm() {
                                 name="outputFormat"
                                 render={({ field }) => {
                                     return (
-                                        <FormItem className="text-left">
+                                        <FormItem className="text-left w-full">
                                             <FormLabel>Output Format</FormLabel>
                                             <Select
                                                 onValueChange={field.onChange}
                                             >
                                                 <FormControl>
-                                                    <SelectTrigger className="w-full">
+                                                    <SelectTrigger>
                                                         <SelectValue placeholder="Choose Output Format" />
                                                     </SelectTrigger>
                                                 </FormControl>
-                                                <SelectContent className="w-full">
+                                                <SelectContent>
                                                     <SelectItem value="String">
                                                         String
                                                     </SelectItem>
@@ -359,16 +356,14 @@ export default function NewCodingProblemForm() {
                                 }}
                             />
                         </div>
-                        <div className="flex flex-col gap-y-2">
-                            <div className="flex justify-start">
-                                <FormLabel>Test Cases</FormLabel>
-                            </div>
+                        <div className="text-left ">
+                            {/* <div className="flex justify-start"> */}
+                            <FormLabel>Test Cases</FormLabel>
+                            {/* </div> */}
                             {testCases.map((testCase, index) => (
                                 <div
                                     key={index}
-                                    className="flex justify-between items-center mr-12 relative"
-                                    onMouseEnter={() => setHoveredIndex(index)}
-                                    onMouseLeave={() => setHoveredIndex(null)}
+                                    className="flex items-center gap-2"
                                 >
                                     <FormField
                                         control={form.control}
@@ -376,7 +371,7 @@ export default function NewCodingProblemForm() {
                                         render={({ field }) => (
                                             <FormItem className="text-left">
                                                 <Input
-                                                    placeholder="Input1"
+                                                    placeholder="Input"
                                                     {...field}
                                                 />
                                                 <FormMessage />
@@ -387,7 +382,7 @@ export default function NewCodingProblemForm() {
                                         control={form.control}
                                         name={`testCaseOutput`}
                                         render={({ field }) => (
-                                            <FormItem className="text-left ">
+                                            <FormItem className="text-left">
                                                 <Input
                                                     placeholder="Output"
                                                     {...field}
@@ -396,33 +391,34 @@ export default function NewCodingProblemForm() {
                                             </FormItem>
                                         )}
                                     />
-                                    <div className="">
+                                    {index !== 0 && (
+                                        <X
+                                            className="cursor-pointer"
+                                            onClick={() =>
+                                                handleRemoveTestCase(
+                                                    testCase.id
+                                                )
+                                            }
+                                        />
+                                    )}
+                                    {/* <div className="">
                                         {hoveredIndex === index &&
                                             testCases.length > 1 && (
-                                                <X
-                                                    className="cursor-pointer absolute top-0"
-                                                    onClick={() =>
-                                                        handleRemoveTestCase(
-                                                            testCase.id
-                                                        )
-                                                    }
-                                                />
+                                                
                                             )}
-                                    </div>
+                                    </div> */}
                                 </div>
                             ))}
-                            <div className="flex justify-start">
-                                <Button
-                                    variant={'outline'}
-                                    className="w-1/3"
-                                    onClick={handleAddTestCase}
-                                >
-                                    <Plus size={20} />
-                                    <p className="text-secondary font-bold">
-                                        Add Test Cases
-                                    </p>
-                                </Button>
-                            </div>
+                            <Button
+                                variant={'outline'}
+                                className="mt-2"
+                                onClick={handleAddTestCase}
+                            >
+                                <Plus size={20} />
+                                <p className="text-secondary font-bold">
+                                    Add Test Cases
+                                </p>
+                            </Button>
                         </div>
 
                         <div className="flex justify-end">

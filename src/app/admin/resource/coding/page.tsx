@@ -56,7 +56,7 @@ const CodingProblems = (props: Props) => {
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[500px]">
                         <DialogHeader>
-                            <DialogTitle>New Coding Problems</DialogTitle>
+                            <DialogTitle>New Coding Problem</DialogTitle>
                         </DialogHeader>
                         <div className="w-full">
                             <NewCodingProblemForm />

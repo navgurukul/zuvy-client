@@ -2,19 +2,35 @@
 
 import { PlusCircle, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Separator } from '@/components/ui/separator'
 import { cn, difficultyColor, ellipsis } from '@/lib/utils'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import SearchBar from './CodingTopics'
+import CodingTopics from './CodingTopics'
 import SelectedProblems from './SelectedProblems'
 import { Input } from '@/components/ui/input'
+import { api } from '@/utils/axios.config'
+
+interface Example {
+    input: number[]
+    output: number[]
+}
 
 interface Question {
     id: number
     title: string
     description: string
     difficulty: string
+    tags: number
+    constraints: string
+    authorId: number
+    inputBase64: string | null
+    examples: Example[]
+    testCases: Example[]
+    expectedOutput: number[]
+    solution: string
+    createdAt: string
+    updatedAt: string
 }
 interface ContentDetail {
     title: string
@@ -33,21 +49,6 @@ interface Content {
 interface CodeProps {
     content: Content
 }
-const questions: Question[] = [
-    {
-        id: 1,
-        title: 'Power Calculator',
-        description:
-            'Power Calculator is a simple coding problem meant to calculate the power of a number',
-        difficulty: 'Easy',
-    },
-    {
-        id: 2,
-        title: 'Array Reversal',
-        description: 'Reverse the elements of an array in place....',
-        difficulty: 'Easy',
-    },
-]
 
 function CodingChallenge({ content }: CodeProps) {
     const [selectedQuestions, setSelectedQuestions] = useState<Question[]>([])
@@ -56,6 +57,21 @@ function CodingChallenge({ content }: CodeProps) {
         useState<string>('Any Difficulty')
     const [selectedLanguage, setSelectedLanguage] =
         useState<string>('All Languages')
+    const [allCodingQuestions, setAllCodingQuestions] = useState<Question[]>([])
+    const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([])
+
+    useEffect(() => {
+        async function getAllCodingQuestions() {
+            try {
+                const response = await api.get('/Content/allCodingQuestions')
+                setAllCodingQuestions(response.data)
+            } catch (error) {
+                console.error('Error:', error)
+            }
+        }
+
+        getAllCodingQuestions()
+    }, [])
 
     return (
         <div>
@@ -73,7 +89,7 @@ function CodingChallenge({ content }: CodeProps) {
             </div>
             <div className="grid grid-cols-2">
                 <div>
-                    <SearchBar
+                    <CodingTopics
                         selectedTopic={selectedTopic}
                         setSelectedTopic={setSelectedTopic}
                         selectedDifficulty={selectedDifficulty}
@@ -82,8 +98,8 @@ function CodingChallenge({ content }: CodeProps) {
                         setSelectedLanguage={setSelectedLanguage}
                     />
                     <ScrollArea className="h-dvh pr-4">
-                        {questions.map((question) => {
-                            const isSelected = selectedQuestions.some(
+                        {allCodingQuestions?.map((question: any) => {
+                            const isSelected = selectedQuestions?.some(
                                 (selectedQuestion) =>
                                     selectedQuestion?.id === question.id
                             )
@@ -167,8 +183,12 @@ function CodingChallenge({ content }: CodeProps) {
                     </ScrollArea>
                 </div>
                 <SelectedProblems
-                    selectedQuestions={selectedQuestions}
-                    setSelectedQuestions={setSelectedQuestions}
+                    selectedQuestions={selectedQuestions as Question[]}
+                    setSelectedQuestions={
+                        setSelectedQuestions as React.Dispatch<
+                            React.SetStateAction<Question[]>
+                        >
+                    }
                 />
             </div>
         </div>
