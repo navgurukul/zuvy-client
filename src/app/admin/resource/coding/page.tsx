@@ -24,27 +24,33 @@ import { DataTable } from '@/app/_components/datatable/data-table'
 import { columns } from '@/app/admin/resource/coding/column'
 import NewCodingProblemForm from '@/app/admin/resource/_components/NewCodingProblemForm'
 import { api } from '@/utils/axios.config'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
+import { getcodingQuestionState } from '@/store/store'
+import { getAllCodingQuestions } from '@/utils/admin'
 
 type Props = {}
 
 const CodingProblems = (props: Props) => {
-    const [selectedTopic, setSelectedTopic] = useState('')
-    const [codingQuestions, setCodingQuestions] = useState([])
-    const [selectedDifficulty, setSelectedDifficulty] = useState('')
+    const { codingQuestions, setCodingQuestions } = getcodingQuestionState()
+
     const [searchTerm, setSearchTerm] = useState('')
     const [searchedQuestions, setSearchedQuestions] = useState([])
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [tags, setTags] = useState([])
-    const [selectedTag, setSelectedTag] = useState([])
+    const [selectedTag, setSelectedTag] = useState({
+        tagName: 'AllTopics',
+        id: -1,
+    })
+    const [selectedDifficulty, setSelectedDifficulty] = useState('any')
 
     const handleTopicClick = (tag: any) => {
         setSelectedTag(tag)
     }
-    async function getAllCodingQuestions() {
-        // fetch all Coding Questions
-        const response = await api.get('Content/allCodingQuestions')
-        setCodingQuestions(response.data)
+
+    const handleAllTopicsClick = () => {
+        setSelectedTag({ id: -1, tagName: 'AllTopics' })
     }
+
     async function getSearchQuestions() {
         // fetch all Searched Coding Questions
         if (selectedDifficulty !== 'any') {
@@ -67,15 +73,22 @@ const CodingProblems = (props: Props) => {
         }
     }
 
-    const filteredQuestions =
-        selectedDifficulty && selectedDifficulty !== 'any'
-            ? codingQuestions.filter(
-                  (question: any) => question.difficulty === selectedDifficulty
-              )
-            : codingQuestions
+    const filteredQuestions = codingQuestions.filter((question: any) => {
+        const difficultyMatches =
+            selectedDifficulty !== 'any'
+                ? question.difficulty === selectedDifficulty
+                : true
+        const tagMatches =
+            selectedTag?.tagName !== 'AllTopics'
+                ? question.tags === selectedTag?.id
+                : true
+
+        const isQuestionIncluded = difficultyMatches && tagMatches
+        return isQuestionIncluded
+    })
 
     useEffect(() => {
-        getAllCodingQuestions()
+        getAllCodingQuestions(setCodingQuestions)
         getAllTags()
     }, [])
 
@@ -113,6 +126,7 @@ const CodingProblems = (props: Props) => {
                                 tags={tags}
                                 setIsDialogOpen={setIsDialogOpen}
                                 getAllCodingQuestions={getAllCodingQuestions}
+                                setCodingQuestions={setCodingQuestions}
                             />
                         </div>
                     </DialogContent>
@@ -136,19 +150,34 @@ const CodingProblems = (props: Props) => {
                     orientation="vertical"
                     className="w-1 h-12 ml-4 bg-gray-400 rounded-lg"
                 />
-                {tags.map((tag: any) => (
+
+                <ScrollArea className=" text-nowrap ">
+                    <ScrollBar orientation="horizontal" />
                     <Button
                         className={`mx-3 rounded-3xl ${
-                            selectedTag === tag
+                            selectedTag?.tagName === 'AllTopics'
                                 ? 'bg-secondary text-white'
                                 : 'bg-gray-200 text-black'
                         }`}
-                        key={tag?.id}
-                        onClick={() => handleTopicClick(tag)}
+                        onClick={handleAllTopicsClick}
                     >
-                        {tag.tagName}
+                        All Topics
                     </Button>
-                ))}
+
+                    {tags.map((tag: any) => (
+                        <Button
+                            className={`mx-3 rounded-3xl ${
+                                selectedTag === tag
+                                    ? 'bg-secondary text-white'
+                                    : 'bg-gray-200 text-black'
+                            }`}
+                            key={tag?.id}
+                            onClick={() => handleTopicClick(tag)}
+                        >
+                            {tag.tagName}
+                        </Button>
+                    ))}
+                </ScrollArea>
             </div>
 
             <DataTable

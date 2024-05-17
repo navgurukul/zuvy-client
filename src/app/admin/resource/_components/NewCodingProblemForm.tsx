@@ -54,10 +54,12 @@ export default function NewCodingProblemForm({
     tags,
     setIsDialogOpen,
     getAllCodingQuestions,
+    setCodingQuestions,
 }: {
     tags: any
     setIsDialogOpen: any
     getAllCodingQuestions: any
+    setCodingQuestions: any
 }) {
     const [testCases, setTestCases] = useState([{ id: 1 }])
 
@@ -89,29 +91,39 @@ export default function NewCodingProblemForm({
     })
 
     async function createCodingQuestion(data: any) {
-        const response = await api.post(
-            `codingPlatform/createCodingQuestion`,
-            data
-        )
-        if (response) {
+        try {
+            const response = await api.post(
+                `codingPlatform/createCodingQuestion`,
+                data
+            )
+
             toast({
                 title: 'Success',
                 description: 'Question Created Successfully',
                 className: 'text-start capitalize',
             })
             setIsDialogOpen(false)
+        } catch (error: any) {
+            toast({
+                title: 'Error',
+                description:
+                    error?.response?.data?.message || 'An error occurred',
+                className: 'text-start capitalize',
+            })
         }
     }
 
     const handleSubmit = (values: z.infer<typeof formSchema>) => {
-        console.log(values)
+        const auth = JSON.parse(localStorage.getItem('AUTH') || '{}')
+        const authorId = Number(auth.id)
+
         const formattedData = {
             title: values.title,
             description: values.problemStatement,
             difficulty: values.difficulty,
             tags: values.topics,
             constraints: values.constraints,
-            authorId: 45499,
+            authorId: authorId,
             examples: [
                 {
                     inputs: {
@@ -132,7 +144,7 @@ export default function NewCodingProblemForm({
             solution: 'solution of the coding question',
         }
         createCodingQuestion(formattedData)
-        getAllCodingQuestions()
+        getAllCodingQuestions(setCodingQuestions)
     }
 
     // const accountType = form.watch('accountType')

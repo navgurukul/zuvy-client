@@ -8,7 +8,14 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { DELETE_CODING_QUESTION_CONFIRMATION } from '@/utils/constant'
 import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
-import { getDeleteCodingQuestion } from '@/store/store'
+import { getDeleteCodingQuestion, getcodingQuestionState } from '@/store/store'
+import { cn, difficultyColor } from '@/lib/utils'
+import {
+    handleConfirm,
+    handleDelete,
+    handleDeleteModal,
+    getAllCodingQuestions,
+} from '@/utils/admin'
 
 export const columns: ColumnDef<CodingQuestion>[] = [
     {
@@ -35,7 +42,12 @@ export const columns: ColumnDef<CodingQuestion>[] = [
             const codingQuestion = row.original
 
             return (
-                <div className="flex items-center">
+                <div
+                    className={cn(
+                        `flex items-center font-semibold text-secondary`,
+                        difficultyColor(codingQuestion.difficulty)
+                    )}
+                >
                     {codingQuestion.difficulty}
                 </div>
             )
@@ -65,33 +77,15 @@ export const columns: ColumnDef<CodingQuestion>[] = [
         // cell: ({ row }) => <DataTableRowActions row={row} />,
         cell: ({ row }) => {
             const codingQuestion = row.original
-            const { isDeleteModalOpen, setDeleteModalOpen } =
-                getDeleteCodingQuestion()
+            const {
+                isDeleteModalOpen,
+                setDeleteModalOpen,
+                deleteCodingQuestionId,
+                setDeleteCodingQuestionId,
+            } = getDeleteCodingQuestion()
 
-            function handleDelete() {
-                api({
-                    method: 'delete',
-                    url: 'Content/deleteCodingQuestion',
-                    data: {
-                        questionIds: [codingQuestion.id],
-                    },
-                }).then((res) => {
-                    toast({
-                        title: 'Success',
-                        description: res.data.message,
-                        className: 'text-start capitalize',
-                    })
-                })
-            }
-
-            const handleDeleteModal = () => {
-                setDeleteModalOpen(true)
-            }
-
-            const handleConfirm = () => {
-                handleDelete()
-                setDeleteModalOpen(false)
-            }
+            const { codingQuestions, setCodingQuestions } =
+                getcodingQuestionState()
 
             return (
                 <>
@@ -100,7 +94,11 @@ export const columns: ColumnDef<CodingQuestion>[] = [
                         <Trash2
                             onClick={(e) => {
                                 e.stopPropagation()
-                                handleDeleteModal()
+                                handleDeleteModal(
+                                    setDeleteModalOpen,
+                                    setDeleteCodingQuestionId,
+                                    codingQuestion
+                                )
                             }}
                             className="text-destructive cursor-pointer"
                             size={20}
@@ -108,7 +106,15 @@ export const columns: ColumnDef<CodingQuestion>[] = [
                         <DeleteConfirmationModal
                             isOpen={isDeleteModalOpen}
                             onClose={() => setDeleteModalOpen(false)}
-                            onConfirm={handleConfirm}
+                            onConfirm={() => {
+                                handleConfirm(
+                                    handleDelete,
+                                    setDeleteModalOpen,
+                                    deleteCodingQuestionId,
+                                    getAllCodingQuestions,
+                                    setCodingQuestions
+                                )
+                            }}
                             modalText={DELETE_CODING_QUESTION_CONFIRMATION}
                             buttonText="Delete Coding Question"
                             input={false}
