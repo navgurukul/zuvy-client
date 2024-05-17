@@ -20,6 +20,8 @@ import { DataTablePagination } from '@/app/_components/datatable/data-table-pagi
 
 function Page() {
     const [classType, setClassType] = useState('upcoming')
+    const [position, setPosition] = useState(POSITION)
+
     const [allClasses, setAllClasses] = useState([])
     const [bootcampData, setBootcampData] = useState([])
     const [batchId, setBatchId] = useState(0)
@@ -83,32 +85,94 @@ function Page() {
         }
     }, [classType, ongoingClasses, completedClasses, upcomingClasses])
 
-    useEffect(() => {
-        let fetchId
-        let fetchUrl
+    const getFetchParameters = useCallback(() => {
         if (!batchId) {
-            fetchId = courseData?.id
-            fetchUrl = 'getClassesByBootcampId'
+            return {
+                fetchId: courseData?.id,
+                fetchUrl: 'getClassesByBootcampId',
+            }
         } else {
-            fetchId = batchId
-            fetchUrl = 'getClassesByBatchId'
+            return { fetchId: batchId, fetchUrl: 'getClassesByBatchId' }
         }
-
-        if (courseData?.id) {
-            api.get(
-                `/classes/${fetchUrl}/${fetchId}?offset=${offset}&limit=${10}`
+    }, [courseData, batchId])
+    const fetchClasses = useCallback(
+        async (
+            fetchUrl: string,
+            fetchId: number,
+            offset: number,
+            position: string
+        ) => {
+            const response = await api.get(
+                `/classes/${fetchUrl}/${fetchId}?offset=${offset}&limit=${position}`
             )
-                .then((response) => {
-                    setUpcomingClasses(response.data.upcomingClasses)
-                    setOngoingClasses(response.data.ongoingClasses)
-                    setCompletedClasses(response.data.completedClasses)
-                    handleClassType(classType)
-                })
-                .catch((error) => {
-                    console.log('Error fetching classes:', error)
-                })
+            return response.data
+        },
+        []
+    )
+    const handleFetchResponse = useCallback(
+        (data: any) => {
+            setUpcomingClasses(data.upcomingClasses)
+            setOngoingClasses(data.ongoingClasses)
+            setCompletedClasses(data.completedClasses)
+            handleClassType(classType)
+        },
+        [classType, handleClassType]
+    )
+    const handleFetchError = (error: any) => {
+        console.log('Error fetching classes:', error)
+    }
+    useEffect(() => {
+        const { fetchId, fetchUrl } = getFetchParameters()
+
+        if (fetchId) {
+            fetchClasses(fetchUrl, fetchId, offset, position)
+                .then(handleFetchResponse)
+                .catch(handleFetchError)
         }
-    }, [courseData, batchId, classType, offset, limit, handleClassType])
+    }, [
+        getFetchParameters,
+        fetchClasses,
+        classType,
+        offset,
+        limit,
+        handleClassType,
+        position,
+        handleFetchResponse,
+    ])
+    // useEffect(() => {
+    //     let fetchId
+    //     let fetchUrl
+    //     if (!batchId) {
+    //         fetchId = courseData?.id
+    //         fetchUrl = 'getClassesByBootcampId'
+    //     } else {
+    //         fetchId = batchId
+    //         fetchUrl = 'getClassesByBatchId'
+    //     }
+
+    //     if (courseData?.id) {
+    //         api.get(
+    //             `/classes/${fetchUrl}/${fetchId}?offset=${offset}&limit=${position}`
+    //         )
+    //             .then((response) => {
+    //                 setUpcomingClasses(response.data.upcomingClasses)
+    //                 setOngoingClasses(response.data.ongoingClasses)
+    //                 setCompletedClasses(response.data.completedClasses)
+    //                 handleClassType(classType)
+    //             })
+    //             .catch((error) => {
+    //                 console.log('Error fetching classes:', error)
+    //             })
+    //     }
+    // }, [
+    //     courseData,
+    //     batchId,
+    //     classType,
+    //     offset,
+    //     limit,
+    //     handleClassType,
+    //     position,
+    // ])
 
     const CreateSession = () => {
         const [title, setTitle] = useState('')
@@ -159,77 +223,84 @@ function Page() {
     }
 
     return (
-        <div>
-            <div className=" relative flex text-start gap-6 my-6 max-w-[800px]">
-                <Combobox
-                    data={bootcampData}
-                    title={'Batch'}
-                    onChange={handleComboboxChange}
-                    batch={false}
-                />
-                <Combobox
-                    data={[]}
-                    title={'Module'}
-                    onChange={function (selectedValue: string): void {
-                        throw new Error('Function not implemented.')
-                    }}
-                    isDisabled
-                    batch={false}
-                />
-            </div>
-            <div className="flex justify-between">
-                <div className="w-[400px] pr-3">
-                    <Input
-                        type="text"
-                        placeholder="Search Classes"
-                        className="max-w-[500px]"
-                        disabled
+        <>
+            <div>
+                <div className=" relative flex text-start gap-6 my-6 max-w-[800px]">
+                    <Combobox
+                        data={bootcampData}
+                        title={'Batch'}
+                        onChange={handleComboboxChange}
+                        batch={false}
+                    />
+                    <Combobox
+                        data={[]}
+                        title={'Module'}
+                        onChange={function (selectedValue: string): void {
+                            throw new Error('Function not implemented.')
+                        }}
+                        isDisabled
+                        batch={false}
                     />
                 </div>
-                <CreateSession />
-            </div>
-            <div className="flex justify-start gap-6 my-6">
-                <Badge
-                    variant={classType === 'active' ? 'secondary' : 'outline'}
-                    onClick={() => handleClassType('active')}
-                    className="rounded-md cursor-pointer"
-                >
-                    Active Classes
-                </Badge>
-                <Badge
-                    variant={classType === 'upcoming' ? 'secondary' : 'outline'}
-                    onClick={() => handleClassType('upcoming')}
-                    className="rounded-md cursor-pointer"
-                >
-                    Upcoming Classes
-                </Badge>
-                <Badge
-                    variant={classType === 'complete' ? 'secondary' : 'outline'}
-                    onClick={() => handleClassType('complete')}
-                    className="rounded-md cursor-pointer"
-                >
-                    Completed Classes
-                </Badge>
-            </div>
-            {allClasses && allClasses.length > 0 ? (
-                <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
-                    {allClasses.map((classData: any, index: any) => {
-                        return classType === 'complete' ? (
-                            <RecordingCard
-                                classData={classData}
-                                key={index}
-                                // classType={classType}
-                                isAdmin
-                            />
-                        ) : (
-                            <ClassCard
-                                classData={classData}
-                                key={index}
-                                classType={classType}
-                            />
-                        )
-                    })}
-                    {/* <div className="flex justify-center items-center my-4 col-span-3">
+                <div className="flex justify-between">
+                    <div className="w-[400px] pr-3">
+                        <Input
+                            type="text"
+                            placeholder="Search Classes"
+                            className="max-w-[500px]"
+                            disabled
+                        />
+                    </div>
+                    <CreateSession />
+                </div>
+                <div className="flex justify-start gap-6 my-6">
+                    <Badge
+                        variant={
+                            classType === 'active' ? 'secondary' : 'outline'
+                        }
+                        onClick={() => handleClassType('active')}
+                        className="rounded-md cursor-pointer"
+                    >
+                        Active Classes
+                    </Badge>
+                    <Badge
+                        variant={
+                            classType === 'upcoming' ? 'secondary' : 'outline'
+                        }
+                        onClick={() => handleClassType('upcoming')}
+                        className="rounded-md cursor-pointer"
+                    >
+                        Upcoming Classes
+                    </Badge>
+                    <Badge
+                        variant={
+                            classType === 'complete' ? 'secondary' : 'outline'
+                        }
+                        onClick={() => handleClassType('complete')}
+                        className="rounded-md cursor-pointer"
+                    >
+                        Completed Classes
+                    </Badge>
+                </div>
+                {allClasses && allClasses.length > 0 ? (
+                    <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
+                        {allClasses.map((classData: any, index: any) => {
+                            return classType === 'complete' ? (
+                                <RecordingCard
+                                    classData={classData}
+                                    key={index}
+                                    // classType={classType}
+                                    isAdmin
+                                />
+                            ) : (
+                                <ClassCard
+                                    classData={classData}
+                                    key={index}
+                                    classType={classType}
+                                />
+                            )
+                        })}
+                        {/* <div className="flex justify-center items-center my-4 col-span-3">
                         <Button
                             onClick={() => {
                                 setOffset(offset - 1)
@@ -248,35 +319,39 @@ function Page() {
                             Next
                         </Button>
                     </div> */}
-                </div>
-            ) : (
-                <div className="w-full flex mb-10 items-center flex-col gap-y-3 justify-center  absolute text-center mt-2">
-                    <Image
-                        src={'/emptyStates/undraw_online_learning_re_qw08.svg'}
-                        height={200}
-                        width={200}
-                        alt="batchEmpty State"
-                    />
-                    <p>
-                        Create a session to start engagement with the learners
-                        for course lessons or doubts
-                    </p>
-                    <CreateSession />
-                </div>
-            )}
-
-            {/* <DataTablePagination
-                totalStudents={totalStudents}
-                position={position}
-                setPosition={setPosition}
-                pages={pages}
-                lastPage={lastPage}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                fetchStudentData={fetchStudentData}
-                setOffset={setOffset} */}
-            {/* /> */}
-        </div>
+                        <div className="flex justify-end w-[1450px]">
+                            {/* <DataTablePagination
+                                totalStudents={totalStudents}
+                                position={position}
+                                setPosition={setPosition}
+                                pages={pages}
+                                // lastPage={lastPage}
+                                currentPage={currentPage}
+                                setCurrentPage={setCurrentPage}
+                                // fetchStudentData={fetchStudentData}
+                                setOffset={setOffset}
+                            /> */}
+                        </div>
+                    </div>
+                ) : (
+                    <div className="w-full flex mb-10 items-center flex-col gap-y-3 justify-center  absolute text-center mt-2">
+                        <Image
+                            src={
+                                '/emptyStates/undraw_online_learning_re_qw08.svg'
+                            }
+                            height={200}
+                            width={200}
+                            alt="batchEmpty State"
+                        />
+                        <p>
+                            Create a session to start engagement with the
+                            learners for course lessons or doubts
+                        </p>
+                        <CreateSession />
+                    </div>
+                )}
+            </div>
+        </>
     )
 }
 

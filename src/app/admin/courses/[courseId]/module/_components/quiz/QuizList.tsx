@@ -1,31 +1,29 @@
 import { Separator } from '@/components/ui/separator'
-import { Plus, PlusCircle, XCircle } from 'lucide-react'
-import React from 'react'
+import { PlusCircle } from 'lucide-react'
+import { difficultyColor } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 
-function QuizList({ questionData, addQuesiton = [], handleAddQuestion }: any) {
-    function getColorByDifficulty(difficulty: string): string {
-        switch (difficulty) {
-            case 'Hard':
-                return 'text-red-600'
-            case 'Medium':
-                return 'text-yellow-600'
-            case 'Easy':
-                return 'text-secondary'
-            default:
-                return ''
-        }
-    }
+function QuizList({
+    questionData,
+    addQuestion = [],
+    handleAddQuestion,
+}: {
+    questionData: any[]
+    addQuestion: any[]
+    handleAddQuestion: (questions: any[]) => void
+}) {
+    console.log(addQuestion)
 
     return (
         <>
             {questionData.map((question: any) => {
-                const isSelected = addQuesiton.some(
+                const isSelected = addQuestion?.some(
                     (quest: any) => quest?.id === question.id
                 )
-
                 const handleClick = () => {
                     if (!isSelected) {
-                        handleAddQuestion([...addQuesiton, question])
+                        handleAddQuestion([...addQuestion, question])
+                    } else {
                     }
                 }
                 return (
@@ -39,18 +37,36 @@ function QuizList({ questionData, addQuesiton = [], handleAddQuestion }: any) {
                                     {question.question}
                                 </h1>
                                 <span
-                                    className={`font-semibold ${getColorByDifficulty(
+                                    className={`font-semibold ${difficultyColor(
                                         question.difficulty
                                     )}`}
                                 >
                                     {question.difficulty}
                                 </span>
                             </div>
-                            <PlusCircle
-                                size={20}
-                                className="text-secondary cursor-pointer "
-                                onClick={handleClick}
-                            />
+                            {isSelected ? (
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    className="lucide lucide-circle-check"
+                                >
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="m9 12 2 2 4-4" />
+                                </svg>
+                            ) : (
+                                <PlusCircle
+                                    size={20}
+                                    className="text-secondary cursor-pointer"
+                                    onClick={handleClick}
+                                />
+                            )}
                         </div>
                         <Separator className="my-4" />
                     </div>

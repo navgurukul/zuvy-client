@@ -31,6 +31,7 @@ export interface Options {
     option3: string
     option4: string
 }
+
 function QuizLibrary({
     activeTab,
     setActiveTab,
@@ -39,8 +40,8 @@ function QuizLibrary({
 }: {
     activeTab: string
     setActiveTab: (tab: string) => void
-    addQuestion: any
-    handleAddQuestion: any
+    addQuestion: any[]
+    handleAddQuestion: (questions: any[]) => void
 }) {
     const [search, setSearch] = useState<string>('')
     const debouncedSeatch = useDebounce(search, 1000)
@@ -55,9 +56,9 @@ function QuizLibrary({
         mediumQuestions: [],
         hardQuestions: [],
     })
+
     const handleTabChange = (tab: string) => {
         setActiveTab(tab)
-        // setSearch(' ')
     }
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -129,6 +130,7 @@ function QuizLibrary({
     useEffect(() => {
         getQuizQuestionHandler()
     }, [])
+
     useEffect(() => {
         questionSearchHandler(activeTab)
     }, [debouncedSeatch, questionSearchHandler, activeTab])
@@ -164,7 +166,6 @@ function QuizLibrary({
                     orientation="vertical"
                     className="mx-4 w-[2px] h-15 rounded "
                 />
-
                 <div className="flex items-start gap-x-4">
                     <Button
                         onClick={() => handleTabChange('anydifficulty')}
