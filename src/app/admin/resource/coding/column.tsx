@@ -1,16 +1,13 @@
 'use client'
-import Image from 'next/image'
 
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
-
-import { Task } from '@/utils/data/schema'
 import { CodingQuestion } from '@/utils/data/schema'
 import { Edit, Pencil, Trash2 } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { DELETE_CODING_QUESTION_CONFIRMATION } from '@/utils/constant'
-import DeleteConfirmationModal from '../../courses/[courseId]/_components/deleteModal'
+import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
 import { getDeleteCodingQuestion } from '@/store/store'
 
 export const columns: ColumnDef<CodingQuestion>[] = [
@@ -91,6 +88,11 @@ export const columns: ColumnDef<CodingQuestion>[] = [
                 setDeleteModalOpen(true)
             }
 
+            const handleConfirm = () => {
+                handleDelete()
+                setDeleteModalOpen(false)
+            }
+
             return (
                 <>
                     <div className="flex">
@@ -106,10 +108,7 @@ export const columns: ColumnDef<CodingQuestion>[] = [
                         <DeleteConfirmationModal
                             isOpen={isDeleteModalOpen}
                             onClose={() => setDeleteModalOpen(false)}
-                            onConfirm={() => {
-                                handleDelete()
-                                setDeleteModalOpen(false)
-                            }}
+                            onConfirm={handleConfirm}
                             modalText={DELETE_CODING_QUESTION_CONFIRMATION}
                             buttonText="Delete Coding Question"
                             input={false}

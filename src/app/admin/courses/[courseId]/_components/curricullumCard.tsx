@@ -9,7 +9,7 @@ import {
     Trash2,
 } from 'lucide-react'
 import React, { useState } from 'react'
-import DeleteConfirmationModal from './deleteModal'
+import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
 import { api } from '@/utils/axios.config'
 import { useRouter } from 'next/navigation'
 import { DELETE_MODULE_CONFIRMATION } from '@/utils/constant'

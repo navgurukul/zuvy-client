@@ -81,7 +81,6 @@ const AddVideo = ({
         links: content.contentDetails[0]?.links ?? [],
     })
 
-    console.log(newContent)
     const handleUploadClick = () => {
         if (fileInputRef.current) {
             fileInputRef.current.click()
