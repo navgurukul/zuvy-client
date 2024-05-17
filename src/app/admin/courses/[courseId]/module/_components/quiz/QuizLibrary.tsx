@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
     Select,
     SelectContent,
@@ -31,7 +31,6 @@ export interface Options {
     option3: string
     option4: string
 }
-
 function QuizLibrary({
     activeTab,
     setActiveTab,
@@ -40,8 +39,8 @@ function QuizLibrary({
 }: {
     activeTab: string
     setActiveTab: (tab: string) => void
-    addQuestion: any[]
-    handleAddQuestion: (questions: any[]) => void
+    addQuestion: any
+    handleAddQuestion: any
 }) {
     const [search, setSearch] = useState<string>('')
     const debouncedSeatch = useDebounce(search, 1000)
@@ -56,39 +55,42 @@ function QuizLibrary({
         mediumQuestions: [],
         hardQuestions: [],
     })
-
     const handleTabChange = (tab: string) => {
         setActiveTab(tab)
+        // setSearch(' ')
     }
+    console.log(addQuestion)
 
-    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) =>
         setSearch(e.target.value)
-    }
 
-    const questionSearchHandler = useCallback(
-        async (difficulty: any) => {
+    const fetchQuizQuestions = useCallback(
+        async (difficulty: string = '', searchTerm: string = '') => {
             try {
                 let endpoint = '/Content/allQuizQuestions'
+                const params = new URLSearchParams()
                 if (difficulty && difficulty !== 'anydifficulty') {
-                    endpoint += `?difficulty=${difficulty}`
-                    if (debouncedSeatch) {
-                        endpoint += `&searchTerm=${debouncedSeatch}`
-                    }
-                } else if (debouncedSeatch) {
-                    endpoint += `?searchTerm=${debouncedSeatch}`
+                    params.append('difficulty', difficulty)
+                }
+                if (searchTerm) {
+                    params.append('searchTerm', searchTerm)
                 }
 
-                const response = await api.get(endpoint)
-                const allQuestions = response.data
+                const response = await api.get(
+                    `${endpoint}?${params.toString()}`
+                )
+                const allQuestions: quizData[] = response.data
+
                 const easyQuestions = allQuestions.filter(
-                    (question: any) => question.difficulty === 'Easy'
+                    (question) => question.difficulty === 'Easy'
                 )
                 const mediumQuestions = allQuestions.filter(
-                    (question: any) => question.difficulty === 'Medium'
+                    (question) => question.difficulty === 'Medium'
                 )
                 const hardQuestions = allQuestions.filter(
-                    (question: any) => question.difficulty === 'Hard'
+                    (question) => question.difficulty === 'Hard'
                 )
+
                 setQuizData({
                     allQuestions,
                     easyQuestions,
@@ -96,45 +98,38 @@ function QuizLibrary({
                     hardQuestions,
                 })
             } catch (error) {
-                console.error('Error searching quiz questions:', error)
+                console.error('Error fetching quiz questions:', error)
             }
         },
-        [debouncedSeatch]
+        []
     )
 
-    const getQuizQuestionHandler = async () => {
-        try {
-            const response = await api.get(`/Content/allQuizQuestions`)
-            const allQuestions = response.data
-            const easyQuestions = allQuestions.filter(
-                (question: any) => question.difficulty === 'Easy'
-            )
-            const mediumQuestions = allQuestions.filter(
-                (question: any) => question.difficulty === 'Medium'
-            )
-            const hardQuestions = allQuestions.filter(
-                (question: any) => question.difficulty === 'Hard'
-            )
-
-            setQuizData({
-                allQuestions,
-                easyQuestions,
-                mediumQuestions,
-                hardQuestions,
-            })
-        } catch (error) {
-            console.error('Error fetching quiz questions:', error)
-        }
-    }
+    useEffect(() => {
+        fetchQuizQuestions()
+    }, [fetchQuizQuestions])
 
     useEffect(() => {
-        getQuizQuestionHandler()
-    }, [])
+        fetchQuizQuestions(activeTab, debouncedSeatch)
+    }, [debouncedSeatch, fetchQuizQuestions, activeTab])
 
-    useEffect(() => {
-        questionSearchHandler(activeTab)
-    }, [debouncedSeatch, questionSearchHandler, activeTab])
+    const renderQuizList = useMemo(() => {
+        const questionData =
+            activeTab === 'Easy'
+                ? quizData.easyQuestions
+                : activeTab === 'Medium'
+                ? quizData.mediumQuestions
+                : activeTab === 'Hard'
+                ? quizData.hardQuestions
+                : quizData.allQuestions
 
+        return (
+            <QuizList
+                addQuestion={addQuestion}
+                handleAddQuestion={handleAddQuestion}
+                questionData={questionData}
+            />
+        )
+    }, [activeTab, quizData, addQuestion, handleAddQuestion])
     return (
         <div className="w-1/2 flex flex-col gap-3">
             <h2 className="text-left text-gray-700 font-semibold">
@@ -166,79 +161,24 @@ function QuizLibrary({
                     orientation="vertical"
                     className="mx-4 w-[2px] h-15 rounded "
                 />
+
                 <div className="flex items-start gap-x-4">
-                    <Button
-                        onClick={() => handleTabChange('anydifficulty')}
-                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
-                            activeTab === 'anydifficulty'
-                                ? 'bg-secondary  text-white'
-                                : 'bg-gray-200 text-gray-800'
-                        }`}
-                    >
-                        Any Difficulty
-                    </Button>
-                    <Button
-                        onClick={() => handleTabChange('Easy')}
-                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
-                            activeTab === 'Easy'
-                                ? 'bg-secondary  text-white'
-                                : 'bg-gray-200 text-gray-800'
-                        }`}
-                    >
-                        Easy
-                    </Button>
-                    <Button
-                        onClick={() => handleTabChange('Medium')}
-                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
-                            activeTab === 'Medium'
-                                ? 'bg-secondary  text-white'
-                                : 'bg-gray-200 text-gray-800'
-                        }`}
-                    >
-                        Medium
-                    </Button>
-                    <Button
-                        onClick={() => handleTabChange('Hard')}
-                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
-                            activeTab === 'Hard'
-                                ? 'bg-secondary  text-white'
-                                : 'bg-gray-200 text-gray-800'
-                        }`}
-                    >
-                        Hard
-                    </Button>
+                    {['anydifficulty', 'Easy', 'Medium', 'Hard'].map((tab) => (
+                        <Button
+                            key={tab}
+                            onClick={() => handleTabChange(tab)}
+                            className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
+                                activeTab === tab
+                                    ? 'bg-secondary text-white'
+                                    : 'bg-gray-200 text-gray-800'
+                            }`}
+                        >
+                            {tab === 'anydifficulty' ? 'Any Difficulty' : tab}
+                        </Button>
+                    ))}
                 </div>
             </div>
-            <div className="w-full h-max-content my-6">
-                {activeTab === 'anydifficulty' && (
-                    <QuizList
-                        addQuestion={addQuestion}
-                        handleAddQuestion={handleAddQuestion}
-                        questionData={quizData.allQuestions}
-                    />
-                )}
-                {activeTab === 'Easy' && (
-                    <QuizList
-                        addQuestion={addQuestion}
-                        handleAddQuestion={handleAddQuestion}
-                        questionData={quizData.easyQuestions}
-                    />
-                )}
-                {activeTab === 'Medium' && (
-                    <QuizList
-                        addQuestion={addQuestion}
-                        handleAddQuestion={handleAddQuestion}
-                        questionData={quizData.mediumQuestions}
-                    />
-                )}
-                {activeTab === 'Hard' && (
-                    <QuizList
-                        addQuestion={addQuestion}
-                        handleAddQuestion={handleAddQuestion}
-                        questionData={quizData.hardQuestions}
-                    />
-                )}
-            </div>
+            <div className="w-full h-max-content my-6">{renderQuizList}</div>
         </div>
     )
 }
