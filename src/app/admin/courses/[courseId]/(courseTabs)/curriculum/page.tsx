@@ -7,10 +7,11 @@ import moment from 'moment'
 import { api } from '@/utils/axios.config'
 import { getCourseData } from '@/store/store'
 import { Button } from '@/components/ui/button'
-import CurricullumCard from '../../_components/curricullumCard'
+import CurricullumCard from '@/app/admin/courses/[courseId]/_components/curricullumCard'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
-import NewModuleDialog from '../../_components/newModuleDialog'
+import NewModuleDialog from '@/app/admin/courses/[courseId]/_components/newModuleDialog'
 import { Reorder } from 'framer-motion'
+import { toast } from '@/components/ui/use-toast'
 
 interface CurriculumItem {
     id: number
@@ -65,6 +66,21 @@ function Page() {
             ...moduleData,
             timeAlloted: totalSeconds,
         })
+            .then((res) => {
+                toast({
+                    title: 'Success',
+                    description: 'Module Created Successfully',
+                    className: 'text-start capitalize',
+                })
+                fetchCourseModules()
+            })
+            .catch((error) => {
+                toast({
+                    title: 'Error',
+                    description: 'Error creating module',
+                    className: 'text-start capitalize',
+                })
+            })
     }
 
     const fetchCourseModules = async () => {
@@ -72,12 +88,13 @@ function Page() {
             const response = await api.get(
                 `/content/allModules/${courseData?.id}`
             )
-            const sortedData = response.data.sort(
-                (a: any, b: any) => a.order - b.order
-            )
-            setCurriculum(sortedData)
+            setCurriculum(response.data)
         } catch (error) {
-            console.error('Error fetching course details:', error)
+            toast({
+                title: 'Error',
+                description: 'Failed to fetch course Modules',
+                className: 'text-start capitalize',
+            })
         }
     }
 
@@ -111,12 +128,17 @@ function Page() {
                     reOrderDto: { newOrder: newOrder + 1 },
                 }
             )
-            if (response.data) {
-                console.log(newOrderModules)
-            }
         } catch (error) {
-            console.error('Error updating module order:', error)
+            toast({
+                title: 'Error',
+                description: 'Error updating module order',
+                className: 'text-start capitalize',
+            })
         }
+    }
+
+    const handleReorderModules = async (newOrderModules: any) => {
+        handleReorder(newOrderModules)
     }
 
     return (
@@ -145,18 +167,13 @@ function Page() {
                     <Reorder.Group
                         className="w-1/2"
                         values={curriculum}
-                        onReorder={async (newOrderModules: any) => {
-                            handleReorder(newOrderModules)
-                        }}
+                        onReorder={handleReorderModules}
                     >
                         {curriculum.map(
                             (item: CurriculumItem, index: number) => (
                                 <div key={item.id}>
                                     <Reorder.Item value={item} key={item.id}>
-                                        <div
-                                            // href={`/admin/courses/${courseData?.id}/module/${id}`}
-                                            className="bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl  "
-                                        >
+                                        <div className="bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl  ">
                                             <CurricullumCard
                                                 moduleId={item.id}
                                                 courseId={courseData?.id ?? 0}

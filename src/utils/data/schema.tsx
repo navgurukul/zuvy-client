@@ -14,4 +14,28 @@ export const taskSchema = z.object({
     attendance: z.number(),
 })
 
+export const testCaseSchema = z.object({
+    input: z.array(z.number()),
+    output: z.array(z.number()),
+})
+
+export const codingQuestionSchema = z.object({
+    id: z.number(),
+    title: z.string(),
+    description: z.string(),
+    difficulty: z.string(),
+    tags: z.number(),
+    constraints: z.string(),
+    authorId: z.number(),
+    inputBase64: z.null().optional(),
+    examples: z.array(testCaseSchema),
+    testCases: z.array(testCaseSchema),
+    expectedOutput: z.array(z.number()),
+    solution: z.string(),
+    createdAt: z.string(),
+    updatedAt: z.string(),
+})
+
+export type CodingQuestion = z.infer<typeof codingQuestionSchema>
+
 export type Task = z.infer<typeof taskSchema>

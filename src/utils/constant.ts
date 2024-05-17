@@ -21,3 +21,5 @@ export const OFFSET = 0
 export const DELETE_MODULE_CONFIRMATION="This action cannot be undone. This will permanently delete the module from this bootcamp"
 
 export const DELETE_CHAPTER_CONFIRMATION="This action cannot be undone. This will permanently delete the module from this bootcamp"
+
+export const DELETE_CODING_QUESTION_CONFIRMATION="This action cannot be undone. This will permanently delete the coding question"
