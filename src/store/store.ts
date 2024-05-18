@@ -1,3 +1,4 @@
+import { set } from 'date-fns';
 import { create } from 'zustand'
 import { useEffect } from 'react'
 import {api} from '@/utils/axios.config'
@@ -119,6 +120,42 @@ export const getStoreStudentData = create<storeStudentData>((set) => ({
     studentsData: [],
     setStoreStudentData: (newValue: any[]) => {
         set({ studentsData: newValue })
+    },
+}))
+
+// ------------------------------
+// ------------------------------
+
+type codingQuestions = {
+    codingQuestions: any[]
+    setCodingQuestions: (newValue: any[]) => void
+}
+
+export const getcodingQuestionState = create<codingQuestions>((set) => ({
+    codingQuestions: [],
+    setCodingQuestions: (newValue: any[]) => {
+        set({ codingQuestions: newValue })
+    },
+}))
+
+// ------------------------------
+
+
+type deleteCodingQuestion = {
+    isDeleteModalOpen: boolean
+    setDeleteModalOpen : (newValue: boolean) => void
+    deleteCodingQuestionId: null,
+    setDeleteCodingQuestionId: (newValue: any) => void
+}
+
+export const getDeleteCodingQuestion = create<deleteCodingQuestion>((set) => ({
+    isDeleteModalOpen: false,
+    setDeleteModalOpen: (newValue: boolean) => {
+        set({ isDeleteModalOpen: newValue })
+    },
+    deleteCodingQuestionId: null,
+    setDeleteCodingQuestionId: (newValue: any) => {
+        set({ deleteCodingQuestionId: newValue })
     },
 }))
 

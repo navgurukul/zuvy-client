@@ -13,7 +13,7 @@ import ChapterModal from '../_components/ChapterModal'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import AddArticle from '../_components/Article/AddArticle'
-import Code from '../_components/codingChallenge/CodingChallenge'
+import CodingChallenge from '../_components/codingChallenge/CodingChallenge'
 import AssessmentItem from '../_components/AssessmentItem'
 import { Reorder } from 'framer-motion'
 
@@ -68,6 +68,7 @@ interface QuizQuestionDetails {
 interface Module {
     chapterId: number
     topicName: string
+    chapterTitle: string
     // include other properties as needed
 }
 
@@ -86,6 +87,7 @@ function Page({
     const [topicId, setTopicId] = useState(0)
     const [key, setKey] = useState(0)
     const { courseId } = useParams()
+    const [activeChapterTitle, setActiveChapterTitle] = useState('')
 
     const [moduleData, setModuleData] = useState<Module[]>([])
     const crumbs = [
@@ -131,6 +133,9 @@ function Page({
                 const currentModule = moduleData.find(
                     (module: any) => module.chapterId === chapterId
                 )
+                if (currentModule) {
+                    setActiveChapterTitle(currentModule?.chapterTitle)
+                }
 
                 if (currentModule?.topicName === 'Quiz') {
                     setChapterContent(
@@ -138,10 +143,7 @@ function Page({
                             .quizQuestionDetails as QuizQuestionDetails[]
                     )
                 } else if (currentModule?.topicName === 'Coding Question') {
-                    setChapterContent(
-                        response.data
-                            .codingQuestionDetails as CodingQuestionDetails[]
-                    )
+                    setChapterContent(response.data)
                 } else {
                     setChapterContent(response.data)
                 }
@@ -170,7 +172,13 @@ function Page({
             case 2:
                 return <AddArticle content={chapterContent} />
             case 3:
-                return <Code content={chapterContent} />
+                return (
+                    <CodingChallenge
+                        moduleId={params.moduleId}
+                        content={chapterContent}
+                        activeChapterTitle={activeChapterTitle}
+                    />
+                )
             case 4:
                 return <Quiz content={chapterContent} />
             case 5:
@@ -220,9 +228,6 @@ function Page({
                 }
             )
             if (response.data) {
-                console.log(movedItem.chapterId, 'movedItem.chapterId')
-                console.log(movedItem.order, 'movedItem.order')
-                console.log(newOrderChapters, 'newOrderChapters')
                 setChapterData(newOrderChapters)
             }
         } catch (error) {
