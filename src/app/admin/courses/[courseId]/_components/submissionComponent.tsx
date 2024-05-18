@@ -5,8 +5,8 @@ type Props = {
     title: string
     studentsSubmitted: number
     totalSubmissions: number
-    index: number
     courseId: number
+    id: string
 }
 
 const SubmissionComponent = (props: Props) => {
@@ -22,11 +22,11 @@ const SubmissionComponent = (props: Props) => {
 
     return (
         <Link
-            href={`/admin/courses/${props.courseId}/submissions/practiceProblems/${props.index}`}
+            href={`/admin/courses/${props.courseId}/submissions/practiceProblems/${props.id}`}
         >
             <div className="lg:flex h-[100px] shadow-md  rounded-md p-4">
                 <div className="flex flex-col justify-between py-2 lg:mx-2">
-                    <h1 className="text-md font-semibold text-gray-800  dark:text-white ">
+                    <h1 className="text-md text-start font-semibold text-gray-800  dark:text-white ">
                         {props.title}
                     </h1>
 

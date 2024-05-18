@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -8,15 +8,33 @@ import { ArrowDownToLine, Search } from 'lucide-react'
 import PraticeProblems from '../../_components/PraticeProblems'
 import Assesments from '../../_components/Assesments'
 import Projects from '../../_components/Projects'
+import { api } from '@/utils/axios.config'
 
 const Page = ({ params }: { params: any }) => {
     const [activeTab, setActiveTab] = useState('practice')
+    const [submissions, setSubmissions] = useState([])
+    const [totalStudents, setTotalStudents] = useState(0)
 
     const handleTabChange = (tab: string) => {
         setActiveTab(tab)
     }
     // console.log(params)
-    const moduleNumbers = [1, 2, 3]
+
+    const getSubmissions = () => {
+        return api.get(
+            `/submission/submissionsOfPractiseProblems/${params.courseId}`
+        )
+    }
+    useEffect(() => {
+        if (params.courseId) {
+            const response = getSubmissions()
+            response.then((res) => {
+                setSubmissions(res.data.trackingData)
+                setTotalStudents(res.data.totalStudents)
+            })
+        }
+    }, [])
+
     return (
         <div className="">
             <div className="flex ml-5 items-start gap-x-3">
@@ -70,11 +88,13 @@ const Page = ({ params }: { params: any }) => {
             </div>
             <div className="w-full">
                 {activeTab === 'practice' &&
-                    moduleNumbers.map((moduleNo) => (
+                    submissions.map(({ id, name, moduleChapterData }) => (
                         <PraticeProblems
-                            key={moduleNo}
-                            moduleNo={moduleNo}
+                            key={id}
                             courseId={params.courseId}
+                            name={name}
+                            totalStudents={totalStudents}
+                            submission={moduleChapterData}
                         />
                     ))}
                 {activeTab === 'assessments' && (
