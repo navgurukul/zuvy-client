@@ -124,7 +124,6 @@ export const getStoreStudentData = create<storeStudentData>((set) => ({
 }))
 
 // ------------------------------
-// ------------------------------
 
 type codingQuestions = {
     codingQuestions: any[]
@@ -139,7 +138,6 @@ export const getcodingQuestionState = create<codingQuestions>((set) => ({
 }))
 
 // ------------------------------
-
 
 type deleteCodingQuestion = {
     isDeleteModalOpen: boolean
@@ -156,6 +154,39 @@ export const getDeleteCodingQuestion = create<deleteCodingQuestion>((set) => ({
     deleteCodingQuestionId: null,
     setDeleteCodingQuestionId: (newValue: any) => {
         set({ deleteCodingQuestionId: newValue })
+    },
+}))
+
+// ------------------------------
+
+type openEndedQuestions = {
+    openEndedQuestions: any[]
+    setOpenEndedQuestions: (newValue: any[]) => void
+}
+
+export const getopenEndedQuestionstate = create<openEndedQuestions>((set) => ({
+    openEndedQuestions: [],
+    setOpenEndedQuestions: (newValue: any[]) => {
+        set({ openEndedQuestions: newValue })
+    },
+}))
+
+// ------------------------------
+type deleteOpenEndedQuestion = {
+    isDeleteModalOpen: boolean
+    setDeleteModalOpen : (newValue: boolean) => void
+    deleteOpenEndedQuestionId: null,
+    setdeleteOpenEndedQuestionId: (newValue: any) => void
+}
+
+export const getdeleteOpenEndedQuestion = create<deleteOpenEndedQuestion>((set) => ({
+    isDeleteModalOpen: false,
+    setDeleteModalOpen: (newValue: boolean) => {
+        set({ isDeleteModalOpen: newValue })
+    },
+    deleteOpenEndedQuestionId: null,
+    setdeleteOpenEndedQuestionId: (newValue: any) => {
+        set({ deleteOpenEndedQuestionId: newValue })
     },
 }))
 

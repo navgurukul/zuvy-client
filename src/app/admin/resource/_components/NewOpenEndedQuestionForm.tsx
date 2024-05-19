@@ -25,38 +25,78 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Plus, X } from 'lucide-react'
+import { api } from '@/utils/axios.config'
+import { toast } from '@/components/ui/use-toast'
 
 type Props = {}
 const formSchema = z.object({
-    difficulty: z.enum(['Easy', 'Medium', 'hard'], {
-        required_error: 'You need to select a Difficulty  type.',
-    }),
-
-    topics: z.enum(['Strings', 'DSA', 'Development'], {
-        required_error: 'You need to select a Topic',
-    }),
     questionDescription: z.string(),
+    marks: z.string().transform((val) => parseInt(val, 10)),
+    topics: z.number(),
+    difficulty: z.string(),
 })
 
-const NewOpenEndedQuestionForm = (props: Props) => {
+function NewOpenEndedQuestionForm({
+    tags,
+    setIsDialogOpen,
+    getAllOpenEndedQuestions,
+    setOpenEndedQuestions,
+}: {
+    tags: any
+    setIsDialogOpen: any
+    getAllOpenEndedQuestions: any
+    setOpenEndedQuestions: any
+}) {
     const [testCases, setTestCases] = useState([{ id: 1 }])
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(0)
-    const [options, setOptions] = useState(['Easy', 'Medium', 'Hard']) // Initial state with three options
+    const [options, setOptions] = useState(['Easy', 'Medium', 'Hard'])
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            difficulty: 'Easy',
-            topics: 'DSA',
             questionDescription: '',
+            marks: 0,
+            topics: 0,
+            difficulty: 'Easy',
         },
     })
+
+    async function createOpenEndedQuestion(data: any) {
+        try {
+            const response = await api.post(
+                `Content/createOpenEndedQuestion`,
+                data
+            )
+
+            toast({
+                title: 'Success',
+                description: 'Open-Ended Question Created Successfully',
+                className: 'text-start capitalize',
+            })
+            setIsDialogOpen(false)
+        } catch (error: any) {
+            toast({
+                title: 'Error',
+                description:
+                    error?.response?.data?.message || 'An error occurred',
+                className: 'text-start capitalize',
+            })
+        }
+    }
 
     // const accountType = form.watch('accountType')
 
     const handleSubmit = (values: z.infer<typeof formSchema>) => {
-        console.log({ values })
+        const formattedData = {
+            question: values.questionDescription,
+            marks: values.marks,
+            tagId: values.topics,
+            difficulty: values.difficulty,
+        }
+        createOpenEndedQuestion(formattedData)
+        getAllOpenEndedQuestions(setOpenEndedQuestions)
     }
+
     return (
         <main className="flex  flex-col p-3 ">
             <Form {...form}>
@@ -114,26 +154,56 @@ const NewOpenEndedQuestionForm = (props: Props) => {
                         name="topics"
                         render={({ field }) => {
                             return (
-                                <FormItem className="text-left">
+                                <FormItem className="text-left w-full">
                                     <FormLabel>Topics</FormLabel>
-                                    <Select onValueChange={field.onChange}>
+                                    <Select
+                                        onValueChange={(value) => {
+                                            const selectedTag = tags.find(
+                                                (tag: any) =>
+                                                    tag.tagName === value
+                                            )
+                                            if (selectedTag) {
+                                                field.onChange(selectedTag.id)
+                                            }
+                                        }}
+                                    >
                                         <FormControl>
-                                            <SelectTrigger className="w-1/2">
+                                            <SelectTrigger>
                                                 <SelectValue placeholder="Choose Topic" />
                                             </SelectTrigger>
                                         </FormControl>
-                                        <SelectContent className="w-1/2">
-                                            <SelectItem value="DSA">
-                                                DSA
-                                            </SelectItem>
-                                            <SelectItem value="C++">
-                                                C++
-                                            </SelectItem>
-                                            <SelectItem value="Python">
-                                                Python
-                                            </SelectItem>
+                                        <SelectContent>
+                                            {tags.map((tag: any) => (
+                                                <SelectItem
+                                                    key={tag.id}
+                                                    value={tag.tagName}
+                                                >
+                                                    {tag.tagName}
+                                                </SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )
+                        }}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="marks"
+                        render={({ field }) => {
+                            return (
+                                <FormItem className="text-left">
+                                    <FormLabel>
+                                        Set the Marks for the Question
+                                    </FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="number"
+                                            placeholder="Enter the Marks for the Question"
+                                            {...field}
+                                        />
+                                    </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )
@@ -162,7 +232,7 @@ const NewOpenEndedQuestionForm = (props: Props) => {
 
                     <div className="flex justify-end">
                         <Button type="submit" className="w-1/2 ">
-                            Create Questions
+                            Create Open-Ended Question
                         </Button>
                     </div>
                 </form>

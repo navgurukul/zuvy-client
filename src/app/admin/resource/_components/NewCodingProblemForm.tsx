@@ -62,7 +62,6 @@ export default function NewCodingProblemForm({
     setCodingQuestions: any
 }) {
     const [testCases, setTestCases] = useState([{ id: 1 }])
-
     const handleAddTestCase = () => {
         const newTestCase = { id: testCases.length + 1 }
         setTestCases([...testCases, newTestCase])
@@ -89,7 +88,6 @@ export default function NewCodingProblemForm({
             testCaseOutput: '',
         },
     })
-
     async function createCodingQuestion(data: any) {
         try {
             const response = await api.post(
@@ -146,7 +144,6 @@ export default function NewCodingProblemForm({
         createCodingQuestion(formattedData)
         getAllCodingQuestions(setCodingQuestions)
     }
-
     // const accountType = form.watch('accountType')
 
     return (
