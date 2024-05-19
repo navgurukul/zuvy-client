@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 
 import { Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -32,6 +32,7 @@ import { toast } from '@/components/ui/use-toast'
 import { getAllQuizData } from '@/store/store'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { RequestBodyType } from '../_components/NewMcqProblemForm'
+import useDebounce from '@/hooks/useDebounce'
 
 type Props = {}
 export type Tag = {
@@ -41,6 +42,9 @@ export type Tag = {
 
 const Mcqs = (props: Props) => {
     const [isOpen, setIsOpen] = useState(false)
+    const [search, setSearch] = useState('')
+    const debouncedSearch = useDebounce(search, 1000)
+    const [difficulty, setDifficulty] = useState<string>('')
     const [tags, setTags] = useState<Tag[]>([])
     const [selectedTag, setSelectedTag] = useState({
         tagName: 'AllTopics',
@@ -51,13 +55,14 @@ const Mcqs = (props: Props) => {
     const handleTopicClick = (tag: Tag) => {
         setSelectedTag(tag)
     }
-
     const handleAllTopicsClick = () => {
         setSelectedTag({ id: -1, tagName: 'AllTopics' })
     }
-
     const openModal = () => setIsOpen(true)
     const closeModal = () => setIsOpen(false)
+    const handleSetsearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearch(e.target.value)
+    }
 
     async function getAllTags() {
         const response = await api.get('Content/allTags')
@@ -66,28 +71,55 @@ const Mcqs = (props: Props) => {
         }
     }
 
-    async function getAllQuizQuestion() {
-        await api.get(`/Content/allQuizQuestions`).then((res) => {
+    const getAllQuizQuestion = useCallback(async () => {
+        try {
+            let url = `/Content/allQuizQuestions`
+
+            const queryParams = []
+
+            if (difficulty && difficulty !== 'None') {
+                queryParams.push(`difficulty=${encodeURIComponent(difficulty)}`)
+            }
+            if (selectedTag.id !== -1) {
+                queryParams.push(`tagId=${selectedTag.id}`)
+            }
+            if (debouncedSearch) {
+                queryParams.push(
+                    `searchTerm=${encodeURIComponent(debouncedSearch)}`
+                )
+            }
+
+            if (queryParams.length > 0) {
+                url += `?${queryParams.join('&')}`
+            }
+
+            const res = await api.get(url)
             setStoreQuizData(res.data)
-        })
-    }
+        } catch (error) {
+            console.error('Error fetching quiz questions:', error)
+        }
+    }, [difficulty, debouncedSearch, setStoreQuizData, selectedTag.id])
 
     useEffect(() => {
         getAllTags()
-        getAllQuizQuestion()
     }, [])
+    useEffect(() => {
+        getAllQuizQuestion()
+    }, [getAllQuizQuestion])
 
-    console.log(quizData)
     const handleCreateQuizQuestion = async (requestBody: RequestBodyType) => {
         try {
-            const res = await api.post(`/Content/quiz`, requestBody)
-            console.log('Response:', res.data)
-            toast({
-                title: res.data.status || 'Success',
-                description: res.data.message || 'Quiz Question Created',
-            })
+            const res = await api
+                .post(`/Content/quiz`, requestBody)
+                .then((res) => {
+                    getAllQuizQuestion()
+                    toast({
+                        title: res.data.status || 'Success',
+                        description:
+                            res.data.message || 'Quiz Question Created',
+                    })
+                })
         } catch (error) {
-            console.error('Error creating quiz question:', error)
             toast({
                 title: 'Error',
                 description:
@@ -103,7 +135,9 @@ const Mcqs = (props: Props) => {
             <div className="flex justify-between">
                 <div className="relative w-full">
                     <Input
-                        placeholder="Search for Name, Email"
+                        value={search}
+                        onChange={handleSetsearch}
+                        placeholder="Search for Question"
                         className="w-1/4 p-2 my-6 input-with-icon pl-8" // Add left padding for the icon
                     />
                     <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
@@ -112,7 +146,7 @@ const Mcqs = (props: Props) => {
                 </div>
                 <Dialog open={isOpen} onOpenChange={setIsOpen}>
                     <DialogTrigger asChild>
-                        <Button>+ Create </Button>
+                        <Button>+ Create Quiz Question </Button>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[500px]">
                         <DialogHeader>
@@ -131,15 +165,16 @@ const Mcqs = (props: Props) => {
                 </Dialog>
             </div>
             <div className="flex items-center">
-                <Select>
+                <Select onValueChange={(value: string) => setDifficulty(value)}>
                     <SelectTrigger className="w-[180px]">
                         <SelectValue placeholder="DIfficulty" />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectGroup>
-                            <SelectItem value="apple">Easy</SelectItem>
-                            <SelectItem value="banana">Medium</SelectItem>
-                            <SelectItem value="blueberry">Hard</SelectItem>
+                            <SelectItem value="None">None</SelectItem>
+                            <SelectItem value="Easy">Easy</SelectItem>
+                            <SelectItem value="Medium">Medium</SelectItem>
+                            <SelectItem value="Hard">Hard</SelectItem>
                         </SelectGroup>
                     </SelectContent>
                 </Select>

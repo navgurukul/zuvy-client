@@ -268,6 +268,7 @@ const NewMcqProblemForm = ({
                                                     onClick={() =>
                                                         removeOption(index)
                                                     }
+                                                    type="button"
                                                 >
                                                     <X
                                                         size={20}
