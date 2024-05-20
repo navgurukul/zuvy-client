@@ -14,13 +14,11 @@ import {
 } from '@/components/ui/form'
 
 import { Button } from '@/components/ui/button'
-import { X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-
-import VideoEmbed from './video/VideoEmbed'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
+import VideoEmbed from './VideoEmbed'
 
 const isLinkValid = (link: string) => {
     const urlRegex = /^(https?:\/\/)?([\w-]+\.)*([\w-]+)(:\d{2,5})?(\/\S*)*$/
@@ -61,6 +59,8 @@ interface chapterDetails {
 const AddVideo = ({
     moduleId,
     content,
+    key,
+    fetchChapterContent,
 }: {
     content: {
         id: number
@@ -70,16 +70,23 @@ const AddVideo = ({
         contentDetails: ContentDetail[]
     }
     moduleId: string
+    key: number
+    fetchChapterContent: (chapterId: number) => Promise<void>
 }) => {
-    const [chapterDetails, setChapterDetails] = useState<chapterDetails>()
     const [showVideo, setShowVideo] = useState(true)
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const [newContent, setNewContent] = useState<chapterDetails>({
+        title: content.contentDetails[0]?.title ?? '',
+        description: content.contentDetails[0]?.description ?? '',
+        links: content.contentDetails[0]?.links ?? [],
+    })
 
     const handleUploadClick = () => {
         if (fileInputRef.current) {
             fileInputRef.current.click()
         }
     }
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -88,72 +95,11 @@ const AddVideo = ({
             links: '',
         },
         values: {
-            videoTitle: chapterDetails?.title ?? '',
-            description: chapterDetails?.description ?? '',
-            links: chapterDetails?.links[0] ?? '',
+            videoTitle: newContent?.title ?? '',
+            description: newContent?.description ?? '',
+            links: newContent?.links[0] ?? '',
         },
     })
-    const fetchChapterDetailsHandler = useCallback(async () => {
-        try {
-            const response = await api.get(
-                `/Content/chapterDetailsById/${content.id}`
-            )
-            const contentDetails = response.data.contentDetails
-
-            if (contentDetails && contentDetails.length > 0) {
-                const firstContentDetail = contentDetails[0]
-
-                if (firstContentDetail) {
-                    const {
-                        title = '',
-                        description = '',
-                        links = [],
-                    } = firstContentDetail
-
-                    const firstLink = links && links.length > 0 ? links[0] : ''
-
-                    setChapterDetails({
-                        title,
-                        description,
-                        links: [firstLink],
-                    })
-                    setShowVideo(!!firstLink)
-                } else {
-                    toast({
-                        title: 'Error',
-                        description: 'No content details found',
-                    })
-                    setChapterDetails({
-                        title: '',
-                        description: '',
-                        links: [''],
-                    })
-                    setShowVideo(false)
-                }
-            } else {
-                toast({
-                    title: 'Error',
-                    description: 'Content details not available',
-                })
-                setChapterDetails({
-                    title: '',
-                    description: '',
-                    links: [''],
-                })
-                setShowVideo(false)
-            }
-        } catch (error) {
-            toast({
-                title: 'Error',
-                description: 'Error fetching chapter details:',
-            })
-            console.error('Error fetching chapter details:', error)
-        }
-    }, [content.id])
-
-    useEffect(() => {
-        fetchChapterDetailsHandler()
-    }, [fetchChapterDetailsHandler])
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         const convertedObj = {
@@ -172,7 +118,7 @@ const AddVideo = ({
                         title: res.data.status,
                         description: res.data.message,
                     })
-                    fetchChapterDetailsHandler()
+                    fetchChapterContent(content.id)
                 })
         } catch (error) {
             toast({
@@ -181,6 +127,10 @@ const AddVideo = ({
             })
         }
     }
+    useEffect(() => {
+        setShowVideo(newContent.links.length > 0)
+    }, [newContent.links])
+
     const handleClose = () => {
         setShowVideo(false)
         form.setValue('videoTitle', '')
@@ -217,8 +167,8 @@ const AddVideo = ({
                             <>
                                 <div className="flex items-center justify-center ">
                                     <VideoEmbed
-                                        title={chapterDetails?.title || ''}
-                                        src={chapterDetails?.links[0] || ''}
+                                        title={newContent?.title || ''}
+                                        src={newContent?.links[0] || ''}
                                     />
                                 </div>
                                 <svg
@@ -274,23 +224,6 @@ const AddVideo = ({
                         </>
                     )} */}
                     {/* <h1 >Title</h1> */}
-                    <div className=" flex justify-between items-start ">
-                        {showVideo && (
-                            <>
-                                <div className="flex items-center justify-center ">
-                                    <VideoEmbed
-                                        title={chapterDetails?.title || ''}
-                                        src={chapterDetails?.links[0] || ''}
-                                    />
-                                </div>
-                                <X
-                                    className="cursor-pointer"
-                                    size={20}
-                                    onClick={handleClose}
-                                />
-                            </>
-                        )}
-                    </div>
 
                     <FormField
                         control={form.control}

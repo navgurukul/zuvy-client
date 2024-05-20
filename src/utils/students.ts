@@ -1,5 +1,5 @@
 import { toast } from '@/components/ui/use-toast'
-import {api} from './axios.config'
+import { api } from './axios.config'
 import { OFFSET, POSITION } from './constant'
 
 export const fetchStudentData = async (
@@ -11,7 +11,7 @@ export const fetchStudentData = async (
             `/bootcamp/students/${id}/?limit=${POSITION}&offset=${OFFSET}`
         )
         const data = response.data
-        setStoreStudentData(data.studentsEmails)
+        setStoreStudentData(data.totalStudents)
     } catch (error) {
         console.error('Error fetching student data:', error)
     }
@@ -31,41 +31,29 @@ export async function onBatchChange(
             description: 'Initial Batch And selected batch Are same',
         })
     }
-    await api
-        .post(
-            `/bootcamp/students/${student.bootcampId}?batch_id=${selectedvalue}`,
-            {
-                students: [
-                    {
-                        email: student.email,
-                        name: student.name,
-                    },
-                ],
-            }
-        )
-        .then((res) => {
-            fetchStudentData(bootcampId, setStoreStudentData)
-            toast({
-                title: 'Success',
-                description: res.data.students_enrolled[0].message,
-            })
-        })
-        .catch((error) => {
-            let errorMessage = 'Failed to update students batch'
-            if (
-                error.response &&
-                error.response.data &&
-                error.response.data.message
-            ) {
-                errorMessage = error.response.data.message
-            }
 
-            console.error('Error updating students batch:', errorMessage)
-            toast({
-                title: 'Error',
-                description: errorMessage,
-            })
+    try {
+        let url = `/batch/reassign/student_id=${student.userId}/new_batch_id=${selectedvalue}`
+
+        if (student.batchId && student.batchId !== 'unassigned') {
+            url += `?old_batch_id=${student.batchId}`
+        } else {
+            url += `?bootcamp_id=${bootcampId}`
+        }
+
+        const res = await api.patch(url)
+
+        fetchStudentData(bootcampId, setStoreStudentData)
+        toast({
+            title: res.data.status,
+            description: res.data.message,
         })
+    } catch (error: any) {
+        toast({
+            title: 'Error',
+            description: error.message,
+        })
+    }
 }
 
 export async function deleteStudentHandler(

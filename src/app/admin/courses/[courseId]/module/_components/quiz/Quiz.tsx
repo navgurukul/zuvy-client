@@ -6,25 +6,97 @@ import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 
 import { Separator } from '@/components/ui/separator'
-import { ArrowUpRight, GripVertical, X, Plus } from 'lucide-react'
+import { ExternalLink } from 'lucide-react'
 import QuizLibrary from './QuizLibrary'
+import { quizData, Options } from './QuizLibrary'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Button } from '@/components/ui/button'
+import QuizModal from './QuizModal'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog'
+import NewMcqProblemForm from '@/app/admin/resource/_components/NewMcqProblemForm'
+import { api } from '@/utils/axios.config'
+import { Tag } from '@/app/admin/resource/mcq/page'
+import { toast } from '@/components/ui/use-toast'
+import { RequestBodyType } from '@/app/admin/resource/_components/NewMcqProblemForm'
+
 interface QuizProps {
     content: Object
 }
 
 function Quiz({ content }: QuizProps) {
     const [activeTab, setActiveTab] = useState('anydifficulty')
+    const [tags, setTags] = useState<Tag[]>([])
+    const [isOpen, setIsOpen] = useState(false)
 
+    const [addQuestion, setAddQuestion] = useState<quizData[]>([])
+
+    const handleAddQuestion = (data: any) => {
+        const uniqueData = data.filter((question: quizData) => {
+            return !addQuestion.some(
+                (existingQuestion: quizData) =>
+                    existingQuestion.id === question.id
+            )
+        })
+        setAddQuestion((prevQuestions: quizData[]) => [
+            ...prevQuestions,
+            ...uniqueData,
+        ])
+    }
+    const openModal = () => setIsOpen(true)
+    const closeModal = () => setIsOpen(false)
+    async function getAllTags() {
+        const response = await api.get('Content/allTags')
+        if (response) {
+            setTags(response.data.allTags)
+        }
+    }
+    const removeQuestionById = (questionId: number) => {
+        setAddQuestion((prevQuestions: any) =>
+            prevQuestions.filter((question: any) => question.id !== questionId)
+        )
+    }
+
+    const handleCreateQuizQuestion = async (requestBody: RequestBodyType) => {
+        try {
+            const res = await api
+                .post(`/Content/quiz`, requestBody)
+                .then((res) => {
+                    // getAllQuizQuestion()
+                    toast({
+                        title: res.data.status || 'Success',
+                        description:
+                            res.data.message || 'Quiz Question Created',
+                    })
+                })
+        } catch (error) {
+            toast({
+                title: 'Error',
+                description:
+                    'There was an error creating the quiz question. Please try again.',
+            })
+        }
+    }
     return (
         <>
-            <div className="flex items-center gap-x-6 mb-10">
+            <div className="flex flex-row items-center justify-start gap-x-6 mb-10">
                 <Input
                     placeholder="Untitled Quiz"
-                    className="w-2/5 text-2xl text-left font-semibold border-0 bg-gray-100 rounded-md py-2 px-4   focus:outline-none"
+                    className="p-0 text-3xl w-1/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize"
                 />
-                <Link className="text-secondary font-semibold flex" href={''}>
+                <Link
+                    className="text-secondary font-semibold flex mt-2"
+                    href={''}
+                >
                     Preview
-                    <ArrowUpRight />
+                    <ExternalLink size={20} />
                 </Link>
             </div>
 
@@ -32,31 +104,54 @@ function Quiz({ content }: QuizProps) {
                 <QuizLibrary
                     activeTab={activeTab}
                     setActiveTab={setActiveTab}
+                    addQuestion={addQuestion}
+                    handleAddQuestion={handleAddQuestion}
                 />
                 <Separator
                     orientation="vertical"
                     className="mx-4 w-[2px] h-screen rounded "
                 />
-                <div>
-                    <h1 className="text-left font-semibold">
-                        Selected Questions
-                    </h1>
-                    <div className="gap-y-4 flex flex-col ">
-                        <h1 className="text-left font-semibold">
-                            Question Text
-                        </h1>
-                        <div className="flex w-full">
-                            <div className="border-2 w-full text-left border-gray-400 rounded-lg p-2">
-                                <p>
-                                    Using which block can we rotate the sprite ?
-                                </p>
-                            </div>
-                            <div className="flex flex-col">
-                                <X className="text-gray-400" />
-                                <GripVertical className="text-gray-400" />
-                            </div>
-                        </div>
+                <ScrollArea className="h-screen w-full rounded-md ">
+                    <div className="flex flex-col gap-y-4">
+                        {addQuestion.map(
+                            (questions: quizData, index: number) => {
+                                return (
+                                    <QuizModal
+                                        key={index}
+                                        data={questions}
+                                        removeQuestionById={removeQuestionById}
+                                    />
+                                )
+                            }
+                        )}
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button
+                                    variant={'outline'}
+                                    className="text-secondary font-semibold"
+                                >
+                                    Add Question
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>New MCQ</DialogTitle>
+                                </DialogHeader>
+                                <div className="w-full">
+                                    <NewMcqProblemForm
+                                        handleCreateQuizQuestion={
+                                            handleCreateQuizQuestion
+                                        }
+                                        tags={tags}
+                                        closeModal={closeModal}
+                                    />
+                                </div>{' '}
+                            </DialogContent>
+                        </Dialog>
                     </div>
+                </ScrollArea>
+
+                <div>
                     <div className="w-full mt-6">
                         {' '}
                         {content &&

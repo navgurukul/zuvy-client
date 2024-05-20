@@ -44,26 +44,30 @@ const Page = ({ params }: { params: any }) => {
     const [attendenceIds, setAttendenceIds] = useState<string[]>()
     const debouncedSearch = useDebounce(search, 1000)
     const [lastPage, setLastPage] = useState<number>(0)
-    const { courseData } = getCourseData()
     const { fetchBatches, batchData } = getBatchData()
 
-    const fetchClassesData = async (bootcampId: number) => {
+    const handleSetsearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearch(e.target.value)
+    }
+
+    const handleClick = async () => {
+        await handleRefreshAttendence()
+    }
+
+    const fetchClassesData = useCallback(async (bootcampId: number) => {
         try {
-            await api
-                .get(`/classes/meetings/{bootcampId}?bootcampId=${bootcampId}`)
-                .then((res) => {
-                    setAttendenceIds(res.data.unattendedClassIds)
-                })
+            const res = await api.get(
+                `/classes/meetings/${bootcampId}?bootcampId=${bootcampId}`
+            )
+            setAttendenceIds(res.data.unattendedClassIds)
         } catch (error: any) {
             console.log(error.message)
         }
-    }
+    }, [])
+
     const handleRefreshAttendence = async () => {
         setLoading(true)
-        const requestBody = {
-            meetingIds: attendenceIds,
-        }
-
+        const requestBody = { meetingIds: attendenceIds }
         try {
             const res = await api.post(`/classes/analytics/reload`, requestBody)
             toast({ title: res.data.title, description: res.data.message })
@@ -75,69 +79,41 @@ const Page = ({ params }: { params: any }) => {
     }
 
     const fetchStudentData = useCallback(
-        async (offset: number) => {
+        async (offset: number, searchTerm: string | null = null) => {
             if (params.courseId) {
                 try {
+                    const searchParam = searchTerm
+                        ? `&searchTerm=${encodeURIComponent(searchTerm)}`
+                        : ''
                     const response = await api.get(
-                        `/bootcamp/students/${params.courseId}?limit=${position}&offset=${offset}`
+                        `/bootcamp/students/${params.courseId}?limit=${position}&offset=${offset}${searchParam}`
                     )
-                    setStoreStudentData(response.data.studentsEmails)
+                    setStoreStudentData(response.data.totalStudents)
                     setPages(response.data.totalPages)
                     setLastPage(response.data.totalPages)
-                    setTotalStudents(response.data.totalStudents)
+                    setTotalStudents(response.data.totalStudentsCount)
                 } catch (error) {
                     console.error('Error fetching student data:', error)
                 }
             }
         },
-        [position, setStoreStudentData, params.courseId]
+        [params.courseId, position, setStoreStudentData]
     )
-    useEffect(() => {
-        fetchClassesData(params.courseId)
-    }, [params.courseId])
 
     useEffect(() => {
-        fetchStudentData(offset)
+        if (params.courseId) {
+            fetchClassesData(params.courseId)
+        }
+    }, [params.courseId, fetchClassesData])
+
+    useEffect(() => {
         fetchBatches(params.courseId)
-    }, [offset, fetchStudentData, fetchBatches, params.courseId])
+    }, [params.courseId, fetchBatches])
 
     useEffect(() => {
-        fetchStudentData(offset)
-    }, [offset, position, courseData, fetchStudentData])
+        fetchStudentData(offset, debouncedSearch)
+    }, [offset, position, debouncedSearch, fetchStudentData])
 
-    useEffect(() => {
-        const searchStudentsDataHandler = async () => {
-            setLoading(true)
-            try {
-                const response = await api.get(
-                    `/bootcamp/studentSearch/${params.courseId}?searchTerm=${debouncedSearch}`
-                )
-                setStoreStudentData(response.data.data[1].studentsEmails)
-            } catch (error) {
-                console.error('Error searching students:', error)
-            } finally {
-                setLoading(false)
-            }
-        }
-
-        if (debouncedSearch) {
-            searchStudentsDataHandler()
-        } else {
-            fetchStudentData(0)
-        }
-    }, [
-        debouncedSearch,
-        params.courseId,
-        setStoreStudentData,
-        fetchStudentData,
-    ])
-
-    const handleSetsearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearch(e.target.value)
-    }
-    const handleClick = async () => {
-        await handleRefreshAttendence()
-    }
     return (
         <div>
             {
