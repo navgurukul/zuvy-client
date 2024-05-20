@@ -11,7 +11,7 @@ export const fetchStudentData = async (
             `/bootcamp/students/${id}/?limit=${POSITION}&offset=${OFFSET}`
         )
         const data = response.data
-        setStoreStudentData(data.studentsEmails)
+        setStoreStudentData(data.totalStudents)
     } catch (error) {
         console.error('Error fetching student data:', error)
     }
@@ -31,24 +31,29 @@ export async function onBatchChange(
             description: 'Initial Batch And selected batch Are same',
         })
     }
-    // /batch/reassign/student_id20230/new_batch_id263/old_batch_id206
-    await api
-        .patch(
-            `/batch/reassign/student_id${student.userId}/new_batch_id${selectedvalue}/old_batch_id${student.batchId}`
-        )
-        .then((res) => {
-            fetchStudentData(bootcampId, setStoreStudentData)
-            toast({
-                title: res.data.status,
-                description: res.data.message,
-            })
+
+    try {
+        let url = `/batch/reassign/student_id=${student.userId}/new_batch_id=${selectedvalue}`
+
+        if (student.batchId && student.batchId !== 'unassigned') {
+            url += `?old_batch_id=${student.batchId}`
+        } else {
+            url += `?bootcamp_id=${bootcampId}`
+        }
+
+        const res = await api.patch(url)
+
+        fetchStudentData(bootcampId, setStoreStudentData)
+        toast({
+            title: res.data.status,
+            description: res.data.message,
         })
-        .catch((error) => {
-            toast({
-                title: 'Error',
-                description: error.message,
-            })
+    } catch (error: any) {
+        toast({
+            title: 'Error',
+            description: error.message,
         })
+    }
 }
 
 export async function deleteStudentHandler(

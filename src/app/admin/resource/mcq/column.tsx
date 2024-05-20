@@ -1,43 +1,41 @@
 'use client'
-import Image from 'next/image'
 
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 
-import { Task } from '@/utils/data/schema'
-import { Edit, Eye, Trash2 } from 'lucide-react'
+import { getAllQuizData, quiz } from '@/store/store'
+import { Edit, Eye, Pencil, Trash2 } from 'lucide-react'
+import { difficultyColor } from '@/lib/utils'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 
-export const columns: ColumnDef<Task>[] = [
+import DeleteConfirmationModal from '../../courses/[courseId]/_components/deleteModal'
+import { getDeleteQuizQuestion } from '@/store/store'
+import {
+    handleQuizConfirm,
+    handleQuizDelete,
+    handleDeleteQuizModal,
+    getAllQuizQuestion,
+} from '@/utils/admin'
+import { DELETE_QUIZ_QUESTION_CONFIRMATION } from '@/utils/constant'
+
+export const columns: ColumnDef<quiz>[] = [
     {
-        accessorKey: 'problemName',
+        accessorKey: 'question',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Question Name" />
+            <DataTableColumnHeader
+                className="text-[17px]"
+                column={column}
+                title="Question Name"
+            />
         ),
         cell: ({ row }) => {
-            const student = row.original
-            const profilePitcure = student.profilePicture
-            const ImageContainer = () => {
-                return profilePitcure ? (
-                    <Image
-                        src={profilePitcure}
-                        alt="profilePic"
-                        height={10}
-                        width={30}
-                        className="rounded-[100%] ml-2"
-                    />
-                ) : (
-                    <Image
-                        src={
-                            'https://avatar.iran.liara.run/public/boy?username=Ash'
-                        }
-                        alt="profilePic"
-                        height={35}
-                        width={35}
-                        className="rounded-[50%] ml-2"
-                    />
-                )
-            }
-            return <div className="flex items-center">{ImageContainer()}</div>
+            const question = row.original?.question
+            return <p className="text-left text-md font-[14px] ">{question}</p>
         },
         enableSorting: false,
         enableHiding: false,
@@ -45,27 +43,81 @@ export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'difficulty',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Difficulty" />
+            <DataTableColumnHeader
+                className="text-[17px]"
+                column={column}
+                title="Difficulty"
+            />
         ),
-        cell: ({ row }) => (
-            <div className="w-[150px]">{row.getValue('name')}</div>
-        ),
+        cell: ({ row }) => {
+            const difficulty = row.original.difficulty
+            return (
+                <p
+                    className={` text-left ml-3 text-[15px] font-semibold  ${difficultyColor(
+                        difficulty
+                    )}`}
+                >
+                    {difficulty}
+                </p>
+            )
+        },
         enableSorting: false,
         enableHiding: false,
     },
 
     {
         id: 'actions',
-        // cell: ({ row }) => <DataTableRowActions row={row} />,
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                className="text-[17px]"
+                column={column}
+                title="Actions"
+            />
+        ),
         cell: ({ row }) => {
+            const quizQuestion = row.original
+            const {
+                isDeleteModalOpen,
+                setDeleteModalOpen,
+                deleteQuizQuestionId,
+                setDeleteQuizQuestionId,
+            } = getDeleteQuizQuestion()
+
+            const { quizData, setStoreQuizData } = getAllQuizData()
+
             return (
                 <>
-                    <Eye size={20} />
-                    <Edit className=" cursor-pointer" size={20} />
-                    <Trash2
-                        className="text-destructive cursor-pointer"
-                        size={20}
-                    />
+                    <div className="flex">
+                        <Pencil className="cursor-pointer mr-5" size={20} />
+                        <Trash2
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                handleDeleteQuizModal(
+                                    setDeleteModalOpen,
+                                    setDeleteQuizQuestionId,
+                                    quizQuestion
+                                )
+                            }}
+                            className="text-destructive cursor-pointer"
+                            size={20}
+                        />
+                        <DeleteConfirmationModal
+                            isOpen={isDeleteModalOpen}
+                            onClose={() => setDeleteModalOpen(false)}
+                            onConfirm={() => {
+                                handleQuizConfirm(
+                                    handleQuizDelete,
+                                    setDeleteModalOpen,
+                                    deleteQuizQuestionId,
+                                    getAllQuizQuestion,
+                                    setStoreQuizData
+                                )
+                            }}
+                            modalText={DELETE_QUIZ_QUESTION_CONFIRMATION}
+                            buttonText="Delete Quiz Question"
+                            input={false}
+                        />
+                    </div>
                 </>
             )
         },

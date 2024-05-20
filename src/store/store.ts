@@ -1,7 +1,7 @@
-import { set } from 'date-fns';
+import { set } from 'date-fns'
 import { create } from 'zustand'
 import { useEffect } from 'react'
-import {api} from '@/utils/axios.config'
+import { api } from '@/utils/axios.config'
 
 type CounterStore = {
     studentData: {
@@ -49,6 +49,19 @@ interface StoreBatchData {
     batchData: BatchData[] | null
     setBatchData: (newValue: BatchData[]) => void
     fetchBatches: (courseId: number) => void
+}
+
+export interface quiz {
+    id: number
+    question: string
+    options: {
+        [key: string]: string
+    }
+    correctOption: number
+    marks: number
+    difficulty: 'Easy' | 'Medium' | 'Hard'
+    tagId: number
+    usage: number
 }
 
 export const getCourseData = create<StoreCourseData>((set) => ({
@@ -122,6 +135,16 @@ export const getStoreStudentData = create<storeStudentData>((set) => ({
         set({ studentsData: newValue })
     },
 }))
+type storequizData = {
+    quizData: quiz[]
+    setStoreQuizData: (newValue: quiz[]) => void
+}
+export const getAllQuizData = create<storequizData>((set) => ({
+    quizData: [],
+    setStoreQuizData: (newValue: quiz[]) => {
+        set({ quizData: newValue })
+    },
+}))
 
 // ------------------------------
 
@@ -141,8 +164,8 @@ export const getcodingQuestionState = create<codingQuestions>((set) => ({
 
 type deleteCodingQuestion = {
     isDeleteModalOpen: boolean
-    setDeleteModalOpen : (newValue: boolean) => void
-    deleteCodingQuestionId: null,
+    setDeleteModalOpen: (newValue: boolean) => void
+    deleteCodingQuestionId: null
     setDeleteCodingQuestionId: (newValue: any) => void
 }
 
@@ -157,6 +180,23 @@ export const getDeleteCodingQuestion = create<deleteCodingQuestion>((set) => ({
     },
 }))
 
+type deleteQuizQuestion = {
+    isDeleteModalOpen: boolean
+    setDeleteModalOpen: (newValue: boolean) => void
+    deleteQuizQuestionId: null
+    setDeleteQuizQuestionId: (newValue: any) => void
+}
+
+export const getDeleteQuizQuestion = create<deleteQuizQuestion>((set) => ({
+    isDeleteModalOpen: false,
+    setDeleteModalOpen: (newValue: boolean) => {
+        set({ isDeleteModalOpen: newValue })
+    },
+    deleteQuizQuestionId: null,
+    setDeleteQuizQuestionId: (newValue: any) => {
+        set({ deleteQuizQuestionId: newValue })
+    },
+}))
 // ------------------------------
 
 type openEndedQuestions = {
@@ -302,6 +342,5 @@ export const useLazyLoadedStudentData = () => {
         setStudentsInfo,
         anotherStudentState,
         setAnotherStudentState,
-        
     }
 }
