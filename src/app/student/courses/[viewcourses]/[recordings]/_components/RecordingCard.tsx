@@ -59,7 +59,6 @@ function RecordingCard({
     // func
 
     async function handleClassDetails() {
-        console.log(classData, 'meetingId adhsfkfhdskfhdkash')
         try {
             const response = await api.get(
                 `/classes/analytics/${classData?.meetingid}`
