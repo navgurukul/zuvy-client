@@ -1,5 +1,5 @@
 import React from 'react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 import * as z from 'zod'
 import { useForm } from 'react-hook-form'
@@ -24,61 +24,101 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Plus, X } from 'lucide-react'
-
+import { Plus, Trash, X } from 'lucide-react'
+import { api } from '@/utils/axios.config'
+import { toast } from '@/components/ui/use-toast'
+import { Tag } from '../mcq/page'
 type Props = {}
+export type RequestBodyType = {
+    questions: {
+        question: string
+        options: { [key: number]: string }
+        correctOption: number
+        mark: number
+        tagId: number
+        difficulty: string
+    }[]
+}
 const formSchema = z.object({
-    title: z.string(),
-    functionName: z.string(),
-    shortDescriptionn: z.string(),
-    problemStatement: z.string(),
-    constraints: z.string(),
-    difficulty: z.enum(['Easy', 'Medium', 'hard'], {
+    difficulty: z.enum(['Easy', 'Medium', 'Hard'], {
         required_error: 'You need to select a Difficulty  type.',
     }),
-    allowedLanguages: z.enum(['All Languages', 'C++', 'Python'], {
-        required_error: 'You need to select a Language',
-    }),
-    topics: z.enum(['Strings', 'DSA', 'Development'], {
-        required_error: 'You need to select a Topic',
-    }),
-    inputFormat: z.enum(['Strings', 'Number', 'Float'], {
-        required_error: 'You need to select a Input Format',
-    }),
-    outputFormat: z.enum(['Strings', 'Number', 'Float'], {
-        required_error: 'You need to select a Output Format',
-    }),
-    testCaseInput: z.string(),
-    testCaseOutput: z.string(),
+
+    topics: z.number().min(1, 'You need to select a Topic'),
+
+    questionText: z
+        .string()
+        .min(10, {
+            message: 'Question Text must be at least 10 characters.',
+        })
+        .max(160, {
+            message: 'Question Text must not be longer than 30 characters.',
+        }),
+    options: z.array(z.string().max(30)),
+    selectedOption: z.number(),
 })
 
-const NewMcqProblemForm = (props: Props) => {
-    const [testCases, setTestCases] = useState([{ id: 1 }])
-    const [hoveredIndex, setHoveredIndex] = useState<number | null>(0)
-    const [options, setOptions] = useState(['Easy', 'Medium', 'Hard']) // Initial state with three options
+const NewMcqProblemForm = ({
+    tags,
+    handleCreateQuizQuestion,
+    closeModal,
+}: {
+    tags: Tag[]
+    handleCreateQuizQuestion: (requestBody: RequestBodyType) => Promise<void>
+    closeModal: () => void
+}) => {
+    const [selectedOption, setSelectedOption] = useState<string>('')
+    const [options, setOptions] = useState<string[]>(['Option 1', 'Option 2'])
+
+    const addOption = () => {
+        const newOptions = [...options, `Option ${options.length + 1}`]
+        setOptions(newOptions)
+        form.setValue('options', newOptions)
+    }
+
+    const removeOption = (index: number) => {
+        if (options.length > 1) {
+            const newOptions = options.filter((_, i) => i !== index)
+            setOptions(newOptions)
+            form.setValue('options', newOptions)
+        }
+    }
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            title: '',
-            functionName: '',
-            shortDescriptionn: '',
-            problemStatement: '',
-            constraints: '',
             difficulty: 'Easy',
-            allowedLanguages: 'All Languages',
-            topics: 'DSA',
-            inputFormat: 'Number',
-            outputFormat: 'Strings',
-            testCaseInput: '',
-            testCaseOutput: '',
+            topics: 0,
+            questionText: '',
+            options: options,
+            selectedOption: 0,
         },
     })
 
-    // const accountType = form.watch('accountType')
+    const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+        const optionsObject: { [key: number]: string } = options.reduce(
+            (acc, option, index) => {
+                acc[index + 1] = option
+                return acc
+            },
+            {} as { [key: number]: string }
+        )
 
-    const handleSubmit = (values: z.infer<typeof formSchema>) => {
-        console.log({ values })
+        const formattedData = {
+            question: values.questionText,
+            options: optionsObject,
+            correctOption: +selectedOption + 1,
+            mark: 1,
+            tagId: values.topics,
+            difficulty: values.difficulty,
+        }
+
+        const requestBody = {
+            questions: [formattedData],
+        }
+
+        await handleCreateQuizQuestion(requestBody)
+        closeModal()
     }
     return (
         <main className="flex  flex-col p-3 ">
@@ -90,80 +130,80 @@ const NewMcqProblemForm = (props: Props) => {
                     <FormField
                         control={form.control}
                         name="difficulty"
-                        render={({ field }) => {
-                            return (
-                                <FormField
-                                    control={form.control}
-                                    name="difficulty"
-                                    render={({ field }) => (
-                                        <FormItem className="space-y-3">
+                        render={({ field }) => (
+                            <FormItem className="space-y-3">
+                                <FormControl>
+                                    <RadioGroup
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value}
+                                        className="flex  space-y-1"
+                                    >
+                                        <FormLabel className="mt-5">
+                                            Difficulty
+                                        </FormLabel>
+                                        <FormItem className="flex  items-center space-x-3 space-y-0">
                                             <FormControl>
-                                                <RadioGroup
-                                                    onValueChange={
-                                                        field.onChange
-                                                    }
-                                                    defaultValue={field.value}
-                                                    className="flex  space-y-1"
-                                                >
-                                                    <FormLabel className="mt-5">
-                                                        Difficulty
-                                                    </FormLabel>
-                                                    <FormItem className="flex  items-center space-x-3 space-y-0">
-                                                        <FormControl>
-                                                            <RadioGroupItem value="Easy" />
-                                                        </FormControl>
-                                                        <FormLabel className="font-normal">
-                                                            Easy
-                                                        </FormLabel>
-                                                    </FormItem>
-                                                    <FormItem className="flex items-center space-x-3 space-y-0">
-                                                        <FormControl>
-                                                            <RadioGroupItem value="Medium" />
-                                                        </FormControl>
-                                                        <FormLabel className="font-normal">
-                                                            Medium
-                                                        </FormLabel>
-                                                    </FormItem>
-                                                    <FormItem className="flex items-center space-x-3 space-y-0">
-                                                        <FormControl>
-                                                            <RadioGroupItem value="Hard" />
-                                                        </FormControl>
-                                                        <FormLabel className="font-normal">
-                                                            Hard
-                                                        </FormLabel>
-                                                    </FormItem>
-                                                </RadioGroup>
+                                                <RadioGroupItem value="Easy" />
                                             </FormControl>
-                                            <FormMessage />
+                                            <FormLabel className="font-normal">
+                                                Easy
+                                            </FormLabel>
                                         </FormItem>
-                                    )}
-                                />
-                            )
-                        }}
+                                        <FormItem className="flex items-center space-x-3 space-y-0">
+                                            <FormControl>
+                                                <RadioGroupItem value="Medium" />
+                                            </FormControl>
+                                            <FormLabel className="font-normal">
+                                                Medium
+                                            </FormLabel>
+                                        </FormItem>
+                                        <FormItem className="flex items-center space-x-3 space-y-0">
+                                            <FormControl>
+                                                <RadioGroupItem value="Hard" />
+                                            </FormControl>
+                                            <FormLabel className="font-normal">
+                                                Hard
+                                            </FormLabel>
+                                        </FormItem>
+                                    </RadioGroup>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
                     />
+
                     <FormField
                         control={form.control}
-                        name="allowedLanguages"
+                        name="topics"
                         render={({ field }) => {
                             return (
-                                <FormItem className="text-left">
+                                <FormItem className="text-left w-full">
                                     <FormLabel>Topics</FormLabel>
-                                    <Select onValueChange={field.onChange}>
+                                    <Select
+                                        onValueChange={(value) => {
+                                            const selectedTag = tags?.find(
+                                                (tag: Tag) =>
+                                                    tag.tagName === value
+                                            )
+                                            if (selectedTag) {
+                                                field.onChange(selectedTag.id)
+                                            }
+                                        }}
+                                    >
                                         <FormControl>
-                                            <SelectTrigger className="w-1/2">
+                                            <SelectTrigger>
                                                 <SelectValue placeholder="Choose Topic" />
                                             </SelectTrigger>
                                         </FormControl>
-                                        <SelectContent className="w-1/2">
-                                            <SelectItem value="All Languages">
-                                                All Languages
-                                            </SelectItem>
-                                            <SelectItem value="C++">
-                                                C++
-                                            </SelectItem>
-                                            <SelectItem value="Python">
-                                                Python
-                                            </SelectItem>
+                                        <SelectContent>
+                                            {tags.map((tag: any) => (
+                                                <SelectItem
+                                                    key={tag.id}
+                                                    value={tag.tagName}
+                                                >
+                                                    {tag.tagName}
+                                                </SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -173,7 +213,7 @@ const NewMcqProblemForm = (props: Props) => {
                     />
                     <FormField
                         control={form.control}
-                        name="problemStatement"
+                        name="questionText"
                         render={({ field }) => {
                             return (
                                 <FormItem className="text-left">
@@ -191,63 +231,75 @@ const NewMcqProblemForm = (props: Props) => {
                     />
                     <FormField
                         control={form.control}
-                        name="difficulty"
+                        name="options"
                         render={({ field }) => (
-                            <FormItem className="space-y-3 w-full">
-                                <FormLabel className="flex justify-start mt-5">
-                                    Difficulty
-                                </FormLabel>
-                                <FormControl>
-                                    <RadioGroup
-                                        onValueChange={field.onChange}
-                                        defaultValue={field.value}
-                                        className="space-y-1"
-                                    >
-                                        <FormItem className="flex items-center space-x-3 space-y-0">
-                                            <FormControl>
-                                                <RadioGroupItem value="Easy" />
-                                            </FormControl>
-                                            <Input placeholder="Option 1" />
-                                        </FormItem>
-                                        <FormItem className="flex items-center space-x-3 space-y-0">
-                                            <FormControl>
-                                                <RadioGroupItem value="Medium" />
-                                            </FormControl>
-                                            <Input placeholder="Option 2" />
-                                        </FormItem>
-                                        <FormItem className="flex items-center space-x-3 space-y-0">
-                                            <FormControl>
-                                                <RadioGroupItem value="Hard" />
-                                            </FormControl>
-                                            <Input placeholder="Option 3" />
-                                        </FormItem>
-                                        <FormItem className="flex items-center space-x-3 space-y-0">
-                                            <FormControl>
-                                                <RadioGroupItem value="Hard" />
-                                            </FormControl>
-                                            <Input placeholder="Option 4" />
-                                        </FormItem>
-                                    </RadioGroup>
-                                </FormControl>
+                            <FormItem className="space-y-3 ">
+                                <FormLabel className="mt-5">Options</FormLabel>
+                                <RadioGroup
+                                    onValueChange={(value) => {
+                                        setSelectedOption(value)
+                                        field.onChange(value)
+                                    }}
+                                    defaultValue={selectedOption}
+                                    className=" space-y-1"
+                                >
+                                    {options.map((option, index) => (
+                                        <div
+                                            key={index}
+                                            className="flex items-center  space-x-3 space-y-0"
+                                        >
+                                            <div className="flex gap-x-3 items-center">
+                                                <RadioGroupItem
+                                                    value={index.toString()}
+                                                />
+                                                <Input
+                                                    placeholder={`Option ${
+                                                        index + 1
+                                                    }`}
+                                                    {...form.register(
+                                                        `options.${index}`
+                                                    )}
+                                                    className="w-[350px]"
+                                                />
+                                            </div>
+                                            {options.length > 1 && (
+                                                <Button
+                                                    variant={'ghost'}
+                                                    onClick={() =>
+                                                        removeOption(index)
+                                                    }
+                                                    type="button"
+                                                >
+                                                    <X
+                                                        size={20}
+                                                        className="text-secondary"
+                                                    />
+                                                </Button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </RadioGroup>
                                 <FormMessage />
                                 <div className="flex justify-start">
-                                    <Button variant={'outline'}>
+                                    <Button
+                                        variant={'outline'}
+                                        onClick={addOption}
+                                        type="button"
+                                    >
                                         <Plus
                                             size={20}
                                             className="text-secondary"
                                         />{' '}
-                                        Add Options
+                                        Add Option
                                     </Button>
                                 </div>
                             </FormItem>
                         )}
                     />
 
-                    <div className="flex justify-end">
-                        <Button type="submit" className="w-1/2 ">
-                            Create Problems
-                        </Button>
-                    </div>
+                    <Button type="submit" className="w-1/2 ">
+                        Create Quiz Question
+                    </Button>
                 </form>
             </Form>
         </main>
