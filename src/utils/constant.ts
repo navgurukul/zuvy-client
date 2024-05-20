@@ -24,8 +24,9 @@ export const DELETE_MODULE_CONFIRMATION =
 export const DELETE_CHAPTER_CONFIRMATION =
     'This action cannot be undone. This will permanently delete the module from this bootcamp'
 
-export const DELETE_CODING_QUESTION_CONFIRMATION =
-    'This action cannot be undone. This will permanently delete the coding question'
-
 export const DELETE_QUIZ_QUESTION_CONFIRMATION =
     'This action cannot be undone. This will permanently delete the Quiz question'
+export const DELETE_CODING_QUESTION_CONFIRMATION =
+    'This action cannot be undone. This will permanently delete the coding question'
+export const DELETE_OPEN_ENDED_QUESTION_CONFIRMATION =
+    'This action cannot be undone. This will permanently delete the Open-Ended Question'

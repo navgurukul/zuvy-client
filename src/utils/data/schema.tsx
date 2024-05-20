@@ -39,3 +39,14 @@ export const codingQuestionSchema = z.object({
 export type CodingQuestion = z.infer<typeof codingQuestionSchema>
 
 export type Task = z.infer<typeof taskSchema>
+
+export type OpenEndedQuestion = z.infer<typeof openEndedQuestionSchema>
+
+export const openEndedQuestionSchema = z.object({
+    id: z.number(),
+    question: z.string(),
+    difficulty: z.string(),
+    tagId: z.number(),
+    marks: z.string().transform((val) => parseInt(val, 10)),
+    usage: z.number(),
+})

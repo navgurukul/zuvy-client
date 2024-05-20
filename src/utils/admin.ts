@@ -31,6 +31,36 @@ export function handleDelete(
         })
 }
 
+export function deleteOpenEndedQuestion(
+    deleteOpenEndedQuestionId: any,
+    getAllOpenEndedQuestions: any,
+    setOpenEndedQuestions: any
+) {
+    api({
+        method: 'delete',
+        url: 'Content/deleteOpenEndedQuestion',
+        data: {
+            questionIds: [deleteOpenEndedQuestionId],
+        },
+    })
+        .then((res) => {
+            toast({
+                title: 'Success',
+                description: res.data.message,
+                className: 'text-start capitalize',
+            })
+            getAllOpenEndedQuestions(setOpenEndedQuestions)
+        })
+        .catch((error) => {
+            toast({
+                title: 'Error',
+                description:
+                    error?.response?.data?.message || 'An error occurred',
+                className: 'text-start capitalize',
+            })
+        })
+}
+
 export const handleDeleteModal = (
     setDeleteModalOpen: any,
     setDeleteCodingQuestionId: any,
