@@ -25,7 +25,7 @@ import { columns } from '@/app/admin/resource/coding/column'
 import NewCodingProblemForm from '@/app/admin/resource/_components/NewCodingProblemForm'
 import { api } from '@/utils/axios.config'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
-import { getcodingQuestionState } from '@/store/store'
+import { getCodingQuestionTags, getcodingQuestionState } from '@/store/store'
 import { getAllCodingQuestions } from '@/utils/admin'
 
 type Props = {}
@@ -36,7 +36,7 @@ const CodingProblems = (props: Props) => {
     const [searchTerm, setSearchTerm] = useState('')
     const [searchedQuestions, setSearchedQuestions] = useState([])
     const [isDialogOpen, setIsDialogOpen] = useState(false)
-    const [tags, setTags] = useState([])
+    const { tags, setTags } = getCodingQuestionTags()
     const [selectedTag, setSelectedTag] = useState({
         tagName: 'AllTopics',
         id: -1,

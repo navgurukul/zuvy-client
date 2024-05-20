@@ -28,8 +28,9 @@ import { columns } from './column'
 import NewOpenEndedQuestionForm from '@/app/admin/resource/_components/NewOpenEndedQuestionForm'
 import { api } from '@/utils/axios.config'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
-import { getopenEndedQuestionstate } from '@/store/store'
-import { getAllOpenEndedQuestions } from '@/utils/admin'
+import { getCodingQuestionTags, getopenEndedQuestionstate } from '@/store/store'
+import { getAllOpenEndedQuestions, getAllTags } from '@/utils/admin'
+import EditOpenEndedQuestionForm from '../_components/EditOpenEndedQuestionForm'
 
 type Props = {}
 
@@ -38,11 +39,12 @@ const OpenEndedQuestions = (props: Props) => {
         tagName: 'AllTopics',
         id: -1,
     })
-    const [tags, setTags] = useState<any>([])
+    const { tags, setTags } = getCodingQuestionTags()
     const [selectedDifficulty, setSelectedDifficulty] = useState('any')
     const { openEndedQuestions, setOpenEndedQuestions } =
         getopenEndedQuestionstate()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const [isOpenEndDialogOpen, setIsOpenEndDialogOpen] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
     const [searchedQuestions, setSearchedQuestions] = useState([])
 
@@ -52,13 +54,6 @@ const OpenEndedQuestions = (props: Props) => {
 
     const handleAllTopicsClick = () => {
         setSelectedTag({ id: -1, tagName: 'AllTopics' })
-    }
-
-    async function getAllTags() {
-        const response = await api.get('Content/allTags')
-        if (response) {
-            setTags(response.data.allTags)
-        }
     }
 
     const filteredQuestions = openEndedQuestions?.filter((question: any) => {
@@ -101,7 +96,7 @@ const OpenEndedQuestions = (props: Props) => {
 
     useEffect(() => {
         getAllOpenEndedQuestions(setOpenEndedQuestions)
-        getAllTags()
+        getAllTags(setTags)
     }, [])
 
     useEffect(() => {
@@ -149,7 +144,7 @@ const OpenEndedQuestions = (props: Props) => {
             <div className="flex items-center">
                 <Select onValueChange={(value) => setSelectedDifficulty(value)}>
                     <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Difficulty" />
+                        <SelectValue placeholder="Any Difficulty" />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectGroup>
