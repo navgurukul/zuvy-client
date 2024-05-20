@@ -3,8 +3,8 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 
-import { quiz } from '@/store/store'
-import { Edit, Eye, Trash2 } from 'lucide-react'
+import { getAllQuizData, quiz } from '@/store/store'
+import { Edit, Eye, Pencil, Trash2 } from 'lucide-react'
 import { difficultyColor } from '@/lib/utils'
 import {
     Tooltip,
@@ -12,6 +12,16 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
+
+import DeleteConfirmationModal from '../../courses/[courseId]/_components/deleteModal'
+import { getDeleteQuizQuestion } from '@/store/store'
+import {
+    handleQuizConfirm,
+    handleQuizDelete,
+    handleDeleteQuizModal,
+    getAllQuizQuestion,
+} from '@/utils/admin'
+import { DELETE_QUIZ_QUESTION_CONFIRMATION } from '@/utils/constant'
 
 export const columns: ColumnDef<quiz>[] = [
     {
@@ -25,11 +35,7 @@ export const columns: ColumnDef<quiz>[] = [
         ),
         cell: ({ row }) => {
             const question = row.original?.question
-            return (
-                <p className="text-left text-[15px] font-semibold ">
-                    {question}
-                </p>
-            )
+            return <p className="text-left text-md font-[14px] ">{question}</p>
         },
         enableSorting: false,
         enableHiding: false,
@@ -61,37 +67,58 @@ export const columns: ColumnDef<quiz>[] = [
 
     {
         id: 'actions',
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                className="text-[17px]"
+                column={column}
+                title="Actions"
+            />
+        ),
         cell: ({ row }) => {
-            const tooltips = [
-                { icon: Eye, text: 'View Question' },
-                {
-                    icon: Edit,
-                    text: 'Edit Quiz Question',
-                    className: 'cursor-pointer',
-                },
-                {
-                    icon: Trash2,
-                    text: 'Delete Quiz Question',
-                    className: 'text-destructive cursor-pointer',
-                },
-            ]
+            const quizQuestion = row.original
+            const {
+                isDeleteModalOpen,
+                setDeleteModalOpen,
+                deleteQuizQuestionId,
+                setDeleteQuizQuestionId,
+            } = getDeleteQuizQuestion()
+
+            const { quizData, setStoreQuizData } = getAllQuizData()
+
             return (
-                <div className="flex gap-x-3">
-                    <TooltipProvider>
-                        {tooltips.map(
-                            ({ icon: Icon, text, className }, index) => (
-                                <Tooltip key={index}>
-                                    <TooltipTrigger>
-                                        <Icon size={20} className={className} />
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p>{text}</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            )
-                        )}
-                    </TooltipProvider>
-                </div>
+                <>
+                    <div className="flex">
+                        <Pencil className="cursor-pointer mr-5" size={20} />
+                        <Trash2
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                handleDeleteQuizModal(
+                                    setDeleteModalOpen,
+                                    setDeleteQuizQuestionId,
+                                    quizQuestion
+                                )
+                            }}
+                            className="text-destructive cursor-pointer"
+                            size={20}
+                        />
+                        <DeleteConfirmationModal
+                            isOpen={isDeleteModalOpen}
+                            onClose={() => setDeleteModalOpen(false)}
+                            onConfirm={() => {
+                                handleQuizConfirm(
+                                    handleQuizDelete,
+                                    setDeleteModalOpen,
+                                    deleteQuizQuestionId,
+                                    getAllQuizQuestion,
+                                    setStoreQuizData
+                                )
+                            }}
+                            modalText={DELETE_QUIZ_QUESTION_CONFIRMATION}
+                            buttonText="Delete Quiz Question"
+                            input={false}
+                        />
+                    </div>
+                </>
             )
         },
     },

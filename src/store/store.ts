@@ -181,6 +181,23 @@ export const getDeleteCodingQuestion = create<deleteCodingQuestion>((set) => ({
     },
 }))
 
+type deleteQuizQuestion = {
+    isDeleteModalOpen: boolean
+    setDeleteModalOpen: (newValue: boolean) => void
+    deleteQuizQuestionId: null
+    setDeleteQuizQuestionId: (newValue: any) => void
+}
+
+export const getDeleteQuizQuestion = create<deleteQuizQuestion>((set) => ({
+    isDeleteModalOpen: false,
+    setDeleteModalOpen: (newValue: boolean) => {
+        set({ isDeleteModalOpen: newValue })
+    },
+    deleteQuizQuestionId: null,
+    setDeleteQuizQuestionId: (newValue: any) => {
+        set({ deleteQuizQuestionId: newValue })
+    },
+}))
 // ------------------------------
 
 export const useStudentData = create<CounterStore>((set) => ({
