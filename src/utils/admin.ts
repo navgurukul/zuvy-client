@@ -155,3 +155,14 @@ export async function getAllQuizQuestion(setQuizQuestion: any) {
         console.error(error)
     }
 }
+
+export const getAllOpenEndedQuestions = async (
+    setAllOpenEndedQuestions: any
+) => {
+    try {
+        const response = await api.get('/Content/openEndedQuestions')
+        setAllOpenEndedQuestions(response.data.data)
+    } catch (error) {
+        console.error(error)
+    }
+}
