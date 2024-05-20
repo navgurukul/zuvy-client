@@ -2,6 +2,7 @@ import { Separator } from '@/components/ui/separator'
 import { PlusCircle } from 'lucide-react'
 import { difficultyColor } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 function QuizList({
     questionData,
@@ -15,7 +16,7 @@ function QuizList({
     console.log(addQuestion)
 
     return (
-        <>
+        <ScrollArea className="h-[500px] w-full rounded-md border">
             {questionData.map((question: any) => {
                 const isSelected = addQuestion?.some(
                     (quest: any) => quest?.id === question.id
@@ -31,7 +32,7 @@ function QuizList({
                         className="flex flex-col justify-between"
                         key={question.id}
                     >
-                        <div className="flex w-full justify-between gap-x-4 my-4">
+                        <div className="flex w-full justify-start gap-x-4 my-4">
                             <div className="flex justify-start items-center gap-x-5">
                                 <h1 className="scroll-m-20 text-4xl  font-semibold tracking-tight lg:text-lg">
                                     {question.question}
@@ -63,7 +64,7 @@ function QuizList({
                             ) : (
                                 <PlusCircle
                                     size={20}
-                                    className="text-secondary cursor-pointer"
+                                    className="text-secondary cursor-pointer "
                                     onClick={handleClick}
                                 />
                             )}
@@ -72,7 +73,7 @@ function QuizList({
                     </div>
                 )
             })}
-        </>
+        </ScrollArea>
     )
 }
 

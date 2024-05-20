@@ -138,7 +138,7 @@ const Mcqs = (props: Props) => {
                         value={search}
                         onChange={handleSetsearch}
                         placeholder="Search for Question"
-                        className="w-1/4 p-2 my-6 input-with-icon pl-8" // Add left padding for the icon
+                        className="w-1/4 p-2 my-6 input-with-icon pl-8"
                     />
                     <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
                         <Search className="text-gray-400" size={20} />
@@ -171,7 +171,7 @@ const Mcqs = (props: Props) => {
                     </SelectTrigger>
                     <SelectContent>
                         <SelectGroup>
-                            <SelectItem value="None">None</SelectItem>
+                            <SelectItem value="None">Any</SelectItem>
                             <SelectItem value="Easy">Easy</SelectItem>
                             <SelectItem value="Medium">Medium</SelectItem>
                             <SelectItem value="Hard">Hard</SelectItem>
