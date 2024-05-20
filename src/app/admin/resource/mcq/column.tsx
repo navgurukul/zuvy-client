@@ -1,43 +1,35 @@
 'use client'
-import Image from 'next/image'
 
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 
-import { Task } from '@/utils/data/schema'
+import { quiz } from '@/store/store'
 import { Edit, Eye, Trash2 } from 'lucide-react'
+import { difficultyColor } from '@/lib/utils'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 
-export const columns: ColumnDef<Task>[] = [
+export const columns: ColumnDef<quiz>[] = [
     {
-        accessorKey: 'problemName',
+        accessorKey: 'question',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Question Name" />
+            <DataTableColumnHeader
+                className="text-[17px]"
+                column={column}
+                title="Question Name"
+            />
         ),
         cell: ({ row }) => {
-            const student = row.original
-            const profilePitcure = student.profilePicture
-            const ImageContainer = () => {
-                return profilePitcure ? (
-                    <Image
-                        src={profilePitcure}
-                        alt="profilePic"
-                        height={10}
-                        width={30}
-                        className="rounded-[100%] ml-2"
-                    />
-                ) : (
-                    <Image
-                        src={
-                            'https://avatar.iran.liara.run/public/boy?username=Ash'
-                        }
-                        alt="profilePic"
-                        height={35}
-                        width={35}
-                        className="rounded-[50%] ml-2"
-                    />
-                )
-            }
-            return <div className="flex items-center">{ImageContainer()}</div>
+            const question = row.original?.question
+            return (
+                <p className="text-left text-[15px] font-semibold ">
+                    {question}
+                </p>
+            )
         },
         enableSorting: false,
         enableHiding: false,
@@ -45,28 +37,61 @@ export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'difficulty',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Difficulty" />
+            <DataTableColumnHeader
+                className="text-[17px]"
+                column={column}
+                title="Difficulty"
+            />
         ),
-        cell: ({ row }) => (
-            <div className="w-[150px]">{row.getValue('name')}</div>
-        ),
+        cell: ({ row }) => {
+            const difficulty = row.original.difficulty
+            return (
+                <p
+                    className={` text-left ml-3 text-[15px] font-semibold  ${difficultyColor(
+                        difficulty
+                    )}`}
+                >
+                    {difficulty}
+                </p>
+            )
+        },
         enableSorting: false,
         enableHiding: false,
     },
 
     {
         id: 'actions',
-        // cell: ({ row }) => <DataTableRowActions row={row} />,
         cell: ({ row }) => {
+            const tooltips = [
+                { icon: Eye, text: 'View Question' },
+                {
+                    icon: Edit,
+                    text: 'Edit Quiz Question',
+                    className: 'cursor-pointer',
+                },
+                {
+                    icon: Trash2,
+                    text: 'Delete Quiz Question',
+                    className: 'text-destructive cursor-pointer',
+                },
+            ]
             return (
-                <>
-                    <Eye size={20} />
-                    <Edit className=" cursor-pointer" size={20} />
-                    <Trash2
-                        className="text-destructive cursor-pointer"
-                        size={20}
-                    />
-                </>
+                <div className="flex gap-x-3">
+                    <TooltipProvider>
+                        {tooltips.map(
+                            ({ icon: Icon, text, className }, index) => (
+                                <Tooltip key={index}>
+                                    <TooltipTrigger>
+                                        <Icon size={20} className={className} />
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>{text}</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            )
+                        )}
+                    </TooltipProvider>
+                </div>
             )
         },
     },

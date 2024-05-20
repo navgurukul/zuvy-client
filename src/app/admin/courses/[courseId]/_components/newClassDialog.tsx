@@ -137,9 +137,9 @@ const NewClassDialog = ({
             endDateTime,
             timeZone: 'Asia/Kolkata',
             attendees: [],
-            batchId,
-            bootcampId: courseId.toString(),
-            userId: userIdLocal.id,
+            batchId: Number(batchId),
+            bootcampId: courseId,
+            userId: Number(userIdLocal.id),
             roles: userIdLocal.rolesList,
         }
 

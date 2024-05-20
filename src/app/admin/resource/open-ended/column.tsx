@@ -1,43 +1,37 @@
 'use client'
-import Image from 'next/image'
 
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
+import { Edit, Eye, Pencil, Trash2 } from 'lucide-react'
+import { OpenEndedQuestion } from '@/utils/data/schema'
+import {
+    getdeleteOpenEndedQuestion,
+    getopenEndedQuestionstate,
+} from '@/store/store'
+import {
+    deleteOpenEndedQuestion,
+    getAllOpenEndedQuestions,
+    handleConfirm,
+    handleDeleteModal,
+} from '@/utils/admin'
+import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
+import { DELETE_OPEN_ENDED_QUESTION_CONFIRMATION } from '@/utils/constant'
+import { cn, difficultyColor } from '@/lib/utils'
 
-import { Task } from '@/utils/data/schema'
-import { Edit, Eye, Trash2 } from 'lucide-react'
-
-export const columns: ColumnDef<Task>[] = [
+export const columns: ColumnDef<OpenEndedQuestion>[] = [
     {
-        accessorKey: 'problemName',
+        accessorKey: 'questionname',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Question Name" />
         ),
-        cell: ({ row }) => {
-            const student = row.original
-            const profilePitcure = student.profilePicture
-            const ImageContainer = () => {
-                return profilePitcure ? (
-                    <Image
-                        src={profilePitcure}
-                        alt="profilePic"
-                        height={10}
-                        width={30}
-                        className="rounded-[100%] ml-2"
-                    />
-                ) : (
-                    <Image
-                        src={
-                            'https://avatar.iran.liara.run/public/boy?username=Ash'
-                        }
-                        alt="profilePic"
-                        height={35}
-                        width={35}
-                        className="rounded-[50%] ml-2"
-                    />
-                )
-            }
-            return <div className="flex items-center">{ImageContainer()}</div>
+        cell: ({ row }: { row: any }) => {
+            const openEndedQuestion = row.original
+
+            return (
+                <div className="flex items-center">
+                    {openEndedQuestion.question}
+                </div>
+            )
         },
         enableSorting: false,
         enableHiding: false,
@@ -47,27 +41,76 @@ export const columns: ColumnDef<Task>[] = [
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Difficulty" />
         ),
-        cell: ({ row }) => (
-            <div className="w-[150px]">{row.getValue('name')}</div>
-        ),
+        cell: ({ row }: { row: any }) => {
+            const openEndedQuestion = row.original
+
+            return (
+                <div
+                    className={cn(
+                        `flex items-center font-semibold text-secondary`,
+                        difficultyColor(openEndedQuestion.difficulty)
+                    )}
+                >
+                    {openEndedQuestion.difficulty}
+                </div>
+            )
+        },
         enableSorting: false,
         enableHiding: false,
     },
 
     {
         id: 'actions',
-        // cell: ({ row }) => <DataTableRowActions row={row} />,
+        accessorKey: 'Actions',
         cell: ({ row }) => {
+            const openEndedQuestion = row.original
+            const {
+                isDeleteModalOpen,
+                setDeleteModalOpen,
+                deleteOpenEndedQuestionId,
+                setdeleteOpenEndedQuestionId,
+            } = getdeleteOpenEndedQuestion()
+
+            const { openEndedQuestions, setOpenEndedQuestions } =
+                getopenEndedQuestionstate()
+
             return (
                 <>
-                    <Eye size={20} />
-                    <Edit className=" cursor-pointer" size={20} />
-                    <Trash2
-                        className="text-destructive cursor-pointer"
-                        size={20}
-                    />
+                    <div className="flex">
+                        <Pencil className="cursor-pointer mr-5" size={20} />
+                        <Trash2
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                handleDeleteModal(
+                                    setDeleteModalOpen,
+                                    setdeleteOpenEndedQuestionId,
+                                    openEndedQuestion
+                                )
+                            }}
+                            className="text-destructive cursor-pointer"
+                            size={20}
+                        />
+                        <DeleteConfirmationModal
+                            isOpen={isDeleteModalOpen}
+                            onClose={() => setDeleteModalOpen(false)}
+                            onConfirm={() => {
+                                handleConfirm(
+                                    deleteOpenEndedQuestion,
+                                    setDeleteModalOpen,
+                                    deleteOpenEndedQuestionId,
+                                    getAllOpenEndedQuestions,
+                                    setOpenEndedQuestions
+                                )
+                            }}
+                            modalText={DELETE_OPEN_ENDED_QUESTION_CONFIRMATION}
+                            buttonText="Delete Question"
+                            input={false}
+                        />
+                    </div>
                 </>
             )
         },
+        enableSorting: false,
+        enableHiding: false,
     },
 ]

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import {
     Select,
@@ -32,109 +32,51 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
             <Input placeholder="Search By Name " className="w-full mb-2 " />
 
             <div className="dropDownsContainer flex gap-2">
-                <Select>
+                <Select onValueChange={(value) => setSelectedTopic(value)}>
                     <SelectTrigger className="">
                         <SelectValue placeholder={selectedTopic} />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectGroup>
                             <SelectLabel>Topics</SelectLabel>
-                            <SelectItem
-                                onClick={() => setSelectedTopic('All Topics')}
-                                value="alltopics"
-                            >
+                            <SelectItem value="alltopics">
                                 All Topics
                             </SelectItem>
-                            <SelectItem
-                                onClick={() => setSelectedTopic('Frontend')}
-                                value="Frontend"
-                            >
-                                Frontend
-                            </SelectItem>
-                            <SelectItem
-                                onClick={() => setSelectedTopic('Backend')}
-                                value="Backend"
-                            >
-                                Backend
-                            </SelectItem>
-                            <SelectItem
-                                onClick={() => setSelectedTopic('DSA')}
-                                value="DSA"
-                            >
-                                DSA
-                            </SelectItem>
+                            <SelectItem value="Frontend">Frontend</SelectItem>
+                            <SelectItem value="Backend">Backend</SelectItem>
+                            <SelectItem value="DSA">DSA</SelectItem>
                         </SelectGroup>
                     </SelectContent>
                 </Select>
-                <Select>
+                <Select onValueChange={(value) => setSelectedDifficulty(value)}>
                     <SelectTrigger className="">
                         <SelectValue placeholder={selectedDifficulty} />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectGroup>
                             <SelectLabel>Difficulty</SelectLabel>
-                            <SelectItem
-                                onClick={() =>
-                                    setSelectedDifficulty('Any Difficulty')
-                                }
-                                value="anydifficulty"
-                            >
+                            <SelectItem value="Any Difficulty">
                                 Any Difficulty
                             </SelectItem>
-                            <SelectItem
-                                onClick={() => setSelectedDifficulty('Easy')}
-                                value="Easy"
-                            >
-                                Easy
-                            </SelectItem>
-                            <SelectItem
-                                onClick={() => setSelectedDifficulty('Medium')}
-                                value="Medium"
-                            >
-                                Medium
-                            </SelectItem>
-                            <SelectItem
-                                onClick={() => setSelectedDifficulty('Hard')}
-                                value="Hard"
-                            >
-                                Hard
-                            </SelectItem>
+                            <SelectItem value="Easy">Easy</SelectItem>
+                            <SelectItem value="Medium">Medium</SelectItem>
+                            <SelectItem value="Hard">Hard</SelectItem>
                         </SelectGroup>
                     </SelectContent>
                 </Select>
-                <Select>
+                <Select onValueChange={(value) => setSelectedLanguage(value)}>
                     <SelectTrigger className="">
                         <SelectValue placeholder={selectedLanguage} />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectGroup>
                             <SelectLabel> Languages</SelectLabel>
-                            <SelectItem
-                                onClick={() =>
-                                    setSelectedLanguage('All Languages')
-                                }
-                                value="alllanguages"
-                            >
+                            <SelectItem value="alllanguages">
                                 All Languages
                             </SelectItem>
-                            <SelectItem
-                                onClick={() => setSelectedLanguage('Python')}
-                                value="Python"
-                            >
-                                Python
-                            </SelectItem>
-                            <SelectItem
-                                onClick={() => setSelectedLanguage('Java')}
-                                value="Java"
-                            >
-                                Java
-                            </SelectItem>
-                            <SelectItem
-                                onClick={() => setSelectedLanguage('React')}
-                                value="React"
-                            >
-                                React
-                            </SelectItem>
+                            <SelectItem value="Python">Python</SelectItem>
+                            <SelectItem value="Java">Java</SelectItem>
+                            <SelectItem value="React">React</SelectItem>
                         </SelectGroup>
                     </SelectContent>
                 </Select>

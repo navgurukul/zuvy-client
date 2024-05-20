@@ -6,8 +6,8 @@ import React, { useEffect, useState } from 'react'
 import { Separator } from '@/components/ui/separator'
 import { cn, difficultyColor, ellipsis } from '@/lib/utils'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import CodingTopics from './CodingTopics'
-import SelectedProblems from './SelectedProblems'
+import CodingTopics from '@/app/admin/courses/[courseId]/module/_components/codingChallenge/CodingTopics'
+import SelectedProblems from '@/app/admin/courses/[courseId]/module/_components/codingChallenge/SelectedProblems'
 import { Input } from '@/components/ui/input'
 import { api } from '@/utils/axios.config'
 
@@ -50,35 +50,64 @@ interface CodeProps {
     content: Content
 }
 
-function CodingChallenge({ content }: CodeProps) {
-    const [selectedQuestions, setSelectedQuestions] = useState<Question[]>([])
+function CodingChallenge({
+    content,
+    activeChapterTitle,
+    moduleId,
+}: {
+    content: any
+    activeChapterTitle: string
+    moduleId: string
+}) {
+    const [selectedQuestions, setSelectedQuestions] = useState<Question[]>(
+        content.codingQuestionDetails
+    )
     const [selectedTopic, setSelectedTopic] = useState<string>('All Topics')
     const [selectedDifficulty, setSelectedDifficulty] =
         useState<string>('Any Difficulty')
     const [selectedLanguage, setSelectedLanguage] =
         useState<string>('All Languages')
-    const [allCodingQuestions, setAllCodingQuestions] = useState<Question[]>([])
     const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([])
+    const [chapterTitle, setChapterTitle] = useState<string>(activeChapterTitle)
 
     useEffect(() => {
         async function getAllCodingQuestions() {
             try {
                 const response = await api.get('/Content/allCodingQuestions')
-                setAllCodingQuestions(response.data)
+
+                // Filter the questions by difficulty
+                const filtered = response.data.filter((question: Question) =>
+                    selectedDifficulty === 'Any Difficulty'
+                        ? true
+                        : question.difficulty === selectedDifficulty
+                )
+                setFilteredQuestions(filtered)
             } catch (error) {
                 console.error('Error:', error)
             }
         }
-
         getAllCodingQuestions()
-    }, [])
+    }, [selectedDifficulty, selectedQuestions])
+
+    useEffect(() => {
+        setSelectedQuestions(content.codingQuestionDetails)
+        setChapterTitle(activeChapterTitle)
+    }, [content])
 
     return (
         <div>
             {/* SearchBar component */}
             <div className="flex items-center mb-5">
                 <Input
-                    placeholder="Untitled Coding Problem"
+                    required
+                    onChange={(e) => {
+                        setChapterTitle(e.target.value)
+                    }}
+                    placeholder={`${
+                        activeChapterTitle
+                            ? activeChapterTitle
+                            : 'Untitled Coding Problem'
+                    }`}
                     className="p-0 text-3xl w-2/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize"
                 />
 
@@ -98,97 +127,102 @@ function CodingChallenge({ content }: CodeProps) {
                         setSelectedLanguage={setSelectedLanguage}
                     />
                     <ScrollArea className="h-dvh pr-4">
-                        {allCodingQuestions?.map((question: any) => {
-                            const isSelected = selectedQuestions?.some(
-                                (selectedQuestion) =>
-                                    selectedQuestion?.id === question.id
-                            )
-                            return (
-                                <>
-                                    <div
-                                        key={question.id}
-                                        className={`p-5 rounded-sm ${
-                                            isSelected ? 'bg-gray-200' : ''
-                                        }`}
-                                    >
-                                        <div className="flex justify-between text-start">
-                                            <div>
-                                                <div className="flex items-center gap-2">
-                                                    <h2 className="font-bold text-lg">
-                                                        {question.title}
-                                                    </h2>
-                                                    <span
-                                                        className={cn(
-                                                            `font-semibold text-secondary`,
-                                                            difficultyColor(
-                                                                question.difficulty
-                                                            )
-                                                        )}
-                                                    >
-                                                        {question.difficulty}
-                                                    </span>
-                                                </div>
-                                                <div className="w-full">
-                                                    <p className="text-gray-600 mt-1">
-                                                        {ellipsis(
-                                                            question.description,
-                                                            60
-                                                        )}
-                                                    </p>
-                                                </div>
-                                                <Link
-                                                    href={''}
-                                                    className="font-semibold text-sm mt-2 text-secondary"
-                                                >
-                                                    View Full Description
-                                                </Link>
-                                            </div>
-                                            {isSelected ? (
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    width="20"
-                                                    height="20"
-                                                    viewBox="0 0 24 24"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    strokeWidth="2"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    className="lucide lucide-circle-check"
-                                                >
-                                                    <circle
-                                                        cx="12"
-                                                        cy="12"
-                                                        r="10"
-                                                    />
-                                                    <path d="m9 12 2 2 4-4" />
-                                                </svg>
-                                            ) : (
-                                                <PlusCircle
-                                                    onClick={() => {
-                                                        setSelectedQuestions([
-                                                            question,
-                                                        ])
-                                                    }}
-                                                    className="text-secondary cursor-pointer"
-                                                    size={20}
-                                                />
-                                            )}
+                        {filteredQuestions?.map((question: any) => (
+                            <div
+                                key={question.id}
+                                className={`p-5 rounded-sm ${
+                                    selectedQuestions.some(
+                                        (selectedQuestion) =>
+                                            selectedQuestion?.id === question.id
+                                    )
+                                        ? 'bg-gray-200'
+                                        : ''
+                                }`}
+                            >
+                                <div className="flex justify-between text-start items-center">
+                                    <div>
+                                        <div className="flex items-center gap-2">
+                                            <h2 className="font-bold text-lg">
+                                                {question.title}
+                                            </h2>
+                                            <span
+                                                className={cn(
+                                                    `font-semibold text-secondary`,
+                                                    difficultyColor(
+                                                        question.difficulty
+                                                    )
+                                                )}
+                                            >
+                                                {question.difficulty}
+                                            </span>
                                         </div>
+                                        <div className="w-full">
+                                            <p className="text-gray-600 mt-1">
+                                                {ellipsis(
+                                                    question.description,
+                                                    60
+                                                )}
+                                            </p>
+                                        </div>
+                                        <Link
+                                            href={''}
+                                            className="font-semibold text-sm mt-2 text-secondary"
+                                        >
+                                            View Full Description
+                                        </Link>
                                     </div>
-                                    <Separator className="my-3" />
-                                </>
-                            )
-                        })}
+                                    <div>
+                                        {selectedQuestions.some(
+                                            (selectedQuestion) =>
+                                                selectedQuestion?.id ===
+                                                question.id
+                                        ) ? (
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width="20"
+                                                height="20"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                className="lucide lucide-circle-check"
+                                            >
+                                                <circle
+                                                    cx="12"
+                                                    cy="12"
+                                                    r="10"
+                                                />
+                                                <path d="m9 12 2 2 4-4" />
+                                            </svg>
+                                        ) : (
+                                            <PlusCircle
+                                                onClick={() => {
+                                                    setSelectedQuestions([
+                                                        question,
+                                                    ])
+                                                }}
+                                                className="text-secondary cursor-pointer"
+                                                size={20}
+                                            />
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
                     </ScrollArea>
                 </div>
                 <SelectedProblems
+                    chapterTitle={chapterTitle}
                     selectedQuestions={selectedQuestions as Question[]}
                     setSelectedQuestions={
                         setSelectedQuestions as React.Dispatch<
                             React.SetStateAction<Question[]>
                         >
                     }
+                    content={content}
+                    moduleId={moduleId}
                 />
             </div>
         </div>

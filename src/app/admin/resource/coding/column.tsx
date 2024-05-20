@@ -1,43 +1,34 @@
 'use client'
-import Image from 'next/image'
 
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
+import { CodingQuestion } from '@/utils/data/schema'
+import { Edit, Pencil, Trash2 } from 'lucide-react'
+import { api } from '@/utils/axios.config'
+import { toast } from '@/components/ui/use-toast'
+import { DELETE_CODING_QUESTION_CONFIRMATION } from '@/utils/constant'
+import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
+import { getDeleteCodingQuestion, getcodingQuestionState } from '@/store/store'
+import { cn, difficultyColor } from '@/lib/utils'
+import {
+    handleConfirm,
+    handleDelete,
+    handleDeleteModal,
+    getAllCodingQuestions,
+} from '@/utils/admin'
 
-import { Task } from '@/utils/data/schema'
-import { Edit, Trash2 } from 'lucide-react'
-
-export const columns: ColumnDef<Task>[] = [
+export const columns: ColumnDef<CodingQuestion>[] = [
     {
         accessorKey: 'problemName',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Problem Name" />
         ),
         cell: ({ row }) => {
-            const student = row.original
-            const profilePitcure = student.profilePicture
-            const ImageContainer = () => {
-                return profilePitcure ? (
-                    <Image
-                        src={profilePitcure}
-                        alt="profilePic"
-                        height={10}
-                        width={30}
-                        className="rounded-[100%] ml-2"
-                    />
-                ) : (
-                    <Image
-                        src={
-                            'https://avatar.iran.liara.run/public/boy?username=Ash'
-                        }
-                        alt="profilePic"
-                        height={35}
-                        width={35}
-                        className="rounded-[50%] ml-2"
-                    />
-                )
-            }
-            return <div className="flex items-center">{ImageContainer()}</div>
+            const codingQuestion = row.original
+
+            return (
+                <div className="flex items-center">{codingQuestion.title}</div>
+            )
         },
         enableSorting: false,
         enableHiding: false,
@@ -47,9 +38,20 @@ export const columns: ColumnDef<Task>[] = [
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Difficulty" />
         ),
-        cell: ({ row }) => (
-            <div className="w-[150px]">{row.getValue('name')}</div>
-        ),
+        cell: ({ row }) => {
+            const codingQuestion = row.original
+
+            return (
+                <div
+                    className={cn(
+                        `flex items-center font-semibold text-secondary`,
+                        difficultyColor(codingQuestion.difficulty)
+                    )}
+                >
+                    {codingQuestion.difficulty}
+                </div>
+            )
+        },
         enableSorting: false,
         enableHiding: false,
     },
@@ -59,45 +61,67 @@ export const columns: ColumnDef<Task>[] = [
             <DataTableColumnHeader column={column} title="Usage" />
         ),
         cell: ({ row }) => {
-            // const label = labels.find((label) => label.value === row.original.label);
+            const codingQuestion = row.original
 
             return (
-                <div className="flex space-x-2">
-                    {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
-                    <span className="max-w-[500px] truncate font-medium">
-                        {row.getValue('email')}
-                    </span>
+                <div className="flex items-center">
+                    {codingQuestion.id + ' times'}
                 </div>
             )
         },
+        enableSorting: true,
+        enableHiding: true,
     },
     {
         id: 'actions',
         // cell: ({ row }) => <DataTableRowActions row={row} />,
         cell: ({ row }) => {
+            const codingQuestion = row.original
+            const {
+                isDeleteModalOpen,
+                setDeleteModalOpen,
+                deleteCodingQuestionId,
+                setDeleteCodingQuestionId,
+            } = getDeleteCodingQuestion()
+
+            const { codingQuestions, setCodingQuestions } =
+                getcodingQuestionState()
+
             return (
                 <>
-                    <Edit
-                        className="text-destructive cursor-pointer"
-                        size={20}
-                    />
-                    <Trash2
-                        className="text-destructive cursor-pointer"
-                        size={20}
-                    />
+                    <div className="flex">
+                        <Pencil className="cursor-pointer mr-5" size={20} />
+                        <Trash2
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                handleDeleteModal(
+                                    setDeleteModalOpen,
+                                    setDeleteCodingQuestionId,
+                                    codingQuestion
+                                )
+                            }}
+                            className="text-destructive cursor-pointer"
+                            size={20}
+                        />
+                        <DeleteConfirmationModal
+                            isOpen={isDeleteModalOpen}
+                            onClose={() => setDeleteModalOpen(false)}
+                            onConfirm={() => {
+                                handleConfirm(
+                                    handleDelete,
+                                    setDeleteModalOpen,
+                                    deleteCodingQuestionId,
+                                    getAllCodingQuestions,
+                                    setCodingQuestions
+                                )
+                            }}
+                            modalText={DELETE_CODING_QUESTION_CONFIRMATION}
+                            buttonText="Delete Coding Question"
+                            input={false}
+                        />
+                    </div>
                 </>
             )
-        },
-    },
-
-    {
-        accessorKey: 'Status',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Status" />
-        ),
-
-        filterFn: (row, id, value) => {
-            return value.includes(row.getValue(id))
         },
     },
 ]
