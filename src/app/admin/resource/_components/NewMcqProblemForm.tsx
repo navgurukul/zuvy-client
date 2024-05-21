@@ -60,12 +60,16 @@ const formSchema = z.object({
 
 const NewMcqProblemForm = ({
     tags,
-    handleCreateQuizQuestion,
     closeModal,
+    edit,
+    setStoreQuizData,
+    getAllQuizQuesiton,
 }: {
     tags: Tag[]
-    handleCreateQuizQuestion: (requestBody: RequestBodyType) => Promise<void>
     closeModal: () => void
+    edit: boolean
+    setStoreQuizData: any
+    getAllQuizQuesiton: any
 }) => {
     const [selectedOption, setSelectedOption] = useState<string>('')
     const [options, setOptions] = useState<string[]>(['Option 1', 'Option 2'])
@@ -81,6 +85,22 @@ const NewMcqProblemForm = ({
             const newOptions = options.filter((_, i) => i !== index)
             setOptions(newOptions)
             form.setValue('options', newOptions)
+        }
+    }
+    const handleCreateQuizQuestion = async (requestBody: RequestBodyType) => {
+        try {
+            await api.post(`/Content/quiz`, requestBody).then((res) => {
+                toast({
+                    title: res.data.status || 'Success',
+                    description: res.data.message || 'Quiz Question Created',
+                })
+            })
+        } catch (error) {
+            toast({
+                title: 'Error',
+                description:
+                    'There was an error creating the quiz question. Please try again.',
+            })
         }
     }
 
@@ -118,6 +138,7 @@ const NewMcqProblemForm = ({
         }
 
         await handleCreateQuizQuestion(requestBody)
+        getAllQuizQuesiton(setStoreQuizData)
         closeModal()
     }
     return (

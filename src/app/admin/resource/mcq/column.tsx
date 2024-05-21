@@ -6,15 +6,9 @@ import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-co
 import { getAllQuizData, quiz } from '@/store/store'
 import { Edit, Eye, Pencil, Trash2 } from 'lucide-react'
 import { difficultyColor } from '@/lib/utils'
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '@/components/ui/tooltip'
 
 import DeleteConfirmationModal from '../../courses/[courseId]/_components/deleteModal'
-import { getDeleteQuizQuestion } from '@/store/store'
+import { getDeleteQuizQuestion, getEditQuizQuestion } from '@/store/store'
 import {
     handleQuizConfirm,
     handleQuizDelete,
@@ -22,6 +16,14 @@ import {
     getAllQuizQuestion,
 } from '@/utils/admin'
 import { DELETE_QUIZ_QUESTION_CONFIRMATION } from '@/utils/constant'
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog'
+import NewMcqProblemForm from '../_components/NewMcqProblemForm'
 
 export const columns: ColumnDef<quiz>[] = [
     {
@@ -76,19 +78,45 @@ export const columns: ColumnDef<quiz>[] = [
         ),
         cell: ({ row }) => {
             const quizQuestion = row.original
+            const { isEditQuizModalOpen, setIsEditModalOpen } =
+                getEditQuizQuestion()
+            const closeModal = () => setIsEditModalOpen(false)
             const {
                 isDeleteModalOpen,
                 setDeleteModalOpen,
                 deleteQuizQuestionId,
                 setDeleteQuizQuestionId,
             } = getDeleteQuizQuestion()
-
             const { quizData, setStoreQuizData } = getAllQuizData()
 
             return (
                 <>
                     <div className="flex">
-                        <Pencil className="cursor-pointer mr-5" size={20} />
+                        <Dialog
+                            open={isEditQuizModalOpen}
+                            onOpenChange={setIsEditModalOpen}
+                        >
+                            <DialogTrigger asChild>
+                                <Pencil
+                                    className="cursor-pointer mr-5"
+                                    size={20}
+                                />
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[500px]">
+                                <DialogHeader>
+                                    <DialogTitle>New MCQ</DialogTitle>
+                                </DialogHeader>
+                                <div className="w-full">
+                                    {/* <NewMcqProblemForm
+                                         
+                                        tags={tags}
+                                        closeModal={closeModal}
+                                        edit={true}
+                                    /> */}
+                                    <p>Edit</p>
+                                </div>
+                            </DialogContent>
+                        </Dialog>
                         <Trash2
                             onClick={(e) => {
                                 e.stopPropagation()

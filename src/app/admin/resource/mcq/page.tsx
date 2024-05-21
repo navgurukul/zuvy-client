@@ -28,11 +28,11 @@ import { DataTable } from '@/app/_components/datatable/data-table'
 import { columns } from './column'
 import NewMcqProblemForm from '../_components/NewMcqProblemForm'
 import { api } from '@/utils/axios.config'
-import { toast } from '@/components/ui/use-toast'
 import { getAllQuizData } from '@/store/store'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { RequestBodyType } from '../_components/NewMcqProblemForm'
 import useDebounce from '@/hooks/useDebounce'
+import { getAllQuizQuestion } from '@/utils/admin'
 
 type Props = {}
 export type Tag = {
@@ -108,26 +108,6 @@ const Mcqs = (props: Props) => {
         getAllQuizQuestion()
     }, [getAllQuizQuestion])
 
-    const handleCreateQuizQuestion = async (requestBody: RequestBodyType) => {
-        try {
-            const res = await api
-                .post(`/Content/quiz`, requestBody)
-                .then((res) => {
-                    getAllQuizQuestion()
-                    toast({
-                        title: res.data.status || 'Success',
-                        description:
-                            res.data.message || 'Quiz Question Created',
-                    })
-                })
-        } catch (error) {
-            toast({
-                title: 'Error',
-                description:
-                    'There was an error creating the quiz question. Please try again.',
-            })
-        }
-    }
     return (
         <MaxWidthWrapper>
             <h1 className="text-left font-semibold text-2xl">
@@ -155,11 +135,11 @@ const Mcqs = (props: Props) => {
                         </DialogHeader>
                         <div className="w-full">
                             <NewMcqProblemForm
-                                handleCreateQuizQuestion={
-                                    handleCreateQuizQuestion
-                                }
                                 tags={tags}
                                 closeModal={closeModal}
+                                edit={false}
+                                setStoreQuizData={setStoreQuizData}
+                                getAllQuizQuesiton={getAllQuizQuestion}
                             />
                         </div>
                     </DialogContent>

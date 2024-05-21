@@ -214,19 +214,33 @@ export const getopenEndedQuestionstate = create<openEndedQuestions>((set) => ({
 // ------------------------------
 type deleteOpenEndedQuestion = {
     isDeleteModalOpen: boolean
-    setDeleteModalOpen : (newValue: boolean) => void
-    deleteOpenEndedQuestionId: null,
+    setDeleteModalOpen: (newValue: boolean) => void
+    deleteOpenEndedQuestionId: null
     setdeleteOpenEndedQuestionId: (newValue: any) => void
 }
 
-export const getdeleteOpenEndedQuestion = create<deleteOpenEndedQuestion>((set) => ({
-    isDeleteModalOpen: false,
-    setDeleteModalOpen: (newValue: boolean) => {
-        set({ isDeleteModalOpen: newValue })
-    },
-    deleteOpenEndedQuestionId: null,
-    setdeleteOpenEndedQuestionId: (newValue: any) => {
-        set({ deleteOpenEndedQuestionId: newValue })
+export const getdeleteOpenEndedQuestion = create<deleteOpenEndedQuestion>(
+    (set) => ({
+        isDeleteModalOpen: false,
+        setDeleteModalOpen: (newValue: boolean) => {
+            set({ isDeleteModalOpen: newValue })
+        },
+        deleteOpenEndedQuestionId: null,
+        setdeleteOpenEndedQuestionId: (newValue: any) => {
+            set({ deleteOpenEndedQuestionId: newValue })
+        },
+    })
+)
+
+type editQuizQuestion = {
+    isEditQuizModalOpen: boolean
+    setIsEditModalOpen: (newValue: boolean) => void
+}
+
+export const getEditQuizQuestion = create<editQuizQuestion>((set) => ({
+    isEditQuizModalOpen: false,
+    setIsEditModalOpen: (newValue: boolean) => {
+        set({ isEditQuizModalOpen: newValue })
     },
 }))
 
