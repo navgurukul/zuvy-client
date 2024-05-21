@@ -246,6 +246,61 @@ export const getEditQuizQuestion = create<editQuizQuestion>((set) => ({
 
 // ------------------------------
 
+// ------------------------------
+type editOpenEndedDialogs = {
+    isOpenEndDialogOpen: boolean
+    setIsOpenEndDialogOpen : (newValue: boolean) => void
+    editOpenEndedQuestionId: null,
+    setEditOpenEndedQuestionId: (newValue: any) => void
+}
+
+export const getEditOpenEndedDialogs = create<editOpenEndedDialogs>((set) => ({
+    isOpenEndDialogOpen: false,
+    setIsOpenEndDialogOpen: (newValue: boolean) => {
+        set({ isOpenEndDialogOpen: newValue })
+    },
+    editOpenEndedQuestionId: null,
+    setEditOpenEndedQuestionId: (newValue: any) => {
+        set({ editOpenEndedQuestionId: newValue })
+    },
+}))
+
+// ------------------------------
+// ------------------------------
+type editCodingQuestionDialogs = {
+    isCodingDialogOpen: boolean
+    setIsCodingDialogOpen : (newValue: boolean) => void
+    editCodingQuestionId: null,
+    setEditCodingQuestionId: (newValue: any) => void
+}
+
+export const getEditCodingQuestionDialogs = create<editCodingQuestionDialogs>((set) => ({
+    isCodingDialogOpen: false,
+    setIsCodingDialogOpen: (newValue: boolean) => {
+        set({ isCodingDialogOpen: newValue })
+    },
+    editCodingQuestionId: null,
+    setEditCodingQuestionId: (newValue: any) => {
+        set({ editCodingQuestionId: newValue })
+    },
+}))
+
+// ------------------------------
+
+type codingQuestionTags = {
+    tags: any[]
+    setTags: (newValue: any[]) => void
+}
+
+export const getCodingQuestionTags = create<codingQuestionTags>((set) => ({
+    tags: [],
+    setTags: (newValue: any[]) => {
+        set({ tags: newValue })
+    },
+}))
+
+// ------------------------------
+
 export const useStudentData = create<CounterStore>((set) => ({
     studentData: null,
     studentsInfo: [],

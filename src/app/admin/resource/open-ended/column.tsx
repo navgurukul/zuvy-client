@@ -7,16 +7,26 @@ import { OpenEndedQuestion } from '@/utils/data/schema'
 import {
     getdeleteOpenEndedQuestion,
     getopenEndedQuestionstate,
+    getEditOpenEndedDialogs,
 } from '@/store/store'
 import {
     deleteOpenEndedQuestion,
     getAllOpenEndedQuestions,
     handleConfirm,
     handleDeleteModal,
+    handleEditOpenEndedQuestion,
 } from '@/utils/admin'
 import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
 import { DELETE_OPEN_ENDED_QUESTION_CONFIRMATION } from '@/utils/constant'
 import { cn, difficultyColor } from '@/lib/utils'
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog'
+import EditOpenEndedQuestionForm from '../_components/EditOpenEndedQuestionForm'
 
 export const columns: ColumnDef<OpenEndedQuestion>[] = [
     {
@@ -71,13 +81,55 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
                 setdeleteOpenEndedQuestionId,
             } = getdeleteOpenEndedQuestion()
 
-            const { openEndedQuestions, setOpenEndedQuestions } =
-                getopenEndedQuestionstate()
+            const {
+                isOpenEndDialogOpen,
+                setIsOpenEndDialogOpen,
+                setEditOpenEndedQuestionId,
+            } = getEditOpenEndedDialogs()
+            const { setOpenEndedQuestions } = getopenEndedQuestionstate()
 
             return (
                 <>
                     <div className="flex">
-                        <Pencil className="cursor-pointer mr-5" size={20} />
+                        <Dialog
+                            onOpenChange={setIsOpenEndDialogOpen}
+                            open={isOpenEndDialogOpen}
+                        >
+                            <DialogTrigger>
+                                <Pencil
+                                    className="cursor-pointer mr-5"
+                                    size={20}
+                                    onClick={() => {
+                                        handleEditOpenEndedQuestion(
+                                            openEndedQuestion,
+                                            setIsOpenEndDialogOpen,
+                                            setEditOpenEndedQuestionId
+                                        )
+                                    }}
+                                />
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[500px]">
+                                <DialogHeader>
+                                    <DialogTitle>
+                                        Edit Open-Ended Question
+                                    </DialogTitle>
+                                </DialogHeader>
+                                <div className="w-full">
+                                    <EditOpenEndedQuestionForm
+                                        setIsOpenEndDialogOpen={
+                                            setIsOpenEndDialogOpen
+                                        }
+                                        getAllOpenEndedQuestions={
+                                            getAllOpenEndedQuestions
+                                        }
+                                        setOpenEndedQuestions={
+                                            setOpenEndedQuestions
+                                        }
+                                    />
+                                </div>
+                            </DialogContent>
+                        </Dialog>
+
                         <Trash2
                             onClick={(e) => {
                                 e.stopPropagation()

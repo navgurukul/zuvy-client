@@ -27,6 +27,10 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Plus, X } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
+import {
+    getCodingQuestionTags,
+    getEditCodingQuestionDialogs,
+} from '@/store/store'
 
 const formSchema = z.object({
     title: z.string(),
@@ -54,20 +58,22 @@ const formSchema = z.object({
     ),
 })
 
-export default function NewCodingProblemForm({
-    tags,
-    setIsDialogOpen,
+export default function EditCodingQuestionForm({
+    setIsCodingDialogOpen,
     getAllCodingQuestions,
     setCodingQuestions,
 }: {
-    tags: any
-    setIsDialogOpen: any
+    setIsCodingDialogOpen: any
     getAllCodingQuestions: any
     setCodingQuestions: any
 }) {
     const [testCases, setTestCases] = useState([
         { id: 1, input: '', output: '' },
     ])
+
+    const { tags } = getCodingQuestionTags()
+    const { editCodingQuestionId } = getEditCodingQuestionDialogs()
+
     const handleAddTestCase = () => {
         setTestCases((prevTestCases) => [
             ...prevTestCases,
@@ -96,19 +102,19 @@ export default function NewCodingProblemForm({
             testCases: [],
         },
     })
-    async function createCodingQuestion(data: any) {
+    async function editCodingQuestion(data: any) {
         try {
-            const response = await api.post(
-                `codingPlatform/createCodingQuestion`,
+            const response = await api.patch(
+                `Content/updateCodingQuestion/${editCodingQuestionId}`,
                 data
             )
 
             toast({
                 title: 'Success',
-                description: 'Question Created Successfully',
+                description: 'Question Edited Successfully',
                 className: 'text-start capitalize',
             })
-            setIsDialogOpen(false)
+            setIsCodingDialogOpen(false)
         } catch (error: any) {
             toast({
                 title: 'Error',
@@ -147,9 +153,10 @@ export default function NewCodingProblemForm({
             ],
             solution: 'solution of the coding question',
         }
-        createCodingQuestion(formattedData)
+        editCodingQuestion(formattedData)
         getAllCodingQuestions(setCodingQuestions)
     }
+    // const accountType = form.watch('accountType')
 
     return (
         <ScrollArea className="h-[calc(100vh-200px)] w-full rounded-md  ">
@@ -479,7 +486,7 @@ export default function NewCodingProblemForm({
 
                         <div className="flex justify-end">
                             <Button type="submit" className="w-1/2 ">
-                                Create Question
+                                Edit Coding Question
                             </Button>
                         </div>
                     </form>
