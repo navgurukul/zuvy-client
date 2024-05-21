@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 
 import * as z from 'zod'
 import { useForm } from 'react-hook-form'
@@ -39,24 +39,40 @@ function EditOpenEndedQuestionForm({
     setIsOpenEndDialogOpen,
     getAllOpenEndedQuestions,
     setOpenEndedQuestions,
+    openEndedQuestions,
 }: {
     setIsOpenEndDialogOpen: any
     getAllOpenEndedQuestions: any
     setOpenEndedQuestions: any
+    openEndedQuestions: any
 }) {
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            questionDescription: '',
-            marks: 0,
-            topics: 0,
-            difficulty: 'Easy',
-        },
-    })
-
     const { tags, setTags } = getCodingQuestionTags()
 
     const { editOpenEndedQuestionId } = getEditOpenEndedDialogs()
+
+    const selectedQuestion = openEndedQuestions.filter((question: any) => {
+        return question.id === editOpenEndedQuestionId
+    })
+
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            questionDescription: selectedQuestion[0]?.questionDescription || '',
+            marks: selectedQuestion[0]?.marks || 0,
+            topics: selectedQuestion[0]?.tagId || 0,
+            difficulty: selectedQuestion[0]?.difficulty || 'Easy',
+        },
+    })
+
+    useEffect(() => {
+        if (selectedQuestion) {
+            form.reset({
+                questionDescription: selectedQuestion[0].question,
+                marks: selectedQuestion[0].marks,
+                difficulty: selectedQuestion[0].difficulty,
+            })
+        }
+    }, [selectedQuestion[0], form])
 
     async function editOpenEndedQuestion(data: any) {
         try {
@@ -165,7 +181,16 @@ function EditOpenEndedQuestionForm({
                                     >
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Choose Topic" />
+                                                <SelectValue
+                                                    placeholder={
+                                                        tags.find(
+                                                            (tag) =>
+                                                                tag.id ===
+                                                                selectedQuestion[0]
+                                                                    .tagId
+                                                        )?.tagName || ''
+                                                    }
+                                                />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>

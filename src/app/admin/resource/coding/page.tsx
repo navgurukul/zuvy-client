@@ -51,21 +51,6 @@ const CodingProblems = (props: Props) => {
         setSelectedTag({ id: -1, tagName: 'AllTopics' })
     }
 
-    async function getSearchQuestions() {
-        // fetch all Searched Coding Questions
-        if (selectedDifficulty !== 'any') {
-            const response = await api.get(
-                `Content/allCodingQuestions?difficulty=${selectedDifficulty}&searchTerm=${searchTerm}`
-            )
-            setSearchedQuestions(response.data)
-        } else {
-            const response = await api.get(
-                `Content/allCodingQuestions?searchTerm=${searchTerm}`
-            )
-            setSearchedQuestions(response.data)
-        }
-    }
-
     async function getAllTags() {
         const response = await api.get('Content/allTags')
         if (response) {
@@ -82,8 +67,15 @@ const CodingProblems = (props: Props) => {
             selectedTag?.tagName !== 'AllTopics'
                 ? question.tags === selectedTag?.id
                 : true
+        const searchTermMatches =
+            searchTerm !== ''
+                ? question.title
+                      .toLowerCase()
+                      .includes(searchTerm.toLowerCase())
+                : true
 
-        const isQuestionIncluded = difficultyMatches && tagMatches
+        const isQuestionIncluded =
+            difficultyMatches && tagMatches && searchTermMatches
         return isQuestionIncluded
     })
 
@@ -93,8 +85,8 @@ const CodingProblems = (props: Props) => {
     }, [])
 
     useEffect(() => {
-        searchTerm.trim() !== '' && getSearchQuestions()
-    }, [searchTerm])
+        getAllCodingQuestions(setCodingQuestions)
+    }, [searchTerm, selectedTag.id, selectedDifficulty])
 
     return (
         <MaxWidthWrapper>
@@ -180,10 +172,7 @@ const CodingProblems = (props: Props) => {
                 </ScrollArea>
             </div>
 
-            <DataTable
-                data={searchTerm ? searchedQuestions : filteredQuestions}
-                columns={columns}
-            />
+            <DataTable data={filteredQuestions} columns={columns} />
         </MaxWidthWrapper>
     )
 }
