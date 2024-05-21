@@ -18,12 +18,11 @@ type Props = {
 }
 
 const PracticeProblems = (props: Props) => {
-    console.log('first', props)
     return (
-        <div className="w-full">
-            <h1 className="ml-6 text-start font-semibold">{props.name}</h1>
-            <section className="bg-white dark:bg-gray-900">
-                <div className="px-6 py-5 mx-auto">
+        <div className="w-full mb-10">
+            <h1 className=" text-start font-semibold">{props.name}</h1>
+            <section className=" bg-white dark:bg-gray-900">
+                <div className="mx-auto">
                     <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-3">
                         {props.submission.map(
                             ({ codingQuestionDetails, id, submitStudents }) => (
@@ -31,7 +30,7 @@ const PracticeProblems = (props: Props) => {
                                     key={id} // Use index or any unique identifier from submissionItem
                                     title={
                                         codingQuestionDetails?.title ||
-                                        'Untitled'
+                                        'Untitled Question'
                                     }
                                     totalSubmissions={props.totalStudents}
                                     studentsSubmitted={submitStudents}
