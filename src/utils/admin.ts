@@ -166,3 +166,19 @@ export const getAllOpenEndedQuestions = async (
         console.error(error)
     }
 }
+
+export const handleEditOpenEndedQuestion = (openEndedQuestion:any, setIsOpenEndDialogOpen:any, setEditOpenEndedQuestionId:any) => {
+    setIsOpenEndDialogOpen(true)
+    setEditOpenEndedQuestionId(openEndedQuestion.id)
+}
+export const handleEditCodingQuestion = (codingQuestion:any, setIsCodingDialogOpen:any, setEditCodingQuestionId:any) => {
+    setIsCodingDialogOpen(true)
+    setEditCodingQuestionId(codingQuestion.id)
+}
+
+export async function getAllTags(setTags:any) {
+    const response = await api.get('Content/allTags')
+    if (response) {
+        setTags(response.data.allTags)
+    }
+}

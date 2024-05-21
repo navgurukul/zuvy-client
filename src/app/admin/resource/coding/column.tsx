@@ -4,18 +4,30 @@ import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 import { CodingQuestion } from '@/utils/data/schema'
 import { Edit, Pencil, Trash2 } from 'lucide-react'
-import { api } from '@/utils/axios.config'
-import { toast } from '@/components/ui/use-toast'
+
 import { DELETE_CODING_QUESTION_CONFIRMATION } from '@/utils/constant'
 import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
-import { getDeleteCodingQuestion, getcodingQuestionState } from '@/store/store'
+import {
+    getDeleteCodingQuestion,
+    getEditCodingQuestionDialogs,
+    getcodingQuestionState,
+} from '@/store/store'
 import { cn, difficultyColor } from '@/lib/utils'
 import {
     handleConfirm,
     handleDelete,
     handleDeleteModal,
     getAllCodingQuestions,
+    handleEditCodingQuestion,
 } from '@/utils/admin'
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog'
+import EditCodingQuestionForm from '@/app/admin/resource/_components/EditCodingQuestionForm'
 
 export const columns: ColumnDef<CodingQuestion>[] = [
     {
@@ -84,13 +96,54 @@ export const columns: ColumnDef<CodingQuestion>[] = [
                 setDeleteCodingQuestionId,
             } = getDeleteCodingQuestion()
 
+            const {
+                setEditCodingQuestionId,
+                isCodingDialogOpen,
+                setIsCodingDialogOpen,
+            } = getEditCodingQuestionDialogs()
+
             const { codingQuestions, setCodingQuestions } =
                 getcodingQuestionState()
 
             return (
                 <>
                     <div className="flex">
-                        <Pencil className="cursor-pointer mr-5" size={20} />
+                        <Dialog
+                            onOpenChange={setIsCodingDialogOpen}
+                            open={isCodingDialogOpen}
+                        >
+                            <DialogTrigger>
+                                <Pencil
+                                    className="cursor-pointer mr-5"
+                                    size={20}
+                                    onClick={() => {
+                                        handleEditCodingQuestion(
+                                            codingQuestion,
+                                            setIsCodingDialogOpen,
+                                            setEditCodingQuestionId
+                                        )
+                                    }}
+                                />
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[500px]">
+                                <DialogHeader>
+                                    <DialogTitle>
+                                        Edit Coding Question
+                                    </DialogTitle>
+                                </DialogHeader>
+                                <div className="w-full">
+                                    <EditCodingQuestionForm
+                                        setIsCodingDialogOpen={
+                                            setIsCodingDialogOpen
+                                        }
+                                        getAllCodingQuestions={
+                                            getAllCodingQuestions
+                                        }
+                                        setCodingQuestions={setCodingQuestions}
+                                    />
+                                </div>
+                            </DialogContent>
+                        </Dialog>
                         <Trash2
                             onClick={(e) => {
                                 e.stopPropagation()
