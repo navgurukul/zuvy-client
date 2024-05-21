@@ -88,10 +88,10 @@ const Page = ({ params }: { params: any }) => {
                     const response = await api.get(
                         `/bootcamp/students/${params.courseId}?limit=${position}&offset=${offset}${searchParam}`
                     )
-                    setStoreStudentData(response.data.studentsEmails)
+                    setStoreStudentData(response.data.totalStudents)
                     setPages(response.data.totalPages)
                     setLastPage(response.data.totalPages)
-                    setTotalStudents(response.data.totalStudents)
+                    setTotalStudents(response.data.totalStudentsCount)
                 } catch (error) {
                     console.error('Error fetching student data:', error)
                 }
