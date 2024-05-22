@@ -28,7 +28,7 @@ import { DataTable } from '@/app/_components/datatable/data-table'
 import { columns } from './column'
 import NewMcqProblemForm from '../_components/NewMcqProblemForm'
 import { api } from '@/utils/axios.config'
-import { getAllQuizData } from '@/store/store'
+import { getAllQuizData, getCodingQuestionTags } from '@/store/store'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { RequestBodyType } from '../_components/NewMcqProblemForm'
 import useDebounce from '@/hooks/useDebounce'
@@ -45,7 +45,7 @@ const Mcqs = (props: Props) => {
     const [search, setSearch] = useState('')
     const debouncedSearch = useDebounce(search, 1000)
     const [difficulty, setDifficulty] = useState<string>('')
-    const [tags, setTags] = useState<Tag[]>([])
+    const { tags, setTags } = getCodingQuestionTags()
     const [selectedTag, setSelectedTag] = useState({
         tagName: 'AllTopics',
         id: -1,
@@ -137,7 +137,6 @@ const Mcqs = (props: Props) => {
                             <NewMcqProblemForm
                                 tags={tags}
                                 closeModal={closeModal}
-                                edit={false}
                                 setStoreQuizData={setStoreQuizData}
                                 getAllQuizQuesiton={getAllQuizQuestion}
                             />

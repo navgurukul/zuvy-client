@@ -1,4 +1,6 @@
-import React, { useState } from 'react'
+import React from 'react'
+import { useState, useEffect } from 'react'
+
 import * as z from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -22,53 +24,61 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Plus, X } from 'lucide-react'
+import { Plus, Trash, X } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { Tag } from '../mcq/page'
+import { quizData } from '../../courses/[courseId]/module/_components/quiz/QuizLibrary'
+import { getAllQuizData } from '@/store/store'
 
 type Props = {}
-
 export type RequestBodyType = {
     questions: {
         question: string
         options: { [key: number]: string }
         correctOption: number
-        mark: number
         tagId: number
         difficulty: string
     }[]
 }
-
 const formSchema = z.object({
     difficulty: z.enum(['Easy', 'Medium', 'Hard'], {
-        required_error: 'You need to select a Difficulty type.',
+        required_error: 'You need to select a Difficulty  type.',
     }),
+
     topics: z.number().min(1, 'You need to select a Topic'),
+
     questionText: z
         .string()
         .min(10, {
             message: 'Question Text must be at least 10 characters.',
         })
         .max(160, {
-            message: 'Question Text must not be longer than 160 characters.',
+            message: 'Question Text must not be longer than 30 characters.',
         }),
     options: z.array(z.string().max(30)),
     selectedOption: z.number(),
 })
 
-const NewMcqProblemForm = ({
+const EditQuizQuestion = ({
     tags,
     closeModal,
     setStoreQuizData,
     getAllQuizQuesiton,
+    quizQuestionId,
+    quizQuestion,
 }: {
     tags: Tag[]
     closeModal: () => void
     setStoreQuizData: any
     getAllQuizQuesiton: any
+    quizQuestionId: number
+    quizQuestion: any
 }) => {
+    const { quizData } = getAllQuizData()
+    const [difficulty, setDifficulty] = useState<string>('Easy')
     const [selectedOption, setSelectedOption] = useState<string>('')
+    const [selectedQuizQuestion, setSelectedQuizQuestion] = useState<any>(null)
     const [options, setOptions] = useState<string[]>([''])
 
     const addOption = () => {
@@ -83,9 +93,9 @@ const NewMcqProblemForm = ({
         }
     }
 
-    const handleCreateQuizQuestion = async (requestBody: RequestBodyType) => {
+    const handleEditQuizQuestion = async (requestBody: RequestBodyType) => {
         try {
-            await api.post(`/Content/quiz`, requestBody).then((res) => {
+            await api.post(`/Content/editquiz`, requestBody).then((res) => {
                 toast({
                     title: res.data.status || 'Success',
                     description: res.data.message || 'Quiz Question Created',
@@ -99,17 +109,35 @@ const NewMcqProblemForm = ({
             })
         }
     }
-
+    console.log(selectedQuizQuestion)
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            difficulty: 'Easy',
+            difficulty: undefined,
             topics: 0,
             questionText: '',
             options: options,
             selectedOption: 0,
         },
     })
+    useEffect(() => {
+        const selected = quizData.find(
+            (question) => question.id === quizQuestionId
+        )
+        if (selected) {
+            setSelectedQuizQuestion(selected)
+            setOptions(Object.values(selected.options))
+            setSelectedOption((selected.correctOption - 1).toString())
+            setDifficulty(selected.difficulty)
+            form.reset({
+                difficulty: selected.difficulty,
+                topics: selected.tagId,
+                questionText: selected.question,
+                options: Object.values(selected.options),
+                selectedOption: selected.correctOption - 1,
+            })
+        }
+    }, [quizQuestionId, quizData, form])
 
     const handleSubmit = async (values: z.infer<typeof formSchema>) => {
         const optionsObject: { [key: number]: string } = options.reduce(
@@ -121,10 +149,10 @@ const NewMcqProblemForm = ({
         )
 
         const formattedData = {
+            id: quizQuestionId,
             question: values.questionText,
             options: optionsObject,
             correctOption: +selectedOption + 1,
-            mark: 1,
             tagId: values.topics,
             difficulty: values.difficulty,
         }
@@ -132,17 +160,18 @@ const NewMcqProblemForm = ({
         const requestBody = {
             questions: [formattedData],
         }
-        await handleCreateQuizQuestion(requestBody)
+        console.log(requestBody)
+        await handleEditQuizQuestion(requestBody)
         getAllQuizQuesiton(setStoreQuizData)
         closeModal()
     }
 
     return (
-        <main className="flex flex-col p-3">
+        <main className="flex  flex-col p-3 ">
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(handleSubmit)}
-                    className="max-w-md w-full flex flex-col gap-4"
+                    className=" max-w-md w-full flex flex-col gap-4"
                 >
                     <FormField
                         control={form.control}
@@ -151,14 +180,17 @@ const NewMcqProblemForm = ({
                             <FormItem className="space-y-3">
                                 <FormControl>
                                     <RadioGroup
-                                        onValueChange={field.onChange}
-                                        defaultValue={field.value}
+                                        onValueChange={(value) => {
+                                            setDifficulty(value)
+                                            field.onChange(value)
+                                        }}
+                                        value={difficulty}
                                         className="flex space-y-1"
                                     >
                                         <FormLabel className="mt-5">
                                             Difficulty
                                         </FormLabel>
-                                        <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormItem className="flex  items-center space-x-3 space-y-0">
                                             <FormControl>
                                                 <RadioGroupItem value="Easy" />
                                             </FormControl>
@@ -325,9 +357,8 @@ const NewMcqProblemForm = ({
                             </FormItem>
                         )}
                     />
-
-                    <Button type="submit" className="w-1/2">
-                        Create Quiz Question
+                    <Button type="submit" className="w-1/2 ">
+                        Edit Quiz Question
                     </Button>
                 </form>
             </Form>
@@ -335,4 +366,4 @@ const NewMcqProblemForm = ({
     )
 }
 
-export default NewMcqProblemForm
+export default EditQuizQuestion

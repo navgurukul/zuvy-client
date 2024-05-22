@@ -3,7 +3,7 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 
-import { getAllQuizData, quiz } from '@/store/store'
+import { getAllQuizData, getCodingQuestionTags, quiz } from '@/store/store'
 import { Edit, Eye, Pencil, Trash2 } from 'lucide-react'
 import { difficultyColor } from '@/lib/utils'
 
@@ -24,6 +24,7 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import NewMcqProblemForm from '../_components/NewMcqProblemForm'
+import EditQuizQuestion from '../_components/EditQuizQuestion'
 
 export const columns: ColumnDef<quiz>[] = [
     {
@@ -78,8 +79,16 @@ export const columns: ColumnDef<quiz>[] = [
         ),
         cell: ({ row }) => {
             const quizQuestion = row.original
-            const { isEditQuizModalOpen, setIsEditModalOpen } =
-                getEditQuizQuestion()
+
+            const handlerQuizQuestions = () => {
+                setIsQuizQuestionId(quizQuestion.id)
+            }
+            const {
+                isEditQuizModalOpen,
+                setIsEditModalOpen,
+                quizQuestionId,
+                setIsQuizQuestionId,
+            } = getEditQuizQuestion()
             const closeModal = () => setIsEditModalOpen(false)
             const {
                 isDeleteModalOpen,
@@ -87,7 +96,8 @@ export const columns: ColumnDef<quiz>[] = [
                 deleteQuizQuestionId,
                 setDeleteQuizQuestionId,
             } = getDeleteQuizQuestion()
-            const { quizData, setStoreQuizData } = getAllQuizData()
+            const { setStoreQuizData } = getAllQuizData()
+            const { tags } = getCodingQuestionTags()
 
             return (
                 <>
@@ -100,20 +110,22 @@ export const columns: ColumnDef<quiz>[] = [
                                 <Pencil
                                     className="cursor-pointer mr-5"
                                     size={20}
+                                    onClick={handlerQuizQuestions}
                                 />
                             </DialogTrigger>
                             <DialogContent className="sm:max-w-[500px]">
                                 <DialogHeader>
-                                    <DialogTitle>New MCQ</DialogTitle>
+                                    <DialogTitle>Edit MCQ</DialogTitle>
                                 </DialogHeader>
                                 <div className="w-full">
-                                    {/* <NewMcqProblemForm
-                                         
+                                    <EditQuizQuestion
                                         tags={tags}
                                         closeModal={closeModal}
-                                        edit={true}
-                                    /> */}
-                                    <p>Edit</p>
+                                        getAllQuizQuesiton={getAllQuizQuestion}
+                                        setStoreQuizData={setStoreQuizData}
+                                        quizQuestionId={quizQuestionId}
+                                        quizQuestion={[quizQuestion]}
+                                    />
                                 </div>
                             </DialogContent>
                         </Dialog>
