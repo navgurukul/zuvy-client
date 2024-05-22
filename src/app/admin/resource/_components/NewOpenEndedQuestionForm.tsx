@@ -28,10 +28,12 @@ import { Plus, X } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 
-type Props = {}
 const formSchema = z.object({
     questionDescription: z.string(),
-    marks: z.string().transform((val) => parseInt(val, 10)),
+    marks: z
+        .string()
+        .refine((val) => !isNaN(Number(val)), { message: 'Must be a number' })
+        .transform((val) => Number(val)),
     topics: z.number(),
     difficulty: z.string(),
 })
@@ -47,15 +49,10 @@ function NewOpenEndedQuestionForm({
     getAllOpenEndedQuestions: any
     setOpenEndedQuestions: any
 }) {
-    const [testCases, setTestCases] = useState([{ id: 1 }])
-    const [hoveredIndex, setHoveredIndex] = useState<number | null>(0)
-    const [options, setOptions] = useState(['Easy', 'Medium', 'Hard'])
-
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             questionDescription: '',
-            marks: 0,
             topics: 0,
             difficulty: 'Easy',
         },
@@ -89,8 +86,8 @@ function NewOpenEndedQuestionForm({
     const handleSubmit = (values: z.infer<typeof formSchema>) => {
         const formattedData = {
             question: values.questionDescription,
-            marks: values.marks,
             tagId: values.topics,
+            marks: values.marks,
             difficulty: values.difficulty,
         }
         createOpenEndedQuestion(formattedData)

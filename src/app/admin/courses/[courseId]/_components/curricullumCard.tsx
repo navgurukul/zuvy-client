@@ -27,6 +27,7 @@ type Props = {
     timeAlloted: number
     codingProblemsCount: number
     articlesCount: number
+    typeId: number
     fetchCourseModules: () => void
 }
 
@@ -42,6 +43,7 @@ const CurricullumCard = ({
     timeAlloted,
     codingProblemsCount,
     articlesCount,
+    typeId,
     fetchCourseModules,
 }: Props) => {
     // states and variables

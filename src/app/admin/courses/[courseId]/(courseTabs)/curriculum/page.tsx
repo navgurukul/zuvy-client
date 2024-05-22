@@ -23,6 +23,7 @@ interface CurriculumItem {
     assignmentCount: number
     codingProblemsCount: number
     articlesCount: number
+    typeId: number
 }
 
 function Page() {
@@ -200,6 +201,7 @@ function Page() {
                                                 articlesCount={
                                                     item.articlesCount
                                                 }
+                                                typeId={item?.typeId}
                                                 fetchCourseModules={
                                                     fetchCourseModules
                                                 }

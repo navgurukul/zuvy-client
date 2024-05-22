@@ -27,6 +27,7 @@ import { api } from '@/utils/axios.config'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { getCodingQuestionTags, getcodingQuestionState } from '@/store/store'
 import { getAllCodingQuestions } from '@/utils/admin'
+import Image from 'next/image'
 
 type Props = {}
 
@@ -34,7 +35,6 @@ const CodingProblems = (props: Props) => {
     const { codingQuestions, setCodingQuestions } = getcodingQuestionState()
 
     const [searchTerm, setSearchTerm] = useState('')
-    const [searchedQuestions, setSearchedQuestions] = useState([])
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const { tags, setTags } = getCodingQuestionTags()
     const [selectedTag, setSelectedTag] = useState({
@@ -80,7 +80,6 @@ const CodingProblems = (props: Props) => {
     })
 
     useEffect(() => {
-        getAllCodingQuestions(setCodingQuestions)
         getAllTags()
     }, [])
 
@@ -89,91 +88,155 @@ const CodingProblems = (props: Props) => {
     }, [searchTerm, selectedTag.id, selectedDifficulty])
 
     return (
-        <MaxWidthWrapper>
-            <h1 className="text-left font-semibold text-2xl">
-                Resource Library - Coding Problems
-            </h1>
-            <div className="flex justify-between">
-                <div className="relative w-full">
-                    <Input
-                        placeholder="Problem Name..."
-                        className="w-1/4 p-2 my-6 input-with-icon pl-8"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                    <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                        <Search className="text-gray-400" size={20} />
+        <>
+            {codingQuestions.length > 0 ? (
+                <MaxWidthWrapper>
+                    <h1 className="text-left font-semibold text-2xl">
+                        Resource Library - Coding Problems
+                    </h1>
+                    <div className="flex justify-between">
+                        <div className="relative w-full">
+                            <Input
+                                placeholder="Problem Name..."
+                                className="w-1/4 p-2 my-6 input-with-icon pl-8"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                            <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                                <Search className="text-gray-400" size={20} />
+                            </div>
+                        </div>
+                        <Dialog
+                            onOpenChange={setIsDialogOpen}
+                            open={isDialogOpen}
+                        >
+                            <DialogTrigger asChild>
+                                <Button>+ Create Problems</Button>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[500px]">
+                                <DialogHeader>
+                                    <DialogTitle>
+                                        New Coding Problem
+                                    </DialogTitle>
+                                </DialogHeader>
+                                <div className="w-full">
+                                    <NewCodingProblemForm
+                                        tags={tags}
+                                        setIsDialogOpen={setIsDialogOpen}
+                                        getAllCodingQuestions={
+                                            getAllCodingQuestions
+                                        }
+                                        setCodingQuestions={setCodingQuestions}
+                                    />
+                                </div>
+                            </DialogContent>
+                        </Dialog>
                     </div>
-                </div>
-                <Dialog onOpenChange={setIsDialogOpen} open={isDialogOpen}>
-                    <DialogTrigger asChild>
-                        <Button>+ Create Problems</Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[500px]">
-                        <DialogHeader>
-                            <DialogTitle>New Coding Problem</DialogTitle>
-                        </DialogHeader>
-                        <div className="w-full">
-                            <NewCodingProblemForm
-                                tags={tags}
-                                setIsDialogOpen={setIsDialogOpen}
-                                getAllCodingQuestions={getAllCodingQuestions}
-                                setCodingQuestions={setCodingQuestions}
+                    <div className="flex items-center">
+                        <Select
+                            onValueChange={(value) =>
+                                setSelectedDifficulty(value)
+                            }
+                        >
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Difficulty" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectItem value="any">
+                                        Any Difficulty
+                                    </SelectItem>
+                                    <SelectItem value="Easy">Easy</SelectItem>
+                                    <SelectItem value="Medium">
+                                        Medium
+                                    </SelectItem>
+                                    <SelectItem value="Hard">Hard</SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                        <Separator
+                            orientation="vertical"
+                            className="w-1 h-12 ml-4 bg-gray-400 rounded-lg"
+                        />
+
+                        <ScrollArea className=" text-nowrap ">
+                            <ScrollBar orientation="horizontal" />
+                            <Button
+                                className={`mx-3 rounded-3xl ${
+                                    selectedTag?.tagName === 'AllTopics'
+                                        ? 'bg-secondary text-white'
+                                        : 'bg-gray-200 text-black'
+                                }`}
+                                onClick={handleAllTopicsClick}
+                            >
+                                All Topics
+                            </Button>
+
+                            {tags.map((tag: any) => (
+                                <Button
+                                    className={`mx-3 rounded-3xl ${
+                                        selectedTag === tag
+                                            ? 'bg-secondary text-white'
+                                            : 'bg-gray-200 text-black'
+                                    }`}
+                                    key={tag?.id}
+                                    onClick={() => handleTopicClick(tag)}
+                                >
+                                    {tag.tagName}
+                                </Button>
+                            ))}
+                        </ScrollArea>
+                    </div>
+
+                    <DataTable data={filteredQuestions} columns={columns} />
+                </MaxWidthWrapper>
+            ) : (
+                <>
+                    <h1 className="text-left font-semibold text-2xl">
+                        Resource Library - Coding Problems
+                    </h1>
+                    <MaxWidthWrapper className="flex flex-col justify-center items-center gap-5">
+                        <div>
+                            <Image
+                                src="/resource_library_empty_state.svg"
+                                alt="Empty State"
+                                width={500}
+                                height={500}
                             />
                         </div>
-                    </DialogContent>
-                </Dialog>
-            </div>
-            <div className="flex items-center">
-                <Select onValueChange={(value) => setSelectedDifficulty(value)}>
-                    <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Difficulty" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectGroup>
-                            <SelectItem value="any">Any Difficulty</SelectItem>
-                            <SelectItem value="Easy">Easy</SelectItem>
-                            <SelectItem value="Medium">Medium</SelectItem>
-                            <SelectItem value="Hard">Hard</SelectItem>
-                        </SelectGroup>
-                    </SelectContent>
-                </Select>
-                <Separator
-                    orientation="vertical"
-                    className="w-1 h-12 ml-4 bg-gray-400 rounded-lg"
-                />
-
-                <ScrollArea className=" text-nowrap ">
-                    <ScrollBar orientation="horizontal" />
-                    <Button
-                        className={`mx-3 rounded-3xl ${
-                            selectedTag?.tagName === 'AllTopics'
-                                ? 'bg-secondary text-white'
-                                : 'bg-gray-200 text-black'
-                        }`}
-                        onClick={handleAllTopicsClick}
-                    >
-                        All Topics
-                    </Button>
-
-                    {tags.map((tag: any) => (
-                        <Button
-                            className={`mx-3 rounded-3xl ${
-                                selectedTag === tag
-                                    ? 'bg-secondary text-white'
-                                    : 'bg-gray-200 text-black'
-                            }`}
-                            key={tag?.id}
-                            onClick={() => handleTopicClick(tag)}
+                        <h2>
+                            No coding problems have been created yet. Start by
+                            adding the first one
+                        </h2>
+                        <Dialog
+                            onOpenChange={setIsDialogOpen}
+                            open={isDialogOpen}
                         >
-                            {tag.tagName}
-                        </Button>
-                    ))}
-                </ScrollArea>
-            </div>
-
-            <DataTable data={filteredQuestions} columns={columns} />
-        </MaxWidthWrapper>
+                            <DialogTrigger asChild>
+                                <Button>+ Create Problems</Button>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[500px]">
+                                <DialogHeader>
+                                    <DialogTitle>
+                                        New Coding Problem
+                                    </DialogTitle>
+                                </DialogHeader>
+                                <div className="w-full">
+                                    <NewCodingProblemForm
+                                        tags={tags}
+                                        setIsDialogOpen={setIsDialogOpen}
+                                        getAllCodingQuestions={
+                                            getAllCodingQuestions
+                                        }
+                                        setCodingQuestions={setCodingQuestions}
+                                    />
+                                </div>
+                            </DialogContent>
+                        </Dialog>
+                    </MaxWidthWrapper>
+                </>
+            )}
+        </>
     )
 }
 
