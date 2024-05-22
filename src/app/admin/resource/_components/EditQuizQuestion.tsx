@@ -30,6 +30,7 @@ import { toast } from '@/components/ui/use-toast'
 import { Tag } from '../mcq/page'
 import { quizData } from '../../courses/[courseId]/module/_components/quiz/QuizLibrary'
 import { getAllQuizData } from '@/store/store'
+import { DialogFooter } from '@/components/ui/dialog'
 
 type Props = {}
 export type RequestBodyType = {
@@ -62,25 +63,53 @@ const formSchema = z.object({
 
 const EditQuizQuestion = ({
     tags,
-    closeModal,
+    setIsEditModalOpen,
     setStoreQuizData,
     getAllQuizQuesiton,
     quizQuestionId,
     quizQuestion,
 }: {
     tags: Tag[]
-    closeModal: () => void
+    setIsEditModalOpen: any
     setStoreQuizData: any
     getAllQuizQuesiton: any
     quizQuestionId: number
     quizQuestion: any
 }) => {
-    const { quizData } = getAllQuizData()
     const [difficulty, setDifficulty] = useState<string>('Easy')
     const [selectedOption, setSelectedOption] = useState<string>('')
-    const [selectedQuizQuestion, setSelectedQuizQuestion] = useState<any>(null)
     const [options, setOptions] = useState<string[]>([''])
 
+    let selectedQuizQuestion = quizQuestion.filter((question: any) => {
+        return question.id === quizQuestionId
+    })
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            difficulty: selectedQuizQuestion[0]?.difficulty || 'Easy',
+            topics: selectedQuizQuestion[0]?.tagId || 0,
+            questionText: selectedQuizQuestion[0].question || '',
+            options: selectedQuizQuestion[0].options,
+            selectedOption: selectedQuizQuestion[0].correctOption || 0,
+        },
+    })
+    useEffect(() => {
+        const selected = quizQuestion.find(
+            (question: any) => question.id === quizQuestionId
+        )
+        if (selected) {
+            setOptions(Object.values(selected.options))
+            setSelectedOption((selected.correctOption - 1).toString())
+            setDifficulty(selected.difficulty)
+            form.reset({
+                difficulty: selected.difficulty,
+                topics: selected.tagId,
+                questionText: selected.question,
+                options: Object.values(selected.options),
+                selectedOption: selected.correctOption - 1,
+            })
+        }
+    }, [quizQuestionId, quizQuestion, form])
     const addOption = () => {
         setOptions([...options, ''])
     }
@@ -101,6 +130,7 @@ const EditQuizQuestion = ({
                     description: res.data.message || 'Quiz Question Created',
                 })
             })
+            setIsEditModalOpen(false)
         } catch (error) {
             toast({
                 title: 'Error',
@@ -109,35 +139,6 @@ const EditQuizQuestion = ({
             })
         }
     }
-    console.log(selectedQuizQuestion)
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            difficulty: undefined,
-            topics: 0,
-            questionText: '',
-            options: options,
-            selectedOption: 0,
-        },
-    })
-    useEffect(() => {
-        const selected = quizData.find(
-            (question) => question.id === quizQuestionId
-        )
-        if (selected) {
-            setSelectedQuizQuestion(selected)
-            setOptions(Object.values(selected.options))
-            setSelectedOption((selected.correctOption - 1).toString())
-            setDifficulty(selected.difficulty)
-            form.reset({
-                difficulty: selected.difficulty,
-                topics: selected.tagId,
-                questionText: selected.question,
-                options: Object.values(selected.options),
-                selectedOption: selected.correctOption - 1,
-            })
-        }
-    }, [quizQuestionId, quizData, form])
 
     const handleSubmit = async (values: z.infer<typeof formSchema>) => {
         const optionsObject: { [key: number]: string } = options.reduce(
@@ -163,7 +164,6 @@ const EditQuizQuestion = ({
         console.log(requestBody)
         await handleEditQuizQuestion(requestBody)
         getAllQuizQuesiton(setStoreQuizData)
-        closeModal()
     }
 
     return (
@@ -230,8 +230,8 @@ const EditQuizQuestion = ({
                                     <FormLabel>Topics</FormLabel>
                                     <Select
                                         onValueChange={(value) => {
-                                            const selectedTag = tags?.find(
-                                                (tag: Tag) =>
+                                            const selectedTag = tags.find(
+                                                (tag: any) =>
                                                     tag.tagName === value
                                             )
                                             if (selectedTag) {
@@ -241,7 +241,17 @@ const EditQuizQuestion = ({
                                     >
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Choose Topic" />
+                                                <SelectValue
+                                                    placeholder={
+                                                        tags.find(
+                                                            (tag) =>
+                                                                tag.id ===
+                                                                selectedQuizQuestion[0]
+                                                                    ?.tagId
+                                                        )?.tagName ||
+                                                        'Choose Topic'
+                                                    }
+                                                />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
@@ -289,7 +299,7 @@ const EditQuizQuestion = ({
                                         setSelectedOption(value)
                                         field.onChange(value)
                                     }}
-                                    defaultValue={selectedOption}
+                                    value={selectedOption}
                                     className="space-y-1"
                                 >
                                     {options.map((option, index) => (
@@ -357,9 +367,11 @@ const EditQuizQuestion = ({
                             </FormItem>
                         )}
                     />
-                    <Button type="submit" className="w-1/2 ">
-                        Edit Quiz Question
-                    </Button>
+                    <DialogFooter>
+                        <Button type="submit" className="w-1/2 ">
+                            Edit Quiz Question
+                        </Button>
+                    </DialogFooter>
                 </form>
             </Form>
         </main>

@@ -14,6 +14,7 @@ import {
     handleQuizDelete,
     handleDeleteQuizModal,
     getAllQuizQuestion,
+    // handlerQuizQuestions,
 } from '@/utils/admin'
 import { DELETE_QUIZ_QUESTION_CONFIRMATION } from '@/utils/constant'
 import {
@@ -80,54 +81,59 @@ export const columns: ColumnDef<quiz>[] = [
         cell: ({ row }) => {
             const quizQuestion = row.original
 
-            const handlerQuizQuestions = () => {
-                setIsQuizQuestionId(quizQuestion.id)
-            }
             const {
                 isEditQuizModalOpen,
                 setIsEditModalOpen,
                 quizQuestionId,
                 setIsQuizQuestionId,
             } = getEditQuizQuestion()
-            const closeModal = () => setIsEditModalOpen(false)
             const {
                 isDeleteModalOpen,
                 setDeleteModalOpen,
                 deleteQuizQuestionId,
                 setDeleteQuizQuestionId,
             } = getDeleteQuizQuestion()
-            const { setStoreQuizData } = getAllQuizData()
+            const { quizData, setStoreQuizData } = getAllQuizData()
             const { tags } = getCodingQuestionTags()
+            const handlerQuizQuestions = (quizQuestion: any) => {
+                setIsEditModalOpen(true)
+                setIsQuizQuestionId(quizQuestion.id)
+            }
 
             return (
                 <>
                     <div className="flex">
-                        <Dialog
-                            open={isEditQuizModalOpen}
-                            onOpenChange={setIsEditModalOpen}
-                        >
+                        <Dialog>
                             <DialogTrigger asChild>
                                 <Pencil
                                     className="cursor-pointer mr-5"
                                     size={20}
-                                    onClick={handlerQuizQuestions}
+                                    onClick={() =>
+                                        handlerQuizQuestions(quizQuestion)
+                                    }
                                 />
                             </DialogTrigger>
-                            <DialogContent className="sm:max-w-[500px]">
-                                <DialogHeader>
-                                    <DialogTitle>Edit MCQ</DialogTitle>
-                                </DialogHeader>
-                                <div className="w-full">
-                                    <EditQuizQuestion
-                                        tags={tags}
-                                        closeModal={closeModal}
-                                        getAllQuizQuesiton={getAllQuizQuestion}
-                                        setStoreQuizData={setStoreQuizData}
-                                        quizQuestionId={quizQuestionId}
-                                        quizQuestion={[quizQuestion]}
-                                    />
-                                </div>
-                            </DialogContent>
+                            {isEditQuizModalOpen && (
+                                <DialogContent className="sm:max-w-[500px]">
+                                    <DialogHeader>
+                                        <DialogTitle>Edit MCQ</DialogTitle>
+                                    </DialogHeader>
+                                    <div className="w-full">
+                                        <EditQuizQuestion
+                                            tags={tags}
+                                            setIsEditModalOpen={
+                                                setIsEditModalOpen
+                                            }
+                                            getAllQuizQuesiton={
+                                                getAllQuizQuestion
+                                            }
+                                            setStoreQuizData={setStoreQuizData}
+                                            quizQuestionId={quizQuestionId}
+                                            quizQuestion={quizData}
+                                        />
+                                    </div>
+                                </DialogContent>
+                            )}
                         </Dialog>
                         <Trash2
                             onClick={(e) => {
