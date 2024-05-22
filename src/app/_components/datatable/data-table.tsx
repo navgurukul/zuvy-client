@@ -64,6 +64,7 @@ export function DataTable<TData, TValue>({
         getFacetedRowModel: getFacetedRowModel(),
         getFacetedUniqueValues: getFacetedUniqueValues(),
     })
+
     return (
         <div className="space-y-4">
             <DataTableToolbar table={table} />

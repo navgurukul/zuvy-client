@@ -141,6 +141,7 @@ export const columns: ColumnDef<CodingQuestion>[] = [
                                             getAllCodingQuestions
                                         }
                                         setCodingQuestions={setCodingQuestions}
+                                        codingQuestions={codingQuestions}
                                     />
                                 </div>
                             </DialogContent>

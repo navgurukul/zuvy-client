@@ -86,7 +86,8 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
                 setIsOpenEndDialogOpen,
                 setEditOpenEndedQuestionId,
             } = getEditOpenEndedDialogs()
-            const { setOpenEndedQuestions } = getopenEndedQuestionstate()
+            const { openEndedQuestions, setOpenEndedQuestions } =
+                getopenEndedQuestionstate()
 
             return (
                 <>
@@ -125,6 +126,7 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
                                         setOpenEndedQuestions={
                                             setOpenEndedQuestions
                                         }
+                                        openEndedQuestions={openEndedQuestions}
                                     />
                                 </div>
                             </DialogContent>

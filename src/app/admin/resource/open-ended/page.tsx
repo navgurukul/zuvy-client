@@ -44,9 +44,7 @@ const OpenEndedQuestions = (props: Props) => {
     const { openEndedQuestions, setOpenEndedQuestions } =
         getopenEndedQuestionstate()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
-    const [isOpenEndDialogOpen, setIsOpenEndDialogOpen] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
-    const [searchedQuestions, setSearchedQuestions] = useState([])
 
     const handleTopicClick = (tag: any) => {
         setSelectedTag(tag)
@@ -65,34 +63,17 @@ const OpenEndedQuestions = (props: Props) => {
             selectedTag?.tagName !== 'AllTopics'
                 ? question.tagId === selectedTag?.id
                 : true
+        const searchTermMatches =
+            searchTerm !== ''
+                ? question.question
+                      .toLowerCase()
+                      .includes(searchTerm.toLowerCase())
+                : true
 
-        const isQuestionIncluded = difficultyMatches && tagMatches
+        const isQuestionIncluded =
+            difficultyMatches && tagMatches && searchTermMatches
         return isQuestionIncluded
     })
-
-    async function getSearchQuestions() {
-        if (
-            selectedDifficulty !== 'any' &&
-            selectedTag?.tagName === 'AllTopics'
-        ) {
-            const response = await api.get(
-                `Content/openEndedQuestions?difficulty=${selectedDifficulty}&searchTerm=${searchTerm}`
-            )
-            setSearchedQuestions(response.data.data)
-        } else if (selectedTag?.tagName !== 'AllTopics') {
-            {
-                const response = await api.get(
-                    `Content/openEndedQuestions?tagId=${selectedTag.id}&difficulty=${selectedDifficulty}&searchTerm=${searchTerm}`
-                )
-                setSearchedQuestions(response.data.data)
-            }
-        } else {
-            const response = await api.get(
-                `Content/openEndedQuestions?searchTerm=${searchTerm}`
-            )
-            setSearchedQuestions(response.data.data)
-        }
-    }
 
     useEffect(() => {
         getAllOpenEndedQuestions(setOpenEndedQuestions)
@@ -100,8 +81,8 @@ const OpenEndedQuestions = (props: Props) => {
     }, [])
 
     useEffect(() => {
-        searchTerm.trim() !== '' && getSearchQuestions()
-    }, [searchTerm])
+        getAllOpenEndedQuestions(setOpenEndedQuestions)
+    }, [searchTerm, selectedTag, selectedDifficulty])
 
     return (
         <MaxWidthWrapper>
@@ -189,10 +170,7 @@ const OpenEndedQuestions = (props: Props) => {
                 </ScrollArea>
             </div>
 
-            <DataTable
-                data={searchTerm ? searchedQuestions : filteredQuestions}
-                columns={columns}
-            />
+            <DataTable data={filteredQuestions} columns={columns} />
         </MaxWidthWrapper>
     )
 }
