@@ -166,7 +166,6 @@ function Page({
                         moduleId={params.moduleId}
                         content={chapterContent}
                         fetchChapterContent={fetchChapterContent}
-                        key={key}
                     />
                 )
             case 2:
