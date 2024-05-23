@@ -12,6 +12,20 @@ import { quizData, Options } from './QuizLibrary'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import QuizModal from './QuizModal'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog'
+import NewMcqProblemForm from '@/app/admin/resource/_components/NewMcqProblemForm'
+import { api } from '@/utils/axios.config'
+import { Tag } from '@/app/admin/resource/mcq/page'
+import { toast } from '@/components/ui/use-toast'
+import { RequestBodyType } from '@/app/admin/resource/_components/NewMcqProblemForm'
 
 interface QuizProps {
     content: Object
@@ -19,6 +33,9 @@ interface QuizProps {
 
 function Quiz({ content }: QuizProps) {
     const [activeTab, setActiveTab] = useState('anydifficulty')
+    const [tags, setTags] = useState<Tag[]>([])
+    const [isOpen, setIsOpen] = useState(false)
+
     const [addQuestion, setAddQuestion] = useState<quizData[]>([])
 
     const handleAddQuestion = (data: any) => {
@@ -33,10 +50,39 @@ function Quiz({ content }: QuizProps) {
             ...uniqueData,
         ])
     }
+    const openModal = () => setIsOpen(true)
+    const closeModal = () => setIsOpen(false)
+    async function getAllTags() {
+        const response = await api.get('Content/allTags')
+        if (response) {
+            setTags(response.data.allTags)
+        }
+    }
     const removeQuestionById = (questionId: number) => {
         setAddQuestion((prevQuestions: any) =>
             prevQuestions.filter((question: any) => question.id !== questionId)
         )
+    }
+
+    const handleCreateQuizQuestion = async (requestBody: RequestBodyType) => {
+        try {
+            const res = await api
+                .post(`/Content/quiz`, requestBody)
+                .then((res) => {
+                    // getAllQuizQuestion()
+                    toast({
+                        title: res.data.status || 'Success',
+                        description:
+                            res.data.message || 'Quiz Question Created',
+                    })
+                })
+        } catch (error) {
+            toast({
+                title: 'Error',
+                description:
+                    'There was an error creating the quiz question. Please try again.',
+            })
+        }
     }
     return (
         <>
@@ -78,12 +124,30 @@ function Quiz({ content }: QuizProps) {
                                 )
                             }
                         )}
-                        <Button
-                            variant={'outline'}
-                            className="text-secondary font-semibold"
-                        >
-                            Add Question
-                        </Button>
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button
+                                    variant={'outline'}
+                                    className="text-secondary font-semibold"
+                                >
+                                    Add Question
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>New MCQ</DialogTitle>
+                                </DialogHeader>
+                                <div className="w-full">
+                                    <NewMcqProblemForm
+                                        handleCreateQuizQuestion={
+                                            handleCreateQuizQuestion
+                                        }
+                                        tags={tags}
+                                        closeModal={closeModal}
+                                    />
+                                </div>{' '}
+                            </DialogContent>
+                        </Dialog>
                     </div>
                 </ScrollArea>
 

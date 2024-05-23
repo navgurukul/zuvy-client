@@ -38,7 +38,7 @@ const Page = ({ params }: { params: any }) => {
     console.log(submissions)
     return (
         <div className="">
-            <div className="flex ml-5 items-start gap-x-3">
+            <div className="flex items-start gap-x-3">
                 <Button
                     onClick={() => handleTabChange('practice')}
                     className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${

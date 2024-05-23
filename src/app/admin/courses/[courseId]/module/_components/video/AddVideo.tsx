@@ -59,7 +59,6 @@ interface chapterDetails {
 const AddVideo = ({
     moduleId,
     content,
-    key,
     fetchChapterContent,
 }: {
     content: {
@@ -70,7 +69,6 @@ const AddVideo = ({
         contentDetails: ContentDetail[]
     }
     moduleId: string
-    key: number
     fetchChapterContent: (chapterId: number) => Promise<void>
 }) => {
     const [showVideo, setShowVideo] = useState(true)
@@ -81,7 +79,6 @@ const AddVideo = ({
         links: content.contentDetails[0]?.links ?? [],
     })
 
-    console.log(newContent)
     const handleUploadClick = () => {
         if (fileInputRef.current) {
             fileInputRef.current.click()
