@@ -40,9 +40,6 @@ const formSchema = z.object({
     difficulty: z.enum(['Easy', 'Medium', 'Hard'], {
         required_error: 'You need to select a Difficulty  type.',
     }),
-    // allowedLanguages: z.enum(['All Languages', 'C++', 'Python'], {
-    //     required_error: 'You need to select a Language',
-    // }),
     topics: z.number().min(1, 'You need to select a Topic'),
     inputFormat: z.enum(['Strings', 'Number', 'Float'], {
         required_error: 'You need to select an Input Format',
@@ -62,10 +59,12 @@ export default function EditCodingQuestionForm({
     setIsCodingDialogOpen,
     getAllCodingQuestions,
     setCodingQuestions,
+    codingQuestions,
 }: {
     setIsCodingDialogOpen: any
     getAllCodingQuestions: any
     setCodingQuestions: any
+    codingQuestions: any
 }) {
     const [testCases, setTestCases] = useState([
         { id: 1, input: '', output: '' },
@@ -73,6 +72,10 @@ export default function EditCodingQuestionForm({
 
     const { tags } = getCodingQuestionTags()
     const { editCodingQuestionId } = getEditCodingQuestionDialogs()
+
+    let selectCodingQuestion = codingQuestions.filter((question: any) => {
+        return question.id === editCodingQuestionId
+    })
 
     const handleAddTestCase = () => {
         setTestCases((prevTestCases) => [
@@ -90,18 +93,22 @@ export default function EditCodingQuestionForm({
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            title: '',
-            description: '',
-            problemStatement: '',
-            constraints: '',
-            difficulty: 'Easy',
-            // allowedLanguages: 'All Languages',
-            topics: 0,
+            title: selectCodingQuestion[0]?.title || '',
+            description: selectCodingQuestion[0]?.description || '',
+            problemStatement: selectCodingQuestion[0]?.description || '',
+            constraints: selectCodingQuestion[0]?.constraints || '',
+            difficulty: selectCodingQuestion[0]?.difficulty || 'Easy',
+            topics: selectCodingQuestion[0]?.tags || 0,
             inputFormat: 'Number',
             outputFormat: 'Strings',
-            testCases: [],
+            testCases:
+                selectCodingQuestion[0]?.testCases.map((testCase: any) => ({
+                    input: testCase.input[0],
+                    output: testCase.output[0],
+                })) || [],
         },
     })
+
     async function editCodingQuestion(data: any) {
         try {
             const response = await api.patch(
@@ -156,7 +163,36 @@ export default function EditCodingQuestionForm({
         editCodingQuestion(formattedData)
         getAllCodingQuestions(setCodingQuestions)
     }
-    // const accountType = form.watch('accountType')
+
+    useEffect(() => {
+        if (selectCodingQuestion) {
+            form.reset({
+                title: selectCodingQuestion[0].title,
+                description: selectCodingQuestion[0].description,
+                problemStatement: selectCodingQuestion[0].description,
+                constraints: selectCodingQuestion[0].constraints,
+                difficulty: selectCodingQuestion[0].difficulty,
+                topics: selectCodingQuestion[0].tags,
+                inputFormat: 'Number',
+                outputFormat: 'Strings',
+                testCases: selectCodingQuestion[0].testCases.map(
+                    (testCase: any) => ({
+                        input: testCase.input[0],
+                        output: testCase.output[0],
+                    })
+                ),
+            })
+            setTestCases(
+                selectCodingQuestion[0].testCases.map(
+                    (testCase: any, index: number) => ({
+                        id: index + 1,
+                        input: testCase.input[0],
+                        output: testCase.output[0],
+                    })
+                )
+            )
+        }
+    }, [selectCodingQuestion[0]])
 
     return (
         <ScrollArea className="h-[calc(100vh-200px)] w-full rounded-md  ">
@@ -237,7 +273,8 @@ export default function EditCodingQuestionForm({
                                                             field.onChange
                                                         }
                                                         defaultValue={
-                                                            field.value
+                                                            selectCodingQuestion[0]
+                                                                .difficulty
                                                         }
                                                         className="flex  space-y-1"
                                                     >
@@ -336,7 +373,17 @@ export default function EditCodingQuestionForm({
                                             >
                                                 <FormControl>
                                                     <SelectTrigger>
-                                                        <SelectValue placeholder="Choose Topic" />
+                                                        <SelectValue
+                                                            placeholder={
+                                                                tags.find(
+                                                                    (tag) =>
+                                                                        tag.id ===
+                                                                        selectCodingQuestion[0]
+                                                                            ?.tags
+                                                                )?.tagName ||
+                                                                'Choose Topic'
+                                                            }
+                                                        />
                                                     </SelectTrigger>
                                                 </FormControl>
                                                 <SelectContent>

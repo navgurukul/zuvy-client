@@ -36,9 +36,7 @@ const formSchema = z.object({
     difficulty: z.enum(['Easy', 'Medium', 'Hard'], {
         required_error: 'You need to select a Difficulty  type.',
     }),
-    // allowedLanguages: z.enum(['All Languages', 'C++', 'Python'], {
-    //     required_error: 'You need to select a Language',
-    // }),
+
     topics: z.number().min(1, 'You need to select a Topic'),
     inputFormat: z.enum(['Strings', 'Number', 'Float'], {
         required_error: 'You need to select an Input Format',

@@ -59,10 +59,9 @@ function RecordingCard({
     // func
 
     async function handleClassDetails() {
-        console.log(classData, 'meetingId adhsfkfhdskfhdkash')
         try {
             const response = await api.get(
-                `/classes/analytics/${classData?.meetingid}`
+                `/classes/analytics/${classData?.meetingId}`
             )
             setDisplayAttendance(response.data)
         } catch (err) {
@@ -91,7 +90,7 @@ function RecordingCard({
     const handleAttendance = async () => {
         try {
             const response = await api.get(
-                `/classes/getAttendance/${classData.meetingid}`
+                `/classes/getAttendance/${classData.meetingId}`
             )
             const attendanceData = response.data.attendanceSheet
             if (!Array.isArray(attendanceData) || attendanceData.length === 0) {
@@ -195,32 +194,34 @@ function RecordingCard({
                                     <h3 className="mb-3 font-bold mt-3">
                                         Attendance Information
                                     </h3>
-                                    <div className="flex mb-5">
-                                        <div className="flex-grow basis-0">
-                                            <p>Total Students</p>
-                                            <p>
-                                                {' '}
-                                                {
-                                                    displayAttendance
-                                                        ?.studentsInfo
-                                                        ?.total_students
-                                                }
-                                            </p>
+                                    {displayAttendance ? (
+                                        <div className="flex mb-5">
+                                            <div className="flex-grow basis-0">
+                                                <p>Total Students</p>
+                                                <p>
+                                                    {
+                                                        displayAttendance
+                                                            ?.studentsInfo
+                                                            ?.total_students
+                                                    }
+                                                </p>
+                                            </div>
+                                            <div className="flex-grow basis-0">
+                                                <p>Present</p>
+                                                <p className="text-secondary">
+                                                    {presentStudents}
+                                                </p>
+                                            </div>
+                                            <div className="flex-grow basis-0">
+                                                <p>Absent</p>
+                                                <p className="text-destructive">
+                                                    {absentStudents}
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div className="flex-grow basis-0">
-                                            <p>Present</p>
-                                            <p className="text-secondary">
-                                                {' '}
-                                                {presentStudents}
-                                            </p>
-                                        </div>
-                                        <div className="flex-grow basis-0">
-                                            <p>Absent</p>
-                                            <p className="text-destructive">
-                                                {absentStudents}
-                                            </p>
-                                        </div>
-                                    </div>
+                                    ) : (
+                                        <p className="my-5">Loading...</p>
+                                    )}
                                     <Button
                                         className="flex gap-2 items-center"
                                         onClick={handleAttendance}

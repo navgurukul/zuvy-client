@@ -68,13 +68,7 @@ enum Level {
     Level6 = 6,
 }
 
-const TiptapToolbar = ({
-    editor,
-    chapterContent,
-}: {
-    editor: any
-    chapterContent: any
-}) => {
+const TiptapToolbar = ({ editor }: { editor: any }) => {
     const [selectedHeading, setSelectedHeading] = useState('H1')
     const [isDropdownOpen, setDropdownOpen] = useState(false)
     const [isDialogOpen, setDialogOpen] = useState(false)
