@@ -15,10 +15,11 @@ type Props = {
     name: string
     totalStudents: number
     submission: Submission[]
+    moduleId: number
 }
 
 const PracticeProblems = (props: Props) => {
-    console.log('first', props)
+    console.log(props.submission)
     return (
         <div className="w-full">
             <h1 className="ml-6 text-start font-semibold">{props.name}</h1>
@@ -28,7 +29,7 @@ const PracticeProblems = (props: Props) => {
                         {props.submission.map(
                             ({ codingQuestionDetails, id, submitStudents }) => (
                                 <SubmissionComponent
-                                    key={id} // Use index or any unique identifier from submissionItem
+                                    key={id}
                                     title={
                                         codingQuestionDetails?.title ||
                                         'Untitled'
@@ -37,6 +38,7 @@ const PracticeProblems = (props: Props) => {
                                     studentsSubmitted={submitStudents}
                                     courseId={props.courseId}
                                     id={id}
+                                    moduleId={props.moduleId}
                                 />
                             )
                         )}

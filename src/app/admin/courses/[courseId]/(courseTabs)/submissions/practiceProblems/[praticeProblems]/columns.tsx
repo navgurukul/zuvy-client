@@ -53,7 +53,7 @@ export const columns: ColumnDef<Task>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: 'email',
+        accessorKey: 'emailId',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Email" />
         ),
@@ -64,26 +64,46 @@ export const columns: ColumnDef<Task>[] = [
                 <div className="flex space-x-2">
                     {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
                     <span className="max-w-[500px] truncate font-medium">
-                        {row.getValue('email')}
+                        {row.getValue('emailId')}
                     </span>
                 </div>
             )
         },
     },
     {
-        accessorKey: 'noOfAttemps',
+        accessorKey: 'noOfAttempts',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="noOfAttemps" />
         ),
+        cell: ({ row }) => {
+            // const label = labels.find((label) => label.value === row.original.label);
+
+            return (
+                <div className="flex space-x-2">
+                    {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
+                    <span className="max-w-[500px] truncate font-medium">
+                        {row.getValue('noOfAttempts')}
+                    </span>
+                </div>
+            )
+        },
     },
     {
-        accessorKey: 'Status',
+        accessorKey: 'status',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Status" />
         ),
+        cell: ({ row }) => {
+            // const label = labels.find((label) => label.value === row.original.label);
 
-        filterFn: (row, id, value) => {
-            return value.includes(row.getValue(id))
+            return (
+                <div className="flex space-x-2">
+                    {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
+                    <span className="max-w-[500px] truncate font-medium">
+                        {row.getValue('status')}
+                    </span>
+                </div>
+            )
         },
     },
 ]

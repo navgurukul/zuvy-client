@@ -8,7 +8,8 @@ import { DataTable } from '@/app/_components/datatable/data-table'
 
 type Props = {}
 
-const Page = (props: Props) => {
+const Page = ({ params }: any) => {
+    console.log(params)
     return (
         <div className="flex flex-col">
             <h1 className="text-start text-xl font-bold capitalize text-primary">

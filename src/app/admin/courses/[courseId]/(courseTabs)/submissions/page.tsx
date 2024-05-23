@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -9,6 +9,7 @@ import PraticeProblems from '../../_components/PraticeProblems'
 import Assesments from '../../_components/Assesments'
 import Projects from '../../_components/Projects'
 import { api } from '@/utils/axios.config'
+import PracticeProblems from '../../_components/PraticeProblems'
 
 const Page = ({ params }: { params: any }) => {
     const [activeTab, setActiveTab] = useState('practice')
@@ -20,11 +21,11 @@ const Page = ({ params }: { params: any }) => {
     }
     // console.log(params)
 
-    const getSubmissions = () => {
+    const getSubmissions = useCallback(() => {
         return api.get(
             `/submission/submissionsOfPractiseProblems/${params.courseId}`
         )
-    }
+    }, [params.courseId])
     useEffect(() => {
         if (params.courseId) {
             const response = getSubmissions()
@@ -33,8 +34,8 @@ const Page = ({ params }: { params: any }) => {
                 setTotalStudents(res.data.totalStudents)
             })
         }
-    }, [])
-
+    }, [getSubmissions, params.courseId])
+    console.log(submissions)
     return (
         <div className="">
             <div className="flex ml-5 items-start gap-x-3">
@@ -88,15 +89,19 @@ const Page = ({ params }: { params: any }) => {
             </div>
             <div className="w-full">
                 {activeTab === 'practice' &&
-                    submissions.map(({ id, name, moduleChapterData }) => (
-                        <PraticeProblems
-                            key={id}
-                            courseId={params.courseId}
-                            name={name}
-                            totalStudents={totalStudents}
-                            submission={moduleChapterData}
-                        />
-                    ))}
+                    submissions.map(function ({ id, name, moduleChapterData }) {
+                        console.log(id)
+                        return (
+                            <PracticeProblems
+                                key={id}
+                                courseId={params.courseId}
+                                name={name}
+                                totalStudents={totalStudents}
+                                submission={moduleChapterData}
+                                moduleId={id}
+                            />
+                        )
+                    })}
                 {activeTab === 'assessments' && (
                     <Assesments courseId={params.courseId} />
                 )}

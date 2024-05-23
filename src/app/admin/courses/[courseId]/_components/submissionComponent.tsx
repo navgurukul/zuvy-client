@@ -7,6 +7,7 @@ type Props = {
     totalSubmissions: number
     courseId: number
     id: string
+    moduleId: any
 }
 
 const SubmissionComponent = (props: Props) => {
@@ -17,12 +18,11 @@ const SubmissionComponent = (props: Props) => {
             '#' + Math.floor(Math.random() * 16777215).toString(16)
         setColor(randomColor)
     }
-
-    // console.log(props)
+    console.log(props.moduleId)
 
     return (
         <Link
-            href={`/admin/courses/${props.courseId}/submissions/practiceProblems/${props.id}`}
+            href={`/admin/courses/${props.courseId}/submissions/practiceProblems/${props.moduleId}`}
         >
             <div className="lg:flex h-[100px] shadow-md  rounded-md p-4">
                 <div className="flex flex-col justify-between py-2 lg:mx-2">
