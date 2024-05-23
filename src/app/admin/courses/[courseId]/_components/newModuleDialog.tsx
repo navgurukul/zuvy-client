@@ -11,6 +11,7 @@ import {
 
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 
 interface newModuleDialogProps {
     moduleData: {
@@ -27,6 +28,8 @@ interface newModuleDialogProps {
     handleTimeAllotedChange: (
         event: React.ChangeEvent<HTMLInputElement>
     ) => void
+    handleTypeChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+    typeId: number
 }
 
 const NewModuleDialog: React.FC<newModuleDialogProps> = ({
@@ -35,29 +38,83 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
     handleModuleChange,
     createModule,
     handleTimeAllotedChange,
+    handleTypeChange,
+    typeId,
 }) => {
     return (
         <DialogContent>
             <DialogHeader>
                 <DialogTitle>New Module</DialogTitle>
+                <div className="main_container flex items-center align-middle text-center">
+                    <div className="flex items-center">
+                        <div>
+                            <Input
+                                type="radio"
+                                id="learning-material"
+                                name="module-type"
+                                className="size-4"
+                                value="learning-material"
+                                checked={typeId === 1}
+                                onChange={handleTypeChange}
+                            />
+                        </div>
+                        <div>
+                            <Label className="m-2 " htmlFor="learning-material">
+                                Learning Material
+                            </Label>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center ">
+                        <div>
+                            <Input
+                                type="radio"
+                                id="Project"
+                                name="module-type"
+                                className="size-4"
+                                value="project"
+                                checked={typeId === 2}
+                                onChange={handleTypeChange}
+                            />
+                        </div>
+                        <div>
+                            <Label className="mx-2   " htmlFor="Project">
+                                Project
+                            </Label>
+                        </div>
+                    </div>
+                </div>
+
                 <div className="py-4">
-                    <Label htmlFor="name">Module Name:</Label>
+                    <Label htmlFor="name">
+                        {typeId === 2 ? 'Project Name' : 'Module Name'}
+                    </Label>
                     <Input
                         type="text"
                         id="name"
                         name="name"
-                        placeholder="Enter Module Name"
+                        placeholder={
+                            typeId === 2 ? 'Project Name' : 'Module Name'
+                        }
                         value={moduleData?.name}
                         onChange={handleModuleChange}
                     />
                 </div>
                 <div className="py-4">
-                    <Label htmlFor="desc">Module Description:</Label>
+                    <Label htmlFor="desc">
+                        {typeId === 2
+                            ? 'Project Description'
+                            : 'Module Description'}
+                    </Label>
                     <Input
                         type="text"
                         id="desc"
                         name="description"
-                        placeholder="Enter Module Description"
+                        placeholder={
+                            typeId === 2
+                                ? 'Project Description'
+                                : 'Module Description'
+                        }
                         value={moduleData?.description}
                         onChange={handleModuleChange}
                     />

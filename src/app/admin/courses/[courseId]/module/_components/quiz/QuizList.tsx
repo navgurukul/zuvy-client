@@ -13,6 +13,8 @@ function QuizList({
     addQuestion: any[]
     handleAddQuestion: (questions: any[]) => void
 }) {
+    console.log(addQuestion)
+
     return (
         <ScrollArea className="h-[500px] w-full rounded-md border">
             {questionData.map((question: any) => {

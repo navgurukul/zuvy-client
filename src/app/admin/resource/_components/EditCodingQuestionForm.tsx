@@ -27,6 +27,10 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Plus, X } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
+import {
+    getCodingQuestionTags,
+    getEditCodingQuestionDialogs,
+} from '@/store/store'
 
 const formSchema = z.object({
     title: z.string(),
@@ -51,20 +55,28 @@ const formSchema = z.object({
     ),
 })
 
-export default function NewCodingProblemForm({
-    tags,
-    setIsDialogOpen,
+export default function EditCodingQuestionForm({
+    setIsCodingDialogOpen,
     getAllCodingQuestions,
     setCodingQuestions,
+    codingQuestions,
 }: {
-    tags: any
-    setIsDialogOpen: any
+    setIsCodingDialogOpen: any
     getAllCodingQuestions: any
     setCodingQuestions: any
+    codingQuestions: any
 }) {
     const [testCases, setTestCases] = useState([
         { id: 1, input: '', output: '' },
     ])
+
+    const { tags } = getCodingQuestionTags()
+    const { editCodingQuestionId } = getEditCodingQuestionDialogs()
+
+    let selectCodingQuestion = codingQuestions.filter((question: any) => {
+        return question.id === editCodingQuestionId
+    })
+
     const handleAddTestCase = () => {
         setTestCases((prevTestCases) => [
             ...prevTestCases,
@@ -81,31 +93,35 @@ export default function NewCodingProblemForm({
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            title: '',
-            description: '',
-            problemStatement: '',
-            constraints: '',
-            difficulty: 'Easy',
-            // allowedLanguages: 'All Languages',
-            topics: 0,
+            title: selectCodingQuestion[0]?.title || '',
+            description: selectCodingQuestion[0]?.description || '',
+            problemStatement: selectCodingQuestion[0]?.description || '',
+            constraints: selectCodingQuestion[0]?.constraints || '',
+            difficulty: selectCodingQuestion[0]?.difficulty || 'Easy',
+            topics: selectCodingQuestion[0]?.tags || 0,
             inputFormat: 'Number',
             outputFormat: 'Strings',
-            testCases: [],
+            testCases:
+                selectCodingQuestion[0]?.testCases.map((testCase: any) => ({
+                    input: testCase.input[0],
+                    output: testCase.output[0],
+                })) || [],
         },
     })
-    async function createCodingQuestion(data: any) {
+
+    async function editCodingQuestion(data: any) {
         try {
-            const response = await api.post(
-                `codingPlatform/createCodingQuestion`,
+            const response = await api.patch(
+                `Content/updateCodingQuestion/${editCodingQuestionId}`,
                 data
             )
 
             toast({
                 title: 'Success',
-                description: 'Question Created Successfully',
+                description: 'Question Edited Successfully',
                 className: 'text-start capitalize',
             })
-            setIsDialogOpen(false)
+            setIsCodingDialogOpen(false)
         } catch (error: any) {
             toast({
                 title: 'Error',
@@ -144,10 +160,39 @@ export default function NewCodingProblemForm({
             ],
             solution: 'solution of the coding question',
         }
-        createCodingQuestion(formattedData)
+        editCodingQuestion(formattedData)
         getAllCodingQuestions(setCodingQuestions)
     }
-    // const accountType = form.watch('accountType')
+
+    useEffect(() => {
+        if (selectCodingQuestion) {
+            form.reset({
+                title: selectCodingQuestion[0].title,
+                description: selectCodingQuestion[0].description,
+                problemStatement: selectCodingQuestion[0].description,
+                constraints: selectCodingQuestion[0].constraints,
+                difficulty: selectCodingQuestion[0].difficulty,
+                topics: selectCodingQuestion[0].tags,
+                inputFormat: 'Number',
+                outputFormat: 'Strings',
+                testCases: selectCodingQuestion[0].testCases.map(
+                    (testCase: any) => ({
+                        input: testCase.input[0],
+                        output: testCase.output[0],
+                    })
+                ),
+            })
+            setTestCases(
+                selectCodingQuestion[0].testCases.map(
+                    (testCase: any, index: number) => ({
+                        id: index + 1,
+                        input: testCase.input[0],
+                        output: testCase.output[0],
+                    })
+                )
+            )
+        }
+    }, [selectCodingQuestion[0]])
 
     return (
         <ScrollArea className="h-[calc(100vh-200px)] w-full rounded-md  ">
@@ -228,7 +273,8 @@ export default function NewCodingProblemForm({
                                                             field.onChange
                                                         }
                                                         defaultValue={
-                                                            field.value
+                                                            selectCodingQuestion[0]
+                                                                .difficulty
                                                         }
                                                         className="flex  space-y-1"
                                                     >
@@ -327,7 +373,17 @@ export default function NewCodingProblemForm({
                                             >
                                                 <FormControl>
                                                     <SelectTrigger>
-                                                        <SelectValue placeholder="Choose Topic" />
+                                                        <SelectValue
+                                                            placeholder={
+                                                                tags.find(
+                                                                    (tag) =>
+                                                                        tag.id ===
+                                                                        selectCodingQuestion[0]
+                                                                            ?.tags
+                                                                )?.tagName ||
+                                                                'Choose Topic'
+                                                            }
+                                                        />
                                                     </SelectTrigger>
                                                 </FormControl>
                                                 <SelectContent>
@@ -477,7 +533,7 @@ export default function NewCodingProblemForm({
 
                         <div className="flex justify-end">
                             <Button type="submit" className="w-1/2 ">
-                                Create Question
+                                Edit Coding Question
                             </Button>
                         </div>
                     </form>
