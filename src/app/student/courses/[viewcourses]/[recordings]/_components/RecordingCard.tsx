@@ -61,7 +61,7 @@ function RecordingCard({
     async function handleClassDetails() {
         try {
             const response = await api.get(
-                `/classes/analytics/${classData?.meetingid}`
+                `/classes/analytics/${classData?.meetingId}`
             )
             setDisplayAttendance(response.data)
         } catch (err) {
@@ -90,7 +90,7 @@ function RecordingCard({
     const handleAttendance = async () => {
         try {
             const response = await api.get(
-                `/classes/getAttendance/${classData.meetingid}`
+                `/classes/getAttendance/${classData.meetingId}`
             )
             const attendanceData = response.data.attendanceSheet
             if (!Array.isArray(attendanceData) || attendanceData.length === 0) {
