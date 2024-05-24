@@ -23,12 +23,14 @@ interface CurriculumItem {
     assignmentCount: number
     codingProblemsCount: number
     articlesCount: number
+    typeId: number
 }
 
 function Page() {
     // state and variables
     const [curriculum, setCurriculum] = useState([])
     const { courseData } = getCourseData()
+    const [typeId, setTypeId] = useState(0)
 
     const [moduleData, setModuleData] = useState({
         name: '',
@@ -42,6 +44,11 @@ function Page() {
     })
 
     // func
+    const handleTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { value } = event.target
+        console.log(event.target)
+        setTypeId(value === 'learning-material' ? 1 : 2)
+    }
 
     const handleModuleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
@@ -62,7 +69,7 @@ function Page() {
             .duration({ days, weeks, months })
             .asSeconds()
 
-        api.post(`/content/modules/${courseData?.id}`, {
+        api.post(`/content/modules/${courseData?.id}?typeId=${typeId}`, {
             ...moduleData,
             timeAlloted: totalSeconds,
         })
@@ -158,6 +165,8 @@ function Page() {
                             createModule={createModule}
                             handleModuleChange={handleModuleChange}
                             handleTimeAllotedChange={handleTimeAllotedChange}
+                            handleTypeChange={handleTypeChange}
+                            typeId={typeId}
                         />
                     </Dialog>
                 </div>
@@ -192,6 +201,7 @@ function Page() {
                                                 articlesCount={
                                                     item.articlesCount
                                                 }
+                                                typeId={item?.typeId}
                                                 fetchCourseModules={
                                                     fetchCourseModules
                                                 }
@@ -229,6 +239,8 @@ function Page() {
                                     handleTimeAllotedChange
                                 }
                                 timeData={timeData}
+                                handleTypeChange={handleTypeChange}
+                                typeId={typeId}
                             />
                         </Dialog>
                     </div>

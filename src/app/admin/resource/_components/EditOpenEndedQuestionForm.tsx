@@ -1,6 +1,4 @@
-import React from 'react'
-import { useState } from 'react'
-
+import React, { useEffect } from 'react'
 import * as z from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -14,7 +12,6 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import {
     SelectValue,
     SelectTrigger,
@@ -24,9 +21,11 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Plus, X } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
+import { getEditOpenEndedDialogs, getCodingQuestionTags } from '@/store/store'
+
+type Props = {}
 
 const formSchema = z.object({
     questionDescription: z.string(),
@@ -38,39 +37,57 @@ const formSchema = z.object({
     difficulty: z.string(),
 })
 
-function NewOpenEndedQuestionForm({
-    tags,
-    setIsDialogOpen,
+function EditOpenEndedQuestionForm({
+    setIsOpenEndDialogOpen,
     getAllOpenEndedQuestions,
     setOpenEndedQuestions,
+    openEndedQuestions,
 }: {
-    tags: any
-    setIsDialogOpen: any
+    setIsOpenEndDialogOpen: any
     getAllOpenEndedQuestions: any
     setOpenEndedQuestions: any
+    openEndedQuestions: any
 }) {
+    const { tags, setTags } = getCodingQuestionTags()
+
+    const { editOpenEndedQuestionId } = getEditOpenEndedDialogs()
+
+    const selectedQuestion = openEndedQuestions.filter((question: any) => {
+        return question.id === editOpenEndedQuestionId
+    })
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            questionDescription: '',
-            topics: 0,
-            difficulty: 'Easy',
+            questionDescription: selectedQuestion[0]?.questionDescription || '',
+            marks: selectedQuestion[0]?.marks.toString() || '0',
+            topics: selectedQuestion[0]?.tagId || 0,
+            difficulty: selectedQuestion[0]?.difficulty || 'Easy',
         },
     })
 
-    async function createOpenEndedQuestion(data: any) {
+    useEffect(() => {
+        if (selectedQuestion) {
+            form.reset({
+                questionDescription: selectedQuestion[0].question,
+                marks: selectedQuestion[0].marks.toString(),
+                difficulty: selectedQuestion[0].difficulty,
+            })
+        }
+    }, [selectedQuestion[0], form])
+
+    async function editOpenEndedQuestion(data: any) {
         try {
-            const response = await api.post(
-                `Content/createOpenEndedQuestion`,
+            const response = await api.patch(
+                `/Content/updateOpenEndedQuestion/${editOpenEndedQuestionId}`,
                 data
             )
-
+            setIsOpenEndDialogOpen(false)
             toast({
                 title: 'Success',
-                description: 'Open-Ended Question Created Successfully',
+                description: response.data.message,
                 className: 'text-start capitalize',
             })
-            setIsDialogOpen(false)
         } catch (error: any) {
             toast({
                 title: 'Error',
@@ -81,25 +98,23 @@ function NewOpenEndedQuestionForm({
         }
     }
 
-    // const accountType = form.watch('accountType')
-
     const handleSubmit = (values: z.infer<typeof formSchema>) => {
         const formattedData = {
             question: values.questionDescription,
-            tagId: values.topics,
             marks: values.marks,
+            tagId: values.topics,
             difficulty: values.difficulty,
         }
-        createOpenEndedQuestion(formattedData)
+        editOpenEndedQuestion(formattedData)
         getAllOpenEndedQuestions(setOpenEndedQuestions)
     }
 
     return (
-        <main className="flex  flex-col p-3 ">
+        <main className="flex flex-col p-3">
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(handleSubmit)}
-                    className=" max-w-md w-full flex flex-col gap-4"
+                    className="max-w-md w-full flex flex-col gap-4"
                 >
                     <FormField
                         control={form.control}
@@ -145,7 +160,6 @@ function NewOpenEndedQuestionForm({
                             </FormItem>
                         )}
                     />
-
                     <FormField
                         control={form.control}
                         name="topics"
@@ -166,7 +180,16 @@ function NewOpenEndedQuestionForm({
                                     >
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Choose Topic" />
+                                                <SelectValue
+                                                    placeholder={
+                                                        tags.find(
+                                                            (tag) =>
+                                                                tag.id ===
+                                                                selectedQuestion[0]
+                                                                    .tagId
+                                                        )?.tagName || ''
+                                                    }
+                                                />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
@@ -226,10 +249,9 @@ function NewOpenEndedQuestionForm({
                             )
                         }}
                     />
-
                     <div className="flex justify-end">
-                        <Button type="submit" className="w-1/2 ">
-                            Create Open-Ended Question
+                        <Button type="submit" className="w-1/2">
+                            Edit Open-Ended Question
                         </Button>
                     </div>
                 </form>
@@ -238,4 +260,4 @@ function NewOpenEndedQuestionForm({
     )
 }
 
-export default NewOpenEndedQuestionForm
+export default EditOpenEndedQuestionForm

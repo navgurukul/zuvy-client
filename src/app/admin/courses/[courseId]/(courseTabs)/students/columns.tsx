@@ -243,15 +243,15 @@ export const columns: ColumnDef<Task>[] = [
         },
     },
     {
-        accessorKey: 'attendence',
+        accessorKey: 'attendance',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Attendence" />
+            <DataTableColumnHeader column={column} title="Attendance" />
         ),
         cell: ({ row }) => {
             const attendance =
                 row.original.attendance === null
                     ? 0
-                    : Math.floor(row.original.attendance)
+                    : Math.round(row.original.attendance)
 
             const circleColorClass = getAttendanceColorClass(attendance)
 

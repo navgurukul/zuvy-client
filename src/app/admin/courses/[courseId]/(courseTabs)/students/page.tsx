@@ -41,7 +41,7 @@ const Page = ({ params }: { params: any }) => {
     const [currentPage, setCurrentPage] = useState<number>(1)
     const [totalStudents, setTotalStudents] = useState<number>(0)
     const [search, setSearch] = useState<string | null>(null)
-    const [attendenceIds, setAttendenceIds] = useState<string[]>()
+    const [attendanceIds, setAttendanceIds] = useState<string[]>()
     const debouncedSearch = useDebounce(search, 1000)
     const [lastPage, setLastPage] = useState<number>(0)
     const { fetchBatches, batchData } = getBatchData()
@@ -51,7 +51,7 @@ const Page = ({ params }: { params: any }) => {
     }
 
     const handleClick = async () => {
-        await handleRefreshAttendence()
+        await handleRefreshAttendance()
     }
 
     const fetchClassesData = useCallback(async (bootcampId: number) => {
@@ -59,15 +59,15 @@ const Page = ({ params }: { params: any }) => {
             const res = await api.get(
                 `/classes/meetings/${bootcampId}?bootcampId=${bootcampId}`
             )
-            setAttendenceIds(res.data.unattendedClassIds)
+            setAttendanceIds(res.data.unattendedClassIds)
         } catch (error: any) {
             console.log(error.message)
         }
     }, [])
 
-    const handleRefreshAttendence = async () => {
+    const handleRefreshAttendance = async () => {
         setLoading(true)
-        const requestBody = { meetingIds: attendenceIds }
+        const requestBody = { meetingIds: attendanceIds }
         try {
             const res = await api.post(`/classes/analytics/reload`, requestBody)
             toast({ title: res.data.title, description: res.data.message })
@@ -103,10 +103,9 @@ const Page = ({ params }: { params: any }) => {
         if (params.courseId) {
             fetchClassesData(params.courseId)
         }
-    }, [params.courseId])
+    }, [params.courseId, fetchClassesData])
 
     useEffect(() => {
-        // fetchStudentData(offset)
         fetchBatches(params.courseId)
     }, [params.courseId, fetchBatches])
 
@@ -163,7 +162,7 @@ const Page = ({ params }: { params: any }) => {
                                     </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                    <p> Update Attendence</p>
+                                    <p> Update Attendance</p>
                                 </TooltipContent>
                             </Tooltip>
                         </TooltipProvider>

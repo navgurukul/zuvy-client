@@ -20,7 +20,6 @@ function ClassCard({
     classData: any
     classType: any
 }) {
-    console.log('first', classType)
     return (
         <Card className="w-full border-none shadow p-6" key={classData.id}>
             <div className="flex items-center justify-between truncate">
