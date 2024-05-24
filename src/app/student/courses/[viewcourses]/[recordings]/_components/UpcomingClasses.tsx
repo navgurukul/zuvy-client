@@ -14,7 +14,7 @@ function UpcomingClasses({
                 ? ongoingClasses.map((classObj: any) => (
                       <ClassCard
                           classData={classObj}
-                          key={classObj.meetingid}
+                          key={classObj.meetingId}
                           classType="ongoing"
                       />
                   ))
@@ -23,7 +23,7 @@ function UpcomingClasses({
                 upcomingClasses.map((classObj: any) => (
                     <ClassCard
                         classData={classObj}
-                        key={classObj.meetingid}
+                        key={classObj.meetingId}
                         classType="Upcoming"
                     />
                 ))
