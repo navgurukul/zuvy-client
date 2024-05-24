@@ -249,7 +249,9 @@ export const columns: ColumnDef<Task>[] = [
         ),
         cell: ({ row }) => {
             const attendance =
-                row.original.attendance === null ? 0 : row.original.attendance
+                row.original.attendance === null
+                    ? 0
+                    : Math.floor(row.original.attendance)
 
             const circleColorClass = getAttendanceColorClass(attendance)
 
