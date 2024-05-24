@@ -243,9 +243,9 @@ export const columns: ColumnDef<Task>[] = [
         },
     },
     {
-        accessorKey: 'attendence',
+        accessorKey: 'attendance',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Attendence" />
+            <DataTableColumnHeader column={column} title="Attendance" />
         ),
         cell: ({ row }) => {
             const attendance =

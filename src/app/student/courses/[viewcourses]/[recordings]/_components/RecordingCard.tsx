@@ -61,7 +61,7 @@ function RecordingCard({
     async function handleClassDetails() {
         try {
             const response = await api.get(
-                `/classes/analytics/${classData?.meetingid}`
+                `/classes/analytics/${classData?.meetingId}`
             )
             setDisplayAttendance(response.data)
         } catch (err) {
