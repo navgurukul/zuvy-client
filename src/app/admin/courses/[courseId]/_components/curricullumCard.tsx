@@ -29,6 +29,7 @@ type Props = {
     articlesCount: number
     typeId: number
     fetchCourseModules: () => void
+    projectId: number
 }
 
 const CurricullumCard = ({
@@ -45,6 +46,7 @@ const CurricullumCard = ({
     articlesCount,
     typeId,
     fetchCourseModules,
+    projectId,
 }: Props) => {
     // states and variables
     const router = useRouter()
