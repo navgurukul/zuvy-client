@@ -19,6 +19,7 @@ type Props = {
 }
 
 const PracticeProblems = (props: Props) => {
+    console.log(props.submission)
     return (
         <div className="w-full mb-10">
             <h1 className=" text-start font-semibold">{props.name}</h1>

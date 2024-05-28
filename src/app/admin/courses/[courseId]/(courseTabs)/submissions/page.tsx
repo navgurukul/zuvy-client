@@ -13,7 +13,7 @@ import PracticeProblems from '../../_components/PraticeProblems'
 
 const Page = ({ params }: { params: any }) => {
     const [activeTab, setActiveTab] = useState('practice')
-    const [submissions, setSubmissions] = useState([])
+    const [submissions, setSubmissions] = useState<any[]>([])
     const [totalStudents, setTotalStudents] = useState(0)
 
     const handleTabChange = (tab: string) => {
@@ -86,12 +86,21 @@ const Page = ({ params }: { params: any }) => {
                         Full Report
                     </Button>
                 )}
+                {activeTab === 'projects' && (
+                    <Button>
+                        <ArrowDownToLine size={20} className="mr-2" /> Download
+                        Full Report
+                    </Button>
+                )}
             </div>
             <div className="w-full">
                 {activeTab === 'practice' &&
-                    submissions.map(function ({ id, name, moduleChapterData }) {
-                        console.log(id)
-                        return (
+                    submissions
+                        .filter(
+                            ({ moduleChapterData }) =>
+                                moduleChapterData.length > 0
+                        )
+                        .map(({ id, name, moduleChapterData }) => (
                             <PracticeProblems
                                 key={id}
                                 courseId={params.courseId}
@@ -100,12 +109,13 @@ const Page = ({ params }: { params: any }) => {
                                 submission={moduleChapterData}
                                 moduleId={id}
                             />
-                        )
-                    })}
+                        ))}
                 {activeTab === 'assessments' && (
                     <Assesments courseId={params.courseId} />
                 )}
-                {activeTab === 'projects' && <Projects />}
+                {activeTab === 'projects' && (
+                    <Projects courseId={params.courseId} />
+                )}
             </div>
         </div>
     )

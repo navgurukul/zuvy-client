@@ -55,7 +55,7 @@ const PraticeProblems = ({ params }: any) => {
                 `/submission/practiseProblemStatus/${matchingData?.id}?chapterId=${matchingData?.moduleChapterData[0].id}&questionId=${matchingData?.moduleChapterData[0].codingQuestionDetails.id}`
             )
 
-            setStudentDetails(res.data)
+            setStudentDetails(res.data.data)
         } catch (error) {
             console.error('API Error:', error)
         }
@@ -80,7 +80,6 @@ const PraticeProblems = ({ params }: any) => {
             setMatchingData(null)
         }
     }, [submissionData, params.praticeProblems])
-    console.log(studentDetails)
     return (
         <div className="flex flex-col">
             <h1 className="text-start text-xl font-bold capitalize text-primary">
