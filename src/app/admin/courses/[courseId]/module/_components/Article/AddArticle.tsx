@@ -103,13 +103,14 @@ const AddArticle = ({ content }: ArticleProps) => {
                 className: 'text-start capitalize',
                 variant: 'destructive',
             })
-            console.error('Error creating batch:', error)
+            console.error('Error Editing Article:', error)
         }
     }
 
     // async
     useEffect(() => {
         getArticleContent()
+        console.log(content)
     }, [content])
 
     return (
