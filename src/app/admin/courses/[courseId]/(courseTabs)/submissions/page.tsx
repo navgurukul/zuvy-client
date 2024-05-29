@@ -15,6 +15,7 @@ const Page = ({ params }: { params: any }) => {
     const [activeTab, setActiveTab] = useState('practice')
     const [submissions, setSubmissions] = useState<any[]>([])
     const [totalStudents, setTotalStudents] = useState(0)
+    const [assesments, setAssesments] = useState<any[]>([])
 
     const handleTabChange = (tab: string) => {
         setActiveTab(tab)
@@ -26,6 +27,14 @@ const Page = ({ params }: { params: any }) => {
             `/submission/submissionsOfPractiseProblems/${params.courseId}`
         )
     }, [params.courseId])
+    const getAssesments = useCallback(() => {
+        return api.get(
+            `/submission/assessmentInfoBy?bootcampId=${
+                params.courseId
+            }&limit=${10}&offset=${0}`
+        )
+    }, [params.courseId])
+
     useEffect(() => {
         if (params.courseId) {
             const response = getSubmissions()
@@ -35,7 +44,18 @@ const Page = ({ params }: { params: any }) => {
             })
         }
     }, [getSubmissions, params.courseId])
-    console.log(submissions)
+
+    useEffect(() => {
+        if (params.courseId) {
+            const response = getAssesments()
+            response.then((res) => {
+                setAssesments(res.data.data)
+                setTotalStudents(res.data.totalStudents)
+            })
+        }
+    }, [getAssesments, params.courseId])
+
+    console.log(assesments)
     return (
         <div className="">
             <div className="flex items-start gap-x-3">
@@ -111,7 +131,21 @@ const Page = ({ params }: { params: any }) => {
                             />
                         ))}
                 {activeTab === 'assessments' && (
-                    <Assesments courseId={params.courseId} />
+                    <>
+                        {assesments
+                            .filter(
+                                ({ moduleAssessments }) =>
+                                    moduleAssessments.length > 0
+                            )
+                            .map(({ id, name, moduleAssessments }) => (
+                                <Assesments
+                                    key={id}
+                                    courseId={params.courseId}
+                                    name={name}
+                                    moduleAssessments={moduleAssessments}
+                                />
+                            ))}
+                    </>
                 )}
                 {activeTab === 'projects' && (
                     <Projects courseId={params.courseId} />

@@ -84,6 +84,8 @@ function Quiz({ content }: QuizProps) {
             })
         }
     }
+
+    console.log(addQuestion)
     return (
         <>
             <div className="flex flex-row items-center justify-start gap-x-6 mb-10">
@@ -123,6 +125,14 @@ function Quiz({ content }: QuizProps) {
                                     />
                                 )
                             }
+                        )}
+                        {addQuestion.length > 0 && (
+                            <Button
+                                variant={'outline'}
+                                className="text-secondary font-semibold"
+                            >
+                                Save
+                            </Button>
                         )}
                         <Dialog>
                             <DialogTrigger asChild>
