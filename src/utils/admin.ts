@@ -1,5 +1,5 @@
 import { toast } from '@/components/ui/use-toast'
-import { api } from './axios.config'
+import {api} from '@/utils/axios.config'
 
 export function handleDelete(
     deleteCodingQuestionId: any,
@@ -182,3 +182,46 @@ export async function getAllTags(setTags:any) {
         setTags(response.data.allTags)
     }
 }
+// ----------------------
+export async function filteredCodingQuestions(setFilteredQuestions: any, selectedDifficulty: string, selectedTopic: string, selectedLanguage: string) {
+    try {
+        const response = await api.get('/Content/allCodingQuestions')
+        const filtered = response.data.filter((question: any) =>
+            (selectedDifficulty === 'Any Difficulty' || question.difficulty === selectedDifficulty) &&
+            (selectedTopic === 'All Topics' || question.tags.includes(selectedTopic)) &&
+            (selectedLanguage === 'All Languages' || question.language === selectedLanguage)
+        )
+        setFilteredQuestions(filtered)
+    } catch (error) {
+        console.error('Error:', error)
+    }
+}
+
+export async function filteredQuizQuestions(setFilteredQuestions: any, selectedDifficulty: string, selectedTopic: string, selectedLanguage: string) {
+    try {
+        const response = await api.get('/Content/allQuizQuestions')
+        const filtered = response.data.filter((question: any) =>
+            (selectedDifficulty === 'Any Difficulty' || question.difficulty === selectedDifficulty) &&
+            (selectedTopic === 'All Topics' || question.tags.includes(selectedTopic)) &&
+            (selectedLanguage === 'All Languages' || question.language === selectedLanguage)
+        )
+        setFilteredQuestions(filtered)
+    } catch (error) {
+        console.error('Error:', error)
+    }
+}
+
+export async function filteredOpenEndedQuestions(setFilteredQuestions: any, selectedDifficulty: string, selectedTopic: string, selectedLanguage: string) {
+    try {
+        const response = await api.get('/Content/openEndedQuestions')
+        const filtered = response.data.data.filter((question: any) =>
+            (selectedDifficulty === 'Any Difficulty' || question.difficulty === selectedDifficulty) &&
+            (selectedTopic === 'All Topics' || question.tags.includes(selectedTopic)) &&
+            (selectedLanguage === 'All Languages' || question.language === selectedLanguage)
+        )
+        setFilteredQuestions(filtered)
+    } catch (error) {
+        console.error('Error:', error)
+    }
+}
+// --------------------------
