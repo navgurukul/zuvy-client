@@ -19,11 +19,9 @@ import { Button } from '@/components/ui/button'
 
 interface CourseProgress {
     status: string
-    info: {
-        progress: number
-        bootcamp_name: string
-        instructor_name: string
-        instructor_profile_picture: string
+    progress: number
+    bootcampTracking: {
+        name: string
     }
     code: number
 }
@@ -49,7 +47,7 @@ function Page({
     const crumbs = [
         { crumb: 'My Courses', href: '/student/courses', isLast: false },
         {
-            crumb: courseProgress?.info?.bootcamp_name || 'Course',
+            crumb: courseProgress?.bootcampTracking?.name || 'Course',
             // href: `/student/courses/${params.viewcourses}`,
             isLast: true,
         },
@@ -78,7 +76,7 @@ function Page({
         const getModulesProgress = async () => {
             try {
                 const response = await api.get(
-                    `/Content/modules/${params.viewcourses}?user_id=${userID}`
+                    `/tracking/allModulesForStudents/${params.viewcourses}/${userID}`
                 )
                 response.data.map((module: any) => {
                     setModulesProgress(response.data)
@@ -94,9 +92,9 @@ function Page({
         const getCourseProgress = async () => {
             try {
                 const response = await api.get(
-                    `/bootcamp/${userID}/progress?bootcamp_id=${params.viewcourses}`
+                    `/tracking/bootcampProgress/${params.viewcourses}/${userID}`
                 )
-                setCourseProgress(response.data)
+                setCourseProgress(response.data.data)
             } catch (error) {
                 console.error('Error getting course progress:', error)
             }
@@ -121,9 +119,9 @@ function Page({
                         </div>
                         <div className="grow text-start">
                             <p className="text-xl font-bold mb-2">
-                                {courseProgress?.info?.bootcamp_name}
+                                {courseProgress?.bootcampTracking?.name}
                             </p>
-                            <Loader progress={courseProgress?.info?.progress} />
+                            <Loader progress={courseProgress?.progress} />
                         </div>
                     </div>
 
@@ -198,22 +196,42 @@ function Page({
                             modulesProgress.map(
                                 ({
                                     name,
+                                    description,
                                     id,
                                     lock,
                                     progress,
+                                    timeAlloted,
+                                    articlesCount,
+                                    assignmentCount,
+                                    codingProblemsCount,
+                                    quizCount,
                                 }: {
                                     name: string
+                                    description: string
                                     id: number
                                     lock: boolean
                                     progress: number
+                                    timeAlloted: number
+                                    articlesCount: number
+                                    assignmentCount: number
+                                    codingProblemsCount: number
+                                    quizCount: number
                                 }) => (
                                     <CourseCard
                                         key={id}
                                         param={params.viewcourses}
                                         name={name}
+                                        description={description}
                                         id={id}
                                         lock={lock}
                                         progress={progress}
+                                        timeAlloted={timeAlloted}
+                                        articlesCount={articlesCount}
+                                        assignmentCount={assignmentCount}
+                                        codingProblemsCount={
+                                            codingProblemsCount
+                                        }
+                                        quizCount={quizCount}
                                     />
                                 )
                             )
@@ -231,7 +249,7 @@ function Page({
                     </div>
                     <div className="bg-gradient-to-bl p-3 from-blue-50 to-violet-50 flex rounded-xl  ">
                         <div className="flex flex-col items-center justify-center p-4 gap-3">
-                            <Image
+                            {/* <Image
                                 src={
                                     courseProgress?.info
                                         ?.instructor_profile_picture ?? ''
@@ -240,9 +258,9 @@ function Page({
                                 alt="instructor profile pic"
                                 width={40}
                                 height={10}
-                            />
+                            /> */}
                             <span className="text-lg font-semibold">
-                                {courseProgress?.info?.instructor_name}
+                                {/* {courseProgress?.info?.instructor_name} */}
                             </span>
                             <p>
                                 Ask doubts or general questions about the
