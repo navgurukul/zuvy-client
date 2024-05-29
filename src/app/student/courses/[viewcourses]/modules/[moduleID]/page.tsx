@@ -11,11 +11,31 @@ import Video from '../_components/Video'
 import Article from '../_components/Article'
 import Quiz from '../_components/Quiz'
 import Assignment from '../_components/Assignment'
+import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
+import { useParams } from 'next/navigation'
 
 function Page({ params }: { params: { moduleID: string } }) {
     // misc
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
+    const { viewcourses } = useParams()
+
+    const crumbs = [
+        {
+            crumb: 'Courses',
+            href: '/student/courses',
+            isLast: false,
+        },
+        {
+            crumb: 'Curriculum',
+            href: `/student/courses/${viewcourses}`,
+            isLast: false,
+        },
+        {
+            crumb: 'moduleName',
+            isLast: true,
+        },
+    ]
 
     // state and variables
     const [chapters, setChapters] = useState([])
@@ -28,7 +48,7 @@ function Page({ params }: { params: { moduleID: string } }) {
             const response = await api.get(
                 `tracking/getAllChaptersWithStatus/${params.moduleID}?userId=${userID}`
             )
-            console.log('first', response.data.trackingData)
+            // ModuleName for breadcumb should also come in this API
             setChapters(response.data.trackingData)
         } catch (error) {
             console.log(error)
@@ -76,27 +96,32 @@ function Page({ params }: { params: { moduleID: string } }) {
     }, [userID])
 
     return (
-        <div className="grid  grid-cols-4 mt-5">
-            <div className=" col-span-1">
-                <ScrollArea className="h-dvh pr-4">
-                    {chapters &&
-                        chapters?.map((item: any, index: any) => {
-                            return (
-                                <StudentChapterItem
-                                    key={item.id}
-                                    chapterId={item.id}
-                                    title={item.title}
-                                    topicId={item.topicId}
-                                    fetchChapterContent={fetchChapterContent}
-                                    activeChapter={activeChapter}
-                                    status={item.status}
-                                />
-                            )
-                        })}
-                </ScrollArea>
+        <>
+            <BreadcrumbComponent crumbs={crumbs} />
+            <div className="grid  grid-cols-4 mt-5">
+                <div className=" col-span-1">
+                    <ScrollArea className="h-dvh pr-4">
+                        {chapters &&
+                            chapters?.map((item: any, index: any) => {
+                                return (
+                                    <StudentChapterItem
+                                        key={item.id}
+                                        chapterId={item.id}
+                                        title={item.title}
+                                        topicId={item.topicId}
+                                        fetchChapterContent={
+                                            fetchChapterContent
+                                        }
+                                        activeChapter={activeChapter}
+                                        status={item.status}
+                                    />
+                                )
+                            })}
+                    </ScrollArea>
+                </div>
+                <div className="col-span-3 mx-4">{renderChapterContent()}</div>
             </div>
-            <div className="col-span-3 mx-4">{renderChapterContent()}</div>
-        </div>
+        </>
     )
 }
 
