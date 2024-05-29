@@ -85,7 +85,6 @@ function Quiz({ content }: QuizProps) {
         }
     }
 
-    console.log(addQuestion)
     return (
         <>
             <div className="flex flex-row items-center justify-start gap-x-6 mb-10">
