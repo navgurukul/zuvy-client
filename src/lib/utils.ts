@@ -4,13 +4,16 @@ import { twMerge } from 'tailwind-merge'
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))
 }
-export function ellipsis(text: string, maxLength: number): string {
+export function ellipsis(text: string | undefined, maxLength: number): string {
+    if (!text) {
+        return ''
+    }
     if (text.length <= maxLength) {
         return text
     }
-
     return text.slice(0, maxLength - 3) + '...'
 }
+
 
 export function isPlural(count: number): boolean {
     return count !== 1

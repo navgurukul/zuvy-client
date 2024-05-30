@@ -16,9 +16,9 @@ import AddArticle from '@/app/admin/courses/[courseId]/module/_components/Articl
 import CodingChallenge from '@/app/admin/courses/[courseId]/module/_components/codingChallenge/CodingChallenge'
 import { Reorder } from 'framer-motion'
 import { useEditor } from '@tiptap/react'
-import TiptapEditor from '@/app/admin/courses/[courseId]/module/_components/TiptapEditor'
-import TiptapToolbar from '@/app/admin/courses/[courseId]/module/_components/TiptapToolbar'
-import extensions from '@/app/admin/courses/[courseId]/module/_components/TiptapExtensions'
+import TiptapEditor from '@/app/admin/courses/[courseId]/module/_components/TiptapEditor/TiptapEditor'
+import TiptapToolbar from '@/app/admin/courses/[courseId]/module/_components/TiptapEditor/TiptapToolbar'
+import extensions from '@/app/admin/courses/[courseId]/module/_components/TiptapEditor/TiptapExtensions'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { toast } from '@/components/ui/use-toast'
@@ -32,6 +32,7 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import AddAssessment from '@/app/admin/courses/[courseId]/module/_components/Assessment/AddAssessment'
 
 // Interfaces:-
 type Chapter = {
@@ -98,6 +99,7 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
     const [projectData, setProjectData] = useState<ProjectData>()
     const [moduleData, setModuleData] = useState<Module[]>([])
     const [title, setTitle] = useState('')
+    const [codingChapterContent, setCodingChapterContent] = useState<any>([])
 
     const crumbs = [
         {
@@ -187,7 +189,7 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                 `/Content/allChaptersOfModule/${moduleId}`
             )
             setChapterData(response.data.chapterWithTopic)
-            setAssessmentData(response.data.assessment)
+            setAssessmentData(response.data.chapterWithTopic)
             setModuleName(response.data.moduleName)
             setModuleData(response.data.chapterWithTopic)
         } catch (error) {
@@ -202,9 +204,10 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                 const response = await api.get(
                     `/Content/chapterDetailsById/${chapterId}`
                 )
-                const currentModule = moduleData.find(
+                const currentModule: any = moduleData.find(
                     (myModule: any) => myModule.chapterId === chapterId
                 )
+
                 if (currentModule) {
                     setActiveChapterTitle(currentModule?.chapterTitle)
                 }
@@ -216,11 +219,15 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                     )
                 } else if (currentModule?.topicName === 'Coding Question') {
                     setChapterContent(response.data)
+                    setCodingChapterContent(response.data)
                 } else {
                     setChapterContent(response.data)
                 }
 
-                setTopicId(response.data.topicId)
+                setTopicId(currentModule?.topicId)
+
+                // setTopicId(response.data.topicId)
+
                 setActiveChapter(chapterId)
                 setKey((prevKey) => prevKey + 1)
             } catch (error) {
@@ -255,6 +262,8 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                 return <Quiz content={chapterContent} />
             case 5:
                 return <Assignment content={chapterContent} />
+            case 6:
+                return <AddAssessment moduleId={params.moduleId} />
             default:
                 return <h1>Create New Chapter</h1>
         }
