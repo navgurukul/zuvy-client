@@ -47,7 +47,7 @@ function RecordingCard({
     // Check if classData.s3link is truthy
     if (isVideo) {
         // Extract video ID from classData.s3link
-        const videoId = classData.s3link.split('/d/')[1].split('/view')[0]
+        const videoId = classData.s3link?.split('/d/')[1]?.split('/view')[0]
 
         // Construct embeddable URL
         embedUrl = `https://drive.google.com/file/d/${videoId}/preview`
