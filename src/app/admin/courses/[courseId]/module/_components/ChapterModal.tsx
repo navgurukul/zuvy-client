@@ -37,17 +37,17 @@ function ChapterModal({
         fetchChapters()
     }
 
-    const createAssessment = async () => {
-        await api
-            .post(`/content/createAssessment/${params.moduleId}`)
-            .then((res) => {
-                toast({
-                    title: res.data.message,
-                    description: res.data[0].title,
-                })
-            })
-        fetchChapters()
-    }
+    // const createAssessment = async () => {
+    //     await api
+    //         .post(`/content/createAssessment/${params.moduleId}`)
+    //         .then((res) => {
+    //             toast({
+    //                 title: res.data.message,
+    //                 description: res.data[0].title,
+    //             })
+    //         })
+    //     fetchChapters()
+    // }
     return (
         <DialogContent>
             <DialogHeader>
@@ -101,7 +101,7 @@ function ChapterModal({
                     <DialogClose asChild>
                         <div
                             className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
-                            onClick={createAssessment}
+                            onClick={() => createChapter(6)}
                         >
                             <BookOpenCheck className="mr-2 h-6 w-6" />
                             <span>Assessment</span>

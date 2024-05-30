@@ -86,23 +86,35 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                 </div>
 
                 <div className="py-4">
-                    <Label htmlFor="name">Module Name:</Label>
+                    <Label htmlFor="name">
+                        {typeId === 2 ? 'Project Name' : 'Module Name'}
+                    </Label>
                     <Input
                         type="text"
                         id="name"
                         name="name"
-                        placeholder="Enter Module Name"
+                        placeholder={
+                            typeId === 2 ? 'Project Name' : 'Module Name'
+                        }
                         value={moduleData?.name}
                         onChange={handleModuleChange}
                     />
                 </div>
                 <div className="py-4">
-                    <Label htmlFor="desc">Module Description:</Label>
+                    <Label htmlFor="desc">
+                        {typeId === 2
+                            ? 'Project Description'
+                            : 'Module Description'}
+                    </Label>
                     <Input
                         type="text"
                         id="desc"
                         name="description"
-                        placeholder="Enter Module Description"
+                        placeholder={
+                            typeId === 2
+                                ? 'Project Description'
+                                : 'Module Description'
+                        }
                         value={moduleData?.description}
                         onChange={handleModuleChange}
                     />

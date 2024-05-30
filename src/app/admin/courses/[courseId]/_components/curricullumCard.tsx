@@ -27,7 +27,9 @@ type Props = {
     timeAlloted: number
     codingProblemsCount: number
     articlesCount: number
+    typeId: number
     fetchCourseModules: () => void
+    projectId: number
 }
 
 const CurricullumCard = ({
@@ -42,7 +44,9 @@ const CurricullumCard = ({
     timeAlloted,
     codingProblemsCount,
     articlesCount,
+    typeId,
     fetchCourseModules,
+    projectId,
 }: Props) => {
     // states and variables
     const router = useRouter()

@@ -19,14 +19,23 @@ import { Button } from '@/components/ui/button'
 
 interface CourseProgress {
     status: string
-    info: {
-        progress: number
-        bootcamp_name: string
-        instructor_name: string
-        instructor_profile_picture: string
+    progress: number
+    bootcampTracking: {
+        name: string
     }
     code: number
 }
+interface Instructor {
+    instructorId: number
+    instructorName: string
+    instructorPicture: string
+}
+
+// Define the initial state type as an array of instructors
+type InstructorDetailsState = Instructor[]
+
+// Initial state object
+const initialInstructorDetailsState: InstructorDetailsState = []
 
 import ClassCard from '@/app/admin/courses/[courseId]/_components/classCard'
 import CourseCard from '@/app/_components/courseCard'
@@ -43,13 +52,15 @@ function Page({
     const [courseProgress, setCourseProgress] = useState<CourseProgress | null>(
         null
     )
+    const [instructorDetails, setInstructorDetails] =
+        useState<InstructorDetailsState>(initialInstructorDetailsState)
     const [upcomingClasses, setUpcomingClasses] = useState([])
     const [ongoingClasses, setOngoingClasses] = useState([])
     // const [completedClasses, setCompletedClasses] = useState([])
     const crumbs = [
         { crumb: 'My Courses', href: '/student/courses', isLast: false },
         {
-            crumb: courseProgress?.info?.bootcamp_name || 'Course',
+            crumb: courseProgress?.bootcampTracking?.name || 'Course',
             // href: `/student/courses/${params.viewcourses}`,
             isLast: true,
         },
@@ -78,7 +89,7 @@ function Page({
         const getModulesProgress = async () => {
             try {
                 const response = await api.get(
-                    `/Content/modules/${params.viewcourses}?user_id=${userID}`
+                    `/tracking/allModulesForStudents/${params.viewcourses}/${userID}`
                 )
                 response.data.map((module: any) => {
                     setModulesProgress(response.data)
@@ -94,9 +105,11 @@ function Page({
         const getCourseProgress = async () => {
             try {
                 const response = await api.get(
-                    `/bootcamp/${userID}/progress?bootcamp_id=${params.viewcourses}`
+                    `/tracking/bootcampProgress/${params.viewcourses}/${userID}`
                 )
-                setCourseProgress(response.data)
+                setCourseProgress(response.data.data)
+                setInstructorDetails(response.data.instructorDetails)
+                console.log('first', response.data.instructorDetails)
             } catch (error) {
                 console.error('Error getting course progress:', error)
             }
@@ -121,9 +134,9 @@ function Page({
                         </div>
                         <div className="grow text-start">
                             <p className="text-xl font-bold mb-2">
-                                {courseProgress?.info?.bootcamp_name}
+                                {courseProgress?.bootcampTracking?.name}
                             </p>
-                            <Loader progress={courseProgress?.info?.progress} />
+                            <Loader progress={courseProgress?.progress} />
                         </div>
                     </div>
 
@@ -198,22 +211,42 @@ function Page({
                             modulesProgress.map(
                                 ({
                                     name,
+                                    description,
                                     id,
-                                    lock,
+                                    isLock,
                                     progress,
+                                    timeAlloted,
+                                    articlesCount,
+                                    assignmentCount,
+                                    codingProblemsCount,
+                                    quizCount,
                                 }: {
                                     name: string
+                                    description: string
                                     id: number
-                                    lock: boolean
+                                    isLock: boolean
                                     progress: number
+                                    timeAlloted: number
+                                    articlesCount: number
+                                    assignmentCount: number
+                                    codingProblemsCount: number
+                                    quizCount: number
                                 }) => (
                                     <CourseCard
                                         key={id}
                                         param={params.viewcourses}
                                         name={name}
+                                        description={description}
                                         id={id}
-                                        lock={lock}
+                                        isLock={isLock}
                                         progress={progress}
+                                        timeAlloted={timeAlloted}
+                                        articlesCount={articlesCount}
+                                        assignmentCount={assignmentCount}
+                                        codingProblemsCount={
+                                            codingProblemsCount
+                                        }
+                                        quizCount={quizCount}
                                     />
                                 )
                             )
@@ -233,8 +266,8 @@ function Page({
                         <div className="flex flex-col items-center justify-center p-4 gap-3">
                             <Image
                                 src={
-                                    courseProgress?.info
-                                        ?.instructor_profile_picture ?? ''
+                                    instructorDetails[0]?.instructorPicture ||
+                                    'https://avatar.iran.liara.run/public/boy?username=Ash'
                                 }
                                 className="rounded-full "
                                 alt="instructor profile pic"
@@ -242,7 +275,7 @@ function Page({
                                 height={10}
                             />
                             <span className="text-lg font-semibold">
-                                {courseProgress?.info?.instructor_name}
+                                {instructorDetails[0]?.instructorName}
                             </span>
                             <p>
                                 Ask doubts or general questions about the

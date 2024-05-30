@@ -69,7 +69,6 @@ function Quiz({ content }: QuizProps) {
             const res = await api
                 .post(`/Content/quiz`, requestBody)
                 .then((res) => {
-                    // getAllQuizQuestion()
                     toast({
                         title: res.data.status || 'Success',
                         description:
@@ -93,7 +92,7 @@ function Quiz({ content }: QuizProps) {
                 />
                 <Link
                     className="text-secondary font-semibold flex mt-2"
-                    href={''}
+                    href=""
                 >
                     Preview
                     <ExternalLink size={20} />
@@ -109,25 +108,23 @@ function Quiz({ content }: QuizProps) {
                 />
                 <Separator
                     orientation="vertical"
-                    className="mx-4 w-[2px] h-screen rounded "
+                    className="mx-4 w-[2px] h-screen rounded"
                 />
-                <ScrollArea className="h-screen w-full rounded-md ">
+                <ScrollArea className="h-screen w-full rounded-md">
                     <div className="flex flex-col gap-y-4">
                         {addQuestion.map(
-                            (questions: quizData, index: number) => {
-                                return (
-                                    <QuizModal
-                                        key={index}
-                                        data={questions}
-                                        removeQuestionById={removeQuestionById}
-                                    />
-                                )
-                            }
+                            (questions: quizData, index: number) => (
+                                <QuizModal
+                                    key={index}
+                                    data={questions}
+                                    removeQuestionById={removeQuestionById}
+                                />
+                            )
                         )}
                         <Dialog>
                             <DialogTrigger asChild>
                                 <Button
-                                    variant={'outline'}
+                                    variant="outline"
                                     className="text-secondary font-semibold"
                                 >
                                     Add Question
@@ -145,61 +142,50 @@ function Quiz({ content }: QuizProps) {
                                         tags={tags}
                                         closeModal={closeModal}
                                     />
-                                </div>{' '}
+                                </div>
                             </DialogContent>
                         </Dialog>
                     </div>
                 </ScrollArea>
 
-                <div>
-                    <div className="w-full mt-6">
-                        {' '}
-                        {content &&
+                <div className="w-full mt-6">
+                    {content &&
+                        (
+                            content as {
+                                id: number
+                                question: string
+                                options: string[]
+                                correctOption: string
+                            }[]
+                        ).map(
                             (
-                                content as {
-                                    id: number
-                                    question: string
-                                    options: string[]
-                                    correctOption: string
-                                }[]
-                            )?.map(
-                                (
-                                    { id, question, options, correctOption },
-                                    index
-                                ) => {
-                                    return (
-                                        <div
-                                            key={id}
-                                            className="text-start mb-5"
-                                        >
-                                            <p>
-                                                Q{index + 1}. {question}
-                                            </p>
-                                            <ul className="text-start">
-                                                {Object.entries(options).map(
-                                                    ([key, value]) => {
-                                                        return (
-                                                            <li
-                                                                key={key}
-                                                                className={cn(
-                                                                    'rounded-sm my-1 p-2',
-                                                                    correctOption ===
-                                                                        key.toString()
-                                                                        ? 'bg-secondary text-white'
-                                                                        : ''
-                                                                )}
-                                                            >
-                                                                {value}
-                                                            </li>
-                                                        )
-                                                    }
-                                                )}
-                                            </ul>
-                                        </div>
-                                    )
-                                }
-                            )}
-                    </div>
+                                { id, question, options, correctOption },
+                                index
+                            ) => (
+                                <div key={id} className="text-start mb-5">
+                                    <p>
+                                        Q{index + 1}. {question}
+                                    </p>
+                                    <ul className="text-start">
+                                        {Object.entries(options).map(
+                                            ([key, value]) => (
+                                                <li
+                                                    key={key}
+                                                    className={`rounded-sm my-1 p-2 ${
+                                                        correctOption ===
+                                                        key.toString()
+                                                            ? 'bg-secondary text-white'
+                                                            : ''
+                                                    }`}
+                                                >
+                                                    {value}
+                                                </li>
+                                            )
+                                        )}
+                                    </ul>
+                                </div>
+                            )
+                        )}
                 </div>
             </div>
         </>

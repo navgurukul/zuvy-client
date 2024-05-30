@@ -80,7 +80,7 @@ const BatchesInfo = ({
         {
             crumb: `${bootcamp?.name}`,
             href: `/admin/courses/${
-                studentData.length > 0
+                studentData?.length > 0
                     ? studentData[0].bootcampId
                     : params.batchId
             }/batches`,
@@ -88,7 +88,7 @@ const BatchesInfo = ({
         },
         {
             crumb: `${
-                studentData.length > 0
+                studentData?.length > 0
                     ? studentData[0].batchName
                     : instructorsInfo.name
             }`,
@@ -111,7 +111,7 @@ const BatchesInfo = ({
                 )
             },
             {
-                message: `The cap enrollment must be greater than or equal to the number of students inside a batch there are currently ${studentsData.length} students  .`,
+                message: `The cap enrollment must be greater than or equal to the number of students inside a batch there are currently ${studentsData?.length} students  .`,
             }
         ),
     })
@@ -234,11 +234,11 @@ const BatchesInfo = ({
                     `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}&limit=${position}&offset=${offset}`
                 )
                 .then((response) => {
-                    setStudentData(response.data.studentsEmails)
-                    setStoreStudentData(response.data.studentsEmails)
+                    setStudentData(response.data.totalStudents)
+                    setStoreStudentData(response.data.totalStudents)
                     setLastPage(response.data.totalPages)
                     setPages(response.data.totalPages)
-                    setTotalStudents(response.data.totalStudents)
+                    setTotalStudents(response.data.totalStudentsCount)
                 })
         },
         [
@@ -287,7 +287,7 @@ const BatchesInfo = ({
                     <div className="w-1/2 flex flex-col items-start ">
                         <div className=" flex flex-col ">
                             <h1 className="capitalize text-start text-[30px] font-semibold">
-                                {studentData.length > 0
+                                {studentData?.length > 0
                                     ? studentData[0].batchName
                                     : ''}
                             </h1>

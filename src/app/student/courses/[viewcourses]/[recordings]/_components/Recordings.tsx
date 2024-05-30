@@ -9,7 +9,7 @@ function Recordings({ completedClasses }: { completedClasses: any }) {
                 completedClasses.map((classObj: any) => (
                     <RecordingCard
                         classData={classObj}
-                        key={classObj.meetingid}
+                        key={classObj.meetingId}
                         // classType="complete"
                         isAdmin={false}
                     />

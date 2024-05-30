@@ -23,6 +23,8 @@ interface CurriculumItem {
     assignmentCount: number
     codingProblemsCount: number
     articlesCount: number
+    typeId: number
+    projectId: number
 }
 
 function Page() {
@@ -200,9 +202,11 @@ function Page() {
                                                 articlesCount={
                                                     item.articlesCount
                                                 }
+                                                typeId={item?.typeId}
                                                 fetchCourseModules={
                                                     fetchCourseModules
                                                 }
+                                                projectId={item.projectId}
                                             />
                                         </div>
                                     </Reorder.Item>
