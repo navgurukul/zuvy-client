@@ -18,7 +18,7 @@ function CourseCard({
     name,
     description,
     id,
-    lock = true,
+    isLock,
     progress,
     timeAlloted,
     articlesCount,
@@ -30,7 +30,7 @@ function CourseCard({
     name: string
     description: string
     id: number
-    lock: boolean
+    isLock: boolean
     progress: number
     timeAlloted: number
     articlesCount: number
@@ -47,7 +47,7 @@ function CourseCard({
             href={`/student/courses/${param}/modules/${id}`}
             style={{ width: '800px' }}
             className={
-                lock
+                !isLock
                     ? 'bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl'
                     : 'bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl pointer-events-none opacity-50'
             }
@@ -60,15 +60,21 @@ function CourseCard({
                     <div className="flex justify-between text-xl font-bold capitalize ">
                         {name}
                         <div>
-                            {lock ? (
+                            {!isLock ? (
                                 <>
                                     <div key={id} className="flex items-center">
                                         <CircularProgress
-                                            color="secondary"
-                                            size="md"
+                                            classNames={{
+                                                // svg: 'w-10 h-10',
+                                                // indicator: 'bg-secondary',
+                                                track: 'stroke-white',
+                                                value: 'text-xs font-semibold',
+                                            }}
                                             value={progress}
+                                            strokeWidth={4}
+                                            showValueLabel={true}
                                         />
-                                        <div
+                                        {/* <div
                                             className={`ml-2 ${
                                                 progress > 9 && progress < 100
                                                     ? 'mr-1'
@@ -76,7 +82,7 @@ function CourseCard({
                                             } ${progress < 10 ? 'mr-2' : ''}`}
                                         >
                                             {progress}%
-                                        </div>
+                                        </div> */}
                                     </div>
                                 </>
                             ) : (
@@ -84,7 +90,9 @@ function CourseCard({
                             )}
                         </div>
                     </div>
-                    <div className="flex justify-start mt-10 gap-2">
+                    <p className="mt-2">{description}</p>
+
+                    <div className="flex justify-start mt-4 gap-2">
                         <Clock3
                             size={15}
                             className="inline mr-1 mt-1"
@@ -142,7 +150,6 @@ function CourseCard({
                             </div>
                         ) : null}
                     </div>
-                    <p className="mt-10">{description}</p>
                 </div>
             </div>
         </Link>

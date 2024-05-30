@@ -25,6 +25,17 @@ interface CourseProgress {
     }
     code: number
 }
+interface Instructor {
+    instructorId: number
+    instructorName: string
+    instructorPicture: string
+}
+
+// Define the initial state type as an array of instructors
+type InstructorDetailsState = Instructor[]
+
+// Initial state object
+const initialInstructorDetailsState: InstructorDetailsState = []
 
 import ClassCard from '@/app/admin/courses/[courseId]/_components/classCard'
 import CourseCard from '@/app/_components/courseCard'
@@ -41,6 +52,8 @@ function Page({
     const [courseProgress, setCourseProgress] = useState<CourseProgress | null>(
         null
     )
+    const [instructorDetails, setInstructorDetails] =
+        useState<InstructorDetailsState>(initialInstructorDetailsState)
     const [upcomingClasses, setUpcomingClasses] = useState([])
     const [ongoingClasses, setOngoingClasses] = useState([])
     // const [completedClasses, setCompletedClasses] = useState([])
@@ -95,6 +108,8 @@ function Page({
                     `/tracking/bootcampProgress/${params.viewcourses}/${userID}`
                 )
                 setCourseProgress(response.data.data)
+                setInstructorDetails(response.data.instructorDetails)
+                console.log('first', response.data.instructorDetails)
             } catch (error) {
                 console.error('Error getting course progress:', error)
             }
@@ -198,7 +213,7 @@ function Page({
                                     name,
                                     description,
                                     id,
-                                    lock,
+                                    isLock,
                                     progress,
                                     timeAlloted,
                                     articlesCount,
@@ -209,7 +224,7 @@ function Page({
                                     name: string
                                     description: string
                                     id: number
-                                    lock: boolean
+                                    isLock: boolean
                                     progress: number
                                     timeAlloted: number
                                     articlesCount: number
@@ -223,7 +238,7 @@ function Page({
                                         name={name}
                                         description={description}
                                         id={id}
-                                        lock={lock}
+                                        isLock={isLock}
                                         progress={progress}
                                         timeAlloted={timeAlloted}
                                         articlesCount={articlesCount}
@@ -249,18 +264,18 @@ function Page({
                     </div>
                     <div className="bg-gradient-to-bl p-3 from-blue-50 to-violet-50 flex rounded-xl  ">
                         <div className="flex flex-col items-center justify-center p-4 gap-3">
-                            {/* <Image
+                            <Image
                                 src={
-                                    courseProgress?.info
-                                        ?.instructor_profile_picture ?? ''
+                                    instructorDetails[0]?.instructorPicture ||
+                                    'https://avatar.iran.liara.run/public/boy?username=Ash'
                                 }
                                 className="rounded-full "
                                 alt="instructor profile pic"
                                 width={40}
                                 height={10}
-                            /> */}
+                            />
                             <span className="text-lg font-semibold">
-                                {/* {courseProgress?.info?.instructor_name} */}
+                                {instructorDetails[0]?.instructorName}
                             </span>
                             <p>
                                 Ask doubts or general questions about the

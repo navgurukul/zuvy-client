@@ -20,6 +20,12 @@ function Page({ params }: { params: { moduleID: string } }) {
     const userID = studentData?.id && studentData?.id
     const { viewcourses } = useParams()
 
+    // state and variables
+    const [chapters, setChapters] = useState([])
+    const [activeChapter, setActiveChapter] = useState(0)
+    const [topicId, setTopicId] = useState(0)
+    const [moduleName, setModuleName] = useState('')
+
     const crumbs = [
         {
             crumb: 'Courses',
@@ -32,15 +38,10 @@ function Page({ params }: { params: { moduleID: string } }) {
             isLast: false,
         },
         {
-            crumb: 'moduleName',
+            crumb: moduleName,
             isLast: true,
         },
     ]
-
-    // state and variables
-    const [chapters, setChapters] = useState([])
-    const [activeChapter, setActiveChapter] = useState(0)
-    const [topicId, setTopicId] = useState(0)
 
     // func
     const fetchChapters = async () => {
@@ -48,8 +49,8 @@ function Page({ params }: { params: { moduleID: string } }) {
             const response = await api.get(
                 `tracking/getAllChaptersWithStatus/${params.moduleID}?userId=${userID}`
             )
-            // ModuleName for breadcumb should also come in this API
             setChapters(response.data.trackingData)
+            setModuleName(response.data.moduleDetails[0].name)
         } catch (error) {
             console.log(error)
         }
@@ -61,7 +62,6 @@ function Page({ params }: { params: { moduleID: string } }) {
                 const response = await api.get(
                     `/Content/chapterDetailsById/${chapterId}`
                 )
-                console.log('response', response.data)
                 setActiveChapter(chapterId)
                 setTopicId(response.data.topicId)
             } catch (error) {
