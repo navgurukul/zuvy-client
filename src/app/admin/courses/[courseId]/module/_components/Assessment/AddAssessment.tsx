@@ -13,6 +13,7 @@ import CodingTopics from '@/app/admin/courses/[courseId]/module/_components/codi
 import CodingQuestions from '@/app/admin/courses/[courseId]/module/_components/Assessment/CodingQuestions'
 import { Button } from '@/components/ui/button'
 import { cn, difficultyColor, ellipsis } from '@/lib/utils'
+import SelectOpenEndedQuestions from './SelectOpenEndedQuestions'
 
 const AddAssessment = ({ moduleId }: { moduleId: any }) => {
     const [selectedQuestions, setSelectedQuestions] = useState<any[]>([])
@@ -208,73 +209,17 @@ const AddAssessment = ({ moduleId }: { moduleId: any }) => {
                         )}
                         {questionType === 'open-ended' &&
                             selectedOpenEndedQuestions && (
-                                <div className="w-full">
-                                    <h3>Open-Ended Question</h3>
-                                    {selectedOpenEndedQuestions.map(
-                                        (question: any) => (
-                                            <>
-                                                <div
-                                                    key={question.id}
-                                                    className={`p-5 rounded-sm border border-gray-200 mb-4`}
-                                                >
-                                                    <div className="flex justify-between text-start items-center">
-                                                        <div>
-                                                            <div className="flex items-center gap-2">
-                                                                <h2 className="font-bold text-lg">
-                                                                    {ellipsis(
-                                                                        question.question,
-                                                                        30
-                                                                    )}
-                                                                </h2>
-                                                                <span
-                                                                    className={cn(
-                                                                        `font-semibold text-secondary`,
-                                                                        difficultyColor(
-                                                                            question.difficulty
-                                                                        )
-                                                                    )}
-                                                                >
-                                                                    {
-                                                                        question.difficulty
-                                                                    }
-                                                                </span>
-                                                            </div>
-                                                            <div className="w-full">
-                                                                <p className="text-gray-600 mt-1">
-                                                                    {ellipsis(
-                                                                        question.question,
-                                                                        60
-                                                                    )}
-                                                                </p>
-                                                            </div>
-                                                            <Link
-                                                                href={''}
-                                                                className="font-semibold text-sm mt-2 text-secondary"
-                                                            >
-                                                                View Full
-                                                                Description
-                                                            </Link>
-                                                        </div>
-                                                        <div className="flex">
-                                                            <PlusCircle
-                                                                onClick={() =>
-                                                                    setSelectedQuestions(
-                                                                        [
-                                                                            ...selectedQuestions,
-                                                                            question,
-                                                                        ]
-                                                                    )
-                                                                }
-                                                                className="text-secondary cursor-pointer"
-                                                                size={20}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </>
-                                        )
-                                    )}
-                                </div>
+                                <SelectOpenEndedQuestions
+                                    selectedOpenEndedQuestions={
+                                        selectedOpenEndedQuestions
+                                    }
+                                    setSelectedQuestions={
+                                        setSelectedOpenEndedQuestions
+                                    }
+                                    selectedQuestions={
+                                        selectedOpenEndedQuestions
+                                    }
+                                />
                             )}
                     </div>
                 </div>
