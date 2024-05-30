@@ -70,24 +70,7 @@ export const columns: ColumnDef<Task>[] = [
             )
         },
     },
-    {
-        accessorKey: 'noOfAttempts',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="No of Attemps" />
-        ),
-        cell: ({ row }) => {
-            // const label = labels.find((label) => label.value === row.original.label);
 
-            return (
-                <div className="flex space-x-2 ml-8">
-                    {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
-                    <span className="max-w-[500px]  truncate font-medium">
-                        {row.getValue('noOfAttempts')}
-                    </span>
-                </div>
-            )
-        },
-    },
     {
         accessorKey: 'status',
         header: ({ column }) => (
@@ -101,6 +84,20 @@ export const columns: ColumnDef<Task>[] = [
                     {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
                     <span className="max-w-[500px] truncate font-medium">
                         {row.getValue('status')}
+                    </span>
+                </div>
+            )
+        },
+    },
+    {
+        id: 'actions',
+        cell: ({ row }) => {
+            // const label = labels.find((label) => label.value === row.original.label);
+
+            return (
+                <div className="flex space-x-2">
+                    <span className="max-w-[500px] truncate font-medium">
+                        View Report
                     </span>
                 </div>
             )

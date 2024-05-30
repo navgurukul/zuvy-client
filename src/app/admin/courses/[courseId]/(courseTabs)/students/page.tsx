@@ -99,7 +99,6 @@ const Page = ({ params }: { params: any }) => {
         },
         [params.courseId, position, setStoreStudentData]
     )
-
     useEffect(() => {
         if (params.courseId) {
             fetchClassesData(params.courseId)

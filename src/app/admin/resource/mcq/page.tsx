@@ -52,7 +52,6 @@ const Mcqs = (props: Props) => {
     })
 
     const { quizData, setStoreQuizData } = getAllQuizData()
-
     const handleTopicClick = (tag: Tag) => {
         setSelectedTag(tag)
     }
