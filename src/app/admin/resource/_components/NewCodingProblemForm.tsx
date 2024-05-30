@@ -147,7 +147,6 @@ export default function NewCodingProblemForm({
         createCodingQuestion(formattedData)
         getAllCodingQuestions(setCodingQuestions)
     }
-    // const accountType = form.watch('accountType')
 
     return (
         <ScrollArea className="h-[calc(100vh-200px)] w-full rounded-md  ">

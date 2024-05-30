@@ -3,25 +3,29 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 
-import { getAllQuizData, quiz } from '@/store/store'
+import { getAllQuizData, getCodingQuestionTags, quiz } from '@/store/store'
 import { Edit, Eye, Pencil, Trash2 } from 'lucide-react'
 import { difficultyColor } from '@/lib/utils'
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '@/components/ui/tooltip'
 
 import DeleteConfirmationModal from '../../courses/[courseId]/_components/deleteModal'
-import { getDeleteQuizQuestion } from '@/store/store'
+import { getDeleteQuizQuestion, getEditQuizQuestion } from '@/store/store'
 import {
     handleQuizConfirm,
     handleQuizDelete,
     handleDeleteQuizModal,
     getAllQuizQuestion,
+    // handlerQuizQuestions,
 } from '@/utils/admin'
 import { DELETE_QUIZ_QUESTION_CONFIRMATION } from '@/utils/constant'
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog'
+import NewMcqProblemForm from '../_components/NewMcqProblemForm'
+import EditQuizQuestion from '../_components/EditQuizQuestion'
 
 export const columns: ColumnDef<quiz>[] = [
     {
@@ -76,19 +80,61 @@ export const columns: ColumnDef<quiz>[] = [
         ),
         cell: ({ row }) => {
             const quizQuestion = row.original
+
+            const {
+                isEditQuizModalOpen,
+                setIsEditModalOpen,
+                quizQuestionId,
+                setIsQuizQuestionId,
+            } = getEditQuizQuestion()
             const {
                 isDeleteModalOpen,
                 setDeleteModalOpen,
                 deleteQuizQuestionId,
                 setDeleteQuizQuestionId,
             } = getDeleteQuizQuestion()
-
             const { quizData, setStoreQuizData } = getAllQuizData()
+            const { tags } = getCodingQuestionTags()
+            const handlerQuizQuestions = (quizQuestion: any) => {
+                setIsEditModalOpen(true)
+                setIsQuizQuestionId(quizQuestion.id)
+            }
 
             return (
                 <>
                     <div className="flex">
-                        <Pencil className="cursor-pointer mr-5" size={20} />
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Pencil
+                                    className="cursor-pointer mr-5"
+                                    size={20}
+                                    onClick={() =>
+                                        handlerQuizQuestions(quizQuestion)
+                                    }
+                                />
+                            </DialogTrigger>
+                            {isEditQuizModalOpen && (
+                                <DialogContent className="sm:max-w-[500px]">
+                                    <DialogHeader>
+                                        <DialogTitle>Edit MCQ</DialogTitle>
+                                    </DialogHeader>
+                                    <div className="w-full">
+                                        <EditQuizQuestion
+                                            tags={tags}
+                                            setIsEditModalOpen={
+                                                setIsEditModalOpen
+                                            }
+                                            getAllQuizQuesiton={
+                                                getAllQuizQuestion
+                                            }
+                                            setStoreQuizData={setStoreQuizData}
+                                            quizQuestionId={quizQuestionId}
+                                            quizQuestion={quizData}
+                                        />
+                                    </div>
+                                </DialogContent>
+                            )}
+                        </Dialog>
                         <Trash2
                             onClick={(e) => {
                                 e.stopPropagation()

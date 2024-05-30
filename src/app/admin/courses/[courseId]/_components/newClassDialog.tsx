@@ -19,14 +19,7 @@ import CalendarInput from '@/app/_components/calendarInput'
 import { toast } from '@/components/ui/use-toast'
 
 import { api } from '@/utils/axios.config'
-
-// interface newClassDialogProps {
-//   newCourseName: string;
-//   handleNewCourseNameChange: (
-//     event: React.ChangeEvent<HTMLInputElement>
-//   ) => void;
-//   handleCreateCourse: () => void;
-// }
+import { useForm } from 'react-hook-form'
 
 const data = [
     {
@@ -71,6 +64,8 @@ function DateTimePicker({
         setDateTime(new Date(`${date}T${newTime}:00.000Z`))
     }
     const currentDate = new Date().toISOString().split('T')[0]
+    const currentTime = new Date().toISOString().split('T')[1].slice(0, 5)
+
     return (
         <div className="my-6">
             <Label htmlFor={`${label}DateTime`}>{label}:</Label>
@@ -85,6 +80,11 @@ function DateTimePicker({
                     type="time"
                     value={dateTime.toISOString().split('T')[1].slice(0, 5)}
                     onChange={handleTimeChange}
+                    min={
+                        dateTime.toISOString().split('T')[0] === currentDate
+                            ? currentTime
+                            : undefined
+                    }
                 />
             </div>
         </div>
@@ -119,14 +119,31 @@ const NewClassDialog = ({
     setBatchId: any
 }) => {
     // const [title, setTitle] = useState('')
-
+    const [errors, setErrors] = useState<Record<string, string>>({})
     const [attendeesInput, setAttendeesInput] = useState('')
+
+    const validateForm = () => {
+        const newErrors: Record<string, string> = {}
+        if (!title) newErrors.title = 'Session title is required'
+        if (!description) newErrors.description = 'Description is required'
+        if (!batchId) newErrors.batchId = 'Batch is required'
+        if (startDateTime <= new Date())
+            newErrors.startDateTime = 'Start date/time must be in the future'
+        if (endDateTime <= startDateTime)
+            newErrors.endDateTime =
+                'End date/time must be after start date/time'
+
+        setErrors(newErrors)
+        return Object.keys(newErrors).length === 0
+    }
 
     const handleComboboxChange = (value: string) => {
         setBatchId(value)
     }
 
     const handleCreateCourse = async () => {
+        if (!validateForm()) return
+
         const attendeesArray = attendeesInput.split(', ')
 
         const userIdLocal = JSON.parse(localStorage.getItem('AUTH') || '')
@@ -179,7 +196,13 @@ const NewClassDialog = ({
                             placeholder="Enter session title"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
+                            required
                         />
+                        {errors.title && (
+                            <p className="text-red-500">
+                                Session title is required
+                            </p>
+                        )}
                     </div>
                     <div className="my-6">
                         <Label htmlFor="description">Description:</Label>
@@ -189,7 +212,13 @@ const NewClassDialog = ({
                             placeholder="Enter course description"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
+                            required
                         />
+                        {errors.description && (
+                            <p className="text-red-500">
+                                Description is required
+                            </p>
+                        )}
                     </div>
                     <div className="my-6">
                         <DateTimePicker
@@ -197,6 +226,11 @@ const NewClassDialog = ({
                             dateTime={startDateTime}
                             setDateTime={setStartDateTime}
                         />
+                        {errors.startDateTime && (
+                            <p className="text-red-500">
+                                Start date/time must be in the future
+                            </p>
+                        )}
                     </div>
                     <div className="my-6">
                         <DateTimePicker
@@ -204,8 +238,12 @@ const NewClassDialog = ({
                             dateTime={endDateTime}
                             setDateTime={setEndDateTime}
                         />
+                        {errors.endDateTime && (
+                            <p className="text-red-500">
+                                End date/time must be after start date/time
+                            </p>
+                        )}
                     </div>
-
                     <div className="my-6">
                         <Label htmlFor="batchId">Batch:</Label>
                         <Combobox
@@ -214,6 +252,9 @@ const NewClassDialog = ({
                             onChange={handleComboboxChange}
                             batch={false}
                         />
+                        {errors.batchId && (
+                            <p className="text-red-500">Batch is required</p>
+                        )}
                     </div>
                     <DialogClose asChild>
                         <div className="text-end">

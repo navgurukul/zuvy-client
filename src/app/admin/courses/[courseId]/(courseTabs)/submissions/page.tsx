@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -8,18 +8,57 @@ import { ArrowDownToLine, Search } from 'lucide-react'
 import PraticeProblems from '../../_components/PraticeProblems'
 import Assesments from '../../_components/Assesments'
 import Projects from '../../_components/Projects'
+import { api } from '@/utils/axios.config'
+import PracticeProblems from '../../_components/PraticeProblems'
 
 const Page = ({ params }: { params: any }) => {
     const [activeTab, setActiveTab] = useState('practice')
+    const [submissions, setSubmissions] = useState<any[]>([])
+    const [totalStudents, setTotalStudents] = useState(0)
+    const [assesments, setAssesments] = useState<any[]>([])
 
     const handleTabChange = (tab: string) => {
         setActiveTab(tab)
     }
     // console.log(params)
-    const moduleNumbers = [1, 2, 3]
+
+    const getSubmissions = useCallback(() => {
+        return api.get(
+            `/submission/submissionsOfPractiseProblems/${params.courseId}`
+        )
+    }, [params.courseId])
+    const getAssesments = useCallback(() => {
+        return api.get(
+            `/submission/assessmentInfoBy?bootcampId=${
+                params.courseId
+            }&limit=${10}&offset=${0}`
+        )
+    }, [params.courseId])
+
+    useEffect(() => {
+        if (params.courseId) {
+            const response = getSubmissions()
+            response.then((res) => {
+                setSubmissions(res.data.trackingData)
+                setTotalStudents(res.data.totalStudents)
+            })
+        }
+    }, [getSubmissions, params.courseId])
+
+    useEffect(() => {
+        if (params.courseId) {
+            const response = getAssesments()
+            response.then((res) => {
+                setAssesments(res.data.data)
+                setTotalStudents(res.data.totalStudents)
+            })
+        }
+    }, [getAssesments, params.courseId])
+
+    console.log(assesments)
     return (
         <div className="">
-            <div className="flex ml-5 items-start gap-x-3">
+            <div className="flex items-start gap-x-3">
                 <Button
                     onClick={() => handleTabChange('practice')}
                     className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
@@ -67,20 +106,50 @@ const Page = ({ params }: { params: any }) => {
                         Full Report
                     </Button>
                 )}
+                {activeTab === 'projects' && (
+                    <Button>
+                        <ArrowDownToLine size={20} className="mr-2" /> Download
+                        Full Report
+                    </Button>
+                )}
             </div>
             <div className="w-full">
                 {activeTab === 'practice' &&
-                    moduleNumbers.map((moduleNo) => (
-                        <PraticeProblems
-                            key={moduleNo}
-                            moduleNo={moduleNo}
-                            courseId={params.courseId}
-                        />
-                    ))}
+                    submissions
+                        .filter(
+                            ({ moduleChapterData }) =>
+                                moduleChapterData.length > 0
+                        )
+                        .map(({ id, name, moduleChapterData }) => (
+                            <PracticeProblems
+                                key={id}
+                                courseId={params.courseId}
+                                name={name}
+                                totalStudents={totalStudents}
+                                submission={moduleChapterData}
+                                moduleId={id}
+                            />
+                        ))}
                 {activeTab === 'assessments' && (
-                    <Assesments courseId={params.courseId} />
+                    <>
+                        {assesments
+                            .filter(
+                                ({ moduleAssessments }) =>
+                                    moduleAssessments.length > 0
+                            )
+                            .map(({ id, name, moduleAssessments }) => (
+                                <Assesments
+                                    key={id}
+                                    courseId={params.courseId}
+                                    name={name}
+                                    moduleAssessments={moduleAssessments}
+                                />
+                            ))}
+                    </>
                 )}
-                {activeTab === 'projects' && <Projects />}
+                {activeTab === 'projects' && (
+                    <Projects courseId={params.courseId} />
+                )}
             </div>
         </div>
     )

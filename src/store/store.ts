@@ -214,19 +214,39 @@ export const getopenEndedQuestionstate = create<openEndedQuestions>((set) => ({
 // ------------------------------
 type deleteOpenEndedQuestion = {
     isDeleteModalOpen: boolean
-    setDeleteModalOpen : (newValue: boolean) => void
-    deleteOpenEndedQuestionId: null,
+    setDeleteModalOpen: (newValue: boolean) => void
+    deleteOpenEndedQuestionId: null
     setdeleteOpenEndedQuestionId: (newValue: any) => void
 }
 
-export const getdeleteOpenEndedQuestion = create<deleteOpenEndedQuestion>((set) => ({
-    isDeleteModalOpen: false,
-    setDeleteModalOpen: (newValue: boolean) => {
-        set({ isDeleteModalOpen: newValue })
+export const getdeleteOpenEndedQuestion = create<deleteOpenEndedQuestion>(
+    (set) => ({
+        isDeleteModalOpen: false,
+        setDeleteModalOpen: (newValue: boolean) => {
+            set({ isDeleteModalOpen: newValue })
+        },
+        deleteOpenEndedQuestionId: null,
+        setdeleteOpenEndedQuestionId: (newValue: any) => {
+            set({ deleteOpenEndedQuestionId: newValue })
+        },
+    })
+)
+
+type editQuizQuestion = {
+    isEditQuizModalOpen: boolean
+    setIsEditModalOpen: (newValue: boolean) => void
+    quizQuestionId: number
+    setIsQuizQuestionId: (newValue: number) => void
+}
+
+export const getEditQuizQuestion = create<editQuizQuestion>((set) => ({
+    isEditQuizModalOpen: false,
+    setIsEditModalOpen: (newValue: boolean) => {
+        set({ isEditQuizModalOpen: newValue })
     },
-    deleteOpenEndedQuestionId: null,
-    setdeleteOpenEndedQuestionId: (newValue: any) => {
-        set({ deleteOpenEndedQuestionId: newValue })
+    quizQuestionId: 0,
+    setIsQuizQuestionId: (newValue: number) => {
+        set({ quizQuestionId: newValue })
     },
 }))
 
@@ -235,8 +255,8 @@ export const getdeleteOpenEndedQuestion = create<deleteOpenEndedQuestion>((set) 
 // ------------------------------
 type editOpenEndedDialogs = {
     isOpenEndDialogOpen: boolean
-    setIsOpenEndDialogOpen : (newValue: boolean) => void
-    editOpenEndedQuestionId: null,
+    setIsOpenEndDialogOpen: (newValue: boolean) => void
+    editOpenEndedQuestionId: null
     setEditOpenEndedQuestionId: (newValue: any) => void
 }
 
@@ -255,21 +275,23 @@ export const getEditOpenEndedDialogs = create<editOpenEndedDialogs>((set) => ({
 // ------------------------------
 type editCodingQuestionDialogs = {
     isCodingDialogOpen: boolean
-    setIsCodingDialogOpen : (newValue: boolean) => void
-    editCodingQuestionId: null,
+    setIsCodingDialogOpen: (newValue: boolean) => void
+    editCodingQuestionId: null
     setEditCodingQuestionId: (newValue: any) => void
 }
 
-export const getEditCodingQuestionDialogs = create<editCodingQuestionDialogs>((set) => ({
-    isCodingDialogOpen: false,
-    setIsCodingDialogOpen: (newValue: boolean) => {
-        set({ isCodingDialogOpen: newValue })
-    },
-    editCodingQuestionId: null,
-    setEditCodingQuestionId: (newValue: any) => {
-        set({ editCodingQuestionId: newValue })
-    },
-}))
+export const getEditCodingQuestionDialogs = create<editCodingQuestionDialogs>(
+    (set) => ({
+        isCodingDialogOpen: false,
+        setIsCodingDialogOpen: (newValue: boolean) => {
+            set({ isCodingDialogOpen: newValue })
+        },
+        editCodingQuestionId: null,
+        setEditCodingQuestionId: (newValue: any) => {
+            set({ editCodingQuestionId: newValue })
+        },
+    })
+)
 
 // ------------------------------
 

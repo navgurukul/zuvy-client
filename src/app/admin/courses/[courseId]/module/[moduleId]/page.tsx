@@ -245,7 +245,6 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                         moduleId={params.moduleId}
                         content={chapterContent}
                         fetchChapterContent={fetchChapterContent}
-                        key={key}
                     />
                 )
             case 2:
