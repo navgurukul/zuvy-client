@@ -63,7 +63,7 @@ function StudentChapterItem({
                     fetchChapterContent(chapterId)
                 }}
             >
-                <div className="flex gap-2 capitalize">
+                <div className="flex gap-2 text-start capitalize">
                     <p>{setTopicIcon()} </p>
                     <p>{title}</p>
                 </div>
