@@ -65,10 +65,10 @@ function CourseCard({
                                     <div key={id} className="flex items-center">
                                         <CircularProgress
                                             classNames={{
-                                                // svg: 'w-10 h-10',
-                                                // indicator: 'bg-secondary',
+                                                svg: 'w-11 h-11',
+                                                indicator: 'text-secondary',
                                                 track: 'stroke-white',
-                                                value: 'text-xs font-semibold',
+                                                value: 'text-sm font-bold',
                                             }}
                                             value={progress}
                                             strokeWidth={4}

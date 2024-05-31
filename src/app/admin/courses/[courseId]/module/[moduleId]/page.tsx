@@ -16,9 +16,15 @@ import AddArticle from '@/app/admin/courses/[courseId]/module/_components/Articl
 import CodingChallenge from '@/app/admin/courses/[courseId]/module/_components/codingChallenge/CodingChallenge'
 import { Reorder } from 'framer-motion'
 import { useEditor } from '@tiptap/react'
+<<<<<<< HEAD
+import TiptapEditor from '@/app/_components/editor/TiptapEditor'
+import TiptapToolbar from '@/app/_components/editor/TiptapToolbar'
+import extensions from '@/app/_components/editor/TiptapExtensions'
+=======
 import TiptapEditor from '@/app/admin/courses/[courseId]/module/_components/TiptapEditor/TiptapEditor'
 import TiptapToolbar from '@/app/admin/courses/[courseId]/module/_components/TiptapEditor/TiptapToolbar'
 import extensions from '@/app/admin/courses/[courseId]/module/_components/TiptapEditor/TiptapExtensions'
+>>>>>>> 0769adbf074bc84213452c5c4bc92ac2cfc17398
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { toast } from '@/components/ui/use-toast'
