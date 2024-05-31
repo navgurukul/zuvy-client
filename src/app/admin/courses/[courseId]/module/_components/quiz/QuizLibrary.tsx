@@ -13,10 +13,10 @@ import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 
 import QuizList from './QuizList'
-
+import { Tag } from '@/app/admin/resource/mcq/page'
 import { api } from '@/utils/axios.config'
 import useDebounce from '@/hooks/useDebounce'
-
+import { getCodingQuestionTags } from '@/store/store'
 export interface quizData {
     id: number
     question: string
@@ -38,11 +38,13 @@ function QuizLibrary({
     setActiveTab,
     addQuestion,
     handleAddQuestion,
+    tags,
 }: {
     activeTab: string
     setActiveTab: (tab: string) => void
     addQuestion: any
     handleAddQuestion: any
+    tags: any
 }) {
     const [search, setSearch] = useState<string>('')
     const debouncedSeatch = useDebounce(search, 1000)
@@ -143,18 +145,16 @@ function QuizLibrary({
             />
             <div className="flex">
                 <Select>
-                    <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="All Topics" />
+                    <SelectTrigger>
+                        <SelectValue placeholder="Choose Topic" />
                     </SelectTrigger>
+
                     <SelectContent>
-                        <SelectGroup>
-                            <SelectLabel>All Topics</SelectLabel>
-                            <SelectItem value="apple">Apple</SelectItem>
-                            <SelectItem value="banana">Banana</SelectItem>
-                            <SelectItem value="blueberry">Blueberry</SelectItem>
-                            <SelectItem value="grapes">Grapes</SelectItem>
-                            <SelectItem value="pineapple">Pineapple</SelectItem>
-                        </SelectGroup>
+                        {tags.map((tag: any) => (
+                            <SelectItem key={tag.id} value={tag.tagName}>
+                                {tag.tagName}
+                            </SelectItem>
+                        ))}
                     </SelectContent>
                 </Select>
                 <Separator
