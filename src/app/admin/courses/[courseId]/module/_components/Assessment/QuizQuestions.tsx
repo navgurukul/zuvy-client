@@ -29,7 +29,7 @@ const QuizQuestions = ({
             {questions.map((question: MCQQuestion) => (
                 <div
                     key={question.id}
-                    className={`p-5 rounded-sm border border-gray-200 mb-4`}
+                    className={`p-5 rounded-sm  border-gray-200 mb-4`}
                 >
                     <div className="flex justify-between text-start items-center">
                         <div>
