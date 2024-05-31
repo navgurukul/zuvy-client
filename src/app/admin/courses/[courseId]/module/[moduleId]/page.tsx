@@ -88,6 +88,7 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
     const [activeChapter, setActiveChapter] = useState(0)
     const [chapterContent, setChapterContent] = useState<any>([])
     const [topicId, setTopicId] = useState(0)
+    const [chapterId, setChapterId] = useState<number>(0)
     const [key, setKey] = useState(0)
     const { courseId, moduleId } = useParams()
     const [activeChapterTitle, setActiveChapterTitle] = useState('')
@@ -203,6 +204,7 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                 const response = await api.get(
                     `/Content/chapterDetailsById/${chapterId}`
                 )
+                setChapterId(chapterId)
                 const currentModule: any = moduleData.find(
                     (myModule: any) => myModule.chapterId === chapterId
                 )
@@ -257,7 +259,13 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                     />
                 )
             case 4:
-                return <Quiz content={chapterContent} />
+                return (
+                    <Quiz
+                        chapterId={chapterId}
+                        moduleId={params.moduleId}
+                        content={chapterContent}
+                    />
+                )
             case 5:
                 return <Assignment content={chapterContent} />
             case 6:
@@ -329,7 +337,6 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
             console.error('Error updating order:', error)
         }
     }
-
     return (
         <>
             <BreadcrumbComponent crumbs={crumbs} />

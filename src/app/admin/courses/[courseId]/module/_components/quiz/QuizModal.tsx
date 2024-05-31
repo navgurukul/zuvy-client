@@ -1,6 +1,6 @@
 import React from 'react'
 import { Button } from '@/components/ui/button'
-import { difficultyColor } from '@/lib/utils'
+import { difficultyColor, ellipsis } from '@/lib/utils'
 import { Edit, XCircle } from 'lucide-react'
 import {
     Tooltip,
@@ -15,10 +15,12 @@ const QuizModal = ({ data, removeQuestionById }: any) => {
         removeQuestionById(data.id)
     }
     return (
-        <div className="flex justify-between p-3   rounded-lg border-gray-400">
+        <div className="flex justify-between py-3 items-center">
             <div className="flex flex-col gap-2  ">
                 <div className="flex gap-2">
-                    <h1 className="font-semibold">{data.question}</h1>
+                    <h1 className="font-semibold">
+                        {ellipsis(data.question, 40)}
+                    </h1>
                     <h2
                         className={`${difficultyColor(
                             data.difficulty
@@ -27,7 +29,7 @@ const QuizModal = ({ data, removeQuestionById }: any) => {
                         {data.difficulty}
                     </h2>
                 </div>
-                <Button
+                {/* <Button
                     className="flex w-1/3 text-secondary font-semibold text-md justify-start mr-10"
                     variant={'ghost'}
                 >
@@ -41,7 +43,7 @@ const QuizModal = ({ data, removeQuestionById }: any) => {
                             </TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
-                </Button>
+                </Button> */}
             </div>
             <XCircle
                 size={20}
