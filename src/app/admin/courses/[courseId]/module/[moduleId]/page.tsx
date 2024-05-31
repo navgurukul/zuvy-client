@@ -83,7 +83,7 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
     // states and variables
     const [open, setOpen] = useState(false)
     const [chapterData, setChapterData] = useState<Chapter[]>([])
-    const [assessmentData, setAssessmentData] = useState<Chapter[]>([])
+    const [currentChapter, setCurrentChapter] = useState<Chapter[]>([])
     const [moduleName, setModuleName] = useState('')
     const [activeChapter, setActiveChapter] = useState(0)
     const [chapterContent, setChapterContent] = useState<any>([])
@@ -99,7 +99,6 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
     const [projectData, setProjectData] = useState<ProjectData>()
     const [moduleData, setModuleData] = useState<Module[]>([])
     const [title, setTitle] = useState('')
-    const [codingChapterContent, setCodingChapterContent] = useState<any>([])
 
     const crumbs = [
         {
@@ -188,8 +187,8 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
             const response = await api.get(
                 `/Content/allChaptersOfModule/${moduleId}`
             )
+
             setChapterData(response.data.chapterWithTopic)
-            setAssessmentData(response.data.chapterWithTopic)
             setModuleName(response.data.moduleName)
             setModuleData(response.data.chapterWithTopic)
         } catch (error) {
@@ -210,6 +209,7 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
 
                 if (currentModule) {
                     setActiveChapterTitle(currentModule?.chapterTitle)
+                    setCurrentChapter(currentModule)
                 }
 
                 if (currentModule?.topicName === 'Quiz') {
@@ -219,7 +219,6 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                     )
                 } else if (currentModule?.topicName === 'Coding Question') {
                     setChapterContent(response.data)
-                    setCodingChapterContent(response.data)
                 } else {
                     setChapterContent(response.data)
                 }
@@ -262,7 +261,14 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
             case 5:
                 return <Assignment content={chapterContent} />
             case 6:
-                return <AddAssessment moduleId={params.moduleId} />
+                return (
+                    <AddAssessment
+                        chapterData={currentChapter}
+                        content={chapterContent}
+                        fetchChapterContent={fetchChapterContent}
+                        moduleId={params.moduleId}
+                    />
+                )
             default:
                 return <h1>Create New Chapter</h1>
         }

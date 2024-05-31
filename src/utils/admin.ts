@@ -198,14 +198,15 @@ export async function getAllTags(setTags: any) {
         setTags(response.data.allTags)
     }
 }
-// ----------------------
+// --------------------------------------------
+// AddAssessment.tsx functions:-
 export async function filteredCodingQuestions(setFilteredQuestions: any, selectedDifficulty: string, selectedTopic: string, selectedLanguage: string) {
     try {
         const response = await api.get('/Content/allCodingQuestions')
         const filtered = response.data.filter((question: any) =>
-            (selectedDifficulty === 'Any Difficulty' || question.difficulty === selectedDifficulty) &&
-            (selectedTopic === 'All Topics' || question.tags.includes(selectedTopic)) &&
-            (selectedLanguage === 'All Languages' || question.language === selectedLanguage)
+            (selectedDifficulty === 'Any Difficulty' || question.difficulty === selectedDifficulty)
+            // &&(selectedTopic === 'All Topics' || question.tags.includes(selectedTopic)) &&
+            // (selectedLanguage === 'All Languages' || question.language === selectedLanguage)
         )
         setFilteredQuestions(filtered)
     } catch (error) {
@@ -217,9 +218,9 @@ export async function filteredQuizQuestions(setFilteredQuestions: any, selectedD
     try {
         const response = await api.get('/Content/allQuizQuestions')
         const filtered = response.data.filter((question: any) =>
-            (selectedDifficulty === 'Any Difficulty' || question.difficulty === selectedDifficulty) &&
-            (selectedTopic === 'All Topics' || question.tags.includes(selectedTopic)) &&
-            (selectedLanguage === 'All Languages' || question.language === selectedLanguage)
+            (selectedDifficulty === 'Any Difficulty' || question.difficulty === selectedDifficulty)
+            // &&(selectedTopic === 'All Topics' || question.tags.includes(selectedTopic)) &&
+            // (selectedLanguage === 'All Languages' || question.language === selectedLanguage)
         )
         setFilteredQuestions(filtered)
     } catch (error) {
@@ -231,11 +232,20 @@ export async function filteredOpenEndedQuestions(setFilteredQuestions: any, sele
     try {
         const response = await api.get('/Content/openEndedQuestions')
         const filtered = response.data.data.filter((question: any) =>
-            (selectedDifficulty === 'Any Difficulty' || question.difficulty === selectedDifficulty) &&
-            (selectedTopic === 'All Topics' || question.tags.includes(selectedTopic)) &&
-            (selectedLanguage === 'All Languages' || question.language === selectedLanguage)
+            (selectedDifficulty === 'Any Difficulty' || question.difficulty === selectedDifficulty)
+            // && (selectedTopic === 'All Topics' || question.tags.includes(selectedTopic)) &&
+            // (selectedLanguage === 'All Languages' || question.language === selectedLanguage)
         )
         setFilteredQuestions(filtered)
+    } catch (error) {
+        console.error('Error:', error)
+    }
+}
+
+export async function getChapterDetailsById(chapterId: any, setChapter: any) {
+    try {
+        const response = await api.get(`Content/chapterDetailsById/${chapterId}`)
+        setChapter(response.data)
     } catch (error) {
         console.error('Error:', error)
     }
