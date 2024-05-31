@@ -14,17 +14,26 @@ import Assignment from '../_components/Assignment'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import { useParams } from 'next/navigation'
 
-function Page({ params }: { params: { moduleID: string } }) {
+interface Chapter {
+    id: number
+    title: string
+    topicId: number
+    chapterTrackingDetails: { id: number }[]
+    status: string
+}
+
+function Page() {
     // misc
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
-    const { viewcourses } = useParams()
+    const { viewcourses, moduleID } = useParams()
 
     // state and variables
     const [chapters, setChapters] = useState([])
     const [activeChapter, setActiveChapter] = useState(0)
     const [topicId, setTopicId] = useState(0)
     const [moduleName, setModuleName] = useState('')
+    const [chapterContent, setChapterContent] = useState({})
 
     const crumbs = [
         {
@@ -47,10 +56,15 @@ function Page({ params }: { params: { moduleID: string } }) {
     const fetchChapters = async () => {
         try {
             const response = await api.get(
-                `tracking/getAllChaptersWithStatus/${params.moduleID}?userId=${userID}`
+                `tracking/getAllChaptersWithStatus/${moduleID}?userId=${userID}`
             )
             setChapters(response.data.trackingData)
             setModuleName(response.data.moduleDetails[0].name)
+            const firstPending = response.data.trackingData.find(
+                (chapter: Chapter) => chapter.status === 'Pending'
+            )
+            setActiveChapter(firstPending.id)
+            fetchChapterContent(firstPending.id)
         } catch (error) {
             console.log(error)
         }
@@ -58,25 +72,45 @@ function Page({ params }: { params: { moduleID: string } }) {
 
     const fetchChapterContent = useCallback(
         async (chapterId: number) => {
+            if (!userID) return
             try {
                 const response = await api.get(
-                    `/Content/chapterDetailsById/${chapterId}`
+                    `/tracking/getChapterDetailsWithStatus/${chapterId}?userId=${userID}`
                 )
                 setActiveChapter(chapterId)
-                setTopicId(response.data.topicId)
+                setTopicId(response.data.trackingData.topicId)
+                setChapterContent(response.data.trackingData)
             } catch (error) {
                 console.error('Error fetching chapter content:', error)
             }
         },
-        [chapters]
+        [chapters, userID]
     )
+
+    const completeChapter = () => {
+        api.post(
+            `tracking/updateChapterStatus/${viewcourses}/${userID}/${moduleID}?chapterId=${activeChapter}`
+        )
+
+        fetchChapters()
+    }
 
     const renderChapterContent = () => {
         switch (topicId) {
             case 1:
-                return <Video />
+                return (
+                    <Video
+                        content={chapterContent}
+                        completeChapter={completeChapter}
+                    />
+                )
             case 2:
-                return <Article />
+                return (
+                    <Article
+                        content={chapterContent}
+                        completeChapter={completeChapter}
+                    />
+                )
             case 3:
                 return <CodingChallenge />
             case 4:
