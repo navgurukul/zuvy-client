@@ -1,19 +1,16 @@
-import React from 'react'
-
-import { Search } from 'lucide-react'
 import { Input } from '@/components/ui/input'
-
+import { Search } from 'lucide-react'
+import React from 'react'
 import { columns } from './columns'
 import { DataTable } from '@/app/_components/datatable/data-table'
 
 type Props = {}
 
-const Page = ({ params }: any) => {
-    console.log(params)
+const Page = (props: Props) => {
     return (
         <div className="flex flex-col">
             <h1 className="text-start text-xl font-bold capitalize text-primary">
-                Invert a Binary Tree
+                Build a calculator
             </h1>
 
             <div className="text-start flex gap-x-3">
@@ -22,11 +19,11 @@ const Page = ({ params }: any) => {
                     <p className="text-gray-500 ">Total Students</p>
                 </div>
                 <div className="p-4 rounded-lg shadow-md ">
-                    <h1 className="text-gray-600 font-semibold text-xl">70</h1>
+                    <h1 className="text-gray-600 font-semibold text-xl">30</h1>
                     <p className="text-gray-500 ">Submissions Received</p>
                 </div>
                 <div className="p-4 rounded-lg shadow-md">
-                    <h1 className="text-gray-600 font-semibold text-xl">30</h1>
+                    <h1 className="text-gray-600 font-semibold text-xl">70</h1>
                     <p className="text-gray-500 ">Not Yet Submitted</p>
                 </div>
             </div>

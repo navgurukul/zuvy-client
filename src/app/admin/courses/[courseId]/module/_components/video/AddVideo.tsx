@@ -59,7 +59,6 @@ interface chapterDetails {
 const AddVideo = ({
     moduleId,
     content,
-    key,
     fetchChapterContent,
 }: {
     content: {
@@ -70,7 +69,6 @@ const AddVideo = ({
         contentDetails: ContentDetail[]
     }
     moduleId: string
-    key: number
     fetchChapterContent: (chapterId: number) => Promise<void>
 }) => {
     const [showVideo, setShowVideo] = useState(true)

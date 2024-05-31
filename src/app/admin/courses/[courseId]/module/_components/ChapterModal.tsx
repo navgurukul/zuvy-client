@@ -37,22 +37,31 @@ function ChapterModal({
         fetchChapters()
     }
 
-    const createAssessment = async () => {
-        await api
-            .post(`/content/createAssessment/${params.moduleId}`)
-            .then((res) => {
-                toast({
-                    title: res.data.message,
-                    description: res.data[0].title,
-                })
-            })
-        fetchChapters()
-    }
+    // const createAssessment = async () => {
+    //     await api
+    //         .post(`/content/createAssessment/${params.moduleId}`)
+    //         .then((res) => {
+    //             toast({
+    //                 title: res.data.message,
+    //                 description: res.data[0].title,
+    //             })
+    //         })
+    //     fetchChapters()
+    // }
     return (
-        <DialogContent>
+        <DialogContent className="max-w-max">
             <DialogHeader>
                 <DialogTitle className="mb-3">New Chapter</DialogTitle>
                 <div className="grid grid-cols-3 p-3 gap-y-6 gap-x-2 ">
+                    <DialogClose asChild>
+                        <div
+                            className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
+                            onClick={() => createChapter(1)}
+                        >
+                            <Video className="mr-2 h-6 w-6" />
+                            <span>Video</span>
+                        </div>
+                    </DialogClose>
                     <DialogClose asChild>
                         <div
                             className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
@@ -65,10 +74,10 @@ function ChapterModal({
                     <DialogClose asChild>
                         <div
                             className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
-                            onClick={() => createChapter(1)}
+                            onClick={() => createChapter(3)}
                         >
-                            <Video className="mr-2 h-6 w-6" />
-                            <span>Video</span>
+                            <SquareCode className="mr-2 h-6 w-6" />
+                            <span>Coding Problem</span>
                         </div>
                     </DialogClose>
                     <DialogClose asChild>
@@ -89,19 +98,11 @@ function ChapterModal({
                             <span>Assignment</span>
                         </div>
                     </DialogClose>
+
                     <DialogClose asChild>
                         <div
                             className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
-                            onClick={() => createChapter(3)}
-                        >
-                            <SquareCode className="mr-2 h-6 w-6" />
-                            <span>Coding Problem</span>
-                        </div>
-                    </DialogClose>
-                    <DialogClose asChild>
-                        <div
-                            className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
-                            onClick={createAssessment}
+                            onClick={() => createChapter(6)}
                         >
                             <BookOpenCheck className="mr-2 h-6 w-6" />
                             <span>Assessment</span>

@@ -1,5 +1,3 @@
-'use client'
-
 import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -38,13 +36,13 @@ interface Content {
     contentDetails: ContentDetail[]
 }
 
-interface ArticleProps {
-    content: Content
-}
-
-const AddArticle = ({ content }: ArticleProps) => {
+const AddArticle = ({ content }: any) => {
+    // state
+    const [title, setTitle] = useState('')
+    const [contentDetails, setContentDetails] = useState(
+        content.contentDetails[0].content
+    )
     // misc
-
     const formSchema = z.object({
         title: z.string().min(2, {
             message: 'Title must be at least 2 characters.',
@@ -56,8 +54,6 @@ const AddArticle = ({ content }: ArticleProps) => {
         content,
     })
 
-    const [title, setTitle] = useState('')
-
     const form = useForm({
         resolver: zodResolver(formSchema),
         values: {
@@ -66,14 +62,16 @@ const AddArticle = ({ content }: ArticleProps) => {
         mode: 'onChange',
     })
 
+    // functions
     const getArticleContent = async () => {
+        console.log('asdfl')
         try {
             const response = await api.get(
                 `/Content/chapterDetailsById/${content.id}`
             )
-            const contentDetails = response.data.contentDetails[0]
-            setTitle(contentDetails.title)
-            editor?.commands.setContent(contentDetails.content)
+            setContentDetails(response.data.contentDetails[0].content)
+            setTitle(content.title)
+            editor?.commands.setContent(contentDetails)
         } catch (error) {
             console.error('Error fetching article content:', error)
         }
@@ -110,7 +108,6 @@ const AddArticle = ({ content }: ArticleProps) => {
     // async
     useEffect(() => {
         getArticleContent()
-        console.log(content)
     }, [content])
 
     return (
