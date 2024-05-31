@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import Link from 'next/link'
 
@@ -26,6 +26,8 @@ import { api } from '@/utils/axios.config'
 import { Tag } from '@/app/admin/resource/mcq/page'
 import { toast } from '@/components/ui/use-toast'
 import { RequestBodyType } from '@/app/admin/resource/_components/NewMcqProblemForm'
+import { getAllQuizQuestion } from '@/utils/admin'
+import { getAllQuizData } from '@/store/store'
 
 interface QuizProps {
     content: Object
@@ -37,6 +39,8 @@ function Quiz({ content }: QuizProps) {
     const [isOpen, setIsOpen] = useState(false)
 
     const [addQuestion, setAddQuestion] = useState<quizData[]>([])
+    const [questionId, setQuestionId] = useState()
+    const { quizData, setStoreQuizData } = getAllQuizData()
 
     const handleAddQuestion = (data: any) => {
         const uniqueData = data.filter((question: quizData) => {
@@ -64,26 +68,9 @@ function Quiz({ content }: QuizProps) {
         )
     }
 
-    const handleCreateQuizQuestion = async (requestBody: RequestBodyType) => {
-        try {
-            const res = await api
-                .post(`/Content/quiz`, requestBody)
-                .then((res) => {
-                    toast({
-                        title: res.data.status || 'Success',
-                        description:
-                            res.data.message || 'Quiz Question Created',
-                    })
-                })
-        } catch (error) {
-            toast({
-                title: 'Error',
-                description:
-                    'There was an error creating the quiz question. Please try again.',
-            })
-        }
-    }
-
+    useEffect(() => {
+        getAllTags()
+    }, [])
     return (
         <>
             <div className="flex flex-row items-center justify-start gap-x-6 mb-10">
@@ -106,6 +93,7 @@ function Quiz({ content }: QuizProps) {
                     setActiveTab={setActiveTab}
                     addQuestion={addQuestion}
                     handleAddQuestion={handleAddQuestion}
+                    tags={tags}
                 />
                 <Separator
                     orientation="vertical"
@@ -122,14 +110,14 @@ function Quiz({ content }: QuizProps) {
                                 />
                             )
                         )}
-                        {addQuestion.length > 0 && (
+                        {/* {addQuestion.length > 0 && (
                             <Button
                                 variant={'outline'}
                                 className="text-secondary font-semibold"
                             >
                                 Save
                             </Button>
-                        )}
+                        )} */}
                         <Dialog>
                             <DialogTrigger asChild>
                                 <Button
@@ -145,11 +133,10 @@ function Quiz({ content }: QuizProps) {
                                 </DialogHeader>
                                 <div className="w-full">
                                     <NewMcqProblemForm
-                                        handleCreateQuizQuestion={
-                                            handleCreateQuizQuestion
-                                        }
                                         tags={tags}
                                         closeModal={closeModal}
+                                        setStoreQuizData={setStoreQuizData}
+                                        getAllQuizQuesiton={getAllQuizQuestion}
                                     />
                                 </div>
                             </DialogContent>
@@ -157,7 +144,7 @@ function Quiz({ content }: QuizProps) {
                     </div>
                 </ScrollArea>
 
-                <div className="w-full mt-6">
+                {/* <div className="w-full mt-6">
                     {content &&
                         (
                             content as {
@@ -195,7 +182,7 @@ function Quiz({ content }: QuizProps) {
                                 </div>
                             )
                         )}
-                </div>
+                </div> */}
             </div>
         </>
     )

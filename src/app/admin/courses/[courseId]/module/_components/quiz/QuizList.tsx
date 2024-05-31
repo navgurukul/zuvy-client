@@ -14,7 +14,7 @@ function QuizList({
     handleAddQuestion: (questions: any[]) => void
 }) {
     return (
-        <ScrollArea className="h-[500px] w-full rounded-md border">
+        <ScrollArea className="h-[550px] w-full rounded-md border">
             {questionData.map((question: any) => {
                 const isSelected = addQuestion?.some(
                     (quest: any) => quest?.id === question.id

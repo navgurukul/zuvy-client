@@ -20,42 +20,38 @@ const Page = ({ params }: { params: any }) => {
     const handleTabChange = (tab: string) => {
         setActiveTab(tab)
     }
-    // console.log(params)
 
-    const getSubmissions = useCallback(() => {
-        return api.get(
-            `/submission/submissionsOfPractiseProblems/${params.courseId}`
-        )
+    const getSubmissions = useCallback(async () => {
+        try {
+            const res = await api.get(
+                `/submission/submissionsOfPractiseProblems/${params.courseId}`
+            )
+            setSubmissions(res.data.trackingData)
+            setTotalStudents(res.data.totalStudents)
+        } catch (error) {
+            console.error('Error fetching submissions:', error)
+        }
     }, [params.courseId])
-    const getAssesments = useCallback(() => {
-        return api.get(
-            `/submission/assessmentInfoBy?bootcampId=${
-                params.courseId
-            }&limit=${10}&offset=${0}`
-        )
+
+    const getAssessments = useCallback(async () => {
+        try {
+            const res = await api.get(
+                `/submission/assessmentInfoBy?bootcampId=${params.courseId}&limit=10&offset=0`
+            )
+            setAssesments(res.data.data)
+            setTotalStudents(res.data.totalStudents)
+        } catch (error) {
+            console.error('Error fetching assessments:', error)
+        }
     }, [params.courseId])
 
     useEffect(() => {
         if (params.courseId) {
-            const response = getSubmissions()
-            response.then((res) => {
-                setSubmissions(res.data.trackingData)
-                setTotalStudents(res.data.totalStudents)
-            })
+            getSubmissions()
+            getAssessments()
         }
-    }, [getSubmissions, params.courseId])
+    }, [getSubmissions, getAssessments, params.courseId])
 
-    useEffect(() => {
-        if (params.courseId) {
-            const response = getAssesments()
-            response.then((res) => {
-                setAssesments(res.data.data)
-                setTotalStudents(res.data.totalStudents)
-            })
-        }
-    }, [getAssesments, params.courseId])
-
-    console.log(assesments)
     return (
         <div className="">
             <div className="flex items-start gap-x-3">
