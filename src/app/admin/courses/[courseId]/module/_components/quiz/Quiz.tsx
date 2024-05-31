@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 
 import Link from 'next/link'
 
@@ -29,11 +29,7 @@ import { RequestBodyType } from '@/app/admin/resource/_components/NewMcqProblemF
 import { getAllQuizQuestion } from '@/utils/admin'
 import { getAllQuizData } from '@/store/store'
 
-interface QuizProps {
-    content: Object
-}
-
-function Quiz({ content }: QuizProps) {
+function Quiz(props: any) {
     const [activeTab, setActiveTab] = useState('anydifficulty')
     const [tags, setTags] = useState<Tag[]>([])
     const [isOpen, setIsOpen] = useState(false)
@@ -67,10 +63,45 @@ function Quiz({ content }: QuizProps) {
             prevQuestions.filter((question: any) => question.id !== questionId)
         )
     }
+    const saveQuizQUestionHandler = async () => {
+        const selecedtedId = addQuestion?.map((item) => item.id)
+        const transformedObject = {
+            quizQuestions: selecedtedId,
+        }
+
+        await api
+            .put(
+                `/Content/editChapterOfModule/${props.moduleId}?chapterId=${props.chapterId}`,
+                transformedObject
+            )
+            .then((res: any) => {
+                toast({
+                    title: 'Success',
+                    description: res.message,
+                })
+            })
+            .catch((error: any) => {
+                toast({
+                    title: 'Error',
+                    description:
+                        'An error occurred while saving the chapter the chapter.',
+                })
+                console.error('Error updating chapter:', error)
+            })
+    }
+    const getAllSavedQuizQuestion = useCallback(async () => {
+        await api
+            .get(`/Content/chapterDetailsById/${props.chapterId}`)
+            .then((res) => {
+                setAddQuestion(res.data.quizQuestionDetails)
+            })
+    }, [props.chapterId])
 
     useEffect(() => {
         getAllTags()
-    }, [])
+        getAllSavedQuizQuestion()
+    }, [getAllSavedQuizQuestion])
+    console.log(props)
     return (
         <>
             <div className="flex flex-row items-center justify-start gap-x-6 mb-10">
@@ -110,22 +141,23 @@ function Quiz({ content }: QuizProps) {
                                 />
                             )
                         )}
-                        {/* {addQuestion.length > 0 && (
+                        {addQuestion.length > 0 && (
                             <Button
                                 variant={'outline'}
                                 className="text-secondary font-semibold"
+                                onClick={saveQuizQUestionHandler}
                             >
                                 Save
                             </Button>
-                        )} */}
+                        )}
                         <Dialog>
                             <DialogTrigger asChild>
-                                <Button
+                                {/* <Button
                                     variant="outline"
                                     className="text-secondary font-semibold"
                                 >
                                     Add Question
-                                </Button>
+                                </Button> */}
                             </DialogTrigger>
                             <DialogContent>
                                 <DialogHeader>
