@@ -1,5 +1,4 @@
 import { cn } from '@/lib/utils'
-import { api } from '@/utils/axios.config'
 import {
     BookOpenText,
     SquareCode,
@@ -8,8 +7,6 @@ import {
     StickyNote,
     Video,
 } from 'lucide-react'
-import { useState } from 'react'
-import { toast } from '@/components/ui/use-toast'
 
 function StudentChapterItem({
     title,
@@ -27,7 +24,6 @@ function StudentChapterItem({
     status: string
 }) {
     // states and variables
-    console.log('first', status)
     // functions
     const setTopicIcon = () => {
         switch (topicId) {
@@ -51,6 +47,12 @@ function StudentChapterItem({
             ? 'bg-secondary/50 text-primary'
             : 'text-black hover:bg-secondary/20'
     }
+
+    // async
+
+    // useEffect(() => {
+    //     fetchChapterContent(chapterId)
+    // }, [activeChapter])
 
     return (
         <div>

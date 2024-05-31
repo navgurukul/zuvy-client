@@ -17,9 +17,9 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useEditor } from '@tiptap/react'
-import TiptapEditor from '../TiptapEditor/TiptapEditor'
-import TiptapToolbar from '../TiptapEditor/TiptapToolbar'
-import extensions from '../TiptapEditor/TiptapExtensions'
+import TiptapEditor from '../../../../../../_components/editor/TiptapEditor'
+import TiptapToolbar from '../../../../../../_components/editor/TiptapToolbar'
+import extensions from '../../../../../../_components/editor/TiptapExtensions'
 import '../Tiptap.css'
 
 interface ContentDetail {
