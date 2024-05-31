@@ -220,6 +220,7 @@ function Page({
                                     assignmentCount,
                                     codingProblemsCount,
                                     quizCount,
+                                    typeId,
                                 }: {
                                     name: string
                                     description: string
@@ -231,6 +232,7 @@ function Page({
                                     assignmentCount: number
                                     codingProblemsCount: number
                                     quizCount: number
+                                    typeId: number
                                 }) => (
                                     <CourseCard
                                         key={id}
@@ -247,6 +249,7 @@ function Page({
                                             codingProblemsCount
                                         }
                                         quizCount={quizCount}
+                                        typeId={typeId}
                                     />
                                 )
                             )
