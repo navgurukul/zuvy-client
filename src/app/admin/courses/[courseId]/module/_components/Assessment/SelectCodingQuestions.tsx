@@ -3,7 +3,7 @@ import { PlusCircle, XCircle } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
 
-const SelectOpenEndedQuestions = ({
+const SelectCodingQuestions = ({
     setSelectedQuestions,
     selectedQuestions,
 }: {
@@ -22,7 +22,7 @@ const SelectOpenEndedQuestions = ({
                                 <div>
                                     <div className="flex items-center gap-2">
                                         <h2 className="font-bold text-lg">
-                                            {ellipsis(question.question, 30)}
+                                            {ellipsis(question.title, 30)}
                                         </h2>
                                         <span
                                             className={cn(
@@ -38,6 +38,11 @@ const SelectOpenEndedQuestions = ({
                                     <div className="w-full">
                                         <p className="text-gray-600 mt-1">
                                             {ellipsis(question.question, 60)}
+                                        </p>
+                                    </div>
+                                    <div className="w-full">
+                                        <p className="text-gray-600 mt-1">
+                                            {ellipsis(question.description, 60)}
                                         </p>
                                     </div>
                                     <Link
@@ -70,4 +75,4 @@ const SelectOpenEndedQuestions = ({
     )
 }
 
-export default SelectOpenEndedQuestions
+export default SelectCodingQuestions

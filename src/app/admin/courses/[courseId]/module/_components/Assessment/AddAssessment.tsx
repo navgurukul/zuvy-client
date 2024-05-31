@@ -1,22 +1,31 @@
 import { PlusCircle, ExternalLink } from 'lucide-react'
-import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
 import { Input } from '@/components/ui/input'
 import {
     filteredCodingQuestions,
     filteredQuizQuestions,
     filteredOpenEndedQuestions,
+    getChapterDetailsById,
 } from '@/utils/admin'
 import OpenEndedQuestions from '@/app/admin/courses/[courseId]/module/_components/Assessment/OpenEndedQuestions'
 import QuizQuestions from '@/app/admin/courses/[courseId]/module/_components/Assessment/QuizQuestions'
 import CodingTopics from '@/app/admin/courses/[courseId]/module/_components/codingChallenge/CodingTopics'
 import CodingQuestions from '@/app/admin/courses/[courseId]/module/_components/Assessment/CodingQuestions'
 import { Button } from '@/components/ui/button'
-import { cn, difficultyColor, ellipsis } from '@/lib/utils'
-import SelectOpenEndedQuestions from './SelectOpenEndedQuestions'
+import SettingsAssessment from './SettingsAssessment'
+import SelectedQuestions from './SelectedQuestions'
 
-const AddAssessment = ({ moduleId }: { moduleId: any }) => {
-    const [selectedQuestions, setSelectedQuestions] = useState<any[]>([])
+const AddAssessment = ({
+    moduleId,
+    content,
+    fetchChapterContent,
+    chapterData,
+}: {
+    moduleId: any
+    content: any
+    fetchChapterContent: any
+    chapterData: any
+}) => {
     const [selectedDifficulty, setSelectedDifficulty] =
         useState<string>('Any Difficulty')
     const [selectedTopic, setSelectedTopic] = useState<string>('All Topics')
@@ -27,15 +36,24 @@ const AddAssessment = ({ moduleId }: { moduleId: any }) => {
     const [questionType, setQuestionType] = useState<string>('coding')
     const [selectedCodingQuestions, setSelectedCodingQuestions] = useState<
         any[]
-    >([])
+    >(content.codingQuesDetails || [])
     const [selectedQuizQuestions, setSelectedQuizQuestions] = useState<any[]>(
-        []
+        content.mcqDetails || []
     )
     const [selectedOpenEndedQuestions, setSelectedOpenEndedQuestions] =
-        useState<any[]>([])
+        useState<any[]>(content.openEndedQuesDetails || [])
+
+    const [selectedCodingQuesIds, setSelectedCodingQuesIds] = useState<
+        number[]
+    >([])
+    const [selectedQuizQuesIds, setSelectedQuizQuesIds] = useState<number[]>([])
+    const [selectedOpenEndedQuesIds, setSelectedOpenEndedQuesIds] = useState<
+        number[]
+    >([])
 
     useEffect(() => {
-        setChapterTitle('Untitled Assessment')
+        setChapterTitle(chapterData.chapterTitle)
+
         if (questionType === 'coding') {
             filteredCodingQuestions(
                 setFilteredQuestions,
@@ -89,6 +107,31 @@ const AddAssessment = ({ moduleId }: { moduleId: any }) => {
             selectedLanguage
         )
     }
+    const handleSettingsButtonClick = () => {
+        setQuestionType('settings')
+    }
+
+    useEffect(() => {
+        fetchChapterContent(chapterData.chapterId)
+    }, [fetchChapterContent])
+
+    useEffect(() => {
+        setSelectedCodingQuesIds(
+            selectedCodingQuestions.map((question) => question.id)
+        )
+    }, [selectedCodingQuestions])
+
+    useEffect(() => {
+        setSelectedQuizQuesIds(
+            selectedQuizQuestions.map((question) => question.id)
+        )
+    }, [selectedQuizQuestions])
+
+    useEffect(() => {
+        setSelectedOpenEndedQuesIds(
+            selectedOpenEndedQuestions.map((question) => question.id)
+        )
+    }, [selectedOpenEndedQuestions])
 
     return (
         <div className="container mx-auto p-4">
@@ -106,6 +149,7 @@ const AddAssessment = ({ moduleId }: { moduleId: any }) => {
                     <ExternalLink size={15} />
                 </div>
             </div>
+            {/* select type of questions */}
             <div className="flex gap-2 mb-5">
                 <Button
                     className={`${
@@ -137,28 +181,43 @@ const AddAssessment = ({ moduleId }: { moduleId: any }) => {
                 >
                     Open-Ended Questions
                 </Button>
-                <Button className={`bg-gray-200 text-gray-600`}>
+                <Button
+                    onClick={handleSettingsButtonClick}
+                    className={`${
+                        questionType === 'settings'
+                            ? ''
+                            : 'bg-gray-200 text-gray-600'
+                    }`}
+                >
                     Settings
                 </Button>
             </div>
-            <div className="mb-5 grid grid-cols-2">
-                <CodingTopics
-                    selectedTopic={selectedTopic}
-                    setSelectedTopic={setSelectedTopic}
-                    selectedDifficulty={selectedDifficulty}
-                    setSelectedDifficulty={setSelectedDifficulty}
-                    selectedLanguage={selectedLanguage}
-                    setSelectedLanguage={setSelectedLanguage}
-                />
-            </div>
+            {/* DropDown Filters for questions:- */}
+            {questionType !== 'settings' && (
+                <>
+                    <div className="mb-5 grid grid-cols-2">
+                        <CodingTopics
+                            selectedTopic={selectedTopic}
+                            setSelectedTopic={setSelectedTopic}
+                            selectedDifficulty={selectedDifficulty}
+                            setSelectedDifficulty={setSelectedDifficulty}
+                            selectedLanguage={selectedLanguage}
+                            setSelectedLanguage={setSelectedLanguage}
+                        />
+                    </div>
+                </>
+            )}
+            {/* Display & select questions + settings*/}
             <div className="grid grid-cols-2 ">
                 <div>
-                    <h3 className="text-left font-bold">
+                    <h3 className="text-left font-bold mb-5">
                         {questionType === 'coding'
                             ? 'Coding Problem Library'
                             : questionType === 'mcq'
                             ? 'MCQ Library'
-                            : 'Open-Ended Question Library'}
+                            : questionType === 'open-ended'
+                            ? 'Open-Ended Question Library'
+                            : ''}
                     </h3>
                     {questionType === 'coding' ? (
                         <CodingQuestions
@@ -172,57 +231,54 @@ const AddAssessment = ({ moduleId }: { moduleId: any }) => {
                             setSelectedQuestions={setSelectedQuizQuestions}
                             selectedQuestions={selectedQuizQuestions}
                         />
-                    ) : (
+                    ) : questionType == 'open-ended' ? (
                         <OpenEndedQuestions
                             questions={filteredQuestions}
                             setSelectedQuestions={setSelectedOpenEndedQuestions}
                             selectedQuestions={selectedOpenEndedQuestions}
                         />
+                    ) : (
+                        selectedOpenEndedQuestions && (
+                            <SettingsAssessment
+                                selectedCodingQuesIds={selectedCodingQuesIds}
+                                selectedQuizQuesIds={selectedQuizQuesIds}
+                                selectedOpenEndedQuesIds={
+                                    selectedOpenEndedQuesIds
+                                }
+                                content={content}
+                            />
+                        )
                     )}
                 </div>
-                <div className="">
-                    <div>
-                        {/* Display the selected question */}
-                        {questionType === 'coding' &&
-                            selectedCodingQuestions && (
-                                <div>
-                                    <h3>Coding Question</h3>
-                                    {selectedCodingQuestions.map(
-                                        (question: any) => (
-                                            <>
-                                                <p>{question?.title}</p>
-                                                <p>{question?.description}</p>
-                                            </>
-                                        )
-                                    )}
-                                </div>
-                            )}
-                        {questionType === 'mcq' && selectedQuizQuestions && (
+                {questionType !== 'settings' && (
+                    <>
+                        <div className="">
                             <div>
-                                <h3>Quiz Question</h3>
-                                {selectedQuizQuestions.map((question: any) => (
-                                    <>
-                                        <p>{question?.question}</p>
-                                    </>
-                                ))}
-                            </div>
-                        )}
-                        {questionType === 'open-ended' &&
-                            selectedOpenEndedQuestions && (
-                                <SelectOpenEndedQuestions
+                                {/* Display & remove the selected questions */}
+                                <SelectedQuestions
+                                    selectedCodingQuestions={
+                                        selectedCodingQuestions
+                                    }
+                                    selectedQuizQuestions={
+                                        selectedQuizQuestions
+                                    }
                                     selectedOpenEndedQuestions={
                                         selectedOpenEndedQuestions
                                     }
-                                    setSelectedQuestions={
+                                    setSelectedCodingQuestions={
+                                        setSelectedCodingQuestions
+                                    }
+                                    setSelectedQuizQuestions={
+                                        setSelectedQuizQuestions
+                                    }
+                                    setSelectedOpenEndedQuestions={
                                         setSelectedOpenEndedQuestions
                                     }
-                                    selectedQuestions={
-                                        selectedOpenEndedQuestions
-                                    }
                                 />
-                            )}
-                    </div>
-                </div>
+                            </div>
+                        </div>
+                    </>
+                )}
             </div>
         </div>
     )
