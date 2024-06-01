@@ -2,18 +2,12 @@ import { useState, useEffect } from 'react'
 
 const ToggleSwitch = ({
     className,
-    defaultChecked,
     onToggle,
 }: {
     className?: string
-    defaultChecked: boolean
     onToggle: (isChecked: boolean) => void
 }) => {
-    const [isChecked, setIsChecked] = useState(defaultChecked)
-
-    useEffect(() => {
-        setIsChecked(defaultChecked)
-    }, [defaultChecked])
+    const [isChecked, setIsChecked] = useState(false)
 
     const handleToggle = () => {
         setIsChecked(!isChecked)
