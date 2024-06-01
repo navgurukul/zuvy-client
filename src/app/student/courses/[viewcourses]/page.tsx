@@ -53,6 +53,8 @@ function Page({
     const [instructorDetails, setInstructorDetails] =
         useState<InstructorDetailsState>(initialInstructorDetailsState)
     const [upcomingClasses, setUpcomingClasses] = useState([])
+    const [ongoingClasses, setOngoingClasses] = useState([])
+
     const [attendenceData, setAttendenceData] = useState<any[]>([])
     // const [completedClasses, setCompletedClasses] = useState([])
     const crumbs = [
@@ -77,7 +79,8 @@ function Page({
 
     const getUpcomingClassesHandler = async () => {
         await api.get(`/student/Dashboard/classes`).then((res) => {
-            setUpcomingClasses(res.data)
+            setUpcomingClasses(res.data.upcoming)
+            setOngoingClasses(res.data.ongoing)
         })
     }
     const getAttendenceHandler = async () => {
@@ -182,6 +185,15 @@ function Page({
                                         Upcoming Classes
                                     </p>
                                     <div className="w-[800px]">
+                                        {ongoingClasses.map(
+                                            (classData: any, index) => (
+                                                <ClassCard
+                                                    classData={classData}
+                                                    classType={classData.status}
+                                                    key={index}
+                                                />
+                                            )
+                                        )}
                                         {upcomingClasses.map(
                                             (classData: any, index) => (
                                                 <ClassCard

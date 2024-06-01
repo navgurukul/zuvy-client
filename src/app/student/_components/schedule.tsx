@@ -25,6 +25,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
     // const userID = studentData?.id && studentData?.id
     // const [resumeCourse, setResumeCourse] = useState<ResumeCourse>({})
     const [upcomingClasses, setUpcomingClasses] = useState([])
+    const [ongoingClasses, setOngoingClasses] = useState([])
     const [attendenceData, setAttendenceData] = useState<any[]>([])
     // const [ongoingClasses, setOngoingClasses] = useState([])
     // const [completedClasses, setCompletedClasses] = useState([])
@@ -94,7 +95,8 @@ function Schedule({ className, ...props }: ScheduleProps) {
 
     const getUpcomingClassesHandler = async () => {
         await api.get(`/student/Dashboard/classes`).then((res) => {
-            setUpcomingClasses(res.data)
+            setUpcomingClasses(res.data.upcoming)
+            setOngoingClasses(res.data.ongoing)
         })
     }
     const getAttendenceHandler = async () => {
@@ -109,13 +111,20 @@ function Schedule({ className, ...props }: ScheduleProps) {
 
     return (
         <>
-            <div className="flex flex-row justify-between">
+            <div className="flex flex-row justify-between gap-6">
                 {upcomingClasses?.length > 0 ? (
                     <div className="flex flex-col">
                         <p className="text-lg p-1 text-start font-bold">
                             Upcoming Classes
                         </p>
                         <div className="w-[800px]">
+                            {ongoingClasses.map((classData: any, index) => (
+                                <ClassCard
+                                    classData={classData}
+                                    classType={classData.status}
+                                    key={index}
+                                />
+                            ))}
                             {upcomingClasses.map((classData: any, index) => (
                                 <ClassCard
                                     classData={classData}
@@ -168,9 +177,11 @@ function Schedule({ className, ...props }: ScheduleProps) {
                         </CardContent>
                     </Card> */}
 
-                <div className="w-[400px] h-[200px] flex flex-col bg-gray-100 rounded-lg items-center justify-center ">
-                    <h1 className="mt-6 text-xl font-semibold">Attendance</h1>
-                    <div className="flex flex-col gap-2 items-center">
+                <div className="w-full h-full p-6 bg-gray-100 rounded-lg items-center justify-center ">
+                    <h1 className=" text-xl text-start font-semibold">
+                        Attendance
+                    </h1>
+                    <div className=" gap-2 items-center">
                         <div className="flex items-center gap-2">
                             <div
                                 className={`w-[10px] h-[10px] rounded-full  ${getAttendanceColorClass(
