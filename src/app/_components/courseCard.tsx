@@ -25,6 +25,7 @@ function CourseCard({
     assignmentCount,
     codingProblemsCount,
     quizCount,
+    typeId,
 }: {
     param: string
     name: string
@@ -37,6 +38,7 @@ function CourseCard({
     assignmentCount: number
     codingProblemsCount: number
     quizCount: number
+    typeId: number
 }) {
     const timeAllotedInWeeks = Math.round(timeAlloted / 604800)
     const timeAllotedInDays = Math.round(timeAlloted / 86400)
@@ -47,9 +49,13 @@ function CourseCard({
             href={`/student/courses/${param}/modules/${id}`}
             style={{ width: '800px' }}
             className={
-                !isLock
-                    ? 'bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl'
-                    : 'bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl pointer-events-none opacity-50'
+                typeId === 1
+                    ? !isLock
+                        ? 'bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl'
+                        : 'bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl pointer-events-none opacity-50'
+                    : isLock
+                    ? 'bg-yellow/30 my-3 p-3 rounded-xl flex '
+                    : 'bg-yellow/50 my-3 p-3 rounded-xl flex'
             }
         >
             <div className="flex  justify-between ">

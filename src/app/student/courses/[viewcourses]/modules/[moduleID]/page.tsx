@@ -56,7 +56,7 @@ function Page() {
     const fetchChapters = async () => {
         try {
             const response = await api.get(
-                `tracking/getAllChaptersWithStatus/${moduleID}?userId=${userID}`
+                `tracking/getAllChaptersWithStatus/${moduleID}`
             )
             setChapters(response.data.trackingData)
             setModuleName(response.data.moduleDetails[0].name)
@@ -75,7 +75,7 @@ function Page() {
             if (!userID) return
             try {
                 const response = await api.get(
-                    `/tracking/getChapterDetailsWithStatus/${chapterId}?userId=${userID}`
+                    `/tracking/getChapterDetailsWithStatus/${chapterId}`
                 )
                 setActiveChapter(chapterId)
                 setTopicId(response.data.trackingData.topicId)
@@ -89,7 +89,7 @@ function Page() {
 
     const completeChapter = () => {
         api.post(
-            `tracking/updateChapterStatus/${viewcourses}/${userID}/${moduleID}?chapterId=${activeChapter}`
+            `tracking/updateChapterStatus/${viewcourses}/${moduleID}?chapterId=${activeChapter}`
         )
 
         fetchChapters()

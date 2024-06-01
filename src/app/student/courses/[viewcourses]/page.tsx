@@ -16,7 +16,9 @@ import Loader from '../_components/Loader'
 import Image from 'next/image'
 import { api } from '@/utils/axios.config'
 import { Button } from '@/components/ui/button'
-
+import ClassCard from '@/app/admin/courses/[courseId]/_components/classCard'
+import CourseCard from '@/app/_components/courseCard'
+import BreadcrumbCmponent from '@/app/_components/breadcrumbCmponent'
 interface CourseProgress {
     status: string
     progress: number
@@ -36,10 +38,6 @@ type InstructorDetailsState = Instructor[]
 
 // Initial state object
 const initialInstructorDetailsState: InstructorDetailsState = []
-
-import ClassCard from '@/app/admin/courses/[courseId]/_components/classCard'
-import CourseCard from '@/app/_components/courseCard'
-import BreadcrumbCmponent from '@/app/_components/breadcrumbCmponent'
 
 function Page({
     params,
@@ -115,7 +113,7 @@ function Page({
         const getModulesProgress = async () => {
             try {
                 const response = await api.get(
-                    `/tracking/allModulesForStudents/${params.viewcourses}/${userID}`
+                    `/tracking/allModulesForStudents/${params.viewcourses}`
                 )
                 response.data.map((module: any) => {
                     setModulesProgress(response.data)
@@ -131,7 +129,7 @@ function Page({
         const getCourseProgress = async () => {
             try {
                 const response = await api.get(
-                    `/tracking/bootcampProgress/${params.viewcourses}/${userID}`
+                    `/tracking/bootcampProgress/${params.viewcourses}`
                 )
                 setCourseProgress(response.data.data)
                 setInstructorDetails(response.data.instructorDetails)
@@ -302,6 +300,7 @@ function Page({
                                     assignmentCount,
                                     codingProblemsCount,
                                     quizCount,
+                                    typeId,
                                 }: {
                                     name: string
                                     description: string
@@ -313,6 +312,7 @@ function Page({
                                     assignmentCount: number
                                     codingProblemsCount: number
                                     quizCount: number
+                                    typeId: number
                                 }) => (
                                     <CourseCard
                                         key={id}
@@ -329,6 +329,7 @@ function Page({
                                             codingProblemsCount
                                         }
                                         quizCount={quizCount}
+                                        typeId={typeId}
                                     />
                                 )
                             )

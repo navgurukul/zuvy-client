@@ -1,9 +1,21 @@
-import { cn, difficultyColor, ellipsis } from '@/lib/utils'
+import React from 'react'
 import { PlusCircle, XCircle } from 'lucide-react'
 import Link from 'next/link'
-import React from 'react'
+import { cn, difficultyColor, ellipsis } from '@/lib/utils'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
-const SelectOpenEndedQuestions = ({
+interface MCQQuestion {
+    id: number
+    question: string
+    options: Record<string, string>
+    correctOption: number
+    marks: number | null
+    difficulty: string
+    tagId: number
+    usage: number
+}
+
+const SelectQuizQuestions = ({
     setSelectedQuestions,
     selectedQuestions,
 }: {
@@ -13,7 +25,7 @@ const SelectOpenEndedQuestions = ({
     return (
         <>
             <div className="w-full">
-                {selectedQuestions.map((question: any) => (
+                {selectedQuestions.map((question: MCQQuestion) => (
                     <React.Fragment key={question.id}>
                         <div
                             className={`p-5 rounded-sm border border-gray-200 mb-4`}
@@ -40,6 +52,7 @@ const SelectOpenEndedQuestions = ({
                                             {ellipsis(question.question, 60)}
                                         </p>
                                     </div>
+
                                     <Link
                                         href={''}
                                         className="font-semibold text-sm mt-2 text-secondary"
@@ -70,4 +83,4 @@ const SelectOpenEndedQuestions = ({
     )
 }
 
-export default SelectOpenEndedQuestions
+export default SelectQuizQuestions

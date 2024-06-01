@@ -25,7 +25,6 @@ import NewMcqProblemForm from '@/app/admin/resource/_components/NewMcqProblemFor
 import { api } from '@/utils/axios.config'
 import { Tag } from '@/app/admin/resource/mcq/page'
 import { toast } from '@/components/ui/use-toast'
-import { RequestBodyType } from '@/app/admin/resource/_components/NewMcqProblemForm'
 import { getAllQuizQuestion } from '@/utils/admin'
 import { getAllQuizData } from '@/store/store'
 
@@ -131,7 +130,7 @@ function Quiz(props: any) {
                     className="mx-4 w-[2px] h-screen rounded"
                 />
                 <ScrollArea className="h-screen w-full rounded-md">
-                    <div className="flex flex-col gap-y-4">
+                    <div>
                         {addQuestion.map(
                             (questions: quizData, index: number) => (
                                 <QuizModal
@@ -142,22 +141,20 @@ function Quiz(props: any) {
                             )
                         )}
                         {addQuestion.length > 0 && (
-                            <Button
-                                variant={'outline'}
-                                className="text-secondary font-semibold"
-                                onClick={saveQuizQUestionHandler}
-                            >
-                                Save
-                            </Button>
+                            <div className="text-end mt-2">
+                                <Button onClick={saveQuizQUestionHandler}>
+                                    Save
+                                </Button>
+                            </div>
                         )}
-                        <Dialog>
+                        {/* <Dialog>
                             <DialogTrigger asChild>
-                                {/* <Button
+                                <Button
                                     variant="outline"
                                     className="text-secondary font-semibold"
                                 >
                                     Add Question
-                                </Button> */}
+                                </Button>
                             </DialogTrigger>
                             <DialogContent>
                                 <DialogHeader>
@@ -172,7 +169,7 @@ function Quiz(props: any) {
                                     />
                                 </div>
                             </DialogContent>
-                        </Dialog>
+                        </Dialog> */}
                     </div>
                 </ScrollArea>
 

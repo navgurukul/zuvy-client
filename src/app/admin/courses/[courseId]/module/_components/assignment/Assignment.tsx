@@ -17,10 +17,10 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useEditor } from '@tiptap/react'
-import TiptapEditor from '../../../../../../_components/editor/TiptapEditor'
-import TiptapToolbar from '../../../../../../_components/editor/TiptapToolbar'
-import extensions from '../../../../../../_components/editor/TiptapExtensions'
-import '../../../../../../_components/editor/Tiptap.css'
+import TiptapEditor from '@/app/_components/editor/TiptapEditor'
+import TiptapToolbar from '@/app/_components/editor/TiptapToolbar'
+import extensions from '@/app/_components/editor/TiptapExtensions'
+import '@/app/_components/editor/Tiptap.css'
 
 interface ContentDetail {
     title: string
