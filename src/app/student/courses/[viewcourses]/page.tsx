@@ -181,9 +181,9 @@ function Page({
                         <div className="flex flex-row justify-between">
                             {upcomingClasses?.length > 0 ? (
                                 <div className="flex flex-col">
-                                    <p className="text-lg p-1 text-start font-bold">
+                                    {/* <p className="text-lg p-1 text-start font-bold">
                                         Upcoming Classes
-                                    </p>
+                                    </p> */}
                                     <div className="w-[800px]">
                                         {ongoingClasses.map(
                                             (classData: any, index) => (
