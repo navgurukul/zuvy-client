@@ -45,12 +45,13 @@ const formSchema = z.object({
 })
 
 type SettingsAssessmentProps = {
-    selectedCodingQuesIds: any // replace with the actual type
-    selectedQuizQuesIds: any // replace with the actual type
-    selectedOpenEndedQuesIds: any // replace with the actual type
-    content: any // replace with the actual type
+    selectedCodingQuesIds: any
+    selectedQuizQuesIds: any
+    selectedOpenEndedQuesIds: any
+    content: any
     fetchChapterContent: (chapterId: number) => void
-    chapterData: any // replace with the actual type
+    chapterData: any
+    chapterTitle: string
 }
 
 const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
@@ -60,6 +61,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     content,
     fetchChapterContent,
     chapterData,
+    chapterTitle,
 }) => {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -143,12 +145,12 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     const handleSubmit = async (values: any) => {
         const timeLimit = values.hour * 3600 + values.minute * 60
 
-        const codingProblems: any = selectedCodingQuesIds.map((id: number) => ({
+        const codingProblems = selectedCodingQuesIds.map((id: number) => ({
             [id]: Number(values.codingProblems),
         }))
 
         const data = {
-            title: 'Assessment:Intro to Python',
+            title: chapterTitle,
             description:
                 'This assessment has 2 dsa problems,5 mcq and 3 theory questions',
             codingProblems,
@@ -163,19 +165,17 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
             webCamera: values.webCamera,
         }
 
-        console.log(data)
-
         try {
             await api.put(
                 `Content/editAssessment/${content.assessment[0].id}`,
                 data
             )
+            fetchChapterContent(chapterData.chapterId)
             toast({
                 title: 'Assessment Updated Successfully',
                 description: 'Assessment has been updated successfully',
                 className: 'text-left',
             })
-            fetchChapterContent(chapterData.chapterId)
         } catch (error) {
             console.error(error)
         }
@@ -225,7 +225,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                         value={hour.toString()}
                                                     >
                                                         {hour} Hour
-                                                        {hour > 1 ? 's' : ''}
+                                                        {hour !== 1 ? 's' : ''}
                                                     </SelectItem>
                                                 ))}
                                             </SelectGroup>
@@ -336,6 +336,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                     </FormLabel>
                                     <FormControl>
                                         <ToggleSwitch
+                                            initialChecked={field.value}
                                             onToggle={(checked: any) =>
                                                 field.onChange(checked)
                                             }
@@ -355,6 +356,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                     </FormLabel>
                                     <FormControl>
                                         <ToggleSwitch
+                                            initialChecked={field.value}
                                             onToggle={(checked: any) =>
                                                 field.onChange(checked)
                                             }
@@ -374,6 +376,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                     </FormLabel>
                                     <FormControl>
                                         <ToggleSwitch
+                                            initialChecked={field.value}
                                             onToggle={(checked: any) =>
                                                 field.onChange(checked)
                                             }
@@ -393,6 +396,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                     </FormLabel>
                                     <FormControl>
                                         <ToggleSwitch
+                                            initialChecked={field.value}
                                             onToggle={(checked: any) =>
                                                 field.onChange(checked)
                                             }
@@ -412,6 +416,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                     </FormLabel>
                                     <FormControl>
                                         <ToggleSwitch
+                                            initialChecked={field.value}
                                             onToggle={(checked: any) =>
                                                 field.onChange(checked)
                                             }

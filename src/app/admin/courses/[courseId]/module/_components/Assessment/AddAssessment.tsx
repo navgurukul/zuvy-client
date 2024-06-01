@@ -18,10 +18,10 @@ import SettingsAssessment from './SettingsAssessment'
 import SelectedQuestions from './SelectedQuestions'
 
 type AddAssessmentProps = {
-    chapterData: any // replace with the actual type
-    content: any // replace with the actual type
+    chapterData: any
+    content: any
     fetchChapterContent: (chapterId: number) => void
-    moduleId: any // replace with the actual type
+    moduleId: any
 }
 
 const AddAssessment: React.FC<AddAssessmentProps> = ({
@@ -36,7 +36,9 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     const [selectedLanguage, setSelectedLanguage] =
         useState<string>('All Languages')
     const [filteredQuestions, setFilteredQuestions] = useState<any[]>([])
-    const [chapterTitle, setChapterTitle] = useState<string>('Untitled Chapter')
+    const [chapterTitle, setChapterTitle] = useState<string>(
+        content.assessment[0].title
+    )
     const [questionType, setQuestionType] = useState<string>('coding')
     const [selectedCodingQuestions, setSelectedCodingQuestions] = useState<
         any[]
@@ -55,15 +57,9 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         number[]
     >([])
 
-    useEffect(() => {
-        setSelectedCodingQuestions(content.codingQuesDetails || [])
-        setSelectedQuizQuestions(content.mcqDetails || [])
-        setSelectedOpenEndedQuestions(content.openEndedQuesDetails || [])
-    }, [content])
+    useEffect(() => {}, [content])
 
     useEffect(() => {
-        setChapterTitle(chapterData.chapterTitle)
-
         if (questionType === 'coding') {
             filteredCodingQuestions(
                 setFilteredQuestions,
@@ -122,6 +118,13 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     }
 
     useEffect(() => {
+        setChapterTitle(content.assessment[0].title)
+        setSelectedCodingQuestions(content.codingQuesDetails || [])
+        setSelectedQuizQuestions(content.mcqDetails || [])
+        setSelectedOpenEndedQuestions(content.openEndedQuesDetails || [])
+    }, [content])
+
+    useEffect(() => {
         setSelectedCodingQuesIds(
             selectedCodingQuestions.map((question) => question.id)
         )
@@ -139,8 +142,12 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         )
     }, [selectedOpenEndedQuestions])
 
+    useEffect(() => {
+        fetchChapterContent(chapterData.chapterId)
+    }, [])
+
     return (
-        <div className="container mx-auto p-4">
+        <div className="container p-4">
             <div className="flex items-center mb-5">
                 <Input
                     required
@@ -254,6 +261,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                 content={content}
                                 fetchChapterContent={fetchChapterContent}
                                 chapterData={chapterData}
+                                chapterTitle={chapterTitle}
                             />
                         )
                     )}
