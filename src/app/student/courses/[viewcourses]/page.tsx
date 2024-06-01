@@ -53,7 +53,7 @@ function Page({
     const [instructorDetails, setInstructorDetails] =
         useState<InstructorDetailsState>(initialInstructorDetailsState)
     const [upcomingClasses, setUpcomingClasses] = useState([])
-    const [ongoingClasses, setOngoingClasses] = useState([])
+    const [attendenceData, setAttendenceData] = useState<any[]>([])
     // const [completedClasses, setCompletedClasses] = useState([])
     const crumbs = [
         { crumb: 'My Courses', href: '/student/courses', isLast: false },
@@ -63,25 +63,51 @@ function Page({
             isLast: true,
         },
     ]
-    useEffect(() => {
-        // const userIdLocal = JSON.parse(localStorage.getItem("AUTH") || "");
-        if (userID) {
-            api.get(`/bootcamp/studentClasses/${params.viewcourses}`, {
-                params: {
-                    userId: userID,
-                },
-            })
-                .then((response) => {
-                    const { upcomingClasses, ongoingClasses } = response.data
-                    setUpcomingClasses(upcomingClasses)
-                    setOngoingClasses(ongoingClasses)
-                    // setCompletedClasses(completedClasses)
-                })
-                .catch((error) => {
-                    console.log('Error fetching classes:', error)
-                })
+    const getAttendanceColorClass = (attendance: any) => {
+        if (attendance === 100) {
+            return 'bg-green-500 text-white'
+        } else if (attendance >= 75) {
+            return 'bg-yellow-500 text-black'
+        } else if (attendance < 50) {
+            return 'bg-red-500 text-white'
+        } else {
+            return 'bg-gray-500 text-white' // Default color for other cases
         }
-    }, [userID])
+    }
+
+    const getUpcomingClassesHandler = async () => {
+        await api.get(`/student/Dashboard/classes`).then((res) => {
+            setUpcomingClasses(res.data)
+        })
+    }
+    const getAttendenceHandler = async () => {
+        await api.get(`/student/Dashboard/attendance`).then((res) => {
+            setAttendenceData(res.data)
+        })
+    }
+    useEffect(() => {
+        getUpcomingClassesHandler()
+        getAttendenceHandler()
+    }, [])
+    // useEffect(() => {
+    //     // const userIdLocal = JSON.parse(localStorage.getItem("AUTH") || "");
+    //     if (userID) {
+    //         api.get(`/bootcamp/studentClasses/${params.viewcourses}`, {
+    //             params: {
+    //                 userId: userID,
+    //             },
+    //         })
+    //             .then((response) => {
+    //                 const { upcomingClasses, ongoingClasses } = response.data
+    //                 setUpcomingClasses(upcomingClasses)
+    //                 setOngoingClasses(ongoingClasses)
+    //                 // setCompletedClasses(completedClasses)
+    //             })
+    //             .catch((error) => {
+    //                 console.log('Error fetching classes:', error)
+    //             })
+    //     }
+    // }, [userID])
 
     useEffect(() => {
         const getModulesProgress = async () => {
@@ -149,40 +175,96 @@ function Page({
                                 Upcoming Classes
                             </p>
                         </div>
-                        {ongoingClasses?.length > 0 ||
-                        upcomingClasses?.length > 0 ? null : (
-                            <div className="flex flex-col items-center mt-12">
-                                <Image
-                                    src={'/no-class.svg'}
-                                    alt="party popper"
-                                    width={'240'}
-                                    height={'240'}
-                                />
-                                <p className="text-lg mt-3">
-                                    There are no upcoming classes
-                                </p>
-                            </div>
-                        )}
+                        <div className="flex flex-row justify-between">
+                            {upcomingClasses?.length > 0 ? (
+                                <div className="flex flex-col">
+                                    <p className="text-lg p-1 text-start font-bold">
+                                        Upcoming Classes
+                                    </p>
+                                    <div className="w-[800px]">
+                                        {upcomingClasses.map(
+                                            (classData: any, index) => (
+                                                <ClassCard
+                                                    classData={classData}
+                                                    classType={classData.status}
+                                                    key={index}
+                                                />
+                                            )
+                                        )}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="flex flex-col items-center mt-12">
+                                    <Image
+                                        src="/no-class.svg"
+                                        alt="No classes"
+                                        width={240}
+                                        height={240}
+                                    />
+                                    <p className="text-lg mt-3 text-center">
+                                        There are no upcoming classes
+                                    </p>
+                                </div>
+                            )}
 
-                        {ongoingClasses?.length > 0
-                            ? ongoingClasses.map((classObj, index) => (
-                                  <ClassCard
-                                      classData={classObj}
-                                      key={index}
-                                      classType="ongoing"
-                                  />
-                              ))
-                            : null}
+                            {/* Other components can be placed here */}
 
-                        {upcomingClasses?.length > 0
-                            ? upcomingClasses.map((classObj, index) => (
-                                  <ClassCard
-                                      classData={classObj}
-                                      key={index}
-                                      classType="Upcoming"
-                                  />
-                              ))
-                            : null}
+                            {/* Example card component for future use */}
+                            {/* <Card className="text-start">
+            <CardHeader className="bg-muted">
+                <CardTitle>Pick up where you left</CardTitle>
+            </CardHeader>
+            <CardContent className="p-3 grid gap-4">
+                <div className="flex flex-wrap items-center p-4 justify-between gap-8">
+                    <div className="flex items-center">
+                        <BookOpenText className="hidden sm:block" />
+                        <div className="flex-1 ml-2 space-y-1">
+                            <p className="text-sm font-medium leading-none">
+                            {resumeCourse?.bootcamp_name}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                                {resumeCourse.module_name}
+                            </p>
+                        </div>
+                    </div>
+                    <Link
+                        href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`}
+                    >
+                        <Button>Continue</Button>
+                        </Link>
+                        </div>
+                        </CardContent>
+                    </Card> */}
+
+                            {/* <div className="w-[400px] h-[200px] flex flex-col bg-gray-100 rounded-lg items-center justify-center ">
+                                <h1 className="mt-6 text-xl font-semibold">
+                                    Attendance
+                                </h1>
+                                <div className="flex flex-col gap-2 items-center">
+                                    <div className="flex items-center gap-2">
+                                        <div
+                                            className={`w-[10px] h-[10px] rounded-full  ${getAttendanceColorClass(
+                                                attendenceData[0]?.attendance
+                                            )}`}
+                                        />
+                                        <h1>
+                                            {attendenceData[0]?.attendance}%
+                                        </h1>
+                                    </div>
+                                    <div className="flex">
+                                        <p className="text-md font-semibold">
+                                            {' '}
+                                            {
+                                                attendenceData[0]
+                                                    ?.attendedClasses
+                                            }{' '}
+                                            of {attendenceData[0]?.totalClasses}{' '}
+                                            Classes Attended
+                                        </p>
+                                    </div>
+                                </div>
+                            </div> */}
+                        </div>
 
                         <div className="flex justify-center mt-3">
                             <Link

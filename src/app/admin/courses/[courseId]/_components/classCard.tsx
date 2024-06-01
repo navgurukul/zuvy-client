@@ -20,9 +20,8 @@ function ClassCard({
     classData: any
     classType: any
 }) {
-    console.log(classData)
     return (
-        <Card className="w-full border-none shadow p-6" key={classData.id}>
+        <Card className="w-full mb-3 border-none shadow p-6" key={classData.id}>
             <div className="flex items-center justify-between truncate">
                 <div className="flex items-center space-x-4">
                     <div className="font-bold text-lg flex flex-col border rounded-md py-2 px-4 text-muted-foreground border-muted-foreground">
