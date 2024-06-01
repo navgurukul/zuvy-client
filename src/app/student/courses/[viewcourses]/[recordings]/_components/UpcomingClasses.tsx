@@ -28,7 +28,7 @@ function UpcomingClasses({
                     />
                 ))
             ) : (
-                <p>No upcoming classes found</p>
+                <p>No upcoming classes sads asdasdfound</p>
             )}
         </div>
     )

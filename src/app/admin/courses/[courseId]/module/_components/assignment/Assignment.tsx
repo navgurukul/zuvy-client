@@ -20,7 +20,7 @@ import { useEditor } from '@tiptap/react'
 import TiptapEditor from '../../../../../../_components/editor/TiptapEditor'
 import TiptapToolbar from '../../../../../../_components/editor/TiptapToolbar'
 import extensions from '../../../../../../_components/editor/TiptapExtensions'
-import '../Tiptap.css'
+import '../../../../../../_components/editor/Tiptap.css'
 
 interface ContentDetail {
     title: string
