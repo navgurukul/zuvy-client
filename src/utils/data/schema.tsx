@@ -34,6 +34,7 @@ export const codingQuestionSchema = z.object({
     solution: z.string(),
     createdAt: z.string(),
     updatedAt: z.string(),
+    usage: z.number(),
 })
 
 export type CodingQuestion = z.infer<typeof codingQuestionSchema>

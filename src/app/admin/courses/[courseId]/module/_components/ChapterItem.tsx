@@ -9,6 +9,7 @@ import {
     Trash2,
     Video,
     GripVertical,
+    BookOpenCheck,
 } from 'lucide-react'
 import DeleteConfirmationModal from '../../_components/deleteModal'
 import { useState } from 'react'
@@ -50,6 +51,8 @@ function ChapterItem({
                 return <FileQuestion />
             case 5:
                 return <PencilLine />
+            case 6:
+                return <BookOpenCheck />
             default:
                 return <StickyNote />
         }

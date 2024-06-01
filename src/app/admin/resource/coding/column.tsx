@@ -78,7 +78,7 @@ export const columns: ColumnDef<CodingQuestion>[] = [
 
             return (
                 <div className="flex items-center">
-                    {codingQuestion.id + ' times'}
+                    {codingQuestion.usage + ' times'}
                 </div>
             )
         },
