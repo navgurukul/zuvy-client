@@ -44,17 +44,23 @@ const formSchema = z.object({
     webCamera: z.boolean(),
 })
 
-export default function SettingsAssessment({
+type SettingsAssessmentProps = {
+    selectedCodingQuesIds: any // replace with the actual type
+    selectedQuizQuesIds: any // replace with the actual type
+    selectedOpenEndedQuesIds: any // replace with the actual type
+    content: any // replace with the actual type
+    fetchChapterContent: (chapterId: number) => void
+    chapterData: any // replace with the actual type
+}
+
+const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     selectedCodingQuesIds,
     selectedQuizQuesIds,
     selectedOpenEndedQuesIds,
     content,
-}: {
-    selectedCodingQuesIds: any
-    selectedQuizQuesIds: any
-    selectedOpenEndedQuesIds: any
-    content: any
-}) {
+    fetchChapterContent,
+    chapterData,
+}) => {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -169,6 +175,7 @@ export default function SettingsAssessment({
                 description: 'Assessment has been updated successfully',
                 className: 'text-left',
             })
+            fetchChapterContent(chapterData.chapterId)
         } catch (error) {
             console.error(error)
         }
@@ -425,3 +432,5 @@ export default function SettingsAssessment({
         </main>
     )
 }
+
+export default SettingsAssessment
