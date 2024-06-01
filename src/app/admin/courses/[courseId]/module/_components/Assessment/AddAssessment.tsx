@@ -1,3 +1,5 @@
+'use client'
+
 import { PlusCircle, ExternalLink } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { Input } from '@/components/ui/input'
@@ -15,16 +17,18 @@ import { Button } from '@/components/ui/button'
 import SettingsAssessment from './SettingsAssessment'
 import SelectedQuestions from './SelectedQuestions'
 
-const AddAssessment = ({
-    moduleId,
+type AddAssessmentProps = {
+    chapterData: any // replace with the actual type
+    content: any // replace with the actual type
+    fetchChapterContent: (chapterId: number) => void
+    moduleId: any // replace with the actual type
+}
+
+const AddAssessment: React.FC<AddAssessmentProps> = ({
+    chapterData,
     content,
     fetchChapterContent,
-    chapterData,
-}: {
-    moduleId: any
-    content: any
-    fetchChapterContent: any
-    chapterData: any
+    moduleId,
 }) => {
     const [selectedDifficulty, setSelectedDifficulty] =
         useState<string>('Any Difficulty')
@@ -50,6 +54,12 @@ const AddAssessment = ({
     const [selectedOpenEndedQuesIds, setSelectedOpenEndedQuesIds] = useState<
         number[]
     >([])
+
+    useEffect(() => {
+        setSelectedCodingQuestions(content.codingQuesDetails || [])
+        setSelectedQuizQuestions(content.mcqDetails || [])
+        setSelectedOpenEndedQuestions(content.openEndedQuesDetails || [])
+    }, [content])
 
     useEffect(() => {
         setChapterTitle(chapterData.chapterTitle)
@@ -110,10 +120,6 @@ const AddAssessment = ({
     const handleSettingsButtonClick = () => {
         setQuestionType('settings')
     }
-
-    useEffect(() => {
-        fetchChapterContent(chapterData.chapterId)
-    }, [fetchChapterContent])
 
     useEffect(() => {
         setSelectedCodingQuesIds(
@@ -246,6 +252,8 @@ const AddAssessment = ({
                                     selectedOpenEndedQuesIds
                                 }
                                 content={content}
+                                fetchChapterContent={fetchChapterContent}
+                                chapterData={chapterData}
                             />
                         )
                     )}
