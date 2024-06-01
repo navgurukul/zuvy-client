@@ -200,6 +200,7 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
 
     const fetchChapterContent = useCallback(
         async (chapterId: number) => {
+            console.log('jksdhfjksahdfhsdjkflkasdhfhjk')
             try {
                 const response = await api.get(
                     `/Content/chapterDetailsById/${chapterId}`

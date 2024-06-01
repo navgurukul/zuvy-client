@@ -24,6 +24,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import ToggleSwitch from './ToggleSwitch'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
+import { useEffect } from 'react'
 
 const formSchema = z.object({
     hour: z
@@ -60,26 +61,85 @@ export default function SettingsAssessment({
             hour: Math.floor(content.assessment[0].timeLimit / 3600),
             minute: (content.assessment[0].timeLimit / 60) % 60,
             codingProblems:
-                content.assessment[0].codingProblems[0][
-                    Object.keys(content.assessment[0].codingProblems[0])[0]
-                ].toString(),
-            passPercentage: content.assessment[0].passPercentage.toString(),
-            copyPaste: content.assessment[0].copyPaste,
-            embeddedGoogleSearch: content.assessment[0].embeddedGoogleSearch,
-            tabChange: content.assessment[0].tabChange,
-            screenRecord: content.assessment[0].screenRecord,
-            webCamera: content.assessment[0].webCamera,
+                content.assessment[0].codingProblems == null
+                    ? '0'
+                    : content.assessment[0].codingProblems[0][
+                          Object.keys(
+                              content.assessment[0].codingProblems[0]
+                          )[0]
+                      ].toString(),
+            passPercentage:
+                content.assessment[0].passPercentage != null
+                    ? content.assessment[0].passPercentage.toString()
+                    : '0',
+            copyPaste:
+                content.assessment[0].copyPaste == null
+                    ? false
+                    : content.assessment[0].copyPaste,
+            embeddedGoogleSearch:
+                content.assessment[0].embeddedGoogleSearch == null
+                    ? false
+                    : content.assessment[0].embeddedGoogleSearch,
+            tabChange:
+                content.assessment[0].tabChange == null
+                    ? false
+                    : content.assessment[0].tabChange,
+            screenRecord:
+                content.assessment[0].screenRecord == null
+                    ? false
+                    : content.assessment[0].screenRecord,
+            webCamera:
+                content.assessment[0].webCamera == null
+                    ? false
+                    : content.assessment[0].webCamera,
         },
     })
+
+    useEffect(() => {
+        form.reset({
+            hour: Math.floor(content.assessment[0].timeLimit / 3600),
+            minute: (content.assessment[0].timeLimit / 60) % 60,
+            codingProblems:
+                content.assessment[0].codingProblems == null
+                    ? '0'
+                    : content.assessment[0].codingProblems[0][
+                          Object.keys(
+                              content.assessment[0].codingProblems[0]
+                          )[0]
+                      ].toString(),
+            passPercentage:
+                content.assessment[0].passPercentage != null
+                    ? content.assessment[0].passPercentage.toString()
+                    : '0',
+            copyPaste:
+                content.assessment[0].copyPaste == null
+                    ? false
+                    : content.assessment[0].copyPaste,
+            embeddedGoogleSearch:
+                content.assessment[0].embeddedGoogleSearch == null
+                    ? false
+                    : content.assessment[0].embeddedGoogleSearch,
+            tabChange:
+                content.assessment[0].tabChange == null
+                    ? false
+                    : content.assessment[0].tabChange,
+            screenRecord:
+                content.assessment[0].screenRecord == null
+                    ? false
+                    : content.assessment[0].screenRecord,
+            webCamera:
+                content.assessment[0].webCamera == null
+                    ? false
+                    : content.assessment[0].webCamera,
+        })
+    }, [content])
 
     const handleSubmit = async (values: any) => {
         const timeLimit = values.hour * 3600 + values.minute * 60
 
-        const codingProblems: any = selectedCodingQuesIds.forEach(
-            (id: number) => ({
-                [id]: Number(values.codingProblems),
-            })
-        )
+        const codingProblems: any = selectedCodingQuesIds.map((id: number) => ({
+            [id]: Number(values.codingProblems),
+        }))
 
         const data = {
             title: 'Assessment:Intro to Python',
@@ -96,6 +156,8 @@ export default function SettingsAssessment({
             screenRecord: values.screenRecord,
             webCamera: values.webCamera,
         }
+
+        console.log(data)
 
         try {
             await api.put(
@@ -267,7 +329,6 @@ export default function SettingsAssessment({
                                     </FormLabel>
                                     <FormControl>
                                         <ToggleSwitch
-                                            defaultChecked={field.value}
                                             onToggle={(checked: any) =>
                                                 field.onChange(checked)
                                             }
@@ -287,7 +348,6 @@ export default function SettingsAssessment({
                                     </FormLabel>
                                     <FormControl>
                                         <ToggleSwitch
-                                            defaultChecked={field.value}
                                             onToggle={(checked: any) =>
                                                 field.onChange(checked)
                                             }
@@ -307,7 +367,6 @@ export default function SettingsAssessment({
                                     </FormLabel>
                                     <FormControl>
                                         <ToggleSwitch
-                                            defaultChecked={field.value}
                                             onToggle={(checked: any) =>
                                                 field.onChange(checked)
                                             }
@@ -327,7 +386,6 @@ export default function SettingsAssessment({
                                     </FormLabel>
                                     <FormControl>
                                         <ToggleSwitch
-                                            defaultChecked={field.value}
                                             onToggle={(checked: any) =>
                                                 field.onChange(checked)
                                             }
@@ -347,7 +405,6 @@ export default function SettingsAssessment({
                                     </FormLabel>
                                     <FormControl>
                                         <ToggleSwitch
-                                            defaultChecked={field.value}
                                             onToggle={(checked: any) =>
                                                 field.onChange(checked)
                                             }

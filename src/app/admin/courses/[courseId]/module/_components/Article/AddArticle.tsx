@@ -36,7 +36,7 @@ interface Content {
     contentDetails: ContentDetail[]
 }
 
-const AddArticle = ({ content }: any) => {
+const AddArticle = ({ content }: { content: any }) => {
     // state
     const [title, setTitle] = useState('')
     const [contentDetails, setContentDetails] = useState(
@@ -71,7 +71,7 @@ const AddArticle = ({ content }: any) => {
             )
             setContentDetails(response.data.contentDetails[0].content)
             setTitle(content.title)
-            editor?.commands.setContent(contentDetails)
+            contentDetails && editor?.commands.setContent(contentDetails)
         } catch (error) {
             console.error('Error fetching article content:', error)
         }
@@ -108,7 +108,7 @@ const AddArticle = ({ content }: any) => {
     // async
     useEffect(() => {
         getArticleContent()
-    }, [content])
+    }, [content, editor])
 
     return (
         <div>

@@ -1,3 +1,5 @@
+'use client'
+
 import { PlusCircle, ExternalLink } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { Input } from '@/components/ui/input'
@@ -50,6 +52,12 @@ const AddAssessment = ({
     const [selectedOpenEndedQuesIds, setSelectedOpenEndedQuesIds] = useState<
         number[]
     >([])
+
+    useEffect(() => {
+        setSelectedCodingQuestions(content.codingQuesDetails || [])
+        setSelectedQuizQuestions(content.mcqDetails || [])
+        setSelectedOpenEndedQuestions(content.openEndedQuesDetails || [])
+    }, [content])
 
     useEffect(() => {
         setChapterTitle(chapterData.chapterTitle)
@@ -110,10 +118,6 @@ const AddAssessment = ({
     const handleSettingsButtonClick = () => {
         setQuestionType('settings')
     }
-
-    useEffect(() => {
-        fetchChapterContent(chapterData.chapterId)
-    }, [fetchChapterContent])
 
     useEffect(() => {
         setSelectedCodingQuesIds(
