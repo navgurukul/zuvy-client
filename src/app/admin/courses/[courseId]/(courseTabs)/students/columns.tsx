@@ -1,13 +1,10 @@
 'use client'
 import Image from 'next/image'
-
 import { ColumnDef } from '@tanstack/react-table'
-
 import { Trash2 } from 'lucide-react'
-import { DataTableColumnHeader } from '../../../../../_components/datatable/data-table-column-header'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Combobox } from '@/components/ui/combobox'
 
+import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
+import { Combobox } from '@/components/ui/combobox'
 import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
 import {
     deleteStudentHandler,
@@ -20,8 +17,8 @@ import {
     getDeleteStudentStore,
     getStoreStudentData,
 } from '@/store/store'
-import { getAttendanceColorClass } from '@/utils/students'
-import { trace } from 'console'
+import { getAttendanceColorClass } from '@/lib/utils'
+
 export const columns: ColumnDef<Task>[] = [
     // {
     //     id: 'select',

@@ -31,3 +31,16 @@ export function difficultyColor(difficulty: string): string {
             return 'text-gray-500'
     }
 }
+
+
+export const getAttendanceColorClass = (attendance: any) => {
+    if (attendance === 100) {
+        return 'bg-green-500 text-white'
+    } else if (attendance >= 75) {
+        return 'bg-yellow-500 text-black'
+    } else if (attendance < 50) {
+        return 'bg-red-500 text-white'
+    } else {
+        return 'bg-gray-500 text-white' // Default color for other cases
+    }
+}

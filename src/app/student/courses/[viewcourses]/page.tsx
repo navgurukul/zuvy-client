@@ -2,16 +2,10 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { BookMinus, ChevronRight, Lock } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
-import {
-    Breadcrumb,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
+
 import { useLazyLoadedStudentData } from '@/store/store'
-import { BreadcrumbItem, CircularProgress } from '@nextui-org/react'
 import Loader from '../_components/Loader'
 import Image from 'next/image'
 import { api } from '@/utils/axios.config'
@@ -65,17 +59,6 @@ function Page({
             isLast: true,
         },
     ]
-    const getAttendanceColorClass = (attendance: any) => {
-        if (attendance === 100) {
-            return 'bg-green-500 text-white'
-        } else if (attendance >= 75) {
-            return 'bg-yellow-500 text-black'
-        } else if (attendance < 50) {
-            return 'bg-red-500 text-white'
-        } else {
-            return 'bg-gray-500 text-white' // Default color for other cases
-        }
-    }
 
     const getUpcomingClassesHandler = async () => {
         await api.get(`/student/Dashboard/classes`).then((res) => {
