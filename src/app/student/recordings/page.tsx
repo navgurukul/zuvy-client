@@ -57,9 +57,8 @@ function Page({}: any) {
     const [completedClasses, setCompletedClasses] = useState([])
     const [enrolledCourse, setEnrolledCourse] = useState<EnrolledCourse[]>([])
     const [search, setSearch] = useState('')
-    const [selectedCourse, setSelectedCourse] = useState<EnrolledCourse | null>(
-        enrolledCourse[0]
-    )
+    const [selectedCourse, setSelectedCourse] =
+        useState<EnrolledCourse | null>()
     const [position, setPosition] = useState(POSITION)
     const [pages, setPages] = useState<number>()
     const [offset, setOffset] = useState<number>(OFFSET)
@@ -109,7 +108,7 @@ function Page({}: any) {
 
     const handleCourseChange = (selectedCourseId: any) => {
         const newSelectedCourse: any = enrolledCourse.find(
-            (course) => course.id === selectedCourseId
+            (course) => course.id === +selectedCourseId
         )
         setSelectedCourse(newSelectedCourse)
     }
@@ -130,7 +129,8 @@ function Page({}: any) {
     const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value)
     }
-    // JSX render:-
+    // JSX render:-\
+    // console.log(enrolledCourse)
     return (
         <>
             <div className="flex flex-col gap-3 text-start">
