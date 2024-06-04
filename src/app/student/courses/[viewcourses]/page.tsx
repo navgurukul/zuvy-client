@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { BookMinus, ChevronRight, Lock } from 'lucide-react'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button'
 import ClassCard from '@/app/admin/courses/[courseId]/_components/classCard'
 import CourseCard from '@/app/_components/courseCard'
 import BreadcrumbCmponent from '@/app/_components/breadcrumbCmponent'
+import SubmissionCard from '@/app/admin/courses/[courseId]/_components/SubmissionCard'
 interface CourseProgress {
     status: string
     progress: number
@@ -54,6 +55,7 @@ function Page({
         useState<InstructorDetailsState>(initialInstructorDetailsState)
     const [upcomingClasses, setUpcomingClasses] = useState([])
     const [ongoingClasses, setOngoingClasses] = useState([])
+    const [submission, setSubmission] = useState<any[]>([])
 
     const [attendenceData, setAttendenceData] = useState<any[]>([])
     // const [completedClasses, setCompletedClasses] = useState([])
@@ -65,33 +67,39 @@ function Page({
             isLast: true,
         },
     ]
-    const getAttendanceColorClass = (attendance: any) => {
-        if (attendance === 100) {
-            return 'bg-green-500 text-white'
-        } else if (attendance >= 75) {
-            return 'bg-yellow-500 text-black'
-        } else if (attendance < 50) {
-            return 'bg-red-500 text-white'
-        } else {
-            return 'bg-gray-500 text-white' // Default color for other cases
-        }
-    }
-
-    const getUpcomingClassesHandler = async () => {
+    const getUpcomingClassesHandler = useCallback(async () => {
         await api.get(`/student/Dashboard/classes`).then((res) => {
             setUpcomingClasses(res.data.upcoming)
             setOngoingClasses(res.data.ongoing)
         })
-    }
-    const getAttendenceHandler = async () => {
+    }, [])
+    const getAttendanceHandler = useCallback(async () => {
         await api.get(`/student/Dashboard/attendance`).then((res) => {
             setAttendenceData(res.data)
         })
-    }
-    useEffect(() => {
-        getUpcomingClassesHandler()
-        getAttendenceHandler()
     }, [])
+    const getUpcomingSubmissionHandler = useCallback(async () => {
+        await api
+            .get(`/tracking/upcomingSubmission/${params.viewcourses}`)
+            .then((res) => {
+                setSubmission(res.data)
+            })
+    }, [params.viewcourses])
+    useEffect(() => {
+        const fetchData = async () => {
+            await Promise.all([
+                getUpcomingClassesHandler(),
+                getAttendanceHandler(),
+                getUpcomingSubmissionHandler(),
+            ])
+        }
+
+        fetchData()
+    }, [
+        getUpcomingSubmissionHandler,
+        getUpcomingClassesHandler,
+        getAttendanceHandler,
+    ])
     // useEffect(() => {
     //     // const userIdLocal = JSON.parse(localStorage.getItem("AUTH") || "");
     //     if (userID) {
@@ -178,7 +186,7 @@ function Page({
                                 Upcoming Classes
                             </p>
                         </div>
-                        <div className="flex flex-row justify-between">
+                        <div className="flex flex-col justify-between">
                             {upcomingClasses?.length > 0 ? (
                                 <div className="flex flex-col">
                                     {/* <p className="text-lg p-1 text-start font-bold">
@@ -289,6 +297,21 @@ function Page({
                                     <ChevronRight size={20} />
                                 </div>
                             </Link>
+                        </div>
+                        <div className="flex flex-col flex-start">
+                            <h1 className="text-lg p-1 text-start font-bold">
+                                Upcoming Submission
+                            </h1>
+                            <div className="w-[800px]">
+                                {submission.map((data) => {
+                                    return (
+                                        <SubmissionCard
+                                            classData={data}
+                                            key={data}
+                                        />
+                                    )
+                                })}
+                            </div>
                         </div>
                     </div>
 

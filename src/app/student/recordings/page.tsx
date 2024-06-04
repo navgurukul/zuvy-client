@@ -76,7 +76,7 @@ function Page({}: any) {
         async (offset: number) => {
             if (userID && selectedCourse?.id) {
                 try {
-                    let baseUrl = `/classes/all/${selectedCourse.id}/?status=completed&limit=10&offset=${offset}`
+                    let baseUrl = `/classes/all/${selectedCourse.id}/?status=completed&limit=${position}&offset=${offset}`
 
                     if (debouncedSearch) {
                         baseUrl += `&searchTerm=${encodeURIComponent(
@@ -94,7 +94,7 @@ function Page({}: any) {
                 }
             }
         },
-        [userID, selectedCourse?.id, debouncedSearch]
+        [userID, selectedCourse?.id, debouncedSearch, position]
     )
 
     const getEnrolledCourses = useCallback(async () => {

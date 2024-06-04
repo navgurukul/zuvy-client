@@ -12,6 +12,8 @@ export const taskSchema = z.object({
     progress: z.number(),
     batchName: z.string(),
     attendance: z.number(),
+    status: z.string(),
+    noOfAttempts: z.number(),
 })
 
 export const testCaseSchema = z.object({
