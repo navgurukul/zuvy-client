@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/breadcrumb'
 import { useLazyLoadedStudentData } from '@/store/store'
 import { BreadcrumbItem, CircularProgress } from '@nextui-org/react'
-import Loader from '../_components/Loader'
+import Loader from '../../../_components/Loader'
 import Image from 'next/image'
 import { api } from '@/utils/axios.config'
 import { Button } from '@/components/ui/button'
@@ -43,7 +43,7 @@ const initialInstructorDetailsState: InstructorDetailsState = []
 function Page({
     params,
 }: {
-    params: { viewcourses: string; moduleID: string }
+    params: { viewcourses: string; batchId: number; moduleID: string }
 }) {
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
@@ -68,10 +68,14 @@ function Page({
         },
     ]
     const getUpcomingClassesHandler = useCallback(async () => {
-        await api.get(`/student/Dashboard/classes`).then((res) => {
-            setUpcomingClasses(res.data.upcoming)
-            setOngoingClasses(res.data.ongoing)
-        })
+        await api
+            .get(
+                `/student/Dashboard/classes/{batch_id}?batch_id=${params.batchId}`
+            )
+            .then((res) => {
+                setUpcomingClasses(res.data.upcoming)
+                setOngoingClasses(res.data.ongoing)
+            })
     }, [])
     const getAttendanceHandler = useCallback(async () => {
         await api.get(`/student/Dashboard/attendance`).then((res) => {

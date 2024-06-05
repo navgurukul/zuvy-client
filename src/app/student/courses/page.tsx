@@ -15,6 +15,7 @@ interface EnrolledCourse {
     coverImage: string
     id: number
     progress: number
+    batchId: number
 }
 
 interface ResumeCourse {
@@ -40,14 +41,14 @@ const Page: React.FC<pageProps> = () => {
     useEffect(() => {
         const getEnrolledCourses = async () => {
             try {
-                const response = await api.get(`/student/${userID}`)
+                const response = await api.get(`/student`)
                 setEnrolledCourse(response.data)
             } catch (error) {
                 console.error('Error getting enrolled courses:', error)
             }
         }
-        if (userID) getEnrolledCourses()
-    }, [userID])
+        getEnrolledCourses()
+    }, [])
 
     useEffect(() => {
         const getResumeCourse = async () => {
@@ -131,15 +132,17 @@ const Page: React.FC<pageProps> = () => {
                                         coverImage,
                                         id,
                                         progress,
+                                        batchId,
                                     }: {
                                         name: string
                                         coverImage: string
                                         id: number
                                         progress: number
+                                        batchId: number
                                     }) => (
                                         <Link
                                             key={id}
-                                            href={`courses/${id}`}
+                                            href={`courses/${id}/batch/${batchId}`}
                                             className="text-gray-900 text-base"
                                         >
                                             <div className="bg-muted flex justify-center h-[200px] relative overflow-hidden rounded-sm">

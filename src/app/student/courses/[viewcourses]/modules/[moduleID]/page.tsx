@@ -22,7 +22,7 @@ interface Chapter {
     status: string
 }
 
-function Page() {
+function Page({ params }: any) {
     // misc
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
@@ -34,6 +34,7 @@ function Page() {
     const [topicId, setTopicId] = useState(0)
     const [moduleName, setModuleName] = useState('')
     const [chapterContent, setChapterContent] = useState({})
+    const [chapterId, setChapterId] = useState<number>(0)
 
     const crumbs = [
         {
@@ -79,6 +80,7 @@ function Page() {
                 )
                 setActiveChapter(chapterId)
                 setTopicId(response.data.trackingData.topicId)
+                setChapterId(response.data.trackingData.id)
                 setChapterContent(response.data.trackingData)
             } catch (error) {
                 console.error('Error fetching chapter content:', error)
@@ -114,7 +116,13 @@ function Page() {
             case 3:
                 return <CodingChallenge />
             case 4:
-                return <Quiz />
+                return (
+                    <Quiz
+                        content={chapterContent}
+                        moduleId={params.moduleID}
+                        chapterId={chapterId}
+                    />
+                )
             case 5:
                 return <Assignment />
             // default:
