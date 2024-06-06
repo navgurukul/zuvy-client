@@ -121,6 +121,7 @@ function Page({ params }: any) {
                         content={chapterContent}
                         moduleId={params.moduleID}
                         chapterId={chapterId}
+                        bootcampId={params.viewcourses}
                     />
                 )
             case 5:
@@ -137,6 +138,7 @@ function Page({ params }: any) {
         }
     }, [userID])
 
+    // console.log(params)
     return (
         <>
             <BreadcrumbComponent crumbs={crumbs} />

@@ -86,7 +86,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
     // }, [userID])
 
     const getUpcomingClassesHandler = useCallback(async () => {
-        await api.get(`/student/Dashboard/classes`).then((res) => {
+        await api.get(`/student/Dashboard/classes/{batch_id}`).then((res) => {
             setUpcomingClasses(res.data.upcoming)
             setOngoingClasses(res.data.ongoing)
         })
@@ -142,7 +142,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                         </div>
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center mt-12">
+                    <div className="flex w-full flex-col items-center mt-12">
                         <Image
                             src="/no-class.svg"
                             alt="No classes"
@@ -154,7 +154,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                         </p>
                     </div>
                 )}
-                <div className="w-full h-full p-6 bg-gray-100 rounded-lg items-center justify-center ">
+                <div className="w-1/2 h-full p-6 bg-gray-100 rounded-lg items-center justify-center ">
                     <h1 className=" text-xl text-start font-semibold">
                         Attendance
                     </h1>
