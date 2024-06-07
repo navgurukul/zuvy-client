@@ -74,6 +74,8 @@ function ChapterItem({
                     toast({
                         title: res.data.title,
                         description: res.data.message,
+                        className:
+                            'text-start capitalize border border-secondary',
                     })
                     fetchChapters()
                 })
@@ -81,6 +83,8 @@ function ChapterItem({
                     toast({
                         title: error.data.title,
                         description: error.data.message,
+                        className:
+                            'text-start capitalize border border-destructive',
                     })
                 })
         } catch (error) {

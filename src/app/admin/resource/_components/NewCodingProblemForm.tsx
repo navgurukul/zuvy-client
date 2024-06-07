@@ -103,7 +103,7 @@ export default function NewCodingProblemForm({
             toast({
                 title: 'Success',
                 description: 'Question Created Successfully',
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-secondary',
             })
             setIsDialogOpen(false)
         } catch (error: any) {
@@ -111,7 +111,7 @@ export default function NewCodingProblemForm({
                 title: 'Error',
                 description:
                     error?.response?.data?.message || 'An error occurred',
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-destructive',
             })
         }
     }

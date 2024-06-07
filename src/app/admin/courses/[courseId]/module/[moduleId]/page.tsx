@@ -169,17 +169,16 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
             toast({
                 title: 'Success',
                 description: 'Project Edited Successfully',
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-secondary',
             })
         } catch (error: any) {
             toast({
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'An error occurred.',
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-destructive',
                 variant: 'destructive',
             })
-            console.error('Error Editing Project:', error)
         }
     }
 
@@ -330,11 +329,21 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                 `/Content/editChapterOfModule/${params.moduleId}?chapterId=${movedItem.chapterId}`,
                 { newOrder: movedItem.order }
             )
+            toast({
+                title: 'Success',
+                description: 'Content Edited Successfully',
+                className: 'text-start capitalize border border-secondary',
+            })
             if (response.data) {
                 setChapterData(newOrderChapters)
             }
-        } catch (error) {
-            console.error('Error updating order:', error)
+        } catch (error: any) {
+            toast({
+                title: 'Failed',
+                description:
+                    error.response?.data?.message || 'An error occurred.',
+                className: 'text-start capitalize border border-destructive',
+            })
         }
     }
     return (

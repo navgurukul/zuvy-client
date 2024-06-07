@@ -47,7 +47,6 @@ function Page() {
     // func
     const handleTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { value } = event.target
-        console.log(event.target)
         setTypeId(value === 'learning-material' ? 1 : 2)
     }
 
@@ -78,7 +77,7 @@ function Page() {
                 toast({
                     title: 'Success',
                     description: 'Module Created Successfully',
-                    className: 'text-start capitalize',
+                    className: 'text-start capitalize border border-secondary',
                 })
                 fetchCourseModules()
             })
@@ -86,7 +85,8 @@ function Page() {
                 toast({
                     title: 'Error',
                     description: 'Error creating module',
-                    className: 'text-start capitalize',
+                    className:
+                        'text-start capitalize border border-destructive',
                 })
             })
     }
@@ -101,7 +101,7 @@ function Page() {
             toast({
                 title: 'Error',
                 description: 'Failed to fetch course Modules',
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-destructive',
             })
         }
     }
@@ -140,7 +140,7 @@ function Page() {
             toast({
                 title: 'Error',
                 description: 'Error updating module order',
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-destructive',
             })
         }
     }

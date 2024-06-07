@@ -47,7 +47,8 @@ function LoginPage({}: Props) {
                     toast({
                         title: 'Login Successful',
                         description: 'Welcome to Zuvy Dashboard',
-                        className: 'text-start capitalize',
+                        className:
+                            'text-start capitalize border border-secondary',
                     })
                 }
 
@@ -68,8 +69,14 @@ function LoginPage({}: Props) {
 
                     return router.push(`/${resp.data.user.rolesList[0]}`)
                 }
-            } catch (err) {
-                console.log(err)
+            } catch (err: any) {
+                toast({
+                    title: 'Failed',
+                    description:
+                        err.response?.data?.message || 'An error occurred.',
+                    className:
+                        'text-start capitalize border border-destructive',
+                })
             }
         }
 

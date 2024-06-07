@@ -94,16 +94,16 @@ const AddAssignent = ({ content }: AssignmentProps) => {
             toast({
                 title: 'Success',
                 description: 'Article Chapter Edited Successfully',
+                className: 'text-start capitalize border border-secondary',
             })
         } catch (error: any) {
             toast({
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'An error occurred.',
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-destructive',
                 variant: 'destructive',
             })
-            console.error('Error creating batch:', error)
         }
     }
 

@@ -38,7 +38,6 @@ export default function SubmissionsList({
             const response = await api.get(
                 `/codingPlatform/allSubmissionsByQuestionId/${questionId}?userId=${userID}`
             )
-            console.log('submissions', response.data.respond)
             setSubmissions(response.data.respond)
         } catch (error) {
             console.error('Error fetching courses:', error)

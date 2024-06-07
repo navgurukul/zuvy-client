@@ -172,16 +172,15 @@ const BatchesInfo = ({
             await api.delete(`/batch/${params.batchId}`)
             toast({
                 title: 'Batch Deleted Successfully',
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-secondary',
             })
             setDeleteModalOpen(false)
             router.push(`/admin/courses/${params.courseId}/batches`)
         } catch (error) {
             toast({
                 title: 'Batch not Deleted',
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-destructive',
             })
-            console.error('Error deleting batch:', error)
         }
     }
 
@@ -199,6 +198,8 @@ const BatchesInfo = ({
                     toast({
                         title: res.data.status,
                         description: res.data.message,
+                        className:
+                            'text-start capitalize border border-secondary',
                     })
                     const fetchBatchesInfo = async () => {
                         try {
@@ -215,6 +216,7 @@ const BatchesInfo = ({
         } catch (error) {
             toast({
                 title: "Batches Didn't Update Succesfully",
+                className: 'text-start capitalize border border-destructive',
             })
         }
     }

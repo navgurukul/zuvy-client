@@ -168,7 +168,7 @@ const NewClassDialog = ({
                 toast({
                     title: 'class created successfully',
                     variant: 'default',
-                    className: 'text-start capitalize',
+                    className: 'text-start capitalize border border-secondary',
                 })
                 getClasses()
             }
@@ -178,7 +178,7 @@ const NewClassDialog = ({
             toast({
                 title: 'class creation failed',
                 variant: 'default',
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-destructiv',
             })
             console.error('Error creating class:', error)
         }

@@ -11,7 +11,6 @@ type Props = {
 }
 
 const Assesments = (props: Props) => {
-    console.log(props)
     return (
         <div className="w-full">
             <section className="bg-white dark:bg-gray-900">

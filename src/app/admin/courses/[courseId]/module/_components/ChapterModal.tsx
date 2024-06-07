@@ -30,8 +30,17 @@ function ChapterModal({
             .post(`/Content/chapter/${params.moduleId}?topicId=${topicId}`)
             .then((res) => {
                 toast({
-                    title: res.data.message,
-                    description: res.data.module[0].title,
+                    title: res.data.module[0].title,
+                    description: res.data.message,
+                    className: 'text-start capitalize border border-secondary',
+                })
+            })
+            .catch((error) => {
+                toast({
+                    title: error.data.title,
+                    description: error.data.message,
+                    className:
+                        'text-start capitalize border border-destructive',
                 })
             })
         fetchChapters()

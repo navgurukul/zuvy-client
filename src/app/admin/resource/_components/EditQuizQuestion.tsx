@@ -128,6 +128,7 @@ const EditQuizQuestion = ({
                 toast({
                     title: res.data.status || 'Success',
                     description: res.data.message || 'Quiz Question Created',
+                    className: 'text-start capitalize border border-secondary',
                 })
             })
             setIsEditModalOpen(false)
@@ -136,6 +137,7 @@ const EditQuizQuestion = ({
                 title: 'Error',
                 description:
                     'There was an error creating the quiz question. Please try again.',
+                className: 'text-start capitalize border border-destructive',
             })
         }
     }

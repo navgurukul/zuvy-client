@@ -77,6 +77,7 @@ function Quiz(props: any) {
                 toast({
                     title: 'Success',
                     description: res.message,
+                    className: 'text-start capitalize border border-secondary',
                 })
             })
             .catch((error: any) => {
@@ -84,8 +85,9 @@ function Quiz(props: any) {
                     title: 'Error',
                     description:
                         'An error occurred while saving the chapter the chapter.',
+                    className:
+                        'text-start capitalize border border-destructive',
                 })
-                console.error('Error updating chapter:', error)
             })
     }
     const getAllSavedQuizQuestion = useCallback(async () => {

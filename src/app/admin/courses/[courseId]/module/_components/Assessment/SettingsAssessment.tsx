@@ -174,7 +174,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
             toast({
                 title: 'Assessment Updated Successfully',
                 description: 'Assessment has been updated successfully',
-                className: 'text-left',
+                className: 'text-start capitalize border border-secondary',
             })
         } catch (error) {
             console.error(error)
