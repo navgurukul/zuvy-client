@@ -251,7 +251,17 @@ export const getEditQuizQuestion = create<editQuizQuestion>((set) => ({
 }))
 
 // ------------------------------
+type saveParam = {
+    paramBatchId: number
+    setIsParamBatchId: (newValue: number) => void
+}
 
+export const getParamBatchId = create<saveParam>((set) => ({
+    paramBatchId: 0,
+    setIsParamBatchId: (newvalue: number) => {
+        set({ paramBatchId: newvalue })
+    },
+}))
 // ------------------------------
 type editOpenEndedDialogs = {
     isOpenEndDialogOpen: boolean

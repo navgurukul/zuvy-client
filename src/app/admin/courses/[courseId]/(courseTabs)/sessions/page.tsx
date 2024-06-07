@@ -167,26 +167,32 @@ function Page({ params }: any) {
     //     handleClassType,
     // ])
     const tabs = ['completed', 'upcoming', 'ongoing']
-    const getHandleAllClasses = useCallback(async () => {
-        let baseUrl = `/classes/all/${params.courseId}?limit=10&offset=0`
+    const getHandleAllClasses = useCallback(
+        async (offset: number) => {
+            let baseUrl = `/classes/all/${params.courseId}?limit=${position}&offset=${offset}`
 
-        if (batchId) {
-            baseUrl += `&batchId=${batchId}`
-        }
+            if (batchId) {
+                baseUrl += `&batchId=${batchId}`
+            }
 
-        baseUrl += `&status=${activeTab}`
+            baseUrl += `&status=${activeTab}`
 
-        if (debouncedSearch) {
-            baseUrl += `&searchTerm=${encodeURIComponent(debouncedSearch)}`
-        }
+            if (debouncedSearch) {
+                baseUrl += `&searchTerm=${encodeURIComponent(debouncedSearch)}`
+            }
 
-        try {
-            const res = await api.get(baseUrl)
-            setClasses(res.data.classes)
-        } catch (error) {
-            console.error('Error fetching classes:', error)
-        }
-    }, [batchId, activeTab, debouncedSearch, params.courseId])
+            try {
+                const res = await api.get(baseUrl)
+                setClasses(res.data.classes)
+                setTotalStudents(res.data.total_items)
+                setPages(res.data.total_pages)
+                setLastPage(res.data.total_items)
+            } catch (error) {
+                console.error('Error fetching classes:', error)
+            }
+        },
+        [batchId, activeTab, debouncedSearch, params.courseId, position]
+    )
     const getHandleAllBootcampBatches = useCallback(async () => {
         if (params.courseId) {
             await api
@@ -207,8 +213,8 @@ function Page({ params }: any) {
     }, [params.courseId])
 
     useEffect(() => {
-        getHandleAllClasses()
-    }, [getHandleAllClasses])
+        getHandleAllClasses(offset)
+    }, [getHandleAllClasses, offset])
 
     useEffect(() => {
         getHandleAllBootcampBatches()
@@ -237,6 +243,7 @@ function Page({ params }: any) {
                     <CreateSession
                         courseId={params?.courseId || 0}
                         bootcampData={bootcampData}
+                        getClasses={getHandleAllClasses}
                     />
                 </div>
                 <div className="flex justify-start gap-6 my-6">
@@ -292,12 +299,13 @@ function Page({ params }: any) {
                             <CreateSession
                                 courseId={params.courseId || 0}
                                 bootcampData={bootcampData}
+                                getClasses={getHandleAllClasses}
                             />
                         </div>
                     </>
                 )}
             </div>
-            {/* <DataTablePagination
+            <DataTablePagination
                 totalStudents={totalStudents}
                 position={position}
                 setPosition={setPosition}
@@ -305,9 +313,9 @@ function Page({ params }: any) {
                 lastPage={lastPage}
                 currentPage={currentPage}
                 setCurrentPage={setCurrentPage}
-                fetchStudentData={fetchStudentData}
+                fetchStudentData={getHandleAllClasses}
                 setOffset={setOffset}
-            /> */}
+            />
         </>
     )
 }

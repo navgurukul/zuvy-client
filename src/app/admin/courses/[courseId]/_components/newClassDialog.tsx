@@ -104,6 +104,7 @@ const NewClassDialog = ({
     setEndDateTime,
     batchId,
     setBatchId,
+    getClasses,
 }: {
     courseId: number
     bootcampData: Object
@@ -117,6 +118,7 @@ const NewClassDialog = ({
     setEndDateTime: any
     batchId: any
     setBatchId: any
+    getClasses: any
 }) => {
     // const [title, setTitle] = useState('')
     const [errors, setErrors] = useState<Record<string, string>>({})
@@ -168,6 +170,7 @@ const NewClassDialog = ({
                     variant: 'default',
                     className: 'text-start capitalize',
                 })
+                getClasses()
             }
 
             return postClass

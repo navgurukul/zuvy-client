@@ -21,7 +21,7 @@ const SubmissionComponent = (props: Props) => {
 
     return (
         <Link
-            href={`/admin/courses/${props.courseId}/submissions/practiceProblems/${props.moduleId}`}
+            href={`/admin/courses/${props.courseId}/submissionProblems/${props.moduleId}`}
         >
             <div className="lg:flex h-[100px] shadow-md  rounded-md p-4">
                 <div className="flex flex-col justify-between py-2 lg:mx-2">

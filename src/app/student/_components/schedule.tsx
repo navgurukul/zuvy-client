@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 // import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { cn } from '@/lib/utils'
+import { cn, getAttendanceColorClass } from '@/lib/utils'
 import { BookOpenText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { api } from '@/utils/axios.config'
@@ -11,6 +11,8 @@ import { useLazyLoadedStudentData } from '@/store/store'
 import Link from 'next/link'
 import ClassCard from '@/app/admin/courses/[courseId]/_components/classCard'
 import Image from 'next/image'
+import SubmissionCard from '@/app/admin/courses/[courseId]/_components/SubmissionCard'
+
 interface ResumeCourse {
     bootcamp_name?: string
     module_name?: string
@@ -27,6 +29,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
     const [upcomingClasses, setUpcomingClasses] = useState([])
     const [ongoingClasses, setOngoingClasses] = useState([])
     const [attendenceData, setAttendenceData] = useState<any[]>([])
+    const [submission, setSubmission] = useState<any[]>([])
     // const [ongoingClasses, setOngoingClasses] = useState([])
     // const [completedClasses, setCompletedClasses] = useState([])
     // useEffect(() => {
@@ -81,42 +84,46 @@ function Schedule({ className, ...props }: ScheduleProps) {
     //     }
     //     if (userID) getResumeCourse()
     // }, [userID])
-    const getAttendanceColorClass = (attendance: any) => {
-        if (attendance === 100) {
-            return 'bg-green-500 text-white'
-        } else if (attendance >= 75) {
-            return 'bg-yellow-500 text-black'
-        } else if (attendance < 50) {
-            return 'bg-red-500 text-white'
-        } else {
-            return 'bg-gray-500 text-white' // Default color for other cases
-        }
-    }
 
-    const getUpcomingClassesHandler = async () => {
-        await api.get(`/student/Dashboard/classes`).then((res) => {
+    const getUpcomingClassesHandler = useCallback(async () => {
+        await api.get(`/student/Dashboard/classes/{batch_id}`).then((res) => {
             setUpcomingClasses(res.data.upcoming)
             setOngoingClasses(res.data.ongoing)
         })
-    }
-    const getAttendenceHandler = async () => {
+    }, [])
+    const getAttendanceHandler = useCallback(async () => {
         await api.get(`/student/Dashboard/attendance`).then((res) => {
             setAttendenceData(res.data)
         })
-    }
-    useEffect(() => {
-        getUpcomingClassesHandler()
-        getAttendenceHandler()
     }, [])
+    const getUpcomingSubmissionHandler = useCallback(async () => {
+        await api.get(`/tracking/upcomingSubmission/9`).then((res) => {
+            setSubmission(res.data)
+        })
+    }, [])
+    useEffect(() => {
+        const fetchData = async () => {
+            await Promise.all([
+                getUpcomingClassesHandler(),
+                getAttendanceHandler(),
+                getUpcomingSubmissionHandler(),
+            ])
+        }
 
+        fetchData()
+    }, [
+        getAttendanceHandler,
+        getUpcomingClassesHandler,
+        getUpcomingSubmissionHandler,
+    ])
     return (
-        <>
+        <div>
             <div className="flex flex-row justify-between gap-6">
                 {upcomingClasses?.length > 0 ? (
                     <div className="flex flex-col">
-                        <p className="text-lg p-1 text-start font-bold">
+                        <h1 className="text-lg p-1 text-start font-bold">
                             Upcoming Classes
-                        </p>
+                        </h1>
                         <div className="w-[800px]">
                             {ongoingClasses.map((classData: any, index) => (
                                 <ClassCard
@@ -135,7 +142,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                         </div>
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center mt-12">
+                    <div className="flex w-full flex-col items-center mt-12">
                         <Image
                             src="/no-class.svg"
                             alt="No classes"
@@ -147,10 +154,29 @@ function Schedule({ className, ...props }: ScheduleProps) {
                         </p>
                     </div>
                 )}
-
-                {/* Other components can be placed here */}
-
-                {/* Example card component for future use */}
+                <div className="w-1/3 h-full p-6 bg-gray-100 rounded-lg items-center justify-center ">
+                    <h1 className=" text-xl text-start font-semibold">
+                        Attendance
+                    </h1>
+                    <div className=" gap-2 items-center">
+                        <div className="flex items-center gap-2">
+                            <div
+                                className={`w-[10px] h-[10px] rounded-full  ${getAttendanceColorClass(
+                                    attendenceData[0]?.attendance
+                                )}`}
+                            />
+                            <h1>{attendenceData[0]?.attendance}%</h1>
+                        </div>
+                        <div className="flex">
+                            <p className="text-md font-semibold">
+                                {' '}
+                                {attendenceData[0]?.attendedClasses} of{' '}
+                                {attendenceData[0]?.totalClasses} Classes
+                                Attended
+                            </p>
+                        </div>
+                    </div>
+                </div>
                 {/* <Card className="text-start">
             <CardHeader className="bg-muted">
                 <CardTitle>Pick up where you left</CardTitle>
@@ -176,30 +202,6 @@ function Schedule({ className, ...props }: ScheduleProps) {
                         </div>
                         </CardContent>
                     </Card> */}
-
-                <div className="w-full h-full p-6 bg-gray-100 rounded-lg items-center justify-center ">
-                    <h1 className=" text-xl text-start font-semibold">
-                        Attendance
-                    </h1>
-                    <div className=" gap-2 items-center">
-                        <div className="flex items-center gap-2">
-                            <div
-                                className={`w-[10px] h-[10px] rounded-full  ${getAttendanceColorClass(
-                                    attendenceData[0]?.attendance
-                                )}`}
-                            />
-                            <h1>{attendenceData[0]?.attendance}%</h1>
-                        </div>
-                        <div className="flex">
-                            <p className="text-md font-semibold">
-                                {' '}
-                                {attendenceData[0]?.attendedClasses} of{' '}
-                                {attendenceData[0]?.totalClasses} Classes
-                                Attended
-                            </p>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             {/* <Calendar
@@ -208,7 +210,33 @@ function Schedule({ className, ...props }: ScheduleProps) {
         onSelect={setDate}
         className="rounded-md border"
       /> */}
-        </>
+            <div className="flex flex-col flex-start">
+                <h1 className="text-lg p-1 text-start font-bold">
+                    Upcoming Submission
+                </h1>
+                <div className="w-[800px]">
+                    {submission.length > 0 ? (
+                        submission.map((data) => {
+                            return (
+                                <SubmissionCard classData={data} key={data} />
+                            )
+                        })
+                    ) : (
+                        <div className="flex w-full flex-col items-center mt-12">
+                            <Image
+                                src="/no-class.svg"
+                                alt="No Submission"
+                                width={240}
+                                height={240}
+                            />
+                            <p className="text-md font-semibold">
+                                There are no upcoming Submission
+                            </p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
     )
 }
 

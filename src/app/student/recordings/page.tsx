@@ -57,9 +57,8 @@ function Page({}: any) {
     const [completedClasses, setCompletedClasses] = useState([])
     const [enrolledCourse, setEnrolledCourse] = useState<EnrolledCourse[]>([])
     const [search, setSearch] = useState('')
-    const [selectedCourse, setSelectedCourse] = useState<EnrolledCourse | null>(
-        enrolledCourse[0]
-    )
+    const [selectedCourse, setSelectedCourse] =
+        useState<EnrolledCourse | null>()
     const [position, setPosition] = useState(POSITION)
     const [pages, setPages] = useState<number>()
     const [offset, setOffset] = useState<number>(OFFSET)
@@ -76,7 +75,7 @@ function Page({}: any) {
         async (offset: number) => {
             if (userID && selectedCourse?.id) {
                 try {
-                    let baseUrl = `/classes/all/${selectedCourse.id}/?status=completed&limit=10&offset=${offset}`
+                    let baseUrl = `/classes/all/${selectedCourse.id}/?status=completed&limit=${position}&offset=${offset}`
 
                     if (debouncedSearch) {
                         baseUrl += `&searchTerm=${encodeURIComponent(
@@ -94,12 +93,12 @@ function Page({}: any) {
                 }
             }
         },
-        [userID, selectedCourse?.id, debouncedSearch]
+        [userID, selectedCourse?.id, debouncedSearch, position]
     )
 
     const getEnrolledCourses = useCallback(async () => {
         try {
-            const response = await api.get(`/student/${userID}`)
+            const response = await api.get(`/student`)
             setEnrolledCourse(response.data)
             setSelectedCourse(response.data[0]) // Preselect the first course
         } catch (error) {
@@ -109,7 +108,7 @@ function Page({}: any) {
 
     const handleCourseChange = (selectedCourseId: any) => {
         const newSelectedCourse: any = enrolledCourse.find(
-            (course) => course.id === selectedCourseId
+            (course) => course.id === +selectedCourseId
         )
         setSelectedCourse(newSelectedCourse)
     }
@@ -130,7 +129,7 @@ function Page({}: any) {
     const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value)
     }
-    // JSX render:-
+    // JSX render:-\
     return (
         <>
             <div className="flex flex-col gap-3 text-start">

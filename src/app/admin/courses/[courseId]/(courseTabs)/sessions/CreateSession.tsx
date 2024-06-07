@@ -7,11 +7,13 @@ import NewClassDialog from '../../_components/newClassDialog'
 interface CreateSessionProps {
     courseId: number
     bootcampData: { value: string; label: string }[]
+    getClasses: any
 }
 
 const CreateSessionDialog: React.FC<CreateSessionProps> = ({
     courseId,
     bootcampData,
+    getClasses,
 }) => {
     const [title, setTitle] = useState('')
     const [description, setDescription] = useState('')
@@ -54,6 +56,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = ({
                 setEndDateTime={setEndDateTime}
                 batchId={batchId}
                 setBatchId={setBatchId}
+                getClasses={getClasses}
             />
         </Dialog>
     )

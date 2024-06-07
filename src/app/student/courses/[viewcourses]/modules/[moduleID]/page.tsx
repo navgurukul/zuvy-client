@@ -2,7 +2,7 @@
 
 import ChapterItem from '@/app/admin/courses/[courseId]/module/_components/ChapterItem'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { useLazyLoadedStudentData } from '@/store/store'
+import { getParamBatchId, useLazyLoadedStudentData } from '@/store/store'
 import { api } from '@/utils/axios.config'
 import React, { useCallback, useEffect, useState } from 'react'
 import StudentChapterItem from '../../../_components/StudentChapterItem'
@@ -22,11 +22,12 @@ interface Chapter {
     status: string
 }
 
-function Page() {
+function Page({ params }: any) {
     // misc
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
     const { viewcourses, moduleID } = useParams()
+    const { paramBatchId } = getParamBatchId()
 
     // state and variables
     const [chapters, setChapters] = useState([])
@@ -34,6 +35,7 @@ function Page() {
     const [topicId, setTopicId] = useState(0)
     const [moduleName, setModuleName] = useState('')
     const [chapterContent, setChapterContent] = useState({})
+    const [chapterId, setChapterId] = useState<number>(0)
 
     const crumbs = [
         {
@@ -43,7 +45,7 @@ function Page() {
         },
         {
             crumb: 'Curriculum',
-            href: `/student/courses/${viewcourses}`,
+            href: `/student/courses/${viewcourses}/batch/${paramBatchId}`,
             isLast: false,
         },
         {
@@ -53,7 +55,7 @@ function Page() {
     ]
 
     // func
-    const fetchChapters = async () => {
+    const fetchChapters = useCallback(async () => {
         try {
             const response = await api.get(
                 `tracking/getAllChaptersWithStatus/${moduleID}`
@@ -68,7 +70,7 @@ function Page() {
         } catch (error) {
             console.log(error)
         }
-    }
+    }, [])
 
     const fetchChapterContent = useCallback(
         async (chapterId: number) => {
@@ -79,12 +81,13 @@ function Page() {
                 )
                 setActiveChapter(chapterId)
                 setTopicId(response.data.trackingData.topicId)
+                setChapterId(response.data.trackingData.id)
                 setChapterContent(response.data.trackingData)
             } catch (error) {
                 console.error('Error fetching chapter content:', error)
             }
         },
-        [chapters, userID]
+        [userID]
     )
 
     const completeChapter = () => {
@@ -114,7 +117,14 @@ function Page() {
             case 3:
                 return <CodingChallenge />
             case 4:
-                return <Quiz />
+                return (
+                    <Quiz
+                        content={chapterContent}
+                        moduleId={params.moduleID}
+                        chapterId={chapterId}
+                        bootcampId={params.viewcourses}
+                    />
+                )
             case 5:
                 return <Assignment />
             // default:
@@ -127,8 +137,9 @@ function Page() {
         if (userID) {
             fetchChapters()
         }
-    }, [userID])
+    }, [userID, fetchChapters])
 
+    console.log(params)
     return (
         <>
             <BreadcrumbComponent crumbs={crumbs} />

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { BookMinus, ChevronRight, Lock } from 'lucide-react'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
@@ -10,15 +10,16 @@ import {
     BreadcrumbList,
     BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
-import { useLazyLoadedStudentData } from '@/store/store'
+import { getParamBatchId, useLazyLoadedStudentData } from '@/store/store'
 import { BreadcrumbItem, CircularProgress } from '@nextui-org/react'
-import Loader from '../_components/Loader'
+import Loader from '../../../_components/Loader'
 import Image from 'next/image'
 import { api } from '@/utils/axios.config'
 import { Button } from '@/components/ui/button'
 import ClassCard from '@/app/admin/courses/[courseId]/_components/classCard'
 import CourseCard from '@/app/_components/courseCard'
 import BreadcrumbCmponent from '@/app/_components/breadcrumbCmponent'
+import SubmissionCard from '@/app/admin/courses/[courseId]/_components/SubmissionCard'
 interface CourseProgress {
     status: string
     progress: number
@@ -42,7 +43,7 @@ const initialInstructorDetailsState: InstructorDetailsState = []
 function Page({
     params,
 }: {
-    params: { viewcourses: string; moduleID: string }
+    params: { viewcourses: string; batchId: number; moduleID: string }
 }) {
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
@@ -50,10 +51,11 @@ function Page({
     const [courseProgress, setCourseProgress] = useState<CourseProgress | null>(
         null
     )
-    const [instructorDetails, setInstructorDetails] =
-        useState<InstructorDetailsState>(initialInstructorDetailsState)
+    const { setIsParamBatchId } = getParamBatchId()
+    const [instructorDetails, setInstructorDetails] = useState<any>()
     const [upcomingClasses, setUpcomingClasses] = useState([])
     const [ongoingClasses, setOngoingClasses] = useState([])
+    const [submission, setSubmission] = useState<any[]>([])
 
     const [attendenceData, setAttendenceData] = useState<any[]>([])
     // const [completedClasses, setCompletedClasses] = useState([])
@@ -65,33 +67,46 @@ function Page({
             isLast: true,
         },
     ]
-    const getAttendanceColorClass = (attendance: any) => {
-        if (attendance === 100) {
-            return 'bg-green-500 text-white'
-        } else if (attendance >= 75) {
-            return 'bg-yellow-500 text-black'
-        } else if (attendance < 50) {
-            return 'bg-red-500 text-white'
-        } else {
-            return 'bg-gray-500 text-white' // Default color for other cases
-        }
-    }
 
-    const getUpcomingClassesHandler = async () => {
-        await api.get(`/student/Dashboard/classes`).then((res) => {
-            setUpcomingClasses(res.data.upcoming)
-            setOngoingClasses(res.data.ongoing)
-        })
-    }
-    const getAttendenceHandler = async () => {
+    // setIsParamBatchId(params.batchId)
+    const getUpcomingClassesHandler = useCallback(async () => {
+        await api
+            .get(
+                `/student/Dashboard/classes/{batch_id}?batch_id=${params.batchId}`
+            )
+            .then((res) => {
+                setUpcomingClasses(res.data.upcoming)
+                setOngoingClasses(res.data.ongoing)
+            })
+    }, [params.batchId])
+    const getAttendanceHandler = useCallback(async () => {
         await api.get(`/student/Dashboard/attendance`).then((res) => {
             setAttendenceData(res.data)
         })
-    }
-    useEffect(() => {
-        getUpcomingClassesHandler()
-        getAttendenceHandler()
     }, [])
+    const getUpcomingSubmissionHandler = useCallback(async () => {
+        await api
+            .get(`/tracking/upcomingSubmission/${params.viewcourses}`)
+            .then((res) => {
+                setSubmission(res.data)
+            })
+    }, [params.viewcourses])
+    useEffect(() => {
+        const fetchData = async () => {
+            await Promise.all([
+                getUpcomingClassesHandler(),
+                getAttendanceHandler(),
+                getUpcomingSubmissionHandler(),
+            ])
+        }
+        setIsParamBatchId(params.batchId)
+
+        fetchData()
+    }, [
+        getUpcomingSubmissionHandler,
+        getUpcomingClassesHandler,
+        getAttendanceHandler,
+    ])
     // useEffect(() => {
     //     // const userIdLocal = JSON.parse(localStorage.getItem("AUTH") || "");
     //     if (userID) {
@@ -136,13 +151,15 @@ function Page({
                 )
                 setCourseProgress(response.data.data)
                 setInstructorDetails(response.data.instructorDetails)
-                console.log('first', response.data.instructorDetails)
+                // console.log('first', response.data.instructorDetails)
             } catch (error) {
                 console.error('Error getting course progress:', error)
             }
         }
         if (userID) getCourseProgress()
-    }, [userID])
+    }, [userID, params.viewcourses])
+
+    // console.log(instructorDetails)
 
     return (
         <MaxWidthWrapper>
@@ -178,7 +195,7 @@ function Page({
                                 Upcoming Classes
                             </p>
                         </div>
-                        <div className="flex flex-row justify-between">
+                        <div className="flex flex-col justify-between">
                             {upcomingClasses?.length > 0 ? (
                                 <div className="flex flex-col">
                                     {/* <p className="text-lg p-1 text-start font-bold">
@@ -290,6 +307,25 @@ function Page({
                                 </div>
                             </Link>
                         </div>
+                        <div className="flex flex-col flex-start">
+                            <h1 className="text-lg p-1 text-start font-bold">
+                                Upcoming Submission
+                            </h1>
+                            <div className="w-[800px]">
+                                {submission.length > 0 ? (
+                                    submission.map((data) => {
+                                        return (
+                                            <SubmissionCard
+                                                classData={data}
+                                                key={data}
+                                            />
+                                        )
+                                    })
+                                ) : (
+                                    <div>No upcoming Submission</div>
+                                )}
+                            </div>
+                        </div>
                     </div>
 
                     <div className="mt-10">
@@ -357,36 +393,41 @@ function Page({
                             Instructor
                         </h1>
                     </div>
-                    <div className="bg-gradient-to-bl p-3 from-blue-50 to-violet-50 flex rounded-xl  ">
-                        <div className="flex flex-col items-center justify-center p-4 gap-3">
-                            <Image
-                                src={
-                                    instructorDetails[0]?.instructorPicture ||
-                                    'https://avatar.iran.liara.run/public/boy?username=Ash'
-                                }
-                                className="rounded-full "
-                                alt="instructor profile pic"
-                                width={40}
-                                height={10}
-                            />
-                            <span className="text-lg font-semibold">
-                                {instructorDetails[0]?.instructorName}
-                            </span>
-                            <p>
-                                Ask doubts or general questions about the
-                                programs anytime and get answers within a few
-                                hours
-                            </p>
-                            <Button
-                                disabled
-                                className="px-4 py-2 rounded-lg mt-2 w-[200px] "
-                            >
-                                Start New Chat
-                            </Button>
-                            {/* <Button disabled className="px-4 py-2 rounded-lg mt-2 w-[200px] ">
-                View Past Chat
-              </Button> */}
-                        </div>
+                    <div className="bg-gradient-to-bl p-3 from-blue-50 to-violet-50 flex rounded-xl">
+                        {instructorDetails ? (
+                            <div className="flex flex-col items-center justify-center p-4 gap-3">
+                                <Image
+                                    src={
+                                        instructorDetails.instructorProfilePicture ||
+                                        'https://avatar.iran.liara.run/public/boy?username=Ash'
+                                    }
+                                    className="rounded-full "
+                                    alt="instructor profile pic"
+                                    width={40}
+                                    height={10}
+                                />
+                                <span className="text-lg font-semibold">
+                                    {instructorDetails.instructorName}
+                                </span>
+                                <p>
+                                    Ask doubts or general questions about the
+                                    programs anytime and get answers within a
+                                    few hours
+                                </p>
+                                <Button
+                                    disabled
+                                    className="px-4 py-2 rounded-lg mt-2 w-[200px] "
+                                >
+                                    Start New Chat
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className="flex items-center justify-center p-4 gap-3">
+                                <p className="text-lg font-semibold">
+                                    Instructor details not available
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     {/* <div className="flex flex-start">
