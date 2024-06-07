@@ -67,9 +67,18 @@ const CurricullumCard = ({
                 toast({
                     title: 'Success',
                     description: 'Module Deleted Successfully',
-                    className: 'text-start capitalize',
+                    className: 'text-start capitalize border border-secondary',
                 })
                 fetchCourseModules()
+            })
+            .catch((error) => {
+                toast({
+                    title: 'Error',
+                    description:
+                        'There was an error while deleting. Please try again.',
+                    className:
+                        'text-start capitalize border border-destructive',
+                })
             })
     }
 

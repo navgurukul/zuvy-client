@@ -206,7 +206,7 @@ function Page({
             toast({
                 title: 'Successfully Submitted Assignment',
                 description: response.data.projectUrl,
-                className: 'text-start capitalize bg-green-500 text-white',
+                className: 'text-start capitalize border border-secondary',
             })
             setAssignmentId(selectedChapter.id ?? 0)
 
@@ -221,7 +221,7 @@ function Page({
             toast({
                 title: 'Error Submitting',
                 description: error.response.data.message,
-                className: 'text-start capitalize bg-red-500 text-white',
+                className: 'text-start capitalize border border-destructive',
             })
         }
 
@@ -243,15 +243,14 @@ function Page({
             toast({
                 title: 'Completed Article Successfully',
                 description: 'You have completed the article successfully',
-                className: 'text-start capitalize bg-green-500 text-white',
+                className: 'text-start capitalize border border-secondary',
             })
             setArticleId(selectedChapter.id ?? 0)
         } catch (error: any) {
-            console.error('Error Completing Article:', error)
             toast({
                 title: 'Error',
                 description: error.response.data.message,
-                className: 'text-start capitalize bg-red-500 text-white',
+                className: 'text-start capitalize border border-destructive',
             })
         }
     }
@@ -317,15 +316,14 @@ function Page({
             toast({
                 title: 'Quiz Submitted Successfully',
                 description: 'Successfully submitted the quiz',
-                className: 'text-start capitalize bg-green-500 text-white',
+                className: 'text-start capitalize border border-secondary',
             })
             setQuizId(selectedChapter.id ?? 0)
         } catch (error) {
-            console.error('Error creating course:', error)
             toast({
                 title: 'Error',
                 description: 'Cannot submit the quiz',
-                className: 'text-start capitalize bg-red-500 text-white',
+                className: 'text-start capitalize border border-destructive',
             })
         }
     }

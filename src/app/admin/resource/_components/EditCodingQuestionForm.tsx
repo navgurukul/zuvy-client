@@ -119,7 +119,7 @@ export default function EditCodingQuestionForm({
             toast({
                 title: 'Success',
                 description: 'Question Edited Successfully',
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-secondary',
             })
             setIsCodingDialogOpen(false)
         } catch (error: any) {
@@ -127,7 +127,7 @@ export default function EditCodingQuestionForm({
                 title: 'Error',
                 description:
                     error?.response?.data?.message || 'An error occurred',
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-destructive',
             })
         }
     }

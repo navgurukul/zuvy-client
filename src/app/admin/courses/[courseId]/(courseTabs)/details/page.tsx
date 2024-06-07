@@ -55,8 +55,6 @@ interface CourseData {
 }
 
 function Page({ params }: { params: any }) {
-    // console.log(params.courseId)
-
     const { courseData, setCourseData } = getCourseData()
     const { setStoreStudentData } = getStoreStudentData()
     const form = useForm<z.infer<typeof FormSchema>>({
@@ -127,7 +125,8 @@ function Page({ params }: { params: any }) {
                     toast({
                         title: res.data.status,
                         description: res.data.message,
-                        className: 'text-start capitalize',
+                        className:
+                            'text-start capitalize border border-secondary',
                     })
                 })
         } catch (error) {
@@ -135,6 +134,7 @@ function Page({ params }: { params: any }) {
                 title: 'Failed',
                 variant: 'destructive',
                 // description: error.message,
+                className: 'text-start capitalize border border-destructive',
             })
             console.error('Error saving changes:', error)
         }
@@ -170,7 +170,13 @@ function Page({ params }: { params: any }) {
                         setCourseData(updatedCourseData)
                     })
             } catch (error) {
-                console.error('Network error:', error)
+                toast({
+                    title: 'Error',
+                    description:
+                        'There was an error while uploading the image. Please try again.',
+                    className:
+                        'text-start capitalize border border-destructive',
+                })
             }
         }
     }

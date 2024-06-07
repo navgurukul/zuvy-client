@@ -124,16 +124,23 @@ export default function IDE({ params }: { params: { editor: string } }) {
                     title: `Test Cases Passed ${
                         action === 'submit' ? ', Solution submitted' : ''
                     }`,
+                    className: 'text-start capitalize border border-secondary',
                 })
             } else {
                 toast({
                     title: 'Test Cases Failed',
-                    variant: 'destructive',
+                    className:
+                        'text-start capitalize border border-destructive',
                 })
             }
             setCodeError('')
         } catch (error: any) {
-            console.error('Error getting modules progress', error)
+            toast({
+                title: 'Failed',
+                description:
+                    error.response?.data?.message || 'An error occurred.',
+                className: 'text-start capitalize border border-destructive',
+            })
             setCodeError(error?.message)
         }
     }
@@ -266,7 +273,6 @@ export default function IDE({ params }: { params: { editor: string } }) {
                                                 <Editor
                                                     height="52vh"
                                                     language={language}
-                                                    // defaultValue='console.log("Zuvy");'
                                                     theme="vs-dark"
                                                     value={currentCode}
                                                     onChange={

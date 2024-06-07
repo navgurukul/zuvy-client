@@ -87,6 +87,7 @@ const Courses: React.FC = () => {
             toast({
                 title: 'Cannot Create A New Course',
                 description: 'Course Name Already Exists',
+                className: 'text-start capitalize',
             })
         } else {
             try {
@@ -96,7 +97,8 @@ const Courses: React.FC = () => {
                         toast({
                             title: response.data.status,
                             description: response.data.message,
-                            className: 'text-start capitalize',
+                            className:
+                                'text-start capitalize border border-secondary',
                         })
                     })
                 getBootcamp()
@@ -104,9 +106,9 @@ const Courses: React.FC = () => {
                 toast({
                     title: error.data.status,
                     description: error.data.message,
-                    className: 'text-start capitalize',
+                    className:
+                        'text-start capitalize border border-destructive',
                 })
-                console.error('Error creating course:', error)
             }
         }
     }
@@ -152,7 +154,6 @@ const Courses: React.FC = () => {
                 email: studentData?.email,
             },
         }).then((response) => {
-            // console.log(response.data.url)
             router.push(response.data.url)
         })
     }

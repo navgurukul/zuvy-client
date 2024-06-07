@@ -47,11 +47,13 @@ export async function onBatchChange(
         toast({
             title: res.data.status,
             description: res.data.message,
+            className: 'text-start capitalize border border-secondary',
         })
     } catch (error: any) {
         toast({
             title: 'Error',
             description: error.message,
+            className: 'text-start capitalize border border-destructive',
         })
     }
 }
@@ -71,10 +73,11 @@ export async function deleteStudentHandler(
             })
             fetchStudentData(bootcampId, setStudentData)
         })
-    } catch (error) {
+    } catch (error: any) {
         toast({
             title: 'Failed',
-            variant: 'destructive',
+            description: error.response?.data?.message || 'An error occurred.',
+            className: 'text-start capitalize border border-destructive',
         })
     }
     setDeleteModalOpen(false)

@@ -131,7 +131,7 @@ const Page = ({ params }: { params: any }) => {
                 toast({
                     title: res.data.status,
                     description: res.data.message,
-                    className: 'text-start capitalize',
+                    className: 'text-start capitalize border border-secondary',
                 })
             }
         } catch (error: any) {
@@ -139,7 +139,7 @@ const Page = ({ params }: { params: any }) => {
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'An error occurred.',
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-destructive',
                 variant: 'destructive',
             })
             console.error('Error creating batch:', error)

@@ -18,8 +18,6 @@ const SubmissionComponent = (props: Props) => {
         setColor(randomColor)
     }
 
-    // console.log(props)
-
     return (
         <Link
             href={`/admin/courses/${props.courseId}/submissions/practiceProblems/${props.index}`}

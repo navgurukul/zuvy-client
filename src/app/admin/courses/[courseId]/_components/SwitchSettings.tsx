@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { api } from '@/utils/axios.config'
+import { toast } from '@/components/ui/use-toast'
 
 interface ToggleSwitchProps {
     onToggle: (isChecked: boolean) => void
@@ -37,9 +38,18 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
             await api.put(`/bootcamp/bootcampSetting/${bootcampId}`, {
                 type,
             })
-            console.log(`Bootcamp type updated to ${type}`)
+            toast({
+                title: 'Success',
+                description: `Bootcamp type updated to ${type}`,
+                className: 'text-start capitalize border border-secondary',
+            })
         } catch (error) {
-            console.error('Error updating boot camp settings:', error)
+            toast({
+                title: 'Error',
+                description:
+                    'Error updating bootcamp settings. Please try again.',
+                className: 'text-start capitalize border border-destructive',
+            })
         }
     }
 

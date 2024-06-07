@@ -85,7 +85,6 @@ function Page() {
     }
 
     const handleCourseChange = (selectedCourseId: any) => {
-        console.log('selectedCourseId:', selectedCourseId)
         const newSelectedCourse: any = enrolledCourse.find(
             (course) => course.id === selectedCourseId
         )

@@ -171,6 +171,8 @@ const AddVideo = ({
                     toast({
                         title: res.data.status,
                         description: res.data.message,
+                        className:
+                            'text-start capitalize border border-secondary',
                     })
                     fetchChapterDetailsHandler()
                 })
@@ -178,6 +180,7 @@ const AddVideo = ({
             toast({
                 title: 'Error',
                 description: "Couldn't Update the Chapter Module",
+                className: 'text-start capitalize border border-destructive',
             })
         }
     }

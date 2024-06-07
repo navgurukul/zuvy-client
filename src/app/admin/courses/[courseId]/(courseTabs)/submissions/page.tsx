@@ -15,7 +15,6 @@ const Page = ({ params }: { params: any }) => {
     const handleTabChange = (tab: string) => {
         setActiveTab(tab)
     }
-    // console.log(params)
     const moduleNumbers = [1, 2, 3]
     return (
         <div className="">

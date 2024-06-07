@@ -68,7 +68,7 @@ function NewOpenEndedQuestionForm({
             toast({
                 title: 'Success',
                 description: 'Open-Ended Question Created Successfully',
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-secondary',
             })
             setIsDialogOpen(false)
         } catch (error: any) {
@@ -76,7 +76,7 @@ function NewOpenEndedQuestionForm({
                 title: 'Error',
                 description:
                     error?.response?.data?.message || 'An error occurred',
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-destructive',
             })
         }
     }

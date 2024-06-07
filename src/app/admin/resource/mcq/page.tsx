@@ -118,6 +118,8 @@ const Mcqs = (props: Props) => {
                         title: res.data.status || 'Success',
                         description:
                             res.data.message || 'Quiz Question Created',
+                        className:
+                            'text-start capitalize border border-secondary',
                     })
                 })
         } catch (error) {
@@ -125,6 +127,7 @@ const Mcqs = (props: Props) => {
                 title: 'Error',
                 description:
                     'There was an error creating the quiz question. Please try again.',
+                className: 'text-start capitalize border border-destructive',
             })
         }
     }

@@ -9,7 +9,6 @@ type Props = {
 }
 
 const Assesments = (props: Props) => {
-    // console.log(props)
     const arr = [1, 2, 3]
     return (
         <div className="w-full ">
