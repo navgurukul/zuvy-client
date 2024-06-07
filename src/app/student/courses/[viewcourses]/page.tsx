@@ -16,21 +16,28 @@ import Loader from '../_components/Loader'
 import Image from 'next/image'
 import { api } from '@/utils/axios.config'
 import { Button } from '@/components/ui/button'
-
-interface CourseProgress {
-    status: string
-    info: {
-        progress: number
-        bootcamp_name: string
-        instructor_name: string
-        instructor_profile_picture: string
-    }
-    code: number
-}
-
 import ClassCard from '@/app/admin/courses/[courseId]/_components/classCard'
 import CourseCard from '@/app/_components/courseCard'
 import BreadcrumbCmponent from '@/app/_components/breadcrumbCmponent'
+interface CourseProgress {
+    status: string
+    progress: number
+    bootcampTracking: {
+        name: string
+    }
+    code: number
+}
+interface Instructor {
+    instructorId: number
+    instructorName: string
+    instructorPicture: string
+}
+
+// Define the initial state type as an array of instructors
+type InstructorDetailsState = Instructor[]
+
+// Initial state object
+const initialInstructorDetailsState: InstructorDetailsState = []
 
 function Page({
     params,
@@ -43,42 +50,73 @@ function Page({
     const [courseProgress, setCourseProgress] = useState<CourseProgress | null>(
         null
     )
+    const [instructorDetails, setInstructorDetails] =
+        useState<InstructorDetailsState>(initialInstructorDetailsState)
     const [upcomingClasses, setUpcomingClasses] = useState([])
     const [ongoingClasses, setOngoingClasses] = useState([])
+
+    const [attendenceData, setAttendenceData] = useState<any[]>([])
     // const [completedClasses, setCompletedClasses] = useState([])
     const crumbs = [
         { crumb: 'My Courses', href: '/student/courses', isLast: false },
         {
-            crumb: courseProgress?.info?.bootcamp_name || 'Course',
+            crumb: courseProgress?.bootcampTracking?.name || 'Course',
             // href: `/student/courses/${params.viewcourses}`,
             isLast: true,
         },
     ]
-    useEffect(() => {
-        // const userIdLocal = JSON.parse(localStorage.getItem("AUTH") || "");
-        if (userID) {
-            api.get(`/bootcamp/studentClasses/${params.viewcourses}`, {
-                params: {
-                    userId: userID,
-                },
-            })
-                .then((response) => {
-                    const { upcomingClasses, ongoingClasses } = response.data
-                    setUpcomingClasses(upcomingClasses)
-                    setOngoingClasses(ongoingClasses)
-                    // setCompletedClasses(completedClasses)
-                })
-                .catch((error) => {
-                    console.log('Error fetching classes:', error)
-                })
+    const getAttendanceColorClass = (attendance: any) => {
+        if (attendance === 100) {
+            return 'bg-green-500 text-white'
+        } else if (attendance >= 75) {
+            return 'bg-yellow-500 text-black'
+        } else if (attendance < 50) {
+            return 'bg-red-500 text-white'
+        } else {
+            return 'bg-gray-500 text-white' // Default color for other cases
         }
-    }, [userID])
+    }
+
+    const getUpcomingClassesHandler = async () => {
+        await api.get(`/student/Dashboard/classes`).then((res) => {
+            setUpcomingClasses(res.data.upcoming)
+            setOngoingClasses(res.data.ongoing)
+        })
+    }
+    const getAttendenceHandler = async () => {
+        await api.get(`/student/Dashboard/attendance`).then((res) => {
+            setAttendenceData(res.data)
+        })
+    }
+    useEffect(() => {
+        getUpcomingClassesHandler()
+        getAttendenceHandler()
+    }, [])
+    // useEffect(() => {
+    //     // const userIdLocal = JSON.parse(localStorage.getItem("AUTH") || "");
+    //     if (userID) {
+    //         api.get(`/bootcamp/studentClasses/${params.viewcourses}`, {
+    //             params: {
+    //                 userId: userID,
+    //             },
+    //         })
+    //             .then((response) => {
+    //                 const { upcomingClasses, ongoingClasses } = response.data
+    //                 setUpcomingClasses(upcomingClasses)
+    //                 setOngoingClasses(ongoingClasses)
+    //                 // setCompletedClasses(completedClasses)
+    //             })
+    //             .catch((error) => {
+    //                 console.log('Error fetching classes:', error)
+    //             })
+    //     }
+    // }, [userID])
 
     useEffect(() => {
         const getModulesProgress = async () => {
             try {
                 const response = await api.get(
-                    `/Content/modules/${params.viewcourses}?user_id=${userID}`
+                    `/tracking/allModulesForStudents/${params.viewcourses}`
                 )
                 response.data.map((module: any) => {
                     setModulesProgress(response.data)
@@ -94,9 +132,11 @@ function Page({
         const getCourseProgress = async () => {
             try {
                 const response = await api.get(
-                    `/bootcamp/${userID}/progress?bootcamp_id=${params.viewcourses}`
+                    `/tracking/bootcampProgress/${params.viewcourses}`
                 )
-                setCourseProgress(response.data)
+                setCourseProgress(response.data.data)
+                setInstructorDetails(response.data.instructorDetails)
+                console.log('first', response.data.instructorDetails)
             } catch (error) {
                 console.error('Error getting course progress:', error)
             }
@@ -121,9 +161,9 @@ function Page({
                         </div>
                         <div className="grow text-start">
                             <p className="text-xl font-bold mb-2">
-                                {courseProgress?.info?.bootcamp_name}
+                                {courseProgress?.bootcampTracking?.name}
                             </p>
-                            <Loader progress={courseProgress?.info?.progress} />
+                            <Loader progress={courseProgress?.progress} />
                         </div>
                     </div>
 
@@ -138,40 +178,105 @@ function Page({
                                 Upcoming Classes
                             </p>
                         </div>
-                        {ongoingClasses?.length > 0 ||
-                        upcomingClasses?.length > 0 ? null : (
-                            <div className="flex flex-col items-center mt-12">
-                                <Image
-                                    src={'/no-class.svg'}
-                                    alt="party popper"
-                                    width={'240'}
-                                    height={'240'}
-                                />
-                                <p className="text-lg mt-3">
-                                    There are no upcoming classes
-                                </p>
-                            </div>
-                        )}
+                        <div className="flex flex-row justify-between">
+                            {upcomingClasses?.length > 0 ? (
+                                <div className="flex flex-col">
+                                    {/* <p className="text-lg p-1 text-start font-bold">
+                                        Upcoming Classes
+                                    </p> */}
+                                    <div className="w-[800px]">
+                                        {ongoingClasses.map(
+                                            (classData: any, index) => (
+                                                <ClassCard
+                                                    classData={classData}
+                                                    classType={classData.status}
+                                                    key={index}
+                                                />
+                                            )
+                                        )}
+                                        {upcomingClasses.map(
+                                            (classData: any, index) => (
+                                                <ClassCard
+                                                    classData={classData}
+                                                    classType={classData.status}
+                                                    key={index}
+                                                />
+                                            )
+                                        )}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="flex flex-col items-center mt-12">
+                                    <Image
+                                        src="/no-class.svg"
+                                        alt="No classes"
+                                        width={240}
+                                        height={240}
+                                    />
+                                    <p className="text-lg mt-3 text-center">
+                                        There are no upcoming classes
+                                    </p>
+                                </div>
+                            )}
 
-                        {ongoingClasses?.length > 0
-                            ? ongoingClasses.map((classObj, index) => (
-                                  <ClassCard
-                                      classData={classObj}
-                                      key={index}
-                                      classType="ongoing"
-                                  />
-                              ))
-                            : null}
+                            {/* Other components can be placed here */}
 
-                        {upcomingClasses?.length > 0
-                            ? upcomingClasses.map((classObj, index) => (
-                                  <ClassCard
-                                      classData={classObj}
-                                      key={index}
-                                      classType="Upcoming"
-                                  />
-                              ))
-                            : null}
+                            {/* Example card component for future use */}
+                            {/* <Card className="text-start">
+            <CardHeader className="bg-muted">
+                <CardTitle>Pick up where you left</CardTitle>
+            </CardHeader>
+            <CardContent className="p-3 grid gap-4">
+                <div className="flex flex-wrap items-center p-4 justify-between gap-8">
+                    <div className="flex items-center">
+                        <BookOpenText className="hidden sm:block" />
+                        <div className="flex-1 ml-2 space-y-1">
+                            <p className="text-sm font-medium leading-none">
+                            {resumeCourse?.bootcamp_name}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                                {resumeCourse.module_name}
+                            </p>
+                        </div>
+                    </div>
+                    <Link
+                        href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`}
+                    >
+                        <Button>Continue</Button>
+                        </Link>
+                        </div>
+                        </CardContent>
+                    </Card> */}
+
+                            {/* <div className="w-[400px] h-[200px] flex flex-col bg-gray-100 rounded-lg items-center justify-center ">
+                                <h1 className="mt-6 text-xl font-semibold">
+                                    Attendance
+                                </h1>
+                                <div className="flex flex-col gap-2 items-center">
+                                    <div className="flex items-center gap-2">
+                                        <div
+                                            className={`w-[10px] h-[10px] rounded-full  ${getAttendanceColorClass(
+                                                attendenceData[0]?.attendance
+                                            )}`}
+                                        />
+                                        <h1>
+                                            {attendenceData[0]?.attendance}%
+                                        </h1>
+                                    </div>
+                                    <div className="flex">
+                                        <p className="text-md font-semibold">
+                                            {' '}
+                                            {
+                                                attendenceData[0]
+                                                    ?.attendedClasses
+                                            }{' '}
+                                            of {attendenceData[0]?.totalClasses}{' '}
+                                            Classes Attended
+                                        </p>
+                                    </div>
+                                </div>
+                            </div> */}
+                        </div>
 
                         <div className="flex justify-center mt-3">
                             <Link
@@ -198,22 +303,45 @@ function Page({
                             modulesProgress.map(
                                 ({
                                     name,
+                                    description,
                                     id,
-                                    lock,
+                                    isLock,
                                     progress,
+                                    timeAlloted,
+                                    articlesCount,
+                                    assignmentCount,
+                                    codingProblemsCount,
+                                    quizCount,
+                                    typeId,
                                 }: {
                                     name: string
+                                    description: string
                                     id: number
-                                    lock: boolean
+                                    isLock: boolean
                                     progress: number
+                                    timeAlloted: number
+                                    articlesCount: number
+                                    assignmentCount: number
+                                    codingProblemsCount: number
+                                    quizCount: number
+                                    typeId: number
                                 }) => (
                                     <CourseCard
                                         key={id}
                                         param={params.viewcourses}
                                         name={name}
+                                        description={description}
                                         id={id}
-                                        lock={lock}
+                                        isLock={isLock}
                                         progress={progress}
+                                        timeAlloted={timeAlloted}
+                                        articlesCount={articlesCount}
+                                        assignmentCount={assignmentCount}
+                                        codingProblemsCount={
+                                            codingProblemsCount
+                                        }
+                                        quizCount={quizCount}
+                                        typeId={typeId}
                                     />
                                 )
                             )
@@ -233,8 +361,8 @@ function Page({
                         <div className="flex flex-col items-center justify-center p-4 gap-3">
                             <Image
                                 src={
-                                    courseProgress?.info
-                                        ?.instructor_profile_picture ?? ''
+                                    instructorDetails[0]?.instructorPicture ||
+                                    'https://avatar.iran.liara.run/public/boy?username=Ash'
                                 }
                                 className="rounded-full "
                                 alt="instructor profile pic"
@@ -242,7 +370,7 @@ function Page({
                                 height={10}
                             />
                             <span className="text-lg font-semibold">
-                                {courseProgress?.info?.instructor_name}
+                                {instructorDetails[0]?.instructorName}
                             </span>
                             <p>
                                 Ask doubts or general questions about the

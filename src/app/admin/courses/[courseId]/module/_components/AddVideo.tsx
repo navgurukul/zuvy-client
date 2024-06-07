@@ -122,6 +122,8 @@ const AddVideo = ({
                     toast({
                         title: 'Error',
                         description: 'No content details found',
+                        className:
+                            'text-start capitalize border border-destructive',
                     })
                     setChapterDetails({
                         title: '',
@@ -134,6 +136,8 @@ const AddVideo = ({
                 toast({
                     title: 'Error',
                     description: 'Content details not available',
+                    className:
+                        'text-start capitalize border border-destructive',
                 })
                 setChapterDetails({
                     title: '',
@@ -146,8 +150,8 @@ const AddVideo = ({
             toast({
                 title: 'Error',
                 description: 'Error fetching chapter details:',
+                className: 'text-start capitalize border border-destructive',
             })
-            console.error('Error fetching chapter details:', error)
         }
     }, [content.id])
 

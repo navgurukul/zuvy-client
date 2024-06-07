@@ -13,6 +13,7 @@ import {
     getcodingQuestionState,
 } from '@/store/store'
 import { cn, difficultyColor } from '@/lib/utils'
+
 import {
     handleConfirm,
     handleDelete,
@@ -77,7 +78,7 @@ export const columns: ColumnDef<CodingQuestion>[] = [
 
             return (
                 <div className="flex items-center">
-                    {codingQuestion.id + ' times'}
+                    {codingQuestion.usage + ' times'}
                 </div>
             )
         },

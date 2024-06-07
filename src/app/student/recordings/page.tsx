@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { api } from '@/utils/axios.config'
 import { useLazyLoadedStudentData } from '@/store/store'
 import Recordings from '../courses/[viewcourses]/[recordings]/_components/Recordings'
@@ -12,7 +12,10 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-
+import { Input } from '@/components/ui/input'
+import useDebounce from '@/hooks/useDebounce'
+import { OFFSET, POSITION } from '@/utils/constant'
+import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 // Interfaces:-
 interface Bootcamp {
     id: number
@@ -49,32 +52,52 @@ interface EnrolledCourse {
 }
 
 // Component:-
-function Page() {
+function Page({}: any) {
     // states:-
     const [completedClasses, setCompletedClasses] = useState([])
-    const { studentData } = useLazyLoadedStudentData()
-    const userID = studentData?.id && studentData?.id
     const [enrolledCourse, setEnrolledCourse] = useState<EnrolledCourse[]>([])
+    const [search, setSearch] = useState('')
     const [selectedCourse, setSelectedCourse] = useState<EnrolledCourse | null>(
         enrolledCourse[0]
     )
+    const [position, setPosition] = useState(POSITION)
+    const [pages, setPages] = useState<number>()
+    const [offset, setOffset] = useState<number>(OFFSET)
+    const [currentPage, setCurrentPage] = useState<number>(1)
+    const [totalStudents, setTotalStudents] = useState<number>(0)
+    const [lastPage, setLastPage] = useState<number>(0)
+    const { studentData } = useLazyLoadedStudentData()
+    const userID = studentData?.id
+    const debouncedSearch = useDebounce(search, 1000)
 
-    // functions:-
-    const fetchRecordings = async (courseId: any) => {
-        if (userID) {
-            try {
-                const response = await api.get(
-                    `/bootcamp/studentClasses/${courseId}`,
-                    { params: { userId: userID } }
-                )
-                setCompletedClasses(response.data.completedClasses)
-            } catch (error) {
-                console.error('Error getting completed classes:', error)
+    // Functions
+
+    const fetchRecordings = useCallback(
+        async (offset: number) => {
+            if (userID && selectedCourse?.id) {
+                try {
+                    let baseUrl = `/classes/all/${selectedCourse.id}/?status=completed&limit=10&offset=${offset}`
+
+                    if (debouncedSearch) {
+                        baseUrl += `&searchTerm=${encodeURIComponent(
+                            debouncedSearch
+                        )}`
+                    }
+
+                    const response = await api.get(baseUrl)
+                    setCompletedClasses(response.data.classes)
+                    setTotalStudents(response.data.total_items)
+                    setPages(response.data.total_pages)
+                    setLastPage(response.data.total_pages)
+                } catch (error) {
+                    console.error('Error getting completed classes:', error)
+                }
             }
-        }
-    }
+        },
+        [userID, selectedCourse?.id, debouncedSearch]
+    )
 
-    const getEnrolledCourses = async () => {
+    const getEnrolledCourses = useCallback(async () => {
         try {
             const response = await api.get(`/student/${userID}`)
             setEnrolledCourse(response.data)
@@ -82,33 +105,35 @@ function Page() {
         } catch (error) {
             console.error('Error getting enrolled courses:', error)
         }
-    }
+    }, [userID])
 
     const handleCourseChange = (selectedCourseId: any) => {
         const newSelectedCourse: any = enrolledCourse.find(
             (course) => course.id === selectedCourseId
         )
         setSelectedCourse(newSelectedCourse)
-        fetchRecordings(selectedCourseId)
     }
 
-    // use effects:-
+    // useEffects
     useEffect(() => {
         if (userID) {
             getEnrolledCourses()
         }
-    }, [userID])
+    }, [userID, getEnrolledCourses])
 
     useEffect(() => {
         if (selectedCourse?.id) {
-            fetchRecordings(selectedCourse.id)
+            fetchRecordings(offset)
         }
-    }, [selectedCourse?.id, userID])
+    }, [selectedCourse?.id, userID, fetchRecordings, offset])
 
+    const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearch(e.target.value)
+    }
     // JSX render:-
     return (
         <>
-            <div className="flex text-start">
+            <div className="flex flex-col gap-3 text-start">
                 <Select
                     onValueChange={(e) => {
                         handleCourseChange(e)
@@ -135,11 +160,28 @@ function Page() {
                         </SelectGroup>
                     </SelectContent>
                 </Select>
+                <Input
+                    value={search}
+                    onChange={handleSetSearch}
+                    className="w-1/5"
+                    placeholder="Search Class Recordings"
+                />
             </div>
 
             <div className=" mt-10 ">
                 <Recordings completedClasses={completedClasses} />
             </div>
+            <DataTablePagination
+                totalStudents={totalStudents}
+                position={position}
+                setPosition={setPosition}
+                pages={pages}
+                lastPage={lastPage}
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+                fetchStudentData={fetchRecordings}
+                setOffset={setOffset}
+            />
         </>
     )
 }

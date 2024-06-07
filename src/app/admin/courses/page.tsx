@@ -87,7 +87,7 @@ const Courses: React.FC = () => {
             toast({
                 title: 'Cannot Create A New Course',
                 description: 'Course Name Already Exists',
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-destructive',
             })
         } else {
             try {

@@ -136,7 +136,6 @@ function Page({ params }: { params: any }) {
                 // description: error.message,
                 className: 'text-start capitalize border border-destructive',
             })
-            console.error('Error saving changes:', error)
         }
     }
 

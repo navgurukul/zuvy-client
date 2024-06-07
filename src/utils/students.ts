@@ -29,6 +29,7 @@ export async function onBatchChange(
         toast({
             title: 'Cannot Update the Batch',
             description: 'Initial Batch And selected batch Are same',
+            className: 'text-start capitalize border border-destructive',
         })
     }
 
@@ -69,7 +70,7 @@ export async function deleteStudentHandler(
             toast({
                 title: res.data.status,
                 description: res.data.message,
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-secondary',
             })
             fetchStudentData(bootcampId, setStudentData)
         })

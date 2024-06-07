@@ -1,25 +1,21 @@
 import { cn, difficultyColor, ellipsis } from '@/lib/utils'
-import { PlusCircle } from 'lucide-react'
+import { PlusCircle, XCircle } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
 
 const SelectOpenEndedQuestions = ({
-    selectedOpenEndedQuestions,
     setSelectedQuestions,
     selectedQuestions,
 }: {
-    selectedOpenEndedQuestions: any
     setSelectedQuestions: any
     selectedQuestions: any
 }) => {
     return (
         <>
             <div className="w-full">
-                <h3>Open-Ended Question</h3>
-                {selectedOpenEndedQuestions.map((question: any) => (
-                    <>
+                {selectedQuestions.map((question: any) => (
+                    <React.Fragment key={question.id}>
                         <div
-                            key={question.id}
                             className={`p-5 rounded-sm border border-gray-200 mb-4`}
                         >
                             <div className="flex justify-between text-start items-center">
@@ -52,7 +48,7 @@ const SelectOpenEndedQuestions = ({
                                     </Link>
                                 </div>
                                 <div className="flex">
-                                    <PlusCircle
+                                    <XCircle
                                         onClick={() =>
                                             setSelectedQuestions(
                                                 selectedQuestions.filter(
@@ -61,13 +57,13 @@ const SelectOpenEndedQuestions = ({
                                                 )
                                             )
                                         }
-                                        className="text-secondary cursor-pointer"
+                                        className="text-destructive cursor-pointer"
                                         size={20}
                                     />
                                 </div>
                             </div>
                         </div>
-                    </>
+                    </React.Fragment>
                 ))}
             </div>
         </>

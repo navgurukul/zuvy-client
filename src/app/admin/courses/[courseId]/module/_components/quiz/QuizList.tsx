@@ -1,6 +1,6 @@
 import { Separator } from '@/components/ui/separator'
 import { PlusCircle } from 'lucide-react'
-import { difficultyColor } from '@/lib/utils'
+import { difficultyColor, ellipsis } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
@@ -14,7 +14,7 @@ function QuizList({
     handleAddQuestion: (questions: any[]) => void
 }) {
     return (
-        <ScrollArea className="h-[500px] w-full rounded-md border">
+        <ScrollArea className="h-[550px] w-full  ">
             {questionData.map((question: any) => {
                 const isSelected = addQuestion?.some(
                     (quest: any) => quest?.id === question.id
@@ -27,13 +27,13 @@ function QuizList({
                 }
                 return (
                     <div
-                        className="flex flex-col justify-between"
+                        // className="flex flex-col justify-between"
                         key={question.id}
                     >
-                        <div className="flex w-full justify-start gap-x-4 my-4">
+                        <div className="flex items-center justify-between gap-x-4 py-4">
                             <div className="flex justify-start items-center gap-x-5">
                                 <h1 className="scroll-m-20 text-4xl  font-semibold tracking-tight lg:text-lg">
-                                    {question.question}
+                                    {ellipsis(question.question, 40)}
                                 </h1>
                                 <span
                                     className={`font-semibold ${difficultyColor(
@@ -67,7 +67,7 @@ function QuizList({
                                 />
                             )}
                         </div>
-                        <Separator className="my-4" />
+                        {/* <Separator className="my-4" /> */}
                     </div>
                 )
             })}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 
 import Link from 'next/link'
 
@@ -25,18 +25,17 @@ import NewMcqProblemForm from '@/app/admin/resource/_components/NewMcqProblemFor
 import { api } from '@/utils/axios.config'
 import { Tag } from '@/app/admin/resource/mcq/page'
 import { toast } from '@/components/ui/use-toast'
-import { RequestBodyType } from '@/app/admin/resource/_components/NewMcqProblemForm'
+import { getAllQuizQuestion } from '@/utils/admin'
+import { getAllQuizData } from '@/store/store'
 
-interface QuizProps {
-    content: Object
-}
-
-function Quiz({ content }: QuizProps) {
+function Quiz(props: any) {
     const [activeTab, setActiveTab] = useState('anydifficulty')
     const [tags, setTags] = useState<Tag[]>([])
     const [isOpen, setIsOpen] = useState(false)
 
     const [addQuestion, setAddQuestion] = useState<quizData[]>([])
+    const [questionId, setQuestionId] = useState()
+    const { quizData, setStoreQuizData } = getAllQuizData()
 
     const handleAddQuestion = (data: any) => {
         const uniqueData = data.filter((question: quizData) => {
@@ -63,30 +62,47 @@ function Quiz({ content }: QuizProps) {
             prevQuestions.filter((question: any) => question.id !== questionId)
         )
     }
-
-    const handleCreateQuizQuestion = async (requestBody: RequestBodyType) => {
-        try {
-            const res = await api
-                .post(`/Content/quiz`, requestBody)
-                .then((res) => {
-                    // getAllQuizQuestion()
-                    toast({
-                        title: res.data.status || 'Success',
-                        description:
-                            res.data.message || 'Quiz Question Created',
-                        className:
-                            'text-start capitalize border border-secondary',
-                    })
-                })
-        } catch (error) {
-            toast({
-                title: 'Error',
-                description:
-                    'There was an error creating the quiz question. Please try again.',
-                className: 'text-start border border-destructive',
-            })
+    const saveQuizQUestionHandler = async () => {
+        const selecedtedId = addQuestion?.map((item) => item.id)
+        const transformedObject = {
+            quizQuestions: selecedtedId,
         }
+
+        await api
+            .put(
+                `/Content/editChapterOfModule/${props.moduleId}?chapterId=${props.chapterId}`,
+                transformedObject
+            )
+            .then((res: any) => {
+                toast({
+                    title: 'Success',
+                    description: res.message,
+                    className: 'text-start capitalize border border-secondary',
+                })
+            })
+            .catch((error: any) => {
+                toast({
+                    title: 'Error',
+                    description:
+                        'An error occurred while saving the chapter the chapter.',
+                    className:
+                        'text-start capitalize border border-destructive',
+                })
+            })
     }
+    const getAllSavedQuizQuestion = useCallback(async () => {
+        await api
+            .get(`/Content/chapterDetailsById/${props.chapterId}`)
+            .then((res) => {
+                setAddQuestion(res.data.quizQuestionDetails)
+            })
+    }, [props.chapterId])
+
+    useEffect(() => {
+        getAllTags()
+        getAllSavedQuizQuestion()
+    }, [getAllSavedQuizQuestion])
+    console.log(props)
     return (
         <>
             <div className="flex flex-row items-center justify-start gap-x-6 mb-10">
@@ -96,7 +112,7 @@ function Quiz({ content }: QuizProps) {
                 />
                 <Link
                     className="text-secondary font-semibold flex mt-2"
-                    href={''}
+                    href=""
                 >
                     Preview
                     <ExternalLink size={20} />
@@ -109,28 +125,34 @@ function Quiz({ content }: QuizProps) {
                     setActiveTab={setActiveTab}
                     addQuestion={addQuestion}
                     handleAddQuestion={handleAddQuestion}
+                    tags={tags}
                 />
                 <Separator
                     orientation="vertical"
-                    className="mx-4 w-[2px] h-screen rounded "
+                    className="mx-4 w-[2px] h-screen rounded"
                 />
-                <ScrollArea className="h-screen w-full rounded-md ">
-                    <div className="flex flex-col gap-y-4">
+                <ScrollArea className="h-screen w-full rounded-md">
+                    <div>
                         {addQuestion.map(
-                            (questions: quizData, index: number) => {
-                                return (
-                                    <QuizModal
-                                        key={index}
-                                        data={questions}
-                                        removeQuestionById={removeQuestionById}
-                                    />
-                                )
-                            }
+                            (questions: quizData, index: number) => (
+                                <QuizModal
+                                    key={index}
+                                    data={questions}
+                                    removeQuestionById={removeQuestionById}
+                                />
+                            )
                         )}
-                        <Dialog>
+                        {addQuestion.length > 0 && (
+                            <div className="text-end mt-2">
+                                <Button onClick={saveQuizQUestionHandler}>
+                                    Save
+                                </Button>
+                            </div>
+                        )}
+                        {/* <Dialog>
                             <DialogTrigger asChild>
                                 <Button
-                                    variant={'outline'}
+                                    variant="outline"
                                     className="text-secondary font-semibold"
                                 >
                                     Add Question
@@ -142,68 +164,56 @@ function Quiz({ content }: QuizProps) {
                                 </DialogHeader>
                                 <div className="w-full">
                                     <NewMcqProblemForm
-                                        handleCreateQuizQuestion={
-                                            handleCreateQuizQuestion
-                                        }
                                         tags={tags}
                                         closeModal={closeModal}
+                                        setStoreQuizData={setStoreQuizData}
+                                        getAllQuizQuesiton={getAllQuizQuestion}
                                     />
-                                </div>{' '}
+                                </div>
                             </DialogContent>
-                        </Dialog>
+                        </Dialog> */}
                     </div>
                 </ScrollArea>
 
-                <div>
-                    <div className="w-full mt-6">
-                        {' '}
-                        {content &&
+                {/* <div className="w-full mt-6">
+                    {content &&
+                        (
+                            content as {
+                                id: number
+                                question: string
+                                options: string[]
+                                correctOption: string
+                            }[]
+                        ).map(
                             (
-                                content as {
-                                    id: number
-                                    question: string
-                                    options: string[]
-                                    correctOption: string
-                                }[]
-                            )?.map(
-                                (
-                                    { id, question, options, correctOption },
-                                    index
-                                ) => {
-                                    return (
-                                        <div
-                                            key={id}
-                                            className="text-start mb-5"
-                                        >
-                                            <p>
-                                                Q{index + 1}. {question}
-                                            </p>
-                                            <ul className="text-start">
-                                                {Object.entries(options).map(
-                                                    ([key, value]) => {
-                                                        return (
-                                                            <li
-                                                                key={key}
-                                                                className={cn(
-                                                                    'rounded-sm my-1 p-2',
-                                                                    correctOption ===
-                                                                        key.toString()
-                                                                        ? 'bg-secondary text-white'
-                                                                        : ''
-                                                                )}
-                                                            >
-                                                                {value}
-                                                            </li>
-                                                        )
-                                                    }
-                                                )}
-                                            </ul>
-                                        </div>
-                                    )
-                                }
-                            )}
-                    </div>
-                </div>
+                                { id, question, options, correctOption },
+                                index
+                            ) => (
+                                <div key={id} className="text-start mb-5">
+                                    <p>
+                                        Q{index + 1}. {question}
+                                    </p>
+                                    <ul className="text-start">
+                                        {Object.entries(options).map(
+                                            ([key, value]) => (
+                                                <li
+                                                    key={key}
+                                                    className={`rounded-sm my-1 p-2 ${
+                                                        correctOption ===
+                                                        key.toString()
+                                                            ? 'bg-secondary text-white'
+                                                            : ''
+                                                    }`}
+                                                >
+                                                    {value}
+                                                </li>
+                                            )
+                                        )}
+                                    </ul>
+                                </div>
+                            )
+                        )}
+                </div> */}
             </div>
         </>
     )

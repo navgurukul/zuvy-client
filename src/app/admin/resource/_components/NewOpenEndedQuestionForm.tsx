@@ -197,6 +197,7 @@ function NewOpenEndedQuestionForm({
                                     <FormControl>
                                         <Input
                                             type="number"
+                                            min="0"
                                             placeholder="Enter the Marks for the Question"
                                             {...field}
                                         />

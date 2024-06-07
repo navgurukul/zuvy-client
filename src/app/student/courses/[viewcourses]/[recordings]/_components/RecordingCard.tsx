@@ -82,7 +82,7 @@ function RecordingCard({
             toast({
                 title: 'Recording not yet updated',
                 variant: 'default',
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-destructive',
             })
         }
     }
@@ -120,7 +120,7 @@ function RecordingCard({
             toast({
                 title: 'Error fetching attendance data',
                 variant: 'default',
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-destructive',
             })
         }
     }

@@ -1,5 +1,5 @@
 import { toast } from '@/components/ui/use-toast'
-import {api} from '@/utils/axios.config'
+import { api } from '@/utils/axios.config'
 
 export function handleDelete(
     deleteCodingQuestionId: any,
@@ -17,7 +17,7 @@ export function handleDelete(
             toast({
                 title: 'Success',
                 description: res.data.message,
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-secondary',
             })
             getAllCodingQuestions(setCodingQuestions)
         })
@@ -26,7 +26,7 @@ export function handleDelete(
                 title: 'Error',
                 description:
                     error.response?.data?.message || 'An error occurred',
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-destructive',
             })
         })
 }
@@ -47,7 +47,7 @@ export function deleteOpenEndedQuestion(
             toast({
                 title: 'Success',
                 description: res.data.message,
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-secondary',
             })
             getAllOpenEndedQuestions(setOpenEndedQuestions)
         })
@@ -56,7 +56,7 @@ export function deleteOpenEndedQuestion(
                 title: 'Error',
                 description:
                     error?.response?.data?.message || 'An error occurred',
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-destructive',
             })
         })
 }
@@ -109,7 +109,7 @@ export function handleQuizDelete(
             toast({
                 title: 'Success',
                 description: res.data.message,
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-secondary',
             })
             getAllQUizQuestions(setQuizQuestions)
         })
@@ -118,7 +118,7 @@ export function handleQuizDelete(
                 title: 'Error',
                 description:
                     error.response?.data?.message || 'An error occurred',
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-destructive',
             })
         })
 }
@@ -167,29 +167,53 @@ export const getAllOpenEndedQuestions = async (
     }
 }
 
-export const handleEditOpenEndedQuestion = (openEndedQuestion:any, setIsOpenEndDialogOpen:any, setEditOpenEndedQuestionId:any) => {
+export const handleEditOpenEndedQuestion = (
+    openEndedQuestion: any,
+    setIsOpenEndDialogOpen: any,
+    setEditOpenEndedQuestionId: any
+) => {
     setIsOpenEndDialogOpen(true)
     setEditOpenEndedQuestionId(openEndedQuestion.id)
 }
-export const handleEditCodingQuestion = (codingQuestion:any, setIsCodingDialogOpen:any, setEditCodingQuestionId:any) => {
+export const handleEditCodingQuestion = (
+    codingQuestion: any,
+    setIsCodingDialogOpen: any,
+    setEditCodingQuestionId: any
+) => {
     setIsCodingDialogOpen(true)
     setEditCodingQuestionId(codingQuestion.id)
 }
+export const handlerQuizQuestions = (
+    quizQuestion: any,
+    setIsEditModalOpen: any,
+    setIsQuizQuestionId: any
+) => {
+    setIsEditModalOpen(true)
+    setIsQuizQuestionId(quizQuestion.id)
+}
 
-export async function getAllTags(setTags:any) {
+export async function getAllTags(setTags: any) {
     const response = await api.get('Content/allTags')
     if (response) {
         setTags(response.data.allTags)
     }
 }
-// ----------------------
-export async function filteredCodingQuestions(setFilteredQuestions: any, selectedDifficulty: string, selectedTopic: string, selectedLanguage: string) {
+// --------------------------------------------
+// AddAssessment.tsx functions:-
+export async function filteredCodingQuestions(
+    setFilteredQuestions: any,
+    selectedDifficulty: string,
+    selectedTopic: string,
+    selectedLanguage: string
+) {
     try {
         const response = await api.get('/Content/allCodingQuestions')
-        const filtered = response.data.filter((question: any) =>
-            (selectedDifficulty === 'Any Difficulty' || question.difficulty === selectedDifficulty) &&
-            (selectedTopic === 'All Topics' || question.tags.includes(selectedTopic)) &&
-            (selectedLanguage === 'All Languages' || question.language === selectedLanguage)
+        const filtered = response.data.filter(
+            (question: any) =>
+                selectedDifficulty === 'Any Difficulty' ||
+                question.difficulty === selectedDifficulty
+            // &&(selectedTopic === 'All Topics' || question.tags.includes(selectedTopic)) &&
+            // (selectedLanguage === 'All Languages' || question.language === selectedLanguage)
         )
         setFilteredQuestions(filtered)
     } catch (error) {
@@ -197,13 +221,20 @@ export async function filteredCodingQuestions(setFilteredQuestions: any, selecte
     }
 }
 
-export async function filteredQuizQuestions(setFilteredQuestions: any, selectedDifficulty: string, selectedTopic: string, selectedLanguage: string) {
+export async function filteredQuizQuestions(
+    setFilteredQuestions: any,
+    selectedDifficulty: string,
+    selectedTopic: string,
+    selectedLanguage: string
+) {
     try {
         const response = await api.get('/Content/allQuizQuestions')
-        const filtered = response.data.filter((question: any) =>
-            (selectedDifficulty === 'Any Difficulty' || question.difficulty === selectedDifficulty) &&
-            (selectedTopic === 'All Topics' || question.tags.includes(selectedTopic)) &&
-            (selectedLanguage === 'All Languages' || question.language === selectedLanguage)
+        const filtered = response.data.filter(
+            (question: any) =>
+                selectedDifficulty === 'Any Difficulty' ||
+                question.difficulty === selectedDifficulty
+            // &&(selectedTopic === 'All Topics' || question.tags.includes(selectedTopic)) &&
+            // (selectedLanguage === 'All Languages' || question.language === selectedLanguage)
         )
         setFilteredQuestions(filtered)
     } catch (error) {
@@ -211,15 +242,33 @@ export async function filteredQuizQuestions(setFilteredQuestions: any, selectedD
     }
 }
 
-export async function filteredOpenEndedQuestions(setFilteredQuestions: any, selectedDifficulty: string, selectedTopic: string, selectedLanguage: string) {
+export async function filteredOpenEndedQuestions(
+    setFilteredQuestions: any,
+    selectedDifficulty: string,
+    selectedTopic: string,
+    selectedLanguage: string
+) {
     try {
         const response = await api.get('/Content/openEndedQuestions')
-        const filtered = response.data.data.filter((question: any) =>
-            (selectedDifficulty === 'Any Difficulty' || question.difficulty === selectedDifficulty) &&
-            (selectedTopic === 'All Topics' || question.tags.includes(selectedTopic)) &&
-            (selectedLanguage === 'All Languages' || question.language === selectedLanguage)
+        const filtered = response.data.data.filter(
+            (question: any) =>
+                selectedDifficulty === 'Any Difficulty' ||
+                question.difficulty === selectedDifficulty
+            // && (selectedTopic === 'All Topics' || question.tags.includes(selectedTopic)) &&
+            // (selectedLanguage === 'All Languages' || question.language === selectedLanguage)
         )
         setFilteredQuestions(filtered)
+    } catch (error) {
+        console.error('Error:', error)
+    }
+}
+
+export async function getChapterDetailsById(chapterId: any, setChapter: any) {
+    try {
+        const response = await api.get(
+            `Content/chapterDetailsById/${chapterId}`
+        )
+        setChapter(response.data)
     } catch (error) {
         console.error('Error:', error)
     }

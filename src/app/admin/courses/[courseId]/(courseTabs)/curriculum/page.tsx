@@ -77,7 +77,7 @@ function Page() {
                 toast({
                     title: 'Success',
                     description: 'Module Created Successfully',
-                    className: 'text-start capitalize',
+                    className: 'text-start capitalize border border-secondary',
                 })
                 fetchCourseModules()
             })
@@ -85,7 +85,8 @@ function Page() {
                 toast({
                     title: 'Error',
                     description: 'Error creating module',
-                    className: 'text-start capitalize',
+                    className:
+                        'text-start capitalize border border-destructive',
                 })
             })
     }
@@ -182,7 +183,13 @@ function Page() {
                             (item: CurriculumItem, index: number) => (
                                 <div key={item.id}>
                                     <Reorder.Item value={item} key={item.id}>
-                                        <div className="bg-gradient-to-bl my-3 p-3 from-blue-50 to-violet-50 flex rounded-xl  ">
+                                        <div
+                                            className={`${
+                                                item.typeId === 2
+                                                    ? 'bg-yellow/50'
+                                                    : 'bg-muted'
+                                            } my-3 p-3  flex rounded-xl`}
+                                        >
                                             <CurricullumCard
                                                 moduleId={item.id}
                                                 courseId={courseData?.id ?? 0}

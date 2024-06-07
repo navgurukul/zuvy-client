@@ -120,6 +120,8 @@ const Page = ({ params }: { params: any }) => {
                 toast({
                     title: 'Cannot Create New Batch',
                     description: 'This Batch Name Already Exists',
+                    className:
+                        'text-start capitalize border border-destructive',
                 })
             } else {
                 const res = await api.post(`/batch`, convertedData)
@@ -199,6 +201,8 @@ const Page = ({ params }: { params: any }) => {
                                             title: 'Failed',
                                             description:
                                                 'Entered Corect values',
+                                            className:
+                                                'text-start capitalize border border-destructive',
                                         })
                                     }
                                     className="space-y-8"
