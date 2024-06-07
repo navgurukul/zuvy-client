@@ -98,7 +98,7 @@ function Page({}: any) {
 
     const getEnrolledCourses = useCallback(async () => {
         try {
-            const response = await api.get(`/student/${userID}`)
+            const response = await api.get(`/student`)
             setEnrolledCourse(response.data)
             setSelectedCourse(response.data[0]) // Preselect the first course
         } catch (error) {
@@ -130,7 +130,7 @@ function Page({}: any) {
         setSearch(e.target.value)
     }
     // JSX render:-\
-    // console.log(enrolledCourse)
+    console.log(completedClasses)
     return (
         <>
             <div className="flex flex-col gap-3 text-start">
