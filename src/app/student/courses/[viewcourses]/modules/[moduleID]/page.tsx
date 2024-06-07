@@ -55,7 +55,7 @@ function Page({ params }: any) {
     ]
 
     // func
-    const fetchChapters = async () => {
+    const fetchChapters = useCallback(async () => {
         try {
             const response = await api.get(
                 `tracking/getAllChaptersWithStatus/${moduleID}`
@@ -70,7 +70,7 @@ function Page({ params }: any) {
         } catch (error) {
             console.log(error)
         }
-    }
+    }, [])
 
     const fetchChapterContent = useCallback(
         async (chapterId: number) => {
@@ -87,7 +87,7 @@ function Page({ params }: any) {
                 console.error('Error fetching chapter content:', error)
             }
         },
-        [chapters, userID]
+        [userID]
     )
 
     const completeChapter = () => {
@@ -137,7 +137,7 @@ function Page({ params }: any) {
         if (userID) {
             fetchChapters()
         }
-    }, [userID])
+    }, [userID, fetchChapters])
 
     console.log(params)
     return (
