@@ -2,7 +2,7 @@
 
 import ChapterItem from '@/app/admin/courses/[courseId]/module/_components/ChapterItem'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { useLazyLoadedStudentData } from '@/store/store'
+import { getParamBatchId, useLazyLoadedStudentData } from '@/store/store'
 import { api } from '@/utils/axios.config'
 import React, { useCallback, useEffect, useState } from 'react'
 import StudentChapterItem from '../../../_components/StudentChapterItem'
@@ -27,6 +27,7 @@ function Page({ params }: any) {
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
     const { viewcourses, moduleID } = useParams()
+    const { paramBatchId } = getParamBatchId()
 
     // state and variables
     const [chapters, setChapters] = useState([])
@@ -44,7 +45,7 @@ function Page({ params }: any) {
         },
         {
             crumb: 'Curriculum',
-            href: `/student/courses/${viewcourses}`,
+            href: `/student/courses/${viewcourses}/batch/${paramBatchId}`,
             isLast: false,
         },
         {
@@ -138,7 +139,7 @@ function Page({ params }: any) {
         }
     }, [userID])
 
-    // console.log(params)
+    console.log(params)
     return (
         <>
             <BreadcrumbComponent crumbs={crumbs} />

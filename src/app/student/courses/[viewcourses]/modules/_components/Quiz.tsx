@@ -17,6 +17,7 @@ type Props = {
 
 function Quiz(props: Props) {
     const [questions, setQuestions] = useState<any[]>([])
+    const [status, setStatus] = useState<boolean>(false)
     const [selectedAnswers, setSelectedAnswers] = useState<{
         [key: number]: string
     }>({})
@@ -60,18 +61,21 @@ function Quiz(props: Props) {
         const transformedBody = {
             submitQuiz: mappedAnswers,
         }
-        await api
-            .post(
-                `/tracking/updateQuizAndAssignmentStatus/${props.bootcampId}/${props.moduleId}?chapterId=${props.chapterId}`,
-                transformedBody
-            )
-            .then(() => {
-                toast({
-                    title: 'Success',
-                    description: 'Submitted Quiz Successfully',
-                })
-            })
+        console.log(transformedBody)
+        // await api
+        //     .post(
+        //         `/tracking/updateQuizAndAssignmentStatus/${props.bootcampId}/${props.moduleId}?chapterId=${props.chapterId}`,
+        //         transformedBody
+        //     )
+        //     .then(() => {
+        //         toast({
+        //             title: 'Success',
+        //             description: 'Submitted Quiz Successfully',
+        //         })
+        //     })
     }
+
+    console.log(questions)
     return (
         <div>
             <ScrollArea className="h-screen w-full   rounded-md">
@@ -80,43 +84,134 @@ function Quiz(props: Props) {
                         <h1 className="text-xl font-semibold">
                             {props.content.title}
                         </h1>
-                        <h2 className="text-red-600">
-                            Please complete all the questions and then submit.
-                        </h2>
-                        {questions.map((question, index) => (
-                            <div key={question.id}>
-                                <h1 className="font-semibold">
-                                    {'Q'}
-                                    {index + 1} .{question.question}
-                                </h1>
-                                <div className="flex flex-col items-start">
-                                    {Object.entries(question.options).map(
-                                        ([optionId, optionText]) => (
-                                            <div key={optionId} className="">
-                                                <label
-                                                    key={optionId}
-                                                    className=" mt-2 flex items-center  "
-                                                >
-                                                    <Input
-                                                        type="radio"
-                                                        name={`question_${question.id}`}
-                                                        value={optionId}
-                                                        className="m-5 w-3 h-3  text-black bg-secondary"
-                                                        onChange={() =>
-                                                            handleCorrectQuizQuestion(
-                                                                question.id,
-                                                                optionId
-                                                            )
-                                                        }
-                                                    />
-                                                    {String(optionText)}
-                                                </label>
-                                            </div>
-                                        )
-                                    )}
-                                </div>
-                            </div>
-                        ))}
+                        {!status ? (
+                            <h2 className="text-red-600">
+                                Please complete all the questions and then
+                                submit.
+                            </h2>
+                        ) : (
+                            <h1 className=" text-lg text-secondary font-semibold">
+                                You have already submitted this Quiz
+                            </h1>
+                        )}
+                        {status
+                            ? questions.map((question, index) => (
+                                  <div key={question.id}>
+                                      <h1 className="font-semibold my-3">
+                                          {'Q'}
+                                          {index + 1} .{question.question}
+                                      </h1>
+                                      <div className="flex flex-col items-start">
+                                          {Object.entries(question.options).map(
+                                              ([optionId, optionText]) => (
+                                                  <div
+                                                      key={optionId}
+                                                      className="flex items-center gap-5"
+                                                  >
+                                                      <input
+                                                          type="radio"
+                                                          name={`question_${question.id}`}
+                                                          value={optionId}
+                                                          className="m-4 w-4 h-4 text-secondary focus:ring-secondary-500"
+                                                          checked={
+                                                              question.status ===
+                                                                  'pass' ||
+                                                              question.status ===
+                                                                  'fail' ||
+                                                              question.status ===
+                                                                  'done'
+                                                                  ? question.correctOption ===
+                                                                    Number(
+                                                                        optionId
+                                                                    )
+                                                                  : selectedAnswers[
+                                                                        question
+                                                                            .id
+                                                                    ] ===
+                                                                    optionId
+                                                          }
+                                                          onChange={() =>
+                                                              handleCorrectQuizQuestion(
+                                                                  question.id,
+                                                                  optionId
+                                                              )
+                                                          }
+                                                          disabled={
+                                                              question.status ===
+                                                                  'pass' ||
+                                                              question.status ===
+                                                                  'fail' ||
+                                                              question.status ===
+                                                                  'done'
+                                                          }
+                                                      />
+                                                      <label
+                                                          key={optionId}
+                                                          className="m-4 flex items-center"
+                                                      >
+                                                          {String(optionText)}
+                                                      </label>
+                                                  </div>
+                                              )
+                                          )}
+                                          {(question.status === 'pass' ||
+                                              question.status === 'fail' ||
+                                              question.status === 'done') && (
+                                              <p
+                                                  className={`mt-2 ${
+                                                      question.status === 'fail'
+                                                          ? 'text-red-600'
+                                                          : 'text-secondary'
+                                                  }`}
+                                              >
+                                                  Chosen Option:{' '}
+                                                  {
+                                                      question.options[
+                                                          question.chosenOption
+                                                      ]
+                                                  }
+                                              </p>
+                                          )}
+                                      </div>
+                                  </div>
+                              ))
+                            : questions.map((question, index) => (
+                                  <div key={question.id}>
+                                      <h1 className="font-semibold my-3">
+                                          {'Q'}
+                                          {index + 1} .{question.question}
+                                      </h1>
+                                      <div className="flex flex-col items-start">
+                                          {Object.entries(question.options).map(
+                                              ([optionId, optionText]) => (
+                                                  <div
+                                                      key={optionId}
+                                                      className="flex items-center gap-5"
+                                                  >
+                                                      <input
+                                                          type="radio"
+                                                          name={`question_${question.id}`}
+                                                          value={optionId}
+                                                          className="m-4 w-4 h-4 text-secondary "
+                                                          onChange={() =>
+                                                              handleCorrectQuizQuestion(
+                                                                  question.id,
+                                                                  optionId
+                                                              )
+                                                          }
+                                                      />
+                                                      <label
+                                                          key={optionId}
+                                                          className="m-4 flex items-center  "
+                                                      >
+                                                          {String(optionText)}
+                                                      </label>
+                                                  </div>
+                                              )
+                                          )}
+                                      </div>
+                                  </div>
+                              ))}
                     </div>
                 </div>
             </ScrollArea>

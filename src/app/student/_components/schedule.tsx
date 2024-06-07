@@ -154,7 +154,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                         </p>
                     </div>
                 )}
-                <div className="w-1/2 h-full p-6 bg-gray-100 rounded-lg items-center justify-center ">
+                <div className="w-1/3 h-full p-6 bg-gray-100 rounded-lg items-center justify-center ">
                     <h1 className=" text-xl text-start font-semibold">
                         Attendance
                     </h1>
@@ -215,9 +215,25 @@ function Schedule({ className, ...props }: ScheduleProps) {
                     Upcoming Submission
                 </h1>
                 <div className="w-[800px]">
-                    {submission.map((data) => {
-                        return <SubmissionCard classData={data} key={data} />
-                    })}
+                    {submission.length > 0 ? (
+                        submission.map((data) => {
+                            return (
+                                <SubmissionCard classData={data} key={data} />
+                            )
+                        })
+                    ) : (
+                        <div className="flex w-full flex-col items-center mt-12">
+                            <Image
+                                src="/no-class.svg"
+                                alt="No Submission"
+                                width={240}
+                                height={240}
+                            />
+                            <p className="text-md font-semibold">
+                                There are no upcoming Submission
+                            </p>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

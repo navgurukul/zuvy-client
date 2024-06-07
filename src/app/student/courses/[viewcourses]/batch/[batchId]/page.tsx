@@ -10,7 +10,7 @@ import {
     BreadcrumbList,
     BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
-import { useLazyLoadedStudentData } from '@/store/store'
+import { getParamBatchId, useLazyLoadedStudentData } from '@/store/store'
 import { BreadcrumbItem, CircularProgress } from '@nextui-org/react'
 import Loader from '../../../_components/Loader'
 import Image from 'next/image'
@@ -51,8 +51,8 @@ function Page({
     const [courseProgress, setCourseProgress] = useState<CourseProgress | null>(
         null
     )
-    const [instructorDetails, setInstructorDetails] =
-        useState<InstructorDetailsState>(initialInstructorDetailsState)
+    const { setIsParamBatchId } = getParamBatchId()
+    const [instructorDetails, setInstructorDetails] = useState<any>()
     const [upcomingClasses, setUpcomingClasses] = useState([])
     const [ongoingClasses, setOngoingClasses] = useState([])
     const [submission, setSubmission] = useState<any[]>([])
@@ -67,6 +67,8 @@ function Page({
             isLast: true,
         },
     ]
+
+    // setIsParamBatchId(params.batchId)
     const getUpcomingClassesHandler = useCallback(async () => {
         await api
             .get(
@@ -76,7 +78,7 @@ function Page({
                 setUpcomingClasses(res.data.upcoming)
                 setOngoingClasses(res.data.ongoing)
             })
-    }, [])
+    }, [params.batchId])
     const getAttendanceHandler = useCallback(async () => {
         await api.get(`/student/Dashboard/attendance`).then((res) => {
             setAttendenceData(res.data)
@@ -97,6 +99,7 @@ function Page({
                 getUpcomingSubmissionHandler(),
             ])
         }
+        setIsParamBatchId(params.batchId)
 
         fetchData()
     }, [
@@ -148,13 +151,15 @@ function Page({
                 )
                 setCourseProgress(response.data.data)
                 setInstructorDetails(response.data.instructorDetails)
-                console.log('first', response.data.instructorDetails)
+                // console.log('first', response.data.instructorDetails)
             } catch (error) {
                 console.error('Error getting course progress:', error)
             }
         }
         if (userID) getCourseProgress()
-    }, [userID])
+    }, [userID, params.viewcourses])
+
+    // console.log(instructorDetails)
 
     return (
         <MaxWidthWrapper>
@@ -307,14 +312,18 @@ function Page({
                                 Upcoming Submission
                             </h1>
                             <div className="w-[800px]">
-                                {submission.map((data) => {
-                                    return (
-                                        <SubmissionCard
-                                            classData={data}
-                                            key={data}
-                                        />
-                                    )
-                                })}
+                                {submission.length > 0 ? (
+                                    submission.map((data) => {
+                                        return (
+                                            <SubmissionCard
+                                                classData={data}
+                                                key={data}
+                                            />
+                                        )
+                                    })
+                                ) : (
+                                    <div>No upcoming Submission</div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -384,36 +393,41 @@ function Page({
                             Instructor
                         </h1>
                     </div>
-                    <div className="bg-gradient-to-bl p-3 from-blue-50 to-violet-50 flex rounded-xl  ">
-                        <div className="flex flex-col items-center justify-center p-4 gap-3">
-                            <Image
-                                src={
-                                    instructorDetails[0]?.instructorPicture ||
-                                    'https://avatar.iran.liara.run/public/boy?username=Ash'
-                                }
-                                className="rounded-full "
-                                alt="instructor profile pic"
-                                width={40}
-                                height={10}
-                            />
-                            <span className="text-lg font-semibold">
-                                {instructorDetails[0]?.instructorName}
-                            </span>
-                            <p>
-                                Ask doubts or general questions about the
-                                programs anytime and get answers within a few
-                                hours
-                            </p>
-                            <Button
-                                disabled
-                                className="px-4 py-2 rounded-lg mt-2 w-[200px] "
-                            >
-                                Start New Chat
-                            </Button>
-                            {/* <Button disabled className="px-4 py-2 rounded-lg mt-2 w-[200px] ">
-                View Past Chat
-              </Button> */}
-                        </div>
+                    <div className="bg-gradient-to-bl p-3 from-blue-50 to-violet-50 flex rounded-xl">
+                        {instructorDetails ? (
+                            <div className="flex flex-col items-center justify-center p-4 gap-3">
+                                <Image
+                                    src={
+                                        instructorDetails.instructorProfilePicture ||
+                                        'https://avatar.iran.liara.run/public/boy?username=Ash'
+                                    }
+                                    className="rounded-full "
+                                    alt="instructor profile pic"
+                                    width={40}
+                                    height={10}
+                                />
+                                <span className="text-lg font-semibold">
+                                    {instructorDetails.instructorName}
+                                </span>
+                                <p>
+                                    Ask doubts or general questions about the
+                                    programs anytime and get answers within a
+                                    few hours
+                                </p>
+                                <Button
+                                    disabled
+                                    className="px-4 py-2 rounded-lg mt-2 w-[200px] "
+                                >
+                                    Start New Chat
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className="flex items-center justify-center p-4 gap-3">
+                                <p className="text-lg font-semibold">
+                                    Instructor details not available
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     {/* <div className="flex flex-start">
