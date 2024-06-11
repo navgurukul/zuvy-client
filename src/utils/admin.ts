@@ -149,7 +149,14 @@ export const handleQuizConfirm = (
 
 export async function getAllQuizQuestion(setQuizQuestion: any) {
     try {
-        const response = await api.get('Content/allQuizQuestions')
+        let url = `/Content/allQuizQuestions`
+        const storedTag = localStorage.getItem('currentTag')
+        const tag = storedTag !== null && JSON.parse(storedTag)
+        const tagId = tag && tag.id
+        if (tagId && tagId !== -1) {
+            url = `/Content/allQuizQuestions?tagId=${tagId}`
+        }
+        const response = await api.get(url)
         setQuizQuestion(response.data)
     } catch (error) {
         console.error(error)
@@ -228,7 +235,14 @@ export async function filteredQuizQuestions(
     selectedLanguage: string
 ) {
     try {
-        const response = await api.get('/Content/allQuizQuestions')
+        let url = `/Content/allQuizQuestions`
+        const storedTag = localStorage.getItem('currentTag')
+        const tag = storedTag !== null && JSON.parse(storedTag)
+        const tagId = tag && tag.id
+        if (tagId && tagId !== -1) {
+            url = `/Content/allQuizQuestions?tagId=${tagId}`
+        }
+        const response = await api.get(url)
         const filtered = response.data.filter(
             (question: any) =>
                 selectedDifficulty === 'Any Difficulty' ||
