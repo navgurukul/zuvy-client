@@ -46,26 +46,17 @@ const Mcqs = (props: Props) => {
     const debouncedSearch = useDebounce(search, 1000)
     const [difficulty, setDifficulty] = useState<string>('')
     const { tags, setTags } = getCodingQuestionTags()
-    const storedTag = localStorage.getItem('currentTag')
-    const [selectedTag, setSelectedTag] = useState(
-        storedTag !== null
-            ? JSON.parse(storedTag)
-            : { tagName: 'AllTopics', id: -1 }
-    )
-    // const [selectedTag, setSelectedTag] = useState(() => {
-    //     if (typeof window !== 'undefined') {
-    //         const storedTag = localStorage.getItem('currentTag')
-    //         return storedTag !== null
-    //             ? JSON.parse(storedTag)
-    //             : { tagName: 'AllTopics', id: -1 }
-    //     }
-    //     return { tagName: 'AllTopics', id: -1 }
-    // })
-    // const [selectedTag, setSelectedTag] = useState({
-    //     tagName: 'AllTopics',
-    //     id: -1,
-    // })
     const { quizData, setStoreQuizData } = getAllQuizData()
+    const [selectedTag, setSelectedTag] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const storedTag = localStorage.getItem('currentTag')
+            return storedTag !== null
+                ? JSON.parse(storedTag)
+                : { tagName: 'AllTopics', id: -1 }
+        }
+        return { tagName: 'AllTopics', id: -1 }
+    })
+
     const handleTopicClick = (tag: Tag) => {
         setSelectedTag(tag)
         const currentTag = JSON.stringify(tag)
@@ -76,14 +67,6 @@ const Mcqs = (props: Props) => {
     const handleSetsearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value)
     }
-
-    // useEffect(() => {
-    //     const storedTag = localStorage.getItem('currentTag')
-    //     // storedTag !== null
-    //     //     ? JSON.parse(storedTag)
-    //     if (storedTag !== null) setSelectedTag(JSON.parse(storedTag))
-    //     // setSelectedTag(storedTag)
-    // }, [])
 
     async function getAllTags() {
         const response = await api.get('Content/allTags')
