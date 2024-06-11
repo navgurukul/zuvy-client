@@ -42,7 +42,8 @@ import { api } from '@/utils/axios.config'
 import { StudentData } from '../../(courseTabs)/students/page'
 import useDebounce from '@/hooks/useDebounce'
 import { DataTable } from '@/app/_components/datatable/data-table'
-
+import CircularLoader from '@/components/ui/circularLoader'
+import { CircularProgress } from '@nextui-org/react'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import BreadcrumbCmponent from '@/app/_components/breadcrumbCmponent'
 
@@ -70,6 +71,7 @@ const BatchesInfo = ({
     const [isFormOpen, setIsFormOpen] = useState(false)
     const [error, setError] = useState(true)
     const debouncedValue = useDebounce(search, 1000)
+    const [loading, setLoading] = useState(true)
 
     const crumbs = [
         {
@@ -241,6 +243,7 @@ const BatchesInfo = ({
                     setLastPage(response.data.totalPages)
                     setPages(response.data.totalPages)
                     setTotalStudents(response.data.totalStudentsCount)
+                    setLoading(false)
                 })
         },
         [
@@ -256,7 +259,9 @@ const BatchesInfo = ({
     useEffect(() => {
         fetchStudentData(offset)
     }, [offset, position, fetchStudentData])
+
     useEffect(() => {
+        setLoading(true)
         const searchBatchStudentsHandler = async () => {
             await api
                 .get(
@@ -264,6 +269,7 @@ const BatchesInfo = ({
                 )
                 .then((res) => {
                     setStoreStudentData(res.data.data[1].studentsEmails)
+                    setLoading(false)
                 })
         }
 
@@ -606,7 +612,42 @@ const BatchesInfo = ({
                         </div>
                     </div>
                 </div>
-                <DataTable columns={columns} data={studentsData} />
+                {loading ? (
+                    <div className="flex justify-center">
+                        {/* <CircularLoader />
+                        <CircularProgress
+                            color="success"
+                            aria-label="Loading..."
+                        /> */}
+                        <CircularProgress
+                            classNames={{
+                                svg: 'w-11 h-11',
+                                indicator: 'text-secondary',
+                                track: 'stroke-white',
+                                value: 'text-sm font-bold',
+                            }}
+                            value={90}
+                            strokeWidth={4}
+                            // showValueLabel={true}
+                        />
+                    </div>
+                ) : (
+                    <div>
+                        <DataTable columns={columns} data={studentsData} />
+                        <DataTablePagination
+                            totalStudents={totalStudents}
+                            position={position}
+                            setPosition={setPosition}
+                            pages={pages}
+                            lastPage={lastPage}
+                            currentPage={currentPage}
+                            setCurrentPage={setCurrentPage}
+                            fetchStudentData={fetchStudentData}
+                            setOffset={setOffset}
+                        />
+                    </div>
+                )}
+                {/* <DataTable columns={columns} data={studentsData} />
 
                 <DataTablePagination
                     totalStudents={totalStudents}
@@ -618,7 +659,7 @@ const BatchesInfo = ({
                     setCurrentPage={setCurrentPage}
                     fetchStudentData={fetchStudentData}
                     setOffset={setOffset}
-                />
+                /> */}
             </MaxWidthWrapper>
         </>
     )

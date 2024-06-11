@@ -12,6 +12,7 @@ import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import NewModuleDialog from '@/app/admin/courses/[courseId]/_components/newModuleDialog'
 import { Reorder } from 'framer-motion'
 import { toast } from '@/components/ui/use-toast'
+import { CircularProgress } from '@nextui-org/react'
 
 interface CurriculumItem {
     id: number
@@ -32,6 +33,7 @@ function Page() {
     const [curriculum, setCurriculum] = useState([])
     const { courseData } = getCourseData()
     const [typeId, setTypeId] = useState(0)
+    const [loading, setLoading] = useState(true)
 
     const [moduleData, setModuleData] = useState({
         name: '',
@@ -97,6 +99,7 @@ function Page() {
                 `/content/allModules/${courseData?.id}`
             )
             setCurriculum(response.data)
+            setLoading(false)
         } catch (error) {
             toast({
                 title: 'Error',
@@ -172,88 +175,104 @@ function Page() {
                     </Dialog>
                 </div>
             )}
-            <div className="flex flex-col items-center justify-center">
-                {curriculum.length > 0 ? (
-                    <Reorder.Group
-                        className="w-1/2"
-                        values={curriculum}
-                        onReorder={handleReorderModules}
-                    >
-                        {curriculum.map(
-                            (item: CurriculumItem, index: number) => (
-                                <div key={item.id}>
+            {loading ? (
+                <div className="flex justify-center">
+                    <CircularProgress
+                        classNames={{
+                            svg: 'w-11 h-11',
+                            indicator: 'text-secondary',
+                            track: 'stroke-white',
+                            value: 'text-sm font-bold',
+                        }}
+                        value={90}
+                        strokeWidth={4}
+                        // showValueLabel={true}
+                    />
+                </div>
+            ) : (
+                <div className="flex flex-col items-center justify-center">
+                    {curriculum.length > 0 ? (
+                        <Reorder.Group
+                            className="w-1/2"
+                            values={curriculum}
+                            onReorder={handleReorderModules}
+                        >
+                            {curriculum.map(
+                                (item: CurriculumItem, index: number) => (
+                                    <div key={item.id}>
                                     <Reorder.Item value={item} key={item.id}>
-                                        <div
-                                            className={`${
-                                                item.typeId === 2
-                                                    ? 'bg-yellow/50'
-                                                    : 'bg-muted'
-                                            } my-3 p-3  flex rounded-xl`}
-                                        >
-                                            <CurricullumCard
-                                                moduleId={item.id}
+                                            <div
+                                                className={`${
+                                                    item.typeId === 2
+                                                        ? 'bg-yellow/50'
+                                                        : 'bg-muted'
+                                                } my-3 p-3  flex rounded-xl`}
+                                            >
+                                                <CurricullumCard
+                                                    moduleId={item.id}
                                                 courseId={courseData?.id ?? 0}
-                                                order={item.order}
-                                                name={item.name}
+                                                    order={item.order}
+                                                    name={item.name}
                                                 description={item.description}
-                                                index={index}
-                                                quizCount={item.quizCount}
-                                                assignmentCount={
-                                                    item.assignmentCount
-                                                }
+                                                    index={index}
+                                                    quizCount={item.quizCount}
+                                                    assignmentCount={
+                                                        item.assignmentCount
+                                                    }
                                                 timeAlloted={item.timeAlloted}
-                                                codingProblemsCount={
-                                                    item.codingProblemsCount
-                                                }
-                                                articlesCount={
-                                                    item.articlesCount
-                                                }
-                                                typeId={item?.typeId}
-                                                fetchCourseModules={
-                                                    fetchCourseModules
-                                                }
-                                                projectId={item.projectId}
-                                            />
-                                        </div>
-                                    </Reorder.Item>
-                                </div>
-                            )
-                        )}
-                    </Reorder.Group>
-                ) : (
-                    <div className=" w-full flex flex-col gap-y-5 items-center justify-center">
-                        <Image
-                            src="/emptyStates/curriculum.svg"
-                            alt="curriculum"
-                            width={200}
-                            height={200}
-                        />
-
-                        <p>
-                            Create new modules for the curriculum on Strapi CMS
-                        </p>
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button className="text-white bg-secondary">
-                                    Add Module
-                                </Button>
-                            </DialogTrigger>
-                            <DialogOverlay />
-                            <NewModuleDialog
-                                moduleData={moduleData}
-                                createModule={createModule}
-                                handleModuleChange={handleModuleChange}
-                                handleTimeAllotedChange={
-                                    handleTimeAllotedChange
-                                }
-                                timeData={timeData}
-                                handleTypeChange={handleTypeChange}
-                                typeId={typeId}
+                                                    codingProblemsCount={
+                                                        item.codingProblemsCount
+                                                    }
+                                                    articlesCount={
+                                                        item.articlesCount
+                                                    }
+                                                    typeId={item?.typeId}
+                                                    fetchCourseModules={
+                                                        fetchCourseModules
+                                                    }
+                                                    projectId={item.projectId}
+                                                />
+                                            </div>
+                                        </Reorder.Item>
+                                    </div>
+                                )
+                            )}
+                        </Reorder.Group>
+                    ) : (
+                        <div className=" w-full flex flex-col gap-y-5 items-center justify-center">
+                            <Image
+                                src="/emptyStates/curriculum.svg"
+                                alt="curriculum"
+                                width={200}
+                                height={200}
                             />
-                        </Dialog>
-                    </div>
-                )}
-            </div>
+
+                            <p>
+                                Create new modules for the curriculum on Strapi CMS
+                            </p>
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button className="text-white bg-secondary">
+                                        Add Module
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogOverlay />
+                                <NewModuleDialog
+                                    moduleData={moduleData}
+                                    createModule={createModule}
+                                    handleModuleChange={handleModuleChange}
+                                    handleTimeAllotedChange={
+                                        handleTimeAllotedChange
+                                    }
+                                    timeData={timeData}
+                                    handleTypeChange={handleTypeChange}
+                                    typeId={typeId}
+                                />
+                            </Dialog>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     )
 }

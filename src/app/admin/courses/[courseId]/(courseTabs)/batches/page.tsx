@@ -32,7 +32,7 @@ import {
 } from '@/components/ui/form'
 import { CardDescription, CardTitle } from '@/components/ui/card'
 import { toast } from '@/components/ui/use-toast'
-
+import { CircularProgress } from '@nextui-org/react'
 import AddStudentsModal from '../../_components/addStudentsmodal'
 import { api } from '@/utils/axios.config'
 import { getBatchData, getCourseData, getStoreStudentData } from '@/store/store'
@@ -43,7 +43,7 @@ const Page = ({ params }: { params: any }) => {
     const { courseData, fetchCourseDetails } = getCourseData()
     const { fetchBatches, batchData, setBatchData } = getBatchData()
     const { setStoreStudentData } = getStoreStudentData()
-
+    const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState<string>('')
     const debouncedSearch = useDebounce(search, 1000)
     // useEffect(() => {
@@ -147,6 +147,14 @@ const Page = ({ params }: { params: any }) => {
             console.error('Error creating batch:', error)
         }
     }
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setLoading(false)
+        }, 1500)
+
+        return () => clearTimeout(timer)
+    }, [])
 
     useEffect(() => {
         const searchBatchHandler = async () => {
@@ -302,48 +310,64 @@ const Page = ({ params }: { params: any }) => {
                     {renderModal(false)}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 mt-2">
-                    {batchData?.length ?? 0 > 0 ? (
-                        batchData?.map((batch: any, index: number) => (
-                            <Link
-                                key={batch.name}
-                                href={`/admin/courses/${courseData?.id}/batch/${batch.id}`}
-                            >
-                                <Card
-                                    key={batch.id}
-                                    className="text-gray-900 text-base"
+                {loading ? (
+                    <div className="flex justify-center">
+                        <CircularProgress
+                            classNames={{
+                                svg: 'w-11 h-11',
+                                indicator: 'text-secondary',
+                                track: 'stroke-white',
+                                value: 'text-sm font-bold',
+                            }}
+                            value={90}
+                            strokeWidth={4}
+                            // showValueLabel={true}
+                        />
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 mt-2">
+                        {batchData?.length ?? 0 > 0 ? (
+                            batchData?.map((batch: any, index: number) => (
+                                <Link
+                                    key={batch.name}
+                                    href={`/admin/courses/${courseData?.id}/batch/${batch.id}`}
                                 >
-                                    <div className="bg-white rounded-lg border p-4">
-                                        <div className="px-1 py-4 flex flex-col items-start">
-                                            <CardTitle className="font-semibold capitalize">
-                                                {batch.name}
-                                            </CardTitle>
-                                            <CardDescription className="capitalize">
-                                                {batch.students_enrolled}{' '}
-                                                <span>Learners</span>
-                                            </CardDescription>
+                                    <Card
+                                        key={batch.id}
+                                        className="text-gray-900 text-base"
+                                    >
+                                        <div className="bg-white rounded-lg border p-4">
+                                            <div className="px-1 py-4 flex flex-col items-start">
+                                                <CardTitle className="font-semibold capitalize">
+                                                    {batch.name}
+                                                </CardTitle>
+                                                <CardDescription className="capitalize">
+                                                    {batch.students_enrolled}{' '}
+                                                    <span>Learners</span>
+                                                </CardDescription>
+                                            </div>
                                         </div>
-                                    </div>
-                                </Card>
-                            </Link>
-                        ))
-                    ) : (
-                        <div className="w-full flex flex-col items-center justify-center gap-y-3 absolute">
-                            <Image
-                                src="/batches.svg"
-                                alt="create batch"
-                                width={100}
-                                height={100}
-                            />
-                            <p>
-                                Start by creating the first batch for the
-                                course. Learners will get added automatically
-                                based on enrollment cap
-                            </p>
-                            {renderModal(true)}
-                        </div>
-                    )}
-                </div>
+                                    </Card>
+                                </Link>
+                            ))
+                        ) : (
+                            <div className="w-full flex flex-col items-center justify-center gap-y-3 absolute">
+                                <Image
+                                    src="/batches.svg"
+                                    alt="create batch"
+                                    width={100}
+                                    height={100}
+                                />
+                                <p>
+                                    Start by creating the first batch for the
+                                    course. Learners will get added
+                                    automatically based on enrollment cap
+                                </p>
+                                {renderModal(true)}
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
         )
     }
