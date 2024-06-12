@@ -1,9 +1,9 @@
-"use client";
+'use client'
 
-import { usePathname } from "next/navigation";
+import { usePathname } from 'next/navigation'
 
-import { SidebarItem } from "./sidebar-item";
-import { adminRoutes, guestRoutes, teacherRoutes } from "@/lib/navbar-routes";
+import { SidebarItem } from './sidebar-item'
+import { adminRoutes, guestRoutes, teacherRoutes } from '@/lib/navbar-routes'
 
 // const commonRoutes = [
 //   {
@@ -14,25 +14,25 @@ import { adminRoutes, guestRoutes, teacherRoutes } from "@/lib/navbar-routes";
 // ];
 
 export const MobileNavbarRoutes = () => {
-  const pathname = usePathname();
+    const pathname = usePathname()
 
-  const isAdmin = pathname?.includes("/admin");
+    const isAdmin = pathname?.includes('/admin')
 
-  const routes = isAdmin ? adminRoutes : guestRoutes;
+    const routes = isAdmin ? adminRoutes : guestRoutes
 
-  return (
-    <div className="flex justify-between flex-col h-full">
-      <div>
-        {routes.map((route) => (
-          <SidebarItem
-            key={route.href}
-            icon={route.icon}
-            label={route.label}
-            href={route.href}
-          />
-        ))}
-      </div>
-      {/* <div>
+    return (
+        <div className="flex justify-between flex-col h-full">
+            <div>
+                {routes.map((route) => (
+                    <SidebarItem
+                        key={route.href}
+                        icon={route.icon}
+                        label={route.label}
+                        href={route.href}
+                    />
+                ))}
+            </div>
+            {/* <div>
         {commonRoutes.map((route) => (
           <SidebarItem
             key={route.href}
@@ -42,6 +42,6 @@ export const MobileNavbarRoutes = () => {
           />
         ))}
       </div> */}
-    </div>
-  );
-};
+        </div>
+    )
+}

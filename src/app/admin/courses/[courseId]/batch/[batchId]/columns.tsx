@@ -88,8 +88,8 @@ export const columns: ColumnDef<Task>[] = [
         cell: ({ row }) => (
             <div className="w-[180px] text-start">{row.getValue('name')}</div>
         ),
-        enableSorting: false,
-        enableHiding: false,
+        enableSorting: true,
+        enableHiding: true,
     },
     {
         accessorKey: 'email',

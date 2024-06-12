@@ -13,6 +13,7 @@ import Quiz from '../_components/Quiz'
 import Assignment from '../_components/Assignment'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import { useParams } from 'next/navigation'
+import Assessment from '../_components/Assessment'
 
 interface Chapter {
     id: number
@@ -127,6 +128,8 @@ function Page({ params }: any) {
                 )
             case 5:
                 return <Assignment />
+            case 6:
+                return <Assessment />
             // default:
             //     return <h1>Create New Chapter</h1>
         }

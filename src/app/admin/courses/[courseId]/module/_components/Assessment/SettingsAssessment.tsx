@@ -35,7 +35,6 @@ const formSchema = z.object({
         .number()
         .min(0, 'Minute must be between 0 and 59')
         .max(59, 'Minute must be between 0 and 59'),
-    codingProblems: z.string().nonempty('Coding problems score is required'),
     passPercentage: z.string().nonempty('Percentage is required'),
     copyPaste: z.boolean(),
     embeddedGoogleSearch: z.boolean(),
@@ -66,96 +65,54 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            hour: Math.floor(content.assessment[0].timeLimit / 3600),
-            minute: (content.assessment[0].timeLimit / 60) % 60,
-            codingProblems:
-                content.assessment[0].codingProblems == null
-                    ? '0'
-                    : content.assessment[0].codingProblems[0][
-                          Object.keys(
-                              content.assessment[0].codingProblems[0]
-                          )[0]
-                      ].toString(),
+            hour: Math.floor(content.timeLimit / 3600),
+            minute: (content.timeLimit / 60) % 60,
             passPercentage:
-                content.assessment[0].passPercentage != null
-                    ? content.assessment[0].passPercentage.toString()
+                content.passPercentage != null
+                    ? content.passPercentage.toString()
                     : '0',
-            copyPaste:
-                content.assessment[0].copyPaste == null
-                    ? false
-                    : content.assessment[0].copyPaste,
+            copyPaste: content.copyPaste == null ? false : content.copyPaste,
             embeddedGoogleSearch:
-                content.assessment[0].embeddedGoogleSearch == null
+                content.embeddedGoogleSearch == null
                     ? false
-                    : content.assessment[0].embeddedGoogleSearch,
-            tabChange:
-                content.assessment[0].tabChange == null
-                    ? false
-                    : content.assessment[0].tabChange,
+                    : content.embeddedGoogleSearch,
+            tabChange: content.tabChange == null ? false : content.tabChange,
             screenRecord:
-                content.assessment[0].screenRecord == null
-                    ? false
-                    : content.assessment[0].screenRecord,
-            webCamera:
-                content.assessment[0].webCamera == null
-                    ? false
-                    : content.assessment[0].webCamera,
+                content.screenRecord == null ? false : content.screenRecord,
+            webCamera: content.webCamera == null ? false : content.webCamera,
         },
     })
 
     useEffect(() => {
         form.reset({
-            hour: Math.floor(content.assessment[0].timeLimit / 3600),
-            minute: (content.assessment[0].timeLimit / 60) % 60,
-            codingProblems:
-                content.assessment[0].codingProblems == null
-                    ? '0'
-                    : content.assessment[0].codingProblems[0][
-                          Object.keys(
-                              content.assessment[0].codingProblems[0]
-                          )[0]
-                      ].toString(),
+            hour: Math.floor(content.timeLimit / 3600),
+            minute: (content.timeLimit / 60) % 60,
             passPercentage:
-                content.assessment[0].passPercentage != null
-                    ? content.assessment[0].passPercentage.toString()
+                content.passPercentage != null
+                    ? content.passPercentage.toString()
                     : '0',
-            copyPaste:
-                content.assessment[0].copyPaste == null
-                    ? false
-                    : content.assessment[0].copyPaste,
+            copyPaste: content.copyPaste == null ? false : content.copyPaste,
             embeddedGoogleSearch:
-                content.assessment[0].embeddedGoogleSearch == null
+                content.embeddedGoogleSearch == null
                     ? false
-                    : content.assessment[0].embeddedGoogleSearch,
-            tabChange:
-                content.assessment[0].tabChange == null
-                    ? false
-                    : content.assessment[0].tabChange,
+                    : content.embeddedGoogleSearch,
+            tabChange: content.tabChange == null ? false : content.tabChange,
             screenRecord:
-                content.assessment[0].screenRecord == null
-                    ? false
-                    : content.assessment[0].screenRecord,
-            webCamera:
-                content.assessment[0].webCamera == null
-                    ? false
-                    : content.assessment[0].webCamera,
+                content.screenRecord == null ? false : content.screenRecord,
+            webCamera: content.webCamera == null ? false : content.webCamera,
         })
     }, [content])
 
     const handleSubmit = async (values: any) => {
         const timeLimit = values.hour * 3600 + values.minute * 60
 
-        const codingProblems = selectedCodingQuesIds.map((id: number) => ({
-            [id]: Number(values.codingProblems),
-        }))
-
         const data = {
             title: chapterTitle,
             description:
                 'This assessment has 2 dsa problems,5 mcq and 3 theory questions',
-            codingProblems,
-            mcq: selectedQuizQuesIds,
-            openEndedQuestions: selectedOpenEndedQuesIds,
+            codingProblemIds: selectedCodingQuesIds,
+            mcqIds: selectedQuizQuesIds,
+            openEndedQuestionIds: selectedOpenEndedQuesIds,
             passPercentage: Number(values.passPercentage),
             timeLimit: Number(timeLimit),
             copyPaste: values.copyPaste,
@@ -166,10 +123,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
         }
 
         try {
-            await api.put(
-                `Content/editAssessment/${content.assessment[0].id}`,
-                data
-            )
+            await api.put(`Content/editAssessment/${content.id}`, data)
             fetchChapterContent(chapterData.chapterId)
             toast({
                 title: 'Assessment Updated Successfully',
@@ -280,28 +234,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                             )}
                         />
                     </div>
-                    <h2 className="text-left mt-5 mb-3 font-bold">
-                        Individual Question Score In Each Question
-                    </h2>
-                    <FormField
-                        control={form.control}
-                        name="codingProblems"
-                        render={({ field }) => (
-                            <FormItem className="flex items-center text-left">
-                                <FormLabel className="my-3">
-                                    Coding Problems
-                                </FormLabel>
-                                <FormControl>
-                                    <Input
-                                        {...field}
-                                        type="number"
-                                        className="w-1/5 outline-none no-spinners ml-10 border-gray-300"
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+
                     <h2 className="text-left mt-5 font-bold">
                         Pass Percentage (Out of 100)
                     </h2>

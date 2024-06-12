@@ -32,13 +32,20 @@ import {
 } from '@/components/ui/select'
 import SubmissionsList from '../_components/submissions-list'
 import { b64DecodeUnicode, b64EncodeUnicode } from '@/utils/base64'
+import TimerDisplay from '../../courses/[viewcourses]/modules/[moduleID]/assessment/TimerDisplay'
 
 interface questionDetails {
     title: string
     description: string
     examples: { input: number[]; output: number }
 }
-export default function IDE({ params }: { params: { editor: string } }) {
+
+interface IDEProps {
+    params: { editor: string }
+    onBack?: () => void
+}
+
+const IDE: React.FC<IDEProps> = ({ params, onBack }) => {
     const [questionDetails, setQuestionDetails] = useState<questionDetails>({
         title: '',
         description: '',
@@ -53,6 +60,7 @@ export default function IDE({ params }: { params: { editor: string } }) {
     const [codeError, setCodeError] = useState('')
     const [language, setLanguage] = useState('c')
     const [testCases, setTestCases] = useState<any>([])
+    const [examples, setExamples] = useState<any>([])
     const router = useRouter()
     const { toast } = useToast()
 
@@ -155,6 +163,7 @@ export default function IDE({ params }: { params: { editor: string } }) {
                 .then((response) => {
                     setQuestionDetails(response.data[0])
                     setTestCases(response.data[0].testCases[0])
+                    setExamples(response.data[0].examples)
                 })
         } catch (error) {
             console.error('Error fetching courses:', error)
@@ -172,7 +181,7 @@ export default function IDE({ params }: { params: { editor: string } }) {
         <div>
             <div className="flex justify-between mb-2">
                 <div>
-                    <Button variant="ghost" size="icon" onClick={handleBack}>
+                    <Button variant="ghost" size="icon" onClick={onBack}>
                         <ArrowLeft className="h-5 w-5" />
                     </Button>
                     <SubmissionsList questionId={params.editor} />
@@ -193,6 +202,7 @@ export default function IDE({ params }: { params: { editor: string } }) {
                         <Upload size={20} />
                         <span className="ml-2 text-lg font-bold">Submit</span>
                     </Button>
+                    <TimerDisplay />
                 </div>
             </div>
 
@@ -211,11 +221,8 @@ export default function IDE({ params }: { params: { editor: string } }) {
                                     <p>{questionDetails?.description}</p>
                                     <p>
                                         Examples : Input -{' '}
-                                        {questionDetails?.examples?.input.join(
-                                            ','
-                                        )}{' '}
-                                        ; Output :{' '}
-                                        {questionDetails?.examples?.output}
+                                        {examples[0]?.input.join(',')} ; Output
+                                        : {examples[0]?.output}
                                     </p>
                                 </div>
                             </div>
@@ -394,3 +401,5 @@ export default function IDE({ params }: { params: { editor: string } }) {
         </div>
     )
 }
+
+export default IDE

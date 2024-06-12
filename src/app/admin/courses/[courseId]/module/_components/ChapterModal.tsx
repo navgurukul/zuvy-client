@@ -27,7 +27,12 @@ function ChapterModal({
 }) {
     const createChapter = async (topicId: number) => {
         await api
-            .post(`/Content/chapter/${params.moduleId}?topicId=${topicId}`)
+            .post(`Content/chapter`, {
+                moduleId: Number(params.moduleId),
+                bootcampId: Number(params.courseId),
+                topicId: topicId,
+                order: 1,
+            })
             .then((res) => {
                 toast({
                     title: res.data.module[0].title,
