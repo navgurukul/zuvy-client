@@ -33,6 +33,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { RequestBodyType } from '../_components/NewMcqProblemForm'
 import useDebounce from '@/hooks/useDebounce'
 import { getAllQuizQuestion } from '@/utils/admin'
+import { CircularProgress } from '@nextui-org/react'
 
 type Props = {}
 export type Tag = {
@@ -50,6 +51,7 @@ const Mcqs = (props: Props) => {
         tagName: 'AllTopics',
         id: -1,
     })
+    const [loading, setLoading] = useState(true)
 
     const { quizData, setStoreQuizData } = getAllQuizData()
     const handleTopicClick = (tag: Tag) => {
@@ -95,6 +97,7 @@ const Mcqs = (props: Props) => {
 
             const res = await api.get(url)
             setStoreQuizData(res.data)
+            setLoading(false)
         } catch (error) {
             console.error('Error fetching quiz questions:', error)
         }
@@ -103,95 +106,117 @@ const Mcqs = (props: Props) => {
     useEffect(() => {
         getAllTags()
     }, [])
+
     useEffect(() => {
         getAllQuizQuestion()
     }, [getAllQuizQuestion])
 
     return (
-        <MaxWidthWrapper>
-            <h1 className="text-left font-semibold text-2xl">
-                Resource Library - MCQs
-            </h1>
-            <div className="flex justify-between">
-                <div className="relative w-full">
-                    <Input
-                        value={search}
-                        onChange={handleSetsearch}
-                        placeholder="Search for Question"
-                        className="w-1/4 p-2 my-6 input-with-icon pl-8"
+        <>
+            {loading ? (
+                <div className="flex justify-center items-center h-screen">
+                    <CircularProgress
+                        classNames={{
+                            svg: 'w-11 h-11',
+                            indicator: 'text-secondary',
+                            track: 'stroke-white',
+                            value: 'text-sm font-bold',
+                        }}
+                        value={90}
+                        strokeWidth={4}
                     />
-                    <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                        <Search className="text-gray-400" size={20} />
-                    </div>
                 </div>
-                <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                    <DialogTrigger asChild>
-                        <Button>+ Create Quiz Question </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[500px]">
-                        <DialogHeader>
-                            <DialogTitle>New MCQ</DialogTitle>
-                        </DialogHeader>
-                        <div className="w-full">
-                            <NewMcqProblemForm
-                                tags={tags}
-                                closeModal={closeModal}
-                                setStoreQuizData={setStoreQuizData}
-                                getAllQuizQuesiton={getAllQuizQuestion}
+            ) : (
+                <MaxWidthWrapper>
+                    <h1 className="text-left font-semibold text-2xl">
+                        Resource Library - MCQs
+                    </h1>
+                    <div className="flex justify-between">
+                        <div className="relative w-full">
+                            <Input
+                                value={search}
+                                onChange={handleSetsearch}
+                                placeholder="Search for Question"
+                                className="w-1/4 p-2 my-6 input-with-icon pl-8"
                             />
+                            <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                                <Search className="text-gray-400" size={20} />
+                            </div>
                         </div>
-                    </DialogContent>
-                </Dialog>
-            </div>
-            <div className="flex items-center">
-                <Select onValueChange={(value: string) => setDifficulty(value)}>
-                    <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="DIfficulty" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectGroup>
-                            <SelectItem value="None">Any</SelectItem>
-                            <SelectItem value="Easy">Easy</SelectItem>
-                            <SelectItem value="Medium">Medium</SelectItem>
-                            <SelectItem value="Hard">Hard</SelectItem>
-                        </SelectGroup>
-                    </SelectContent>
-                </Select>
-                <Separator
-                    orientation="vertical"
-                    className="w-1 h-12 ml-4 bg-gray-400 rounded-lg"
-                />
-                <ScrollArea className=" text-nowrap ">
-                    <ScrollBar orientation="horizontal" />
-                    <Button
-                        className={`mx-3 rounded-3xl ${
-                            selectedTag?.tagName === 'AllTopics'
-                                ? 'bg-secondary text-white'
-                                : 'bg-gray-200 text-black'
-                        }`}
-                        onClick={handleAllTopicsClick}
-                    >
-                        All Topics
-                    </Button>
-
-                    {tags.map((tag: Tag) => (
-                        <Button
-                            className={`mx-3 rounded-3xl ${
-                                selectedTag === tag
-                                    ? 'bg-secondary text-white'
-                                    : 'bg-gray-200 text-black'
-                            }`}
-                            key={tag?.id}
-                            onClick={() => handleTopicClick(tag)}
+                        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                            <DialogTrigger asChild>
+                                <Button>+ Create Quiz Question </Button>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[500px]">
+                                <DialogHeader>
+                                    <DialogTitle>New MCQ</DialogTitle>
+                                </DialogHeader>
+                                <div className="w-full">
+                                    <NewMcqProblemForm
+                                        tags={tags}
+                                        closeModal={closeModal}
+                                        setStoreQuizData={setStoreQuizData}
+                                        getAllQuizQuesiton={getAllQuizQuestion}
+                                    />
+                                </div>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
+                    <div className="flex items-center">
+                        <Select
+                            onValueChange={(value: string) =>
+                                setDifficulty(value)
+                            }
                         >
-                            {tag.tagName}
-                        </Button>
-                    ))}
-                </ScrollArea>
-            </div>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="DIfficulty" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectItem value="None">Any</SelectItem>
+                                    <SelectItem value="Easy">Easy</SelectItem>
+                                    <SelectItem value="Medium">Medium</SelectItem>
+                                    <SelectItem value="Hard">Hard</SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                        <Separator
+                            orientation="vertical"
+                            className="w-1 h-12 ml-4 bg-gray-400 rounded-lg"
+                        />
+                        <ScrollArea className=" text-nowrap ">
+                            <ScrollBar orientation="horizontal" />
+                            <Button
+                                className={`mx-3 rounded-3xl ${
+                                    selectedTag?.tagName === 'AllTopics'
+                                        ? 'bg-secondary text-white'
+                                        : 'bg-gray-200 text-black'
+                                }`}
+                                onClick={handleAllTopicsClick}
+                            >
+                                All Topics
+                            </Button>
 
-            <DataTable data={quizData} columns={columns} />
-        </MaxWidthWrapper>
+                            {tags.map((tag: Tag) => (
+                                <Button
+                                    className={`mx-3 rounded-3xl ${
+                                        selectedTag === tag
+                                            ? 'bg-secondary text-white'
+                                            : 'bg-gray-200 text-black'
+                                    }`}
+                                    key={tag?.id}
+                                    onClick={() => handleTopicClick(tag)}
+                                >
+                                    {tag.tagName}
+                                </Button>
+                            ))}
+                        </ScrollArea>
+                    </div>
+
+                    <DataTable data={quizData} columns={columns} />
+                </MaxWidthWrapper>
+            )}
+        </>
     )
 }
 
