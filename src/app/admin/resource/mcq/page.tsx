@@ -47,18 +47,22 @@ const Mcqs = (props: Props) => {
     const debouncedSearch = useDebounce(search, 1000)
     const [difficulty, setDifficulty] = useState<string>('')
     const { tags, setTags } = getCodingQuestionTags()
-    const [selectedTag, setSelectedTag] = useState({
-        tagName: 'AllTopics',
-        id: -1,
+    const { quizData, setStoreQuizData } = getAllQuizData()
+    const [selectedTag, setSelectedTag] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const storedTag = localStorage.getItem('currentTag')
+            return storedTag !== null
+                ? JSON.parse(storedTag)
+                : { tagName: 'AllTopics', id: -1 }
+        }
+        return { tagName: 'AllTopics', id: -1 }
     })
     const [loading, setLoading] = useState(true)
 
-    const { quizData, setStoreQuizData } = getAllQuizData()
     const handleTopicClick = (tag: Tag) => {
         setSelectedTag(tag)
-    }
-    const handleAllTopicsClick = () => {
-        setSelectedTag({ id: -1, tagName: 'AllTopics' })
+        const currentTag = JSON.stringify(tag)
+        localStorage.setItem('currentTag', currentTag)
     }
     const openModal = () => setIsOpen(true)
     const closeModal = () => setIsOpen(false)
@@ -69,7 +73,8 @@ const Mcqs = (props: Props) => {
     async function getAllTags() {
         const response = await api.get('Content/allTags')
         if (response) {
-            setTags(response.data.allTags)
+            const allTopics = { id: -1, tagName: 'AllTopics' }
+            setTags([allTopics, ...response.data.allTags])
         }
     }
 
@@ -175,7 +180,9 @@ const Mcqs = (props: Props) => {
                                 <SelectGroup>
                                     <SelectItem value="None">Any</SelectItem>
                                     <SelectItem value="Easy">Easy</SelectItem>
-                                    <SelectItem value="Medium">Medium</SelectItem>
+                                    <SelectItem value="Medium">
+                                        Medium
+                                    </SelectItem>
                                     <SelectItem value="Hard">Hard</SelectItem>
                                 </SelectGroup>
                             </SelectContent>
@@ -186,21 +193,10 @@ const Mcqs = (props: Props) => {
                         />
                         <ScrollArea className=" text-nowrap ">
                             <ScrollBar orientation="horizontal" />
-                            <Button
-                                className={`mx-3 rounded-3xl ${
-                                    selectedTag?.tagName === 'AllTopics'
-                                        ? 'bg-secondary text-white'
-                                        : 'bg-gray-200 text-black'
-                                }`}
-                                onClick={handleAllTopicsClick}
-                            >
-                                All Topics
-                            </Button>
-
                             {tags.map((tag: Tag) => (
                                 <Button
                                     className={`mx-3 rounded-3xl ${
-                                        selectedTag === tag
+                                        selectedTag.id === tag.id
                                             ? 'bg-secondary text-white'
                                             : 'bg-gray-200 text-black'
                                     }`}
