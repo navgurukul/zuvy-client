@@ -1,14 +1,14 @@
+import React from 'react'
 import { cn, difficultyColor, ellipsis } from '@/lib/utils'
 import { PlusCircle, XCircle } from 'lucide-react'
 import Link from 'next/link'
-import React from 'react'
 
 const SelectCodingQuestions = ({
     setSelectedQuestions,
     selectedQuestions,
 }: {
-    setSelectedQuestions: any
-    selectedQuestions: any
+    setSelectedQuestions: React.Dispatch<React.SetStateAction<any[]>>
+    selectedQuestions: any[]
 }) => {
     return (
         <>
@@ -46,7 +46,7 @@ const SelectCodingQuestions = ({
                                         </p>
                                     </div>
                                     <Link
-                                        href={''}
+                                        href=""
                                         className="font-semibold text-sm mt-2 text-secondary"
                                     >
                                         View Full Description

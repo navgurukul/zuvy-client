@@ -16,6 +16,7 @@ import CodingQuestions from '@/app/admin/courses/[courseId]/module/_components/A
 import { Button } from '@/components/ui/button'
 import SettingsAssessment from './SettingsAssessment'
 import SelectedQuestions from './SelectedQuestions'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 
 type AddAssessmentProps = {
     chapterData: any
@@ -37,17 +38,17 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         useState<string>('All Languages')
     const [filteredQuestions, setFilteredQuestions] = useState<any[]>([])
     const [chapterTitle, setChapterTitle] = useState<string>(
-        content.assessment[0].title
+        content.ModuleAssessment.title
     )
     const [questionType, setQuestionType] = useState<string>('coding')
     const [selectedCodingQuestions, setSelectedCodingQuestions] = useState<
         any[]
-    >(content.codingQuesDetails || [])
+    >(content.CodingQuestions || [])
     const [selectedQuizQuestions, setSelectedQuizQuestions] = useState<any[]>(
-        content.mcqDetails || []
+        content.Quizzes || []
     )
     const [selectedOpenEndedQuestions, setSelectedOpenEndedQuestions] =
-        useState<any[]>(content.openEndedQuesDetails || [])
+        useState<any[]>(content.OpenEndedQuestions || [])
 
     const [selectedCodingQuesIds, setSelectedCodingQuesIds] = useState<
         number[]
@@ -118,10 +119,10 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     }
 
     useEffect(() => {
-        setChapterTitle(content.assessment[0].title)
-        setSelectedCodingQuestions(content.codingQuesDetails || [])
-        setSelectedQuizQuestions(content.mcqDetails || [])
-        setSelectedOpenEndedQuestions(content.openEndedQuesDetails || [])
+        setChapterTitle(content.ModuleAssessment.title)
+        setSelectedCodingQuestions(content.CodingQuestions || [])
+        setSelectedQuizQuestions(content.Quizzes || [])
+        setSelectedOpenEndedQuestions(content.openEndedQuestions || [])
     }, [content])
 
     useEffect(() => {
@@ -221,7 +222,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                 </>
             )}
             {/* Display & select questions + settings*/}
-            <div className="grid grid-cols-2 ">
+            <div className="grid grid-cols-2">
                 <div>
                     <h3 className="text-left font-bold mb-5">
                         {questionType === 'coding'
@@ -232,26 +233,31 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                             ? 'Open-Ended Question Library'
                             : ''}
                     </h3>
-                    {questionType === 'coding' ? (
-                        <CodingQuestions
-                            questions={filteredQuestions}
-                            setSelectedQuestions={setSelectedCodingQuestions}
-                            selectedQuestions={selectedCodingQuestions}
-                        />
-                    ) : questionType === 'mcq' ? (
-                        <QuizQuestions
-                            questions={filteredQuestions}
-                            setSelectedQuestions={setSelectedQuizQuestions}
-                            selectedQuestions={selectedQuizQuestions}
-                        />
-                    ) : questionType == 'open-ended' ? (
-                        <OpenEndedQuestions
-                            questions={filteredQuestions}
-                            setSelectedQuestions={setSelectedOpenEndedQuestions}
-                            selectedQuestions={selectedOpenEndedQuestions}
-                        />
-                    ) : (
-                        selectedOpenEndedQuestions && (
+                    <ScrollArea className="h-96">
+                        <ScrollBar orientation="vertical" />
+                        {questionType === 'coding' ? (
+                            <CodingQuestions
+                                questions={filteredQuestions}
+                                setSelectedQuestions={
+                                    setSelectedCodingQuestions
+                                }
+                                selectedQuestions={selectedCodingQuestions}
+                            />
+                        ) : questionType === 'mcq' ? (
+                            <QuizQuestions
+                                questions={filteredQuestions}
+                                setSelectedQuestions={setSelectedQuizQuestions}
+                                selectedQuestions={selectedQuizQuestions}
+                            />
+                        ) : questionType == 'open-ended' ? (
+                            <OpenEndedQuestions
+                                questions={filteredQuestions}
+                                setSelectedQuestions={
+                                    setSelectedOpenEndedQuestions
+                                }
+                                selectedQuestions={selectedOpenEndedQuestions}
+                            />
+                        ) : (
                             <SettingsAssessment
                                 selectedCodingQuesIds={selectedCodingQuesIds}
                                 selectedQuizQuesIds={selectedQuizQuesIds}
@@ -263,34 +269,41 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                 chapterData={chapterData}
                                 chapterTitle={chapterTitle}
                             />
-                        )
-                    )}
+                        )}
+                    </ScrollArea>
                 </div>
+
                 {questionType !== 'settings' && (
                     <>
-                        <div className="">
+                        <div>
                             <div>
-                                {/* Display & remove the selected questions */}
-                                <SelectedQuestions
-                                    selectedCodingQuestions={
-                                        selectedCodingQuestions
-                                    }
-                                    selectedQuizQuestions={
-                                        selectedQuizQuestions
-                                    }
-                                    selectedOpenEndedQuestions={
-                                        selectedOpenEndedQuestions
-                                    }
-                                    setSelectedCodingQuestions={
-                                        setSelectedCodingQuestions
-                                    }
-                                    setSelectedQuizQuestions={
-                                        setSelectedQuizQuestions
-                                    }
-                                    setSelectedOpenEndedQuestions={
-                                        setSelectedOpenEndedQuestions
-                                    }
-                                />
+                                <h1 className="text-left font-bold mb-5">
+                                    Selected Questions
+                                </h1>
+                                <ScrollArea className="h-96">
+                                    <ScrollBar orientation="vertical" />
+                                    {/* Display & remove the selected questions */}
+                                    <SelectedQuestions
+                                        selectedCodingQuestions={
+                                            selectedCodingQuestions
+                                        }
+                                        selectedQuizQuestions={
+                                            selectedQuizQuestions
+                                        }
+                                        selectedOpenEndedQuestions={
+                                            selectedOpenEndedQuestions
+                                        }
+                                        setSelectedCodingQuestions={
+                                            setSelectedCodingQuestions
+                                        }
+                                        setSelectedQuizQuestions={
+                                            setSelectedQuizQuestions
+                                        }
+                                        setSelectedOpenEndedQuestions={
+                                            setSelectedOpenEndedQuestions
+                                        }
+                                    />
+                                </ScrollArea>
                             </div>
                         </div>
                     </>
