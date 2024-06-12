@@ -33,7 +33,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { RequestBodyType } from '../_components/NewMcqProblemForm'
 import useDebounce from '@/hooks/useDebounce'
 import { getAllQuizQuestion } from '@/utils/admin'
-import { CircularProgress } from '@nextui-org/react'
+import { Spinner } from '@/components/ui/spinner'
 
 type Props = {}
 export type Tag = {
@@ -120,16 +120,7 @@ const Mcqs = (props: Props) => {
         <>
             {loading ? (
                 <div className="flex justify-center items-center h-screen">
-                    <CircularProgress
-                        classNames={{
-                            svg: 'w-11 h-11',
-                            indicator: 'text-secondary',
-                            track: 'stroke-white',
-                            value: 'text-sm font-bold',
-                        }}
-                        value={90}
-                        strokeWidth={4}
-                    />
+                    <Spinner className="text-secondary" />
                 </div>
             ) : (
                 <MaxWidthWrapper>

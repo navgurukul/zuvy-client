@@ -12,7 +12,7 @@ import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import NewModuleDialog from '@/app/admin/courses/[courseId]/_components/newModuleDialog'
 import { Reorder } from 'framer-motion'
 import { toast } from '@/components/ui/use-toast'
-import { CircularProgress } from '@nextui-org/react'
+import { Spinner } from '@/components/ui/spinner'
 
 interface CurriculumItem {
     id: number
@@ -177,17 +177,7 @@ function Page() {
             )}
             {loading ? (
                 <div className="flex justify-center">
-                    <CircularProgress
-                        classNames={{
-                            svg: 'w-11 h-11',
-                            indicator: 'text-secondary',
-                            track: 'stroke-white',
-                            value: 'text-sm font-bold',
-                        }}
-                        value={90}
-                        strokeWidth={4}
-                        // showValueLabel={true}
-                    />
+                    <Spinner className="text-secondary" />
                 </div>
             ) : (
                 <div className="flex flex-col items-center justify-center">
@@ -200,7 +190,10 @@ function Page() {
                             {curriculum.map(
                                 (item: CurriculumItem, index: number) => (
                                     <div key={item.id}>
-                                    <Reorder.Item value={item} key={item.id}>
+                                        <Reorder.Item
+                                            value={item}
+                                            key={item.id}
+                                        >
                                             <div
                                                 className={`${
                                                     item.typeId === 2
@@ -210,16 +203,22 @@ function Page() {
                                             >
                                                 <CurricullumCard
                                                     moduleId={item.id}
-                                                courseId={courseData?.id ?? 0}
+                                                    courseId={
+                                                        courseData?.id ?? 0
+                                                    }
                                                     order={item.order}
                                                     name={item.name}
-                                                description={item.description}
+                                                    description={
+                                                        item.description
+                                                    }
                                                     index={index}
                                                     quizCount={item.quizCount}
                                                     assignmentCount={
                                                         item.assignmentCount
                                                     }
-                                                timeAlloted={item.timeAlloted}
+                                                    timeAlloted={
+                                                        item.timeAlloted
+                                                    }
                                                     codingProblemsCount={
                                                         item.codingProblemsCount
                                                     }
@@ -248,7 +247,8 @@ function Page() {
                             />
 
                             <p>
-                                Create new modules for the curriculum on Strapi CMS
+                                Create new modules for the curriculum on Strapi
+                                CMS
                             </p>
                             <Dialog>
                                 <DialogTrigger asChild>

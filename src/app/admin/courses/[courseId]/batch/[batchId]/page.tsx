@@ -42,8 +42,7 @@ import { api } from '@/utils/axios.config'
 import { StudentData } from '../../(courseTabs)/students/page'
 import useDebounce from '@/hooks/useDebounce'
 import { DataTable } from '@/app/_components/datatable/data-table'
-import CircularLoader from '@/components/ui/circularLoader'
-import { CircularProgress } from '@nextui-org/react'
+import { Spinner } from '@/components/ui/spinner'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import BreadcrumbCmponent from '@/app/_components/breadcrumbCmponent'
 
@@ -614,22 +613,7 @@ const BatchesInfo = ({
                 </div>
                 {loading ? (
                     <div className="flex justify-center">
-                        {/* <CircularLoader />
-                        <CircularProgress
-                            color="success"
-                            aria-label="Loading..."
-                        /> */}
-                        <CircularProgress
-                            classNames={{
-                                svg: 'w-11 h-11',
-                                indicator: 'text-secondary',
-                                track: 'stroke-white',
-                                value: 'text-sm font-bold',
-                            }}
-                            value={90}
-                            strokeWidth={4}
-                            // showValueLabel={true}
-                        />
+                        <Spinner className="text-secondary" />
                     </div>
                 ) : (
                     <div>

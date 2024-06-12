@@ -14,7 +14,7 @@ import RecordingCard from '@/app/student/courses/[viewcourses]/[recordings]/_com
 import { OFFSET, POSITION } from '@/utils/constant'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import useDebounce from '@/hooks/useDebounce'
-import { CircularProgress } from '@nextui-org/react'
+import { Spinner } from '@/components/ui/spinner'
 
 type ClassType = 'active' | 'upcoming' | 'complete'
 
@@ -266,19 +266,10 @@ function Page({ params }: any) {
                         </Button>
                     ))}
                 </div>
+
                 {loading ? (
                     <div className="flex justify-center">
-                        <CircularProgress
-                            classNames={{
-                                svg: 'w-11 h-11',
-                                indicator: 'text-secondary',
-                                track: 'stroke-white',
-                                value: 'text-sm font-bold',
-                            }}
-                            value={90}
-                            strokeWidth={4}
-                            // showValueLabel={true}
-                        />
+                        <Spinner className="text-secondary" />
                     </div>
                 ) : (
                     <div>

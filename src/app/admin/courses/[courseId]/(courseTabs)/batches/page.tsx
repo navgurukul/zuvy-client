@@ -32,7 +32,7 @@ import {
 } from '@/components/ui/form'
 import { CardDescription, CardTitle } from '@/components/ui/card'
 import { toast } from '@/components/ui/use-toast'
-import { CircularProgress } from '@nextui-org/react'
+import { Spinner } from '@/components/ui/spinner'
 import AddStudentsModal from '../../_components/addStudentsmodal'
 import { api } from '@/utils/axios.config'
 import { getBatchData, getCourseData, getStoreStudentData } from '@/store/store'
@@ -151,7 +151,7 @@ const Page = ({ params }: { params: any }) => {
     useEffect(() => {
         const timer = setTimeout(() => {
             setLoading(false)
-        }, 1500)
+        }, 1000)
 
         return () => clearTimeout(timer)
     }, [])
@@ -312,17 +312,7 @@ const Page = ({ params }: { params: any }) => {
 
                 {loading ? (
                     <div className="flex justify-center">
-                        <CircularProgress
-                            classNames={{
-                                svg: 'w-11 h-11',
-                                indicator: 'text-secondary',
-                                track: 'stroke-white',
-                                value: 'text-sm font-bold',
-                            }}
-                            value={90}
-                            strokeWidth={4}
-                            // showValueLabel={true}
-                        />
+                        <Spinner className="text-secondary" />
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 mt-2">

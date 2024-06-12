@@ -28,7 +28,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { getCodingQuestionTags, getcodingQuestionState } from '@/store/store'
 import { getAllCodingQuestions } from '@/utils/admin'
 import Image from 'next/image'
-import { CircularProgress } from '@nextui-org/react'
+import { Spinner } from '@/components/ui/spinner'
 
 type Props = {}
 
@@ -92,7 +92,7 @@ const CodingProblems = (props: Props) => {
     useEffect(() => {
         const timer = setTimeout(() => {
             setLoading(false)
-        }, 1500)
+        }, 1000)
 
         return () => clearTimeout(timer)
     }, [])
@@ -101,16 +101,7 @@ const CodingProblems = (props: Props) => {
         <>
             {loading ? (
                 <div className="flex justify-center items-center h-screen">
-                    <CircularProgress
-                        classNames={{
-                            svg: 'w-11 h-11',
-                            indicator: 'text-secondary',
-                            track: 'stroke-white',
-                            value: 'text-sm font-bold',
-                        }}
-                        value={90}
-                        strokeWidth={4}
-                    />
+                    <Spinner className="text-secondary" />
                 </div>
             ) : (
                 <div>
@@ -125,10 +116,15 @@ const CodingProblems = (props: Props) => {
                                         placeholder="Problem Name..."
                                         className="w-1/4 p-2 my-6 input-with-icon pl-8"
                                         value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        onChange={(e) =>
+                                            setSearchTerm(e.target.value)
+                                        }
                                     />
                                     <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                                    <Search className="text-gray-400" size={20} />
+                                        <Search
+                                            className="text-gray-400"
+                                            size={20}
+                                        />
                                     </div>
                                 </div>
                                 <Dialog
@@ -147,11 +143,15 @@ const CodingProblems = (props: Props) => {
                                         <div className="w-full">
                                             <NewCodingProblemForm
                                                 tags={tags}
-                                        setIsDialogOpen={setIsDialogOpen}
+                                                setIsDialogOpen={
+                                                    setIsDialogOpen
+                                                }
                                                 getAllCodingQuestions={
                                                     getAllCodingQuestions
                                                 }
-                                        setCodingQuestions={setCodingQuestions}
+                                                setCodingQuestions={
+                                                    setCodingQuestions
+                                                }
                                             />
                                         </div>
                                     </DialogContent>
@@ -209,7 +209,9 @@ const CodingProblems = (props: Props) => {
                                                     : 'bg-gray-200 text-black'
                                             }`}
                                             key={tag?.id}
-                                        onClick={() => handleTopicClick(tag)}
+                                            onClick={() =>
+                                                handleTopicClick(tag)
+                                            }
                                         >
                                             {tag.tagName}
                                         </Button>
@@ -217,7 +219,10 @@ const CodingProblems = (props: Props) => {
                                 </ScrollArea>
                             </div>
 
-                            <DataTable data={filteredQuestions} columns={columns} />
+                            <DataTable
+                                data={filteredQuestions}
+                                columns={columns}
+                            />
                         </MaxWidthWrapper>
                     ) : (
                         <>
@@ -253,11 +258,15 @@ const CodingProblems = (props: Props) => {
                                         <div className="w-full">
                                             <NewCodingProblemForm
                                                 tags={tags}
-                                        setIsDialogOpen={setIsDialogOpen}
+                                                setIsDialogOpen={
+                                                    setIsDialogOpen
+                                                }
                                                 getAllCodingQuestions={
                                                     getAllCodingQuestions
                                                 }
-                                        setCodingQuestions={setCodingQuestions}
+                                                setCodingQuestions={
+                                                    setCodingQuestions
+                                                }
                                             />
                                         </div>
                                     </DialogContent>

@@ -32,7 +32,7 @@ import { getCodingQuestionTags, getopenEndedQuestionstate } from '@/store/store'
 import { getAllOpenEndedQuestions, getAllTags } from '@/utils/admin'
 import EditOpenEndedQuestionForm from '../_components/EditOpenEndedQuestionForm'
 import Image from 'next/image'
-import { CircularProgress } from '@nextui-org/react'
+import { Spinner } from '@/components/ui/spinner'
 
 type Props = {}
 
@@ -89,7 +89,7 @@ const OpenEndedQuestions = (props: Props) => {
     useEffect(() => {
         const timer = setTimeout(() => {
             setLoading(false)
-        }, 1500)
+        }, 1000)
 
         return () => clearTimeout(timer)
     }, [])
@@ -98,16 +98,7 @@ const OpenEndedQuestions = (props: Props) => {
         <>
             {loading ? (
                 <div className="flex justify-center items-center h-screen">
-                    <CircularProgress
-                        classNames={{
-                            svg: 'w-11 h-11',
-                            indicator: 'text-secondary',
-                            track: 'stroke-white',
-                            value: 'text-sm font-bold',
-                        }}
-                        value={90}
-                        strokeWidth={4}
-                    />
+                    <Spinner className="text-secondary" />
                 </div>
             ) : (
                 <div>
