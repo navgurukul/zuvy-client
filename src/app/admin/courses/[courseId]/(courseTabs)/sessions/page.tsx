@@ -14,6 +14,7 @@ import RecordingCard from '@/app/student/courses/[viewcourses]/[recordings]/_com
 import { OFFSET, POSITION } from '@/utils/constant'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import useDebounce from '@/hooks/useDebounce'
+import { Spinner } from '@/components/ui/spinner'
 
 type ClassType = 'active' | 'upcoming' | 'complete'
 
@@ -64,6 +65,7 @@ function Page({ params }: any) {
     const [totalStudents, setTotalStudents] = useState<number>(0)
     const [lastPage, setLastPage] = useState<number>(0)
     const [search, setSearch] = useState<string>('')
+    const [loading, setLoading] = useState(true)
     const debouncedSearch = useDebounce(search, 1000)
 
     // const { courseData } = getCourseData()
@@ -167,6 +169,7 @@ function Page({ params }: any) {
     //     handleClassType,
     // ])
     const tabs = ['completed', 'upcoming', 'ongoing']
+
     const getHandleAllClasses = useCallback(
         async (offset: number) => {
             let baseUrl = `/classes/all/${params.courseId}?limit=${position}&offset=${offset}`
@@ -187,6 +190,7 @@ function Page({ params }: any) {
                 setTotalStudents(res.data.total_items)
                 setPages(res.data.total_pages)
                 setLastPage(res.data.total_items)
+                setLoading(false)
             } catch (error) {
                 console.error('Error fetching classes:', error)
             }
@@ -262,47 +266,57 @@ function Page({ params }: any) {
                         </Button>
                     ))}
                 </div>
-                {classes.length > 0 ? (
-                    <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
-                        {classes.map((classData, index) =>
-                            activeTab === 'completed' ? (
-                                <RecordingCard
-                                    classData={classData}
-                                    key={index}
-                                    isAdmin
-                                />
-                            ) : (
-                                <ClassCard
-                                    classData={classData}
-                                    key={index}
-                                    classType={activeTab}
-                                />
-                            )
-                        )}
+
+                {loading ? (
+                    <div className="flex justify-center">
+                        <Spinner className="text-secondary" />
                     </div>
                 ) : (
-                    <>
-                        {' '}
-                        <div className="w-full flex mb-10 items-center flex-col gap-y-3 justify-center absolute text-center mt-2">
-                            <Image
-                                src={
-                                    '/emptyStates/undraw_online_learning_re_qw08.svg'
-                                }
-                                height={200}
-                                width={200}
-                                alt="batchEmpty State"
-                            />
-                            <p>
-                                Create a session to start engagement with the
-                                learners for course lessons or doubts
-                            </p>
-                            <CreateSession
-                                courseId={params.courseId || 0}
-                                bootcampData={bootcampData}
-                                getClasses={getHandleAllClasses}
-                            />
-                        </div>
-                    </>
+                    <div>
+                        {classes.length > 0 ? (
+                            <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
+                                {classes.map((classData, index) =>
+                                    activeTab === 'completed' ? (
+                                        <RecordingCard
+                                            classData={classData}
+                                            key={index}
+                                            isAdmin
+                                        />
+                                    ) : (
+                                        <ClassCard
+                                            classData={classData}
+                                            key={index}
+                                            classType={activeTab}
+                                        />
+                                    )
+                                )}
+                            </div>
+                        ) : (
+                            <>
+                                {' '}
+                                <div className="w-full flex mb-10 items-center flex-col gap-y-3 justify-center absolute text-center mt-2">
+                                    <Image
+                                        src={
+                                            '/emptyStates/undraw_online_learning_re_qw08.svg'
+                                        }
+                                        height={200}
+                                        width={200}
+                                        alt="batchEmpty State"
+                                    />
+                                    <p>
+                                        Create a session to start engagement
+                                        with the learners for course lessons or
+                                        doubts
+                                    </p>
+                                    <CreateSession
+                                        courseId={params.courseId || 0}
+                                        bootcampData={bootcampData}
+                                        getClasses={getHandleAllClasses}
+                                    />
+                                </div>
+                            </>
+                        )}
+                    </div>
                 )}
             </div>
             <DataTablePagination
