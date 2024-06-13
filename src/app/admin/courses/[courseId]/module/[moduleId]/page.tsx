@@ -62,6 +62,7 @@ interface Module {
     chapterId: number
     topicName: string
     chapterTitle: string
+    topicId: number
     // include other properties as needed
 }
 interface Project {
@@ -199,9 +200,12 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
 
     const fetchChapterContent = useCallback(
         async (chapterId: number) => {
+            let topicId = moduleData.find(
+                (myModule: any) => myModule.chapterId === chapterId
+            )?.topicId
             try {
                 const response = await api.get(
-                    `/Content/chapterDetailsById/${chapterId}`
+                    `Content/chapterDetailsById/${chapterId}?bootcampId=${params.courseId}&moduleId=${params.moduleId}&topicId=${topicId}`
                 )
                 setChapterId(chapterId)
                 const currentModule: any = moduleData.find(
@@ -222,6 +226,7 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                     setChapterContent(response.data)
                 } else {
                     setChapterContent(response.data)
+                    console.log(response.data, 'chapter content')
                 }
 
                 setTopicId(currentModule?.topicId)

@@ -2,7 +2,7 @@ import React from 'react'
 import { PlusCircle } from 'lucide-react'
 import Link from 'next/link'
 import { cn, difficultyColor, ellipsis } from '@/lib/utils'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 
 interface Example {
     input: number[]
@@ -31,17 +31,20 @@ const CodingQuestions = ({
     setSelectedQuestions,
     selectedQuestions,
 }: {
-    questions: any
-    setSelectedQuestions: any
-    selectedQuestions: any
+    questions: CodingQuestion[]
+    setSelectedQuestions: React.Dispatch<React.SetStateAction<CodingQuestion[]>>
+    selectedQuestions: CodingQuestion[]
 }) => {
     return (
         <ScrollArea className="h-dvh pr-4">
+            <ScrollBar orientation="vertical" />
             {questions.map((question: CodingQuestion) => (
                 <div
                     key={question.id}
                     className={`p-5 rounded-sm border border-gray-200 mb-4 ${
-                        selectedQuestions.some((q: any) => q.id === question.id)
+                        selectedQuestions.some(
+                            (q: CodingQuestion) => q.id === question.id
+                        )
                             ? 'bg-gray-100'
                             : ''
                     }`}
@@ -67,7 +70,7 @@ const CodingQuestions = ({
                                 </p>
                             </div>
                             <Link
-                                href={''}
+                                href=""
                                 className="font-semibold text-sm mt-2 text-secondary"
                             >
                                 View Full Description
@@ -75,7 +78,7 @@ const CodingQuestions = ({
                         </div>
                         <div className="flex">
                             {selectedQuestions.some(
-                                (q: any) => q.id === question.id
+                                (q: CodingQuestion) => q.id === question.id
                             ) ? (
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -97,7 +100,8 @@ const CodingQuestions = ({
                                     onClick={() => {
                                         if (
                                             !selectedQuestions.some(
-                                                (q: any) => q.id === question.id
+                                                (q: CodingQuestion) =>
+                                                    q.id === question.id
                                             )
                                         ) {
                                             setSelectedQuestions([

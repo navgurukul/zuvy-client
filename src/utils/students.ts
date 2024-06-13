@@ -93,3 +93,37 @@ export const getAttendanceColorClass = (attendance: number) => {
         return 'text-secondary' // Green color for attendance >= 75%
     }
 }
+
+// Student Assessment functions:-
+export function requestFullScreen(element: HTMLElement) {
+    if (element.requestFullscreen) {
+        element.requestFullscreen()
+    } else if ((element as any).mozRequestFullScreen) {
+        /* Firefox */
+        ;(element as any).mozRequestFullScreen()
+    } else if ((element as any).webkitRequestFullscreen) {
+        /* Chrome, Safari and Opera */
+        ;(element as any).webkitRequestFullscreen()
+    } else if ((element as any).msRequestFullscreen) {
+        /* IE/Edge */
+        ;(element as any).msRequestFullscreen()
+    }
+}
+
+    // tab change event listener
+   export function handleVisibilityChange() {
+        if (document.hidden) {
+            console.log('The Page is no longer visible. Test ended.')
+        }
+    }
+
+        // Request full screen as full screen is only allowed by user click
+
+    export function handleFullScreenChange() {
+            if (!document.fullscreenElement) {
+                alert('User has exited full screen. Test ended.')
+                // Here you could end the test, show a warning, etc.
+            }
+        }
+
+// --------------------------------------------
