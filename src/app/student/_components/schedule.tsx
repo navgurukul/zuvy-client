@@ -86,7 +86,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
     // }, [userID])
 
     const getUpcomingClassesHandler = useCallback(async () => {
-        await api.get(`/student/Dashboard/classes/{batch_id}`).then((res) => {
+        await api.get(`/student/Dashboard/classes/`).then((res) => {
             setUpcomingClasses(res.data.upcoming)
             setOngoingClasses(res.data.ongoing)
         })
@@ -116,92 +116,104 @@ function Schedule({ className, ...props }: ScheduleProps) {
         getUpcomingClassesHandler,
         getUpcomingSubmissionHandler,
     ])
+
     return (
         <div>
-            <div className="flex flex-row justify-between gap-6">
-                {upcomingClasses?.length > 0 ? (
-                    <div className="flex flex-col">
-                        <h1 className="text-lg p-1 text-start font-bold">
-                            Upcoming Classes
-                        </h1>
-                        <div className="w-[800px]">
-                            {ongoingClasses.map((classData: any, index) => (
-                                <ClassCard
-                                    classData={classData}
-                                    classType={classData.status}
-                                    key={index}
-                                />
-                            ))}
-                            {upcomingClasses.map((classData: any, index) => (
-                                <ClassCard
-                                    classData={classData}
-                                    classType={classData.status}
-                                    key={index}
-                                />
-                            ))}
+            <div className="flex flex-col flex-start mt-6">
+                <h1 className="text-xl p-1 text-start font-bold">
+                    Upcoming Classes
+                </h1>
+                <div className="flex flex-row justify-between gap-6">
+                    {upcomingClasses?.length > 0 ? (
+                        <div className="flex flex-col">
+                            <div className="w-[800px]">
+                                {ongoingClasses.map((classData: any, index) => (
+                                    <ClassCard
+                                        classData={classData}
+                                        classType={classData.status}
+                                        key={index}
+                                    />
+                                ))}
+                                {upcomingClasses.map(
+                                    (classData: any, index) => (
+                                        <ClassCard
+                                            classData={classData}
+                                            classType={classData.status}
+                                            key={index}
+                                        />
+                                    )
+                                )}
+                            </div>
                         </div>
-                    </div>
-                ) : (
-                    <div className="flex w-full flex-col items-center mt-12">
-                        <Image
-                            src="/no-class.svg"
-                            alt="No classes"
-                            width={240}
-                            height={240}
-                        />
-                        <p className="text-lg mt-3 text-center">
-                            There are no upcoming classes
-                        </p>
-                    </div>
-                )}
-                <div className="w-1/3 h-full p-6 bg-gray-100 rounded-lg items-center justify-center ">
-                    <h1 className=" text-xl text-start font-semibold">
-                        Attendance
-                    </h1>
-                    <div className=" gap-2 items-center">
-                        <div className="flex items-center gap-2">
-                            <div
-                                className={`w-[10px] h-[10px] rounded-full  ${getAttendanceColorClass(
-                                    attendenceData[0]?.attendance
-                                )}`}
+                    ) : (
+                        <div className="flex w-full flex-col items-center mt-12">
+                            <Image
+                                src="/no-class.svg"
+                                alt="No classes"
+                                width={240}
+                                height={240}
                             />
-                            <h1>{attendenceData[0]?.attendance}%</h1>
-                        </div>
-                        <div className="flex">
-                            <p className="text-md font-semibold">
-                                {' '}
-                                {attendenceData[0]?.attendedClasses} of{' '}
-                                {attendenceData[0]?.totalClasses} Classes
-                                Attended
+                            <p className="text-lg mt-3 text-center">
+                                There are no upcoming classes
                             </p>
                         </div>
-                    </div>
-                </div>
-                {/* <Card className="text-start">
-            <CardHeader className="bg-muted">
-                <CardTitle>Pick up where you left</CardTitle>
-            </CardHeader>
-            <CardContent className="p-3 grid gap-4">
-                <div className="flex flex-wrap items-center p-4 justify-between gap-8">
-                    <div className="flex items-center">
-                        <BookOpenText className="hidden sm:block" />
-                        <div className="flex-1 ml-2 space-y-1">
-                            <p className="text-sm font-medium leading-none">
-                            {resumeCourse?.bootcamp_name}
+                    )}
+                    {upcomingClasses?.length > 0 && (
+                        <div className="w-1/3 h-full p-6 bg-gray-100 rounded-lg items-center justify-center ">
+                            <h1 className=" text-xl text-start font-semibold">
+                                Attendance
+                            </h1>
+                            <p className="text-md text-start mt-3 mb-2 text-center">
+                                AFE + Navgurukul Coding Bootcamp
                             </p>
-                            <p className="text-sm text-muted-foreground">
-                                {resumeCourse.module_name}
-                            </p>
+                            <div className=" gap-2 items-center">
+                                <div className="flex items-center gap-2">
+                                    <div
+                                        className={`w-[10px] h-[10px] rounded-full  ${getAttendanceColorClass(
+                                            attendenceData[0]?.attendance
+                                        )}`}
+                                    />
+                                    <h1>{attendenceData[0]?.attendance}%</h1>
+                                </div>
+                                <div className="flex">
+                                    <p className="text-md font-semibold">
+                                        {' '}
+                                        {
+                                            attendenceData[0]?.attendedClasses
+                                        } of {attendenceData[0]?.totalClasses}{' '}
+                                        Classes Attended
+                                    </p>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <Link
-                        href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`}
-                    >
-                        <Button>Continue</Button>
-                        </Link>
+                    )}
+
+                    {/* <Card className="text-start">
+                    <CardHeader className="bg-muted">
+                        <CardTitle>Pick up where you left</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-3 grid gap-4">
+                    <div className="flex flex-wrap items-center p-4 justify-between gap-8">
+                        <div className="flex items-center">
+                            <BookOpenText className="hidden sm:block" />
+                            <div className="flex-1 ml-2 space-y-1">
+                                <p className="text-sm font-medium leading-none">
+                                {resumeCourse?.bootcamp_name}
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                    {resumeCourse.module_name}
+                                </p>
+                            </div>
                         </div>
-                        </CardContent>
+                        <Link
+                            href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`}
+                        >
+                            <Button>Continue</Button>
+                            </Link>
+                            </div>
+                            </CardContent>
                     </Card> */}
+                </div>
             </div>
 
             {/* <Calendar
@@ -211,10 +223,11 @@ function Schedule({ className, ...props }: ScheduleProps) {
         className="rounded-md border"
       /> */}
             <div className="flex flex-col flex-start">
-                <h1 className="text-lg p-1 text-start font-bold">
-                    Upcoming Submission
+                <h1 className="text-xl p-1 text-start font-bold">
+                    Upcoming Submissions
                 </h1>
-                <div className="w-[800px]">
+                {/* <div className="w-[800px]"> */}
+                <div className="flex flex-row">
                     {submission.length > 0 ? (
                         submission.map((data) => {
                             return (
@@ -224,12 +237,13 @@ function Schedule({ className, ...props }: ScheduleProps) {
                     ) : (
                         <div className="flex w-full flex-col items-center mt-12">
                             <Image
-                                src="/no-class.svg"
+                                src="/no-submission.svg"
                                 alt="No Submission"
                                 width={240}
                                 height={240}
                             />
-                            <p className="text-md font-semibold">
+                            <p className="text-lg mt-3 text-center">
+                                {/* <p className="text-md font-semibold"> */}
                                 There are no upcoming Submission
                             </p>
                         </div>
