@@ -220,7 +220,7 @@ function Page({ params }: any) {
         getHandleAllBootcampBatches()
     }, [getHandleAllBootcampBatches])
     return (
-        <>
+        <div>
             <div>
                 <div className="relative flex text-start gap-6 my-6 w-[200px]">
                     <Combobox
@@ -263,22 +263,35 @@ function Page({ params }: any) {
                     ))}
                 </div>
                 {classes.length > 0 ? (
-                    <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
-                        {classes.map((classData, index) =>
-                            activeTab === 'completed' ? (
-                                <RecordingCard
-                                    classData={classData}
-                                    key={index}
-                                    isAdmin
-                                />
-                            ) : (
-                                <ClassCard
-                                    classData={classData}
-                                    key={index}
-                                    classType={activeTab}
-                                />
-                            )
-                        )}
+                    <div>
+                        <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
+                            {classes.map((classData, index) =>
+                                activeTab === 'completed' ? (
+                                    <RecordingCard
+                                        classData={classData}
+                                        key={index}
+                                        isAdmin
+                                    />
+                                ) : (
+                                    <ClassCard
+                                        classData={classData}
+                                        key={index}
+                                        classType={activeTab}
+                                    />
+                                )
+                            )}
+                        </div>
+                        <DataTablePagination
+                            totalStudents={totalStudents}
+                            position={position}
+                            setPosition={setPosition}
+                            pages={pages}
+                            lastPage={lastPage}
+                            currentPage={currentPage}
+                            setCurrentPage={setCurrentPage}
+                            fetchStudentData={getHandleAllClasses}
+                            setOffset={setOffset}
+                        />
                     </div>
                 ) : (
                     <>
@@ -305,18 +318,7 @@ function Page({ params }: any) {
                     </>
                 )}
             </div>
-            <DataTablePagination
-                totalStudents={totalStudents}
-                position={position}
-                setPosition={setPosition}
-                pages={pages}
-                lastPage={lastPage}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                fetchStudentData={getHandleAllClasses}
-                setOffset={setOffset}
-            />
-        </>
+        </div>
     )
 }
 

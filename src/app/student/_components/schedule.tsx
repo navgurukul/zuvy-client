@@ -86,7 +86,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
     // }, [userID])
 
     const getUpcomingClassesHandler = useCallback(async () => {
-        await api.get(`/student/Dashboard/classes/{batch_id}`).then((res) => {
+        await api.get(`/student/Dashboard/classes`).then((res) => {
             setUpcomingClasses(res.data.upcoming)
             setOngoingClasses(res.data.ongoing)
         })

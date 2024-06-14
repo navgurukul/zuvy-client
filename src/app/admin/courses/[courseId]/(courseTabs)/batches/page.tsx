@@ -46,19 +46,6 @@ const Page = ({ params }: { params: any }) => {
 
     const [search, setSearch] = useState<string>('')
     const debouncedSearch = useDebounce(search, 1000)
-    // useEffect(() => {
-    //     if (courseData?.id) {
-    //         console.log('first', courseData)
-    //         fetchBatches(courseData?.id)
-    //         // setBatches(batchData)
-    //     }
-    // }, [courseData?.id, fetchBatches])
-
-    // useEffect(() => {
-    //     if (params.courseId) {
-    //         fetchCourseDetails(params.courseId)
-    //     }
-    // }, [params.courseId, fetchCourseDetails])
 
     const formSchema = z.object({
         name: z.string().min(2, {
@@ -147,6 +134,17 @@ const Page = ({ params }: { params: any }) => {
             console.error('Error creating batch:', error)
         }
     }
+
+    useEffect(() => {
+        if (params.courseId) {
+            fetchCourseDetails(params.courseId)
+        }
+    }, [params.courseId, fetchCourseDetails])
+    useEffect(() => {
+        if (courseData?.id) {
+            fetchBatches(courseData?.id)
+        }
+    }, [courseData?.id, fetchBatches])
 
     useEffect(() => {
         const searchBatchHandler = async () => {

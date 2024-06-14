@@ -231,17 +231,17 @@ const BatchesInfo = ({
 
     const fetchStudentData = useCallback(
         async (offset: number) => {
-            await api
-                .get(
-                    `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}&limit=${position}&offset=${offset}`
-                )
-                .then((response) => {
-                    setStudentData(response.data.totalStudents)
-                    setStoreStudentData(response.data.totalStudents)
-                    setLastPage(response.data.totalPages)
-                    setPages(response.data.totalPages)
-                    setTotalStudents(response.data.totalStudentsCount)
-                })
+            let endpoint = `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}&limit=${position}&offset=${offset}`
+            if (debouncedValue) {
+                endpoint += `&searchTerm=${debouncedValue}`
+            }
+            await api.get(endpoint).then((response) => {
+                setStudentData(response.data.totalStudents)
+                setStoreStudentData(response.data.totalStudents)
+                setLastPage(response.data.totalPages)
+                setPages(response.data.totalPages)
+                setTotalStudents(response.data.totalStudentsCount)
+            })
         },
         [
             params,
@@ -251,31 +251,33 @@ const BatchesInfo = ({
             setLastPage,
             setPages,
             setTotalStudents,
+            debouncedValue, // Ensure searchTerm is included as a dependency
         ]
     )
+
     useEffect(() => {
         fetchStudentData(offset)
     }, [offset, position, fetchStudentData])
-    useEffect(() => {
-        const searchBatchStudentsHandler = async () => {
-            await api
-                .get(
-                    `/bootcamp/studentSearch/${params.courseId}?batch_id=${params.batchId}&searchTerm=${debouncedValue}`
-                )
-                .then((res) => {
-                    setStoreStudentData(res.data.data[1].studentsEmails)
-                })
-        }
+    // useEffect(() => {
+    //     const searchBatchStudentsHandler = async () => {
+    //         await api
+    //             .get(
+    //                 `/bootcamp/studentSearch/${params.courseId}?batch_id=${params.batchId}&searchTerm=${debouncedValue}`
+    //             )
+    //             .then((res) => {
+    //                 setStoreStudentData(res.data.data[1].studentsEmails)
+    //             })
+    //     }
 
-        if (debouncedValue) searchBatchStudentsHandler()
-        if (debouncedValue?.trim().length === 0) fetchStudentData(0)
-    }, [
-        debouncedValue,
-        fetchStudentData,
-        params.batchId,
-        params.courseId,
-        setStoreStudentData,
-    ])
+    //     if (debouncedValue) searchBatchStudentsHandler()
+    //     if (debouncedValue?.trim().length === 0) fetchStudentData(0)
+    // }, [
+    //     debouncedValue,
+    //     fetchStudentData,
+    //     params.batchId,
+    //     params.courseId,
+    //     setStoreStudentData,
+    // ])
 
     const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value)

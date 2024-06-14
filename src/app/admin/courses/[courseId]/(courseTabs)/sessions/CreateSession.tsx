@@ -1,8 +1,45 @@
-'use client'
-import React, { useState } from 'react'
-import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
+import React, { useEffect, useState } from 'react'
+import { z } from 'zod'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { setHours, setMinutes, setSeconds, setMilliseconds } from 'date-fns'
+import { CalendarIcon, Check, ChevronsUpDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import NewClassDialog from '../../_components/newClassDialog'
+import { Calendar } from '@/components/ui/calendar'
+import { format, addDays } from 'date-fns'
+
+import {
+    Form,
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from '@/components/ui/form'
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover'
+import { toast } from '@/components/ui/use-toast'
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogOverlay,
+    DialogTrigger,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+} from '@/components/ui/command'
+import { cn } from '@/lib/utils'
+import { api } from '@/utils/axios.config'
 
 interface CreateSessionProps {
     courseId: number
@@ -10,54 +47,368 @@ interface CreateSessionProps {
     getClasses: any
 }
 
-const CreateSessionDialog: React.FC<CreateSessionProps> = ({
-    courseId,
-    bootcampData,
-    getClasses,
-}) => {
-    const [title, setTitle] = useState('')
-    const [description, setDescription] = useState('')
-    const [startDateTime, setStartDateTime] = useState(new Date())
-    const [endDateTime, setEndDateTime] = useState(new Date())
-    const [batchId, setBatchId] = useState('')
+const formSchema = z.object({
+    sessionTitle: z.string().min(2, {
+        message: 'Session Title must be at least 2 characters.',
+    }),
+    description: z.string().min(2, {
+        message: 'Description must be at least 2 characters.',
+    }),
+    startDate: z.date({
+        required_error: 'A start date is required.',
+    }),
+    endDate: z.date({
+        required_error: 'A start date is required.',
+    }),
+    startTime: z.string().min(1, {
+        message: 'Start Time is required',
+    }),
+    endTime: z.string().min(1, {
+        message: 'End Time is required',
+    }),
+    batch: z.string({
+        required_error: 'Please select a Batch.',
+    }),
+})
 
-    const handleDialogOpenChange = () => {
-        setTitle('')
-        setDescription('')
-        const startDate = new Date()
-        startDate.setHours(startDate.getHours() + 5)
-        startDate.setMinutes(startDate.getMinutes() + 30)
-        setStartDateTime(startDate)
-        const endDate = new Date()
-        endDate.setHours(endDate.getHours() + 5)
-        endDate.setMinutes(endDate.getMinutes() + 30)
-        setEndDateTime(endDate)
-        setBatchId('')
+const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
+    const [formIsOpen, setFormIsOpen] = useState<boolean>(false)
+    const toggleForm = () => {
+        setFormIsOpen(!formIsOpen)
+        console.log(formIsOpen)
     }
 
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            sessionTitle: '',
+            description: '',
+            startDate: setHours(
+                setMinutes(setSeconds(setMilliseconds(new Date(), 0), 0), 0),
+                0
+            ),
+            endDate: setHours(
+                setMinutes(setSeconds(setMilliseconds(new Date(), 0), 0), 0),
+                0
+            ),
+            startTime: '',
+            endTime: '',
+            batch: '',
+        },
+    })
+
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        const userIdLocal = JSON.parse(localStorage.getItem('AUTH') || '')
+        const combineDateTime = (dateStr: any, timeStr: string) => {
+            const adjustedDate = addDays(dateStr, 1)
+            const dateString =
+                typeof adjustedDate === 'string'
+                    ? adjustedDate
+                    : adjustedDate.toISOString()
+            const datePart = dateString.split('T')[0]
+            const dateTimeStr = `${datePart}T${timeStr}:00.000Z`
+            return dateTimeStr
+        }
+        const startDateTime = combineDateTime(
+            values.startDate,
+            values.startTime
+        )
+        const endDateTime = combineDateTime(values.endDate, values.endTime)
+        const transformedData = {
+            title: values.sessionTitle,
+            description: values.description,
+            startDateTime: startDateTime,
+            endDateTime: endDateTime,
+            timeZone: 'Asia/Kolkata',
+            attendees: [],
+            batchId: +values.batch,
+            bootcampId: +props.courseId,
+            userId: +userIdLocal?.id,
+            roles: userIdLocal?.rolesList,
+        }
+        await api.post(`/classes`, transformedData).then((res) => {
+            toast({
+                title: res.data.status,
+                description: res.data.message,
+                variant: 'default',
+                className: 'text-start capitalize border border-secondary',
+            })
+            props.getClasses()
+        })
+    }
     return (
-        <Dialog onOpenChange={handleDialogOpenChange}>
+        <Dialog>
             <DialogTrigger asChild>
-                <Button className="text-white bg-secondary">
+                <Button
+                    onClick={toggleForm}
+                    className="text-white bg-secondary"
+                >
                     Create Session
                 </Button>
             </DialogTrigger>
             <DialogOverlay />
-            <NewClassDialog
-                courseId={courseId}
-                bootcampData={bootcampData}
-                title={title}
-                setTitle={setTitle}
-                description={description}
-                setDescription={setDescription}
-                startDateTime={startDateTime}
-                setStartDateTime={setStartDateTime}
-                endDateTime={endDateTime}
-                setEndDateTime={setEndDateTime}
-                batchId={batchId}
-                setBatchId={setBatchId}
-                getClasses={getClasses}
-            />
+            <DialogContent>
+                <DialogHeader className="text-lg font-semibold">
+                    New Session
+                </DialogHeader>
+                <Form {...form}>
+                    <form
+                        onSubmit={form.handleSubmit(onSubmit)}
+                        className="space-y-8"
+                    >
+                        <FormField
+                            control={form.control}
+                            name="sessionTitle"
+                            render={({ field }) => (
+                                <FormItem className="text-left">
+                                    <FormLabel>Session Title</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="Session Title"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="description"
+                            render={({ field }) => (
+                                <FormItem className="text-left">
+                                    <FormLabel>Description</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="Description"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <div className="flex items-center gap-x-4 ">
+                            <FormField
+                                control={form.control}
+                                name="startDate"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-col text-left">
+                                        <FormLabel>Start Date</FormLabel>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <FormControl>
+                                                    <Button
+                                                        variant={'outline'}
+                                                        className={`w-[230px]  text-left font-normal ${
+                                                            !field.value &&
+                                                            'text-muted-foreground'
+                                                        }`}
+                                                    >
+                                                        {field.value ? (
+                                                            format(
+                                                                field.value,
+                                                                'PPP'
+                                                            )
+                                                        ) : (
+                                                            <span>
+                                                                Pick a date
+                                                            </span>
+                                                        )}
+                                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                    </Button>
+                                                </FormControl>
+                                            </PopoverTrigger>
+                                            <PopoverContent
+                                                className="w-auto p-0"
+                                                align="start"
+                                            >
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={field.value}
+                                                    onSelect={field.onChange}
+                                                    disabled={(date) =>
+                                                        date <=
+                                                        addDays(new Date(), -1)
+                                                    } // Disable past dates
+                                                    initialFocus
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
+
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="startTime"
+                                render={({ field }) => (
+                                    <FormItem className="text-left flex flex-col  ">
+                                        <FormLabel>StartTime</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                placeholder="Time"
+                                                {...field}
+                                                type="time"
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                        <div className="flex items-center gap-x-4 ">
+                            <FormField
+                                control={form.control}
+                                name="endDate"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-col text-left">
+                                        <FormLabel>End Date</FormLabel>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <FormControl>
+                                                    <Button
+                                                        variant={'outline'}
+                                                        className={`w-[230px] pl-3 text-left font-normal ${
+                                                            !field.value &&
+                                                            'text-muted-foreground'
+                                                        }`}
+                                                    >
+                                                        {field.value ? (
+                                                            format(
+                                                                field.value,
+                                                                'PPP'
+                                                            )
+                                                        ) : (
+                                                            <span>
+                                                                Pick a date
+                                                            </span>
+                                                        )}
+                                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                    </Button>
+                                                </FormControl>
+                                            </PopoverTrigger>
+                                            <PopoverContent
+                                                className="w-auto p-0"
+                                                align="start"
+                                            >
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={field.value}
+                                                    onSelect={field.onChange}
+                                                    disabled={(date) =>
+                                                        date <=
+                                                        addDays(new Date(), -1)
+                                                    } // Disable past dates
+                                                    initialFocus
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
+
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="endTime"
+                                render={({ field }) => (
+                                    <FormItem className="text-left flex flex-col  ">
+                                        <FormLabel>End Time</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                placeholder="Time"
+                                                {...field}
+                                                type="time"
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                        <FormField
+                            control={form.control}
+                            name="batch"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-col text-left">
+                                    <FormLabel>Select Batch</FormLabel>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <FormControl>
+                                                <Button
+                                                    variant="outline"
+                                                    role="combobox"
+                                                    className={cn(
+                                                        'w-full justify-between',
+                                                        !field.value &&
+                                                            'text-muted-foreground'
+                                                    )}
+                                                >
+                                                    {field.value
+                                                        ? props.bootcampData.find(
+                                                              (language) =>
+                                                                  language.value ===
+                                                                  field.value
+                                                          )?.label
+                                                        : 'Select Batch'}
+                                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                </Button>
+                                            </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent className=" flex items-center justify-center  w-[500px] p-0">
+                                            <Command>
+                                                <CommandInput placeholder="Search Batch..." />
+                                                <CommandEmpty>
+                                                    No Batch Found
+                                                </CommandEmpty>
+                                                <CommandGroup>
+                                                    {props.bootcampData.map(
+                                                        (language) => (
+                                                            <CommandItem
+                                                                value={
+                                                                    language.label
+                                                                }
+                                                                key={
+                                                                    language.value
+                                                                }
+                                                                onSelect={() => {
+                                                                    form.setValue(
+                                                                        'batch',
+                                                                        language.value
+                                                                    )
+                                                                }}
+                                                            >
+                                                                <Check
+                                                                    className={cn(
+                                                                        'mr-2 h-4 w-4',
+                                                                        language.value ===
+                                                                            field.value
+                                                                            ? 'opacity-100'
+                                                                            : 'opacity-0'
+                                                                    )}
+                                                                />
+                                                                {language.label}
+                                                            </CommandItem>
+                                                        )
+                                                    )}
+                                                </CommandGroup>
+                                            </Command>
+                                        </PopoverContent>
+                                    </Popover>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <div className="flex justify-end">
+                            <Button variant={'secondary'} type="submit">
+                                Create Class
+                            </Button>
+                        </div>
+                    </form>
+                </Form>
+            </DialogContent>
         </Dialog>
     )
 }

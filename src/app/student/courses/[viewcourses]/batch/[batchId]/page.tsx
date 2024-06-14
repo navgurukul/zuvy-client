@@ -71,9 +71,7 @@ function Page({
     // setIsParamBatchId(params.batchId)
     const getUpcomingClassesHandler = useCallback(async () => {
         await api
-            .get(
-                `/student/Dashboard/classes/{batch_id}?batch_id=${params.batchId}`
-            )
+            .get(`/student/Dashboard/classes/?batch_id=${params.batchId}`)
             .then((res) => {
                 setUpcomingClasses(res.data.upcoming)
                 setOngoingClasses(res.data.ongoing)
@@ -105,7 +103,9 @@ function Page({
     }, [
         getUpcomingSubmissionHandler,
         getUpcomingClassesHandler,
+        params.batchId,
         getAttendanceHandler,
+        setIsParamBatchId,
     ])
     // useEffect(() => {
     //     // const userIdLocal = JSON.parse(localStorage.getItem("AUTH") || "");
