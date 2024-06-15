@@ -16,6 +16,7 @@ import { DELETE_MODULE_CONFIRMATION } from '@/utils/constant'
 import { toast } from '@/components/ui/use-toast'
 
 type Props = {
+    editHandle: any
     index: number
     moduleId: any
     courseId: number
@@ -33,6 +34,7 @@ type Props = {
 }
 
 const CurricullumCard = ({
+    editHandle,
     index,
     moduleId,
     courseId,
@@ -101,7 +103,12 @@ const CurricullumCard = ({
                                 handleDeleteModal()
                             }}
                         />
-                        <GripVertical />
+                        <GripVertical
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                editHandle(moduleId)
+                            }}
+                        />
                     </div>
                 </div>
                 <p className="text-start mb-2">{description}</p>

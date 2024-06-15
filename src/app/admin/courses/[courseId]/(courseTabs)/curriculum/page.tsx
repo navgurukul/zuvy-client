@@ -27,6 +27,12 @@ interface CurriculumItem {
     typeId: number
     projectId: number
 }
+interface ModuleData {
+    name: string
+    description: string
+    type: string
+    timeAlloted: number
+}
 
 function Page() {
     // state and variables
@@ -34,16 +40,20 @@ function Page() {
     const { courseData } = getCourseData()
     const [typeId, setTypeId] = useState(0)
     const [loading, setLoading] = useState(true)
-
+    const [editMode, setEditMode] = useState(false)
+    const [moduleId, setModuleId] = useState(0)
+    const [isOpen, setIsOpen] = useState(false)
+    const [selectedModuleData, setSelectedModuleData] =
+        useState<ModuleData | null>(null)
     const [moduleData, setModuleData] = useState({
         name: '',
         description: '',
     })
 
     const [timeData, setTimeData] = useState({
-        months: 0,
-        weeks: 0,
-        days: 0,
+        months: -1,
+        weeks: -1,
+        days: -1,
     })
 
     // func
@@ -62,6 +72,92 @@ function Page() {
     ) => {
         const { name, value } = e.target
         setTimeData((prev) => ({ ...prev, [name]: parseInt(value, 10) }))
+    }
+
+    useEffect(() => {
+        api.get(`/content/allModules/${courseData?.id}`).then((res) => {
+            const data = res.data.find((item: any) => moduleId === item.id)
+            setSelectedModuleData(data)
+        })
+    }, [moduleId])
+
+    const editHandle = (module: any) => {
+        setEditMode(true)
+        setModuleId(module)
+        setIsOpen(true)
+    }
+
+    const convertSeconds = (seconds: number) => {
+        const SECONDS_IN_A_MINUTE = 60
+        const SECONDS_IN_AN_HOUR = 60 * SECONDS_IN_A_MINUTE
+        const SECONDS_IN_A_DAY = 24 * SECONDS_IN_AN_HOUR
+        const SECONDS_IN_A_WEEK = 7 * SECONDS_IN_A_DAY
+        const SECONDS_IN_A_MONTH = 30.44 * SECONDS_IN_A_DAY
+
+        const months = Math.floor(seconds / SECONDS_IN_A_MONTH)
+        seconds %= SECONDS_IN_A_MONTH
+
+        const weeks = Math.floor(seconds / SECONDS_IN_A_WEEK)
+        seconds %= SECONDS_IN_A_WEEK
+
+        const days = Math.floor(seconds / SECONDS_IN_A_DAY)
+        seconds %= SECONDS_IN_A_DAY
+
+        return {
+            months: months,
+            weeks: weeks,
+            days: days,
+        }
+    }
+
+    useEffect(() => {
+        if (selectedModuleData) {
+            setModuleData({
+                name: selectedModuleData.name || '',
+                description: selectedModuleData.description || '',
+            })
+            const result = convertSeconds(selectedModuleData.timeAlloted)
+            setTimeData({
+                days: result.days,
+                weeks: result.weeks,
+                months: result.months,
+            })
+        }
+    }, [selectedModuleData])
+
+    const editModule = () => {
+        const { days, weeks, months } = timeData
+
+        const totalSeconds = moment
+            .duration({ days, weeks, months })
+            .asSeconds()
+
+        const moduleDto = {
+            ...moduleData,
+            timeAlloted: totalSeconds,
+            isLock: false,
+        }
+
+        api.put(
+            `/content/editModuleOfBootcamp/${courseData?.id}?moduleId=${moduleId}`,
+            { moduleDto }
+        )
+            .then((res) => {
+                toast({
+                    title: 'Success',
+                    description: 'Module Edited Successfully',
+                    className: 'text-start capitalize border border-secondary',
+                })
+                fetchCourseModules()
+            })
+            .catch((error) => {
+                toast({
+                    title: 'Error',
+                    description: 'Error creating module',
+                    className:
+                        'text-start capitalize border border-destructive',
+                })
+            })
     }
 
     const createModule = () => {
@@ -164,9 +260,11 @@ function Page() {
                         </DialogTrigger>
                         <DialogOverlay />
                         <NewModuleDialog
+                            editMode={editMode}
                             moduleData={moduleData}
                             timeData={timeData}
                             createModule={createModule}
+                            editModule={editModule}
                             handleModuleChange={handleModuleChange}
                             handleTimeAllotedChange={handleTimeAllotedChange}
                             handleTypeChange={handleTypeChange}
@@ -175,6 +273,19 @@ function Page() {
                     </Dialog>
                 </div>
             )}
+            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                <NewModuleDialog
+                    editMode={editMode}
+                    moduleData={moduleData}
+                    timeData={timeData}
+                    createModule={createModule}
+                    editModule={editModule}
+                    handleModuleChange={handleModuleChange}
+                    handleTimeAllotedChange={handleTimeAllotedChange}
+                    handleTypeChange={handleTypeChange}
+                    typeId={typeId}
+                />
+            </Dialog>
             {loading ? (
                 <div className="flex justify-center">
                     <Spinner className="text-secondary" />
@@ -202,6 +313,7 @@ function Page() {
                                                 } my-3 p-3  flex rounded-xl`}
                                             >
                                                 <CurricullumCard
+                                                    editHandle={editHandle}
                                                     moduleId={item.id}
                                                     courseId={
                                                         courseData?.id ?? 0
@@ -258,8 +370,10 @@ function Page() {
                                 </DialogTrigger>
                                 <DialogOverlay />
                                 <NewModuleDialog
+                                    editMode={editMode}
                                     moduleData={moduleData}
                                     createModule={createModule}
+                                    editModule={editModule}
                                     handleModuleChange={handleModuleChange}
                                     handleTimeAllotedChange={
                                         handleTimeAllotedChange
