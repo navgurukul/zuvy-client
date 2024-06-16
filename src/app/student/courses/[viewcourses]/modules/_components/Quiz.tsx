@@ -30,8 +30,8 @@ function Quiz(props: Props) {
     }
     const allQuestionsAnswered = () => {
         return (
-            questions.length > 0 &&
-            questions.every(
+            questions?.length > 0 &&
+            questions?.every(
                 (question) => selectedAnswers[question.id] !== undefined
             )
         )
@@ -41,7 +41,7 @@ function Quiz(props: Props) {
             const res = await api.get(
                 `/tracking/getAllQuizAndAssignmentWithStatus/${props.moduleId}?chapterId=${props.chapterId}`
             )
-            setQuestions(res.data[0].trackedData)
+            setQuestions(res.data[0].questions)
         } catch (error) {
             console.error('Error fetching quiz questions:', error)
         }
@@ -62,20 +62,19 @@ function Quiz(props: Props) {
             submitQuiz: mappedAnswers,
         }
         console.log(transformedBody)
-        // await api
-        //     .post(
-        //         `/tracking/updateQuizAndAssignmentStatus/${props.bootcampId}/${props.moduleId}?chapterId=${props.chapterId}`,
-        //         transformedBody
-        //     )
-        //     .then(() => {
-        //         toast({
-        //             title: 'Success',
-        //             description: 'Submitted Quiz Successfully',
-        //         })
-        //     })
+        await api
+            .post(
+                `/tracking/updateQuizAndAssignmentStatus/${props.bootcampId}/${props.moduleId}?chapterId=${props.chapterId}`,
+                transformedBody
+            )
+            .then(() => {
+                toast({
+                    title: 'Success',
+                    description: 'Submitted Quiz Successfully',
+                })
+            })
     }
 
-    console.log(questions)
     return (
         <div>
             <ScrollArea className="h-screen w-full   rounded-md">
@@ -95,7 +94,7 @@ function Quiz(props: Props) {
                             </h1>
                         )}
                         {status
-                            ? questions.map((question, index) => (
+                            ? questions?.map((question, index) => (
                                   <div key={question.id}>
                                       <h1 className="font-semibold my-3">
                                           {'Q'}
@@ -175,7 +174,7 @@ function Quiz(props: Props) {
                                       </div>
                                   </div>
                               ))
-                            : questions.map((question, index) => (
+                            : questions?.map((question, index) => (
                                   <div key={question.id}>
                                       <h1 className="font-semibold my-3">
                                           {'Q'}

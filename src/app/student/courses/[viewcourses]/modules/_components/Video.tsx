@@ -9,7 +9,6 @@ function Video({
     content: any
     completeChapter: () => void
 }) {
-    console.log('first', content)
     return (
         <div>
             <p className="text-start mb-2 text-xl font-semibold">
