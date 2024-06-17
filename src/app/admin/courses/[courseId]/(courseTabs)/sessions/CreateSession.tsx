@@ -81,7 +81,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
     const [formIsOpen, setFormIsOpen] = useState<boolean>(false)
     const toggleForm = () => {
         setFormIsOpen(!formIsOpen)
-        console.log(formIsOpen)
+        form.clearErrors()
     }
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -102,6 +102,15 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
             batch: '',
         },
     })
+    useEffect(() => {
+        form.setValue('sessionTitle', '')
+        form.setValue('description', '')
+        form.setValue('startDate', new Date())
+        form.setValue('endDate', new Date())
+        form.setValue('startTime', '')
+        form.setValue('endTime', '')
+        form.setValue('batch', '')
+    }, [formIsOpen, form])
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         const userIdLocal = JSON.parse(localStorage.getItem('AUTH') || '')
