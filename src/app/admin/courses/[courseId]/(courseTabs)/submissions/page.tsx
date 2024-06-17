@@ -3,19 +3,21 @@ import React, { useCallback, useEffect, useState } from 'react'
 
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { ArrowDownToLine, Search } from 'lucide-react'
+import { ArrowDownToLine, ChevronRight, Search } from 'lucide-react'
 
 import PraticeProblems from '../../_components/PraticeProblems'
 import Assesments from '../../_components/Assesments'
 import Projects from '../../_components/Projects'
 import { api } from '@/utils/axios.config'
 import PracticeProblems from '../../_components/PraticeProblems'
+import Link from 'next/link'
 
 const Page = ({ params }: { params: any }) => {
     const [activeTab, setActiveTab] = useState('practice')
     const [submissions, setSubmissions] = useState<any[]>([])
     const [totalStudents, setTotalStudents] = useState(0)
     const [assesments, setAssesments] = useState<any[]>([])
+    const [projectData, setProjectData] = useState<any>([])
 
     const handleTabChange = (tab: string) => {
         setActiveTab(tab)
@@ -44,13 +46,27 @@ const Page = ({ params }: { params: any }) => {
             console.error('Error fetching assessments:', error)
         }
     }, [params.courseId])
+    const getProjectsData = useCallback(async () => {
+        try {
+            const res = await api.get(
+                `/submission/submissionsOfProjects/${params.courseId}`
+            )
+            setProjectData(res.data.data.bootcampModules)
+            setTotalStudents(res.data.totalStudents)
+        } catch (error) {
+            console.error('Error fetching assessments:', error)
+        }
+    }, [params.courseId])
 
     useEffect(() => {
         if (params.courseId) {
             getSubmissions()
             getAssessments()
+            getProjectsData()
         }
-    }, [getSubmissions, getAssessments, params.courseId])
+    }, [getSubmissions, getAssessments, params.courseId, getProjectsData])
+
+    console.log(projectData)
 
     return (
         <div className="">
@@ -144,7 +160,48 @@ const Page = ({ params }: { params: any }) => {
                     </>
                 )}
                 {activeTab === 'projects' && (
-                    <Projects courseId={params.courseId} />
+                    <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2 lg:grid-cols-3">
+                        {projectData.map((item: any) => {
+                            return (
+                                <div
+                                    key={item.id}
+                                    className="lg:flex h-[120px] w-[400px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md p-4"
+                                >
+                                    <div className="flex flex-col w-full ">
+                                        <h1 className="font-semibold text-start">
+                                            {item.projectData[0].title}
+                                        </h1>
+                                        <div className="flex items-center gap-2">
+                                            <div className="bg-yellow h-2 w-2 rounded-full" />
+                                            <p className="text-start">
+                                                {
+                                                    item.projectData[0]
+                                                        .submitStudents
+                                                }
+                                                /{totalStudents} Submission
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-end ">
+                                        <Link
+                                            href={`/admin/courses/${params.courseId}/submissionProjects/${item.projectData[0].id}`}
+                                        >
+                                            <Button
+                                                variant={'ghost'}
+                                                className="text-secondary text-md"
+                                            >
+                                                View Submission{' '}
+                                                <ChevronRight
+                                                    className="text-secondary"
+                                                    size={17}
+                                                />
+                                            </Button>
+                                        </Link>
+                                    </div>
+                                </div>
+                            )
+                        })}
+                    </div>
                 )}
             </div>
         </div>

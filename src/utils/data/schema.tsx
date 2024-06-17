@@ -14,6 +14,10 @@ export const taskSchema = z.object({
     attendance: z.number(),
     status: z.string(),
     noOfAttempts: z.number(),
+    isChecked: z.boolean(),
+    userEmail: z.string(),
+    projectId: z.number(),
+    userName: z.string(),
 })
 
 export const testCaseSchema = z.object({

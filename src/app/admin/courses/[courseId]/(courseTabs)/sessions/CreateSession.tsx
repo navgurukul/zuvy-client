@@ -25,6 +25,7 @@ import {
 import { toast } from '@/components/ui/use-toast'
 import {
     Dialog,
+    DialogClose,
     DialogContent,
     DialogHeader,
     DialogOverlay,
@@ -47,29 +48,34 @@ interface CreateSessionProps {
     getClasses: any
 }
 
-const formSchema = z.object({
-    sessionTitle: z.string().min(2, {
-        message: 'Session Title must be at least 2 characters.',
-    }),
-    description: z.string().min(2, {
-        message: 'Description must be at least 2 characters.',
-    }),
-    startDate: z.date({
-        required_error: 'A start date is required.',
-    }),
-    endDate: z.date({
-        required_error: 'A start date is required.',
-    }),
-    startTime: z.string().min(1, {
-        message: 'Start Time is required',
-    }),
-    endTime: z.string().min(1, {
-        message: 'End Time is required',
-    }),
-    batch: z.string({
-        required_error: 'Please select a Batch.',
-    }),
-})
+const formSchema = z
+    .object({
+        sessionTitle: z.string().min(2, {
+            message: 'Session Title must be at least 2 characters.',
+        }),
+        description: z.string().min(2, {
+            message: 'Description must be at least 2 characters.',
+        }),
+        startDate: z.date({
+            required_error: 'A start date is required.',
+        }),
+        endDate: z.date({
+            required_error: 'A start date is required.',
+        }),
+        startTime: z.string().min(1, {
+            message: 'Start Time is required',
+        }),
+        endTime: z.string().min(1, {
+            message: 'End Time is required',
+        }),
+        batch: z.string({
+            required_error: 'Please select a Batch.',
+        }),
+    })
+    .refine((data) => data.startDate <= data.endDate, {
+        message: 'Start date cannot be after end date',
+        path: ['endDate'], // This will show the error message at the endDate field
+    })
 
 const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
     const [formIsOpen, setFormIsOpen] = useState<boolean>(false)
@@ -402,9 +408,11 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                             )}
                         />
                         <div className="flex justify-end">
-                            <Button variant={'secondary'} type="submit">
-                                Create Class
-                            </Button>
+                            <DialogClose asChild>
+                                <Button variant={'secondary'} type="submit">
+                                    Create Class
+                                </Button>
+                            </DialogClose>
                         </div>
                     </form>
                 </Form>

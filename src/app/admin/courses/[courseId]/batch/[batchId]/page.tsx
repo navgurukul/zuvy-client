@@ -211,6 +211,7 @@ const BatchesInfo = ({
                         } catch (error) {}
                     }
                     fetchBatchesInfo()
+                    fetchInstructorInfo(params.batchId)
                 })
             //   }
         } catch (error) {
@@ -258,26 +259,6 @@ const BatchesInfo = ({
     useEffect(() => {
         fetchStudentData(offset)
     }, [offset, position, fetchStudentData])
-    // useEffect(() => {
-    //     const searchBatchStudentsHandler = async () => {
-    //         await api
-    //             .get(
-    //                 `/bootcamp/studentSearch/${params.courseId}?batch_id=${params.batchId}&searchTerm=${debouncedValue}`
-    //             )
-    //             .then((res) => {
-    //                 setStoreStudentData(res.data.data[1].studentsEmails)
-    //             })
-    //     }
-
-    //     if (debouncedValue) searchBatchStudentsHandler()
-    //     if (debouncedValue?.trim().length === 0) fetchStudentData(0)
-    // }, [
-    //     debouncedValue,
-    //     fetchStudentData,
-    //     params.batchId,
-    //     params.courseId,
-    //     setStoreStudentData,
-    // ])
 
     const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value)
