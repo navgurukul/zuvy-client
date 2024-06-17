@@ -263,6 +263,63 @@ export const getParamBatchId = create<saveParam>((set) => ({
         set({ paramBatchId: newvalue })
     },
 }))
+type TimerState = {
+    remainingTime: number
+    startTime: number | null
+    interval: number | null
+    startTimer: (duration: number) => void
+    stopTimer: () => void
+    resetTimer: () => void
+}
+
+export const useTimerStore = create<TimerState>(() => {
+    let remainingTime = 0;
+    let interval: NodeJS.Timeout | null = null;
+    let startTime: number | null = null;
+
+    const startTimer = (duration: number) => {
+        startTime = Date.now();
+        interval = setInterval(() => {
+            const newElapsedTime = Math.floor((Date.now() - startTime!) / 1000);
+            const newRemainingTime = Math.max(duration - newElapsedTime, 0);
+            if (newRemainingTime === 0) {
+                if (interval) {
+                    clearInterval(interval);
+                }
+            }
+            remainingTime = newRemainingTime;
+        }, 1000);
+    };
+
+    const stopTimer = () => {
+        if (interval) {
+            clearInterval(interval);
+            interval = null;
+        }
+    };
+
+    const resetTimer = () => {
+        remainingTime = 0;
+        if (interval) {
+            clearInterval(interval);
+            interval = null;
+        }
+    };
+
+    return {
+        remainingTime,
+        startTime,
+        interval,
+        startTimer,
+        stopTimer,
+        resetTimer,
+    };
+});
+
+
+
+    
+
 // ------------------------------
 type editOpenEndedDialogs = {
     isOpenEndDialogOpen: boolean

@@ -2,7 +2,7 @@ import React from 'react'
 import { PlusCircle } from 'lucide-react'
 import Link from 'next/link'
 import { cn, difficultyColor, ellipsis } from '@/lib/utils'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 
 interface MCQQuestion {
     id: number
@@ -21,16 +21,19 @@ const QuizQuestions = ({
     selectedQuestions,
 }: {
     questions: MCQQuestion[]
-    setSelectedQuestions: any
-    selectedQuestions: any
+    setSelectedQuestions: React.Dispatch<React.SetStateAction<MCQQuestion[]>>
+    selectedQuestions: MCQQuestion[]
 }) => {
     return (
         <ScrollArea className="h-dvh pr-4">
+            <ScrollBar orientation="vertical" />
             {questions.map((question: MCQQuestion) => (
                 <div
                     key={question.id}
                     className={`p-5 rounded-sm border border-gray-200 mb-4 ${
-                        selectedQuestions.some((q: any) => q.id === question.id)
+                        selectedQuestions.some(
+                            (q: MCQQuestion) => q.id === question.id
+                        )
                             ? 'bg-gray-100'
                             : ''
                     }`}
@@ -56,7 +59,7 @@ const QuizQuestions = ({
                                 </p>
                             </div>
                             <Link
-                                href={''}
+                                href=""
                                 className="font-semibold text-sm mt-2 text-secondary"
                             >
                                 View Full Description
@@ -64,7 +67,7 @@ const QuizQuestions = ({
                         </div>
                         <div className="flex">
                             {selectedQuestions.some(
-                                (q: any) => q.id === question.id
+                                (q: MCQQuestion) => q.id === question.id
                             ) ? (
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -86,7 +89,8 @@ const QuizQuestions = ({
                                     onClick={() => {
                                         if (
                                             !selectedQuestions.some(
-                                                (q: any) => q.id === question.id
+                                                (q: MCQQuestion) =>
+                                                    q.id === question.id
                                             )
                                         ) {
                                             setSelectedQuestions([

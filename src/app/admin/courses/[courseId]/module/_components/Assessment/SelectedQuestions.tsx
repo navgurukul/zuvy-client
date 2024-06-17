@@ -20,7 +20,6 @@ const selectedQuestions = ({
 }) => {
     return (
         <>
-            <h1 className="text-left font-bold mb-5">Selected Questions</h1>
             <SelectCodingQuestions
                 selectedQuestions={selectedCodingQuestions}
                 setSelectedQuestions={setSelectedCodingQuestions}

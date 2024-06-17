@@ -14,6 +14,7 @@ import RecordingCard from '@/app/student/courses/[viewcourses]/[recordings]/_com
 import { OFFSET, POSITION } from '@/utils/constant'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import useDebounce from '@/hooks/useDebounce'
+import { Spinner } from '@/components/ui/spinner'
 
 type ClassType = 'active' | 'upcoming' | 'complete'
 
@@ -64,6 +65,7 @@ function Page({ params }: any) {
     const [totalStudents, setTotalStudents] = useState<number>(0)
     const [lastPage, setLastPage] = useState<number>(0)
     const [search, setSearch] = useState<string>('')
+    const [loading, setLoading] = useState(true)
     const debouncedSearch = useDebounce(search, 1000)
 
     // const { courseData } = getCourseData()
@@ -88,7 +90,7 @@ function Page({ params }: any) {
     const handleTabChange = (tab: string) => {
         setActiveTab(tab)
     }
-    const handleSetsearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value)
     }
     // useEffect(() => {
@@ -167,6 +169,7 @@ function Page({ params }: any) {
     //     handleClassType,
     // ])
     const tabs = ['completed', 'upcoming', 'ongoing']
+
     const getHandleAllClasses = useCallback(
         async (offset: number) => {
             let baseUrl = `/classes/all/${params.courseId}?limit=${position}&offset=${offset}`
@@ -187,6 +190,7 @@ function Page({ params }: any) {
                 setTotalStudents(res.data.total_items)
                 setPages(res.data.total_pages)
                 setLastPage(res.data.total_items)
+                setLoading(false)
             } catch (error) {
                 console.error('Error fetching classes:', error)
             }
@@ -221,81 +225,84 @@ function Page({ params }: any) {
     }, [getHandleAllBootcampBatches])
     return (
         <div>
-            <div>
-                <div className="relative flex text-start gap-6 my-6 w-[200px]">
-                    <Combobox
-                        data={bootcampData}
-                        title={'Batch'}
-                        onChange={handleComboboxChange}
-                        batch={false}
+            <div className="relative flex text-start gap-6 my-6 w-[200px]">
+                <Combobox
+                    data={bootcampData}
+                    title={'Batch'}
+                    onChange={handleComboboxChange}
+                    batch={false}
+                />
+            </div>
+            <div className="flex justify-between">
+                <div className="w-[400px] pr-3">
+                    <Input
+                        type="text"
+                        placeholder="Search Classes"
+                        className="max-w-[500px]"
+                        value={search}
+                        onChange={handleSetSearch}
                     />
                 </div>
-                <div className="flex justify-between">
-                    <div className="w-[400px] pr-3">
-                        <Input
-                            type="text"
-                            placeholder="Search Classes"
-                            className="max-w-[500px]"
-                            value={search}
-                            onChange={handleSetsearch}
-                        />
-                    </div>
-                    <CreateSession
-                        courseId={params?.courseId || 0}
-                        bootcampData={bootcampData}
-                        getClasses={getHandleAllClasses}
-                    />
+                <CreateSession
+                    courseId={params?.courseId || 0}
+                    bootcampData={bootcampData}
+                    getClasses={getHandleAllClasses}
+                />
+            </div>
+            <div className="flex justify-start gap-6 my-6">
+                {tabs.map((tab) => (
+                    <Button
+                        key={tab}
+                        className={`p-1 w-[100px] h-[30px] rounded-lg ${
+                            activeTab === tab
+                                ? 'bg-secondary text-white'
+                                : 'bg-white'
+                        }`}
+                        onClick={() => handleTabChange(tab)}
+                        variant={'outline'}
+                    >
+                        {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                    </Button>
+                ))}
+            </div>
+            {loading ? (
+                <div className="flex justify-center">
+                    <Spinner className="text-secondary" />
                 </div>
-                <div className="flex justify-start gap-6 my-6">
-                    {tabs.map((tab) => (
-                        <Button
-                            key={tab}
-                            className={`p-1 w-[100px] h-[30px] rounded-lg ${
-                                activeTab === tab
-                                    ? 'bg-secondary text-white'
-                                    : 'bg-white'
-                            }`}
-                            onClick={() => handleTabChange(tab)}
-                            variant={'outline'}
-                        >
-                            {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                        </Button>
-                    ))}
-                </div>
-                {classes.length > 0 ? (
-                    <div>
-                        <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
-                            {classes.map((classData, index) =>
-                                activeTab === 'completed' ? (
-                                    <RecordingCard
-                                        classData={classData}
-                                        key={index}
-                                        isAdmin
-                                    />
-                                ) : (
-                                    <ClassCard
-                                        classData={classData}
-                                        key={index}
-                                        classType={activeTab}
-                                    />
-                                )
-                            )}
-                        </div>
-                        <DataTablePagination
-                            totalStudents={totalStudents}
-                            position={position}
-                            setPosition={setPosition}
-                            pages={pages}
-                            lastPage={lastPage}
-                            currentPage={currentPage}
-                            setCurrentPage={setCurrentPage}
-                            fetchStudentData={getHandleAllClasses}
-                            setOffset={setOffset}
-                        />
-                    </div>
-                ) : (
-                    <>
-                        {' '}
+            ) : (
+                <div>
+                    {classes.length > 0 ? (
+                        <>
+                            <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
+                                {classes.map((classData, index) =>
+                                    activeTab === 'completed' ? (
+                                        <RecordingCard
+                                            classData={classData}
+                                            key={index}
+                                            isAdmin
+                                        />
+                                    ) : (
+                                        <ClassCard
+                                            classData={classData}
+                                            key={index}
+                                            classType={activeTab}
+                                        />
+                                    )
+                                )}
+                            </div>
+                            <DataTablePagination
+                                totalStudents={totalStudents}
+                                position={position}
+                                setPosition={setPosition}
+                                pages={pages}
+                                lastPage={lastPage}
+                                currentPage={currentPage}
+                                setCurrentPage={setCurrentPage}
+                                fetchStudentData={getHandleAllClasses}
+                                setOffset={setOffset}
+                            />
+                        </>
+                    ) : (
                         <div className="w-full flex mb-10 items-center flex-col gap-y-3 justify-center absolute text-center mt-2">
                             <Image
                                 src={
@@ -315,9 +322,9 @@ function Page({ params }: any) {
                                 getClasses={getHandleAllClasses}
                             />
                         </div>
-                    </>
-                )}
-            </div>
+                    )}
+                </div>
+            )}
         </div>
     )
 }

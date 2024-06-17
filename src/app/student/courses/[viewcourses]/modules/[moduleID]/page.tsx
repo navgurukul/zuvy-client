@@ -13,6 +13,7 @@ import Quiz from '../_components/Quiz'
 import Assignment from '../_components/Assignment'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import { useParams } from 'next/navigation'
+import Assessment from '../_components/Assessment'
 
 interface Chapter {
     id: number
@@ -28,14 +29,15 @@ function Page({ params }: any) {
     const userID = studentData?.id && studentData?.id
     const { viewcourses, moduleID } = useParams()
     const { paramBatchId } = getParamBatchId()
-
+    const urlParams = new URLSearchParams(window.location.search)
+    const nextChapterId = Number(urlParams.get('nextChapterId'))
     // state and variables
     const [chapters, setChapters] = useState([])
-    const [activeChapter, setActiveChapter] = useState(0)
+    const [activeChapter, setActiveChapter] = useState(nextChapterId || 0)
     const [topicId, setTopicId] = useState(0)
     const [moduleName, setModuleName] = useState('')
     const [chapterContent, setChapterContent] = useState({})
-    const [chapterId, setChapterId] = useState<number>(0)
+    const [chapterId, setChapterId] = useState<number>(nextChapterId || 0)
 
     const crumbs = [
         {
@@ -54,6 +56,9 @@ function Page({ params }: any) {
         },
     ]
 
+    // console.log('nextChapterId', nextChapterId)
+    // console.log('activeChapter', activeChapter)
+
     // func
     const fetchChapters = useCallback(async () => {
         try {
@@ -65,6 +70,13 @@ function Page({ params }: any) {
             const firstPending = response.data.trackingData.find(
                 (chapter: Chapter) => chapter.status === 'Pending'
             )
+            // console.log('response in firstPending.id', response)
+            // console.log(
+            //     'nextChapterId || firstPending.id in if',
+            //     nextChapterId ? nextChapterId : firstPending.id
+            // )
+            // setActiveChapter(nextChapterId || firstPending.id)
+            // fetchChapterContent(nextChapterId || firstPending.id)
             setActiveChapter(firstPending.id)
             fetchChapterContent(firstPending.id)
         } catch (error) {
@@ -78,10 +90,19 @@ function Page({ params }: any) {
             try {
                 const response = await api.get(
                     `/tracking/getChapterDetailsWithStatus/${chapterId}`
+                    // `/tracking/getChapterDetailsWithStatus/${nextChapterId}`
                 )
+                // console.log('response', response)
+                // console.log(
+                //     'nextChapterId || chapterId',
+                //     nextChapterId || chapterId
+                // )
+                // setActiveChapter(nextChapterId || chapterId)
+                // setChapterId(nextChapterId || response.data.trackingData.id)
+
                 setActiveChapter(chapterId)
-                setTopicId(response.data.trackingData.topicId)
                 setChapterId(response.data.trackingData.id)
+                setTopicId(response.data.trackingData.topicId)
                 setChapterContent(response.data.trackingData)
             } catch (error) {
                 console.error('Error fetching chapter content:', error)
@@ -93,10 +114,13 @@ function Page({ params }: any) {
     const completeChapter = () => {
         api.post(
             `tracking/updateChapterStatus/${viewcourses}/${moduleID}?chapterId=${activeChapter}`
+            // `tracking/updateChapterStatus/${viewcourses}/${moduleID}?chapterId=${nextChapterId}`
         )
 
         fetchChapters()
     }
+
+    // console.log('chapterContent', chapterContent)
 
     const renderChapterContent = () => {
         switch (topicId) {
@@ -127,6 +151,8 @@ function Page({ params }: any) {
                 )
             case 5:
                 return <Assignment />
+            case 6:
+                return <Assessment />
             // default:
             //     return <h1>Create New Chapter</h1>
         }
@@ -139,7 +165,6 @@ function Page({ params }: any) {
         }
     }, [userID, fetchChapters])
 
-    console.log(params)
     return (
         <>
             <BreadcrumbComponent crumbs={crumbs} />
