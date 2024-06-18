@@ -120,24 +120,21 @@ export const columns: ColumnDef<Task>[] = [
         cell: ({ row }) => {
             const student = row.original
             const { batchData } = getBatchData()
-            const { studentsData, setStoreStudentData } = getStoreStudentData()
+            const { setStoreStudentData } = getStoreStudentData()
             const bootcampId = batchData && batchData[0]?.bootcampId
             const initialvalue = row.original?.batchId?.toString()
-            const transformedData = studentsData?.reduce(
-                (
-                    transformedData: any[],
-                    item: { batchId: any; batchName: any }
-                ) => {
-                    if (item.batchId != null) {
+            const transformedData = batchData?.reduce(
+                (transformedData: any[], item: { id: any; name: any }) => {
+                    if (item.id != null) {
                         const isUnique = !transformedData.some(
                             (existingItem) =>
-                                existingItem.value === item.batchId.toString()
+                                existingItem.value === item.id.toString()
                         )
 
                         if (isUnique) {
                             transformedData.push({
-                                value: item.batchId.toString(),
-                                label: item.batchName,
+                                value: item.id.toString(),
+                                label: item.name,
                             })
                         }
                     }
