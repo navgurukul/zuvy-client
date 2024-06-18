@@ -46,19 +46,6 @@ const Page = ({ params }: { params: any }) => {
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState<string>('')
     const debouncedSearch = useDebounce(search, 1000)
-    // useEffect(() => {
-    //     if (courseData?.id) {
-    //         console.log('first', courseData)
-    //         fetchBatches(courseData?.id)
-    //         // setBatches(batchData)
-    //     }
-    // }, [courseData?.id, fetchBatches])
-
-    // useEffect(() => {
-    //     if (params.courseId) {
-    //         fetchCourseDetails(params.courseId)
-    //     }
-    // }, [params.courseId, fetchCourseDetails])
 
     const formSchema = z.object({
         name: z.string().min(2, {

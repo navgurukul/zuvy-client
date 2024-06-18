@@ -9,7 +9,7 @@ import Doubt from './_components/doubt'
 import Image from 'next/image'
 import { Spinner } from '@/components/ui/spinner'
 
-function page() {
+function Page() {
     const [loading, setLoading] = useState(true)
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -62,4 +62,4 @@ function page() {
     )
 }
 
-export default page
+export default Page

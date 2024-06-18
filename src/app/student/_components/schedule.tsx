@@ -165,7 +165,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                             <h1 className=" text-xl text-start font-semibold">
                                 Attendance
                             </h1>
-                            <p className="text-md text-start mt-3 mb-2 text-center">
+                            <p className="text-md text-start mt-3 mb-2 ">
                                 AFE + Navgurukul Coding Bootcamp
                             </p>
                             <div className=" gap-2 items-center">
@@ -213,11 +213,11 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                                 </h1>
                                             </div>
                                             <div className="flex flex-row gap-6">
-                                                <p className="text-md text-start mt-3 mb-2 text-center">
+                                                <p className="text-md text-start mt-3 mb-2 ">
                                                     {resumeCourse?.bootcampName}
                                                 </p>
                                                 <span className="w-2 h-2 bg-gray-500 rounded-full mt-5"></span>
-                                                <p className="text-md text-start mt-3 mb-2 text-center">
+                                                <p className="text-md text-start mt-3 mb-2 ">
                                                     {resumeCourse?.moduleName}
                                                 </p>
                                             </div>

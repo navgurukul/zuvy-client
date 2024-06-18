@@ -9,6 +9,7 @@ type CounterStore = {
         profile_picture: string
         email: string
         id: number
+        rolesList: string[]
     } | null
     studentsInfo: any[]
     setStudentsInfo: (newStudentsInfo: any[]) => void
