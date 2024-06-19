@@ -119,6 +119,8 @@ function Schedule({ className, ...props }: ScheduleProps) {
         getUpcomingSubmissionHandler,
     ])
 
+    console.log('resumeCourse', resumeCourse)
+
     return (
         <div>
             <div className="flex flex-col flex-start mt-6">
@@ -194,7 +196,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
 
             {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */}
 
-            {resumeCourse && (
+            {courseStarted && (
                 <div className="flex flex-col flex-start mt-6">
                     <h1 className="text-xl p-1 text-start font-bold">
                         Start From Where You Left Off
@@ -209,7 +211,11 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                                 {/* <Video size={25} /> */}
                                                 <BookOpenText className="hidden sm:block mt-2" />
                                                 <h1 className="text-lg p-1 text-start font-bold">
-                                                    Video - Intro to Variables
+                                                    {/* Video - Intro to Variables */}
+                                                    {
+                                                        resumeCourse.newChapter
+                                                            ?.title
+                                                    }
                                                 </h1>
                                             </div>
                                             <div className="flex flex-row gap-6">

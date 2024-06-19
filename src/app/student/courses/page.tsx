@@ -22,6 +22,8 @@ interface EnrolledCourse {
 
 interface ResumeCourse {
     bootcampName?: string
+    newChapter?: string
+    title?: string
     moduleName?: string
     bootcampId?: number
     moduleId?: number
@@ -131,8 +133,7 @@ const Page: React.FC<pageProps> = () => {
                                                     {/* <Video size={25} /> */}
                                                     <BookOpenText className="hidden sm:block mt-2" />
                                                     <h1 className="text-lg p-1 text-start font-bold">
-                                                        Video - Intro to
-                                                        Variables
+                                                    {resumeCourse?.newChapter?.title}
                                                     </h1>
                                                 </div>
                                                 <div className="flex flex-row gap-6">
