@@ -22,7 +22,7 @@ interface EnrolledCourse {
 
 interface ResumeCourse {
     bootcampName?: string
-    newChapter?: string
+    newChapter?: any
     title?: string
     moduleName?: string
     bootcampId?: number
