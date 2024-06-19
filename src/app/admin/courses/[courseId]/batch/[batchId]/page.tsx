@@ -224,8 +224,7 @@ const BatchesInfo = ({
     }
     useEffect(() => {
         const getBootCamp = async () => {
-            await api
-                .get(`/bootcamp/${params.courseId}`)
+            await api.get(`/bootcamp/${params.courseId}`)
                 .then((response) => setBootcamp(response.data.bootcamp))
         }
         getBootCamp()
