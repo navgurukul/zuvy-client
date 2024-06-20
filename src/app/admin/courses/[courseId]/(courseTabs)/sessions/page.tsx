@@ -189,7 +189,7 @@ function Page({ params }: any) {
                 setClasses(res.data.classes)
                 setTotalStudents(res.data.total_items)
                 setPages(res.data.total_pages)
-                setLastPage(res.data.total_items)
+                setLastPage(res.data.total_pages)
                 setLoading(false)
             } catch (error) {
                 console.error('Error fetching classes:', error)
