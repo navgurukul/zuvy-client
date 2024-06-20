@@ -298,10 +298,15 @@ const Page = ({ params }: { params: any }) => {
                 </div>
 
                 {loading ? (
+                    // <div className="my-5 flex justify-center items-center">
+                    // <div className="absolute h-screen">
+                    // <div className="relative top-[70%]">
                     <div className="flex justify-center">
                         <Spinner className="text-secondary" />
                     </div>
                 ) : (
+                    //     </div>
+                    // </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 mt-2">
                         {batchData?.length ?? 0 > 0 ? (
                             batchData?.map((batch: any, index: number) => (
