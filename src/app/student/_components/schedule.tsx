@@ -33,6 +33,8 @@ function Schedule({ className, ...props }: ScheduleProps) {
     const [ongoingClasses, setOngoingClasses] = useState([])
     const [attendenceData, setAttendenceData] = useState<any[]>([])
     const [submission, setSubmission] = useState<any[]>([])
+    const [enrolledCourse, setEnrolledCourse] = useState([])
+
     // const [ongoingClasses, setOngoingClasses] = useState([])
     // const [completedClasses, setCompletedClasses] = useState([])
     // useEffect(() => {
@@ -73,7 +75,11 @@ function Schedule({ className, ...props }: ScheduleProps) {
                 setResumeCourse(response.data)
                 setNextChapterId(response.data.newChapter.id)
                 // If we get res, then course started, hence courseStarted: true;
-                setCourseStarted(true)
+                if (response?.data?.code === 404) {
+                    setCourseStarted(false)
+                } else {
+                    setCourseStarted(true)
+                }
             } catch (error) {
                 console.error('Error getting resume course:', error)
                 if (
@@ -103,12 +109,24 @@ function Schedule({ className, ...props }: ScheduleProps) {
             setSubmission(res.data)
         })
     }, [])
+
+    const getEnrolledCourses = useCallback(async () => {
+        try {
+            const response = await api.get(`/student`)
+            setEnrolledCourse(response.data)
+            console.log('Enrolled Courses:', response)
+        } catch (error) {
+            console.error('Error getting enrolled courses:', error)
+        }
+    }, [])
+
     useEffect(() => {
         const fetchData = async () => {
             await Promise.all([
                 getUpcomingClassesHandler(),
                 getAttendanceHandler(),
                 getUpcomingSubmissionHandler(),
+                getEnrolledCourses(),
             ])
         }
 
@@ -119,14 +137,25 @@ function Schedule({ className, ...props }: ScheduleProps) {
         getUpcomingSubmissionHandler,
     ])
 
-    console.log('resumeCourse', resumeCourse)
-
     return (
         <div>
             <div className="flex flex-col flex-start mt-6">
                 <h1 className="text-xl p-1 text-start font-bold">
                     Upcoming Classes
                 </h1>
+
+                {/* Proper alignment of the classes and attendance data */}
+                {/* <div className="flex">
+                    <div className="w-[64%] bg-red-500 flex flex-row-reverse mr-10">
+                        <div>01</div>
+                    </div>
+                    <div className="w-[32%] bg-blue-500 flex">
+                        <div>04</div>
+                        <div>05</div>
+                        <div>06</div>
+                    </div>
+                </div> */}
+
                 <div className="flex flex-row justify-between gap-6">
                     {upcomingClasses?.length > 0 ? (
                         <div className="flex flex-col">
@@ -162,7 +191,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                             </p>
                         </div>
                     )}
-                    {upcomingClasses?.length > 0 && (
+                    {enrolledCourse?.length > 0 && (
                         <div className="w-1/3 h-full p-6 bg-gray-100 rounded-lg items-center justify-center ">
                             <h1 className=" text-xl text-start font-semibold">
                                 Attendance
@@ -268,7 +297,14 @@ function Schedule({ className, ...props }: ScheduleProps) {
                 <h1 className="text-xl p-1 text-start font-bold">
                     Upcoming Submissions
                 </h1>
-                <div className="flex flex-row">
+                {/* <div className="flex flex-row"> */}
+                <div
+                    className={
+                        upcomingClasses?.length < 1
+                            ? 'w-[75%]'
+                            : 'flex flex-row'
+                    }
+                >
                     {submission.length > 0 ? (
                         submission.map((data) => {
                             return (
