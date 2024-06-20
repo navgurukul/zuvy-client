@@ -11,12 +11,13 @@ import Projects from '../../_components/Projects'
 import { api } from '@/utils/axios.config'
 import PracticeProblems from '../../_components/PraticeProblems'
 import Link from 'next/link'
+import AssesmentComponent from '../../_components/AssesmentComponent'
 
 const Page = ({ params }: { params: any }) => {
     const [activeTab, setActiveTab] = useState('practice')
     const [submissions, setSubmissions] = useState<any[]>([])
     const [totalStudents, setTotalStudents] = useState(0)
-    const [assesments, setAssesments] = useState<any[]>([])
+    const [assesments, setAssesments] = useState<any>()
     const [projectData, setProjectData] = useState<any>([])
 
     const handleTabChange = (tab: string) => {
@@ -38,10 +39,10 @@ const Page = ({ params }: { params: any }) => {
     const getAssessments = useCallback(async () => {
         try {
             const res = await api.get(
-                `/submission/assessmentInfoBy?bootcampId=${params.courseId}&limit=10&offset=0`
+                `/admin/bootcampAssessment/bootcamp_id${params.courseId}`
             )
-            setAssesments(res.data.data)
-            setTotalStudents(res.data.totalStudents)
+            setAssesments(res.data)
+            // setTotalStudents(res.data.totalStudents)
         } catch (error) {
             console.error('Error fetching assessments:', error)
         }
@@ -66,7 +67,7 @@ const Page = ({ params }: { params: any }) => {
         }
     }, [getSubmissions, getAssessments, params.courseId, getProjectsData])
 
-    console.log(projectData)
+    // console.log(assesments.totalStudents)
 
     return (
         <div className="">
@@ -143,21 +144,43 @@ const Page = ({ params }: { params: any }) => {
                             />
                         ))}
                 {activeTab === 'assessments' && (
-                    <>
-                        {assesments
-                            .filter(
-                                ({ moduleAssessments }) =>
-                                    moduleAssessments.length > 0
-                            )
-                            .map(({ id, name, moduleAssessments }) => (
-                                <Assesments
-                                    key={id}
-                                    courseId={params.courseId}
-                                    name={name}
-                                    moduleAssessments={moduleAssessments}
-                                />
-                            ))}
-                    </>
+                    <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2">
+                        {Object.keys(assesments).map(
+                            (key: any, index) =>
+                                key !== 'totalStudents' && (
+                                    <div key={index}>
+                                        <h2 className="text-md text-start mb-3 font-semibold text-gray-800  dark:text-white ">
+                                            Module--{key}
+                                        </h2>
+                                        {assesments[key].map(
+                                            (assessment: any) => (
+                                                <AssesmentComponent
+                                                    key={assessment.id}
+                                                    id={assessment.id}
+                                                    title={assessment.title}
+                                                    codingChallenges={
+                                                        assessment.totalCodingQuestions
+                                                    }
+                                                    mcq={
+                                                        assessment.totalQuizzes
+                                                    }
+                                                    openEnded={
+                                                        assessment.totalOpenEndedQuestions
+                                                    }
+                                                    totalSubmissions={
+                                                        assesments.totalStudents
+                                                    }
+                                                    studentsSubmitted={
+                                                        assessment.totalSubmitedAssessments
+                                                    }
+                                                    bootcampId={params.courseId}
+                                                />
+                                            )
+                                        )}
+                                    </div>
+                                )
+                        )}
+                    </div>
                 )}
                 {activeTab === 'projects' && (
                     <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2 lg:grid-cols-3">

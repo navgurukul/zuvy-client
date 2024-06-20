@@ -144,6 +144,10 @@ const Page = ({ params }: { params: any }) => {
     }, [])
 
     useEffect(() => {
+        fetchCourseDetails(params.courseId)
+    }, [fetchCourseDetails, params.courseId])
+
+    useEffect(() => {
         const searchBatchHandler = async () => {
             await api
                 .get(
