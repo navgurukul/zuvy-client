@@ -224,53 +224,57 @@ function Page({ params }: any) {
         getHandleAllBootcampBatches()
     }, [getHandleAllBootcampBatches])
     return (
-        <div>
-            <div className="relative flex text-start gap-6 my-6 w-[200px]">
-                <Combobox
-                    data={bootcampData}
-                    title={'Batch'}
-                    onChange={handleComboboxChange}
-                    batch={false}
-                />
-            </div>
-            <div className="flex justify-between">
-                <div className="w-[400px] pr-3">
-                    <Input
-                        type="text"
-                        placeholder="Search Classes"
-                        className="max-w-[500px]"
-                        value={search}
-                        onChange={handleSetSearch}
-                    />
-                </div>
-                <CreateSession
-                    courseId={params?.courseId || 0}
-                    bootcampData={bootcampData}
-                    getClasses={getHandleAllClasses}
-                />
-            </div>
-            <div className="flex justify-start gap-6 my-6">
-                {tabs.map((tab) => (
-                    <Button
-                        key={tab}
-                        className={`p-1 w-[100px] h-[30px] rounded-lg ${
-                            activeTab === tab
-                                ? 'bg-secondary text-white'
-                                : 'bg-white'
-                        }`}
-                        onClick={() => handleTabChange(tab)}
-                        variant={'outline'}
-                    >
-                        {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                    </Button>
-                ))}
-            </div>
+        <>
             {loading ? (
-                <div className="flex justify-center">
-                    <Spinner className="text-secondary" />
+                <div className="my-5 flex justify-center items-center">
+                    <div className="absolute h-screen">
+                        <div className="relative top-[75%]">
+                            <Spinner className="text-secondary" />
+                        </div>
+                    </div>
                 </div>
             ) : (
                 <div>
+                    <div className="relative flex text-start gap-6 my-6 w-[200px]">
+                        <Combobox
+                            data={bootcampData}
+                            title={'Batch'}
+                            onChange={handleComboboxChange}
+                            batch={false}
+                        />
+                    </div>
+                    <div className="flex justify-between">
+                        <div className="w-[400px] pr-3">
+                            <Input
+                                type="text"
+                                placeholder="Search Classes"
+                                className="max-w-[500px]"
+                                value={search}
+                                onChange={handleSetSearch}
+                            />
+                        </div>
+                        <CreateSession
+                            courseId={params?.courseId || 0}
+                            bootcampData={bootcampData}
+                            getClasses={getHandleAllClasses}
+                        />
+                    </div>
+                    <div className="flex justify-start gap-6 my-6">
+                        {tabs.map((tab) => (
+                            <Button
+                                key={tab}
+                                className={`p-1 w-[100px] h-[30px] rounded-lg ${
+                                    activeTab === tab
+                                        ? 'bg-secondary text-white'
+                                        : 'bg-white'
+                                }`}
+                                onClick={() => handleTabChange(tab)}
+                                variant={'outline'}
+                            >
+                                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                            </Button>
+                        ))}
+                    </div>
                     {classes.length > 0 ? (
                         <>
                             <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
@@ -325,7 +329,7 @@ function Page({ params }: any) {
                     )}
                 </div>
             )}
-        </div>
+        </>
     )
 }
 

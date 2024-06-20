@@ -287,8 +287,12 @@ function Page() {
                 />
             </Dialog>
             {loading ? (
-                <div className="flex justify-center">
-                    <Spinner className="text-secondary" />
+                <div className="my-5 flex justify-center items-center">
+                    <div className="absolute h-screen">
+                        <div className="relative top-[75%]">
+                            <Spinner className="text-secondary" />
+                        </div>
+                    </div>
                 </div>
             ) : (
                 <div className="flex flex-col items-center justify-center">
