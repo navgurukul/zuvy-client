@@ -13,6 +13,15 @@ import Link from 'next/link'
 import ClassCard from '@/app/admin/courses/[courseId]/_components/classCard'
 import Image from 'next/image'
 import SubmissionCard from '@/app/admin/courses/[courseId]/_components/SubmissionCard'
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
 
 interface ResumeCourse {
     bootcampName?: string
@@ -21,6 +30,12 @@ interface ResumeCourse {
     newChapter?: any
     moduleId?: number
 }
+
+interface EnrolledCourse {
+    id: number
+    name: string
+}
+
 type ScheduleProps = React.ComponentProps<typeof Card>
 
 function Schedule({ className, ...props }: ScheduleProps) {
@@ -31,9 +46,11 @@ function Schedule({ className, ...props }: ScheduleProps) {
     const [nextChapterId, setNextChapterId] = useState([])
     const [upcomingClasses, setUpcomingClasses] = useState([])
     const [ongoingClasses, setOngoingClasses] = useState([])
-    const [attendenceData, setAttendenceData] = useState<any[]>([])
+    const [attendanceData, setAttendanceData] = useState<any[]>([])
     const [submission, setSubmission] = useState<any[]>([])
     const [enrolledCourse, setEnrolledCourse] = useState([])
+    const [selectedCourse, setSelectedCourse] =
+        useState<EnrolledCourse | null>()
 
     // const [ongoingClasses, setOngoingClasses] = useState([])
     // const [completedClasses, setCompletedClasses] = useState([])
@@ -101,24 +118,37 @@ function Schedule({ className, ...props }: ScheduleProps) {
     }, [])
     const getAttendanceHandler = useCallback(async () => {
         await api.get(`/student/Dashboard/attendance`).then((res) => {
-            setAttendenceData(res.data)
+            const attendance = res.data.filter(
+                (course: any) => selectedCourse?.id === course.bootcampId
+            )
+            setAttendanceData(attendance)
         })
-    }, [])
+    }, [selectedCourse?.id])
     const getUpcomingSubmissionHandler = useCallback(async () => {
         await api.get(`/tracking/upcomingSubmission/9`).then((res) => {
             setSubmission(res.data)
         })
     }, [])
 
-    const getEnrolledCourses = useCallback(async () => {
-        try {
-            const response = await api.get(`/student`)
-            setEnrolledCourse(response.data)
-            console.log('Enrolled Courses:', response)
-        } catch (error) {
-            console.error('Error getting enrolled courses:', error)
+    useEffect(() => {
+        const getEnrolledCourses = async () => {
+            try {
+                const response = await api.get(`/student`)
+                setEnrolledCourse(response.data)
+                setSelectedCourse(response.data[0])
+            } catch (error) {
+                console.error('Error getting enrolled courses:', error)
+            }
         }
-    }, [])
+        if (userID) getEnrolledCourses()
+    }, [userID])
+
+    const handleCourseChange = (selectedCourseId: any) => {
+        const newSelectedCourse: any = enrolledCourse.find(
+            (course: any) => course.id === +selectedCourseId
+        )
+        setSelectedCourse(newSelectedCourse)
+    }
 
     useEffect(() => {
         const fetchData = async () => {
@@ -126,7 +156,6 @@ function Schedule({ className, ...props }: ScheduleProps) {
                 getUpcomingClassesHandler(),
                 getAttendanceHandler(),
                 getUpcomingSubmissionHandler(),
-                getEnrolledCourses(),
             ])
         }
 
@@ -196,24 +225,50 @@ function Schedule({ className, ...props }: ScheduleProps) {
                             <h1 className=" text-xl text-start font-semibold">
                                 Attendance
                             </h1>
-                            <p className="text-md text-start mt-3 mb-2 ">
-                                AFE + Navgurukul Coding Bootcamp
-                            </p>
+                            <Select
+                                onValueChange={(e) => {
+                                    handleCourseChange(e)
+                                }}
+                            >
+                                <SelectTrigger className="w-[300px] border-0 shadow-none focus:ring-0 bg-gray-100 mb-3">
+                                    <SelectValue
+                                        placeholder={
+                                            selectedCourse?.name ||
+                                            'Select a course'
+                                        }
+                                    />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        <SelectLabel>Courses</SelectLabel>
+                                        {enrolledCourse.map((course: any) => (
+                                            <SelectItem
+                                                key={course.id}
+                                                value={course.id.toString()}
+                                            >
+                                                <p className="text-lg">   {/* Font size not getting increased */}
+                                                    {course.name}
+                                                </p>
+                                            </SelectItem>
+                                        ))}
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
                             <div className=" gap-2 items-center">
                                 <div className="flex items-center gap-2">
                                     <div
                                         className={`w-[10px] h-[10px] rounded-full  ${getAttendanceColorClass(
-                                            attendenceData[0]?.attendance
+                                            attendanceData[0]?.attendance
                                         )}`}
                                     />
-                                    <h1>{attendenceData[0]?.attendance}%</h1>
+                                    <h1>{attendanceData[0]?.attendance}%</h1>
                                 </div>
                                 <div className="flex">
                                     <p className="text-md font-semibold">
                                         {' '}
                                         {
-                                            attendenceData[0]?.attendedClasses
-                                        } of {attendenceData[0]?.totalClasses}{' '}
+                                            attendanceData[0]?.attendedClasses
+                                        } of {attendanceData[0]?.totalClasses}{' '}
                                         Classes Attended
                                     </p>
                                 </div>
