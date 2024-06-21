@@ -8,6 +8,7 @@ import { DataTable } from '@/app/_components/datatable/data-table'
 import { api } from '@/utils/axios.config'
 import { columns } from './columns'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
+import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 
 interface CodingQuestionDetails {
     id: number
@@ -120,50 +121,57 @@ const PraticeProblems = ({ params }: any) => {
     console.log(matchingData)
 
     return (
-        <div className="flex flex-col">
-            <div className="my-2">
-                <BreadcrumbComponent crumbs={crumbs} />
-            </div>
+        <>
+            <BreadcrumbComponent crumbs={crumbs} />
+            <MaxWidthWrapper className="p-4">
+                <div className="flex flex-col gap-y-4">
+                    <h1 className="text-start text-xl font-bold capitalize text-primary">
+                        {
+                            matchingData?.moduleChapterData[0]
+                                ?.codingQuestionDetails?.title
+                        }
+                    </h1>
 
-            <h1 className="text-start text-xl font-bold capitalize text-primary">
-                {
-                    matchingData?.moduleChapterData[0]?.codingQuestionDetails
-                        ?.title
-                }
-            </h1>
-
-            <div className="text-start flex gap-x-3">
-                <div className="p-4 rounded-lg shadow-md ">
-                    <h1 className="text-gray-600 font-semibold text-xl">
-                        {totalStudents}
-                    </h1>
-                    <p className="text-gray-500 ">Total Students</p>
+                    <div className="text-start flex gap-x-3">
+                        <div className="p-4 rounded-lg shadow-md ">
+                            <h1 className="text-gray-600 font-semibold text-xl">
+                                {totalStudents}
+                            </h1>
+                            <p className="text-gray-500 ">Total Students</p>
+                        </div>
+                        <div className="p-4 rounded-lg shadow-md ">
+                            <h1 className="text-gray-600 font-semibold text-xl">
+                                {
+                                    matchingData?.moduleChapterData[0]
+                                        .submitStudents
+                                }
+                            </h1>
+                            <p className="text-gray-500 ">
+                                Submissions Received
+                            </p>
+                        </div>
+                        <div className="p-4 rounded-lg shadow-md">
+                            <h1 className="text-gray-600 font-semibold text-xl">
+                                {totalStudents -
+                                    matchingData?.moduleChapterData[0]
+                                        .submitStudents}
+                            </h1>
+                            <p className="text-gray-500 ">Not Yet Submitted</p>
+                        </div>
+                    </div>
+                    <div className="relative">
+                        <Input
+                            placeholder="Search for Name, Email"
+                            className="w-1/3 my-6 input-with-icon pl-8" // Add left padding for the icon
+                        />
+                        <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                            <Search className="text-gray-400" size={20} />
+                        </div>
+                    </div>
+                    <DataTable data={studentDetails} columns={columns} />
                 </div>
-                <div className="p-4 rounded-lg shadow-md ">
-                    <h1 className="text-gray-600 font-semibold text-xl">
-                        {matchingData?.moduleChapterData[0].submitStudents}
-                    </h1>
-                    <p className="text-gray-500 ">Submissions Received</p>
-                </div>
-                <div className="p-4 rounded-lg shadow-md">
-                    <h1 className="text-gray-600 font-semibold text-xl">
-                        {totalStudents -
-                            matchingData?.moduleChapterData[0].submitStudents}
-                    </h1>
-                    <p className="text-gray-500 ">Not Yet Submitted</p>
-                </div>
-            </div>
-            <div className="relative">
-                <Input
-                    placeholder="Search for Name, Email"
-                    className="w-1/3 my-6 input-with-icon pl-8" // Add left padding for the icon
-                />
-                <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                    <Search className="text-gray-400" size={20} />
-                </div>
-            </div>
-            <DataTable data={studentDetails} columns={columns} />
-        </div>
+            </MaxWidthWrapper>
+        </>
     )
 }
 

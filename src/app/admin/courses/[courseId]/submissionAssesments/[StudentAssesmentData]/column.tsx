@@ -6,6 +6,7 @@ import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-co
 
 import { Task } from '@/utils/data/schema'
 import Link from 'next/link'
+import { FileText } from 'lucide-react'
 
 export const columns: ColumnDef<Task>[] = [
     {
@@ -43,12 +44,12 @@ export const columns: ColumnDef<Task>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: 'userName',
+        accessorKey: 'name',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Students Name" />
         ),
         cell: ({ row }) => {
-            const name = row.original.userName
+            const name = row.original.name
 
             return (
                 <div className="flex space-x-2">
@@ -62,12 +63,12 @@ export const columns: ColumnDef<Task>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: 'userEmail',
+        accessorKey: 'email',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Email" />
         ),
         cell: ({ row }) => {
-            const email = row.original.userEmail
+            const email = row.original.email
 
             return (
                 <div className="flex space-x-2">
@@ -80,21 +81,22 @@ export const columns: ColumnDef<Task>[] = [
     },
 
     {
-        accessorKey: 'isChecked',
+        accessorKey: 'Status',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Checked" />
+            <DataTableColumnHeader column={column} title="Status" />
         ),
         cell: ({ row }) => {
-            const isChecked = row.original.isChecked
+            // const isChecked = row.original.isChecked
+            const isSubmitted = true
             return (
                 <div className="flex space-x-2">
                     <div className="max-w-[500px] truncate flex items-center gap-x-2 font-medium">
-                        {isChecked ? (
+                        {isSubmitted ? (
                             <div className="bg-secondary h-3 w-3 rounded-full" />
                         ) : (
                             <div className="bg-red-600 h-3 w-3 rounded-full " />
                         )}
-                        {isChecked ? 'Checked' : 'Not Checked'}
+                        {isSubmitted ? ' Submitted' : ' Not Submitted'}
                     </div>
                 </div>
             )
@@ -103,15 +105,16 @@ export const columns: ColumnDef<Task>[] = [
     {
         id: 'actions',
         cell: ({ row }) => {
-            // const label = labels.find((label) => label.value === row.original.label);
-            console.log(row.original)
+            const { bootcampId, newId, userId, id } = row.original
+            // console.log(row.original)
             return (
                 <div className="flex space-x-2">
                     <Link
-                        href={`/admin/courses/${row.original.bootcampId}/submissionProjects/${row.original.projectId}/IndividualReport/${row.original.userId}`}
-                        className="max-w-[500px] text-secondary font-medium"
+                        href={`/admin/courses/${bootcampId}/submissionAssesments/${newId}/IndividualReport/${userId}/Report/${id}`}
+                        className="max-w-[500px] text-secondary font-medium flex items-center"
                     >
-                        View Report
+                        <FileText size={16} />
+                        <p className="text-[15px]"> View Report</p>
                     </Link>
                 </div>
             )

@@ -7,12 +7,14 @@ import {
     CommandGroup,
     CommandInput,
     CommandItem,
+    CommandList,
 } from '@/components/ui/command'
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover'
+import { cn } from '@/lib/utils'
 
 export interface ComboboxProps {
     data: any
@@ -34,6 +36,7 @@ export function Combobox({
     const [open, setOpen] = React.useState(false)
     const [value, setValue] = React.useState(initialValue)
 
+    console.log(data)
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>

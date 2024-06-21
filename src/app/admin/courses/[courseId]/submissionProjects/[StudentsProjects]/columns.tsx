@@ -5,7 +5,9 @@ import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 
 import { Task } from '@/utils/data/schema'
+
 import Link from 'next/link'
+import { FileText } from 'lucide-react'
 
 export const columns: ColumnDef<Task>[] = [
     {
@@ -105,13 +107,15 @@ export const columns: ColumnDef<Task>[] = [
         cell: ({ row }) => {
             // const label = labels.find((label) => label.value === row.original.label);
             console.log(row.original)
+
             return (
                 <div className="flex space-x-2">
                     <Link
                         href={`/admin/courses/${row.original.bootcampId}/submissionProjects/${row.original.projectId}/IndividualReport/${row.original.userId}`}
-                        className="max-w-[500px] text-secondary font-medium"
+                        className="max-w-[500px] text-secondary font-medium flex items-center"
                     >
-                        View Report
+                        <FileText size={16} />
+                        <p className="text-[15px]"> View Report</p>
                     </Link>
                 </div>
             )

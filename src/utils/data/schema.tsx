@@ -17,7 +17,9 @@ export const taskSchema = z.object({
     isChecked: z.boolean(),
     userEmail: z.string(),
     projectId: z.number(),
+    id: z.number(),
     userName: z.string(),
+    newId: z.number(),
 })
 
 export const testCaseSchema = z.object({
