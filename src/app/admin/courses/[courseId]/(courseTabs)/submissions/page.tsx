@@ -12,6 +12,7 @@ import { api } from '@/utils/axios.config'
 import PracticeProblems from '../../_components/PraticeProblems'
 import Link from 'next/link'
 import AssesmentComponent from '../../_components/AssesmentComponent'
+import { Spinner } from '@/components/ui/spinner'
 
 const Page = ({ params }: { params: any }) => {
     const [activeTab, setActiveTab] = useState('practice')
@@ -19,6 +20,7 @@ const Page = ({ params }: { params: any }) => {
     const [totalStudents, setTotalStudents] = useState(0)
     const [assesments, setAssesments] = useState<any>()
     const [projectData, setProjectData] = useState<any>([])
+    const [loading, setLoading] = useState(true)
 
     const handleTabChange = (tab: string) => {
         setActiveTab(tab)
@@ -67,42 +69,58 @@ const Page = ({ params }: { params: any }) => {
         }
     }, [getSubmissions, getAssessments, params.courseId, getProjectsData])
 
-    // console.log(assesments.totalStudents)
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setLoading(false)
+        }, 1000)
+
+        return () => clearTimeout(timer)
+    }, [])
 
     return (
         <div className="">
-            <div className="flex items-start gap-x-3">
-                <Button
-                    onClick={() => handleTabChange('practice')}
-                    className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
-                        activeTab === 'practice'
-                            ? 'bg-secondary  text-white'
-                            : 'bg-gray-200 text-gray-800'
-                    }`}
-                >
-                    Practice Problems
-                </Button>
-                <Button
-                    onClick={() => handleTabChange('assessments')}
-                    className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
-                        activeTab === 'assessments'
-                            ? 'bg-secondary  text-white'
-                            : 'bg-gray-200 text-gray-800'
-                    }`}
-                >
-                    Assessments
-                </Button>
-                <Button
-                    onClick={() => handleTabChange('projects')}
-                    className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
-                        activeTab === 'projects'
-                            ? 'bg-secondary  text-white'
-                            : 'bg-gray-200 text-gray-800'
-                    }`}
-                >
-                    Projects
-                </Button>
-            </div>
+            {loading ? (
+                <div className="my-5 flex justify-center items-center">
+                    <div className="absolute h-screen">
+                        <div className="relative top-[75%]">
+                            <Spinner className="text-secondary" />
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                <div className="flex items-start gap-x-3">
+                    <Button
+                        onClick={() => handleTabChange('practice')}
+                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
+                            activeTab === 'practice'
+                                ? 'bg-secondary  text-white'
+                                : 'bg-gray-200 text-gray-800'
+                        }`}
+                    >
+                        Practice Problems
+                    </Button>
+                    <Button
+                        onClick={() => handleTabChange('assessments')}
+                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
+                            activeTab === 'assessments'
+                                ? 'bg-secondary  text-white'
+                                : 'bg-gray-200 text-gray-800'
+                        }`}
+                    >
+                        Assessments
+                    </Button>
+                    <Button
+                        onClick={() => handleTabChange('projects')}
+                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
+                            activeTab === 'projects'
+                                ? 'bg-secondary  text-white'
+                                : 'bg-gray-200 text-gray-800'
+                        }`}
+                    >
+                        Projects
+                    </Button>
+                </div>
+            )}
             <div className="flex justify-between">
                 <div className="relative w-full mr-2">
                     <Input

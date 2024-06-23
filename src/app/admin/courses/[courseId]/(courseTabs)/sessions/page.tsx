@@ -231,6 +231,7 @@ function Page({ params }: any) {
                     title={'Batch'}
                     onChange={handleComboboxChange}
                     batch={false}
+                    batchChangeData={{}}
                 />
             </div>
             <div className="flex justify-between">

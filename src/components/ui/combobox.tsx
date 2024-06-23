@@ -23,6 +23,7 @@ export interface ComboboxProps {
     initialValue?: string
     isDisabled?: boolean
     batch: boolean
+    batchChangeData: any
 }
 
 export function Combobox({
@@ -32,11 +33,11 @@ export function Combobox({
     initialValue,
     isDisabled = false,
     batch,
+    batchChangeData,
 }: ComboboxProps) {
     const [open, setOpen] = React.useState(false)
     const [value, setValue] = React.useState(initialValue)
 
-    console.log(data)
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
@@ -49,10 +50,13 @@ export function Combobox({
                     className="w-full justify-between"
                     disabled={isDisabled}
                 >
-                    {value
+                    {batch
+                        ? batchChangeData.label
+                        : value
                         ? data.find((item: any) => item.value === value)
                               ?.label ?? 'No Batch is Assigned'
                         : 'No Batch is Assigned'}
+
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
