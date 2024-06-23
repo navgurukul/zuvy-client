@@ -224,109 +224,122 @@ function Page({ params }: any) {
         getHandleAllBootcampBatches()
     }, [getHandleAllBootcampBatches])
     return (
-        <div>
-            <div className="relative flex text-start gap-6 my-6 w-[200px]">
-                <Combobox
-                    data={bootcampData}
-                    title={'Batch'}
-                    onChange={handleComboboxChange}
-                    batch={false}
-                    batchChangeData={{}}
-                />
-            </div>
-            <div className="flex justify-between">
-                <div className="w-[400px] pr-3">
-                    <Input
-                        type="text"
-                        placeholder="Search Classes"
-                        className="max-w-[500px]"
-                        value={search}
-                        onChange={handleSetSearch}
-                    />
-                </div>
-                <CreateSession
-                    courseId={params?.courseId || 0}
-                    bootcampData={bootcampData}
-                    getClasses={getHandleAllClasses}
-                />
-            </div>
-            <div className="flex justify-start gap-6 my-6">
-                {tabs.map((tab) => (
-                    <Button
-                        key={tab}
-                        className={`p-1 w-[100px] h-[30px] rounded-lg ${
-                            activeTab === tab
-                                ? 'bg-secondary text-white'
-                                : 'bg-white'
-                        }`}
-                        onClick={() => handleTabChange(tab)}
-                        variant={'outline'}
-                    >
-                        {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                    </Button>
-                ))}
-            </div>
+        <>
             {loading ? (
-                <div className="flex justify-center">
-                    <Spinner className="text-secondary" />
+                <div className="my-5 flex justify-center items-center">
+                    <div className="absolute h-screen">
+                        <div className="relative top-[75%]">
+                            <Spinner className="text-secondary" />
+                        </div>
+                    </div>
                 </div>
             ) : (
                 <div>
-                    {classes.length > 0 ? (
-                        <>
-                            <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
-                                {classes.map((classData, index) =>
-                                    activeTab === 'completed' ? (
-                                        <RecordingCard
-                                            classData={classData}
-                                            key={index}
-                                            isAdmin
-                                        />
-                                    ) : (
-                                        <ClassCard
-                                            classData={classData}
-                                            key={index}
-                                            classType={activeTab}
-                                        />
-                                    )
-                                )}
-                            </div>
-                            <DataTablePagination
-                                totalStudents={totalStudents}
-                                position={position}
-                                setPosition={setPosition}
-                                pages={pages}
-                                lastPage={lastPage}
-                                currentPage={currentPage}
-                                setCurrentPage={setCurrentPage}
-                                fetchStudentData={getHandleAllClasses}
-                                setOffset={setOffset}
+                    <div className="relative flex text-start gap-6 my-6 w-[200px]">
+                        <Combobox
+                            data={bootcampData}
+                            title={'Batch'}
+                            onChange={handleComboboxChange}
+                            batch={false}
+                            batchChangeData={{}}
+                        />
+                    </div>
+                    <div className="flex justify-between">
+                        <div className="w-[400px] pr-3">
+                            <Input
+                                type="text"
+                                placeholder="Search Classes"
+                                className="max-w-[500px]"
+                                value={search}
+                                onChange={handleSetSearch}
                             />
-                        </>
+                        </div>
+                        <CreateSession
+                            courseId={params?.courseId || 0}
+                            bootcampData={bootcampData}
+                            getClasses={getHandleAllClasses}
+                        />
+                    </div>
+                    <div className="flex justify-start gap-6 my-6">
+                        {tabs.map((tab) => (
+                            <Button
+                                key={tab}
+                                className={`p-1 w-[100px] h-[30px] rounded-lg ${
+                                    activeTab === tab
+                                        ? 'bg-secondary text-white'
+                                        : 'bg-white'
+                                }`}
+                                onClick={() => handleTabChange(tab)}
+                                variant={'outline'}
+                            >
+                                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                            </Button>
+                        ))}
+                    </div>
+                    {loading ? (
+                        <div className="flex justify-center">
+                            <Spinner className="text-secondary" />
+                        </div>
                     ) : (
-                        <div className="w-full flex mb-10 items-center flex-col gap-y-3 justify-center absolute text-center mt-2">
-                            <Image
-                                src={
-                                    '/emptyStates/undraw_online_learning_re_qw08.svg'
-                                }
-                                height={200}
-                                width={200}
-                                alt="batchEmpty State"
-                            />
-                            <p>
-                                Create a session to start engagement with the
-                                learners for course lessons or doubts
-                            </p>
-                            <CreateSession
-                                courseId={params.courseId || 0}
-                                bootcampData={bootcampData}
-                                getClasses={getHandleAllClasses}
-                            />
+                        <div>
+                            {classes.length > 0 ? (
+                                <>
+                                    <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
+                                        {classes.map((classData, index) =>
+                                            activeTab === 'completed' ? (
+                                                <RecordingCard
+                                                    classData={classData}
+                                                    key={index}
+                                                    isAdmin
+                                                />
+                                            ) : (
+                                                <ClassCard
+                                                    classData={classData}
+                                                    key={index}
+                                                    classType={activeTab}
+                                                />
+                                            )
+                                        )}
+                                    </div>
+                                    <DataTablePagination
+                                        totalStudents={totalStudents}
+                                        position={position}
+                                        setPosition={setPosition}
+                                        pages={pages}
+                                        lastPage={lastPage}
+                                        currentPage={currentPage}
+                                        setCurrentPage={setCurrentPage}
+                                        fetchStudentData={getHandleAllClasses}
+                                        setOffset={setOffset}
+                                    />
+                                </>
+                            ) : (
+                                <div className="w-full flex mb-10 items-center flex-col gap-y-3 justify-center absolute text-center mt-2">
+                                    <Image
+                                        src={
+                                            '/emptyStates/undraw_online_learning_re_qw08.svg'
+                                        }
+                                        height={200}
+                                        width={200}
+                                        alt="batchEmpty State"
+                                    />
+                                    <p>
+                                        Create a session to start engagement
+                                        with the learners for course lessons or
+                                        doubts
+                                    </p>
+                                    <CreateSession
+                                        courseId={params.courseId || 0}
+                                        bootcampData={bootcampData}
+                                        getClasses={getHandleAllClasses}
+                                    />
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
             )}
-        </div>
+        </>
     )
 }
 
