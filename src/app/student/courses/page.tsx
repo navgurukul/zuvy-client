@@ -22,6 +22,8 @@ interface EnrolledCourse {
 
 interface ResumeCourse {
     bootcampName?: string
+    newChapter?: any
+    title?: string
     moduleName?: string
     bootcampId?: number
     moduleId?: number
@@ -61,7 +63,11 @@ const Page: React.FC<pageProps> = () => {
                 )
                 setResumeCourse(response.data)
                 // If we get res, then course started, hence courseStarted: true;
-                setCourseStarted(true)
+                if (response?.data?.code === 404) {
+                    setCourseStarted(false)
+                } else {
+                    setCourseStarted(true)
+                }
             } catch (error) {
                 console.error('Error getting resume course:', error)
                 if (
@@ -83,40 +89,6 @@ const Page: React.FC<pageProps> = () => {
             <div className="px-2 py-2 md:px-6 md:py-10 ">
                 {/* If Course Already Started then Below Message will be displayed: */}
                 {enrolledCourse?.length > 0 && courseStarted ? (
-                    // <>
-                    //     <h1 className="text-lg text-start font-semibold mb-2">
-                    //         Start from where you left
-                    //     </h1>
-                    //     <div className="bg-gradient-to-bl from-blue-50 to-violet-50 rounded-xl  sm:w-full md:w-1/2 lg:w=1/3 p-2 mb-10">
-                    //         <div className="px-1 py-4 flex items-start">
-                    //             <p className="text-gray-900 text-base">
-                    //                 {resumeCourse?.bootcampName}
-                    //             </p>
-                    //         </div>
-                    //         <div className=" flex flex-col ">
-                    //             <div className="flex items-center justify-start">
-                    //                 <span className=" rounded-full bg-gray-100 p-3 text-black">
-                    //                     <Video size={15} />
-                    //                 </span>
-                    //                 <Link
-                    //                     href={`/student/courses/${resumeCourse?.bootcampId}`}
-                    //                     className="text-lg capitalize text-black"
-                    //                 >
-                    //                     {resumeCourse?.moduleName}
-                    //                 </Link>
-                    //             </div>
-                    //             <div className="flex p-2 items-center justify-end">
-                    //                 <Link
-                    //                     href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`}
-                    //                     className="text-lg capitalize "
-                    //                 >
-                    //                     Resume Learning
-                    //                 </Link>
-                    //                 <ChevronRight size={20} />
-                    //             </div>
-                    //         </div>
-                    //     </div>
-                    // </>
                     <div className="flex flex-col flex-start">
                         <h1 className="text-xl p-1 text-start font-bold">
                             Start From Where You Left Off
@@ -131,8 +103,11 @@ const Page: React.FC<pageProps> = () => {
                                                     {/* <Video size={25} /> */}
                                                     <BookOpenText className="hidden sm:block mt-2" />
                                                     <h1 className="text-lg p-1 text-start font-bold">
-                                                        Video - Intro to
-                                                        Variables
+                                                        {
+                                                            resumeCourse
+                                                                ?.newChapter
+                                                                ?.title
+                                                        }
                                                     </h1>
                                                 </div>
                                                 <div className="flex flex-row gap-6">
