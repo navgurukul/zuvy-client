@@ -14,7 +14,6 @@ export function ellipsis(text: string | undefined, maxLength: number): string {
     return text.slice(0, maxLength - 3) + '...'
 }
 
-
 export function isPlural(count: number): boolean {
     return count !== 1
 }
@@ -30,4 +29,44 @@ export function difficultyColor(difficulty: string): string {
         default:
             return 'text-gray-500'
     }
+}
+
+export const getAttendanceColorClass = (attendance: any) => {
+    if (attendance === 100) {
+        return 'bg-green-500 text-white'
+    } else if (attendance >= 75) {
+        return 'bg-yellow-500 text-black'
+    } else if (attendance < 50) {
+        return 'bg-red-500 text-white'
+    } else {
+        return 'bg-gray-500 text-white'
+    }
+}
+
+export function getAssesmentBackgroundColorClass(totalNo: number, no: number) {
+    const percentage = (no / totalNo) * 100
+    if (percentage < 33) {
+        return 'bg-red-600'
+    } else if (percentage < 60 && percentage > 45) {
+        return 'bg-yellow-300'
+    } else if (percentage > 75) {
+        return 'bg-secondary'
+    }
+
+    return 'bg-gray-300'
+}
+
+export const formatDate = (dateString: string): string => {
+    const options: Intl.DateTimeFormatOptions = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZoneName: 'short',
+    }
+
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', options)
 }

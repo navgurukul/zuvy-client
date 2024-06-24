@@ -1,6 +1,6 @@
 import React from 'react'
 
-function Assignment({ content }: { content: Object }) {
+function Assignment() {
     return <div>Assignment</div>
 }
 

@@ -19,7 +19,7 @@ const OverviewComponent = (props: Props) => {
     return (
         <div className="my-4">
             <div className="grid grid-cols-1 gap-20   md:grid-cols-2">
-                <div className="lg:flex h-[150px] ml-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md ">
+                <div className="lg:flex h-[150px]  shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md ">
                     <div className="flex flex-col w-full justify-between   ">
                         <div className="flex items-center p-4 justify-between bg-orange-300 rounded-md">
                             <h1 className="text-xl text-start font-semibold text-gray-800  dark:text-white ">
@@ -49,14 +49,14 @@ const OverviewComponent = (props: Props) => {
                             <div>
                                 <h1 className="text-start font-bold">
                                     {props.openEndedCorrect}/
-                                    {props.totalOpenEnded} Correct
+                                    {props.totalOpenEnded}
                                 </h1>
                                 <p className="text-gray-500">Open-Ended</p>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div className="lg:flex h-[150px] mr-6 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md ">
+                <div className="lg:flex h-[150px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md ">
                     <div className="flex flex-col w-full justify-between   ">
                         <div className="flex items-center justify-between p-4 rounded-md bg-green-300">
                             <h1 className="text-xl text-start font-semibold text-gray-800  dark:text-white ">

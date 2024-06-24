@@ -7,7 +7,6 @@ import axios from 'axios'
 import { Button } from '@/components/ui/button'
 
 import './styles/login.css'
-
 import { toast } from '@/components/ui/use-toast'
 import Link from 'next/link'
 import { apiMeraki } from '@/utils/axios.config'
@@ -47,7 +46,8 @@ function LoginPage({}: Props) {
                     toast({
                         title: 'Login Successful',
                         description: 'Welcome to Zuvy Dashboard',
-                        className: 'text-start capitalize',
+                        className:
+                            'text-start capitalize border border-secondary',
                     })
                 }
 
@@ -68,8 +68,14 @@ function LoginPage({}: Props) {
 
                     return router.push(`/${resp.data.user.rolesList[0]}`)
                 }
-            } catch (err) {
-                console.log(err)
+            } catch (err: any) {
+                toast({
+                    title: 'Failed',
+                    description:
+                        err.response?.data?.message || 'An error occurred.',
+                    className:
+                        'text-start capitalize border border-destructive',
+                })
             }
         }
 

@@ -32,7 +32,7 @@ import {
 } from '@/components/ui/form'
 import { CardDescription, CardTitle } from '@/components/ui/card'
 import { toast } from '@/components/ui/use-toast'
-
+import { Spinner } from '@/components/ui/spinner'
 import AddStudentsModal from '../../_components/addStudentsmodal'
 import { api } from '@/utils/axios.config'
 import { getBatchData, getCourseData, getStoreStudentData } from '@/store/store'
@@ -43,22 +43,9 @@ const Page = ({ params }: { params: any }) => {
     const { courseData, fetchCourseDetails } = getCourseData()
     const { fetchBatches, batchData, setBatchData } = getBatchData()
     const { setStoreStudentData } = getStoreStudentData()
-
+    const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState<string>('')
     const debouncedSearch = useDebounce(search, 1000)
-    // useEffect(() => {
-    //     if (courseData?.id) {
-    //         console.log('first', courseData)
-    //         fetchBatches(courseData?.id)
-    //         // setBatches(batchData)
-    //     }
-    // }, [courseData?.id, fetchBatches])
-
-    // useEffect(() => {
-    //     if (params.courseId) {
-    //         fetchCourseDetails(params.courseId)
-    //     }
-    // }, [params.courseId, fetchCourseDetails])
 
     const formSchema = z.object({
         name: z.string().min(2, {
@@ -120,6 +107,8 @@ const Page = ({ params }: { params: any }) => {
                 toast({
                     title: 'Cannot Create New Batch',
                     description: 'This Batch Name Already Exists',
+                    className:
+                        'text-start capitalize border border-destructive',
                 })
             } else {
                 const res = await api.post(`/batch`, convertedData)
@@ -131,7 +120,7 @@ const Page = ({ params }: { params: any }) => {
                 toast({
                     title: res.data.status,
                     description: res.data.message,
-                    className: 'text-start capitalize',
+                    className: 'text-start capitalize border border-secondary',
                 })
             }
         } catch (error: any) {
@@ -139,12 +128,24 @@ const Page = ({ params }: { params: any }) => {
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'An error occurred.',
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-destructive',
                 variant: 'destructive',
             })
             console.error('Error creating batch:', error)
         }
     }
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setLoading(false)
+        }, 1000)
+
+        return () => clearTimeout(timer)
+    }, [])
+
+    useEffect(() => {
+        fetchCourseDetails(params.courseId)
+    }, [fetchCourseDetails, params.courseId])
 
     useEffect(() => {
         const searchBatchHandler = async () => {
@@ -199,6 +200,8 @@ const Page = ({ params }: { params: any }) => {
                                             title: 'Failed',
                                             description:
                                                 'Entered Corect values',
+                                            className:
+                                                'text-start capitalize border border-destructive',
                                         })
                                     }
                                     className="space-y-8"
@@ -298,48 +301,64 @@ const Page = ({ params }: { params: any }) => {
                     {renderModal(false)}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 mt-2">
-                    {batchData?.length ?? 0 > 0 ? (
-                        batchData?.map((batch: any, index: number) => (
-                            <Link
-                                key={batch.name}
-                                href={`/admin/courses/${courseData?.id}/batch/${batch.id}`}
-                            >
-                                <Card
-                                    key={batch.id}
-                                    className="text-gray-900 text-base"
-                                >
-                                    <div className="bg-white rounded-lg border p-4">
-                                        <div className="px-1 py-4 flex flex-col items-start">
-                                            <CardTitle className="font-semibold capitalize">
-                                                {batch.name}
-                                            </CardTitle>
-                                            <CardDescription className="capitalize">
-                                                {batch.students_enrolled}{' '}
-                                                <span>Learners</span>
-                                            </CardDescription>
-                                        </div>
-                                    </div>
-                                </Card>
-                            </Link>
-                        ))
-                    ) : (
-                        <div className="w-full flex flex-col items-center justify-center gap-y-3 absolute">
-                            <Image
-                                src="/batches.svg"
-                                alt="create batch"
-                                width={100}
-                                height={100}
-                            />
-                            <p>
-                                Start by creating the first batch for the
-                                course. Learners will get added automatically
-                                based on enrollment cap
-                            </p>
-                            {renderModal(true)}
+                {loading ? (
+                    // <div
+                    //     className="flex justify-center"
+                    //     style={{ marginTop: '10%' }}
+                    // >
+                    //     <Spinner className="text-secondary" />
+                    // </div>
+                    <div className="my-5 flex justify-center items-center">
+                        <div className="absolute h-screen">
+                            <div className="relative top-[70%]">
+                                <Spinner className="text-secondary" />
+                            </div>
                         </div>
-                    )}
-                </div>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 mt-2">
+                        {batchData?.length ?? 0 > 0 ? (
+                            batchData?.map((batch: any, index: number) => (
+                                <Link
+                                    key={batch.name}
+                                    href={`/admin/courses/${courseData?.id}/batch/${batch.id}`}
+                                >
+                                    <Card
+                                        key={batch.id}
+                                        className="text-gray-900 text-base"
+                                    >
+                                        <div className="bg-white rounded-lg border p-4">
+                                            <div className="px-1 py-4 flex flex-col items-start">
+                                                <CardTitle className="font-semibold capitalize">
+                                                    {batch.name}
+                                                </CardTitle>
+                                                <CardDescription className="capitalize">
+                                                    {batch.students_enrolled}{' '}
+                                                    <span>Learners</span>
+                                                </CardDescription>
+                                            </div>
+                                        </div>
+                                    </Card>
+                                </Link>
+                            ))
+                        ) : (
+                            <div className="w-full flex flex-col items-center justify-center gap-y-3 absolute">
+                                <Image
+                                    src="/batches.svg"
+                                    alt="create batch"
+                                    width={100}
+                                    height={100}
+                                />
+                                <p>
+                                    Start by creating the first batch for the
+                                    course. Learners will get added
+                                    automatically based on enrollment cap
+                                </p>
+                                {renderModal(true)}
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
         )
     }

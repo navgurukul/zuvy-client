@@ -2,7 +2,7 @@ import React from 'react'
 import { PlusCircle } from 'lucide-react'
 import Link from 'next/link'
 import { cn, difficultyColor, ellipsis } from '@/lib/utils'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 
 interface Example {
     input: number[]
@@ -31,16 +31,23 @@ const CodingQuestions = ({
     setSelectedQuestions,
     selectedQuestions,
 }: {
-    questions: any
-    setSelectedQuestions: any
-    selectedQuestions: any
+    questions: CodingQuestion[]
+    setSelectedQuestions: React.Dispatch<React.SetStateAction<CodingQuestion[]>>
+    selectedQuestions: CodingQuestion[]
 }) => {
     return (
         <ScrollArea className="h-dvh pr-4">
+            <ScrollBar orientation="vertical" />
             {questions.map((question: CodingQuestion) => (
                 <div
                     key={question.id}
-                    className={`p-5 rounded-sm border border-gray-200 mb-4`}
+                    className={`p-5 rounded-sm border border-gray-200 mb-4 ${
+                        selectedQuestions.some(
+                            (q: CodingQuestion) => q.id === question.id
+                        )
+                            ? 'bg-gray-100'
+                            : ''
+                    }`}
                 >
                     <div className="flex justify-between text-start items-center">
                         <div>
@@ -63,23 +70,50 @@ const CodingQuestions = ({
                                 </p>
                             </div>
                             <Link
-                                href={''}
+                                href=""
                                 className="font-semibold text-sm mt-2 text-secondary"
                             >
                                 View Full Description
                             </Link>
                         </div>
                         <div className="flex">
-                            <PlusCircle
-                                onClick={() => {
-                                    setSelectedQuestions([
-                                        ...selectedQuestions,
-                                        question,
-                                    ])
-                                }}
-                                className="text-secondary cursor-pointer"
-                                size={20}
-                            />
+                            {selectedQuestions.some(
+                                (q: CodingQuestion) => q.id === question.id
+                            ) ? (
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    className="lucide lucide-circle-check"
+                                >
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="m9 12 2 2 4-4" />
+                                </svg>
+                            ) : (
+                                <PlusCircle
+                                    onClick={() => {
+                                        if (
+                                            !selectedQuestions.some(
+                                                (q: CodingQuestion) =>
+                                                    q.id === question.id
+                                            )
+                                        ) {
+                                            setSelectedQuestions([
+                                                ...selectedQuestions,
+                                                question,
+                                            ])
+                                        }
+                                    }}
+                                    className="text-secondary cursor-pointer"
+                                    size={20}
+                                />
+                            )}
                         </div>
                     </div>
                 </div>

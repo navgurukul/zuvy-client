@@ -12,6 +12,14 @@ export const taskSchema = z.object({
     progress: z.number(),
     batchName: z.string(),
     attendance: z.number(),
+    status: z.string(),
+    noOfAttempts: z.number(),
+    isChecked: z.boolean(),
+    userEmail: z.string(),
+    projectId: z.number(),
+    id: z.number(),
+    userName: z.string(),
+    newId: z.number(),
 })
 
 export const testCaseSchema = z.object({
@@ -34,6 +42,7 @@ export const codingQuestionSchema = z.object({
     solution: z.string(),
     createdAt: z.string(),
     updatedAt: z.string(),
+    usage: z.number(),
 })
 
 export type CodingQuestion = z.infer<typeof codingQuestionSchema>

@@ -86,14 +86,14 @@ function EditOpenEndedQuestionForm({
             toast({
                 title: 'Success',
                 description: response.data.message,
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-secondary',
             })
         } catch (error: any) {
             toast({
                 title: 'Error',
                 description:
                     error?.response?.data?.message || 'An error occurred',
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-destructive',
             })
         }
     }
@@ -220,6 +220,7 @@ function EditOpenEndedQuestionForm({
                                     <FormControl>
                                         <Input
                                             type="number"
+                                            min="0"
                                             placeholder="Enter the Marks for the Question"
                                             {...field}
                                         />

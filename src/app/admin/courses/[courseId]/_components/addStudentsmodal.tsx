@@ -68,7 +68,8 @@ const AddStudentsModal = ({
                         toast({
                             title: response.data.status,
                             description: response.data.message,
-                            className: 'text-start capitalize',
+                            className:
+                                'text-start capitalize border border-secondary',
                         })
                         fetchStudentData(id, setStoreStudentData)
                         setStudentData({ name: '', email: '' })
@@ -77,7 +78,8 @@ const AddStudentsModal = ({
                 toast({
                     title: 'Error Adding Students',
                     description: error?.response.data.message,
-                    className: 'text-start capitalize',
+                    className:
+                        'text-start capitalize border border-destructive',
                 })
                 console.error('Error', error.message)
             }

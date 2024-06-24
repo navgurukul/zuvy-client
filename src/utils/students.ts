@@ -29,6 +29,7 @@ export async function onBatchChange(
         toast({
             title: 'Cannot Update the Batch',
             description: 'Initial Batch And selected batch Are same',
+            className: 'text-start capitalize border border-destructive',
         })
     }
 
@@ -47,11 +48,13 @@ export async function onBatchChange(
         toast({
             title: res.data.status,
             description: res.data.message,
+            className: 'text-start capitalize border border-secondary',
         })
     } catch (error: any) {
         toast({
             title: 'Error',
             description: error.message,
+            className: 'text-start capitalize border border-destructive',
         })
     }
 }
@@ -67,14 +70,15 @@ export async function deleteStudentHandler(
             toast({
                 title: res.data.status,
                 description: res.data.message,
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-secondary',
             })
             fetchStudentData(bootcampId, setStudentData)
         })
-    } catch (error) {
+    } catch (error: any) {
         toast({
             title: 'Failed',
-            variant: 'destructive',
+            description: error.response?.data?.message || 'An error occurred.',
+            className: 'text-start capitalize border border-destructive',
         })
     }
     setDeleteModalOpen(false)
@@ -89,3 +93,37 @@ export const getAttendanceColorClass = (attendance: number) => {
         return 'text-secondary' // Green color for attendance >= 75%
     }
 }
+
+// Student Assessment functions:-
+export function requestFullScreen(element: HTMLElement) {
+    if (element.requestFullscreen) {
+        element.requestFullscreen()
+    } else if ((element as any).mozRequestFullScreen) {
+        /* Firefox */
+        ;(element as any).mozRequestFullScreen()
+    } else if ((element as any).webkitRequestFullscreen) {
+        /* Chrome, Safari and Opera */
+        ;(element as any).webkitRequestFullscreen()
+    } else if ((element as any).msRequestFullscreen) {
+        /* IE/Edge */
+        ;(element as any).msRequestFullscreen()
+    }
+}
+
+    // tab change event listener
+   export function handleVisibilityChange() {
+        if (document.hidden) {
+            console.log('The Page is no longer visible. Test ended.')
+        }
+    }
+
+        // Request full screen as full screen is only allowed by user click
+
+    export function handleFullScreenChange() {
+            if (!document.fullscreenElement) {
+                alert('User has exited full screen. Test ended.')
+                // Here you could end the test, show a warning, etc.
+            }
+        }
+
+// --------------------------------------------

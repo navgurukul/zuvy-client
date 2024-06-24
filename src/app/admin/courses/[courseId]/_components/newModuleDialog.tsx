@@ -23,7 +23,9 @@ interface newModuleDialogProps {
         months: number
         weeks: number
     }
+    editMode: any
     handleModuleChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+    editModule: () => void
     createModule: () => void
     handleTimeAllotedChange: (
         event: React.ChangeEvent<HTMLInputElement>
@@ -33,9 +35,11 @@ interface newModuleDialogProps {
 }
 
 const NewModuleDialog: React.FC<newModuleDialogProps> = ({
+    editMode,
     moduleData,
     timeData,
     handleModuleChange,
+    editModule,
     createModule,
     handleTimeAllotedChange,
     handleTypeChange,
@@ -44,7 +48,9 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
     return (
         <DialogContent>
             <DialogHeader>
-                <DialogTitle>New Module</DialogTitle>
+                <DialogTitle>
+                    {editMode ? 'Edit Module' : 'New Module'}
+                </DialogTitle>
                 <div className="main_container flex items-center align-middle text-center">
                     <div className="flex items-center">
                         <div>
@@ -129,7 +135,7 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                             name="months"
                             placeholder="Months"
                             value={
-                                timeData?.months > 0
+                                timeData?.months > -1
                                     ? timeData?.months
                                     : undefined
                             }
@@ -142,7 +148,7 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                             name="weeks"
                             placeholder="Weeks"
                             value={
-                                timeData?.weeks > 0
+                                timeData?.weeks > -1
                                     ? timeData?.weeks
                                     : undefined
                             }
@@ -155,7 +161,7 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                             name="days"
                             placeholder="Days"
                             value={
-                                timeData?.days > 0 ? timeData?.days : undefined
+                                timeData?.days > -1 ? timeData?.days : undefined
                             }
                             onChange={handleTimeAllotedChange}
                         />
@@ -164,9 +170,15 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
             </DialogHeader>
             <DialogFooter className="sm:justify-end">
                 <DialogClose asChild>
-                    <Button onClick={() => createModule()}>
-                        Create Module
-                    </Button>
+                    {editMode ? (
+                        <Button onClick={() => editModule()}>
+                            Edit Module
+                        </Button>
+                    ) : (
+                        <Button onClick={() => createModule()}>
+                            Create Module
+                        </Button>
+                    )}
                 </DialogClose>
             </DialogFooter>
         </DialogContent>

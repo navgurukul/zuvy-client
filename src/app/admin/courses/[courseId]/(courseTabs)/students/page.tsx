@@ -70,9 +70,17 @@ const Page = ({ params }: { params: any }) => {
         const requestBody = { meetingIds: attendanceIds }
         try {
             const res = await api.post(`/classes/analytics/reload`, requestBody)
-            toast({ title: res.data.title, description: res.data.message })
+            toast({
+                title: res.data.title,
+                description: res.data.message,
+                className: 'text-start capitalize border border-secondary',
+            })
         } catch (error: any) {
-            toast({ title: 'Error', description: 'Could not refresh' })
+            toast({
+                title: 'Error',
+                description: 'Could not refresh',
+                className: 'text-start capitalize border border-destructive',
+            })
         } finally {
             setLoading(false)
         }
@@ -99,7 +107,6 @@ const Page = ({ params }: { params: any }) => {
         },
         [params.courseId, position, setStoreStudentData]
     )
-
     useEffect(() => {
         if (params.courseId) {
             fetchClassesData(params.courseId)

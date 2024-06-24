@@ -17,10 +17,10 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useEditor } from '@tiptap/react'
-import TiptapEditor from '../TiptapEditor/TiptapEditor'
-import TiptapToolbar from '../TiptapEditor/TiptapToolbar'
-import extensions from '../TiptapEditor/TiptapExtensions'
-import '../Tiptap.css'
+import TiptapEditor from '@/app/_components/editor/TiptapEditor'
+import TiptapToolbar from '@/app/_components/editor/TiptapToolbar'
+import extensions from '@/app/_components/editor/TiptapExtensions'
+import '@/app/_components/editor/Tiptap.css'
 
 interface ContentDetail {
     title: string
@@ -94,16 +94,16 @@ const AddAssignent = ({ content }: AssignmentProps) => {
             toast({
                 title: 'Success',
                 description: 'Article Chapter Edited Successfully',
+                className: 'text-start capitalize border border-secondary',
             })
         } catch (error: any) {
             toast({
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'An error occurred.',
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-destructive',
                 variant: 'destructive',
             })
-            console.error('Error creating batch:', error)
         }
     }
 

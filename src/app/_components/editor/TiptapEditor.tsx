@@ -5,7 +5,7 @@ import { EditorContent } from '@tiptap/react'
 const TiptapEditor = ({ editor }: { editor: any }) => {
     return (
         <div>
-            <div className="bg-muted/80 p-2 rounded-sm mt-4">
+            <div className="bg-muted/80 p-2 rounded-sm mt-4  text-start">
                 <EditorContent editor={editor} className="min-h-80" />
             </div>
         </div>

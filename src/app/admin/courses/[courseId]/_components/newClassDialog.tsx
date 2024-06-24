@@ -1,231 +1,300 @@
-import React, { useState, useEffect } from 'react'
+// import React, { useState, useEffect } from 'react'
 
-import { Button } from '@/components/ui/button'
-import {
-    DialogClose,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog'
+// import { Button } from '@/components/ui/button'
+// import {
+//     DialogClose,
+//     DialogContent,
+//     DialogDescription,
+//     DialogHeader,
+//     DialogTitle,
+// } from '@/components/ui/dialog'
 
-import styles from '../../_components/cources.module.css'
-import { Label } from '@/components/ui/label'
-import { Combobox } from '@/components/ui/combobox'
-import { Calendar } from '@/components/ui/calendar'
-import { ENROLLMENT_CAP } from '@/utils/constant'
-import { Input } from '@/components/ui/input'
-import CalendarInput from '@/app/_components/calendarInput'
-import { toast } from '@/components/ui/use-toast'
+// import styles from '../../_components/cources.module.css'
+// import { Label } from '@/components/ui/label'
+// import { Combobox } from '@/components/ui/combobox'
+// import { Calendar } from '@/components/ui/calendar'
+// import { ENROLLMENT_CAP } from '@/utils/constant'
+// import CalendarInput from '@/app/_components/calendarInput'
+// import { toast } from '@/components/ui/use-toast'
+// import {
+//     Form,
+//     FormControl,
+//     FormDescription,
+//     FormField,
+//     FormItem,
+//     FormLabel,
+//     FormMessage,
+// } from '@/components/ui/form'
+// import { Input } from '@/components/ui/input'
+// import { api } from '@/utils/axios.config'
+// import { useForm } from 'react-hook-form'
+// import { zodResolver } from '@hookform/resolvers/zod'
+// import { z } from 'zod'
 
-import { api } from '@/utils/axios.config'
+// const data = [
+//     {
+//         value: 'next.js',
+//         label: 'Next.js',
+//     },
+//     {
+//         value: 'sveltekit',
+//         label: 'SvelteKit',
+//     },
+//     {
+//         value: 'nuxt.js',
+//         label: 'Nuxt.js',
+//     },
+//     {
+//         value: 'remix',
+//         label: 'Remix',
+//     },
+//     {
+//         value: 'astro',
+//         label: 'Astro',
+//     },
+// ]
 
-// interface newClassDialogProps {
-//   newCourseName: string;
-//   handleNewCourseNameChange: (
-//     event: React.ChangeEvent<HTMLInputElement>
-//   ) => void;
-//   handleCreateCourse: () => void;
+// const formSchema = z.object({
+//     username: z.string().min(2, {
+//         message: 'Username must be at least 2 characters.',
+//     }),
+// })
+// function DateTimePicker({
+//     label,
+//     dateTime,
+//     setDateTime,
+// }: {
+//     label: any
+//     dateTime: any
+//     setDateTime: any
+// }) {
+//     const handleDateChange = (event: { target: { value: any } }) => {
+//         const newDate = event.target.value
+//         const time = dateTime.toISOString().split('T')[1]
+//         setDateTime(new Date(`${newDate}T${time}`))
+//     }
+
+//     const handleTimeChange = (event: { target: { value: any } }) => {
+//         const date = dateTime.toISOString().split('T')[0]
+//         const newTime = event.target.value
+//         setDateTime(new Date(`${date}T${newTime}:00.000Z`))
+//     }
+//     const currentDate = new Date().toISOString().split('T')[0]
+//     const currentTime = new Date().toISOString().split('T')[1].slice(0, 5)
+
+//     return (
+//         <div className="my-6">
+//             <Label htmlFor={`${label}DateTime`}>{label}:</Label>
+//             <div className="flex">
+//                 <input
+//                     type="date"
+//                     value={dateTime.toISOString().split('T')[0]}
+//                     onChange={handleDateChange}
+//                     min={currentDate}
+//                 />
+//                 <input
+//                     type="time"
+//                     value={dateTime.toISOString().split('T')[1].slice(0, 5)}
+//                     onChange={handleTimeChange}
+//                     min={
+//                         dateTime.toISOString().split('T')[0] === currentDate
+//                             ? currentTime
+//                             : undefined
+//                     }
+//                 />
+//             </div>
+//         </div>
+//     )
 // }
 
-const data = [
-    {
-        value: 'next.js',
-        label: 'Next.js',
-    },
-    {
-        value: 'sveltekit',
-        label: 'SvelteKit',
-    },
-    {
-        value: 'nuxt.js',
-        label: 'Nuxt.js',
-    },
-    {
-        value: 'remix',
-        label: 'Remix',
-    },
-    {
-        value: 'astro',
-        label: 'Astro',
-    },
-]
-function DateTimePicker({
-    label,
-    dateTime,
-    setDateTime,
-}: {
-    label: any
-    dateTime: any
-    setDateTime: any
-}) {
-    const handleDateChange = (event: { target: { value: any } }) => {
-        const newDate = event.target.value
-        const time = dateTime.toISOString().split('T')[1]
-        setDateTime(new Date(`${newDate}T${time}`))
-    }
+// const NewClassDialog = ({
+//     courseId,
+//     bootcampData,
+//     title,
+//     setTitle,
+//     description,
+//     setDescription,
+//     startDateTime,
+//     setStartDateTime,
+//     endDateTime,
+//     setEndDateTime,
+//     batchId,
+//     setBatchId,
+//     getClasses,
+// }: {
+//     courseId: number
+//     bootcampData: Object
+//     title: string
+//     setTitle: any
+//     description: string
+//     setDescription: any
+//     startDateTime: Date
+//     setStartDateTime: any
+//     endDateTime: Date
+//     setEndDateTime: any
+//     batchId: any
+//     setBatchId: any
+//     getClasses: any
+// }) => {
+//     // const [title, setTitle] = useState('')
+//     const [errors, setErrors] = useState<Record<string, string>>({})
+//     const [attendeesInput, setAttendeesInput] = useState('')
 
-    const handleTimeChange = (event: { target: { value: any } }) => {
-        const date = dateTime.toISOString().split('T')[0]
-        const newTime = event.target.value
-        setDateTime(new Date(`${date}T${newTime}:00.000Z`))
-    }
-    const currentDate = new Date().toISOString().split('T')[0]
-    return (
-        <div className="my-6">
-            <Label htmlFor={`${label}DateTime`}>{label}:</Label>
-            <div className="flex">
-                <input
-                    type="date"
-                    value={dateTime.toISOString().split('T')[0]}
-                    onChange={handleDateChange}
-                    min={currentDate}
-                />
-                <input
-                    type="time"
-                    value={dateTime.toISOString().split('T')[1].slice(0, 5)}
-                    onChange={handleTimeChange}
-                />
-            </div>
-        </div>
-    )
-}
+//     // const validateForm = () => {
+//     //     const newErrors: Record<string, string> = {}
+//     //     if (!title) newErrors.title = 'Session title is required'
+//     //     if (!description) newErrors.description = 'Description is required'
+//     //     if (!batchId) newErrors.batchId = 'Batch is required'
+//     //     if (startDateTime <= new Date())
+//     //         newErrors.startDateTime = 'Start date/time must be in the future'
+//     //     if (endDateTime <= startDateTime)
+//     //         newErrors.endDateTime =
+//     //             'End date/time must be after start date/time'
 
-const NewClassDialog = ({
-    courseId,
-    bootcampData,
-    title,
-    setTitle,
-    description,
-    setDescription,
-    startDateTime,
-    setStartDateTime,
-    endDateTime,
-    setEndDateTime,
-    batchId,
-    setBatchId,
-}: {
-    courseId: number
-    bootcampData: Object
-    title: string
-    setTitle: any
-    description: string
-    setDescription: any
-    startDateTime: Date
-    setStartDateTime: any
-    endDateTime: Date
-    setEndDateTime: any
-    batchId: any
-    setBatchId: any
-}) => {
-    // const [title, setTitle] = useState('')
+//     //     setErrors(newErrors)
+//     //     return Object.keys(newErrors).length === 0
+//     // }
+//     const form = useForm<z.infer<typeof formSchema>>({
+//         resolver: zodResolver(formSchema),
+//         defaultValues: {
+//             username: '',
+//         },
+//     })
+//     function onSubmit(values: z.infer<typeof formSchema>) {
+//         console.log(values)
+//     }
+//     const handleComboboxChange = (value: string) => {
+//         setBatchId(value)
+//     }
 
-    const [attendeesInput, setAttendeesInput] = useState('')
+//     const handleCreateCourse = async () => {
+//         // if (!validateForm()) return
 
-    const handleComboboxChange = (value: string) => {
-        setBatchId(value)
-    }
+//         const attendeesArray = attendeesInput.split(', ')
 
-    const handleCreateCourse = async () => {
-        const attendeesArray = attendeesInput.split(', ')
+//         const userIdLocal = JSON.parse(localStorage.getItem('AUTH') || '')
+//         const newCourseData = {
+//             title,
+//             description,
+//             startDateTime,
+//             endDateTime,
+//             timeZone: 'Asia/Kolkata',
+//             attendees: [],
+//             batchId: Number(batchId),
+//             bootcampId: +courseId,
+//             userId: Number(userIdLocal.id),
+//             roles: userIdLocal.rolesList,
+//         }
 
-        const userIdLocal = JSON.parse(localStorage.getItem('AUTH') || '')
-        const newCourseData = {
-            title,
-            description,
-            startDateTime,
-            endDateTime,
-            timeZone: 'Asia/Kolkata',
-            attendees: [],
-            batchId: Number(batchId),
-            bootcampId: courseId,
-            userId: Number(userIdLocal.id),
-            roles: userIdLocal.rolesList,
-        }
+//         try {
+//             const postClass = await api.post(`/classes`, newCourseData)
+//             if (postClass.data.status == 'success') {
+//                 toast({
+//                     title: 'class created successfully',
+//                     variant: 'default',
+//                     className: 'text-start capitalize border border-secondary',
+//                 })
+//                 getClasses()
+//             }
 
-        try {
-            const postClass = await api.post(`/classes`, newCourseData)
-            if (postClass.data.status == 'success') {
-                toast({
-                    title: 'class created successfully',
-                    variant: 'default',
-                    className: 'text-start capitalize',
-                })
-            }
+//             return postClass
+//         } catch (error) {
+//             toast({
+//                 title: 'class creation failed',
+//                 variant: 'default',
+//                 className: 'text-start capitalize border border-destructiv',
+//             })
+//             console.error('Error creating class:', error)
+//         }
+//     }
 
-            return postClass
-        } catch (error) {
-            toast({
-                title: 'class creation failed',
-                variant: 'default',
-                className: 'text-start capitalize',
-            })
-            console.error('Error creating class:', error)
-        }
-    }
+//     return (
 
-    return (
-        <DialogContent>
-            <DialogHeader>
-                <DialogTitle className={styles.newCourse}>
-                    New Session
-                </DialogTitle>
-                <DialogDescription className="text-start">
-                    <div className="my-6">
-                        <Label htmlFor="name">Session Title</Label>
-                        <Input
-                            type="text"
-                            id="name"
-                            placeholder="Enter session title"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                        />
-                    </div>
-                    <div className="my-6">
-                        <Label htmlFor="description">Description:</Label>
-                        <Input
-                            type="text"
-                            id="description"
-                            placeholder="Enter course description"
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                        />
-                    </div>
-                    <div className="my-6">
-                        <DateTimePicker
-                            label="Start Date"
-                            dateTime={startDateTime}
-                            setDateTime={setStartDateTime}
-                        />
-                    </div>
-                    <div className="my-6">
-                        <DateTimePicker
-                            label="End Date"
-                            dateTime={endDateTime}
-                            setDateTime={setEndDateTime}
-                        />
-                    </div>
+//         // <DialogContent>
+//         //     <DialogHeader>
+//         //         <DialogTitle className={styles.newCourse}>
+//         //             New Session
+//         //         </DialogTitle>
+//         //         <DialogDescription className="text-start">
+//         //             <div className="my-6">
+//         //                 <Label htmlFor="name">Session Title</Label>
+//         //                 <Input
+//         //                     type="text"
+//         //                     id="name"
+//         //                     placeholder="Enter session title"
+//         //                     value={title}
+//         //                     onChange={(e) => setTitle(e.target.value)}
+//         //                     required
+//         //                 />
+//         //                 {errors.title && (
+//         //                     <p className="text-red-500">
+//         //                         Session title is required
+//         //                     </p>
+//         //                 )}
+//         //             </div>
+//         //             <div className="my-6">
+//         //                 <Label htmlFor="description">Description:</Label>
+//         //                 <Input
+//         //                     type="text"
+//         //                     id="description"
+//         //                     placeholder="Enter course description"
+//         //                     value={description}
+//         //                     onChange={(e) => setDescription(e.target.value)}
+//         //                     required
+//         //                 />
+//         //                 {errors.description && (
+//         //                     <p className="text-red-500">
+//         //                         Description is required
+//         //                     </p>
+//         //                 )}
+//         //             </div>
+//         //             <div className="my-6">
+//         //                 <DateTimePicker
+//         //                     label="Start Date"
+//         //                     dateTime={startDateTime}
+//         //                     setDateTime={setStartDateTime}
+//         //                 />
+//         //                 {errors.startDateTime && (
+//         //                     <p className="text-red-500">
+//         //                         Start date/time must be in the future
+//         //                     </p>
+//         //                 )}
+//         //             </div>
+//         //             <div className="my-6">
+//         //                 <DateTimePicker
+//         //                     label="End Date"
+//         //                     dateTime={endDateTime}
+//         //                     setDateTime={setEndDateTime}
+//         //                 />
+//         //                 {errors.endDateTime && (
+//         //                     <p className="text-red-500">
+//         //                         End date/time must be after start date/time
+//         //                     </p>
+//         //                 )}
+//         //             </div>
+//         //             <div className="my-6">
+//         //                 <Label htmlFor="batchId">Batch:</Label>
+//         //                 <Combobox
+//         //                     data={bootcampData}
+//         //                     title={'Batch'}
+//         //                     onChange={handleComboboxChange}
+//         //                     batch={false}
+//         //                 />
+//         //                 {errors.batchId && (
+//         //                     <p className="text-red-500">Batch is required</p>
+//         //                 )}
+//         //             </div>
+//         //             <DialogClose asChild>
+//         //                 <div className="text-end">
+//         //                     <Button onClick={handleCreateCourse}>
+//         //                         Create Class
+//         //                     </Button>
+//         //                 </div>
+//         //             </DialogClose>
+//         //         </DialogDescription>
+//         //     </DialogHeader>
+//         // </DialogContent>
+//     )
+// }
 
-                    <div className="my-6">
-                        <Label htmlFor="batchId">Batch:</Label>
-                        <Combobox
-                            data={bootcampData}
-                            title={'Batch'}
-                            onChange={handleComboboxChange}
-                            batch={false}
-                        />
-                    </div>
-                    <DialogClose asChild>
-                        <div className="text-end">
-                            <Button onClick={handleCreateCourse}>
-                                Create Class
-                            </Button>
-                        </div>
-                    </DialogClose>
-                </DialogDescription>
-            </DialogHeader>
-        </DialogContent>
-    )
-}
-
-export default NewClassDialog
+// export default NewClassDialog

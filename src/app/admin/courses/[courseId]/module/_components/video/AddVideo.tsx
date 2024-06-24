@@ -59,7 +59,6 @@ interface chapterDetails {
 const AddVideo = ({
     moduleId,
     content,
-    key,
     fetchChapterContent,
 }: {
     content: {
@@ -70,7 +69,6 @@ const AddVideo = ({
         contentDetails: ContentDetail[]
     }
     moduleId: string
-    key: number
     fetchChapterContent: (chapterId: number) => Promise<void>
 }) => {
     const [showVideo, setShowVideo] = useState(true)
@@ -117,6 +115,8 @@ const AddVideo = ({
                     toast({
                         title: res.data.status,
                         description: res.data.message,
+                        className:
+                            'text-start capitalize border border-secondary',
                     })
                     fetchChapterContent(content.id)
                 })
@@ -124,6 +124,7 @@ const AddVideo = ({
             toast({
                 title: 'Error',
                 description: "Couldn't Update the Chapter Module",
+                className: 'text-start capitalize border border-destructive',
             })
         }
     }

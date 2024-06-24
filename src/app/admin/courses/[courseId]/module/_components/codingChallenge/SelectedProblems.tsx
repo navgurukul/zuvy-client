@@ -35,6 +35,7 @@ const SelectedProblems = ({
             toast({
                 title: 'Success',
                 description: 'Chapter saved successfully',
+                className: 'text-start capitalize border border-secondary',
             })
         }
     }

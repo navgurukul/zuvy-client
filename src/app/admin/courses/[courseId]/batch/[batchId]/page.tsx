@@ -42,7 +42,7 @@ import { api } from '@/utils/axios.config'
 import { StudentData } from '../../(courseTabs)/students/page'
 import useDebounce from '@/hooks/useDebounce'
 import { DataTable } from '@/app/_components/datatable/data-table'
-
+import { Spinner } from '@/components/ui/spinner'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import BreadcrumbCmponent from '@/app/_components/breadcrumbCmponent'
 
@@ -70,6 +70,7 @@ const BatchesInfo = ({
     const [isFormOpen, setIsFormOpen] = useState(false)
     const [error, setError] = useState(true)
     const debouncedValue = useDebounce(search, 1000)
+    const [loading, setLoading] = useState(true)
 
     const crumbs = [
         {
@@ -172,16 +173,15 @@ const BatchesInfo = ({
             await api.delete(`/batch/${params.batchId}`)
             toast({
                 title: 'Batch Deleted Successfully',
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-secondary',
             })
             setDeleteModalOpen(false)
             router.push(`/admin/courses/${params.courseId}/batches`)
         } catch (error) {
             toast({
                 title: 'Batch not Deleted',
-                className: 'text-start capitalize',
+                className: 'text-start capitalize border border-destructive',
             })
-            console.error('Error deleting batch:', error)
         }
     }
 
@@ -199,6 +199,8 @@ const BatchesInfo = ({
                     toast({
                         title: res.data.status,
                         description: res.data.message,
+                        className:
+                            'text-start capitalize border border-secondary',
                     })
                     const fetchBatchesInfo = async () => {
                         try {
@@ -210,18 +212,19 @@ const BatchesInfo = ({
                         } catch (error) {}
                     }
                     fetchBatchesInfo()
+                    fetchInstructorInfo(params.batchId)
                 })
             //   }
         } catch (error) {
             toast({
                 title: "Batches Didn't Update Succesfully",
+                className: 'text-start capitalize border border-destructive',
             })
         }
     }
     useEffect(() => {
         const getBootCamp = async () => {
-            await api
-                .get(`/bootcamp/${params.courseId}`)
+            await api.get(`/bootcamp/${params.courseId}`)
                 .then((response) => setBootcamp(response.data.bootcamp))
         }
         getBootCamp()
@@ -229,17 +232,18 @@ const BatchesInfo = ({
 
     const fetchStudentData = useCallback(
         async (offset: number) => {
-            await api
-                .get(
-                    `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}&limit=${position}&offset=${offset}`
-                )
-                .then((response) => {
-                    setStudentData(response.data.totalStudents)
-                    setStoreStudentData(response.data.totalStudents)
-                    setLastPage(response.data.totalPages)
-                    setPages(response.data.totalPages)
-                    setTotalStudents(response.data.totalStudentsCount)
-                })
+            let endpoint = `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}&limit=${position}&offset=${offset}`
+            if (debouncedValue) {
+                endpoint += `&searchTerm=${debouncedValue}`
+            }
+            await api.get(endpoint).then((response) => {
+                setStudentData(response.data.totalStudents)
+                setStoreStudentData(response.data.totalStudents)
+                setLastPage(response.data.totalPages)
+                setPages(response.data.totalPages)
+                setTotalStudents(response.data.totalStudentsCount)
+                setLoading(false)
+            })
         },
         [
             params,
@@ -249,31 +253,13 @@ const BatchesInfo = ({
             setLastPage,
             setPages,
             setTotalStudents,
+            debouncedValue, // Ensure searchTerm is included as a dependency
         ]
     )
+
     useEffect(() => {
         fetchStudentData(offset)
     }, [offset, position, fetchStudentData])
-    useEffect(() => {
-        const searchBatchStudentsHandler = async () => {
-            await api
-                .get(
-                    `/bootcamp/studentSearch/${params.courseId}?batch_id=${params.batchId}&searchTerm=${debouncedValue}`
-                )
-                .then((res) => {
-                    setStoreStudentData(res.data.data[1].studentsEmails)
-                })
-        }
-
-        if (debouncedValue) searchBatchStudentsHandler()
-        if (debouncedValue?.trim().length === 0) fetchStudentData(0)
-    }, [
-        debouncedValue,
-        fetchStudentData,
-        params.batchId,
-        params.courseId,
-        setStoreStudentData,
-    ])
 
     const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value)
@@ -604,7 +590,27 @@ const BatchesInfo = ({
                         </div>
                     </div>
                 </div>
-                <DataTable columns={columns} data={studentsData} />
+                {loading ? (
+                    <div className="flex justify-center">
+                        <Spinner className="text-secondary" />
+                    </div>
+                ) : (
+                    <div>
+                        <DataTable columns={columns} data={studentsData} />
+                        <DataTablePagination
+                            totalStudents={totalStudents}
+                            position={position}
+                            setPosition={setPosition}
+                            pages={pages}
+                            lastPage={lastPage}
+                            currentPage={currentPage}
+                            setCurrentPage={setCurrentPage}
+                            fetchStudentData={fetchStudentData}
+                            setOffset={setOffset}
+                        />
+                    </div>
+                )}
+                {/* <DataTable columns={columns} data={studentsData} />
 
                 <DataTablePagination
                     totalStudents={totalStudents}
@@ -616,7 +622,7 @@ const BatchesInfo = ({
                     setCurrentPage={setCurrentPage}
                     fetchStudentData={fetchStudentData}
                     setOffset={setOffset}
-                />
+                /> */}
             </MaxWidthWrapper>
         </>
     )
