@@ -189,7 +189,7 @@ function Page({ params }: any) {
                 setClasses(res.data.classes)
                 setTotalStudents(res.data.total_items)
                 setPages(res.data.total_pages)
-                setLastPage(res.data.total_pages)
+                setLastPage(res.data.total_items)
                 setLoading(false)
             } catch (error) {
                 console.error('Error fetching classes:', error)
@@ -241,6 +241,7 @@ function Page({ params }: any) {
                             title={'Batch'}
                             onChange={handleComboboxChange}
                             batch={false}
+                            batchChangeData={{}}
                         />
                     </div>
                     <div className="flex justify-between">
@@ -275,56 +276,65 @@ function Page({ params }: any) {
                             </Button>
                         ))}
                     </div>
-                    {classes.length > 0 ? (
-                        <>
-                            <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
-                                {classes.map((classData, index) =>
-                                    activeTab === 'completed' ? (
-                                        <RecordingCard
-                                            classData={classData}
-                                            key={index}
-                                            isAdmin
-                                        />
-                                    ) : (
-                                        <ClassCard
-                                            classData={classData}
-                                            key={index}
-                                            classType={activeTab}
-                                        />
-                                    )
-                                )}
-                            </div>
-                            <DataTablePagination
-                                totalStudents={totalStudents}
-                                position={position}
-                                setPosition={setPosition}
-                                pages={pages}
-                                lastPage={lastPage}
-                                currentPage={currentPage}
-                                setCurrentPage={setCurrentPage}
-                                fetchStudentData={getHandleAllClasses}
-                                setOffset={setOffset}
-                            />
-                        </>
+                    {loading ? (
+                        <div className="flex justify-center">
+                            <Spinner className="text-secondary" />
+                        </div>
                     ) : (
-                        <div className="w-full flex mb-10 items-center flex-col gap-y-3 justify-center absolute text-center mt-2">
-                            <Image
-                                src={
-                                    '/emptyStates/undraw_online_learning_re_qw08.svg'
-                                }
-                                height={200}
-                                width={200}
-                                alt="batchEmpty State"
-                            />
-                            <p>
-                                Create a session to start engagement with the
-                                learners for course lessons or doubts
-                            </p>
-                            <CreateSession
-                                courseId={params.courseId || 0}
-                                bootcampData={bootcampData}
-                                getClasses={getHandleAllClasses}
-                            />
+                        <div>
+                            {classes.length > 0 ? (
+                                <>
+                                    <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
+                                        {classes.map((classData, index) =>
+                                            activeTab === 'completed' ? (
+                                                <RecordingCard
+                                                    classData={classData}
+                                                    key={index}
+                                                    isAdmin
+                                                />
+                                            ) : (
+                                                <ClassCard
+                                                    classData={classData}
+                                                    key={index}
+                                                    classType={activeTab}
+                                                />
+                                            )
+                                        )}
+                                    </div>
+                                    <DataTablePagination
+                                        totalStudents={totalStudents}
+                                        position={position}
+                                        setPosition={setPosition}
+                                        pages={pages}
+                                        lastPage={lastPage}
+                                        currentPage={currentPage}
+                                        setCurrentPage={setCurrentPage}
+                                        fetchStudentData={getHandleAllClasses}
+                                        setOffset={setOffset}
+                                    />
+                                </>
+                            ) : (
+                                <div className="w-full flex mb-10 items-center flex-col gap-y-3 justify-center absolute text-center mt-2">
+                                    <Image
+                                        src={
+                                            '/emptyStates/undraw_online_learning_re_qw08.svg'
+                                        }
+                                        height={200}
+                                        width={200}
+                                        alt="batchEmpty State"
+                                    />
+                                    <p>
+                                        Create a session to start engagement
+                                        with the learners for course lessons or
+                                        doubts
+                                    </p>
+                                    <CreateSession
+                                        courseId={params.courseId || 0}
+                                        bootcampData={bootcampData}
+                                        getClasses={getHandleAllClasses}
+                                    />
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>

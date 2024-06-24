@@ -242,6 +242,7 @@ const BatchesInfo = ({
                 setLastPage(response.data.totalPages)
                 setPages(response.data.totalPages)
                 setTotalStudents(response.data.totalStudentsCount)
+                setLoading(false)
             })
         },
         [

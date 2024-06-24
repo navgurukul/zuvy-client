@@ -22,7 +22,7 @@ const Assesments = (props: Props) => {
                                 href={`/admin/courses/${props.courseId}/submissions/${module.id}`}
                                 className=""
                             >
-                                <AssesmentComponent
+                                {/* <AssesmentComponent
                                     title={module.title}
                                     codingChallenges={
                                         module.codingChallenges || 10
@@ -35,7 +35,7 @@ const Assesments = (props: Props) => {
                                     studentsSubmitted={
                                         module.studentsSubmitted || 20
                                     }
-                                />
+                                /> */}
                             </Link>
                         ))}
                     </div>

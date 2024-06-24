@@ -136,6 +136,7 @@ export const getStoreStudentData = create<storeStudentData>((set) => ({
         set({ studentsData: newValue })
     },
 }))
+
 type storequizData = {
     quizData: quiz[]
     setStoreQuizData: (newValue: quiz[]) => void
@@ -273,38 +274,38 @@ type TimerState = {
 }
 
 export const useTimerStore = create<TimerState>(() => {
-    let remainingTime = 0;
-    let interval: NodeJS.Timeout | null = null;
-    let startTime: number | null = null;
+    let remainingTime = 0
+    let interval: NodeJS.Timeout | null = null
+    let startTime: number | null = null
 
     const startTimer = (duration: number) => {
-        startTime = Date.now();
+        startTime = Date.now()
         interval = setInterval(() => {
-            const newElapsedTime = Math.floor((Date.now() - startTime!) / 1000);
-            const newRemainingTime = Math.max(duration - newElapsedTime, 0);
+            const newElapsedTime = Math.floor((Date.now() - startTime!) / 1000)
+            const newRemainingTime = Math.max(duration - newElapsedTime, 0)
             if (newRemainingTime === 0) {
                 if (interval) {
-                    clearInterval(interval);
+                    clearInterval(interval)
                 }
             }
-            remainingTime = newRemainingTime;
-        }, 1000);
-    };
+            remainingTime = newRemainingTime
+        }, 1000)
+    }
 
     const stopTimer = () => {
         if (interval) {
-            clearInterval(interval);
-            interval = null;
+            clearInterval(interval)
+            interval = null
         }
-    };
+    }
 
     const resetTimer = () => {
-        remainingTime = 0;
+        remainingTime = 0
         if (interval) {
-            clearInterval(interval);
-            interval = null;
+            clearInterval(interval)
+            interval = null
         }
-    };
+    }
 
     return {
         remainingTime,
@@ -313,12 +314,8 @@ export const useTimerStore = create<TimerState>(() => {
         startTimer,
         stopTimer,
         resetTimer,
-    };
-});
-
-
-
-    
+    }
+})
 
 // ------------------------------
 type editOpenEndedDialogs = {

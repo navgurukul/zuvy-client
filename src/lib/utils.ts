@@ -42,3 +42,31 @@ export const getAttendanceColorClass = (attendance: any) => {
         return 'bg-gray-500 text-white'
     }
 }
+
+export function getAssesmentBackgroundColorClass(totalNo: number, no: number) {
+    const percentage = (no / totalNo) * 100
+    if (percentage < 33) {
+        return 'bg-red-600'
+    } else if (percentage < 60 && percentage > 45) {
+        return 'bg-yellow-300'
+    } else if (percentage > 75) {
+        return 'bg-secondary'
+    }
+
+    return 'bg-gray-300'
+}
+
+export const formatDate = (dateString: string): string => {
+    const options: Intl.DateTimeFormatOptions = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZoneName: 'short',
+    }
+
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', options)
+}
