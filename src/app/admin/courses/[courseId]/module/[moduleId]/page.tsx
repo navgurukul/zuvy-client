@@ -33,6 +33,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import AddAssessment from '@/app/admin/courses/[courseId]/module/_components/Assessment/AddAssessment'
+import AddForm from '../_components/form/AddForm'
 
 // Interfaces:-
 type Chapter = {
@@ -281,6 +282,15 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                         moduleId={params.moduleId}
                     />
                 )
+            case 7:
+                return (
+                    <AddForm
+                        chapterData={currentChapter}
+                        content={chapterContent}
+                        fetchChapterContent={fetchChapterContent}
+                        moduleId={params.moduleId}
+                    />
+                )
             default:
                 return <h1>Create New Chapter</h1>
         }
@@ -423,7 +433,13 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                         </ScrollArea>
                     </div>
                     <div className="col-span-3 mx-4">
-                        {renderChapterContent()}
+                        {/* {renderChapterContent()} */}
+                        <AddForm
+                            chapterData={currentChapter}
+                            content={chapterContent}
+                            fetchChapterContent={fetchChapterContent}
+                            moduleId={params.moduleId}
+                        />
                     </div>
                 </div>
             ) : (
