@@ -49,7 +49,15 @@ const AddForm: React.FC<AddFormProps> = ({
         title: 'title',
         description: 'description',
     })
-    const [section, setSection] = useState([{ name: '', number: '' }])
+    // const [section, setSection] = useState([{ name: '', number: '' }])
+    const [section, setSection] = useState([
+        {
+            type: 'Multiple Choice',
+            question: 'Question 1',
+            options: ['Op1'],
+            textField: true,
+        },
+    ])
 
     const form = useForm<z.infer<typeof formSchema>>({
         // const form = useForm({
@@ -67,13 +75,21 @@ const AddForm: React.FC<AddFormProps> = ({
 
     const addQuestion = () => {
         console.log('Clicked')
-        const newSection = { name: '', number: '' }
+        // const newSection = { name: '', number: '' }
+        const newSection = {
+            type: 'Multiple Choice',
+            question: 'Question 1',
+            options: ['Op1'],
+            textField: true,
+        }
         setSection([...section, newSection])
     }
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         console.log('values', values)
     }
+
+    console.log('section in form', section)
 
     return (
         <div className="flex flex-col gap-y-8 mx-auto items-center justify-center w-full">
@@ -162,9 +178,10 @@ const AddForm: React.FC<AddFormProps> = ({
                     /> */}
                     {section.map((item: any, index) => (
                         <FormSection
-                            index={index + 1}
+                            index={index}
                             form={form}
                             addQuestion={addQuestion}
+                            section={section}
                             setSection={setSection}
                         />
                     ))}

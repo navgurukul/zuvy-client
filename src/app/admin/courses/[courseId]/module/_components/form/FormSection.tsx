@@ -35,6 +35,7 @@ type FormSectionProps = {
     addQuestion: any
     // fetchChapterContent: (chapterId: number) => void
     form: any
+    section: any
     setSection: any
 }
 
@@ -42,6 +43,7 @@ const FormSection: React.FC<FormSectionProps> = ({
     index,
     form,
     addQuestion,
+    section,
     setSection,
 }) => {
     const [selectedSected, setSelectedSection] = useState('Multiple Choice')
@@ -55,6 +57,18 @@ const FormSection: React.FC<FormSectionProps> = ({
     //     empty fields if type is rest
     // }
 
+    // const list = [
+    //     {
+    //         type: 'Multiple Choice',
+    //         question: 'Question 1',
+    //         options: ['Op1', 'Op2', 'Op3'],
+    //         textField: true,
+    //     },
+    // ]
+
+    // get the section with the index to add rest of the things
+    // and the slice the section to add the new object section and set is to setSection
+
     const sectionType = [
         'Multiple Choice',
         'Checkboxes',
@@ -64,36 +78,73 @@ const FormSection: React.FC<FormSectionProps> = ({
     ]
     // const options =
     const handleSectionType = (type: string) => {
-        console.log('type', type)
+        // console.log('index in handleSectionType', index)
+        // console.log('typeeee', type)
+        // console.log('section in handleSectionType', section)
+        const obj = section[index]
+        // console.log('obj', obj)
+        obj.type = type
+        if (type === 'Multiple Choice' || type === 'Checkboxes') {
+            obj.options = ['1']
+            setRadioOptions(['1'])
+            setCheckboxOptions(['1'])
+        } else {
+            obj.options = []
+            setRadioOptions([])
+            setCheckboxOptions([])
+        }
+        section.splice(index, 1, obj)
+        setSection(section)
         setSelectedSection(type)
     }
 
+    console.log('section outside', section)
+
     const addRadioOption = () => {
-        console.log('Radio')
         const addOption = radioOptions.length + 1
         setRadioOptions([...radioOptions, addOption.toString()])
+        const obj = section[index]
+        obj.options = [...radioOptions, addOption.toString()]
+        section.splice(index, 1, obj)
+        setSection(section)
     }
 
     const removeRadioOption = (idx: number) => {
-        console.log('Radiooooooo')
-        // const removeOption =
         radioOptions.splice(idx, 1)
-        console.log('radioOptions', radioOptions)
         setRadioOptions(radioOptions)
+        const obj = section[index]
+        obj.options = radioOptions
+        section.splice(index, 1, obj)
+        setSection(section)
     }
 
     const addCheckboxOption = () => {
-        console.log('Radio')
         const addOption = checkboxOptions.length + 1
         setCheckboxOptions([...checkboxOptions, addOption.toString()])
+        console.log('section in addCheckboxOption', section)
+        const obj = section[index]
+        console.log('obj', obj)
+        obj.options = [...checkboxOptions, addOption.toString()]
+        console.log('Edited obj', obj)
+        section.splice(index, 1, obj)
+        console.log('section after added CheckboxOption')
+        setSection(section)
     }
 
     const removeCheckOption = (idx: number) => {
-        console.log('Radiooooooo')
+        // console.log('Radiooooooo')
         // const removeOption =
         checkboxOptions.splice(idx, 1)
-        console.log('checkboxOptions', checkboxOptions)
+        // console.log('checkboxOptions', checkboxOptions)
         setCheckboxOptions(checkboxOptions)
+        console.log('section in removeCheckOption', section)
+        const obj = section[index]
+        console.log('obj', obj)
+        obj.options = checkboxOptions
+        console.log('Edited obj', obj)
+        section.splice(index, 1, obj)
+        console.log('section after removeCheckOption')
+        setSection(section)
     }
 
     console.log('radioOptions', radioOptions)
@@ -120,11 +171,11 @@ const FormSection: React.FC<FormSectionProps> = ({
             </Select>
             <FormField
                 control={form.control}
-                name={`Question ${index}`}
+                name={`Question ${index + 1}`}
                 render={({ field }) => (
                     <FormItem>
                         <FormLabel className="flex text-left text-md font-semibold mb-1">
-                            Question {index}
+                            Question {index + 1}
                         </FormLabel>
                         <FormControl>
                             <Input
