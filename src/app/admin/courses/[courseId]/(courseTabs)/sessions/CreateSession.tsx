@@ -129,17 +129,23 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
             values.startTime
         )
         const endDateTime = combineDateTime(values.endDate, values.endTime)
+        //         {
+        //   "title": "Live Broadcast Event",
+        //   "batchId": 1,
+        //   "bootcampId": 9,
+        //   "description": "Description of the event",
+        //   "startDateTime": "2022-03-01T00:00:00Z",
+        //   "endDateTime": "2022-03-01T00:00:00Z",
+        //   "timeZone": "Asia/Kolkata"
+        // }
         const transformedData = {
             title: values.sessionTitle,
+            batchId: +values.batch,
+            bootcampId: +props.courseId,
             description: values.description,
             startDateTime: startDateTime,
             endDateTime: endDateTime,
             timeZone: 'Asia/Kolkata',
-            attendees: [],
-            batchId: +values.batch,
-            bootcampId: +props.courseId,
-            userId: +userIdLocal?.id,
-            roles: userIdLocal?.rolesList,
         }
         await api.post(`/classes`, transformedData).then((res) => {
             toast({
