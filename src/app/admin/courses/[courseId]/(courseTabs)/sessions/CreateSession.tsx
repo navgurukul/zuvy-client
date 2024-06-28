@@ -74,7 +74,7 @@ const formSchema = z
     })
     .refine((data) => data.startDate <= data.endDate, {
         message: 'Start date cannot be after end date',
-        path: ['endDate'], // This will show the error message at the endDate field
+        path: ['endDate'],
     })
 
 const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
@@ -101,6 +101,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
             endTime: '',
             batch: '',
         },
+        mode: 'onChange',
     })
     useEffect(() => {
         form.setValue('sessionTitle', '')
@@ -112,10 +113,27 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
         form.setValue('batch', '')
     }, [formIsOpen, form])
 
+    const {
+        sessionTitle,
+        description,
+        startDate,
+        endDate,
+        startTime,
+        endTime,
+        batch,
+    } = form.watch()
+    const isSubmitDisabled = !(
+        sessionTitle &&
+        description &&
+        startDate &&
+        endDate &&
+        startTime &&
+        endTime &&
+        batch
+    )
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        const userIdLocal = JSON.parse(localStorage.getItem('AUTH') || '')
         const combineDateTime = (dateStr: any, timeStr: string) => {
-            const adjustedDate = addDays(dateStr, 1)
+            const adjustedDate = addDays(dateStr, 0)
             const dateString =
                 typeof adjustedDate === 'string'
                     ? adjustedDate
@@ -129,15 +147,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
             values.startTime
         )
         const endDateTime = combineDateTime(values.endDate, values.endTime)
-        //         {
-        //   "title": "Live Broadcast Event",
-        //   "batchId": 1,
-        //   "bootcampId": 9,
-        //   "description": "Description of the event",
-        //   "startDateTime": "2022-03-01T00:00:00Z",
-        //   "endDateTime": "2022-03-01T00:00:00Z",
-        //   "timeZone": "Asia/Kolkata"
-        // }
+
         const transformedData = {
             title: values.sessionTitle,
             batchId: +values.batch,
@@ -147,6 +157,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
             endDateTime: endDateTime,
             timeZone: 'Asia/Kolkata',
         }
+
         await api.post(`/classes`, transformedData).then((res) => {
             toast({
                 title: res.data.status,
@@ -168,14 +179,14 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                 </Button>
             </DialogTrigger>
             <DialogOverlay />
-            <DialogContent>
+            <DialogContent className="">
                 <DialogHeader className="text-lg font-semibold">
                     New Session
                 </DialogHeader>
                 <Form {...form}>
                     <form
                         onSubmit={form.handleSubmit(onSubmit)}
-                        className="space-y-8"
+                        className="space-y-4"
                     >
                         <FormField
                             control={form.control}
@@ -378,7 +389,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                 </Button>
                                             </FormControl>
                                         </PopoverTrigger>
-                                        <PopoverContent className=" flex items-center justify-center  w-[500px] p-0">
+                                        <PopoverContent className=" flex items-center justify-center  w-full p-0">
                                             <Command>
                                                 <CommandInput placeholder="Search Batch..." />
                                                 <CommandEmpty>
@@ -424,7 +435,11 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                         />
                         <div className="flex justify-end">
                             <DialogClose asChild>
-                                <Button variant={'secondary'} type="submit">
+                                <Button
+                                    disabled={isSubmitDisabled}
+                                    variant={'secondary'}
+                                    type="submit"
+                                >
                                     Create Class
                                 </Button>
                             </DialogClose>
