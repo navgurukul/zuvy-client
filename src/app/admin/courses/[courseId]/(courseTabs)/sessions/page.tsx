@@ -37,23 +37,6 @@ interface State {
 }
 
 function Page({ params }: any) {
-    // const [state, setState] = useState<State>({
-    //     classType: 'upcoming',
-    //     position: POSITION,
-    //     allClasses: [],
-    //     bootcampData: [],
-    //     batchId: 0,
-    //     upcomingClasses: [],
-    //     pages: 0,
-    //     offset: OFFSET,
-    //     currentPage: 1,
-    //     totalStudents: 0,
-    //     ongoingClasses: [],
-    //     completedClasses: [],
-    //     selectedDate: null,
-    //     lastPage: 0,
-    //     limit: 6,
-    // })
     const [classes, setClasses] = useState<any[]>([])
     const [position, setPosition] = useState(POSITION)
     const [bootcampData, setBootcampData] = useState<any>([])
@@ -68,22 +51,6 @@ function Page({ params }: any) {
     const [loading, setLoading] = useState(true)
     const debouncedSearch = useDebounce(search, 1000)
 
-    // const { courseData } = getCourseData()
-
-    // const classTypes: { type: ClassType; label: string }[] = [
-    //     { type: 'active', label: 'Active Classes' },
-    //     { type: 'upcoming', label: 'Upcoming Classes' },
-    //     { type: 'complete', label: 'Completed Classes' },
-    // ]
-
-    // const handleClassType = useCallback((type: ClassType) => {
-    //     setState((prevState) => ({
-    //         ...prevState,
-    //         classType: type,
-    //         offset: prevState.classType === type ? prevState.offset : 1,
-    //     }))
-    // }, [])
-
     const handleComboboxChange = (value: string) => {
         setBatchId(value)
     }
@@ -93,81 +60,7 @@ function Page({ params }: any) {
     const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value)
     }
-    // useEffect(() => {
-    //     if (courseData?.id) {
-    //         api.get(`/bootcamp/batches/${courseData?.id}`)
-    //             .then((response) => {
-    //                 const transformedData = response.data.data.map(
-    //                     (item: { id: any; name: any }) => ({
-    //                         value: item.id.toString(),
-    //                         label: item.name,
-    //                     })
-    //                 )
-    //                 setState((prevState) => ({
-    //                     ...prevState,
-    //                     bootcampData: transformedData,
-    //                 }))
-    //             })
-    //             .catch((error) => {
-    //                 console.log('Error fetching data:', error)
-    //             })
-    //     }
-    // }, [courseData])
 
-    // useEffect(() => {
-    //     const { classType, ongoingClasses, completedClasses, upcomingClasses } =
-    //         state
-    //     const classes: Record<ClassType, any[]> = {
-    //         active: ongoingClasses,
-    //         complete: completedClasses,
-    //         upcoming: upcomingClasses,
-    //     }
-    //     setState((prevState) => ({
-    //         ...prevState,
-    //         allClasses: classes[classType],
-    //     }))
-    // }, [
-    //     state.classType,
-    //     state.ongoingClasses,
-    //     state.completedClasses,
-    //     state.upcomingClasses,
-    // ])
-
-    // useEffect(() => {
-    //     const fetchClasses = async () => {
-    //         const { batchId, offset, position, classType } = state
-    //         const fetchId = batchId || courseData?.id
-    //         const fetchUrl = batchId
-    //             ? 'getClassesByBatchId'
-    //             : 'getClassesByBootcampId'
-
-    //         if (fetchId) {
-    //             try {
-    //                 const response = await api.get(
-    //                     `/classes/${fetchUrl}/${fetchId}?offset=${offset}&limit=${position}`
-    //                 )
-    //                 setState((prevState) => ({
-    //                     ...prevState,
-    //                     upcomingClasses: response.data.upcomingClasses,
-    //                     ongoingClasses: response.data.ongoingClasses,
-    //                     completedClasses: response.data.completedClasses,
-    //                 }))
-    //                 handleClassType(classType)
-    //             } catch (error) {
-    //                 console.log('Error fetching classes:', error)
-    //             }
-    //         }
-    //     }
-
-    //     fetchClasses()
-    // }, [
-    //     courseData,
-    //     state.batchId,
-    //     state.classType,
-    //     state.offset,
-    //     state.position,
-    //     handleClassType,
-    // ])
     const tabs = ['completed', 'upcoming', 'ongoing']
 
     const getHandleAllClasses = useCallback(
@@ -197,6 +90,38 @@ function Page({ params }: any) {
         },
         [batchId, activeTab, debouncedSearch, params.courseId, position]
     )
+
+    useEffect(() => {
+        if (activeTab === 'upcoming') {
+            const classesStartTime = classes.map((cls) => ({
+                startTime: cls.startTime,
+            }))
+
+            const currentTimes = classesStartTime.map((newcls) => {
+                const date = new Date(newcls.startTime)
+                const timeString = date.toTimeString().split(' ')[0]
+                return {
+                    date: date,
+                    time: timeString,
+                }
+            })
+
+            currentTimes.forEach((item) => {
+                const now = new Date()
+                const delay = item.date.getTime() - now.getTime()
+
+                if (delay > 0) {
+                    setTimeout(() => {
+                        console.log('Class started at', item.time)
+                        getHandleAllClasses(offset)
+                    }, delay)
+                } else {
+                    console.log('Start time is in the past for', item.time)
+                }
+            })
+        }
+    }, [activeTab, classes, offset, getHandleAllClasses])
+
     const getHandleAllBootcampBatches = useCallback(async () => {
         if (params.courseId) {
             await api
@@ -223,6 +148,7 @@ function Page({ params }: any) {
     useEffect(() => {
         getHandleAllBootcampBatches()
     }, [getHandleAllBootcampBatches])
+
     return (
         <>
             {loading ? (

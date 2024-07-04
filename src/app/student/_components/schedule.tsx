@@ -221,39 +221,49 @@ function Schedule({ className, ...props }: ScheduleProps) {
                         </div>
                     )}
                     {enrolledCourse?.length > 0 && (
-                        <div className="w-1/3 h-full p-6 bg-gray-100 rounded-lg items-center justify-center ">
+                        <div className="w-1/4 h-full p-6 bg-gray-100 rounded-lg items-center justify-center ">
                             <h1 className=" text-xl text-start font-semibold">
                                 Attendance
                             </h1>
-                            <Select
-                                onValueChange={(e) => {
-                                    handleCourseChange(e)
-                                }}
-                            >
-                                <SelectTrigger className="w-[300px] border-0 shadow-none focus:ring-0 bg-gray-100 mb-3">
-                                    <SelectValue
-                                        placeholder={
-                                            selectedCourse?.name ||
-                                            'Select a course'
-                                        }
-                                    />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectGroup>
-                                        <SelectLabel>Courses</SelectLabel>
-                                        {enrolledCourse.map((course: any) => (
-                                            <SelectItem
-                                                key={course.id}
-                                                value={course.id.toString()}
-                                            >
-                                                <p className="text-lg">   {/* Font size not getting increased */}
-                                                    {course.name}
-                                                </p>
-                                            </SelectItem>
-                                        ))}
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select>
+                            {enrolledCourse?.length > 1 ? (
+                                <Select
+                                    onValueChange={(e) => {
+                                        handleCourseChange(e)
+                                    }}
+                                >
+                                    <SelectTrigger className="w-[300px] border-0 shadow-none focus:ring-0 bg-gray-100 mb-3">
+                                        <SelectValue
+                                            placeholder={
+                                                selectedCourse?.name ||
+                                                'Select a course'
+                                            }
+                                        />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>Courses</SelectLabel>
+                                            {enrolledCourse?.map(
+                                                (course: any) => (
+                                                    <SelectItem
+                                                        key={course.id}
+                                                        value={course.id.toString()}
+                                                        className="text-md text-start font-semibold"
+                                                    >
+                                                        {/* Font size not getting increased */}
+                                                        <h1 className="text-md text-start font-semibold">
+                                                            {course.name}
+                                                        </h1>
+                                                    </SelectItem>
+                                                )
+                                            )}
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                            ) : (
+                                <p className="text-sm text-start p-3 w-[300px]">
+                                    {selectedCourse?.name}
+                                </p>
+                            )}
                             <div className=" gap-2 items-center">
                                 <div className="flex items-center gap-2">
                                     <div

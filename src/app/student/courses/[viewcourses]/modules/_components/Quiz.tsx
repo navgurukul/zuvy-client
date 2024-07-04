@@ -13,6 +13,7 @@ type Props = {
     chapterId: number
     content: any
     bootcampId: number
+    fetchChapters: any
 }
 
 function Quiz(props: Props) {
@@ -41,11 +42,42 @@ function Quiz(props: Props) {
             const res = await api.get(
                 `/tracking/getAllQuizAndAssignmentWithStatus/${props.moduleId}?chapterId=${props.chapterId}`
             )
-            setQuestions(res.data[0].questions)
+
+            if (res.data.status === 'success') {
+                const updatedQuestions = res.data.trackedData.map(
+                    (item: any) => ({
+                        ...item,
+                        status: item.quizTrackingData[0].status,
+                    })
+                )
+                setQuestions(updatedQuestions)
+                setStatus(true)
+            } else {
+                setQuestions(res.data[0].questions)
+                setStatus(false)
+            }
         } catch (error) {
             console.error('Error fetching quiz questions:', error)
         }
     }, [props.moduleId, props.chapterId])
+
+    const updateQuizChapterHandler = useCallback(async () => {
+        try {
+            await api
+                .post(
+                    `/tracking/updateChapterStatus/${props.bootcampId}/${props.moduleId}?chapterId=${props.chapterId}`
+                )
+                .then(() => {
+                    toast({
+                        title: 'Success',
+                        description: 'Chapter Status Updated',
+                    })
+                    props.fetchChapters()
+                })
+        } catch (error) {
+            console.error('Error fetching quiz questions:', error)
+        }
+    }, [])
 
     useEffect(() => {
         getAllQuizQuestionHandler()
@@ -72,12 +104,15 @@ function Quiz(props: Props) {
                     title: 'Success',
                     description: 'Submitted Quiz Successfully',
                 })
+                updateQuizChapterHandler()
+                getAllQuizQuestionHandler()
             })
     }
+    console.log(props)
 
     return (
         <div>
-            <ScrollArea className="h-screen w-full   rounded-md">
+            <ScrollArea className="h-screen w-full rounded-md">
                 <div className="flex flex-col justify-center items-center">
                     <div className="p-4 flex gap-y-4 flex-col items-start">
                         <h1 className="text-xl font-semibold">
@@ -89,128 +124,105 @@ function Quiz(props: Props) {
                                 submit.
                             </h2>
                         ) : (
-                            <h1 className=" text-lg text-secondary font-semibold">
+                            <h1 className="text-lg text-secondary font-semibold">
                                 You have already submitted this Quiz
                             </h1>
                         )}
-                        {status
-                            ? questions?.map((question, index) => (
-                                  <div key={question.id}>
-                                      <h1 className="font-semibold my-3">
-                                          {'Q'}
-                                          {index + 1} .{question.question}
-                                      </h1>
-                                      <div className="flex flex-col items-start">
-                                          {Object.entries(question.options).map(
-                                              ([optionId, optionText]) => (
-                                                  <div
-                                                      key={optionId}
-                                                      className="flex items-center gap-5"
-                                                  >
-                                                      <input
-                                                          type="radio"
-                                                          name={`question_${question.id}`}
-                                                          value={optionId}
-                                                          className="m-4 w-4 h-4 text-secondary focus:ring-secondary-500"
-                                                          checked={
-                                                              question.status ===
-                                                                  'pass' ||
-                                                              question.status ===
-                                                                  'fail' ||
-                                                              question.status ===
-                                                                  'done'
-                                                                  ? question.correctOption ===
-                                                                    Number(
-                                                                        optionId
-                                                                    )
-                                                                  : selectedAnswers[
-                                                                        question
-                                                                            .id
-                                                                    ] ===
-                                                                    optionId
-                                                          }
-                                                          onChange={() =>
-                                                              handleCorrectQuizQuestion(
-                                                                  question.id,
-                                                                  optionId
-                                                              )
-                                                          }
-                                                          disabled={
-                                                              question.status ===
-                                                                  'pass' ||
-                                                              question.status ===
-                                                                  'fail' ||
-                                                              question.status ===
-                                                                  'done'
-                                                          }
-                                                      />
-                                                      <label
-                                                          key={optionId}
-                                                          className="m-4 flex items-center"
-                                                      >
-                                                          {String(optionText)}
-                                                      </label>
-                                                  </div>
-                                              )
-                                          )}
-                                          {(question.status === 'pass' ||
-                                              question.status === 'fail' ||
-                                              question.status === 'done') && (
-                                              <p
-                                                  className={`mt-2 ${
-                                                      question.status === 'fail'
-                                                          ? 'text-red-600'
-                                                          : 'text-secondary'
-                                                  }`}
-                                              >
-                                                  Chosen Option:{' '}
-                                                  {
-                                                      question.options[
-                                                          question.chosenOption
-                                                      ]
-                                                  }
-                                              </p>
-                                          )}
-                                      </div>
-                                  </div>
-                              ))
-                            : questions?.map((question, index) => (
-                                  <div key={question.id}>
-                                      <h1 className="font-semibold my-3">
-                                          {'Q'}
-                                          {index + 1} .{question.question}
-                                      </h1>
-                                      <div className="flex flex-col items-start">
-                                          {Object.entries(question.options).map(
-                                              ([optionId, optionText]) => (
-                                                  <div
-                                                      key={optionId}
-                                                      className="flex items-center gap-5"
-                                                  >
-                                                      <input
-                                                          type="radio"
-                                                          name={`question_${question.id}`}
-                                                          value={optionId}
-                                                          className="m-4 w-4 h-4 text-secondary "
-                                                          onChange={() =>
-                                                              handleCorrectQuizQuestion(
-                                                                  question.id,
-                                                                  optionId
-                                                              )
-                                                          }
-                                                      />
-                                                      <label
-                                                          key={optionId}
-                                                          className="m-4 flex items-center  "
-                                                      >
-                                                          {String(optionText)}
-                                                      </label>
-                                                  </div>
-                                              )
-                                          )}
-                                      </div>
-                                  </div>
-                              ))}
+                        {questions?.map((question, index) => (
+                            <div key={question.id}>
+                                <h1 className="font-semibold my-3">
+                                    {'Q'}
+                                    {index + 1} .{question.question}
+                                </h1>
+                                <div className="flex flex-col items-start">
+                                    {Object.entries(question.options).map(
+                                        ([optionId, optionText]) => (
+                                            <div
+                                                key={optionId}
+                                                className="flex items-center gap-5"
+                                            >
+                                                <input
+                                                    type="radio"
+                                                    name={`question_${question.id}`}
+                                                    value={optionId}
+                                                    className="m-4 w-4 h-4 text-secondary focus:ring-secondary-500"
+                                                    checked={
+                                                        question.status ===
+                                                            'pass' ||
+                                                        question.status ===
+                                                            'fail' ||
+                                                        question.status ===
+                                                            'done'
+                                                            ? question.correctOption ===
+                                                              Number(optionId)
+                                                            : selectedAnswers[
+                                                                  question.id
+                                                              ] === optionId
+                                                    }
+                                                    onChange={() =>
+                                                        handleCorrectQuizQuestion(
+                                                            question.id,
+                                                            optionId
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        question.status ===
+                                                            'pass' ||
+                                                        question.status ===
+                                                            'fail' ||
+                                                        question.status ===
+                                                            'done'
+                                                    }
+                                                />
+                                                {status ? (
+                                                    <label
+                                                        key={optionId}
+                                                        className={`m-4 flex  font-semibold items-center ${
+                                                            question
+                                                                .quizTrackingData[0]
+                                                                .chosenOption ===
+                                                            Number(optionId)
+                                                                ? question
+                                                                      .quizTrackingData[0]
+                                                                      .chosenOption ===
+                                                                  question.correctOption
+                                                                    ? 'text-green-600'
+                                                                    : 'text-red-600'
+                                                                : ''
+                                                        }`}
+                                                    >
+                                                        {String(optionText)}
+                                                    </label>
+                                                ) : (
+                                                    <label
+                                                        key={optionId}
+                                                        className="m-4 flex items-center"
+                                                    >
+                                                        {String(optionText)}
+                                                    </label>
+                                                )}
+                                            </div>
+                                        )
+                                    )}
+
+                                    {status && (
+                                        <p
+                                            className={`mt-2 font-semibold ${
+                                                question.status === 'fail'
+                                                    ? 'text-red-600'
+                                                    : 'text-green-600'
+                                            }`}
+                                        >
+                                            Status:{' '}
+                                            {
+                                                question.quizTrackingData[0]
+                                                    .status
+                                            }
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </ScrollArea>

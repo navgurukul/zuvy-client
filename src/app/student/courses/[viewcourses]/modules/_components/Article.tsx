@@ -12,15 +12,15 @@ function Article({
     content: any
     completeChapter: () => void
 }) {
-    const editor = useEditor({
-        extensions,
-        content: content.articleContent[0],
-        editable: false,
-    })
+    // const editor = useEditor({
+    //     extensions,
+    //     content: content.articleContent[0],
+    //     editable: false,
+    // })
 
     return (
         <>
-            <TiptapEditor editor={editor} />
+            {/* <TiptapEditor editor={editor} /> */}
             <div className="mt-2 text-end">
                 <Button onClick={completeChapter}>Mark as Done</Button>
             </div>
