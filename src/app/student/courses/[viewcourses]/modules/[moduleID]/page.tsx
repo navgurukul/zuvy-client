@@ -147,6 +147,7 @@ function Page({ params }: any) {
                         moduleId={params.moduleID}
                         chapterId={chapterId}
                         bootcampId={params.viewcourses}
+                        fetchChapters={fetchChapters}
                     />
                 )
             case 5:
