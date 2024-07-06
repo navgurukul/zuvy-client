@@ -14,6 +14,7 @@ import Assignment from '../_components/Assignment'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import { useParams } from 'next/navigation'
 import Assessment from '../_components/Assessment'
+import FeedbackForm from '../_components/FeedbackForm'
 
 interface Chapter {
     id: number
@@ -153,6 +154,8 @@ function Page({ params }: any) {
                 return <Assignment />
             case 6:
                 return <Assessment />
+            case 7:
+                return <FeedbackForm />
             // default:
             //     return <h1>Create New Chapter</h1>
         }
