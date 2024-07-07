@@ -13,6 +13,7 @@ import PracticeProblems from '../../_components/PraticeProblems'
 import Link from 'next/link'
 import AssesmentComponent from '../../_components/AssesmentComponent'
 import { Spinner } from '@/components/ui/spinner'
+import FormComponent from '../../_components/FormComponent'
 
 const Page = ({ params }: { params: any }) => {
     const [activeTab, setActiveTab] = useState('practice')
@@ -118,6 +119,16 @@ const Page = ({ params }: { params: any }) => {
                         }`}
                     >
                         Projects
+                    </Button>
+                    <Button
+                        onClick={() => handleTabChange('form')}
+                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
+                            activeTab === 'form'
+                                ? 'bg-secondary  text-white'
+                                : 'bg-gray-200 text-gray-800'
+                        }`}
+                    >
+                        Form
                     </Button>
                 </div>
             )}
@@ -244,6 +255,55 @@ const Page = ({ params }: { params: any }) => {
                         })}
                     </div>
                 )}
+
+                {activeTab === 'form' && (
+                    <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2 lg:grid-cols-3">
+                        {['A', 'B', 'C'].map((item: any) => (
+                            <FormComponent />
+                        ))}
+                    </div>
+                )}
+
+                {/* {activeTab === 'form' && (
+                    <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2">
+                        {Object.keys(assesments).map(
+                            (key: any, index) =>
+                                key !== 'totalStudents' && (
+                                    <div key={index}>
+                                        <h2 className="text-md text-start mb-3 font-semibold text-gray-800  dark:text-white ">
+                                            Module--{key}
+                                        </h2>
+                                        {assesments[key].map(
+                                            (assessment: any) => (
+                                                // <FormComponent />
+                                                <FormComponent
+                                                    key={assessment.id}
+                                                    id={assessment.id}
+                                                    title={assessment.title}
+                                                    codingChallenges={
+                                                        assessment.totalCodingQuestions
+                                                    }
+                                                    mcq={
+                                                        assessment.totalQuizzes
+                                                    }
+                                                    openEnded={
+                                                        assessment.totalOpenEndedQuestions
+                                                    }
+                                                    totalSubmissions={
+                                                        assesments.totalStudents
+                                                    }
+                                                    studentsSubmitted={
+                                                        assessment.totalSubmitedAssessments
+                                                    }
+                                                    bootcampId={params.courseId}
+                                                />
+                                            )
+                                        )}
+                                    </div>
+                                )
+                        )}
+                    </div>
+                )} */}
             </div>
         </div>
     )

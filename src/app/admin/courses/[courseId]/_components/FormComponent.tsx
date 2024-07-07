@@ -1,0 +1,83 @@
+'use client'
+import { Button } from '@/components/ui/button'
+import { getAssesmentBackgroundColorClass } from '@/lib/utils'
+import { ChevronRight } from 'lucide-react'
+import Link from 'next/link'
+import React, { useState } from 'react'
+
+// type Props = {
+//     title: string
+//     codingChallenges: number
+//     mcq: number
+//     openEnded: number
+//     studentsSubmitted: number
+//     totalSubmissions: number
+//     id: any
+//     bootcampId: number
+// }
+
+// type Submission = {
+//     id: string
+//     codingQuestionDetails: { id: number; title: string }
+//     submitStudents: number
+// }
+
+// type Props = {
+//     courseId: number
+//     name: string
+//     totalStudents: number
+//     submission: Submission[]
+//     moduleId: number
+// }
+
+const FormComponent = () => {
+    // const FormComponent = (props: Props) => {
+    // const color = getAssesmentBackgroundColorClass(
+    //     props.totalSubmissions,
+    //     props.studentsSubmitted
+    // )
+    return (
+        <div className="lg:flex h-[220px] w-full shadow-[0_4px_4px_rgb(0,0,0,0.12)] my-5 rounded-md p-4">
+            <div className="flex flex-col w-full justify-between py-2 lg:mx-2">
+                <h1 className="text-md text-start font-semibold text-gray-800  dark:text-white ">
+                    {/* {props.title} */}
+                    Assessment for module number 34
+                </h1>
+
+                <div className="flex  justify-between gap-x-2 w-full">
+                    <div className="flex items-center gap-x-2 justify-between">
+                        {/* <div
+                                className={`w-2 h-2 rounded-full flex items-center justify-center cursor-pointer ${color}`}
+                            ></div> */}
+                        <h3>
+                            2/7
+                            {/* {props.studentsSubmitted}/{props.totalSubmissions} */}
+                        </h3>
+
+                        <h3 className="text-gray-400 font-semibold ">
+                            Submissions
+                        </h3>
+                    </div>
+                </div>
+                <div className="flex items-center ml-auto">
+                    <Link
+                        // href=""
+                        href={`/admin/courses/117/submissionForm/15`}
+                        // href={`/admin/courses/${props.bootcampId}/submissionAssesments/${props.id}`}
+                    >
+                        <Button
+                            variant={'secondary'}
+                            // className=" flex items-center text-white font-bold"
+                            className="flex items-center border-none hover:text-secondary hover:bg-popover"
+                        >
+                            View Submissions
+                            <ChevronRight size={20} />
+                        </Button>
+                    </Link>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export default FormComponent
