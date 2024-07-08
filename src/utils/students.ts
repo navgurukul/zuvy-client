@@ -110,20 +110,20 @@ export function requestFullScreen(element: HTMLElement) {
     }
 }
 
-    // tab change event listener
-   export function handleVisibilityChange() {
-        if (document.hidden) {
-            console.log('The Page is no longer visible. Test ended.')
-        }
+// tab change event listener
+export function handleVisibilityChange() {
+    if (document.hidden) {
+        console.log('The Page is no longer visible. Test ended.')
     }
+}
 
-        // Request full screen as full screen is only allowed by user click
+// Request full screen as full screen is only allowed by user click
 
-    export function handleFullScreenChange() {
-            if (!document.fullscreenElement) {
-                alert('User has exited full screen. Test ended.')
-                // Here you could end the test, show a warning, etc.
-            }
-        }
+export function handleFullScreenChange() {
+    if (!document.fullscreenElement) {
+        alert('User has exited full screen. Test ended.')
+        // Here you could end the test, show a warning, etc.
+    }
+}
 
 // --------------------------------------------

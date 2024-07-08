@@ -69,7 +69,7 @@ type StudentAssessment = {
     user: User
     openEndedSubmission: OpenEndedSubmission[]
     quizSubmission: QuizSubmission[]
-    codingSubmission: CodingSubmission[]
+    PracticeCode: any
     totalQuizzes: number
     totalOpenEndedQuestions: number
     totalCodingQuestions: number
@@ -159,14 +159,14 @@ const Page = ({ params }: { params: any }) => {
             return {
                 openEndedSubmission: data.openEndedSubmission,
                 quizSubmission: data.quizSubmission,
-                codingSubmission: data.codingSubmission,
+                codingSubmission: data.PracticeCode,
             }
         }
         return null
     }
 
     const newData: newDataType = newDatafuntion(individualAssesmentData)
-    console.log(params)
+    console.log(newData)
     return (
         <>
             {individualAssesmentData ? (
@@ -224,18 +224,12 @@ const Page = ({ params }: { params: any }) => {
                         totalCodingChallenges={
                             individualAssesmentData.totalCodingQuestions
                         }
-                        correctedCodingChallenges={
-                            individualAssesmentData.codingSubmission.length
-                        }
-                        correctedMcqs={
-                            individualAssesmentData.quizSubmission.length
-                        }
+                        correctedCodingChallenges={1}
+                        correctedMcqs={1}
                         totalCorrectedMcqs={
                             individualAssesmentData.totalQuizzes
                         }
-                        openEndedCorrect={
-                            individualAssesmentData.openEndedSubmission.length
-                        }
+                        openEndedCorrect={1}
                         totalOpenEnded={
                             individualAssesmentData.totalOpenEndedQuestions
                         }
@@ -276,6 +270,7 @@ const Page = ({ params }: { params: any }) => {
                                     <div key={key}>
                                         <IndividualStudentAssesment
                                             data={data}
+                                            type={key}
                                         />
                                     </div>
                                 ))}

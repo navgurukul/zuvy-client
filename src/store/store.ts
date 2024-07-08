@@ -2,6 +2,7 @@ import { set } from 'date-fns'
 import { create } from 'zustand'
 import { useEffect } from 'react'
 import { api } from '@/utils/axios.config'
+import { string } from 'zod'
 
 type CounterStore = {
     studentData: {
@@ -134,6 +135,17 @@ export const getStoreStudentData = create<storeStudentData>((set) => ({
     studentsData: [],
     setStoreStudentData: (newValue: any[]) => {
         set({ studentsData: newValue })
+    },
+}))
+type storeBatchValue = {
+    batchValueData: any
+    setbatchValueData: (newValue: any) => void
+}
+
+export const setStoreBatchValue = create<storeBatchValue>((set) => ({
+    batchValueData: '',
+    setbatchValueData: (newValue: any) => {
+        set({ batchValueData: newValue })
     },
 }))
 

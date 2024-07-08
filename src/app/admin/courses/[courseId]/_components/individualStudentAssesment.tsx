@@ -8,22 +8,22 @@ import { color } from 'framer-motion'
 
 type Props = {}
 
-const IndividualStudentAssesment = (props: any) => {
+const IndividualStudentAssesment = ({ data, type }: any) => {
     const color = getAssesmentBackgroundColorClass(25, 5)
     const renderQuestion = () => {
-        if (props.data.submissionData) {
-            if (props.data.submissionData.OpenEndedQuestion) {
-                return props.data.submissionData.OpenEndedQuestion.question
-            } else if (props.data.submissionData.QuizQuestion) {
-                return props.data.submissionData.QuizQuestion.question
-            } else if (props.data.submissionData.CodingQuestion) {
-                return props.data.submissionData.CodingQuestion.question
-            } else {
-                return 'Question not available'
-            }
-        } else {
-            return 'Submission data not available'
+        if (type === 'openEndedSubmission') {
+            return (
+                data.submissionData.OpenEndedQuestion?.question ||
+                'Question not available'
+            )
+        } else if (type === 'quizSubmission') {
+            return (
+                data.submissionData.Quiz?.question || 'Question not available'
+            )
+        } else if (type === 'codingSubmission') {
+            return data.questionDetail?.title || 'Question not available'
         }
+        return 'Question not available'
     }
     return (
         <div className="lg:flex h-[200px] my-3 p-3 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md ">

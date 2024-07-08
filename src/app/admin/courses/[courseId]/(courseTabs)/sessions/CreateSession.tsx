@@ -41,6 +41,8 @@ import {
 } from '@/components/ui/command'
 import { cn } from '@/lib/utils'
 import { api } from '@/utils/axios.config'
+import { setStoreBatchValue } from '@/store/store'
+import { Spinner } from '@/components/ui/spinner'
 
 interface CreateSessionProps {
     courseId: number
@@ -78,14 +80,21 @@ const formSchema = z
     })
 
 const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
+    const [isLoading, setIsLoading] = useState<boolean>(false)
+    const [isOpen, setIsOpen] = useState(false)
     const [formIsOpen, setFormIsOpen] = useState<boolean>(false)
+    const { batchValueData } = setStoreBatchValue()
+
     const toggleForm = () => {
         setFormIsOpen(!formIsOpen)
         form.clearErrors()
     }
+    const openModal = () => setIsOpen(true)
+    const closeModal = () => setIsOpen(false)
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
+
         defaultValues: {
             sessionTitle: '',
             description: '',
@@ -103,15 +112,6 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
         },
         mode: 'onChange',
     })
-    useEffect(() => {
-        form.setValue('sessionTitle', '')
-        form.setValue('description', '')
-        form.setValue('startDate', new Date())
-        form.setValue('endDate', new Date())
-        form.setValue('startTime', '')
-        form.setValue('endTime', '')
-        form.setValue('batch', '')
-    }, [formIsOpen, form])
 
     const {
         sessionTitle,
@@ -122,16 +122,21 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
         endTime,
         batch,
     } = form.watch()
-    const isSubmitDisabled = !(
-        sessionTitle &&
-        description &&
-        startDate &&
-        endDate &&
-        startTime &&
-        endTime &&
-        batch
-    )
+    const isSubmitDisabled =
+        isLoading ||
+        !(
+            sessionTitle &&
+            description &&
+            startDate &&
+            endDate &&
+            startTime &&
+            endTime &&
+            batch
+        )
     async function onSubmit(values: z.infer<typeof formSchema>) {
+        openModal()
+        setIsLoading(true)
+
         const combineDateTime = (dateStr: any, timeStr: string) => {
             const selectedDate = new Date(dateStr)
             const today = new Date()
@@ -163,6 +168,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
             timeZone: 'Asia/Kolkata',
         }
 
+        // console.log(transformedData)
         await api.post(`/classes`, transformedData).then((res) => {
             toast({
                 title: res.data.status,
@@ -172,9 +178,41 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
             })
             props.getClasses()
         })
+
+        closeModal()
+        setIsLoading(false)
     }
+
+    function generateUniqueLabels(data: any) {
+        const labelCount: { [key: string]: number } = {}
+        return data.map((item: any) => {
+            if (labelCount[item.label]) {
+                labelCount[item.label]++
+                item.label = `${item.label} (${labelCount[item.label]})`
+            } else {
+                labelCount[item.label] = 1
+            }
+            return item
+        })
+    }
+
+    const uniqueLabelData = generateUniqueLabels(props.bootcampData)
+    useEffect(() => {
+        form.setValue('sessionTitle', '')
+        form.setValue('description', '')
+        form.setValue('startDate', new Date())
+        form.setValue('endDate', new Date())
+        form.setValue('startTime', '')
+        form.setValue('endTime', '')
+        form.setValue('batch', '')
+
+        uniqueLabelData.length === 1
+            ? form.setValue('batch', uniqueLabelData[0].value)
+            : form.setValue('batch', batchValueData)
+    }, [formIsOpen, form, batchValueData])
+
     return (
-        <Dialog>
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
                 <Button
                     onClick={toggleForm}
@@ -184,6 +222,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                 </Button>
             </DialogTrigger>
             <DialogOverlay />
+
             <DialogContent className="">
                 <DialogHeader className="text-lg font-semibold">
                     New Session
@@ -407,8 +446,8 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                     No Batch Found
                                                 </CommandEmpty>
                                                 <CommandGroup>
-                                                    {props.bootcampData.map(
-                                                        (language) => (
+                                                    {uniqueLabelData.map(
+                                                        (language: any) => (
                                                             <CommandItem
                                                                 value={
                                                                     language.label
@@ -449,9 +488,17 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                 <Button
                                     disabled={isSubmitDisabled}
                                     variant={'secondary'}
-                                    type="submit"
+                                    onClick={form.handleSubmit(onSubmit)}
+                                    className={`w-1/3`}
                                 >
-                                    Create Class
+                                    {isLoading ? (
+                                        <div className="flex flex-row justify-between items-center">
+                                            <Spinner className="text-secondary h-4 w-4 " />{' '}
+                                            Create Session
+                                        </div>
+                                    ) : (
+                                        'Create Session'
+                                    )}
                                 </Button>
                             </DialogClose>
                         </div>
