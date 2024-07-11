@@ -166,7 +166,7 @@ const Page = ({ params }: { params: any }) => {
     }
 
     const newData: newDataType = newDatafuntion(individualAssesmentData)
-    console.log(newData)
+    
     return (
         <>
             {individualAssesmentData ? (

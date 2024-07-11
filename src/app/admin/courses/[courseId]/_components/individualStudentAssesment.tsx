@@ -55,11 +55,13 @@ const IndividualStudentAssesment = ({ data, type }: any) => {
                 </div>
             </div>
             <div className="flex justify-end items-end">
-                <Button
-                    variant={'ghost'}
-                    className="text-secondary text-md flex items-center "
-                >
-                    View Solution <ChevronRight size={20} />
+                <Button variant={'ghost'}>
+                    <Link
+                        className="text-secondary text-md flex items-center "
+                        href={`/admin/courses/${9}/submissionAssesments/${56756}/IndividualReport/${567567}/Report/${456}/ViewSolution/${12}`}
+                    >
+                        View Solution <ChevronRight size={20} />
+                    </Link>
                 </Button>
             </div>
         </div>

@@ -275,7 +275,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                 control={form.control}
                                 name="startDate"
                                 render={({ field }) => (
-                                    <FormItem className="flex flex-col text-left">
+                                    <FormItem className="flex flex-col text-left w-1/2">
                                         <FormLabel>Start Date</FormLabel>
                                         <Popover>
                                             <PopoverTrigger asChild>
@@ -326,13 +326,14 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                 control={form.control}
                                 name="startTime"
                                 render={({ field }) => (
-                                    <FormItem className="text-left flex flex-col  ">
+                                    <FormItem className="text-left flex flex-col w-1/2 ">
                                         <FormLabel>StartTime</FormLabel>
                                         <FormControl>
                                             <Input
                                                 placeholder="Time"
                                                 {...field}
                                                 type="time"
+                                                className="appearance-none  p-2 text-lg border-2"
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -345,7 +346,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                 control={form.control}
                                 name="endDate"
                                 render={({ field }) => (
-                                    <FormItem className="flex flex-col text-left">
+                                    <FormItem className="flex flex-col text-left w-1/2">
                                         <FormLabel>End Date</FormLabel>
                                         <Popover>
                                             <PopoverTrigger asChild>
@@ -396,13 +397,14 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                 control={form.control}
                                 name="endTime"
                                 render={({ field }) => (
-                                    <FormItem className="text-left flex flex-col  ">
+                                    <FormItem className="text-left flex flex-col w-1/2  ">
                                         <FormLabel>End Time</FormLabel>
                                         <FormControl>
                                             <Input
                                                 placeholder="Time"
                                                 {...field}
                                                 type="time"
+                                                className="appearance-none  p-2 text-lg border-2"
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -502,6 +504,9 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                 </Button>
                             </DialogClose>
                         </div>
+                        <p className="text-left text-red-400">
+                            *Fill out all the required fields to create session
+                        </p>
                     </form>
                 </Form>
             </DialogContent>
