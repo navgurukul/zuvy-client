@@ -181,39 +181,6 @@ const Page = ({ params }: { params: any }) => {
     //         })
     // }, [params.IndividualReport, params.report])
 
-    // const getStudentAssesmentDataHandler = useCallback(async () => {
-    //     await api
-    //         .get(
-    //             `/admin/assessment/students/assessment_id${params.StudentAssesmentData}`
-    //         )
-    //         .then((res) => {
-    //             setAssesmentData(res.data.ModuleAssessment)
-    //         })
-    // }, [params.StudentAssesmentData])
-
-    // useEffect(() => {
-    //     getBootcampHandler()
-    //     getIndividualStudentAssesmentDataHandler()
-    //     getStudentAssesmentDataHandler()
-    // }, [
-    //     getIndividualStudentAssesmentDataHandler,
-    //     getBootcampHandler,
-    //     getStudentAssesmentDataHandler,
-    // ])
-
-    // const newDatafuntion = (data: StudentAssessment | undefined) => {
-    //     if (data) {
-    //         return {
-    //             openEndedSubmission: data.openEndedSubmission,
-    //             quizSubmission: data.quizSubmission,
-    //             codingSubmission: data.codingSubmission,
-    //         }
-    //     }
-    //     return null
-    // }
-
-    // const newData: newDataType = newDatafuntion(individualAssesmentData)
-    // console.log(params)
     return (
         <>
             {/* {individualAssesmentData ? (
@@ -286,33 +253,9 @@ const Page = ({ params }: { params: any }) => {
                                             {item.options.map((option) => (
                                                 <div>
                                                     <Checkbox
-                                                        // checked={(
-                                                        //     field.value as string[]
-                                                        // ).includes(
-                                                        //     option
-                                                        // )}
-                                                        // onCheckedChange={(
-                                                        //     checked
-                                                        // ) => {
-                                                        //     const fieldValue =
-                                                        //         field.value as string[]
-                                                        //     const newValue =
-                                                        //         checked
-                                                        //             ? [
-                                                        //                   ...fieldValue,
-                                                        //                   option,
-                                                        //               ]
-                                                        //             : fieldValue.filter(
-                                                        //                   (
-                                                        //                       val: string
-                                                        //                   ) =>
-                                                        //                       val !==
-                                                        //                       option
-                                                        //               )
-                                                        //     field.onChange(
-                                                        //         newValue
-                                                        //     )
-                                                        // }}
+                                                        checked={item.answer.includes(
+                                                            option
+                                                        )}
                                                         aria-label={option}
                                                         className="translate-y-[2px] mr-1"
                                                     />

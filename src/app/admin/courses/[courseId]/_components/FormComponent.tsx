@@ -5,33 +5,7 @@ import { ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import React, { useState } from 'react'
 
-// type Props = {
-//     title: string
-//     codingChallenges: number
-//     mcq: number
-//     openEnded: number
-//     studentsSubmitted: number
-//     totalSubmissions: number
-//     id: any
-//     bootcampId: number
-// }
-
-// type Submission = {
-//     id: string
-//     codingQuestionDetails: { id: number; title: string }
-//     submitStudents: number
-// }
-
-// type Props = {
-//     courseId: number
-//     name: string
-//     totalStudents: number
-//     submission: Submission[]
-//     moduleId: number
-// }
-
 const FormComponent = () => {
-    // const FormComponent = (props: Props) => {
     // const color = getAssesmentBackgroundColorClass(
     //     props.totalSubmissions,
     //     props.studentsSubmitted
@@ -61,7 +35,6 @@ const FormComponent = () => {
                 </div>
                 <div className="flex items-center ml-auto">
                     <Link
-                        // href=""
                         href={`/admin/courses/117/submissionForm/15`}
                         // href={`/admin/courses/${props.bootcampId}/submissionAssesments/${props.id}`}
                     >

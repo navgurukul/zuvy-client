@@ -263,47 +263,6 @@ const Page = ({ params }: { params: any }) => {
                         ))}
                     </div>
                 )}
-
-                {/* {activeTab === 'form' && (
-                    <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2">
-                        {Object.keys(assesments).map(
-                            (key: any, index) =>
-                                key !== 'totalStudents' && (
-                                    <div key={index}>
-                                        <h2 className="text-md text-start mb-3 font-semibold text-gray-800  dark:text-white ">
-                                            Module--{key}
-                                        </h2>
-                                        {assesments[key].map(
-                                            (assessment: any) => (
-                                                // <FormComponent />
-                                                <FormComponent
-                                                    key={assessment.id}
-                                                    id={assessment.id}
-                                                    title={assessment.title}
-                                                    codingChallenges={
-                                                        assessment.totalCodingQuestions
-                                                    }
-                                                    mcq={
-                                                        assessment.totalQuizzes
-                                                    }
-                                                    openEnded={
-                                                        assessment.totalOpenEndedQuestions
-                                                    }
-                                                    totalSubmissions={
-                                                        assesments.totalStudents
-                                                    }
-                                                    studentsSubmitted={
-                                                        assessment.totalSubmitedAssessments
-                                                    }
-                                                    bootcampId={params.courseId}
-                                                />
-                                            )
-                                        )}
-                                    </div>
-                                )
-                        )}
-                    </div>
-                )} */}
             </div>
         </div>
     )

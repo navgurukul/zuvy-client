@@ -40,12 +40,6 @@ const Page = ({ params }: any) => {
         },
     ]
 
-    // const dataTableAssesment = [{
-    //     name : "Poonam Bagh",
-    //     email: "poonambagh@gmail.com",
-    //     statu: true
-    // }]
-
     const dataTableAssesment = [
         {
             email: 'poonambagh@gmail.com',
