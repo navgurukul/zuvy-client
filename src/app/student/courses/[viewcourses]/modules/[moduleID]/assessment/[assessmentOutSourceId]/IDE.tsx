@@ -30,9 +30,10 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import SubmissionsList from '../_components/submissions-list'
+import SubmissionsList from '@/app/student/playground/_components/submissions-list'
 import { b64DecodeUnicode, b64EncodeUnicode } from '@/utils/base64'
-import TimerDisplay from '../../courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/TimerDisplay'
+import TimerDisplay from '@/app/student/courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/TimerDisplay'
+import CodingSubmissions from './CodingSubmissions'
 
 interface questionDetails {
     title: string
@@ -45,6 +46,7 @@ interface IDEProps {
     onBack?: () => void
     remainingTime?: any
     assessmentSubmitId?: number
+    selectedCodingOutsourseId?: number
 }
 
 const IDE: React.FC<IDEProps> = ({
@@ -52,6 +54,7 @@ const IDE: React.FC<IDEProps> = ({
     onBack,
     remainingTime,
     assessmentSubmitId,
+    selectedCodingOutsourseId,
 }) => {
     const [questionDetails, setQuestionDetails] = useState<questionDetails>({
         title: '',
@@ -110,7 +113,7 @@ const IDE: React.FC<IDEProps> = ({
         e.preventDefault()
         try {
             const response = await api.post(
-                `/codingPlatform/submit?questionId=${params.editor}&action=${action}&assessmentSubmissionId=${assessmentSubmitId}`,
+                `/codingPlatform/practicecode/questionId=${params.editor}?action=${action}&submissionId=${assessmentSubmitId}&codingOutsourseId=${selectedCodingOutsourseId}`,
                 {
                     languageId: Number(
                         getDataFromField(
@@ -123,6 +126,7 @@ const IDE: React.FC<IDEProps> = ({
                     sourceCode: b64EncodeUnicode(currentCode),
                 }
             )
+
             if (
                 response.data.stderr ||
                 response.data.compile_output ||
@@ -136,7 +140,8 @@ const IDE: React.FC<IDEProps> = ({
                 const encodedResult = b64DecodeUnicode(compileOutput)
                 setResult(encodedResult)
             }
-            if (response.data.status_id === 3) {
+
+            if (response.data.data.status_id == 3) {
                 toast({
                     title: `Test Cases Passed ${
                         action === 'submit' ? ', Solution submitted' : ''
@@ -193,7 +198,11 @@ const IDE: React.FC<IDEProps> = ({
                     <Button variant="ghost" size="icon" onClick={onBack}>
                         <ArrowLeft className="h-5 w-5" />
                     </Button>
-                    <SubmissionsList questionId={params.editor} />
+                    <CodingSubmissions
+                        questionId={params.editor}
+                        assessmentSubmissionId={assessmentSubmitId}
+                        selectedCodingOutsourseId={selectedCodingOutsourseId}
+                    />
                 </div>
                 <div>
                     <Button
