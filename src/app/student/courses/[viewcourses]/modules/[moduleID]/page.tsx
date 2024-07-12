@@ -15,6 +15,8 @@ import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import { useParams } from 'next/navigation'
 import Assessment from '../_components/Assessment'
 import FeedbackForm from '../_components/FeedbackForm'
+import { getAssessmentShortInfo } from '@/utils/students'
+import { getAssessmentStore } from '@/store/store'
 
 interface Chapter {
     id: number
@@ -33,12 +35,18 @@ function Page({ params }: any) {
     const urlParams = new URLSearchParams(window.location.search)
     const nextChapterId = Number(urlParams.get('nextChapterId'))
     // state and variables
-    const [chapters, setChapters] = useState([])
-    const [activeChapter, setActiveChapter] = useState(nextChapterId || 0)
+    const [chapters, setChapters] = useState<any>([])
+    const [activeChapter, setActiveChapter] = useState(0)
     const [topicId, setTopicId] = useState(0)
     const [moduleName, setModuleName] = useState('')
-    const [chapterContent, setChapterContent] = useState({})
-    const [chapterId, setChapterId] = useState<number>(nextChapterId || 0)
+    const [chapterContent, setChapterContent] = useState<any>({})
+    const [chapterId, setChapterId] = useState<number>(0)
+
+    const [assessmentShortInfo, setAssessmentShortInfo] = useState<any>({})
+    const [assessmentOutSourceId, setAssessmentOutSourceId] = useState<any>()
+    const [submissionId, setSubmissionId] = useState<any>()
+    const { isAssessmentSubmitted, setIsAssessmentSubmitted } =
+        getAssessmentStore()
 
     const crumbs = [
         {
@@ -148,16 +156,23 @@ function Page({ params }: any) {
                         moduleId={params.moduleID}
                         chapterId={chapterId}
                         bootcampId={params.viewcourses}
+                        fetchChapters={fetchChapters}
                     />
                 )
             case 5:
                 return <Assignment />
             case 6:
-                return <Assessment />
+                return (
+                    <Assessment
+                        assessmentShortInfo={assessmentShortInfo}
+                        assessmentOutSourceId={assessmentOutSourceId}
+                        submissionId={submissionId}
+                    />
+                )
             case 7:
                 return <FeedbackForm />
-            // default:
-            //     return <h1>Create New Chapter</h1>
+            default:
+                return <h1>No Chapters Available Right Now</h1>
         }
     }
 
@@ -167,6 +182,26 @@ function Page({ params }: any) {
             fetchChapters()
         }
     }, [userID, fetchChapters])
+
+    useEffect(() => {
+        if (chapters.length > 0) {
+            fetchChapterContent(chapters[0]?.id)
+        }
+    }, [chapters, isAssessmentSubmitted])
+
+    useEffect(() => {
+        if (topicId === 6) {
+            getAssessmentShortInfo(
+                chapterContent?.assessmentId,
+                moduleID,
+                viewcourses,
+                chapterId,
+                setAssessmentShortInfo,
+                setAssessmentOutSourceId,
+                setSubmissionId
+            )
+        }
+    }, [topicId, chapterId])
 
     return (
         <>

@@ -72,7 +72,7 @@ export function Combobox({
                             <CommandItem
                                 key={item.value}
                                 value={item.value}
-                                disabled={item.value === value}
+                                disabled={item.value === batchChangeData.value}
                                 onSelect={(currentValue) => {
                                     setValue(
                                         currentValue === value

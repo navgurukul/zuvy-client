@@ -74,7 +74,7 @@ const formSchema = z
     })
     .refine((data) => data.startDate <= data.endDate, {
         message: 'Start date cannot be after end date',
-        path: ['endDate'], // This will show the error message at the endDate field
+        path: ['endDate'],
     })
 
 const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
@@ -101,6 +101,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
             endTime: '',
             batch: '',
         },
+        mode: 'onChange',
     })
     useEffect(() => {
         form.setValue('sessionTitle', '')
@@ -112,16 +113,38 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
         form.setValue('batch', '')
     }, [formIsOpen, form])
 
+    const {
+        sessionTitle,
+        description,
+        startDate,
+        endDate,
+        startTime,
+        endTime,
+        batch,
+    } = form.watch()
+    const isSubmitDisabled = !(
+        sessionTitle &&
+        description &&
+        startDate &&
+        endDate &&
+        startTime &&
+        endTime &&
+        batch
+    )
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        const userIdLocal = JSON.parse(localStorage.getItem('AUTH') || '')
         const combineDateTime = (dateStr: any, timeStr: string) => {
-            const adjustedDate = addDays(dateStr, 1)
-            const dateString =
-                typeof adjustedDate === 'string'
-                    ? adjustedDate
-                    : adjustedDate.toISOString()
-            const datePart = dateString.split('T')[0]
-            const dateTimeStr = `${datePart}T${timeStr}:00.000Z`
+            const selectedDate = new Date(dateStr)
+            const today = new Date()
+
+            const isToday = selectedDate.toDateString() === today.toDateString()
+
+            const adjustedDate = isToday
+                ? selectedDate
+                : new Date(selectedDate.getTime() + 24 * 60 * 60 * 1000) // Add 1 day
+
+            const dateString = adjustedDate.toISOString().split('T')[0]
+            const dateTimeStr = `${dateString}T${timeStr}:00.000Z`
+
             return dateTimeStr
         }
         const startDateTime = combineDateTime(
@@ -129,18 +152,17 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
             values.startTime
         )
         const endDateTime = combineDateTime(values.endDate, values.endTime)
+
         const transformedData = {
             title: values.sessionTitle,
+            batchId: +values.batch,
+            bootcampId: +props.courseId,
             description: values.description,
             startDateTime: startDateTime,
             endDateTime: endDateTime,
             timeZone: 'Asia/Kolkata',
-            attendees: [],
-            batchId: +values.batch,
-            bootcampId: +props.courseId,
-            userId: +userIdLocal?.id,
-            roles: userIdLocal?.rolesList,
         }
+
         await api.post(`/classes`, transformedData).then((res) => {
             toast({
                 title: res.data.status,
@@ -162,14 +184,20 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                 </Button>
             </DialogTrigger>
             <DialogOverlay />
-            <DialogContent>
+            <DialogContent className="">
                 <DialogHeader className="text-lg font-semibold">
                     New Session
                 </DialogHeader>
+                {props.bootcampData.length === 0 && (
+                    <p className="text-left text-red-500 ">
+                        You need to create batches first and assign students to
+                        the batches
+                    </p>
+                )}
                 <Form {...form}>
                     <form
                         onSubmit={form.handleSubmit(onSubmit)}
-                        className="space-y-8"
+                        className="space-y-4"
                     >
                         <FormField
                             control={form.control}
@@ -244,7 +272,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                     onSelect={field.onChange}
                                                     disabled={(date) =>
                                                         date <=
-                                                        addDays(new Date(), -1)
+                                                        addDays(new Date(), 0)
                                                     } // Disable past dates
                                                     initialFocus
                                                 />
@@ -372,7 +400,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                 </Button>
                                             </FormControl>
                                         </PopoverTrigger>
-                                        <PopoverContent className=" flex items-center justify-center  w-[500px] p-0">
+                                        <PopoverContent className=" flex items-center justify-center  w-full p-0">
                                             <Command>
                                                 <CommandInput placeholder="Search Batch..." />
                                                 <CommandEmpty>
@@ -418,7 +446,11 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                         />
                         <div className="flex justify-end">
                             <DialogClose asChild>
-                                <Button variant={'secondary'} type="submit">
+                                <Button
+                                    disabled={isSubmitDisabled}
+                                    variant={'secondary'}
+                                    type="submit"
+                                >
                                     Create Class
                                 </Button>
                             </DialogClose>

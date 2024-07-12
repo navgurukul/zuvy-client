@@ -12,9 +12,13 @@ function Article({
     content: any
     completeChapter: () => void
 }) {
+    // if (content.articleContent === null) {
+    //     return <div>Article Content Not Added Yet</div>
+    // }
+
     const editor = useEditor({
         extensions,
-        content: content.articleContent[0],
+        content: content.articleContent[0] || `<h1>No Content Added Yet</h1>`,
         editable: false,
     })
 

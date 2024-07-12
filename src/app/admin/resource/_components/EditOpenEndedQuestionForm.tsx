@@ -60,7 +60,7 @@ function EditOpenEndedQuestionForm({
         resolver: zodResolver(formSchema),
         defaultValues: {
             questionDescription: selectedQuestion[0]?.questionDescription || '',
-            marks: selectedQuestion[0]?.marks.toString() || '0',
+            marks: selectedQuestion[0]?.marks || 0,
             topics: selectedQuestion[0]?.tagId || 0,
             difficulty: selectedQuestion[0]?.difficulty || 'Easy',
         },
@@ -70,7 +70,7 @@ function EditOpenEndedQuestionForm({
         if (selectedQuestion) {
             form.reset({
                 questionDescription: selectedQuestion[0].question,
-                marks: selectedQuestion[0].marks.toString(),
+                marks: selectedQuestion[0],
                 difficulty: selectedQuestion[0].difficulty,
             })
         }
