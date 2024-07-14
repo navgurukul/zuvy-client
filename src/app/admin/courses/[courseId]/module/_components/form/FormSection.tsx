@@ -60,15 +60,25 @@ const FormSection: React.FC<FormSectionProps> = ({
     // and the slice the section to add the new object section and set is to setSection
 
     const sectionType = [
-        'Multiple Choice',
-        'Checkboxes',
-        'Long Text Answer',
-        'Date',
-        'Time',
+        { questionType: 'Multiple Choice', typeId: 1 },
+        { questionType: 'Checkboxes', typeId: 2 },
+        { questionType: 'Long Text Answer', typeId: 3 },
+        { questionType: 'Date', typeId: 4 },
+        { questionType: 'Time', typeId: 5 },
+        // 'Checkboxes',
+        // 'Long Text Answer',
+        // 'Date',
+        // 'Time',
     ]
     const handleSectionType = (type: string) => {
+        console.log('type', type)
+        const questionTypeId = sectionType.find(
+            (item) => item.questionType === type
+        )
+        console.log('questionTypeId', questionTypeId)
         const obj = section[index]
-        obj.type = type
+        obj.questionType = type
+        obj.typeId = questionTypeId?.typeId
         if (type === 'Multiple Choice' || type === 'Checkboxes') {
             obj.options = ['']
             setRadioOptions([''])
@@ -102,7 +112,7 @@ const FormSection: React.FC<FormSectionProps> = ({
     const addOptions = (e: any, idx: number) => {
         const obj = section[index]
 
-        if (obj.type === 'Multiple Choice') {
+        if (obj.questionType === 'Multiple Choice') {
             const newRadioOptions = [...radioOptions]
             newRadioOptions[idx] = e.target.value
             obj.options = newRadioOptions
@@ -166,8 +176,11 @@ const FormSection: React.FC<FormSectionProps> = ({
                         <SelectContent>
                             <SelectGroup>
                                 {sectionType.map((section: any) => (
-                                    <SelectItem key={section} value={section}>
-                                        {section}
+                                    <SelectItem
+                                        key={section.questionType}
+                                        value={section.questionType}
+                                    >
+                                        {section.questionType}
                                     </SelectItem>
                                 ))}
                             </SelectGroup>

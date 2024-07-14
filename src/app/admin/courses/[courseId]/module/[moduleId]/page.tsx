@@ -434,6 +434,12 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                     </div>
                     <div className="col-span-3 mx-4">
                         {renderChapterContent()}
+                        {/* <AddForm
+                            chapterData={currentChapter}
+                            content={chapterContent}
+                            fetchChapterContent={fetchChapterContent}
+                            moduleId={params.moduleId}
+                        /> */}
                     </div>
                 </div>
             ) : (

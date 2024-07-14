@@ -56,10 +56,11 @@ const AddForm: React.FC<AddFormProps> = ({
     })
     const [section, setSection] = useState([
         {
-            type: 'Multiple Choice',
+            questionType: 'Multiple Choice',
+            typeId: 1,
             question: 'Question 1',
             options: ['Op1'],
-            required: true,
+            // required: true,
         },
     ])
 
@@ -77,10 +78,11 @@ const AddForm: React.FC<AddFormProps> = ({
 
     const addQuestion = () => {
         const newSection = {
-            type: 'Multiple Choice',
+            questionType: 'Multiple Choice',
+            typeId: 1,
             question: 'Question 1',
             options: ['Op1'],
-            required: false,
+            // required: false,
         }
         setSection([...section, newSection])
     }
@@ -99,29 +101,52 @@ const AddForm: React.FC<AddFormProps> = ({
     async function onSubmit(values: z.infer<typeof formSchema>) {
         const payload = {
             ...values,
-            section,
+            questions: section,
         }
-        console.log('values', values)
-        console.log('payload', payload)
-        // try {
-        //     const response = await api.put(
-        //         `/Content/editChapterOfModule/${moduleId}?chapterId=${content.id}`,
-        //         values
-        //     )
-        //     console.log('response', response)
-        //     toast({
-        //         title: 'Success',
-        //         description: 'Content Edited Successfully',
-        //         className: 'text-start capitalize border border-secondary',
-        //     })
-        // } catch (error: any) {
-        //     toast({
-        //         title: 'Failed',
-        //         description:
-        //             error.response?.data?.message || 'An error occurred.',
-        //         className: 'text-start capitalize border border-destructive',
-        //     })
-        // }
+
+        const questions = section.map((item, index) => {
+            const optionsObject: { [key: string]: string } =
+                item.options.reduce<{ [key: string]: string }>(
+                    (acc, value, index) => {
+                        acc[(index + 1).toString()] = value
+                        return acc
+                    },
+                    {}
+                )
+            const { questionType, ...rest } = item
+
+            return {
+                ...rest,
+                options: optionsObject,
+            }
+        })
+
+        // console.log('content', content)
+        // console.log('content.id', content.tagId)
+        // console.log('payload', payload)
+        try {
+            const response = await api.put(
+                `/Content/editChapterOfModule/${moduleId}?chapterId=${content.id}`,
+                values
+            )
+            const questionsRespons = await api.put(`Content/form`, {
+                questions,
+            })
+            // console.log('response', response)
+            // console.log('questionsRespons', questionsRespons)
+            toast({
+                title: 'Success',
+                description: 'Form Created Successfully',
+                className: 'text-start capitalize border border-secondary',
+            })
+        } catch (error: any) {
+            toast({
+                title: 'Failed',
+                description:
+                    error.response?.data?.message || 'An error occurred.',
+                className: 'text-start capitalize border border-destructive',
+            })
+        }
     }
 
     return (
