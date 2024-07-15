@@ -60,7 +60,7 @@ const AddForm: React.FC<AddFormProps> = ({
             typeId: 1,
             question: 'Question 1',
             options: ['Op1'],
-            // required: true,
+            required: true,
         },
     ])
 
@@ -82,7 +82,7 @@ const AddForm: React.FC<AddFormProps> = ({
             typeId: 1,
             question: 'Question 1',
             options: ['Op1'],
-            // required: false,
+            required: false,
         }
         setSection([...section, newSection])
     }
@@ -194,6 +194,7 @@ const AddForm: React.FC<AddFormProps> = ({
 
                     {section.map((item: any, index) => (
                         <FormSection
+                            key={index}
                             index={index}
                             form={form}
                             addQuestion={addQuestion}

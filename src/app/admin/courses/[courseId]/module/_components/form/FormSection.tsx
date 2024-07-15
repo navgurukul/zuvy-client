@@ -94,12 +94,19 @@ const FormSection: React.FC<FormSectionProps> = ({
     }
 
     const handleRequiredQuestion = (e: any) => {
+        console.log('index', index)
         console.log('questionType', section[index].questionType)
         console.log('required', !section[index].required)
-        const obj = section[index]
-        obj.required = !section[index].required
-        section.splice(index, 1, obj)
-        setSection(section)
+        // const obj = section[index]
+        // obj.required = !section[index].required
+        // section.splice(index, 1, obj)
+        // setSection(section)
+        const newSection = [...section]
+        newSection[index] = {
+            ...newSection[index],
+            required: !newSection[index].required,
+        }
+        setSection(newSection)
     }
 
     // console.log('section outside', section)
@@ -204,11 +211,8 @@ const FormSection: React.FC<FormSectionProps> = ({
                                 Question {index + 1}
                             </FormLabel>
                             <Switch
-                                checked={section[index].required}
-                                onClick={(e) => {
-                                    // console.log('val', e)
-                                    handleRequiredQuestion(e)
-                                }}
+                                checked={section[index].questionType}
+                                onCheckedChange={handleRequiredQuestion}
                             />
                         </div>
                         <FormControl>
