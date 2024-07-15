@@ -141,14 +141,28 @@ const FormSection: React.FC<FormSectionProps> = ({
         setSection(section)
     }
 
-    const removeRadioOption = (idx: number) => {
-        radioOptions.splice(idx, 1)
-        setRadioOptions(radioOptions)
-        const obj = section[index]
-        obj.options = radioOptions
-        section.splice(index, 1, obj)
-        setSection(section)
-    }
+    // const removeRadioOption = (idx: number) => {
+    //     setRadioOptions((prevRadioOptions) => {
+    //         const updatedOptions = prevRadioOptions.filter(
+    //             (_, index) => index !== idx
+    //         )
+    //         setSection((prevSections: any) => {
+    //             const updatedSections = prevSections.map(
+    //                 (sectionItem: any, sectionIndex: any) => {
+    //                     if (sectionIndex === index) {
+    //                         return {
+    //                             ...sectionItem,
+    //                             options: updatedOptions,
+    //                         }
+    //                     }
+    //                     return sectionItem
+    //                 }
+    //             )
+    //             return updatedSections
+    //         })
+    //         return updatedOptions
+    //     })
+    // }
 
     const addCheckboxOption = () => {
         setCheckboxOptions([...checkboxOptions, ''])
@@ -158,26 +172,34 @@ const FormSection: React.FC<FormSectionProps> = ({
         setSection(section)
     }
 
-    const removeCheckOption = (idx: number) => {
-        checkboxOptions.splice(idx, 1)
-        setCheckboxOptions(checkboxOptions)
-        const obj = section[index]
-        obj.options = checkboxOptions
-        section.splice(index, 1, obj)
-        setSection(section)
+    const removeOption = (idx: number) => {
+        const updatedSections = [...section]
+        if (updatedSections[index].questionType === 'Multiple Choice') {
+            const updatedOptions = radioOptions.filter(
+                (_, index) => index !== idx
+            )
+            setRadioOptions(updatedOptions)
+            updatedSections[index] = {
+                ...updatedSections[index],
+                options: updatedOptions,
+            }
+        } else {
+            const updatedOptions = checkboxOptions.filter(
+                (_, index) => index !== idx
+            )
+            setCheckboxOptions(updatedOptions)
+            updatedSections[index] = {
+                ...updatedSections[index],
+                options: updatedOptions,
+            }
+        }
+        console.log('section in option', updatedSections)
+        setSection(updatedSections)
     }
 
-    // const deleteQuestion = useCallback(
-    //     (key: number) => {
-    //         console.log('section', section)
-    //         const updatedSection = section.filter(
-    //             (item: any) => item.key !== key
-    //         )
-    //         console.log('updatedSection', updatedSection)
-    //         setSection(updatedSection)
-    //     },
-    //     [section]
-    // )
+    useEffect(() => {
+        console.log('section inside', section)
+    }, [section])
 
     return (
         <div key={key}>
@@ -270,7 +292,10 @@ const FormSection: React.FC<FormSectionProps> = ({
                             }}
                             value={item}
                         />
-                        <button onClick={() => removeRadioOption(index)}>
+                        <button
+                            type="button"
+                            onClick={() => removeOption(index)}
+                        >
                             <X className="h-5 w-5 ml-3 mt-2 text-muted-foreground" />
                         </button>
                     </div>
@@ -313,7 +338,10 @@ const FormSection: React.FC<FormSectionProps> = ({
                                 value={item}
                             />
                         </div>
-                        <button onClick={() => removeCheckOption(index)}>
+                        <button
+                            type="button"
+                            onClick={() => removeOption(index)}
+                        >
                             <X className="h-5 w-5 ml-3 mt-2 text-muted-foreground" />
                         </button>
                     </div>

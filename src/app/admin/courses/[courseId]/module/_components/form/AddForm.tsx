@@ -130,11 +130,15 @@ const AddForm: React.FC<AddFormProps> = ({
                 item.options.reduce<{ [key: string]: string }>(
                     (acc, value, index) => {
                         acc[(index + 1).toString()] = value
+                        console.log(
+                            'type of option',
+                            typeof (index + 1).toString()
+                        )
                         return acc
                     },
                     {}
                 )
-            const { questionType, ...rest } = item
+            const { questionType, key, required, ...rest } = item
 
             return {
                 ...rest,
@@ -150,7 +154,7 @@ const AddForm: React.FC<AddFormProps> = ({
                 `/Content/editChapterOfModule/${moduleId}?chapterId=${content.id}`,
                 values
             )
-            const questionsRespons = await api.put(`Content/form`, {
+            const questionsRespons = await api.post(`Content/form`, {
                 questions,
             })
             // console.log('response', response)
