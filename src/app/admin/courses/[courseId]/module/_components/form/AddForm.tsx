@@ -93,31 +93,31 @@ const AddForm: React.FC<AddFormProps> = ({
 
     //Delete question index wise from section
 
-    // const deleteQuestion = (idx: number) => {
-    //     // const sec = section.filter((_: any, i: number) => i !== idx)
-    //     // setSection(sec)
-    //     const updatedSection = section.filter((_: any, i: number) => i !== idx)
-    //     console.log('updatedSection', updatedSection)
-    //     setSection((prevSection) => {
-    //         const updatedSection = prevSection.filter(
-    //             (_: any, i: number) => i !== idx
+    // const deleteQuestion = useCallback(
+    //     (idx: number) => {
+    //         console.log('section', section)
+    //         console.log('idx', idx)
+    //         const updatedSection = section.filter((_, i) => i !== idx)
+    //         console.log('updatedSection', updatedSection)
+    //         setSection((prevSections) =>
+    //             prevSections.filter((_, i) => i !== idx)
     //         )
-    //         return updatedSection
-    //     })
-    // }
+    //     },
+    //     [section]
+    // )
 
-    // const deleteQuestion = useCallback((idx: number) => {
-    //     console.log('section', section)
-    //     console.log('idx', idx)
-    //     const updatedSection = section.filter((_, i) => i !== idx)
-    //     console.log('updatedSection', updatedSection)
-    //     setSection((prevSections) => prevSections.filter((_, i) => i !== idx))
-    // }, [])
-
-    // useEffect(() => {
-    //     console.log('section updated')
-    //     console.log('section inside', section)
-    // }, [section])
+    //Delete question key wise from section
+    const deleteQuestion = useCallback(
+        (key: number) => {
+            console.log('section', section)
+            const updatedSection = section.filter(
+                (item: any) => item.key !== key
+            )
+            console.log('updatedSection', updatedSection)
+            setSection(updatedSection)
+        },
+        [section]
+    )
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         const payload = {
@@ -222,7 +222,7 @@ const AddForm: React.FC<AddFormProps> = ({
                             addQuestion={addQuestion}
                             section={section}
                             setSection={setSection}
-                            // deleteQuestion={deleteQuestion}
+                            deleteQuestion={deleteQuestion}
                         />
                     ))}
 

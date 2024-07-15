@@ -43,7 +43,7 @@ type FormSectionProps = {
     form: any
     section: any
     setSection: any
-    // deleteQuestion: any
+    deleteQuestion: any
 }
 
 const FormSection: React.FC<FormSectionProps> = ({
@@ -54,7 +54,7 @@ const FormSection: React.FC<FormSectionProps> = ({
     addQuestion,
     section,
     setSection,
-    // deleteQuestion,
+    deleteQuestion,
 }) => {
     const [selectedSected, setSelectedSection] = useState('Multiple Choice')
     const [radioOptions, setRadioOptions] = useState([''])
@@ -167,20 +167,20 @@ const FormSection: React.FC<FormSectionProps> = ({
         setSection(section)
     }
 
-    const deleteQuestion = useCallback(
-        (key: number) => {
-            console.log('section', section)
-            const updatedSection = section.filter(
-                (item: any) => item.key !== key
-            )
-            console.log('updatedSection', updatedSection)
-            setSection(updatedSection)
-        },
-        [section]
-    )
+    // const deleteQuestion = useCallback(
+    //     (key: number) => {
+    //         console.log('section', section)
+    //         const updatedSection = section.filter(
+    //             (item: any) => item.key !== key
+    //         )
+    //         console.log('updatedSection', updatedSection)
+    //         setSection(updatedSection)
+    //     },
+    //     [section]
+    // )
 
     return (
-        <div>
+        <div key={key}>
             <Select
                 onValueChange={(e) => {
                     handleSectionType(e)
@@ -210,6 +210,7 @@ const FormSection: React.FC<FormSectionProps> = ({
                         onClick={(e) => {
                             e.preventDefault() // Prevent form submission
                             deleteQuestion(item.key)
+                            // deleteQuestion(index)
                         }}
                     >
                         <X className="h-5 w-5 ml-3 mt-2 text-muted-foreground" />
