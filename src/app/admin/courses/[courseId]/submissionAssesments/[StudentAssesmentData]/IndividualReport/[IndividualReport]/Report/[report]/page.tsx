@@ -166,7 +166,7 @@ const Page = ({ params }: { params: any }) => {
     }
 
     const newData: newDataType = newDatafuntion(individualAssesmentData)
-    
+
     return (
         <>
             {individualAssesmentData ? (
@@ -261,21 +261,7 @@ const Page = ({ params }: { params: any }) => {
             <IndividualStudentAssesment /> */}
                 <div className="grid grid-cols-1   gap-20 mt-4 md:mt-8 md:grid-cols-2">
                     {newData ? (
-                        Object.keys(newData).map((key: string, index) => (
-                            <div key={index}>
-                                <h2 className="text-md capitalize text-start mb-3 font-semibold text-gray-800  dark:text-white ">
-                                    {key}
-                                </h2>
-                                {newData[key].map((data: newDataType) => (
-                                    <div key={key}>
-                                        <IndividualStudentAssesment
-                                            data={data}
-                                            type={key}
-                                        />
-                                    </div>
-                                ))}
-                            </div>
-                        ))
+                        <div>Hello</div>
                     ) : (
                         <div className="absolute w-full flex justify-start items-center">
                             <div className="grid grid-cols-1   gap-20 mt-4 md:mt-8 md:grid-cols-2 ">
