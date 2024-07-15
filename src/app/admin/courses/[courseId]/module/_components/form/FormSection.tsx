@@ -94,6 +94,8 @@ const FormSection: React.FC<FormSectionProps> = ({
     }
 
     const handleRequiredQuestion = (e: any) => {
+        console.log('questionType', section[index].questionType)
+        console.log('required', !section[index].required)
         const obj = section[index]
         obj.required = !section[index].required
         section.splice(index, 1, obj)
@@ -201,13 +203,13 @@ const FormSection: React.FC<FormSectionProps> = ({
                             <FormLabel className="flex text-left text-md font-semibold mb-1">
                                 Question {index + 1}
                             </FormLabel>
-                            {/* <Switch
+                            <Switch
                                 checked={section[index].required}
                                 onClick={(e) => {
-                                    console.log('val', e)
+                                    // console.log('val', e)
                                     handleRequiredQuestion(e)
                                 }}
-                            /> */}
+                            />
                         </div>
                         <FormControl>
                             <Input
