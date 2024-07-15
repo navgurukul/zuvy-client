@@ -35,22 +35,26 @@ import {
 } from '@/components/ui/popover'
 
 type FormSectionProps = {
+    key: any
+    item: any
     index: any
     addQuestion: any
     // deleteQuestion: () => void
     form: any
     section: any
     setSection: any
-    deleteQuestion: any
+    // deleteQuestion: any
 }
 
 const FormSection: React.FC<FormSectionProps> = ({
+    key,
+    item,
     index,
     form,
     addQuestion,
     section,
     setSection,
-    deleteQuestion,
+    // deleteQuestion,
 }) => {
     const [selectedSected, setSelectedSection] = useState('Multiple Choice')
     const [radioOptions, setRadioOptions] = useState([''])
@@ -163,6 +167,18 @@ const FormSection: React.FC<FormSectionProps> = ({
         setSection(section)
     }
 
+    const deleteQuestion = useCallback(
+        (key: number) => {
+            console.log('section', section)
+            const updatedSection = section.filter(
+                (item: any) => item.key !== key
+            )
+            console.log('updatedSection', updatedSection)
+            setSection(updatedSection)
+        },
+        [section]
+    )
+
     return (
         <div>
             <Select
@@ -188,9 +204,16 @@ const FormSection: React.FC<FormSectionProps> = ({
                             </SelectGroup>
                         </SelectContent>
                     </div>
-                    {/* <button onClick={() => deleteQuestion(index)}>
+                    {/* <button onClick={() => deleteQuestion(index)}> */}
+                    <button
+                        type="button" // Set the type to button to prevent form submission
+                        onClick={(e) => {
+                            e.preventDefault() // Prevent form submission
+                            deleteQuestion(item.key)
+                        }}
+                    >
                         <X className="h-5 w-5 ml-3 mt-2 text-muted-foreground" />
-                    </button> */}
+                    </button>
                 </div>
             </Select>
 
