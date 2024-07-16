@@ -54,26 +54,30 @@ const AddForm: React.FC<AddFormProps> = ({
         title: '',
         description: '',
     })
-    const [section, setSection] = useState([
-        {
-            questionType: 'Multiple Choice',
-            typeId: 1,
-            question: 'Question 1',
-            options: ['Op1'],
-            required: true,
-            key: 1,
-        },
-    ])
+    const [section, setSection] = useState(
+        content.formQuestionDetails.length > 0
+            ? content.formQuestionDetails
+            : [
+                  {
+                      questionType: 'Multiple Choice',
+                      typeId: 1,
+                      question: 'Question 1',
+                      options: ['Op1'],
+                      required: true,
+                      key: 1,
+                  },
+              ]
+    )
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            title: '',
-            description: '',
+            title: content?.title ?? '',
+            description: content?.title ?? '',
         },
         values: {
-            title: newContent?.title ?? '',
-            description: newContent?.description ?? '',
+            title: content?.title ?? '',
+            description: content?.description ?? '',
         },
     })
 
@@ -119,51 +123,82 @@ const AddForm: React.FC<AddFormProps> = ({
         [section]
     )
 
+    console.log('content', content)
+
     async function onSubmit(values: z.infer<typeof formSchema>) {
         const payload = {
             ...values,
             questions: section,
         }
 
-        const questions = section.map((item, index) => {
-            const optionsObject: { [key: string]: string } =
-                item.options.reduce<{ [key: string]: string }>(
-                    (acc, value, index) => {
-                        acc[(index + 1).toString()] = value
-                        console.log(
-                            'type of option',
-                            typeof (index + 1).toString()
-                        )
-                        return acc
-                    },
-                    {}
-                )
-            const { questionType, key, required, ...rest } = item
+        console.log('section', section)
+        const questions = section.map((item: any, index: number) => {
+            const options = item.options || {}
+            const optionsObject = Object.keys(options).reduce((acc, key) => {
+                acc[key] = options[key]
+                return acc
+            }, {} as { [key: string]: string })
 
-            return {
-                ...rest,
-                options: optionsObject,
+            if (content.formQuestionDetails.length > 0) {
+                const {
+                    questionType,
+                    key,
+                    required,
+                    createdAt,
+                    updatedAt,
+                    usage,
+                    ...rest
+                } = item
+
+                return {
+                    ...rest,
+                    options: optionsObject,
+                }
+            } else {
+                const { questionType, key, required, ...rest } = item
+
+                return {
+                    ...rest,
+                    options: optionsObject,
+                }
             }
         })
 
-        // console.log('content', content)
-        // console.log('content.id', content.tagId)
-        // console.log('payload', payload)
+        console.log('payload', payload)
         try {
-            const response = await api.put(
-                `/Content/editChapterOfModule/${moduleId}?chapterId=${content.id}`,
-                values
-            )
-            const questionsRespons = await api.post(`Content/form`, {
-                questions,
-            })
-            // console.log('response', response)
-            // console.log('questionsRespons', questionsRespons)
-            toast({
-                title: 'Success',
-                description: 'Form Created Successfully',
-                className: 'text-start capitalize border border-secondary',
-            })
+            if (content.formQuestionDetails.length > 0) {
+                const questionsRespons = await api.post(`Content/editform`, {
+                    questions,
+                })
+                toast({
+                    title: 'Success',
+                    description: 'Form Edited Successfully',
+                    className: 'text-start capitalize border border-secondary',
+                })
+            } else {
+                const questionsRespons = await api.post(`Content/form`, {
+                    questions,
+                })
+
+                const questionIds = questionsRespons?.data.result.map(
+                    (item: any) => item.id
+                )
+                const payload = {
+                    ...values,
+                    formQuestions: questionIds,
+                }
+                //Assign form to the chapter
+                const editChapterResponse = await api.put(
+                    `Content/editChapterOfModule/${moduleId}?chapterId=${content.id}`,
+                    payload
+                )
+
+                toast({
+                    title: 'Success',
+                    description: 'Form Created Successfully',
+                    className: 'text-start capitalize border border-secondary',
+                })
+            }
         } catch (error: any) {
             toast({
                 title: 'Failed',
@@ -217,7 +252,7 @@ const AddForm: React.FC<AddFormProps> = ({
                         )}
                     />
 
-                    {section.map((item: any, index) => (
+                    {section.map((item: any, index: number) => (
                         <FormSection
                             key={item.key}
                             item={item}
@@ -227,6 +262,7 @@ const AddForm: React.FC<AddFormProps> = ({
                             section={section}
                             setSection={setSection}
                             deleteQuestion={deleteQuestion}
+                            formData={content.formQuestionDetails}
                         />
                     ))}
 

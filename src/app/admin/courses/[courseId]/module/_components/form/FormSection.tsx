@@ -44,6 +44,24 @@ type FormSectionProps = {
     section: any
     setSection: any
     deleteQuestion: any
+    formData: any
+}
+
+const getQuestionType = (typeId: number) => {
+    switch (typeId) {
+        case 1:
+            return 'Multiple Choice'
+        case 2:
+            return 'Checkboxes'
+        case 3:
+            return 'Long Text Answer'
+        case 4:
+            return 'Date'
+        case 5:
+            return 'Time'
+        default:
+            return 'Multiple Choice'
+    }
 }
 
 const FormSection: React.FC<FormSectionProps> = ({
@@ -55,10 +73,17 @@ const FormSection: React.FC<FormSectionProps> = ({
     section,
     setSection,
     deleteQuestion,
+    formData,
 }) => {
-    const [selectedSected, setSelectedSection] = useState('Multiple Choice')
-    const [radioOptions, setRadioOptions] = useState([''])
-    const [checkboxOptions, setCheckboxOptions] = useState([''])
+    const questionData = formData[index] || {}
+    const [selectedSection, setSelectedSection] = useState(
+        getQuestionType(questionData.typeId || 1)
+    )
+    const [options, setOptions] = useState<string[]>(
+        Object.values(questionData.options || {}).length > 0
+            ? Object.values(questionData.options || {})
+            : ['']
+    )
 
     // get the section with the index to add rest of the things
     // and the slice the section to add the new object section and set is to setSection
@@ -69,32 +94,79 @@ const FormSection: React.FC<FormSectionProps> = ({
         { questionType: 'Long Text Answer', typeId: 3 },
         { questionType: 'Date', typeId: 4 },
         { questionType: 'Time', typeId: 5 },
-        // 'Checkboxes',
-        // 'Long Text Answer',
-        // 'Date',
-        // 'Time',
     ]
-    const handleSectionType = (type: string) => {
-        console.log('type', type)
-        const questionTypeId = sectionType.find(
-            (item) => item.questionType === type
-        )
-        console.log('questionTypeId', questionTypeId)
-        const obj = section[index]
-        obj.questionType = type
-        obj.typeId = questionTypeId?.typeId
-        if (type === 'Multiple Choice' || type === 'Checkboxes') {
-            obj.options = ['']
-            setRadioOptions([''])
-            setCheckboxOptions([''])
-        } else {
-            obj.options = []
-            setRadioOptions([])
-            setCheckboxOptions([])
+
+    useEffect(() => {
+        if (questionData && Object.keys(questionData).length > 0) {
+            setSelectedSection(getQuestionType(questionData.typeId))
+            setOptions(Object.values(questionData.options || {}))
+
+            // Set form values
+            form.setValue(`question_${index}`, questionData.question || '')
+            form.setValue(
+                `questionType_${index}`,
+                getQuestionType(questionData.typeId)
+            )
+
+            Object.entries(questionData.options || {}).forEach(
+                ([key, value]) => {
+                    form.setValue(`option_${index}_${key}`, value)
+                }
+            )
         }
-        section.splice(index, 1, obj)
-        setSection(section)
+    }, [questionData, index, form])
+
+    const handleSectionType = (type: string) => {
         setSelectedSection(type)
+        form.setValue(`questionType_${index}`, type)
+
+        setSection((prevSection: any) => {
+            const newSection = [...prevSection]
+            newSection[index] = {
+                ...newSection[index],
+                questionType: type,
+                typeId: sectionType.find((item) => item.questionType === type)
+                    ?.typeId,
+            }
+            return newSection
+        })
+
+        if (type === 'Multiple Choice' || type === 'Checkboxes') {
+            setOptions(options.length ? options : [''])
+        } else {
+            setOptions([])
+        }
+    }
+
+    const handleQuestionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newValue = e.target.value
+        form.setValue(`question_${index}`, newValue)
+        setSection((prevSection: any) => {
+            const newSection = [...prevSection]
+            newSection[index] = { ...newSection[index], question: newValue }
+            return newSection
+        })
+    }
+
+    const handleOptionChange = (
+        e: React.ChangeEvent<HTMLInputElement>,
+        optionIndex: number
+    ) => {
+        const newValue = e.target.value
+        const newOptions = [...options]
+        newOptions[optionIndex] = newValue
+        setOptions(newOptions)
+        // form.setValue(`option_${index}_${optionIndex + 1}`, e.target.value)
+        form.setValue(`option_${index}_${optionIndex}`, e.target.value)
+        setSection((prevSection: any) => {
+            const newSection = [...prevSection]
+            newSection[index] = { ...newSection[index], options: newOptions }
+            return newSection
+        })
+    }
+
+    const addOption = () => {
+        setOptions([...options, ''])
     }
 
     const handleRequiredQuestion = (index: number) => {
@@ -106,100 +178,34 @@ const FormSection: React.FC<FormSectionProps> = ({
         setSection(newSection)
     }
 
-    // console.log('section outside', section)
-
-    const onChangeHandler = (e: any) => {
-        const obj = section[index]
-        obj.question = e.target.value
-        section.splice(index, 1, obj)
-        setSection(section)
-    }
-
-    const addOptions = (e: any, idx: number) => {
-        const obj = section[index]
-
-        if (obj.questionType === 'Multiple Choice') {
-            const newRadioOptions = [...radioOptions]
-            newRadioOptions[idx] = e.target.value
-            obj.options = newRadioOptions
-            setRadioOptions(newRadioOptions)
-        } else {
-            const newCheckboxOptions = [...checkboxOptions]
-            newCheckboxOptions[idx] = e.target.value
-            obj.options = newCheckboxOptions
-            setCheckboxOptions(newCheckboxOptions)
-        }
-        section.splice(index, 1, obj)
-        setSection(section)
-    }
-
-    const addRadioOption = () => {
-        setRadioOptions([...radioOptions, ''])
-        const obj = section[index]
-        obj.options = [...radioOptions, '']
-        section.splice(index, 1, obj)
-        setSection(section)
-    }
-
-    // const removeRadioOption = (idx: number) => {
-    //     setRadioOptions((prevRadioOptions) => {
-    //         const updatedOptions = prevRadioOptions.filter(
-    //             (_, index) => index !== idx
-    //         )
-    //         setSection((prevSections: any) => {
-    //             const updatedSections = prevSections.map(
-    //                 (sectionItem: any, sectionIndex: any) => {
-    //                     if (sectionIndex === index) {
-    //                         return {
-    //                             ...sectionItem,
-    //                             options: updatedOptions,
-    //                         }
-    //                     }
-    //                     return sectionItem
-    //                 }
-    //             )
-    //             return updatedSections
-    //         })
-    //         return updatedOptions
-    //     })
-    // }
-
-    const addCheckboxOption = () => {
-        setCheckboxOptions([...checkboxOptions, ''])
-        const obj = section[index]
-        obj.options = [...checkboxOptions, '']
-        section.splice(index, 1, obj)
-        setSection(section)
-    }
-
     const removeOption = (idx: number) => {
-        const updatedSections = [...section]
-        if (updatedSections[index].questionType === 'Multiple Choice') {
-            const updatedOptions = radioOptions.filter(
-                (_, index) => index !== idx
+        setOptions((prevOptions) => {
+            const updatedOptions = prevOptions.filter(
+                (_, optionIndex) => optionIndex !== idx
             )
-            setRadioOptions(updatedOptions)
-            updatedSections[index] = {
-                ...updatedSections[index],
-                options: updatedOptions,
-            }
-        } else {
-            const updatedOptions = checkboxOptions.filter(
-                (_, index) => index !== idx
-            )
-            setCheckboxOptions(updatedOptions)
-            updatedSections[index] = {
-                ...updatedSections[index],
-                options: updatedOptions,
-            }
-        }
-        console.log('section in option', updatedSections)
-        setSection(updatedSections)
-    }
 
-    useEffect(() => {
-        console.log('section inside', section)
-    }, [section])
+            setSection((prevSections: any) => {
+                const updatedSections = [...prevSections]
+                updatedSections[index] = {
+                    ...updatedSections[index],
+                    options: updatedOptions,
+                }
+                return updatedSections
+            })
+
+            return updatedOptions
+        })
+
+        // Update form values
+        options.forEach((_, optionIndex) => {
+            if (optionIndex >= idx) {
+                form.setValue(
+                    `option_${index}_${optionIndex}`,
+                    options[optionIndex + 1] || ''
+                )
+            }
+        })
+    }
 
     return (
         <div key={key}>
@@ -211,7 +217,7 @@ const FormSection: React.FC<FormSectionProps> = ({
                 <div className="flex flex-row justify-between">
                     <div className="mt-5">
                         <SelectTrigger className="w-[175px] focus:ring-0 mb-3">
-                            <SelectValue placeholder={selectedSected} />
+                            <SelectValue placeholder={selectedSection} />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectGroup>
@@ -242,7 +248,7 @@ const FormSection: React.FC<FormSectionProps> = ({
 
             <FormField
                 control={form.control}
-                name={`Question ${index + 1}`}
+                name={`question_${index}`}
                 render={({ field }) => (
                     <FormItem>
                         <div className="flex flex-row justify-between">
@@ -258,55 +264,58 @@ const FormSection: React.FC<FormSectionProps> = ({
                         <FormControl>
                             <Input
                                 {...field}
-                                className="w-full px-3 py-2 border rounded-md "
                                 placeholder="Type a question..."
-                                onChange={(e) => {
-                                    onChangeHandler(e)
-                                }}
+                                onChange={handleQuestionChange}
                             />
                         </FormControl>
-                        <FormMessage />
                     </FormItem>
                 )}
             />
 
-            {selectedSected === 'Multiple Choice' &&
-                radioOptions.map((item, index) => (
-                    <div className="flex space-x-2 mr-4 mt-1">
-                        <RadioGroup
-                            key={item}
-                            // value={selectedOption}
-                            // onValueChange={handleStudentUploadType}
-                        >
-                            <RadioGroupItem
-                                value={item}
-                                id={item}
-                                className="mt-5"
-                            />
-                        </RadioGroup>
-                        <Input
-                            placeholder={`Field ${item}`}
-                            className="w-full px-3 py-2 border rounded-md"
-                            onChange={(e) => {
-                                addOptions(e, index)
-                            }}
-                            value={item}
+            {(selectedSection === 'Multiple Choice' ||
+                selectedSection === 'Checkboxes') &&
+                options.map((option, optionIndex) => (
+                    <div key={optionIndex} className="flex space-x-2 mr-4 mt-1">
+                        {selectedSection === 'Multiple Choice' ? (
+                            <RadioGroup>
+                                <RadioGroupItem
+                                    value={option}
+                                    className="mt-5"
+                                />
+                            </RadioGroup>
+                        ) : (
+                            <Checkbox className="mt-5" />
+                        )}
+                        <FormField
+                            control={form.control}
+                            // name={`option_${index}_${optionIndex + 1}`}
+                            name={`option_${index}_${optionIndex}`}
+                            render={({ field }) => (
+                                <Input
+                                    {...field}
+                                    placeholder={`Option ${optionIndex + 1}`}
+                                    onChange={(e) =>
+                                        handleOptionChange(e, optionIndex)
+                                    }
+                                />
+                            )}
                         />
                         <button
                             type="button"
-                            onClick={() => removeOption(index)}
+                            onClick={() => removeOption(optionIndex)}
                         >
                             <X className="h-5 w-5 ml-3 mt-2 text-muted-foreground" />
                         </button>
                     </div>
                 ))}
 
-            {selectedSected === 'Multiple Choice' && (
+            {(selectedSection === 'Multiple Choice' ||
+                selectedSection === 'Checkboxes') && (
                 <div className="flex justify-end">
                     <Button
                         variant={'secondary'}
                         type="button"
-                        onClick={addRadioOption}
+                        onClick={addOption}
                         className="gap-x-2 border-none hover:text-secondary hover:bg-popover"
                     >
                         <Plus /> Add Option
@@ -314,52 +323,7 @@ const FormSection: React.FC<FormSectionProps> = ({
                 </div>
             )}
 
-            {selectedSected === 'Checkboxes' &&
-                checkboxOptions.map((item, index) => (
-                    <div className="flex space-x-2 mt-1">
-                        <Checkbox
-                            // checked={
-                            //     table.getIsAllPageRowsSelected() ||
-                            //     (table.getIsSomePageRowsSelected() && 'indeterminate')
-                            // }
-                            // onCheckedChange={(value) =>
-                            //     table.toggleAllPageRowsSelected(!!value)
-                            // }
-                            aria-label="Select all"
-                            className="translate-y-[2px] mr-1 mt-4"
-                        />
-                        <div>
-                            <Input
-                                placeholder={`Field ${item}`}
-                                className="w-[450px] px-3 py-2 border rounded-md "
-                                onChange={(e) => {
-                                    addOptions(e, index)
-                                }}
-                                value={item}
-                            />
-                        </div>
-                        <button
-                            type="button"
-                            onClick={() => removeOption(index)}
-                        >
-                            <X className="h-5 w-5 ml-3 mt-2 text-muted-foreground" />
-                        </button>
-                    </div>
-                ))}
-            {selectedSected === 'Checkboxes' && (
-                <div className="flex justify-end">
-                    <Button
-                        variant={'secondary'}
-                        type="button"
-                        onClick={addCheckboxOption}
-                        className="gap-x-2 border-none hover:text-secondary hover:bg-popover"
-                    >
-                        <Plus /> Add Option
-                    </Button>
-                </div>
-            )}
-
-            {selectedSected === 'Long Text Answer' && (
+            {selectedSection === 'Long Text Answer' && (
                 <FormField
                     control={form.control}
                     name={`answer ${index}`}
@@ -379,7 +343,7 @@ const FormSection: React.FC<FormSectionProps> = ({
                 />
             )}
 
-            {selectedSected === 'Date' && (
+            {selectedSection === 'Date' && (
                 <div className="flex justify-start mt-2">
                     <FormField
                         control={form.control}
@@ -420,7 +384,7 @@ const FormSection: React.FC<FormSectionProps> = ({
                 </div>
             )}
 
-            {selectedSected === 'Time' && (
+            {selectedSection === 'Time' && (
                 <FormField
                     control={form.control}
                     name={`Question ${index}`}
