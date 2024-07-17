@@ -13,6 +13,7 @@ import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import OverviewComponent from '@/app/admin/courses/[courseId]/_components/OverviewComponent'
 import IndividualStudentAssesment from '@/app/admin/courses/[courseId]/_components/individualStudentAssesment'
 import { Skeleton } from '@/components/ui/skeleton'
+import { toast } from '@/components/ui/use-toast'
 
 type User = {
     name: string
@@ -81,11 +82,53 @@ type newDataType =
           codingSubmission: CodingSubmission[]
       }
     | any
+
+interface Example {
+    input: string[]
+    output: string[]
+}
+
+interface TestCase {
+    input: string[]
+    output: string[]
+}
+
+interface Submission {
+    id: number
+    status: string
+    action: string
+    createdAt: string
+    codingOutsourseId: number
+}
+
+interface CodingQuestion {
+    questionId: number
+    id: number
+    title: string
+    description: string
+    difficulty: string
+    tags: number
+    constraints: string
+    authorId: number
+    inputBase64: string | null
+    examples: Example[]
+    testCases: TestCase[]
+    expectedOutput: string[]
+    solution: string
+    createdAt: string | null
+    updatedAt: string | null
+    usage: number
+    submissions: Submission[]
+}
+
 const Page = ({ params }: { params: any }) => {
     const [individualAssesmentData, setIndividualAssesmentData] =
         useState<StudentAssessment>()
     const [bootcampData, setBootcampData] = useState<any>()
     const [assesmentData, setAssesmentData] = useState<any>()
+    const [codingdata, setCodingData] = useState<CodingQuestion[]>([])
+    const [loading, setLoading] = useState<boolean>(true)
+
     const crumbs = [
         {
             crumb: 'My Courses',
@@ -134,6 +177,25 @@ const Page = ({ params }: { params: any }) => {
             })
     }, [params.IndividualReport, params.report])
 
+    const getIndividualCodingDataHandler = useCallback(async () => {
+        try {
+            await api
+                .get(
+                    `/tracking/assessment/submissionId=${params.StudentAssesmentData}?studentId=${params.IndividualReport}`
+                )
+                .then((res) => {
+                    setCodingData(res.data.codingSubmission)
+                })
+        } catch (error) {
+            toast({
+                title: 'Error',
+                description: 'Error in fetching the data',
+            })
+        } finally {
+            setLoading(false)
+        }
+    }, [params])
+
     const getStudentAssesmentDataHandler = useCallback(async () => {
         await api
             .get(
@@ -148,10 +210,12 @@ const Page = ({ params }: { params: any }) => {
         getBootcampHandler()
         getIndividualStudentAssesmentDataHandler()
         getStudentAssesmentDataHandler()
+        getIndividualCodingDataHandler()
     }, [
         getIndividualStudentAssesmentDataHandler,
         getBootcampHandler,
         getStudentAssesmentDataHandler,
+        getIndividualCodingDataHandler,
     ])
 
     const newDatafuntion = (data: StudentAssessment | undefined) => {
@@ -166,6 +230,7 @@ const Page = ({ params }: { params: any }) => {
     }
 
     const newData: newDataType = newDatafuntion(individualAssesmentData)
+    console.log(codingdata)
 
     return (
         <>
@@ -208,10 +273,10 @@ const Page = ({ params }: { params: any }) => {
                     </div>
                     <h1 className="flex  mb-10 text-gray-600">
                         {individualAssesmentData ? (
-                            <h3>
+                            <p>
                                 Submitted on:{' '}
                                 {formatDate(individualAssesmentData.submitedAt)}
-                            </h3>
+                            </p>
                         ) : (
                             <Skeleton className="h-4 w-[400px]" />
                         )}
@@ -261,8 +326,64 @@ const Page = ({ params }: { params: any }) => {
             <IndividualStudentAssesment /> */}
                 <div className="grid grid-cols-1   gap-20 mt-4 md:mt-8 md:grid-cols-2">
                     {newData ? (
-                        <div>Hello</div>
+                        <>
+                            <div className="w-full">
+                                <h1 className="text-left font-semibold ">
+                                    {' '}
+                                    Codind Submission
+                                </h1>
+                                {codingdata.map((data, index) => (
+                                    <IndividualStudentAssesment
+                                        key={data.id}
+                                        data={data}
+                                        params={params}
+                                        type={'codingSubmission'}
+                                        codingOutsourseId={
+                                            data.submissions[0]
+                                                .codingOutsourseId
+                                        }
+                                    />
+                                ))}
+                            </div>
+                            <div className="w-full">
+                                <h1 className="text-left font-semibold ">
+                                    {' '}
+                                    Quiz Submission
+                                </h1>
+                                <IndividualStudentAssesment
+                                    data={[]}
+                                    params={params}
+                                    type={'quizSubmission'}
+                                />
+                            </div>
+                            <div className="w-full">
+                                <h1 className="text-left font-semibold ">
+                                    {' '}
+                                    Open Ended Questions
+                                </h1>
+                                <IndividualStudentAssesment
+                                    data={[]}
+                                    params={params}
+                                    type={'openEndedSubmission'}
+                                />
+                            </div>
+                        </>
                     ) : (
+                        // Object.keys(newData).map((key: string, index) => (
+                        //     <div key={index}>
+                        //         <h2 className="text-md capitalize text-start mb-3 font-semibold text-gray-800  dark:text-white ">
+                        //             {key}
+                        //         </h2>
+                        //         {newData[key].map((data: newDataType) => (
+                        //             <div key={key}>
+                        //                 <IndividualStudentAssesment
+                        //                     data={data}
+                        //                     type={key}
+                        //                 />
+                        //             </div>
+                        //         ))}
+                        //     </div>
+                        // ))
                         <div className="absolute w-full flex justify-start items-center">
                             <div className="grid grid-cols-1   gap-20 mt-4 md:mt-8 md:grid-cols-2 ">
                                 <div>

@@ -443,3 +443,25 @@ export const useLazyLoadedStudentData = () => {
         setAnotherStudentState,
     }
 }
+
+type proctoringDataType = {
+    proctoringData: any
+    setproctoringData: (newValue: any) => void
+    fetchProctoringData: (submissionId: string, studentId: string) => void
+}
+
+export const getProctoringDataStore = create<proctoringDataType>((set) => ({
+    proctoringData: {},
+    setproctoringData: (newValue: any) => {
+        set({ proctoringData: newValue })
+    },
+    fetchProctoringData: async (submissionId, studentId) => {
+        await api
+            .get(
+                `/tracking/assessment/submissionId=${submissionId}?studentId=${studentId}`
+            )
+            .then((res) => {
+                set({ proctoringData: res.data })
+            })
+    },
+}))
