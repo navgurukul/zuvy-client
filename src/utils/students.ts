@@ -116,14 +116,22 @@ export function requestFullScreen(element: HTMLElement) {
             const newTabChangeInstance = tabChangeInstance + 1;
             localStorage.setItem('tabChangeInstance', newTabChangeInstance.toString());
             setTabChangeInstance(newTabChangeInstance);
-            console.log('The Page is no longer visible. Test ended.');
+            // toast({
+            //     title: 'WARNING',
+            //     description: 'You have changed the tab. If you change the tab again, your test will get submitted automatically.',
+            //     className: 'text-start capitalize border border-destructive',
+            // })
     
-            if (newTabChangeInstance > 2) {
+            if (newTabChangeInstance > 1000) {
                 // Check if the current page is the submitAssessment page
                 if (isCurrentPageSubmitAssessment()) {
                     // Submit the assessment
+                    toast({
+                        title: 'Test Ended',
+                        description: 'You have changed the tab multiple times.',
+                        className: 'text-start capitalize border border-destructive',
+                    })
                     submitAssessment();
-                    alert('You have changed the tab 2 times. Test Ended')
                 }
             }
         }
@@ -136,14 +144,23 @@ export function requestFullScreen(element: HTMLElement) {
                 const newFullScreenExitInstance = fullScreenExitInstance + 1
                 localStorage.setItem('fullScreenExitInstance', newFullScreenExitInstance.toString());
                 setFullScreenExitInstance(newFullScreenExitInstance)
-                console.log('User has exited full screen. Test ended.')
+                // toast({
+                //     title: 'WARNING',
+                //     description: 'You have exited full screen. If you exit full screen, your test will get submitted automatically.',
+                //     className: 'text-start capitalize border border-destructive',
+                // })
+       
         
-                if (newFullScreenExitInstance > 2) {
+                if (newFullScreenExitInstance > 1000) {
                     // Check if the current page is the submitAssessment page
                     if (isCurrentPageSubmitAssessment()) {
                         // Submit the assessment
+                        toast({
+                            title: 'Test Ended',
+                            description: 'You have exited full screen multiple times.',
+                            className: 'text-start capitalize border border-destructive',
+                        })
                         submitAssessment();
-                        alert('You have exited full screen 2 times. Test ended.')
                     }
                 }
             }

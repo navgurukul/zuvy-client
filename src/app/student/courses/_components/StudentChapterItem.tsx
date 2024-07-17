@@ -6,6 +6,7 @@ import {
     PencilLine,
     StickyNote,
     Video,
+    BookOpenCheck,
 } from 'lucide-react'
 
 function StudentChapterItem({
@@ -37,6 +38,8 @@ function StudentChapterItem({
                 return <FileQuestion />
             case 5:
                 return <PencilLine />
+            case 6:
+                return <BookOpenCheck />
             default:
                 return <StickyNote />
         }
