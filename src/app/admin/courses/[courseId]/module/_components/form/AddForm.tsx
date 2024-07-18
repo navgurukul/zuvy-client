@@ -112,13 +112,47 @@ const AddForm: React.FC<AddFormProps> = ({
 
     //Delete question key wise from section
     const deleteQuestion = useCallback(
-        (key: number) => {
-            console.log('section', section)
-            const updatedSection = section.filter(
-                (item: any) => item.key !== key
-            )
-            console.log('updatedSection', updatedSection)
-            setSection(updatedSection)
+        async (deleteItem: any) => {
+            console.log('I am Okay!', deleteItem)
+            try {
+                if (content.formQuestionDetails.length > 0) {
+                    const questionIds = [deleteItem.id]
+                    console.log('I am in If!', questionIds)
+                    // const updatedSection = section.filter(
+                    //     (item: any) => item.id !== deleteItem.id
+                    // )
+                    // console.log('updatedSection', updatedSection)
+                    // setSection(updatedSection)
+                    const questionsRespons = await api.delete(
+                        `Content/deleteFormQuestion`,
+                        {
+                            data: { questionIds },
+                        }
+                    )
+                    console.log('questionsRespons', questionsRespons)
+                    toast({
+                        title: 'Success',
+                        description: 'Form Edited Successfully',
+                        className:
+                            'text-start capitalize border border-secondary',
+                    })
+                } else {
+                    console.log('I am in else!', deleteItem.key)
+                    const updatedSection = section.filter(
+                        (item: any) => item.key !== deleteItem.key
+                    )
+                    console.log('updatedSection', updatedSection)
+                    setSection(updatedSection)
+                }
+            } catch (error: any) {
+                toast({
+                    title: 'Failed',
+                    description:
+                        error.response?.data?.message || 'An error occurred.',
+                    className:
+                        'text-start capitalize border border-destructive',
+                })
+            }
         },
         [section]
     )

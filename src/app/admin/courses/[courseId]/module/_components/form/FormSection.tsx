@@ -237,7 +237,8 @@ const FormSection: React.FC<FormSectionProps> = ({
                         type="button" // Set the type to button to prevent form submission
                         onClick={(e) => {
                             e.preventDefault() // Prevent form submission
-                            deleteQuestion(item.key)
+                            deleteQuestion(item)
+                            // deleteQuestion(item.key)
                             // deleteQuestion(index)
                         }}
                     >
