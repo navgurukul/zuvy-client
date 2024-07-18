@@ -1,10 +1,19 @@
 'use client'
 import React, { useCallback, useEffect, useState } from 'react'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
+import {
+    ResizablePanelGroup,
+    ResizablePanel,
+    ResizableHandle,
+} from '@/components/ui/resizable'
+
+import Editor from '@monaco-editor/react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { getProctoringDataStore } from '@/store/store'
 import { paramsType } from '../../ViewSolutionOpenEnded/page'
 import { toast } from '@/components/ui/use-toast'
+import dynamic from 'next/dynamic'
+
 import { api } from '@/utils/axios.config'
 
 type Props = {}
@@ -12,6 +21,7 @@ type Props = {}
 const Page = ({ params }: { params: paramsType }) => {
     const { proctoringData, fetchProctoringData } = getProctoringDataStore()
     const [codingSubmissionData, setCodingSubmissionData] = useState<any>()
+    const [codingQuestionData, setcodingQuestionData] = useState<any>()
     const [loading, setLoading] = useState<boolean>(true)
 
     const fetchCodingSubmissionData = useCallback(async () => {
@@ -22,6 +32,7 @@ const Page = ({ params }: { params: paramsType }) => {
                 )
                 .then((res) => {
                     setCodingSubmissionData(res.data.shapecode)
+                    setcodingQuestionData(res.data.questionInfo)
                 })
         } catch (error) {
             toast({
@@ -44,8 +55,6 @@ const Page = ({ params }: { params: paramsType }) => {
         }
     }, [proctoringData])
 
-    console.log(codingSubmissionData)
-
     const sourceCodeDecoder = (sourceCode: string) => {
         if (!codingSubmissionData) return
         const decodedString = atob(sourceCode)
@@ -57,9 +66,10 @@ const Page = ({ params }: { params: paramsType }) => {
     const cheatingClass =
         tabChange > 0 && tabChange > 0 ? 'bg-red-600' : 'bg-green-400'
 
-    console.log(decodedString)
+    console.log(codingQuestionData)
+
     return (
-        <MaxWidthWrapper>
+        <MaxWidthWrapper className="flex flex-col gap-y-4">
             <div className="flex  items-center gap-x-3">
                 <div className="flex flex-col gap-x-2">
                     <div className="flex gap-x-4 my-4 ">
@@ -71,7 +81,7 @@ const Page = ({ params }: { params: paramsType }) => {
                             <AvatarFallback>CN</AvatarFallback>
                         </Avatar>
                         <h1 className="text-left font-semibold text-lg">
-                            {user?.name}- Quiz Questions Report
+                            {user?.name}- Coding Questions Report
                         </h1>
                     </div>
                 </div>
@@ -117,13 +127,117 @@ const Page = ({ params }: { params: paramsType }) => {
                     </div>
                 </div>
             </div>
-            <div className="my-5 flex flex-col gap-y-3 text-left ">
+            {/* <div className="my-5 flex flex-col gap-y-3 text-left ">
                 <h1 className="text-left font-semibold">Student Answers</h1>
                 <div className="flex font-semibold gap-x-3 ">
                     <h1>Answer:</h1>
                     <p>{decodedString}</p>
                 </div>
-            </div>
+            </div> */}
+            <ResizablePanelGroup
+                direction="horizontal"
+                className="w-full max-w-12xl rounded-lg "
+            >
+                <ResizablePanel defaultSize={50}>
+                    <div className="flex  w-full h-[90vh] my-6">
+                        <div className=" flex flex-col items-start space-y-4">
+                            <h1 className="text-2xl font-bold capitalize ">
+                                {codingQuestionData?.title}
+                            </h1>
+
+                            <div>
+                                <h2 className="text-xl text-left font-semibold">
+                                    Description:
+                                </h2>
+                                <p>{codingQuestionData?.description}</p>
+                            </div>
+
+                            <div className="flex ">
+                                <h2 className="text-xl font-semibold">
+                                    Examples:
+                                </h2>
+                                {codingQuestionData?.examples.map(
+                                    (example: any, index: number) => (
+                                        <div
+                                            key={index}
+                                            className="pl-4 flex gap-x-3"
+                                        >
+                                            <p>
+                                                Input:{' '}
+                                                {example.input.join(', ')}
+                                            </p>
+                                            <p>
+                                                Output:{' '}
+                                                {example.output.join(', ')}
+                                            </p>
+                                        </div>
+                                    )
+                                )}
+                            </div>
+
+                            <div className="flex">
+                                <h2 className="text-xl font-semibold">
+                                    Test Cases:
+                                </h2>
+                                {codingQuestionData?.testCases.map(
+                                    (testCase: any, index: number) => (
+                                        <div
+                                            key={index}
+                                            className="pl-4 flex gap-x-3"
+                                        >
+                                            <p>
+                                                Input:{' '}
+                                                {testCase.input.join(', ')}
+                                            </p>
+                                            <p>
+                                                Output:{' '}
+                                                {testCase.output.join(', ')}
+                                            </p>
+                                        </div>
+                                    )
+                                )}
+                            </div>
+
+                            <div className="flex items-center gap-x-2">
+                                <h2 className="text-xl font-semibold">
+                                    Expected Output:
+                                </h2>
+                                <p>
+                                    {codingQuestionData?.expectedOutput.join(
+                                        ', '
+                                    )}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </ResizablePanel>
+                <ResizableHandle withHandle />
+                <ResizablePanel defaultSize={50}>
+                    <ResizablePanelGroup direction="vertical">
+                        <ResizablePanel defaultSize={70}>
+                            <div className="flex h-full">
+                                <div className="w-full max-w-5xl bg-muted p-2">
+                                    <form>
+                                        <div>
+                                            {/* <div className="flex justify-between p-2"></div */}
+                                            <Editor
+                                                height="52vh"
+                                                theme="vs-dark"
+                                                value={decodedString}
+                                                className={`p-6 ${cheatingClass}`}
+                                                options={{
+                                                    readOnly: true,
+                                                }}
+                                            />
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </ResizablePanel>
+                        <ResizableHandle withHandle />
+                    </ResizablePanelGroup>
+                </ResizablePanel>
+            </ResizablePanelGroup>
         </MaxWidthWrapper>
     )
 }

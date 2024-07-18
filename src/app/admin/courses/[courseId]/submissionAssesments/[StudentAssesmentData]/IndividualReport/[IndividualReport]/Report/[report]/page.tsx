@@ -14,6 +14,7 @@ import OverviewComponent from '@/app/admin/courses/[courseId]/_components/Overvi
 import IndividualStudentAssesment from '@/app/admin/courses/[courseId]/_components/individualStudentAssesment'
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from '@/components/ui/use-toast'
+import { getProctoringDataStore } from '@/store/store'
 
 type User = {
     name: string
@@ -127,6 +128,7 @@ const Page = ({ params }: { params: any }) => {
     const [bootcampData, setBootcampData] = useState<any>()
     const [assesmentData, setAssesmentData] = useState<any>()
     const [codingdata, setCodingData] = useState<CodingQuestion[]>([])
+    const { proctoringData, fetchProctoringData } = getProctoringDataStore()
     const [loading, setLoading] = useState<boolean>(true)
 
     const crumbs = [
@@ -211,11 +213,14 @@ const Page = ({ params }: { params: any }) => {
         getIndividualStudentAssesmentDataHandler()
         getStudentAssesmentDataHandler()
         getIndividualCodingDataHandler()
+        fetchProctoringData(params.report, params.IndividualReport)
     }, [
         getIndividualStudentAssesmentDataHandler,
         getBootcampHandler,
         getStudentAssesmentDataHandler,
         getIndividualCodingDataHandler,
+        params,
+        fetchProctoringData,
     ])
 
     const newDatafuntion = (data: StudentAssessment | undefined) => {
@@ -230,8 +235,12 @@ const Page = ({ params }: { params: any }) => {
     }
 
     const newData: newDataType = newDatafuntion(individualAssesmentData)
-    console.log(codingdata)
 
+    const {
+        quizSubmission: { quizScore, totalQuizScore },
+        PracticeCode: { needCodingScore, totalCodingScore },
+        openEndedSubmission: { openTotalAttemted },
+    } = proctoringData
     return (
         <>
             {individualAssesmentData ? (
@@ -289,15 +298,11 @@ const Page = ({ params }: { params: any }) => {
                         totalCodingChallenges={
                             individualAssesmentData.totalCodingQuestions
                         }
-                        correctedCodingChallenges={1}
-                        correctedMcqs={1}
-                        totalCorrectedMcqs={
-                            individualAssesmentData.totalQuizzes
-                        }
+                        correctedCodingChallenges={needCodingScore}
+                        correctedMcqs={quizScore}
+                        totalCorrectedMcqs={totalQuizScore}
                         openEndedCorrect={1}
-                        totalOpenEnded={
-                            individualAssesmentData.totalOpenEndedQuestions
-                        }
+                        totalOpenEnded={openTotalAttemted}
                         score={50}
                         totalScore={100}
                         copyPaste={individualAssesmentData.copyPaste}
@@ -330,7 +335,7 @@ const Page = ({ params }: { params: any }) => {
                             <div className="w-full">
                                 <h1 className="text-left font-semibold ">
                                     {' '}
-                                    Codind Submission
+                                    Coding Submission
                                 </h1>
                                 {codingdata.map((data, index) => (
                                     <IndividualStudentAssesment

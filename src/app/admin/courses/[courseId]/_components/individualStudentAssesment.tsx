@@ -16,6 +16,7 @@ const IndividualStudentAssesment = ({
 }: any) => {
     const { courseId, StudentAssesmentData, IndividualReport, report } = params
     const color = getAssesmentBackgroundColorClass(25, 5)
+    console.log(data)
     const renderQuestion = () => {
         switch (type) {
             case 'openEndedSubmission':
@@ -47,13 +48,15 @@ const IndividualStudentAssesment = ({
             <div className="flex flex-col w-full justify-between   ">
                 <div className="flex items-start flex-col p-4 gap-y-7 justify-betweenrounded-md">
                     <h1 className="text-[20px] capitalize text-start font-semibold text-gray-600  dark:text-white ">
-                        {questionInfo.title}
+                        {type === 'codingSubmission'
+                            ? data.title
+                            : questionInfo.title}
                     </h1>
                     <div className="flex items-center gap-x-2">
-                        <div
+                        {/* <div
                             className={`w-2 h-2 rounded-full flex items-center justify-center cursor-pointer ${color}`}
-                        ></div>
-                        <h1>Score: 2/25</h1>
+                        ></div> */}
+                        {/* <h1>Score: 2/25</h1> */}
                     </div>
                 </div>
             </div>

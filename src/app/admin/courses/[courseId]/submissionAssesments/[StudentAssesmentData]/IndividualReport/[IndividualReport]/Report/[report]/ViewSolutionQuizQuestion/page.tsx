@@ -91,7 +91,7 @@ const Page = ({ params }: { params: paramsType }) => {
                             <AvatarFallback>CN</AvatarFallback>
                         </Avatar>
                         <h1 className="text-left font-semibold text-lg">
-                            {user.name}- Quiz Questions Report
+                            {user?.name}- Quiz Questions Report
                         </h1>
                     </div>
                 </div>
