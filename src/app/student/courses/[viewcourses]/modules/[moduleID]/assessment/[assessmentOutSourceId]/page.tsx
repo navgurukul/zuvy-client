@@ -16,8 +16,9 @@ import QuestionCard from './QuestionCard'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/components/ui/use-toast'
 import { useParams, usePathname } from 'next/navigation'
-import { getAssessmentStore } from '@/store/store'
 import { useRouter } from 'next/navigation'
+import { getAssessmentStore } from '@/store/store'
+import TimerDisplay from './TimerDisplay'
 
 function Page({
     params,
@@ -30,6 +31,7 @@ function Page({
 }) {
     const [isFullScreen, setIsFullScreen] = useState(false)
     const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null)
+    const [disableSubmit, setDisableSubmit] = useState(false)
 
     const decodedParams = {
         assessmentOutSourceId: parseInt(
@@ -47,13 +49,15 @@ function Page({
         fullScreenExitInstance,
         setCopyPasteAttempt,
         copyPasteAttempt,
-        isAssessmentSubmitted,
-        setIsAssessmentSubmitted,
+
     } = getAssessmentStore()
+
     const [selectedQuesType, setSelectedQuesType] = useState<
         'quiz' | 'open-ended' | 'coding'
     >('quiz')
+    
     const [isSolving, setIsSolving] = useState(false)
+    
     const [selectedQuestionId, setSelectedQuestionId] = useState<number | null>(
         null
     )
@@ -259,7 +263,7 @@ function Page({
     }
 
     async function submitAssessment() {
-        
+        setDisableSubmit(true)
         try {
             await api.patch(
                 `/submission/assessment/submit?assessmentSubmissionId=${assessmentSubmitId}`,
@@ -287,11 +291,9 @@ function Page({
                 localStorage.setItem('fullScreenExitInstance', newFullScreenExitInstance.toString());
                 setFullScreenExitInstance(newFullScreenExitInstance)
 
-
-            setIsAssessmentSubmitted(true)
             setTimeout(() => {
                 window.close()
-            }, 2000)
+            }, 5000)
 
         } catch (e) {
             console.error(e)
@@ -313,11 +315,8 @@ function Page({
         <React.Fragment>
             {!isFullScreen ? (
                 <>
-                <div className="flex items-center justify-end gap-2">
-                <Timer size={18} />
-                <h1 className="text-right">
-                    {formatTime(remainingTime)}
-                </h1>
+                <div className="flex items-center justify-center gap-2">
+                <div className='font-bold text-xl'><TimerDisplay remainingTime={remainingTime} /></div>
             </div>
             <Separator />
             <h1>Enter Full Screen to see the Questions. 
@@ -330,11 +329,8 @@ function Page({
                 </>
             ) : (
                 <>
-                    <div className="flex items-center justify-end gap-2">
-                        <Timer size={18} />
-                        <h1 className="text-right">
-                            {formatTime(remainingTime)}
-                        </h1>
+                    <div className="flex items-center justify-center gap-2">
+                    <div className='font-bold text-xl'><TimerDisplay remainingTime={remainingTime} /></div>
                     </div>
                     <Separator />
                     <div
@@ -424,7 +420,7 @@ function Page({
                             />
                         </div>
                     </div>
-                    <Button onClick={submitAssessment}>
+                    <Button onClick={submitAssessment} disabled={disableSubmit}>
                         Submit Assessment
                     </Button>
                 </>

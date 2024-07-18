@@ -16,7 +16,6 @@ import { useParams } from 'next/navigation'
 import Assessment from '../_components/Assessment'
 import FeedbackForm from '../_components/FeedbackForm'
 import { getAssessmentShortInfo } from '@/utils/students'
-import { getAssessmentStore } from '@/store/store'
 
 interface Chapter {
     id: number
@@ -45,8 +44,6 @@ function Page({ params }: any) {
     const [assessmentShortInfo, setAssessmentShortInfo] = useState<any>({})
     const [assessmentOutSourceId, setAssessmentOutSourceId] = useState<any>()
     const [submissionId, setSubmissionId] = useState<any>()
-    const { isAssessmentSubmitted, setIsAssessmentSubmitted } =
-        getAssessmentStore()
 
     const crumbs = [
         {
@@ -187,7 +184,7 @@ function Page({ params }: any) {
         if (chapters.length > 0) {
             fetchChapterContent(chapters[0]?.id)
         }
-    }, [chapters, isAssessmentSubmitted])
+    }, [chapters])
 
     useEffect(() => {
         if (topicId === 6) {

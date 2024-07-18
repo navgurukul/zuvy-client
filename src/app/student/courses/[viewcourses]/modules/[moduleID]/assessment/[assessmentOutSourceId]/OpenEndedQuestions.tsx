@@ -86,12 +86,13 @@ const OpenEndedQuestions = ({
                     className="flex items-center cursor-pointer"
                     onClick={onBack}
                 >
-                    <ChevronLeft strokeWidth={2} size={18} />
-                    <h1 className="font-extrabold">Open-Ended Questions</h1>
+                    <ChevronLeft strokeWidth={2} size={24} />
+                    <h1 className="font-extrabold"></h1>
                 </div>
-                <div className="flex items-center">
-                    <TimerDisplay remainingTime={remainingTime} />
-                </div>
+              
+                <div className='font-bold text-xl'><TimerDisplay remainingTime={remainingTime} /></div>
+                <div></div>
+             
             </div>
             <Separator />
             <Form {...form}>

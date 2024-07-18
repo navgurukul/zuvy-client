@@ -21,9 +21,11 @@ import { toast } from '@/components/ui/use-toast'
 function ChapterModal({
     params,
     fetchChapters,
+    newChapterOrder
 }: {
     params: { moduleId: string; courseId: string }
     fetchChapters: () => void
+    newChapterOrder: number
 }) {
     const createChapter = async (topicId: number) => {
         await api
@@ -31,7 +33,7 @@ function ChapterModal({
                 moduleId: Number(params.moduleId),
                 bootcampId: Number(params.courseId),
                 topicId: topicId,
-                order: 1,
+                order: newChapterOrder,
             })
             .then((res) => {
                 toast({
