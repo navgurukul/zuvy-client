@@ -116,13 +116,13 @@ export function requestFullScreen(element: HTMLElement) {
             const newTabChangeInstance = tabChangeInstance + 1;
             localStorage.setItem('tabChangeInstance', newTabChangeInstance.toString());
             setTabChangeInstance(newTabChangeInstance);
-            // toast({
-            //     title: 'WARNING',
-            //     description: 'You have changed the tab. If you change the tab again, your test will get submitted automatically.',
-            //     className: 'text-start capitalize border border-destructive',
-            // })
+            toast({
+                title: 'WARNING',
+                description: 'You have changed the tab. If you change the tab again, your test will get submitted automatically.',
+                className: 'text-start capitalize border border-destructive',
+            })
     
-            if (newTabChangeInstance > 1000) {
+            if (newTabChangeInstance > 4) {
                 // Check if the current page is the submitAssessment page
                 if (isCurrentPageSubmitAssessment()) {
                     // Submit the assessment
@@ -144,14 +144,14 @@ export function requestFullScreen(element: HTMLElement) {
                 const newFullScreenExitInstance = fullScreenExitInstance + 1
                 localStorage.setItem('fullScreenExitInstance', newFullScreenExitInstance.toString());
                 setFullScreenExitInstance(newFullScreenExitInstance)
-                // toast({
-                //     title: 'WARNING',
-                //     description: 'You have exited full screen. If you exit full screen, your test will get submitted automatically.',
-                //     className: 'text-start capitalize border border-destructive',
-                // })
+                toast({
+                    title: 'WARNING',
+                    description: 'You have exited full screen. If you exit full screen, your test will get submitted automatically.',
+                    className: 'text-start capitalize border border-destructive',
+                })
        
         
-                if (newFullScreenExitInstance > 1000) {
+                if (newFullScreenExitInstance > 4) {
                     // Check if the current page is the submitAssessment page
                     if (isCurrentPageSubmitAssessment()) {
                         // Submit the assessment
