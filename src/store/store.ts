@@ -134,8 +134,7 @@ type assessmentStore = {
     setFullScreenExitInstance: (newValue: number) => void
     copyPasteAttempt: number
     setCopyPasteAttempt: (newValue: number) => void
-    isAssessmentSubmitted: boolean
-    setIsAssessmentSubmitted: (newValue: boolean) => void
+
 }
 
 export const getAssessmentStore = create<assessmentStore>((set) => ({
@@ -151,10 +150,7 @@ export const getAssessmentStore = create<assessmentStore>((set) => ({
     setCopyPasteAttempt: (newValue: number) => {
         set({ copyPasteAttempt: newValue })
     },
-    isAssessmentSubmitted: false,
-    setIsAssessmentSubmitted: (newValue: boolean) => {
-        set({ isAssessmentSubmitted: newValue })
-    },
+
 }))
 // ------------------------------
 

@@ -95,28 +95,9 @@ const OpenEndedResults = ({
                             {result.OpenEndedQuestion.question}
                         </div>
                         <div className="p-2">
-                            {result?.submissionsData[0]?.answer}
+                            Answer: {result?.submissionsData[0]?.answer || 'No Answer Submitted'} 
                         </div>
-                        <div className="flex items-center">
-                            <Dot
-                                className={`${
-                                    getEvaluation(
-                                        result?.submissionsData[0]?.answer,
-                                        result?.OpenEndedQuestion
-                                    ).color
-                                }`}
-                                size={50}
-                            />
-                            <span className="font-semibold">Evaluation:</span>
-                            <span className="ml-2">
-                                {
-                                    getEvaluation(
-                                        result?.submissionsData[0]?.answer,
-                                        result?.OpenEndedQuestion
-                                    ).text
-                                }
-                            </span>
-                        </div>
+                     
                     </div>
                 ))}
             </div>
