@@ -76,7 +76,10 @@ function RecordingCard({
     const presentStudents = displayAttendance?.studentsInfo?.present
 
     const handleViewRecording = () => {
+        console.log(classData, 'asdfjasjkdfhk')
+
         if (isVideo) {
+            console.log(classData, 'asdfjasjkdfhk')
             window.open(classData.s3link, '_blank')
         } else {
             toast({
