@@ -169,7 +169,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
     return (
         <div>
             <div className="flex flex-col flex-start mt-6">
-                <h1 className="text-xl p-1 text-start font-bold">
+                <h1 className="text-xl p-1 text-start font-bold mb-4">
                     Upcoming Classes
                 </h1>
 
@@ -188,7 +188,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                 <div className="flex flex-row justify-between gap-6">
                     {upcomingClasses?.length > 0 ? (
                         <div className="flex flex-col">
-                            <div className="w-[800px]">
+                            <div className="w-[870px]">
                                 {ongoingClasses.map((classData: any, index) => (
                                     <ClassCard
                                         classData={classData}
@@ -221,8 +221,8 @@ function Schedule({ className, ...props }: ScheduleProps) {
                         </div>
                     )}
                     {enrolledCourse?.length > 0 && (
-                        <div className="w-1/4 h-full p-6 bg-gray-100 rounded-lg items-center justify-center ">
-                            <h1 className=" text-xl text-start font-semibold">
+                        <div className="w-1/4 h-full px-3 py-4 bg-gray-100 rounded-lg items-center justify-center ">
+                            <h1 className=" text-xl text-start font-semibold px-3">
                                 Attendance
                             </h1>
                             {enrolledCourse?.length > 1 ? (
@@ -231,7 +231,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                         handleCourseChange(e)
                                     }}
                                 >
-                                    <SelectTrigger className="w-[300px] border-0 shadow-none focus:ring-0 bg-gray-100 mb-3">
+                                    <SelectTrigger className="w-[300px] border-0 shadow-none focus:ring-0 focus:border-0 focus:outline-none bg-gray-100 mb-3 focus:!border-none focus:!outline-none">
                                         <SelectValue
                                             placeholder={
                                                 selectedCourse?.name ||
@@ -264,7 +264,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                     {selectedCourse?.name}
                                 </p>
                             )}
-                            <div className=" gap-2 items-center">
+                            <div className="gap-2 items-center px-3">
                                 <div className="flex items-center gap-2">
                                     <div
                                         className={`w-[10px] h-[10px] rounded-full  ${getAttendanceColorClass(
@@ -292,16 +292,16 @@ function Schedule({ className, ...props }: ScheduleProps) {
 
             {courseStarted && (
                 <div className="flex flex-col flex-start mt-6">
-                    <h1 className="text-xl p-1 text-start font-bold">
+                    <h1 className="text-xl p-1 text-start font-bold mb-4">
                         Start From Where You Left Off
                     </h1>
                     <div className="flex flex-row justify-between gap-6">
                         <div className="flex flex-col">
-                            <div className="w-[800px]">
-                                <Card className="w-full mb-3 border-none shadow p-6">
-                                    <div className="flex flex-row justify-between gap-6">
+                            <div className="w-[870px]">
+                                <Card className="w-full mb-3 border-none p-5 shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F]">
+                                    <div className="flex flex-row justify-between items-center gap-6">
                                         <div>
-                                            <div className="flex flex-row gap-6">
+                                            <div className="flex flex-row gap-4">
                                                 {/* <Video size={25} /> */}
                                                 <BookOpenText className="hidden sm:block mt-2" />
                                                 <h1 className="text-lg p-1 text-start font-bold">
@@ -312,20 +312,20 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                                     }
                                                 </h1>
                                             </div>
-                                            <div className="flex flex-row gap-6">
+                                            <div className="flex flex-row gap-4">
                                                 <p className="text-md text-start mt-3 mb-2 ">
                                                     {resumeCourse?.bootcampName}
                                                 </p>
-                                                <span className="w-2 h-2 bg-gray-500 rounded-full mt-5"></span>
+                                                <span className="w-[5px] h-[5px] bg-gray-500 rounded-full self-center"></span>
                                                 <p className="text-md text-start mt-3 mb-2 ">
                                                     {resumeCourse?.moduleName}
                                                 </p>
                                             </div>
                                         </div>
-                                        <div className="text-end">
+                                        <div className="flex item-center text-end">
                                             <Button
                                                 variant={'ghost'}
-                                                className="text-xl font-bold"
+                                                className="text-lg font-bold"
                                             >
                                                 <Link
                                                     className="gap-3 flex items-center text-secondary"
