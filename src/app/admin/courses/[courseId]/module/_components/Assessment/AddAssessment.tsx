@@ -58,6 +58,13 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         number[]
     >([])
 
+    const [saveSettings, setSaveSettings] = useState(false)
+
+    const handleSaveSettings = () => {
+        setQuestionType('settings')
+        setSaveSettings(true)
+    }
+
     useEffect(() => {}, [content])
 
     useEffect(() => {
@@ -122,7 +129,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         setChapterTitle(content.ModuleAssessment.title)
         setSelectedCodingQuestions(content.CodingQuestions || [])
         setSelectedQuizQuestions(content.Quizzes || [])
-        setSelectedOpenEndedQuestions(content.openEndedQuestions || [])
+        setSelectedOpenEndedQuestions(content.OpenEndedQuestions || [])
     }, [content])
 
     useEffect(() => {
@@ -205,7 +212,12 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                 >
                     Settings
                 </Button>
+
+                <Button onClick={handleSaveSettings} className="ml-auto">
+                    Save Assessment
+                </Button>
             </div>
+
             {/* DropDown Filters for questions:- */}
             {questionType !== 'settings' && (
                 <>
@@ -268,6 +280,8 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                 fetchChapterContent={fetchChapterContent}
                                 chapterData={chapterData}
                                 chapterTitle={chapterTitle}
+                                saveSettings={saveSettings}
+                                setSaveSettings={setSaveSettings}
                             />
                         )}
                     </ScrollArea>

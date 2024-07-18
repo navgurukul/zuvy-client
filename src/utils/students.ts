@@ -111,18 +111,100 @@ export function requestFullScreen(element: HTMLElement) {
 }
 
 // tab change event listener
-export function handleVisibilityChange() {
+export function handleVisibilityChange(
+    setTabChangeInstance: any,
+    tabChangeInstance: any,
+    submitAssessment: () => void,
+    isCurrentPageSubmitAssessment: () => Boolean
+) {
     if (document.hidden) {
-        console.log('The Page is no longer visible. Test ended.')
+        const newTabChangeInstance = tabChangeInstance + 1
+        localStorage.setItem(
+            'tabChangeInstance',
+            newTabChangeInstance.toString()
+        )
+        setTabChangeInstance(newTabChangeInstance)
+        toast({
+            title: 'WARNING',
+            description:
+                'You have changed the tab. If you change the tab again, your test will get submitted automatically.',
+            className: 'text-start capitalize border border-destructive',
+        })
+
+        if (newTabChangeInstance > 4) {
+            // Check if the current page is the submitAssessment page
+            if (isCurrentPageSubmitAssessment()) {
+                // Submit the assessment
+                toast({
+                    title: 'Test Ended',
+                    description: 'You have changed the tab multiple times.',
+                    className:
+                        'text-start capitalize border border-destructive',
+                })
+                submitAssessment()
+            }
+        }
     }
 }
 
 // Request full screen as full screen is only allowed by user click
 
-export function handleFullScreenChange() {
+export function handleFullScreenChange(
+    setFullScreenExitInstance: any,
+    fullScreenExitInstance: any,
+    submitAssessment: () => void,
+    isCurrentPageSubmitAssessment: () => Boolean
+) {
     if (!document.fullscreenElement) {
-        alert('User has exited full screen. Test ended.')
-        // Here you could end the test, show a warning, etc.
+        const newFullScreenExitInstance = fullScreenExitInstance + 1
+        localStorage.setItem(
+            'fullScreenExitInstance',
+            newFullScreenExitInstance.toString()
+        )
+        setFullScreenExitInstance(newFullScreenExitInstance)
+        toast({
+            title: 'WARNING',
+            description:
+                'You have exited full screen. If you exit full screen, your test will get submitted automatically.',
+            className: 'text-start capitalize border border-destructive',
+        })
+
+        if (newFullScreenExitInstance > 4) {
+            // Check if the current page is the submitAssessment page
+            if (isCurrentPageSubmitAssessment()) {
+                // Submit the assessment
+                toast({
+                    title: 'Test Ended',
+                    description: 'You have exited full screen multiple times.',
+                    className:
+                        'text-start capitalize border border-destructive',
+                })
+                submitAssessment()
+            }
+        }
+    }
+}
+
+export async function getAssessmentShortInfo(
+    assessmentId: any,
+    moduleID: any,
+    viewcourses: any,
+    chapterId: any,
+    setAssessmentShortInfo: any,
+    setAssessmentOutSourceId: any,
+    setSubmissionId: any
+) {
+    try {
+        const res = await api.get(
+            `Content/students/assessmentId=${assessmentId}?moduleId=${moduleID}&bootcampId=${viewcourses}&chapterId=${chapterId}`
+        )
+        setAssessmentShortInfo(res.data)
+        setAssessmentOutSourceId(res.data.id)
+        if (res.data.submitedOutsourseAssessments.length > 0) {
+            setSubmissionId(res.data.submitedOutsourseAssessments[0].id)
+        }
+    } catch (e) {
+        console.error(e)
     }
 }
 

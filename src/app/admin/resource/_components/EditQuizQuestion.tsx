@@ -78,7 +78,7 @@ const EditQuizQuestion = ({
 }) => {
     const [difficulty, setDifficulty] = useState<string>('Easy')
     const [selectedOption, setSelectedOption] = useState<string>('')
-    const [options, setOptions] = useState<string[]>([''])
+    const [options, setOptions] = useState<string[]>(['', ''])
 
     let selectedQuizQuestion = quizQuestion.filter((question: any) => {
         return question.id === quizQuestionId
@@ -115,7 +115,7 @@ const EditQuizQuestion = ({
     }
 
     const removeOption = (index: number) => {
-        if (options.length > 1) {
+        if (options.length > 2) {
             const newOptions = options.filter((_, i) => i !== index)
             setOptions(newOptions)
             form.setValue('options', newOptions)
@@ -143,6 +143,16 @@ const EditQuizQuestion = ({
     }
 
     const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+        const emptyOptions = values.options.some(option => option.trim() === '');
+
+        if (emptyOptions) {
+            toast({
+                title: 'Error',
+                description: 'Options cannot be empty',
+                className: 'text-start capitalize border border-destructive',
+            });
+            return;
+        }
         const optionsObject: { [key: number]: string } = options.reduce(
             (acc, option, index) => {
                 acc[index + 1] = option
@@ -335,7 +345,7 @@ const EditQuizQuestion = ({
                                                     }}
                                                 />
                                             </div>
-                                            {options.length > 1 && (
+                                            {options.length > 2 && index >= 2 && (
                                                 <Button
                                                     variant={'ghost'}
                                                     onClick={() =>

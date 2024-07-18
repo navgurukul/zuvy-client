@@ -14,6 +14,8 @@ import Assignment from '../_components/Assignment'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import { useParams } from 'next/navigation'
 import Assessment from '../_components/Assessment'
+import { getAssessmentShortInfo } from '@/utils/students'
+
 
 interface Chapter {
     id: number
@@ -32,12 +34,16 @@ function Page({ params }: any) {
     const urlParams = new URLSearchParams(window.location.search)
     const nextChapterId = Number(urlParams.get('nextChapterId'))
     // state and variables
-    const [chapters, setChapters] = useState([])
-    const [activeChapter, setActiveChapter] = useState(nextChapterId || 0)
+    const [chapters, setChapters] = useState<any>([])
+    const [activeChapter, setActiveChapter] = useState(0)
     const [topicId, setTopicId] = useState(0)
     const [moduleName, setModuleName] = useState('')
-    const [chapterContent, setChapterContent] = useState({})
-    const [chapterId, setChapterId] = useState<number>(nextChapterId || 0)
+    const [chapterContent, setChapterContent] = useState<any>({})
+    const [chapterId, setChapterId] = useState<number>(0)
+
+    const [assessmentShortInfo, setAssessmentShortInfo] = useState<any>({})
+    const [assessmentOutSourceId, setAssessmentOutSourceId] = useState<any>()
+    const [submissionId, setSubmissionId] = useState<any>()
 
     const crumbs = [
         {
@@ -153,9 +159,15 @@ function Page({ params }: any) {
             case 5:
                 return <Assignment />
             case 6:
-                return <Assessment />
-            // default:
-            //     return <h1>Create New Chapter</h1>
+                return (
+                    <Assessment
+                        assessmentShortInfo={assessmentShortInfo}
+                        assessmentOutSourceId={assessmentOutSourceId}
+                        submissionId={submissionId}
+                    />
+                )
+            default:
+                return <h1>No Chapters Available Right Now</h1>
         }
     }
 
@@ -165,6 +177,26 @@ function Page({ params }: any) {
             fetchChapters()
         }
     }, [userID, fetchChapters])
+
+    useEffect(() => {
+        if (chapters.length > 0) {
+            fetchChapterContent(chapters[0]?.id)
+        }
+    }, [chapters])
+
+    useEffect(() => {
+        if (topicId === 6) {
+            getAssessmentShortInfo(
+                chapterContent?.assessmentId,
+                moduleID,
+                viewcourses,
+                chapterId,
+                setAssessmentShortInfo,
+                setAssessmentOutSourceId,
+                setSubmissionId
+            )
+        }
+    }, [topicId, chapterId])
 
     return (
         <>

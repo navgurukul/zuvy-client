@@ -126,6 +126,36 @@ export const getDeleteStudentStore = create<deleteStudentStore>((set) => ({
 }))
 // ------------------------------
 
+// ------------------------------
+// Define the type for the assessment store
+type assessmentStore = {
+    tabChangeInstance: number
+    setTabChangeInstance: (newValue: number) => void
+    fullScreenExitInstance: number
+    setFullScreenExitInstance: (newValue: number) => void
+    copyPasteAttempt: number
+    setCopyPasteAttempt: (newValue: number) => void
+
+}
+
+export const getAssessmentStore = create<assessmentStore>((set) => ({
+    tabChangeInstance: 0,
+    setTabChangeInstance: (newValue: number) => {
+        set({ tabChangeInstance: newValue })
+    },
+    fullScreenExitInstance: 0,
+    setFullScreenExitInstance: (newValue: number) => {
+        set({ fullScreenExitInstance: newValue })
+    },
+    copyPasteAttempt: 0,
+    setCopyPasteAttempt: (newValue: number) => {
+        set({ copyPasteAttempt: newValue })
+    },
+
+}))
+// ------------------------------
+
+
 type storeStudentData = {
     studentsData: any[]
     setStoreStudentData: (newValue: any[]) => void
@@ -275,59 +305,7 @@ export const getParamBatchId = create<saveParam>((set) => ({
     setIsParamBatchId: (newvalue: number) => {
         set({ paramBatchId: newvalue })
     },
-}))
-type TimerState = {
-    remainingTime: number
-    startTime: number | null
-    interval: number | null
-    startTimer: (duration: number) => void
-    stopTimer: () => void
-    resetTimer: () => void
-}
-
-export const useTimerStore = create<TimerState>(() => {
-    let remainingTime = 0
-    let interval: NodeJS.Timeout | null = null
-    let startTime: number | null = null
-
-    const startTimer = (duration: number) => {
-        startTime = Date.now()
-        interval = setInterval(() => {
-            const newElapsedTime = Math.floor((Date.now() - startTime!) / 1000)
-            const newRemainingTime = Math.max(duration - newElapsedTime, 0)
-            if (newRemainingTime === 0) {
-                if (interval) {
-                    clearInterval(interval)
-                }
-            }
-            remainingTime = newRemainingTime
-        }, 1000)
-    }
-
-    const stopTimer = () => {
-        if (interval) {
-            clearInterval(interval)
-            interval = null
-        }
-    }
-
-    const resetTimer = () => {
-        remainingTime = 0
-        if (interval) {
-            clearInterval(interval)
-            interval = null
-        }
-    }
-
-    return {
-        remainingTime,
-        startTime,
-        interval,
-        startTimer,
-        stopTimer,
-        resetTimer,
-    }
-})
+}))  
 
 // ------------------------------
 type editOpenEndedDialogs = {
@@ -349,6 +327,7 @@ export const getEditOpenEndedDialogs = create<editOpenEndedDialogs>((set) => ({
 }))
 
 // ------------------------------
+
 // ------------------------------
 type editCodingQuestionDialogs = {
     isCodingDialogOpen: boolean

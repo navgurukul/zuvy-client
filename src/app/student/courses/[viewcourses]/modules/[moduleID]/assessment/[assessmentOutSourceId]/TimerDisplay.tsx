@@ -1,10 +1,11 @@
 import React from 'react'
-import { useTimerStore } from '@/store/store'
 import { Timer } from 'lucide-react'
 
-const TimerDisplay: React.FC = () => {
-    const remainingTime = useTimerStore((state) => state.remainingTime)
+interface TimerDisplayProps {
+    remainingTime: number
+}
 
+const TimerDisplay: React.FC<TimerDisplayProps> = ({ remainingTime }) => {
     const formatTime = (seconds: number) => {
         const h = Math.floor(seconds / 3600)
             .toString()
@@ -18,7 +19,7 @@ const TimerDisplay: React.FC = () => {
 
     return (
         <div className="flex items-center justify-end gap-2">
-            <Timer size={18} />
+            <Timer size={24} />
             <h1 className="text-right">{formatTime(remainingTime)}</h1>
         </div>
     )

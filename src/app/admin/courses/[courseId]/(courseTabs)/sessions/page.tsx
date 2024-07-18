@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Combobox } from '@/components/ui/combobox'
 import ClassCard from '../../_components/classCard'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
-import CreateSession from './CreateSession'
+import CreateSessionDialog from './CreateSession'
 import { api } from '@/utils/axios.config'
 import { getCourseData, setStoreBatchValue } from '@/store/store'
 import RecordingCard from '@/app/student/courses/[viewcourses]/[recordings]/_components/RecordingCard'
@@ -182,7 +182,7 @@ function Page({ params }: any) {
                                 onChange={handleSetSearch}
                             />
                         </div>
-                        <CreateSession
+                        <CreateSessionDialog
                             courseId={params?.courseId || 0}
                             bootcampData={bootcampData}
                             getClasses={getHandleAllClasses}
@@ -256,7 +256,7 @@ function Page({ params }: any) {
                                         with the learners for course lessons or
                                         doubts
                                     </p>
-                                    <CreateSession
+                                    <CreateSessionDialog
                                         courseId={params.courseId || 0}
                                         bootcampData={bootcampData}
                                         getClasses={getHandleAllClasses}
