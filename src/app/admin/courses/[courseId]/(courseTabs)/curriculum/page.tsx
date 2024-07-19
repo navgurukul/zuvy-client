@@ -269,6 +269,7 @@ function Page() {
                             handleTimeAllotedChange={handleTimeAllotedChange}
                             handleTypeChange={handleTypeChange}
                             typeId={typeId}
+                            setTypeId={setTypeId}
                         />
                     </Dialog>
                 </div>
@@ -284,6 +285,7 @@ function Page() {
                     handleTimeAllotedChange={handleTimeAllotedChange}
                     handleTypeChange={handleTypeChange}
                     typeId={typeId}
+                    setTypeId={setTypeId}
                 />
             </Dialog>
             {loading ? (
@@ -385,6 +387,7 @@ function Page() {
                                     timeData={timeData}
                                     handleTypeChange={handleTypeChange}
                                     typeId={typeId}
+                                    setTypeId={setTypeId}
                                 />
                             </Dialog>
                         </div>

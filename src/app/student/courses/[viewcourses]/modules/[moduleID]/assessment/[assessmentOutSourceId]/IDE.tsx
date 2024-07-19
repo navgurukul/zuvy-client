@@ -15,7 +15,7 @@ import {
     ResizableHandle,
 } from '@/components/ui/resizable'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Code, Lock, Play, Upload } from 'lucide-react'
+import { ChevronLeft, Code, Lock, Play, Upload } from 'lucide-react'
 import { useLazyLoadedStudentData } from '@/store/store'
 import { api } from '@/utils/axios.config'
 import Editor from '@monaco-editor/react'
@@ -43,7 +43,7 @@ interface questionDetails {
 
 interface IDEProps {
     params: { editor: string }
-    onBack?: () => void
+onBack?: () => void
     remainingTime?: any
     assessmentSubmitId?: number
     selectedCodingOutsourseId?: number
@@ -194,7 +194,7 @@ const IDE: React.FC<IDEProps> = ({
     return (
         <div>
             <div className="flex justify-between mb-2">
-                <div>
+                {/* <div>
                     <Button variant="ghost" size="icon" onClick={onBack}>
                         <ArrowLeft className="h-5 w-5" />
                     </Button>
@@ -203,7 +203,11 @@ const IDE: React.FC<IDEProps> = ({
                         assessmentSubmissionId={assessmentSubmitId}
                         selectedCodingOutsourseId={selectedCodingOutsourseId}
                     />
-                </div>
+                </div> */}
+                <div><Button variant="ghost" size="icon" onClick={onBack}>
+                        <ChevronLeft fontSize={24}/>
+                    </Button></div>
+                    <div className='font-bold text-xl'><TimerDisplay remainingTime={remainingTime} /></div>
                 <div>
                     <Button
                         onClick={(e) => handleSubmit(e, 'run')}
@@ -220,7 +224,6 @@ const IDE: React.FC<IDEProps> = ({
                         <Upload size={20} />
                         <span className="ml-2 text-lg font-bold">Submit</span>
                     </Button>
-                    <TimerDisplay remainingTime={remainingTime} />
                 </div>
             </div>
 

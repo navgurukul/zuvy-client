@@ -53,7 +53,7 @@ const CurricullumCard = ({
     // states and variables
     const router = useRouter()
     const timeAllotedInWeeks = Math.round(timeAlloted / 604800)
-    const timeAllotedInDays = Math.round(timeAlloted / 86400)
+    // const timeAllotedInDays = Math.round(timeAlloted / 86400)
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
 
     // functions
@@ -116,15 +116,9 @@ const CurricullumCard = ({
                     <div className="flex  items-center justify-start gap-x-2 ">
                         <Clock1 size={15} />
                         <p className="text-md font-semibold capitalize text-gray-600">
-                            {timeAllotedInWeeks < 1
-                                ? `${timeAllotedInDays} ${
-                                      timeAllotedInDays === 1 ? 'day' : 'days'
-                                  }`
-                                : `${
-                                      timeAllotedInWeeks == 1
-                                          ? '1 week'
-                                          : `${timeAllotedInWeeks} weeks`
-                                  }`}
+                            {timeAllotedInWeeks > 1
+                                ? timeAllotedInWeeks + ' Weeks'
+                                : timeAllotedInWeeks + ' Week'}
                         </p>
                     </div>
                     {articlesCount > 0 ? (

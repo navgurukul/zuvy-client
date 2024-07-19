@@ -1,5 +1,4 @@
-import React from 'react'
-
+import React, { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import {
     DialogClose,
@@ -11,7 +10,6 @@ import {
 
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 
 interface newModuleDialogProps {
     moduleData: {
@@ -32,6 +30,7 @@ interface newModuleDialogProps {
     ) => void
     handleTypeChange: (event: React.ChangeEvent<HTMLInputElement>) => void
     typeId: number
+    setTypeId: (value: number) => void
 }
 
 const NewModuleDialog: React.FC<newModuleDialogProps> = ({
@@ -44,7 +43,14 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
     handleTimeAllotedChange,
     handleTypeChange,
     typeId,
+    setTypeId,
 }) => {
+    useEffect(() => {
+        if (!editMode) {
+            setTypeId(1)
+        }
+    }, [editMode, setTypeId])
+
     return (
         <DialogContent>
             <DialogHeader>

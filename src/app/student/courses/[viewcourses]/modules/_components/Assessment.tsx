@@ -4,7 +4,6 @@ import React, { useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Clock, Timer } from 'lucide-react'
-import { getAssessmentStore } from '@/store/store'
 
 const Assessment = ({
     assessmentShortInfo,
@@ -19,10 +18,9 @@ const Assessment = ({
     const testDuration = assessmentShortInfo.timeLimit
     // const testDuration = 30
     const { viewcourses, moduleID } = useParams()
-    const {setIsAssessmentSubmitted} = getAssessmentStore()
+
 
     const handleStartAssessment = () => {
-        setIsAssessmentSubmitted(false)
         try {
             const assessmentUrl = `/student/courses/${viewcourses}/modules/${moduleID}/assessment/${assessmentOutSourceId}`
 
@@ -43,6 +41,10 @@ const Assessment = ({
                     'Failed to open the new window. Please allow pop-ups for this site.'
                 )
             }
+            // Reload the browser after 5 seconds
+            setTimeout(() => {
+                window.location.reload();
+            }, 5000)
         } catch (error) {
             console.error('Failed to start assessment:', error)
         }
@@ -61,7 +63,7 @@ const Assessment = ({
         <React.Fragment>
             <div className="flex justify-center">
                 <div className="flex flex-col gap-5 text-left">
-                    <h1 className="font-bold">Testing Your Knowledge</h1>
+                    <h1 className="font-bold">{assessmentShortInfo?.ModuleAssessment?.title}</h1>
                     <div className="mainContainer2 flex gap-5 ">
                         <div className="coding ">
                             <h2 className="font-bold">
@@ -105,7 +107,7 @@ const Assessment = ({
                 </div>
             </div>
             {assessmentShortInfo?.submitedOutsourseAssessments?.[0]
-                ?.submitedAt ? (
+                ?.startedAt ? (
                 <Button className="mt-5" onClick={handleViewResults}>
                     View Results
                 </Button>

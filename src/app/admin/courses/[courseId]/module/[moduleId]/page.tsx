@@ -372,6 +372,7 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                                 <ChapterModal
                                     params={params}
                                     fetchChapters={fetchChapters}
+                                    newChapterOrder={chapterData.length}
                                 />
                             </Dialog>
                         </div>
