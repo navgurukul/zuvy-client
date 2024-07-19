@@ -54,6 +54,7 @@ const AddForm: React.FC<AddFormProps> = ({
         title: '',
         description: '',
     })
+    const [forceUpdate, setForceUpdate] = useState(false)
     const [section, setSection] = useState(
         content.formQuestionDetails.length > 0
             ? content.formQuestionDetails
@@ -63,7 +64,7 @@ const AddForm: React.FC<AddFormProps> = ({
                       typeId: 1,
                       question: 'Question 1',
                       options: ['Op1'],
-                      required: true,
+                      isRequired: true,
                       key: 1,
                   },
               ]
@@ -89,7 +90,7 @@ const AddForm: React.FC<AddFormProps> = ({
             typeId: 1,
             question: 'Question 1',
             options: ['Op1'],
-            required: false,
+            isRequired: false,
             key: newKey,
         }
         setSection([...section, newSection])
@@ -111,61 +112,104 @@ const AddForm: React.FC<AddFormProps> = ({
     // )
 
     //Delete question key wise from section
+    // const deleteQuestion = useCallback(
+    //     async (deleteItem: any) => {
+    //         console.log('section', section)
+    //         console.log('I am Okay!', deleteItem)
+    //         // try {
+    //         if (content.formQuestionDetails.length > 0) {
+    //             const questionIds = [deleteItem.id]
+    //             console.log('I am in If!', questionIds)
+    //             const updatedSection = section.filter(
+    //                 (item: any) => item.id !== deleteItem.id
+    //             )
+    //             console.log('updatedSection', updatedSection)
+    //             setSection(updatedSection)
+    //             // const questionsRespons = await api.delete(
+    //             //     `Content/deleteFormQuestion`,
+    //             //     {
+    //             //         data: { questionIds },
+    //             //     }
+    //             // )
+    //             // console.log('questionsRespons', questionsRespons)
+    //             // toast({
+    //             //     title: 'Success',
+    //             //     description: 'Form Edited Successfully',
+    //             //     className: 'text-start capitalize border border-secondary',
+    //             // })
+    //         } else {
+    //             console.log('I am in else!', deleteItem.key)
+    //             const updatedSection = section.filter(
+    //                 (item: any) => item.key !== deleteItem.key
+    //             )
+    //             console.log('updatedSection', updatedSection)
+    //             setSection(updatedSection)
+    //         }
+    //         // } catch (error: any) {
+    //         //     toast({
+    //         //         title: 'Failed',
+    //         //         description:
+    //         //             error.response?.data?.message || 'An error occurred.',
+    //         //         className:
+    //         //             'text-start capitalize border border-destructive',
+    //         //     })
+    //         // }
+    //     },
+    //     [section]
+    // )
+
+    // const deleteQuestion = useCallback(
+    //     async (deleteItem: any) => {
+    //         // ... existing delete logic
+    //         setSection((prevSection: any) =>
+    //             prevSection.filter((item: any) =>
+    //                 content.formQuestionDetails.length > 0
+    //                     ? item.id !== deleteItem.id
+    //                     : item.key !== deleteItem.key
+    //             )
+    //         )
+
+    //         //   setSection(updatedSection);
+    //         setForceUpdate((prev) => !prev) // Toggle to force re-render
+    //     },
+    //     [section]
+    // )
+
     const deleteQuestion = useCallback(
         async (deleteItem: any) => {
-            console.log('I am Okay!', deleteItem)
-            try {
-                if (content.formQuestionDetails.length > 0) {
-                    const questionIds = [deleteItem.id]
-                    console.log('I am in If!', questionIds)
-                    // const updatedSection = section.filter(
-                    //     (item: any) => item.id !== deleteItem.id
-                    // )
-                    // console.log('updatedSection', updatedSection)
-                    // setSection(updatedSection)
-                    const questionsRespons = await api.delete(
-                        `Content/deleteFormQuestion`,
-                        {
-                            data: { questionIds },
-                        }
-                    )
-                    console.log('questionsRespons', questionsRespons)
-                    toast({
-                        title: 'Success',
-                        description: 'Form Edited Successfully',
-                        className:
-                            'text-start capitalize border border-secondary',
-                    })
-                } else {
-                    console.log('I am in else!', deleteItem.key)
-                    const updatedSection = section.filter(
-                        (item: any) => item.key !== deleteItem.key
-                    )
-                    console.log('updatedSection', updatedSection)
-                    setSection(updatedSection)
-                }
-            } catch (error: any) {
-                toast({
-                    title: 'Failed',
-                    description:
-                        error.response?.data?.message || 'An error occurred.',
-                    className:
-                        'text-start capitalize border border-destructive',
-                })
+            console.log('section before delete:', section)
+            console.log('deleteItem:', deleteItem)
+
+            let updatedSection
+
+            if (content.formQuestionDetails.length > 0) {
+                const questionIds = [deleteItem.id]
+                console.log('Deleting by ID:', questionIds)
+
+                updatedSection = section.filter(
+                    (item: any) => item.id !== deleteItem.id
+                )
+            } else {
+                console.log('Deleting by Key:', deleteItem.key)
+
+                updatedSection = section.filter(
+                    (item: any) => item.key !== deleteItem.key
+                )
             }
+
+            console.log('updatedSection:', updatedSection)
+            setSection(updatedSection)
         },
-        [section]
+        [section, content.formQuestionDetails]
     )
+
+    useEffect(() => {
+        console.log('section state updated:', section)
+    }, [section])
 
     console.log('content', content)
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        const payload = {
-            ...values,
-            questions: section,
-        }
-
-        console.log('section', section)
         const questions = section.map((item: any, index: number) => {
             const options = item.options || {}
             const optionsObject = Object.keys(options).reduce((acc, key) => {
@@ -173,66 +217,66 @@ const AddForm: React.FC<AddFormProps> = ({
                 return acc
             }, {} as { [key: string]: string })
 
-            if (content.formQuestionDetails.length > 0) {
-                const {
-                    questionType,
-                    key,
-                    required,
-                    createdAt,
-                    updatedAt,
-                    usage,
-                    ...rest
-                } = item
+            const { questionType, key, ...rest } = item
 
-                return {
-                    ...rest,
-                    options: optionsObject,
-                }
-            } else {
-                const { questionType, key, required, ...rest } = item
-
-                return {
-                    ...rest,
-                    options: optionsObject,
-                }
+            return {
+                ...rest,
+                options: optionsObject,
             }
         })
 
-        console.log('payload', payload)
-        try {
-            if (content.formQuestionDetails.length > 0) {
-                const questionsRespons = await api.post(`Content/editform`, {
-                    questions,
-                })
-                toast({
-                    title: 'Success',
-                    description: 'Form Edited Successfully',
-                    className: 'text-start capitalize border border-secondary',
-                })
-            } else {
-                const questionsRespons = await api.post(`Content/form`, {
-                    questions,
-                })
+        const formQuestionDto = questions.filter((item: any) => !item.id)
+        const editFormQuestionDto = questions
+            .filter((item: any) => item.id)
+            .map((question: any) => ({
+                id: question.id,
+                typeId: question.typeId,
+                isRequired: question.isRequired,
+                options: question.options,
+                question: question.question,
+            }))
 
-                const questionIds = questionsRespons?.data.result.map(
-                    (item: any) => item.id
-                )
-                const payload = {
-                    ...values,
-                    formQuestions: questionIds,
-                }
-                //Assign form to the chapter
-                const editChapterResponse = await api.put(
-                    `Content/editChapterOfModule/${moduleId}?chapterId=${content.id}`,
-                    payload
-                )
-
-                toast({
-                    title: 'Success',
-                    description: 'Form Created Successfully',
-                    className: 'text-start capitalize border border-secondary',
-                })
+        let payload = {}
+        if (formQuestionDto.length > 0 && editFormQuestionDto.length > 0) {
+            payload = {
+                formQuestionDto: {
+                    questions: formQuestionDto,
+                },
+                editFormQuestionDto: {
+                    questions: editFormQuestionDto,
+                },
             }
+        } else if (formQuestionDto.length > 0) {
+            payload = {
+                formQuestionDto: {
+                    questions: formQuestionDto,
+                },
+            }
+        } else {
+            payload = {
+                editFormQuestionDto: {
+                    questions: editFormQuestionDto,
+                },
+            }
+        }
+
+        console.log('payload', payload)
+        console.log('questions', questions)
+        try {
+            const editChapterResponse = await api.put(
+                `Content/editChapterOfModule/${moduleId}?chapterId=${content.id}`,
+                values
+            )
+
+            const questionsRespons = await api.post(
+                `Content/createAndEditForm/${content.id}`,
+                payload
+            )
+            toast({
+                title: 'Success',
+                description: 'Form Edited Successfully',
+                className: 'text-start capitalize border border-secondary',
+            })
         } catch (error: any) {
             toast({
                 title: 'Failed',

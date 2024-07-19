@@ -85,6 +85,8 @@ const FormSection: React.FC<FormSectionProps> = ({
             : ['']
     )
 
+    console.log('item', item)
+
     // get the section with the index to add rest of the things
     // and the slice the section to add the new object section and set is to setSection
 
@@ -173,7 +175,7 @@ const FormSection: React.FC<FormSectionProps> = ({
         const newSection = [...section]
         newSection[index] = {
             ...newSection[index],
-            required: !newSection[index].required,
+            isRequired: !newSection[index].isRequired,
         }
         setSection(newSection)
     }
@@ -206,6 +208,12 @@ const FormSection: React.FC<FormSectionProps> = ({
             }
         })
     }
+
+    console.log('formData', formData)
+
+    useEffect(() => {
+        console.log('Updated section:', section)
+    }, [section])
 
     return (
         <div key={key}>
@@ -257,7 +265,7 @@ const FormSection: React.FC<FormSectionProps> = ({
                                 Question {index + 1}
                             </FormLabel>
                             <Switch
-                                checked={section[index].required}
+                                checked={section[index].isRequired}
                                 onClick={() => handleRequiredQuestion(index)}
                                 // className="m-1 w-[50px]" // Adjust height as needed
                             />
