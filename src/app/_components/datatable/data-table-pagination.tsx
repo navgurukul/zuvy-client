@@ -79,7 +79,7 @@ export function DataTablePagination<TData>({
 
     return (
         <div className="flex items-center justify-end mt-2 px-2 gap-x-2">
-            <p className="text-sm font-medium">Rows Per Page</p>
+            <p className="text-sm font-medium">Items Per Page</p>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="outline">
