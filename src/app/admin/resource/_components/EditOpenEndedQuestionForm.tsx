@@ -219,6 +219,7 @@ function EditOpenEndedQuestionForm({
                                     </FormLabel>
                                     <FormControl>
                                         <Input
+                                        className='no-spinners'
                                             type="number"
                                             min="0"
                                             placeholder="Enter the Marks for the Question"

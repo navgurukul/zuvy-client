@@ -3,13 +3,19 @@
 import { useLazyLoadedStudentData } from '@/store/store'
 import { api } from '@/utils/axios.config'
 import React, { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { ChevronLeft } from 'lucide-react'
 
-const decodeBase64 = (data: string) => Buffer?.from(data, 'base64').toString('utf-8');
+const decodeBase64 = (data: string) => {
+    if (!data) return '';
+    return Buffer.from(data, 'base64').toString('utf-8');
+};
 
 const CodingSubmissionPage = ({ params }: { params: any }) => {
     const { studentData } = useLazyLoadedStudentData()
     let userID = studentData?.id && studentData?.id
     const [codingSubmissionsData, setCodingSubmissionsData] = useState<any>(null)
+    const router = useRouter()
 
     async function getCodingSubmissionsData(codingOutsourseId: any) {
         try {
@@ -30,15 +36,19 @@ const CodingSubmissionPage = ({ params }: { params: any }) => {
 
     if (!codingSubmissionsData) {
         return <div>Loading...</div>
+    }else if(codingSubmissionsData?.status == 'error'){
+        return <div><div onClick={()=>router.back()} className='cursor-pointer flex justify-start'><ChevronLeft width={24}/> Back</div> {codingSubmissionsData?.message}</div>
     }
 
     const { questionInfo, shapecode } = codingSubmissionsData
 
     return (
+        <>
+        <div onClick={()=>router.back()} className='cursor-pointer flex justify-start'><ChevronLeft width={24}/> Back</div>
         <div className="w-full mx-auto p-4 text-start flex justify-center">
             <div className="grid grid-cols-2 gap-5 w-full max-w-7xl">
                 <div className="bg-white shadow-md rounded-lg p-6">
-                  <h2 className="text-xl font-semibold mb-2">Question Details Below:</h2>
+                    <h2 className="text-xl font-semibold mb-2">Question Details Below:</h2>
                     <h2 className="text-xl font-bold mb-2">{questionInfo?.title}</h2>
                     <p className="text-gray-700 mb-4">{questionInfo?.description}</p>
                     <div className="mb-4">
@@ -59,7 +69,6 @@ const CodingSubmissionPage = ({ params }: { params: any }) => {
                 </div>
                 <div className="bg-white shadow-md rounded-lg p-6">
                     <h3 className="text-xl font-semibold mb-2">Submission Details For The Question:</h3>
-                    <p><strong>Status:</strong> {shapecode?.status.description}</p>
                     <p><strong>Language:</strong> {shapecode?.language.name}</p>
                     <div className="mb-4">
                         <h4 className="text-lg font-semibold">Source Code:</h4>
@@ -81,6 +90,7 @@ const CodingSubmissionPage = ({ params }: { params: any }) => {
                 </div>
             </div>
         </div>
+        </>
     )
 }
 

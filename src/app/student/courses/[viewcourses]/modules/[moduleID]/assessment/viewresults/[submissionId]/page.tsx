@@ -4,7 +4,7 @@ import { toast } from '@/components/ui/use-toast'
 import { cn, difficultyColor } from '@/lib/utils'
 import { useLazyLoadedStudentData } from '@/store/store'
 import { api } from '@/utils/axios.config'
-import { ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
@@ -21,19 +21,54 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
         viewResultsData?.openEndedSubmission?.totalOpenEndedScore || 0
     const quizScore = viewResultsData?.quizSubmission?.quizScore || 0
     const totalQuizScore = viewResultsData?.quizSubmission?.totalQuizScore || 0
+    const [timeTaken, setTimeTaken] = useState<any>()
 
     // functions:
     async function getResults() {
         try {
             const res = await api.get(
                 `tracking/assessment/submissionId=${params.submissionId}`
-            )
-            setViewResultsData(res.data)
-            setAssessmentOutsourseId(res.data.assessmentOutsourseId)
+            );
+    
+            // Parse the timestamps into Date objects
+            const startedAt = new Date(res?.data?.startedAt);
+            const submitedAt = new Date(res?.data?.submitedAt);
+    
+            // Convert Date objects to timestamps
+            const startedAtTime = startedAt.getTime();
+            const submitedAtTime = submitedAt.getTime();
+    
+            // Calculate the time difference in milliseconds
+            const timeTakenMs = submitedAtTime - startedAtTime;
+    
+            // Convert the time difference to seconds
+            const timeTakenSeconds = timeTakenMs / 1000;
+    
+            // Convert the time difference to a more readable format
+            const timeTaken = {
+                seconds: Math.floor(timeTakenSeconds % 60),
+                minutes: Math.floor((timeTakenSeconds / 60) % 60),
+                hours: Math.floor((timeTakenSeconds / 3600) % 24)
+            };
+    
+            // Create the output string based on the hours
+            let output;
+            if (timeTaken.hours > 0) {
+                output = `Time taken: ${timeTaken.hours} hours, ${timeTaken.minutes} minutes, and ${timeTaken.seconds} seconds.`;
+            } else {
+                output = `Time taken: ${timeTaken.minutes} minutes and ${timeTaken.seconds} seconds.`;
+            }
+    
+            // Set the time taken and other state
+            setTimeTaken(output);
+            setViewResultsData(res.data);
+            setAssessmentOutsourseId(res.data.assessmentOutsourseId);
         } catch (e: any) {
-            setShowErrorMessage(e?.response?.data?.message)
+            setShowErrorMessage(e?.response?.data?.message);
         }
     }
+    
+    
 
     function viewQuizSubmission() {
         router.push(
@@ -47,18 +82,18 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
         )
     }
 
-    function viewCodingSubmission(codingOutSourceId:any) {
-        if(codingOutSourceId){
+    function viewCodingSubmission(codingOutSourceId: any) {
+        if (codingOutSourceId) {
 
             router.push(
                 `/student/courses/${params.viewcourses}/modules/${params.moduleID}/assessment/codingresults/${codingOutSourceId}`
             )
-        }else{
-           toast({
-            title: 'Error',
-            description: 'No Coding Submission Found',
-            className: 'text-start capitalize border border-destructive',
-           })
+        } else {
+            toast({
+                title: 'Error',
+                description: 'No Coding Submission Found',
+                className: 'text-start capitalize border border-destructive',
+            })
         }
     }
 
@@ -68,12 +103,14 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
     }, [params.submissionId])
 
     if (!viewResultsData) {
-        return <div>{showErrorMessage}</div>
+        return <div><div onClick={() => router.back()} className='cursor-pointer flex justify-start'><ChevronLeft width={24} /> Back</div>{showErrorMessage}</div>
     }
 
     return (
         <React.Fragment>
+            <div onClick={() => router.back()} className='cursor-pointer flex justify-start'><ChevronLeft width={24} />Back</div>
             <div className="headings mx-auto my-5 max-w-2xl">
+                <div>{timeTaken}</div>
                 <h1 className="text-start text-xl">Coding Challenges</h1>
             </div>
 
@@ -102,14 +139,14 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                             <div className={`text-xl mt-2 text-start `}>
                                 Status: <span className={`ml-2 ${lastSubmission?.status === 'Accepted' ? 'text-green-400' : 'text-destructive'}`}>{lastSubmission?.status}</span>
                             </div>
-                            <div onClick={()=>viewCodingSubmission(lastSubmission?.codingOutsourseId)} className="cursor-pointer mt-4 flex justify-end text-secondary font-bold">
+                            <div onClick={() => viewCodingSubmission(lastSubmission?.codingOutsourseId)} className="cursor-pointer mt-4 flex justify-end text-secondary font-bold">
                                 View Submission <ChevronRight />
                             </div>
                         </div>
                     )
                 })
             ) : (
-                <div className="text-xl mt-2 text-start">
+                <div className="container mx-auto rounded-xl shadow-lg overflow-hidden max-w-2xl min-h-24 mt-4 py-5 text-center">
                     No Coding Questions
                 </div>
             )}
