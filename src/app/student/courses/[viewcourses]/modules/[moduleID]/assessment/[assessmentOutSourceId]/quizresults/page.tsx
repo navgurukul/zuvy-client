@@ -63,7 +63,7 @@ const QuizResults = ({
     }, [params.assessmentOutSourceId])
 
     if (!quizResults?.length) {
-        return <div>No Quiz Questions In This Assessment</div>
+        return <div><div onClick={()=>router.back()} className='cursor-pointer flex justify-start'><ChevronLeft width={24}/>Go Back</div>No Quiz Questions In This Assessment</div>
     }
 
     return (
@@ -100,6 +100,7 @@ const QuizResults = ({
                                             ? 'bg-green-100'
                                             : 'bg-red-100'
                                         : ''
+                                    const textColor = isCorrect && 'text-green-400 font-bold' 
                                     const borderColor = isChosen
                                         ? 'border-black'
                                         : 'border-gray-300'
@@ -108,10 +109,11 @@ const QuizResults = ({
                                         <>
                                         <div
                                             key={key}
-                                            className={`p-2 rounded border ${bgColor} ${borderColor}`}
+                                            className={`p-2 rounded border ${bgColor} ${borderColor} ${textColor}`}
                                         >
                                             {value}
                                         </div>
+                                        <div className='text-destructive'>{result?.submissionsData.length == 0 && `No Option Selected`}</div>
                                         </>
                                     )
                                 }
