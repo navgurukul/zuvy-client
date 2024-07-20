@@ -185,10 +185,10 @@ function Schedule({ className, ...props }: ScheduleProps) {
                     </div>
                 </div> */}
 
-                <div className="flex flex-row justify-between gap-6">
+                <div className="flex flex-row justify-between gap-8">
                     {upcomingClasses?.length > 0 ? (
                         <div className="flex flex-col">
-                            <div className="w-[870px]">
+                            <div className="w-[860px]">
                                 {ongoingClasses.map((classData: any, index) => (
                                     <ClassCard
                                         classData={classData}
@@ -208,7 +208,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                             </div>
                         </div>
                     ) : (
-                        <div className="flex w-full flex-col items-center mt-12">
+                        <div className="flex w-[870px] flex-col items-center mt-12">
                             <Image
                                 src="/no-class.svg"
                                 alt="No classes"
@@ -220,8 +220,18 @@ function Schedule({ className, ...props }: ScheduleProps) {
                             </p>
                         </div>
                     )}
+
+                    {/* <div className="w-1/2 h-full px-3 py-4 bg-gray-100 rounded-lg items-center justify-center ">
+                        <div className="w-[500px] h-full px-3 py-4 bg-gray-100 rounded-lg items-center justify-center ">
+                        */}
                     {enrolledCourse?.length > 0 && (
-                        <div className="w-1/4 h-full px-3 py-4 bg-gray-100 rounded-lg items-center justify-center ">
+                        <div
+                            className={`${
+                                upcomingClasses?.length > 0
+                                    ? 'w-1/2'
+                                    : 'w-[500px]'
+                            } h-full px-3 py-4 bg-gray-100 rounded-lg items-center justify-center`}
+                        >
                             <h1 className=" text-xl text-start font-semibold px-3">
                                 Attendance
                             </h1>
@@ -231,7 +241,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                         handleCourseChange(e)
                                     }}
                                 >
-                                    <SelectTrigger className="w-[300px] border-0 shadow-none focus:ring-0 focus:border-0 focus:outline-none bg-gray-100 mb-3 focus:!border-none focus:!outline-none">
+                                    <SelectTrigger className="w-full border-0 shadow-none focus:ring-0 focus:border-0 focus:outline-none bg-gray-100 mb-3 focus:!border-none focus:!outline-none">
                                         <SelectValue
                                             placeholder={
                                                 selectedCourse?.name ||
@@ -297,7 +307,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                     </h1>
                     <div className="flex flex-row justify-between gap-6">
                         <div className="flex flex-col">
-                            <div className="w-[870px]">
+                            <div className="w-[860px]">
                                 <Card className="w-full mb-3 border-none p-5 shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F]">
                                     <div className="flex flex-row justify-between items-center gap-6">
                                         <div>
