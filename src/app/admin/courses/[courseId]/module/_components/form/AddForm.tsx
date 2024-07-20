@@ -84,7 +84,10 @@ const AddForm: React.FC<AddFormProps> = ({
 
     const addQuestion = () => {
         const newKey =
-            section.length > 0 ? section[section.length - 1].key + 1 : 1
+            section.length > 0 &&
+            section[section.length - 1].hasOwnProperty('key')
+                ? section[section.length - 1].key + 1
+                : 1
         const newSection = {
             questionType: 'Multiple Choice',
             typeId: 1,
@@ -111,96 +114,31 @@ const AddForm: React.FC<AddFormProps> = ({
     //     [section]
     // )
 
-    //Delete question key wise from section
-    // const deleteQuestion = useCallback(
-    //     async (deleteItem: any) => {
-    //         console.log('section', section)
-    //         console.log('I am Okay!', deleteItem)
-    //         // try {
-    //         if (content.formQuestionDetails.length > 0) {
-    //             const questionIds = [deleteItem.id]
-    //             console.log('I am in If!', questionIds)
-    //             const updatedSection = section.filter(
-    //                 (item: any) => item.id !== deleteItem.id
-    //             )
-    //             console.log('updatedSection', updatedSection)
-    //             setSection(updatedSection)
-    //             // const questionsRespons = await api.delete(
-    //             //     `Content/deleteFormQuestion`,
-    //             //     {
-    //             //         data: { questionIds },
-    //             //     }
-    //             // )
-    //             // console.log('questionsRespons', questionsRespons)
-    //             // toast({
-    //             //     title: 'Success',
-    //             //     description: 'Form Edited Successfully',
-    //             //     className: 'text-start capitalize border border-secondary',
-    //             // })
-    //         } else {
-    //             console.log('I am in else!', deleteItem.key)
-    //             const updatedSection = section.filter(
-    //                 (item: any) => item.key !== deleteItem.key
-    //             )
-    //             console.log('updatedSection', updatedSection)
-    //             setSection(updatedSection)
-    //         }
-    //         // } catch (error: any) {
-    //         //     toast({
-    //         //         title: 'Failed',
-    //         //         description:
-    //         //             error.response?.data?.message || 'An error occurred.',
-    //         //         className:
-    //         //             'text-start capitalize border border-destructive',
-    //         //     })
-    //         // }
-    //     },
-    //     [section]
-    // )
-
-    // const deleteQuestion = useCallback(
-    //     async (deleteItem: any) => {
-    //         // ... existing delete logic
-    //         setSection((prevSection: any) =>
-    //             prevSection.filter((item: any) =>
-    //                 content.formQuestionDetails.length > 0
-    //                     ? item.id !== deleteItem.id
-    //                     : item.key !== deleteItem.key
-    //             )
-    //         )
-
-    //         //   setSection(updatedSection);
-    //         setForceUpdate((prev) => !prev) // Toggle to force re-render
-    //     },
-    //     [section]
-    // )
-
+    //Delete question key/id wise from section
     const deleteQuestion = useCallback(
         async (deleteItem: any) => {
             console.log('section before delete:', section)
             console.log('deleteItem:', deleteItem)
 
             let updatedSection
+            let formQuestion = section.filter((item: any) => !item.id)
+            const editFormQuestion = section.filter((item: any) => item.id)
 
-            if (content.formQuestionDetails.length > 0) {
-                const questionIds = [deleteItem.id]
-                console.log('Deleting by ID:', questionIds)
-
-                updatedSection = section.filter(
+            if (deleteItem.id) {
+                updatedSection = editFormQuestion.filter(
                     (item: any) => item.id !== deleteItem.id
                 )
-            } else {
-                console.log('Deleting by Key:', deleteItem.key)
-
-                updatedSection = section.filter(
+                setSection([...updatedSection, ...formQuestion])
+            } else if (deleteItem.key) {
+                updatedSection = formQuestion.filter(
                     (item: any) => item.key !== deleteItem.key
                 )
+                setSection([...editFormQuestion, ...updatedSection])
             }
 
             console.log('updatedSection:', updatedSection)
-            setSection(updatedSection)
         },
-        [section, content.formQuestionDetails]
+        [section]
     )
 
     useEffect(() => {

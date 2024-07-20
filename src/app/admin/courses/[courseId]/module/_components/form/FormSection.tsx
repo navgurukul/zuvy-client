@@ -211,6 +211,31 @@ const FormSection: React.FC<FormSectionProps> = ({
 
     console.log('formData', formData)
 
+    // useEffect(() => {
+    //     console.log('Updated section:', section)
+    // }, [section])
+
+    // const deleteQuestion = useCallback(
+    //     (deleteItem: any) => {
+    //         console.log('deleteItem', deleteItem)
+    //         const newData = section.filter(
+    //             (question: any) => question.key !== deleteItem.key
+    //         )
+    //         console.log('newData', newData)
+
+    //         setSection(newData)
+    //         // setSection((prevOptions: any) => {
+    //         //     const updatedOptions = prevOptions.filter(
+    //         //         (_: any, optionIndex: any) => optionIndex !== deleteIndex
+    //         //     )
+    //         //     return updatedOptions
+    //         // })
+    //     },
+    //     [section]
+    // )
+
+    // console.log('section', section)
+
     useEffect(() => {
         console.log('Updated section:', section)
     }, [section])
