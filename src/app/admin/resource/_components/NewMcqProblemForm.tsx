@@ -262,8 +262,10 @@ const NewMcqProblemForm = ({
                         control={form.control}
                         name="options"
                         render={({ field }) => (
-                            <FormItem className="space-y-3">
-                                <FormLabel className="mt-5">Options</FormLabel>
+                            <FormItem className="space-y-3 ">
+                                <FormLabel className="  mt-5">
+                                    <h1 className="text-left"> Options</h1>
+                                </FormLabel>
                                 <RadioGroup
                                     onValueChange={(value) => {
                                         setSelectedOption(value)
@@ -313,7 +315,7 @@ const NewMcqProblemForm = ({
                                                 >
                                                     <X
                                                         size={20}
-                                                        className="text-secondary"
+                                                        className="text-destructive"
                                                     />
                                                 </Button>
                                             )}
@@ -339,7 +341,7 @@ const NewMcqProblemForm = ({
                     />
 
                     <Button type="submit" className="w-1/2">
-                        Create Quiz Question
+                        Create MCQ
                     </Button>
                 </form>
             </Form>

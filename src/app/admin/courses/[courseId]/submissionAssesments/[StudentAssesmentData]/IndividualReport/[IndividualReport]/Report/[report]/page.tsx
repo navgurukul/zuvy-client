@@ -13,6 +13,8 @@ import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import OverviewComponent from '@/app/admin/courses/[courseId]/_components/OverviewComponent'
 import IndividualStudentAssesment from '@/app/admin/courses/[courseId]/_components/individualStudentAssesment'
 import { Skeleton } from '@/components/ui/skeleton'
+import { toast } from '@/components/ui/use-toast'
+import { getProctoringDataStore } from '@/store/store'
 
 type User = {
     name: string
@@ -69,7 +71,7 @@ type StudentAssessment = {
     user: User
     openEndedSubmission: OpenEndedSubmission[]
     quizSubmission: QuizSubmission[]
-    codingSubmission: CodingSubmission[]
+    PracticeCode: any
     totalQuizzes: number
     totalOpenEndedQuestions: number
     totalCodingQuestions: number
@@ -81,11 +83,54 @@ type newDataType =
           codingSubmission: CodingSubmission[]
       }
     | any
+
+interface Example {
+    input: string[]
+    output: string[]
+}
+
+interface TestCase {
+    input: string[]
+    output: string[]
+}
+
+interface Submission {
+    id: number
+    status: string
+    action: string
+    createdAt: string
+    codingOutsourseId: number
+}
+
+interface CodingQuestion {
+    questionId: number
+    id: number
+    title: string
+    description: string
+    difficulty: string
+    tags: number
+    constraints: string
+    authorId: number
+    inputBase64: string | null
+    examples: Example[]
+    testCases: TestCase[]
+    expectedOutput: string[]
+    solution: string
+    createdAt: string | null
+    updatedAt: string | null
+    usage: number
+    submissions: Submission[]
+}
+
 const Page = ({ params }: { params: any }) => {
     const [individualAssesmentData, setIndividualAssesmentData] =
         useState<StudentAssessment>()
     const [bootcampData, setBootcampData] = useState<any>()
     const [assesmentData, setAssesmentData] = useState<any>()
+    const [codingdata, setCodingData] = useState<CodingQuestion[]>([])
+    const { proctoringData, fetchProctoringData } = getProctoringDataStore()
+    const [loading, setLoading] = useState<boolean>(true)
+
     const crumbs = [
         {
             crumb: 'My Courses',
@@ -134,6 +179,25 @@ const Page = ({ params }: { params: any }) => {
             })
     }, [params.IndividualReport, params.report])
 
+    const getIndividualCodingDataHandler = useCallback(async () => {
+        try {
+            await api
+                .get(
+                    `/tracking/assessment/submissionId=${params.StudentAssesmentData}?studentId=${params.IndividualReport}`
+                )
+                .then((res) => {
+                    setCodingData(res.data.codingSubmission)
+                })
+        } catch (error) {
+            toast({
+                title: 'Error',
+                description: 'Error in fetching the data',
+            })
+        } finally {
+            setLoading(false)
+        }
+    }, [params])
+
     const getStudentAssesmentDataHandler = useCallback(async () => {
         await api
             .get(
@@ -148,10 +212,15 @@ const Page = ({ params }: { params: any }) => {
         getBootcampHandler()
         getIndividualStudentAssesmentDataHandler()
         getStudentAssesmentDataHandler()
+        getIndividualCodingDataHandler()
+        fetchProctoringData(params.report, params.IndividualReport)
     }, [
         getIndividualStudentAssesmentDataHandler,
         getBootcampHandler,
         getStudentAssesmentDataHandler,
+        getIndividualCodingDataHandler,
+        params,
+        fetchProctoringData,
     ])
 
     const newDatafuntion = (data: StudentAssessment | undefined) => {
@@ -159,14 +228,20 @@ const Page = ({ params }: { params: any }) => {
             return {
                 openEndedSubmission: data.openEndedSubmission,
                 quizSubmission: data.quizSubmission,
-                codingSubmission: data.codingSubmission,
+                codingSubmission: data.PracticeCode,
             }
         }
         return null
     }
 
     const newData: newDataType = newDatafuntion(individualAssesmentData)
-    console.log(params)
+
+    const quizScore = proctoringData?.quizSubmission?.quizScore || 0
+    const totalQuizScore = proctoringData?.quizSubmission?.totalQuizScore || 0
+    const needCodingScore = proctoringData?.PracticeCode?.needCodingScore || 0
+    const totalCodingScore = proctoringData?.PracticeCode?.totalCodingScore || 0
+    const openTotalAttemted =
+        proctoringData?.openEndedSubmission?.openTotalAttemted || 0
     return (
         <>
             {individualAssesmentData ? (
@@ -208,10 +283,10 @@ const Page = ({ params }: { params: any }) => {
                     </div>
                     <h1 className="flex  mb-10 text-gray-600">
                         {individualAssesmentData ? (
-                            <h3>
+                            <p>
                                 Submitted on:{' '}
                                 {formatDate(individualAssesmentData.submitedAt)}
-                            </h3>
+                            </p>
                         ) : (
                             <Skeleton className="h-4 w-[400px]" />
                         )}
@@ -221,24 +296,12 @@ const Page = ({ params }: { params: any }) => {
                 <h1 className="text-start font-bold text-xl ">Overview</h1>
                 {individualAssesmentData ? (
                     <OverviewComponent
-                        totalCodingChallenges={
-                            individualAssesmentData.totalCodingQuestions
-                        }
-                        correctedCodingChallenges={
-                            individualAssesmentData.codingSubmission.length
-                        }
-                        correctedMcqs={
-                            individualAssesmentData.quizSubmission.length
-                        }
-                        totalCorrectedMcqs={
-                            individualAssesmentData.totalQuizzes
-                        }
-                        openEndedCorrect={
-                            individualAssesmentData.openEndedSubmission.length
-                        }
-                        totalOpenEnded={
-                            individualAssesmentData.totalOpenEndedQuestions
-                        }
+                        totalCodingChallenges={totalCodingScore}
+                        correctedCodingChallenges={needCodingScore}
+                        correctedMcqs={quizScore}
+                        totalCorrectedMcqs={totalQuizScore}
+                        openEndedCorrect={1}
+                        totalOpenEnded={openTotalAttemted}
                         score={50}
                         totalScore={100}
                         copyPaste={individualAssesmentData.copyPaste}
@@ -267,21 +330,71 @@ const Page = ({ params }: { params: any }) => {
             <IndividualStudentAssesment /> */}
                 <div className="grid grid-cols-1   gap-20 mt-4 md:mt-8 md:grid-cols-2">
                     {newData ? (
-                        Object.keys(newData).map((key: string, index) => (
-                            <div key={index}>
-                                <h2 className="text-md capitalize text-start mb-3 font-semibold text-gray-800  dark:text-white ">
-                                    {key}
-                                </h2>
-                                {newData[key].map((data: newDataType) => (
-                                    <div key={key}>
+                        <>
+                            <div className="w-full">
+                                <h1 className="text-left font-semibold ">
+                                    {' '}
+                                    Coding Submission
+                                </h1>
+                                {codingdata.length > 0 ? (
+                                    codingdata.map((data, index) => (
                                         <IndividualStudentAssesment
+                                            key={data.id}
                                             data={data}
+                                            params={params}
+                                            type={'codingSubmission'}
+                                            codingOutsourseId={
+                                                data.submissions[0]
+                                                    ?.codingOutsourseId
+                                            }
                                         />
-                                    </div>
-                                ))}
+                                    ))
+                                ) : (
+                                    <p className="text-left py-20 font-semibold">
+                                        This student have not submitted any
+                                        coding question .
+                                    </p>
+                                )}
                             </div>
-                        ))
+                            <div className="w-full">
+                                <h1 className="text-left font-semibold ">
+                                    {' '}
+                                    Quiz Submission
+                                </h1>
+                                <IndividualStudentAssesment
+                                    data={[]}
+                                    params={params}
+                                    type={'quizSubmission'}
+                                />
+                            </div>
+                            <div className="w-full">
+                                <h1 className="text-left font-semibold ">
+                                    {' '}
+                                    Open Ended Questions
+                                </h1>
+                                <IndividualStudentAssesment
+                                    data={[]}
+                                    params={params}
+                                    type={'openEndedSubmission'}
+                                />
+                            </div>
+                        </>
                     ) : (
+                        // Object.keys(newData).map((key: string, index) => (
+                        //     <div key={index}>
+                        //         <h2 className="text-md capitalize text-start mb-3 font-semibold text-gray-800  dark:text-white ">
+                        //             {key}
+                        //         </h2>
+                        //         {newData[key].map((data: newDataType) => (
+                        //             <div key={key}>
+                        //                 <IndividualStudentAssesment
+                        //                     data={data}
+                        //                     type={key}
+                        //                 />
+                        //             </div>
+                        //         ))}
+                        //     </div>
+                        // ))
                         <div className="absolute w-full flex justify-start items-center">
                             <div className="grid grid-cols-1   gap-20 mt-4 md:mt-8 md:grid-cols-2 ">
                                 <div>

@@ -9,7 +9,7 @@ import ClassCard from '../../_components/classCard'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import CreateSessionDialog from './CreateSession'
 import { api } from '@/utils/axios.config'
-import { getCourseData } from '@/store/store'
+import { getCourseData, setStoreBatchValue } from '@/store/store'
 import RecordingCard from '@/app/student/courses/[viewcourses]/[recordings]/_components/RecordingCard'
 import { OFFSET, POSITION } from '@/utils/constant'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
@@ -38,6 +38,7 @@ interface State {
 
 function Page({ params }: any) {
     const [classes, setClasses] = useState<any[]>([])
+    const { setbatchValueData } = setStoreBatchValue()
     const [position, setPosition] = useState(POSITION)
     const [bootcampData, setBootcampData] = useState<any>([])
     const [batchId, setBatchId] = useState<any>()
@@ -53,6 +54,7 @@ function Page({ params }: any) {
 
     const handleComboboxChange = (value: string) => {
         setBatchId(value)
+        setbatchValueData(value)
     }
     const handleTabChange = (tab: string) => {
         setActiveTab(tab)

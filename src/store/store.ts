@@ -2,6 +2,7 @@ import { set } from 'date-fns'
 import { create } from 'zustand'
 import { useEffect } from 'react'
 import { api } from '@/utils/axios.config'
+import { string } from 'zod'
 
 type CounterStore = {
     studentData: {
@@ -164,6 +165,17 @@ export const getStoreStudentData = create<storeStudentData>((set) => ({
     studentsData: [],
     setStoreStudentData: (newValue: any[]) => {
         set({ studentsData: newValue })
+    },
+}))
+type storeBatchValue = {
+    batchValueData: any
+    setbatchValueData: (newValue: any) => void
+}
+
+export const setStoreBatchValue = create<storeBatchValue>((set) => ({
+    batchValueData: '',
+    setbatchValueData: (newValue: any) => {
+        set({ batchValueData: newValue })
     },
 }))
 
@@ -410,3 +422,25 @@ export const useLazyLoadedStudentData = () => {
         setAnotherStudentState,
     }
 }
+
+type proctoringDataType = {
+    proctoringData: any
+    setproctoringData: (newValue: any) => void
+    fetchProctoringData: (submissionId: string, studentId: string) => void
+}
+
+export const getProctoringDataStore = create<proctoringDataType>((set) => ({
+    proctoringData: {},
+    setproctoringData: (newValue: any) => {
+        set({ proctoringData: newValue })
+    },
+    fetchProctoringData: async (submissionId, studentId) => {
+        await api
+            .get(
+                `/tracking/assessment/submissionId=${submissionId}?studentId=${studentId}`
+            )
+            .then((res) => {
+                set({ proctoringData: res.data })
+            })
+    },
+}))
