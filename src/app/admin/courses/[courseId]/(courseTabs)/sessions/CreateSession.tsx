@@ -176,7 +176,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                 description: 'Session created successfully',
                 variant: 'default',
                 className: 'text-start capitalize border border-secondary',
-            });
+            })
             toggleForm()
             props.getClasses()
         } else {
@@ -185,7 +185,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                 description: res.data.message,
                 variant: 'default',
                 className: 'text-start capitalize border border-secondary',
-            });
+            })
         }
     }
 
@@ -511,7 +511,11 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                             placeholder="Total Classes"
                                             type="number"
                                             {...field}
-                                            onChange={(e) => field.onChange(Number(e.target.value))}
+                                            onChange={(e) =>
+                                                field.onChange(
+                                                    Number(e.target.value)
+                                                )
+                                            }
                                         />
                                     </FormControl>
                                     <FormMessage />
