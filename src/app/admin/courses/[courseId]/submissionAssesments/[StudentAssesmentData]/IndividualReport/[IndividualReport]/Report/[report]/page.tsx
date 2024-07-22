@@ -236,11 +236,12 @@ const Page = ({ params }: { params: any }) => {
 
     const newData: newDataType = newDatafuntion(individualAssesmentData)
 
-    const {
-        quizSubmission: { quizScore, totalQuizScore },
-        PracticeCode: { needCodingScore, totalCodingScore },
-        openEndedSubmission: { openTotalAttemted },
-    } = proctoringData
+    const quizScore = proctoringData?.quizSubmission?.quizScore || 0
+    const totalQuizScore = proctoringData?.quizSubmission?.totalQuizScore || 0
+    const needCodingScore = proctoringData?.PracticeCode?.needCodingScore || 0
+    const totalCodingScore = proctoringData?.PracticeCode?.totalCodingScore || 0
+    const openTotalAttemted =
+        proctoringData?.openEndedSubmission?.openTotalAttemted || 0
     return (
         <>
             {individualAssesmentData ? (
@@ -295,9 +296,7 @@ const Page = ({ params }: { params: any }) => {
                 <h1 className="text-start font-bold text-xl ">Overview</h1>
                 {individualAssesmentData ? (
                     <OverviewComponent
-                        totalCodingChallenges={
-                            individualAssesmentData.totalCodingQuestions
-                        }
+                        totalCodingChallenges={totalCodingScore}
                         correctedCodingChallenges={needCodingScore}
                         correctedMcqs={quizScore}
                         totalCorrectedMcqs={totalQuizScore}

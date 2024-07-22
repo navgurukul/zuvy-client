@@ -77,7 +77,7 @@ const Page = ({ params }: { params: any }) => {
         return () => clearTimeout(timer)
     }, [])
 
-    console.log(submissions)
+    console.log(assesments)
     return (
         <div className="">
             {loading ? (
@@ -175,11 +175,11 @@ const Page = ({ params }: { params: any }) => {
                         {assesments ? (
                             Object.keys(assesments).length > 0 ? (
                                 Object.keys(assesments).map(
-                                    (key, index) =>
+                                    (key) =>
                                         key !== 'totalStudents' && (
-                                            <div key={index}>
-                                                <h2 className="text-md text-start mb-3 font-semibold text-gray-800  dark:text-white ">
-                                                    Module--{key}
+                                            <div key={key}>
+                                                <h2 className="text-md text-start mb-3 font-semibold text-gray-800 dark:text-white">
+                                                    Module - {key}
                                                 </h2>
                                                 {assesments[key].map(
                                                     (assessment: any) => (
