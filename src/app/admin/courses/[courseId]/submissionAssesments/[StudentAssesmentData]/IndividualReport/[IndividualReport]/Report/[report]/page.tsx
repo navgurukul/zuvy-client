@@ -336,18 +336,25 @@ const Page = ({ params }: { params: any }) => {
                                     {' '}
                                     Coding Submission
                                 </h1>
-                                {codingdata.map((data, index) => (
-                                    <IndividualStudentAssesment
-                                        key={data.id}
-                                        data={data}
-                                        params={params}
-                                        type={'codingSubmission'}
-                                        codingOutsourseId={
-                                            data.submissions[0]
-                                                .codingOutsourseId
-                                        }
-                                    />
-                                ))}
+                                {codingdata.length > 0 ? (
+                                    codingdata.map((data, index) => (
+                                        <IndividualStudentAssesment
+                                            key={data.id}
+                                            data={data}
+                                            params={params}
+                                            type={'codingSubmission'}
+                                            codingOutsourseId={
+                                                data.submissions[0]
+                                                    ?.codingOutsourseId
+                                            }
+                                        />
+                                    ))
+                                ) : (
+                                    <p className="text-left py-20 font-semibold">
+                                        This student have not submitted any
+                                        coding question .
+                                    </p>
+                                )}
                             </div>
                             <div className="w-full">
                                 <h1 className="text-left font-semibold ">
