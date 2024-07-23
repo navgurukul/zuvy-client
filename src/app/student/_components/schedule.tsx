@@ -168,7 +168,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
 
     return (
         <div>
-            <div className="flex flex-col flex-start mt-6">
+            <div className="flex flex-col items-start mt-6">
                 <h1 className="text-xl p-1 text-start font-bold mb-4">
                     Upcoming Classes
                 </h1>
@@ -185,30 +185,26 @@ function Schedule({ className, ...props }: ScheduleProps) {
                     </div>
                 </div> */}
 
-                <div className="flex flex-row justify-between gap-8">
+                <div className="w-full flex flex-col items-center lg:flex-row lg:justify-between gap-8">
                     {upcomingClasses?.length > 0 ? (
-                        <div className="flex flex-col">
-                            <div className="w-[860px]">
-                                {ongoingClasses.map((classData: any, index) => (
-                                    <ClassCard
-                                        classData={classData}
-                                        classType={classData.status}
-                                        key={index}
-                                    />
-                                ))}
-                                {upcomingClasses.map(
-                                    (classData: any, index) => (
-                                        <ClassCard
-                                            classData={classData}
-                                            classType={classData.status}
-                                            key={index}
-                                        />
-                                    )
-                                )}
-                            </div>
+                        <div className="flex flex-col lg:w-[860px]">
+                            {ongoingClasses.map((classData: any, index) => (
+                                <ClassCard
+                                    classData={classData}
+                                    classType={classData.status}
+                                    key={index}
+                                />
+                            ))}
+                            {upcomingClasses.map((classData: any, index) => (
+                                <ClassCard
+                                    classData={classData}
+                                    classType={classData.status}
+                                    key={index}
+                                />
+                            ))}
                         </div>
                     ) : (
-                        <div className="flex w-[870px] flex-col items-center mt-12">
+                        <div className="flex flex-col items-center mt-12 lg:w-[870px]">
                             <Image
                                 src="/no-class.svg"
                                 alt="No classes"
@@ -218,81 +214,6 @@ function Schedule({ className, ...props }: ScheduleProps) {
                             <p className="text-lg mt-3 text-center">
                                 There are no upcoming classes
                             </p>
-                        </div>
-                    )}
-
-                    {/* <div className="w-1/2 h-full px-3 py-4 bg-gray-100 rounded-lg items-center justify-center ">
-                        <div className="w-[500px] h-full px-3 py-4 bg-gray-100 rounded-lg items-center justify-center ">
-                        */}
-                    {enrolledCourse?.length > 0 && (
-                        <div
-                            className={`${
-                                upcomingClasses?.length > 0
-                                    ? 'w-1/2'
-                                    : 'w-[500px]'
-                            } h-full px-3 py-4 bg-gray-100 rounded-lg items-center justify-center`}
-                        >
-                            <h1 className=" text-xl text-start font-semibold px-3">
-                                Attendance
-                            </h1>
-                            {enrolledCourse?.length > 1 ? (
-                                <Select
-                                    onValueChange={(e) => {
-                                        handleCourseChange(e)
-                                    }}
-                                >
-                                    <SelectTrigger className="w-full border-0 shadow-none focus:ring-0 focus:border-0 focus:outline-none bg-gray-100 mb-3 focus:!border-none focus:!outline-none">
-                                        <SelectValue
-                                            placeholder={
-                                                selectedCourse?.name ||
-                                                'Select a course'
-                                            }
-                                        />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            <SelectLabel>Courses</SelectLabel>
-                                            {enrolledCourse?.map(
-                                                (course: any) => (
-                                                    <SelectItem
-                                                        key={course.id}
-                                                        value={course.id.toString()}
-                                                        className="text-md text-start font-semibold"
-                                                    >
-                                                        {/* Font size not getting increased */}
-                                                        <h1 className="text-md text-start font-semibold">
-                                                            {course.name}
-                                                        </h1>
-                                                    </SelectItem>
-                                                )
-                                            )}
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
-                            ) : (
-                                <p className="text-sm text-start p-3 w-[300px]">
-                                    {selectedCourse?.name}
-                                </p>
-                            )}
-                            <div className="gap-2 items-center px-3">
-                                <div className="flex items-center gap-2">
-                                    <div
-                                        className={`w-[10px] h-[10px] rounded-full  ${getAttendanceColorClass(
-                                            attendanceData[0]?.attendance
-                                        )}`}
-                                    />
-                                    <h1>{attendanceData[0]?.attendance}%</h1>
-                                </div>
-                                <div className="flex">
-                                    <p className="text-md font-semibold">
-                                        {' '}
-                                        {
-                                            attendanceData[0]?.attendedClasses
-                                        } of {attendanceData[0]?.totalClasses}{' '}
-                                        Classes Attended
-                                    </p>
-                                </div>
-                            </div>
                         </div>
                     )}
                 </div>
@@ -305,17 +226,15 @@ function Schedule({ className, ...props }: ScheduleProps) {
                     <h1 className="text-xl p-1 text-start font-bold mb-4">
                         Start From Where You Left Off
                     </h1>
-                    <div className="flex flex-row justify-between gap-6">
+                    <div className="hidden lg:flex flex-row justify-between gap-6">
                         <div className="flex flex-col">
-                            <div className="w-[860px]">
+                            <div className="lg:w-[860px]">
                                 <Card className="w-full mb-3 border-none p-5 shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F]">
                                     <div className="flex flex-row justify-between items-center gap-6">
                                         <div>
                                             <div className="flex flex-row gap-4">
-                                                {/* <Video size={25} /> */}
                                                 <BookOpenText className="hidden sm:block mt-2" />
                                                 <h1 className="text-lg p-1 text-start font-bold">
-                                                    {/* Video - Intro to Variables */}
                                                     {
                                                         resumeCourse.newChapter
                                                             ?.title
@@ -357,6 +276,49 @@ function Schedule({ className, ...props }: ScheduleProps) {
                             </div>
                         </div>
                     </div>
+                    <div className="block lg:hidden flex flex-col justify-between gap-6">
+                        <div className="flex flex-col">
+                            <div className="w-full">
+                                <Card className="w-full mb-3 border-none p-5 shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F]">
+                                    <div>
+                                        <div className="flex flex-row gap-4">
+                                            <BookOpenText className="mt-2" />
+                                            <h1 className="text-lg p-1 text-start font-bold">
+                                                {resumeCourse.newChapter?.title}
+                                            </h1>
+                                        </div>
+                                        <div className="flex flex-row">
+                                            <p className="text-md text-start mt-3 mb-2 ">
+                                                {resumeCourse?.bootcampName}
+                                                &nbsp;-&nbsp;
+                                                {resumeCourse?.moduleName}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className=" text-end">
+                                        <Button
+                                            variant={'ghost'}
+                                            className="text-lg font-bold"
+                                        >
+                                            <Link
+                                                className="gap-3 flex items-center text-secondary"
+                                                // href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`}
+                                                href={{
+                                                    pathname: `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`,
+                                                    query: {
+                                                        nextChapterId,
+                                                    },
+                                                }}
+                                            >
+                                                <p>Resume Learning</p>
+                                                <ChevronRight size={15} />
+                                            </Link>
+                                        </Button>
+                                    </div>
+                                </Card>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             )}
 
@@ -368,18 +330,19 @@ function Schedule({ className, ...props }: ScheduleProps) {
         onSelect={setDate}
         className="rounded-md border"
       /> */}
-            <div className="flex flex-col flex-start mt-6">
+            <div className="flex flex-col items-start mt-6">
                 <h1 className="text-xl p-1 text-start font-bold">
                     Upcoming Submissions
                 </h1>
                 {/* <div className="flex flex-row"> */}
-                <div
+                {/* <div
                     className={
                         upcomingClasses?.length < 1
                             ? 'w-[75%]'
                             : 'flex flex-row'
                     }
-                >
+                > */}
+                <div className="w-full flex flex-col items-center lg:flex-row lg:justify-between gap-8">
                     {submission.length > 0 ? (
                         submission.map((data) => {
                             return (
@@ -387,7 +350,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                             )
                         })
                     ) : (
-                        <div className="flex w-full flex-col items-center mt-12">
+                        <div className="flex flex-col items-center mt-12 lg:w-[870px]">
                             <Image
                                 src="/no-submission.svg"
                                 alt="No Submission"
