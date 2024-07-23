@@ -108,7 +108,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
             startTime: '',
             endTime: '',
             batch: '',
-            daysOfWeek: [''],
+            daysOfWeek: [],
             totalClasses: 1,
         },
         mode: 'onChange',
@@ -141,8 +141,8 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
         startTime &&
         endTime &&
         batch &&
-        daysOfWeek.length > 0 &&
-        totalClasses > 0
+        daysOfWeek!.length > 0 &&
+        totalClasses! > 0
     )
     async function onSubmit(values: z.infer<typeof formSchema>) {
         openModal()
@@ -168,24 +168,25 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
             values.startTime
         )
         const endDateTime = combineDateTime(values.startDate, values.endTime)
+        let daysWeek = values.daysOfWeek.filter((day) => { return day !== '' })
 
         const transformedData = {
             title: values.sessionTitle,
             batchId: +values.batch,
-            bootcampId: +props.courseId,
             description: values.description,
             startDateTime: startDateTime,
             endDateTime: endDateTime,
             timeZone: 'Asia/Kolkata',
-            daysOfWeek: values.daysOfWeek,
+            daysOfWeek: daysWeek,
             totalClasses: values.totalClasses,
         }
-
+        
         let res = await api.post(`/classes`, transformedData)
-        if (res.status === 201) {
+        console.log(res,'res')
+        if (res?.data.status === 'error') {
             toast({
                 title: 'Session created',
-                description: 'Session created successfully',
+                description: res.data.message,
                 variant: 'default',
                 className: 'text-start capitalize border border-secondary',
             })
@@ -193,10 +194,10 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
             props.getClasses()
         } else {
             toast({
-                title: 'Session created',
+                title: 'Session error',
                 description: res.data.message,
                 variant: 'default',
-                className: 'text-start capitalize border border-secondary',
+                className: 'text-start capitalize border border-destructive',
             })
         }
     }
@@ -350,8 +351,6 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                 )}
                             />
                         </div>
-                        {/* <div className="flex items-center gap-x-4">
-                        </div> */}
                         <FormField
                             control={form.control}
                             name="batch"
@@ -472,17 +471,17 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                                     field.value.includes(
                                                                         day.value
                                                                     )
-                                                                        ? field.value.filter(
-                                                                              (
-                                                                                  value
-                                                                              ) =>
-                                                                                  value !==
-                                                                                  day.value
-                                                                          )
-                                                                        : [
-                                                                              ...field.value,
-                                                                              day.value,
-                                                                          ]
+                                                                    ? field.value.filter(
+                                                                            (
+                                                                                value
+                                                                            ) =>
+                                                                                value !==
+                                                                                day.value
+                                                                        )
+                                                                    : [
+                                                                            ...field.value,
+                                                                            day.value,
+                                                                        ]
                                                                 form.setValue(
                                                                     'daysOfWeek',
                                                                     newValue
