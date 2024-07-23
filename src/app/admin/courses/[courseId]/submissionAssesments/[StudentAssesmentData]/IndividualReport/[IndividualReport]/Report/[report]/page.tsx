@@ -183,7 +183,7 @@ const Page = ({ params }: { params: any }) => {
         try {
             await api
                 .get(
-                    `/tracking/assessment/submissionId=${params.StudentAssesmentData}?studentId=${params.IndividualReport}`
+                    `/tracking/assessment/submissionId=${params.report}?studentId=${params.IndividualReport}`
                 )
                 .then((res) => {
                     setCodingData(res.data.codingSubmission)
