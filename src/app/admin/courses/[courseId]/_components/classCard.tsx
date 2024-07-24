@@ -31,10 +31,12 @@ function ClassCard({
     classData,
     classType,
     getClasses,
+    activeTab,
 }: {
     classData: any
     classType: any
     getClasses: any
+    activeTab: any
 }) {
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const { setDeleteModalOpen, isDeleteModalOpen } = getDeleteStudentStore()
@@ -42,6 +44,7 @@ function ClassCard({
     const handleOpenDialog = () => setIsDialogOpen(true)
     const handleCloseDialog = () => setIsDialogOpen(false)
 
+    console.log(activeTab)
     const handleDelete = async () => {
         try {
             await api
@@ -66,7 +69,6 @@ function ClassCard({
         }
     }
 
-    console.log(isDialogOpen)
     return (
         <>
             <Card
@@ -124,10 +126,14 @@ function ClassCard({
                 <div className="absolute top-4 right-4">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <MoreVertical
-                                size={20}
-                                className="text-secondary cursor-pointer "
-                            />
+                            {activeTab === 'ongoing' ? (
+                                <></>
+                            ) : (
+                                <MoreVertical
+                                    size={20}
+                                    className="text-secondary cursor-pointer "
+                                />
+                            )}
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-full">
                             <DropdownMenuGroup>
@@ -177,7 +183,7 @@ function ClassCard({
                 isOpen={isDeleteModalOpen}
                 onClose={() => setDeleteModalOpen(false)}
                 onConfirm={handleDelete}
-                modalText="This action will delete the Session Permanently"
+                modalText="This action will Permanatly Delete the Session"
                 modalText2=""
                 input={false}
                 buttonText="Delete Session"

@@ -228,6 +228,7 @@ function Page({ params }: any) {
                                                     getClasses={
                                                         getHandleAllClasses
                                                     }
+                                                    activeTab={activeTab}
                                                 />
                                             )
                                         )}

@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { setHours, setMinutes, setSeconds, setMilliseconds } from 'date-fns'
-import { CalendarIcon, Check, ChevronsUpDown } from 'lucide-react'
+import { CalendarIcon, Check, ChevronsUpDown, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { format, addDays } from 'date-fns'
@@ -172,10 +172,18 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
     const isDayDisabled = (day: string) => {
         const selectedDate = form.watch('startDate')
         if (!selectedDate) return false
+
         const selectedDayIndex = weekDays.findIndex(
             (d) => d.label === format(selectedDate, 'EEEE')
         )
         const dayIndex = weekDays.findIndex((d) => d.label === day)
+
+        const selectedDays = form.watch('daysOfWeek') || []
+        const weekendSelected =
+            selectedDays.includes('Saturday') || selectedDays.includes('Sunday')
+
+        if (weekendSelected) return false
+
         return dayIndex < selectedDayIndex
     }
 
@@ -588,21 +596,21 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                         />
                         <div className="flex justify-end">
                             <DialogClose asChild>
-                                <Button
-                                    disabled={isSubmitDisabled}
-                                    variant={'secondary'}
-                                    onClick={form.handleSubmit(onSubmit)}
-                                    className={`w-1/3`}
-                                >
-                                    {isLoading ? (
-                                        <div className="flex flex-row justify-between items-center">
-                                            <Spinner className="text-secondary h-4 w-4 " />{' '}
-                                            Create Session
-                                        </div>
-                                    ) : (
-                                        'Create Session'
-                                    )}
-                                </Button>
+                                {isLoading ? (
+                                    <Button disabled>
+                                        <RotateCcw className="mr-2 text-black h-4  animate-spin w-1/3" />
+                                        Creating Session
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        disabled={isSubmitDisabled}
+                                        variant={'secondary'}
+                                        onClick={form.handleSubmit(onSubmit)}
+                                        className={`w-1/3`}
+                                    >
+                                        Create Session
+                                    </Button>
+                                )}
                             </DialogClose>
                         </div>
                         <p className="text-left text-red-400">
