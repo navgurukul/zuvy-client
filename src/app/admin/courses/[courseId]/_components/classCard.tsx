@@ -32,11 +32,13 @@ function ClassCard({
     classType,
     getClasses,
     activeTab,
+    studentSide,
 }: {
     classData: any
     classType: any
     getClasses: any
     activeTab: any
+    studentSide: any
 }) {
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const { setDeleteModalOpen, isDeleteModalOpen } = getDeleteStudentStore()
@@ -44,7 +46,6 @@ function ClassCard({
     const handleOpenDialog = () => setIsDialogOpen(true)
     const handleCloseDialog = () => setIsDialogOpen(false)
 
-    console.log(activeTab)
     const handleDelete = async () => {
         try {
             await api
@@ -126,9 +127,7 @@ function ClassCard({
                 <div className="absolute top-4 right-4">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            {activeTab === 'ongoing' ? (
-                                <></>
-                            ) : (
+                            {activeTab === 'ongoing' ? null : (
                                 <MoreVertical
                                     size={20}
                                     className="text-secondary cursor-pointer "

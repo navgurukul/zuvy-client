@@ -229,6 +229,7 @@ function Page({ params }: any) {
                                                         getHandleAllClasses
                                                     }
                                                     activeTab={activeTab}
+                                                    studentSide={false}
                                                 />
                                             )
                                         )}
