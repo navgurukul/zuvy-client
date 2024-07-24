@@ -225,6 +225,11 @@ function Page({ params }: any) {
                                                     classData={classData}
                                                     key={index}
                                                     classType={activeTab}
+                                                    getClasses={
+                                                        getHandleAllClasses
+                                                    }
+                                                    activeTab={activeTab}
+                                                    studentSide={false}
                                                 />
                                             )
                                         )}

@@ -194,6 +194,9 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                         classData={classData}
                                         classType={classData.status}
                                         key={index}
+                                        getClasses={() => console.log('')}
+                                        activeTab={'ongoing'}
+                                        studentSide={true}
                                     />
                                 ))}
                                 {upcomingClasses.map(
@@ -202,6 +205,9 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                             classData={classData}
                                             classType={classData.status}
                                             key={index}
+                                            getClasses={() => console.log('')}
+                                            activeTab={'ongoing'}
+                                            studentSide={true}
                                         />
                                     )
                                 )}

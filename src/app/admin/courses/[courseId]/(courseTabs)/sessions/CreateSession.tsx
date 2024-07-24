@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { setHours, setMinutes, setSeconds, setMilliseconds } from 'date-fns'
-import { CalendarIcon, Check, ChevronsUpDown } from 'lucide-react'
+import { CalendarIcon, Check, ChevronsUpDown, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { format, addDays } from 'date-fns'
@@ -61,9 +61,6 @@ const formSchema = z
         startDate: z.date({
             required_error: 'A start date is required.',
         }),
-        endDate: z.date({
-            required_error: 'A start date is required.',
-        }),
         startTime: z.string().min(1, {
             message: 'Start Time is required',
         }),
@@ -73,17 +70,24 @@ const formSchema = z
         batch: z.string({
             required_error: 'Please select a Batch.',
         }),
+        daysOfWeek: z.array(z.string()).nonempty({
+            message: 'Please select at least one day',
+        }),
+        totalClasses: z.number().min(1, {
+            message: 'Total Classes must be at least 1.',
+        }),
     })
-    .refine((data) => data.startDate <= data.endDate, {
-        message: 'Start date cannot be after end date',
-        path: ['endDate'],
+    .refine((data) => data.startTime <= data.endTime, {
+        message: 'Start Time cannot be after end Time',
+        path: ['endTime'],
     })
 
 const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
     const [isLoading, setIsLoading] = useState<boolean>(false)
+
     const [isOpen, setIsOpen] = useState(false)
     const [formIsOpen, setFormIsOpen] = useState<boolean>(false)
-    const { batchValueData } = setStoreBatchValue()
+    // const { batchValueData } = setStoreBatchValue()
 
     const toggleForm = () => {
         setFormIsOpen(!formIsOpen)
@@ -102,37 +106,70 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                 setMinutes(setSeconds(setMilliseconds(new Date(), 0), 0), 0),
                 0
             ),
-            endDate: setHours(
-                setMinutes(setSeconds(setMilliseconds(new Date(), 0), 0), 0),
-                0
-            ),
             startTime: '',
             endTime: '',
             batch: '',
+            daysOfWeek: [],
+            totalClasses: 0,
         },
         mode: 'onChange',
     })
+
+    const weekDays = useMemo(
+        () => [
+            { value: 'Sunday', label: 'Sunday' },
+            { value: 'Monday', label: 'Monday' },
+            { value: 'Tuesday', label: 'Tuesday' },
+            { value: 'Wednesday', label: 'Wednesday' },
+            { value: 'Thursday', label: 'Thursday' },
+            { value: 'Friday', label: 'Friday' },
+            { value: 'Saturday', label: 'Saturday' },
+        ],
+        []
+    )
+    useEffect(() => {
+        form.setValue('sessionTitle', '')
+        form.setValue('description', '')
+        form.setValue('startDate', new Date())
+        form.setValue('startTime', '')
+        form.setValue('endTime', '')
+        form.setValue('batch', '')
+        form.setValue('daysOfWeek', [''])
+        form.setValue('totalClasses', 1)
+    }, [formIsOpen, form])
+    useEffect(() => {
+        const selectedDate = form.watch('startDate')
+        if (selectedDate) {
+            const dayOfWeek = format(selectedDate, 'EEEE')
+            const dayValue =
+                weekDays.find((day) => day.label === dayOfWeek)?.value || ''
+            if (dayValue) {
+                form.setValue('daysOfWeek', [dayValue])
+            }
+        }
+    }, [form.watch('startDate')])
 
     const {
         sessionTitle,
         description,
         startDate,
-        endDate,
         startTime,
         endTime,
         batch,
+        daysOfWeek,
+        totalClasses,
     } = form.watch()
-    const isSubmitDisabled =
-        isLoading ||
-        !(
-            sessionTitle &&
-            description &&
-            startDate &&
-            endDate &&
-            startTime &&
-            endTime &&
-            batch
-        )
+    const isSubmitDisabled = !(
+        sessionTitle &&
+        description &&
+        startDate &&
+        startTime &&
+        endTime &&
+        batch &&
+        (daysOfWeek?.length || 0) > 0 &&
+        totalClasses
+    )
+
     async function onSubmit(values: z.infer<typeof formSchema>) {
         openModal()
         setIsLoading(true)
@@ -156,60 +193,48 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
             values.startDate,
             values.startTime
         )
-        const endDateTime = combineDateTime(values.endDate, values.endTime)
+        const endDateTime = combineDateTime(values.startDate, values.endTime)
+        let daysWeek = values.daysOfWeek.filter((day) => {
+            return day !== ''
+        })
 
         const transformedData = {
             title: values.sessionTitle,
             batchId: +values.batch,
-            bootcampId: +props.courseId,
             description: values.description,
             startDateTime: startDateTime,
             endDateTime: endDateTime,
             timeZone: 'Asia/Kolkata',
+            daysOfWeek: daysWeek,
+            totalClasses: values.totalClasses,
         }
 
-        // console.log(transformedData)
-        await api.post(`/classes`, transformedData).then((res) => {
-            toast({
-                title: res.data.status,
-                description: res.data.message,
-                variant: 'default',
-                className: 'text-start capitalize border border-secondary',
+        try {
+            await api.post(`/classes`, transformedData).then((res) => {
+                toast({
+                    title: res.data.status,
+                    description: res.data.message,
+                    variant: 'default',
+                    className: 'text-start capitalize border border-secondary',
+                })
+
+                props.getClasses()
+                toggleForm()
             })
-            props.getClasses()
-        })
-
-        closeModal()
-        setIsLoading(false)
+        } catch (error) {
+            console.error('An error occurred:', error)
+            toast({
+                title: 'Network error',
+                description:
+                    'Unable to create session. Please try again later.',
+                variant: 'destructive',
+                className: 'text-start capitalize border border-destructive',
+            })
+        } finally {
+            setIsOpen(false)
+            setIsLoading(false)
+        }
     }
-
-    function generateUniqueLabels(data: any) {
-        const labelCount: { [key: string]: number } = {}
-        return data.map((item: any) => {
-            if (labelCount[item.label]) {
-                labelCount[item.label]++
-                item.label = `${item.label} (${labelCount[item.label]})`
-            } else {
-                labelCount[item.label] = 1
-            }
-            return item
-        })
-    }
-
-    const uniqueLabelData = generateUniqueLabels(props.bootcampData)
-    useEffect(() => {
-        form.setValue('sessionTitle', '')
-        form.setValue('description', '')
-        form.setValue('startDate', new Date())
-        form.setValue('endDate', new Date())
-        form.setValue('startTime', '')
-        form.setValue('endTime', '')
-        form.setValue('batch', '')
-
-        uniqueLabelData.length === 1
-            ? form.setValue('batch', uniqueLabelData[0].value)
-            : form.setValue('batch', batchValueData)
-    }, [formIsOpen, form, batchValueData])
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -223,7 +248,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
             </DialogTrigger>
             <DialogOverlay />
 
-            <DialogContent className="">
+            <DialogContent className="w-full p-3">
                 <DialogHeader className="text-lg font-semibold">
                     New Session
                 </DialogHeader>
@@ -236,7 +261,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                 <Form {...form}>
                     <form
                         onSubmit={form.handleSubmit(onSubmit)}
-                        className="space-y-4"
+                        className="w-full flex flex-col gap-4 "
                     >
                         <FormField
                             control={form.control}
@@ -275,8 +300,10 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                 control={form.control}
                                 name="startDate"
                                 render={({ field }) => (
-                                    <FormItem className="flex flex-col text-left w-1/2">
-                                        <FormLabel>Start Date</FormLabel>
+                                    <FormItem className="flex flex-col text-left">
+                                        <FormLabel>
+                                            Classes start date
+                                        </FormLabel>
                                         <Popover>
                                             <PopoverTrigger asChild>
                                                 <FormControl>
@@ -287,16 +314,12 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                             'text-muted-foreground'
                                                         }`}
                                                     >
-                                                        {field.value ? (
-                                                            format(
-                                                                field.value,
-                                                                'PPP'
-                                                            )
-                                                        ) : (
-                                                            <span>
-                                                                Pick a date
-                                                            </span>
-                                                        )}
+                                                        {field.value
+                                                            ? format(
+                                                                  field.value,
+                                                                  'EEEE, MMMM d, yyyy'
+                                                              )
+                                                            : 'Pick a date'}
                                                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                                     </Button>
                                                 </FormControl>
@@ -309,78 +332,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                     mode="single"
                                                     selected={field.value}
                                                     onSelect={field.onChange}
-                                                    disabled={(date) =>
-                                                        date <=
-                                                        addDays(new Date(), 0)
-                                                    } // Disable past dates
-                                                    initialFocus
-                                                />
-                                            </PopoverContent>
-                                        </Popover>
-
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="startTime"
-                                render={({ field }) => (
-                                    <FormItem className="text-left flex flex-col w-1/2 ">
-                                        <FormLabel>StartTime</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                placeholder="Time"
-                                                {...field}
-                                                type="time"
-                                                className="appearance-none  p-2 text-lg border-2"
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-                        <div className="flex items-center gap-x-4 ">
-                            <FormField
-                                control={form.control}
-                                name="endDate"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-col text-left w-1/2">
-                                        <FormLabel>End Date</FormLabel>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <FormControl>
-                                                    <Button
-                                                        variant={'outline'}
-                                                        className={`w-[230px] pl-3 text-left font-normal ${
-                                                            !field.value &&
-                                                            'text-muted-foreground'
-                                                        }`}
-                                                    >
-                                                        {field.value ? (
-                                                            format(
-                                                                field.value,
-                                                                'PPP'
-                                                            )
-                                                        ) : (
-                                                            <span>
-                                                                Pick a date
-                                                            </span>
-                                                        )}
-                                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                    </Button>
-                                                </FormControl>
-                                            </PopoverTrigger>
-                                            <PopoverContent
-                                                className="w-auto p-0"
-                                                align="start"
-                                            >
-                                                <Calendar
-                                                    mode="single"
-                                                    selected={field.value}
-                                                    onSelect={field.onChange}
-                                                    disabled={(date) =>
+                                                    disabled={(date: any) =>
                                                         date <=
                                                         addDays(new Date(), -1)
                                                     } // Disable past dates
@@ -388,42 +340,60 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                 />
                                             </PopoverContent>
                                         </Popover>
-
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
-                            <FormField
-                                control={form.control}
-                                name="endTime"
-                                render={({ field }) => (
-                                    <FormItem className="text-left flex flex-col w-1/2  ">
-                                        <FormLabel>End Time</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                placeholder="Time"
-                                                {...field}
-                                                type="time"
-                                                className="appearance-none  p-2 text-lg border-2"
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                            <div className="flex justify-start w-1/2 gap-x-2">
+                                <FormField
+                                    control={form.control}
+                                    name="startTime"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col text-left   ">
+                                            <FormLabel>Start Time</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="time"
+                                                    {...field}
+                                                    className="w-full "
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="endTime"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col text-left">
+                                            <FormLabel>End Time</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="time"
+                                                    {...field}
+                                                    className="w-full"
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
                         </div>
                         <FormField
                             control={form.control}
                             name="batch"
                             render={({ field }) => (
-                                <FormItem className="flex flex-col text-left">
-                                    <FormLabel>Select Batch</FormLabel>
+                                <FormItem className="text-left">
+                                    <FormLabel>Batches</FormLabel>
                                     <Popover>
                                         <PopoverTrigger asChild>
                                             <FormControl>
                                                 <Button
                                                     variant="outline"
                                                     role="combobox"
+                                                    aria-expanded={formIsOpen}
                                                     className={cn(
                                                         'w-full justify-between',
                                                         !field.value &&
@@ -432,48 +402,51 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                 >
                                                     {field.value
                                                         ? props.bootcampData.find(
-                                                              (language) =>
-                                                                  language.value ===
+                                                              (bootcamp) =>
+                                                                  bootcamp.value ===
                                                                   field.value
                                                           )?.label
-                                                        : 'Select Batch'}
+                                                        : 'Select batch...'}
                                                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                                 </Button>
                                             </FormControl>
                                         </PopoverTrigger>
-                                        <PopoverContent className=" flex items-center justify-center  w-full p-0">
+                                        <PopoverContent className="w-[300px] p-0">
                                             <Command>
-                                                <CommandInput placeholder="Search Batch..." />
+                                                <CommandInput placeholder="Search batch..." />
                                                 <CommandEmpty>
-                                                    No Batch Found
+                                                    No batch found.
                                                 </CommandEmpty>
                                                 <CommandGroup>
-                                                    {uniqueLabelData.map(
-                                                        (language: any) => (
+                                                    {props.bootcampData.map(
+                                                        (bootcamp) => (
                                                             <CommandItem
                                                                 value={
-                                                                    language.label
+                                                                    bootcamp.value
                                                                 }
                                                                 key={
-                                                                    language.value
+                                                                    bootcamp.value
                                                                 }
                                                                 onSelect={() => {
                                                                     form.setValue(
                                                                         'batch',
-                                                                        language.value
+                                                                        bootcamp.value
+                                                                    )
+                                                                    form.clearErrors(
+                                                                        'batch'
                                                                     )
                                                                 }}
                                                             >
                                                                 <Check
                                                                     className={cn(
                                                                         'mr-2 h-4 w-4',
-                                                                        language.value ===
+                                                                        bootcamp.value ===
                                                                             field.value
                                                                             ? 'opacity-100'
                                                                             : 'opacity-0'
                                                                     )}
                                                                 />
-                                                                {language.label}
+                                                                {bootcamp.label}
                                                             </CommandItem>
                                                         )
                                                     )}
@@ -485,23 +458,134 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                 </FormItem>
                             )}
                         />
+                        <FormField
+                            control={form.control}
+                            name="daysOfWeek"
+                            render={({ field }) => (
+                                <FormItem className="text-left">
+                                    <FormLabel>Days of Week</FormLabel>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <FormControl>
+                                                <Button
+                                                    variant="outline"
+                                                    role="combobox"
+                                                    aria-expanded={formIsOpen}
+                                                    className={cn(
+                                                        'w-full justify-between',
+                                                        field.value.length ===
+                                                            0 &&
+                                                            'text-muted-foreground'
+                                                    )}
+                                                >
+                                                    {field.value.length > 0
+                                                        ? field.value.join(' ')
+                                                        : 'Select days...'}
+                                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                </Button>
+                                            </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-[300px] p-0">
+                                            <Command>
+                                                <CommandInput placeholder="Search days..." />
+                                                <CommandEmpty>
+                                                    No day found.
+                                                </CommandEmpty>
+                                                <CommandGroup>
+                                                    {weekDays.map(
+                                                        (day: any) => (
+                                                            <CommandItem
+                                                                value={
+                                                                    day.value
+                                                                }
+                                                                key={day.value}
+                                                                onSelect={() => {
+                                                                    const newValue: any =
+                                                                        field.value.includes(
+                                                                            day.value
+                                                                        )
+                                                                            ? field.value.filter(
+                                                                                  (
+                                                                                      value
+                                                                                  ) =>
+                                                                                      value !==
+                                                                                      day.value
+                                                                              )
+                                                                            : [
+                                                                                  ...field.value,
+                                                                                  day.value,
+                                                                              ]
+                                                                    form.setValue(
+                                                                        'daysOfWeek',
+                                                                        newValue
+                                                                    )
+                                                                    form.clearErrors(
+                                                                        'daysOfWeek'
+                                                                    )
+                                                                }}
+                                                            >
+                                                                <Check
+                                                                    className={cn(
+                                                                        'mr-2 h-4 w-4',
+                                                                        field.value.includes(
+                                                                            day.value
+                                                                        )
+                                                                            ? 'opacity-100'
+                                                                            : 'opacity-0'
+                                                                    )}
+                                                                />
+                                                                {day.label}
+                                                            </CommandItem>
+                                                        )
+                                                    )}
+                                                </CommandGroup>
+                                            </Command>
+                                        </PopoverContent>
+                                    </Popover>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="totalClasses"
+                            render={({ field }) => (
+                                <FormItem className="text-left flex flex-col">
+                                    <FormLabel>Total Classes</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="Total Classes"
+                                            type="number"
+                                            {...field}
+                                            onChange={(e) =>
+                                                field.onChange(
+                                                    Number(e.target.value)
+                                                )
+                                            }
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                         <div className="flex justify-end">
                             <DialogClose asChild>
-                                <Button
-                                    disabled={isSubmitDisabled}
-                                    variant={'secondary'}
-                                    onClick={form.handleSubmit(onSubmit)}
-                                    className={`w-1/3`}
-                                >
-                                    {isLoading ? (
-                                        <div className="flex flex-row justify-between items-center">
-                                            <Spinner className="text-secondary h-4 w-4 " />{' '}
-                                            Create Session
-                                        </div>
-                                    ) : (
-                                        'Create Session'
-                                    )}
-                                </Button>
+                                {isLoading ? (
+                                    <Button disabled>
+                                        <RotateCcw className="mr-2 text-black h-4  animate-spin w-1/3" />
+                                        Creating Session
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        disabled={isSubmitDisabled}
+                                        variant={'secondary'}
+                                        onClick={form.handleSubmit(onSubmit)}
+                                        className={`w-1/3`}
+                                    >
+                                        Create Session
+                                    </Button>
+                                )}
                             </DialogClose>
                         </div>
                         <p className="text-left text-red-400">

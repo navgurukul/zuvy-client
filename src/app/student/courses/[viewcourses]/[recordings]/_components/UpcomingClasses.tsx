@@ -16,6 +16,9 @@ function UpcomingClasses({
                           classData={classObj}
                           key={classObj.meetingId}
                           classType="ongoing"
+                          activeTab={'ongoing'}
+                          studentSide={false}
+                          getClasses={() => console.log('')}
                       />
                   ))
                 : null}
@@ -25,6 +28,9 @@ function UpcomingClasses({
                         classData={classObj}
                         key={classObj.meetingId}
                         classType="Upcoming"
+                        activeTab={'upcoming'}
+                        studentSide={false}
+                        getClasses={() => console.log('')}
                     />
                 ))
             ) : (
