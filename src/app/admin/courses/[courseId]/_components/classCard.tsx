@@ -1,12 +1,13 @@
 import React, { useState } from 'react'
-import { ChevronRight, MoreVertical } from 'lucide-react'
+import { ChevronRight, Edit, MoreVertical, Trash2Icon } from 'lucide-react'
 import Moment from 'react-moment'
 import Link from 'next/link'
-import { Menu } from '@headlessui/react'
 import EditSessionDialog from '../(courseTabs)/sessions/EditSessionDialog'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { api } from '@/utils/axios.config'
+import { FlipVertical } from 'lucide-react'
+import { getDeleteStudentStore } from '@/store/store'
 
 import {
     Tooltip,
@@ -30,6 +31,7 @@ import {
     DropdownMenuSubTrigger,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import DeleteConfirmationModal from './deleteModal'
 
 function ClassCard({
     classData,
@@ -39,6 +41,7 @@ function ClassCard({
     classType: any
 }) {
     const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const { setDeleteModalOpen, isDeleteModalOpen } = getDeleteStudentStore()
 
     const handleOpenDialog = () => setIsDialogOpen(true)
     const handleCloseDialog = () => setIsDialogOpen(false)
@@ -118,49 +121,55 @@ function ClassCard({
                         </Link>
                     </Button>
                 </div>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline">Open</Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56">
-                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                    </DropdownMenuContent>
-                </DropdownMenu>
-                {/* <Menu as="div" className="absolute top-4 right-4">
-                    <Menu.Button className="flex items-center h-10">
-                        <MoreVertical size={20} />
-                    </Menu.Button>
-                    <Menu.Items className="absolute right-0 top-1/2 transform -translate-y-1/2 w-56 bg-white border border-gray-200 rounded-md shadow-lg flex flex-col">
-                        <Menu.Item>
-                            {({ active }) => (
-                                <Button
-                                    className={`${
-                                        active ? 'bg-secondary' : ''
-                                    } w-full text-left px-4 py-2 text-sm text-gray-700 h-10`}
+                <div className="absolute top-4 right-4">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <MoreVertical
+                                size={20}
+                                className="text-secondary cursor-pointer "
+                            />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-full">
+                            <DropdownMenuGroup>
+                                <DropdownMenuItem
                                     onClick={handleOpenDialog}
+                                    className="cursor-pointer flex flex-row justify-between "
                                 >
-                                    Edit
-                                </Button>
-                            )}
-                        </Menu.Item>
-                        <Menu.Item>
-                            {({ active }) => (
-                                <button
-                                    className={`${
-                                        active ? 'bg-secondary' : ''
-                                    } w-full text-left px-4 py-2 text-sm text-gray-700`}
-                                    onClick={handleDelete}
-                                >
-                                    Delete
-                                </button>
-                            )}
-                        </Menu.Item>
-                    </Menu.Items>
-                </Menu> */}
+                                    <span>Edit</span>
+                                    <Edit
+                                        size={18}
+                                        className="text-secondary"
+                                    />
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="cursor-pointer flex flex-row justify-between ">
+                                    <div
+                                        onClick={() => setDeleteModalOpen(true)}
+                                    >
+                                        <span>Delete</span>
+                                        <Trash2Icon
+                                            size={18}
+                                            className="text-destructive"
+                                        />
+                                    </div>
+                                    <DeleteConfirmationModal
+                                        isOpen={isDeleteModalOpen}
+                                        onClose={() =>
+                                            setDeleteModalOpen(false)
+                                        }
+                                        onConfirm={handleDelete}
+                                        modalText="Type the batch name to confirm deletion"
+                                        modalText2="Batch Name"
+                                        input={true}
+                                        buttonText="Delete Batch"
+                                        instructorInfo={''}
+                                    />
+                                </DropdownMenuItem>
+                            </DropdownMenuGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
             </Card>
-
-            {/* {isDialogOpen && (
+            {isDialogOpen && (
                 <EditSessionDialog
                     meetingId={classData.meetingId}
                     initialData={{
@@ -173,7 +182,7 @@ function ClassCard({
                     open={isDialogOpen}
                     onClose={handleCloseDialog}
                 />
-            )} */}
+            )}
         </>
     )
 }
