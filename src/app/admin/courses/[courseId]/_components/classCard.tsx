@@ -1,56 +1,75 @@
-import React, { useState } from 'react';
-import { ChevronRight, MoreVertical } from 'lucide-react';
-import Moment from 'react-moment';
-import Link from 'next/link';
-import { Menu } from '@headlessui/react';
-import EditSessionDialog from '../(courseTabs)/sessions/EditSessionDialog';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { api } from '@/utils/axios.config';
+import React, { useState } from 'react'
+import { ChevronRight, MoreVertical } from 'lucide-react'
+import Moment from 'react-moment'
+import Link from 'next/link'
+import { Menu } from '@headlessui/react'
+import EditSessionDialog from '../(courseTabs)/sessions/EditSessionDialog'
+import { Card } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { api } from '@/utils/axios.config'
 
 import {
     Tooltip,
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { Button } from '@/components/ui/button';
-import { toast } from '@/components/ui/use-toast';
+} from '@/components/ui/tooltip'
+import { Button } from '@/components/ui/button'
+import { toast } from '@/components/ui/use-toast'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuPortal,
+    DropdownMenuSeparator,
+    DropdownMenuShortcut,
+    DropdownMenuSub,
+    DropdownMenuSubContent,
+    DropdownMenuSubTrigger,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 function ClassCard({
     classData,
     classType,
 }: {
-    classData: any;
-    classType: any;
+    classData: any
+    classType: any
 }) {
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isDialogOpen, setIsDialogOpen] = useState(false)
 
-    const handleOpenDialog = () => setIsDialogOpen(true);
-    const handleCloseDialog = () => setIsDialogOpen(false);
+    const handleOpenDialog = () => setIsDialogOpen(true)
+    const handleCloseDialog = () => setIsDialogOpen(false)
 
     const handleDelete = async () => {
         try {
-            const response = await api.delete(`/classes/delete/${classData.meetingId}`, {
-            });
+            const response = await api.delete(
+                `/classes/delete/${classData.meetingId}`,
+                {}
+            )
             if (response.status === 200) {
                 toast({
                     title: 'Session delete',
                     description: 'Session delete successfully',
                     variant: 'default',
                     className: 'text-start capitalize border border-secondary',
-                });
+                })
             } else {
-                console.error('Failed to delete class');
+                console.error('Failed to delete class')
             }
         } catch (error) {
-            console.error('Error deleting class:', error);
+            console.error('Error deleting class:', error)
         }
-    };
+    }
 
     return (
         <>
-            <Card className="w-full mb-6 border-none shadow p-8 relative" key={classData.id}>
+            <Card
+                className="w-full mb-6 border-none shadow p-8 relative"
+                key={classData.id}
+            >
                 <div className="flex items-center justify-between truncate">
                     <div className="flex items-center space-x-6">
                         <div className="font-bold text-lg flex flex-col border rounded-md py-3 px-5 text-muted-foreground border-muted-foreground">
@@ -88,10 +107,7 @@ function ClassCard({
                     </div>
                 </div>
                 <div className="text-end mt-4">
-                    <Button
-                        variant={'ghost'}
-                        className="text-xl font-bold"
-                    >
+                    <Button variant={'ghost'} className="text-xl font-bold">
                         <Link
                             target="_blank"
                             href={classData.hangoutLink}
@@ -102,28 +118,37 @@ function ClassCard({
                         </Link>
                     </Button>
                 </div>
-                <Menu as="div" className="absolute top-4 right-4">
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline">Open</Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56">
+                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                    </DropdownMenuContent>
+                </DropdownMenu>
+                {/* <Menu as="div" className="absolute top-4 right-4">
                     <Menu.Button className="flex items-center h-10">
                         <MoreVertical size={20} />
                     </Menu.Button>
                     <Menu.Items className="absolute right-0 top-1/2 transform -translate-y-1/2 w-56 bg-white border border-gray-200 rounded-md shadow-lg flex flex-col">
                         <Menu.Item>
                             {({ active }) => (
-                                <button
+                                <Button
                                     className={`${
-                                        active ? 'bg-gray-100' : ''
+                                        active ? 'bg-secondary' : ''
                                     } w-full text-left px-4 py-2 text-sm text-gray-700 h-10`}
                                     onClick={handleOpenDialog}
                                 >
                                     Edit
-                                </button>
+                                </Button>
                             )}
                         </Menu.Item>
                         <Menu.Item>
                             {({ active }) => (
                                 <button
                                     className={`${
-                                        active ? 'bg-gray-100' : ''
+                                        active ? 'bg-secondary' : ''
                                     } w-full text-left px-4 py-2 text-sm text-gray-700`}
                                     onClick={handleDelete}
                                 >
@@ -132,25 +157,25 @@ function ClassCard({
                             )}
                         </Menu.Item>
                     </Menu.Items>
-                </Menu>
+                </Menu> */}
             </Card>
 
-            {isDialogOpen && (
+            {/* {isDialogOpen && (
                 <EditSessionDialog
                     meetingId={classData.meetingId}
                     initialData={{
                         sessionTitle: classData.title,
                         description: classData.description,
                         startTime: classData.startTime,
-                        endTime: classData.endTime
+                        endTime: classData.endTime,
                     }}
                     getClasses={() => console.log('Classes updated')}
                     open={isDialogOpen}
                     onClose={handleCloseDialog}
                 />
-            )}
+            )} */}
         </>
-    );
+    )
 }
 
-export default ClassCard;
+export default ClassCard
