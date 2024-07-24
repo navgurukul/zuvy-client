@@ -169,23 +169,6 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
         (daysOfWeek?.length || 0) > 0 &&
         totalClasses
     )
-    const isDayDisabled = (day: string) => {
-        const selectedDate = form.watch('startDate')
-        if (!selectedDate) return false
-
-        const selectedDayIndex = weekDays.findIndex(
-            (d) => d.label === format(selectedDate, 'EEEE')
-        )
-        const dayIndex = weekDays.findIndex((d) => d.label === day)
-
-        const selectedDays = form.watch('daysOfWeek') || []
-        const weekendSelected =
-            selectedDays.includes('Saturday') || selectedDays.includes('Sunday')
-
-        if (weekendSelected) return false
-
-        return dayIndex < selectedDayIndex
-    }
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         openModal()
