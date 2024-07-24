@@ -351,7 +351,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                     onSelect={field.onChange}
                                                     disabled={(date: any) =>
                                                         date <=
-                                                        addDays(new Date(), 0)
+                                                        addDays(new Date(), -1)
                                                     } // Disable past dates
                                                     initialFocus
                                                 />
@@ -516,38 +516,29 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                                     day.value
                                                                 }
                                                                 key={day.value}
-                                                                disabled={isDayDisabled(
-                                                                    day.label
-                                                                )}
                                                                 onSelect={() => {
-                                                                    if (
-                                                                        !isDayDisabled(
-                                                                            day.label
+                                                                    const newValue: any =
+                                                                        field.value.includes(
+                                                                            day.value
                                                                         )
-                                                                    ) {
-                                                                        const newValue: any =
-                                                                            field.value.includes(
-                                                                                day.value
-                                                                            )
-                                                                                ? field.value.filter(
-                                                                                      (
-                                                                                          value
-                                                                                      ) =>
-                                                                                          value !==
-                                                                                          day.value
-                                                                                  )
-                                                                                : [
-                                                                                      ...field.value,
-                                                                                      day.value,
-                                                                                  ]
-                                                                        form.setValue(
-                                                                            'daysOfWeek',
-                                                                            newValue
-                                                                        )
-                                                                        form.clearErrors(
-                                                                            'daysOfWeek'
-                                                                        )
-                                                                    }
+                                                                            ? field.value.filter(
+                                                                                  (
+                                                                                      value
+                                                                                  ) =>
+                                                                                      value !==
+                                                                                      day.value
+                                                                              )
+                                                                            : [
+                                                                                  ...field.value,
+                                                                                  day.value,
+                                                                              ]
+                                                                    form.setValue(
+                                                                        'daysOfWeek',
+                                                                        newValue
+                                                                    )
+                                                                    form.clearErrors(
+                                                                        'daysOfWeek'
+                                                                    )
                                                                 }}
                                                             >
                                                                 <Check
@@ -572,6 +563,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                 </FormItem>
                             )}
                         />
+
                         <FormField
                             control={form.control}
                             name="totalClasses"
