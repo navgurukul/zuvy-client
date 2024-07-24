@@ -22,23 +22,19 @@ import {
     DropdownMenuContent,
     DropdownMenuGroup,
     DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuPortal,
-    DropdownMenuSeparator,
-    DropdownMenuShortcut,
-    DropdownMenuSub,
-    DropdownMenuSubContent,
-    DropdownMenuSubTrigger,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import DeleteConfirmationModal from './deleteModal'
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
 
 function ClassCard({
     classData,
     classType,
+    getClasses,
 }: {
     classData: any
     classType: any
+    getClasses: any
 }) {
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const { setDeleteModalOpen, isDeleteModalOpen } = getDeleteStudentStore()
@@ -48,25 +44,29 @@ function ClassCard({
 
     const handleDelete = async () => {
         try {
-            const response = await api.delete(
-                `/classes/delete/${classData.meetingId}`,
-                {}
-            )
-            if (response.status === 200) {
-                toast({
-                    title: 'Session delete',
-                    description: 'Session delete successfully',
-                    variant: 'default',
-                    className: 'text-start capitalize border border-secondary',
+            await api
+                .delete(`/classes/delete/${classData.meetingId}`, {})
+                .then(() => {
+                    toast({
+                        title: 'Session deleted',
+                        description: 'Session delete successfully',
+                        variant: 'default',
+                        className:
+                            'text-start capitalize border border-secondary',
+                    })
+                    getClasses()
                 })
-            } else {
-                console.error('Failed to delete class')
-            }
+            setDeleteModalOpen(false)
         } catch (error) {
-            console.error('Error deleting class:', error)
+            toast({
+                title: 'Error',
+                description: 'Unable to delete the Session',
+                variant: 'destructive',
+            })
         }
     }
 
+    console.log(isDialogOpen)
     return (
         <>
             <Card
@@ -141,27 +141,14 @@ function ClassCard({
                                         className="text-secondary"
                                     />
                                 </DropdownMenuItem>
-                                <DropdownMenuItem className="cursor-pointer flex flex-row justify-between ">
-                                    <div
-                                        onClick={() => setDeleteModalOpen(true)}
-                                    >
-                                        <span>Delete</span>
-                                        <Trash2Icon
-                                            size={18}
-                                            className="text-destructive"
-                                        />
-                                    </div>
-                                    <DeleteConfirmationModal
-                                        isOpen={isDeleteModalOpen}
-                                        onClose={() =>
-                                            setDeleteModalOpen(false)
-                                        }
-                                        onConfirm={handleDelete}
-                                        modalText="Type the batch name to confirm deletion"
-                                        modalText2="Batch Name"
-                                        input={true}
-                                        buttonText="Delete Batch"
-                                        instructorInfo={''}
+                                <DropdownMenuItem
+                                    onClick={() => setDeleteModalOpen(true)}
+                                    className="cursor-pointer flex flex-row justify-between "
+                                >
+                                    <span>Delete</span>
+                                    <Trash2Icon
+                                        size={18}
+                                        className="text-destructive"
                                     />
                                 </DropdownMenuItem>
                             </DropdownMenuGroup>
@@ -169,20 +156,33 @@ function ClassCard({
                     </DropdownMenu>
                 </div>
             </Card>
-            {isDialogOpen && (
-                <EditSessionDialog
-                    meetingId={classData.meetingId}
-                    initialData={{
-                        sessionTitle: classData.title,
-                        description: classData.description,
-                        startTime: classData.startTime,
-                        endTime: classData.endTime,
-                    }}
-                    getClasses={() => console.log('Classes updated')}
-                    open={isDialogOpen}
-                    onClose={handleCloseDialog}
-                />
-            )}
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogContent>
+                    <EditSessionDialog
+                        meetingId={classData.meetingId}
+                        initialData={{
+                            sessionTitle: classData.title,
+                            description: classData.description,
+                            startTime: classData.startTime,
+                            endTime: classData.endTime,
+                        }}
+                        getClasses={getClasses}
+                        open={isDialogOpen}
+                        onClose={handleCloseDialog}
+                    />
+                </DialogContent>
+            </Dialog>
+
+            <DeleteConfirmationModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setDeleteModalOpen(false)}
+                onConfirm={handleDelete}
+                modalText="This action will delete the Session Permanently"
+                modalText2=""
+                input={false}
+                buttonText="Delete Session"
+                instructorInfo={''}
+            />
         </>
     )
 }

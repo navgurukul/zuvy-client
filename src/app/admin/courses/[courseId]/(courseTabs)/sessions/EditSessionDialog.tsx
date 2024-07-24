@@ -1,9 +1,9 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { addDays, format } from 'date-fns'
-import { CalendarIcon } from 'lucide-react'
+import { CalendarIcon, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { toast } from '@/components/ui/use-toast'
@@ -21,16 +21,9 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover'
-import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogHeader,
-    DialogOverlay,
-} from '@/components/ui/dialog'
+
 import { Input } from '@/components/ui/input'
 import { api } from '@/utils/axios.config'
-
 
 interface EditSessionProps {
     meetingId: string
@@ -69,7 +62,7 @@ const formSchema = z
     })
 
 const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
-
+    const [loading, setLoading] = useState<boolean>(false)
     const formatTime = (dateString: string) => {
         const date = new Date(dateString)
         const hours = date.getHours().toString().padStart(2, '0')
@@ -91,8 +84,7 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
 
     const { sessionTitle, description, startDate, startTime, endTime } =
         form.watch()
-    console.log('endTime :', endTime)
-    console.log('startTime:', startTime)
+
     const isSubmitDisabled = !(
         sessionTitle &&
         description &&
@@ -102,6 +94,7 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
     )
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
+        setLoading(true)
         const combineDateTime = (date: Date, timeStr: string) => {
             const [hours, minutes] = timeStr.split(':').map(Number)
             const dateTime = new Date(date)
@@ -148,164 +141,159 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
             }
         } catch (error) {
             console.error('Error updating session:', error)
+        } finally {
+            setLoading(false)
         }
     }
 
     return (
-        <Dialog open={props.open} onOpenChange={props.onClose}>
-            <DialogOverlay />
-            <DialogContent>
-                <DialogHeader className="text-lg font-semibold">
-                    Edit Session
-                </DialogHeader>
-                <Form {...form}>
-                    <form
-                        onSubmit={form.handleSubmit(onSubmit)}
-                        className="space-y-4"
-                    >
+        <>
+            <div className="text-lg font-semibold">Edit Session</div>
+            <Form {...form}>
+                <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-4"
+                >
+                    <FormField
+                        control={form.control}
+                        name="sessionTitle"
+                        render={({ field }) => (
+                            <FormItem className="text-left">
+                                <FormLabel>Session Title</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        placeholder="Session Title"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                            <FormItem className="text-left">
+                                <FormLabel>Description</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        placeholder="Description"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <div className="flex items-center gap-x-4">
                         <FormField
                             control={form.control}
-                            name="sessionTitle"
+                            name="startDate"
                             render={({ field }) => (
-                                <FormItem className="text-left">
-                                    <FormLabel>Session Title</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            placeholder="Session Title"
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="description"
-                            render={({ field }) => (
-                                <FormItem className="text-left">
-                                    <FormLabel>Description</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            placeholder="Description"
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <div className="flex items-center gap-x-4">
-                            <FormField
-                                control={form.control}
-                                name="startDate"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-col text-left">
-                                        <FormLabel>Start Date</FormLabel>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <FormControl>
-                                                    <Button
-                                                        variant={'outline'}
-                                                        className={`w-[230px] text-left font-normal ${
-                                                            !field.value &&
-                                                            'text-muted-foreground'
-                                                        }`}
-                                                    >
-                                                        {field.value ? (
-                                                            format(
-                                                                field.value,
-                                                                'PPP'
-                                                            )
-                                                        ) : (
-                                                            <span>
-                                                                Pick a date
-                                                            </span>
-                                                        )}
-                                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                    </Button>
-                                                </FormControl>
-                                            </PopoverTrigger>
-                                            <PopoverContent
-                                                className="w-auto p-0"
-                                                align="start"
-                                            >
-                                                <Calendar
-                                                    mode="single"
-                                                    selected={field.value}
-                                                    onSelect={field.onChange}
-                                                    disabled={(date) =>
-                                                        date <=
-                                                        addDays(new Date(), 0)
-                                                    }
-                                                    initialFocus
-                                                />
-                                            </PopoverContent>
-                                        </Popover>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-                        <div className="flex items-center gap-x-4">
-                            <FormField
-                                control={form.control}
-                                name="startTime"
-                                render={({ field }) => (
-                                    <FormItem className="text-left flex flex-col">
-                                        <FormLabel>Start Time</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                placeholder="startTime"
-                                                {...field}
-                                                type="time"
+                                <FormItem className="flex flex-col text-left">
+                                    <FormLabel>Start Date</FormLabel>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <FormControl>
+                                                <Button
+                                                    variant={'outline'}
+                                                    className={`w-[230px] text-left font-normal ${
+                                                        !field.value &&
+                                                        'text-muted-foreground'
+                                                    }`}
+                                                >
+                                                    {field.value ? (
+                                                        format(
+                                                            field.value,
+                                                            'PPP'
+                                                        )
+                                                    ) : (
+                                                        <span>Pick a date</span>
+                                                    )}
+                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                </Button>
+                                            </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent
+                                            className="w-auto p-0"
+                                            align="start"
+                                        >
+                                            <Calendar
+                                                mode="single"
+                                                selected={field.value}
+                                                onSelect={field.onChange}
+                                                disabled={(date) =>
+                                                    date <=
+                                                    addDays(new Date(), 0)
+                                                }
+                                                initialFocus
                                             />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                    <div className="flex items-center gap-x-4">
+                        <FormField
+                            control={form.control}
+                            name="startTime"
+                            render={({ field }) => (
+                                <FormItem className="text-left flex flex-col">
+                                    <FormLabel>Start Time</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="startTime"
+                                            {...field}
+                                            type="time"
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
 
-                            <FormField
-                                control={form.control}
-                                name="endTime"
-                                render={({ field }) => (
-                                    <FormItem className="text-left flex flex-col">
-                                        <FormLabel>End Time</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                placeholder="endTime"
-                                                {...field}
-                                                type="time"
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-                        <div className="flex justify-end">
-                            <Button
-                                disabled={isSubmitDisabled}
-                                variant={'secondary'}
-                                type="submit"
-                            >
-                                Save Changes
-                            </Button>
-                            <DialogClose asChild>
-                                <Button
-                                    variant={'outline'}
-                                    type="button"
-                                    onClick={props.onClose}
-                                >
-                                    Close
+                        <FormField
+                            control={form.control}
+                            name="endTime"
+                            render={({ field }) => (
+                                <FormItem className="text-left flex flex-col">
+                                    <FormLabel>End Time</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="endTime"
+                                            {...field}
+                                            type="time"
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                    <div className="flex justify-end">
+                        <div>
+                            {loading ? (
+                                <Button disabled>
+                                    <RotateCcw className="mr-2 text-black h-4 w-4 animate-spin" />
+                                    Please wait
                                 </Button>
-                            </DialogClose>
+                            ) : (
+                                <Button
+                                    disabled={isSubmitDisabled}
+                                    variant={'secondary'}
+                                    type="submit"
+                                >
+                                    Save Changes
+                                </Button>
+                            )}
                         </div>
-                    </form>
-                </Form>
-            </DialogContent>
-        </Dialog>
+                    </div>
+                </form>
+            </Form>
+        </>
     )
 }
 

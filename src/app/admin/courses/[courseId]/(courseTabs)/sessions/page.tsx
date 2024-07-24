@@ -225,6 +225,9 @@ function Page({ params }: any) {
                                                     classData={classData}
                                                     key={index}
                                                     classType={activeTab}
+                                                    getClasses={
+                                                        getHandleAllClasses
+                                                    }
                                                 />
                                             )
                                         )}

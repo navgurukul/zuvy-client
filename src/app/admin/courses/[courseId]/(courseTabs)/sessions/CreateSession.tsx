@@ -84,6 +84,7 @@ const formSchema = z
 
 const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
     const [isLoading, setIsLoading] = useState<boolean>(false)
+
     const [isOpen, setIsOpen] = useState(false)
     const [formIsOpen, setFormIsOpen] = useState<boolean>(false)
     // const { batchValueData } = setStoreBatchValue()
