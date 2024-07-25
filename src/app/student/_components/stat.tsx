@@ -276,12 +276,13 @@ export function Stat({ className, ...props }: CardProps) {
                                 </div>
                             </div>
                             <div className="mt-12 text-center">
-                                <a
+                                <div className="inline-flex justify-between items-center py-2 px-2 pr-4 text-sm text-gray-700 bg-gray-100 rounded-full dark:bg-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700">
+                                    {/* <a
                                     href="/"
                                     className="inline-flex justify-between items-center py-2 px-2 pr-4 text-sm text-gray-700 bg-gray-100 rounded-full dark:bg-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700"
                                     role="alert"
                                     aria-label="Whatsapp us"
-                                >
+                                > */}
                                     <button>
                                         <span className="text-xs font-bold bg-secondary rounded-full text-white px-4 py-1.5 mr-3">
                                             {ownRank}
@@ -291,7 +292,8 @@ export function Stat({ className, ...props }: CardProps) {
                                         Your rank
                                     </span>
                                     <ChevronUp color="#518672" />
-                                </a>
+                                    {/* </a> */}
+                                </div>
                             </div>
                         </CardContent>
                     </Card>
