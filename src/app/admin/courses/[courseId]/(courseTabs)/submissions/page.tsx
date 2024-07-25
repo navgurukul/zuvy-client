@@ -13,6 +13,7 @@ import PracticeProblems from '../../_components/PraticeProblems'
 import Link from 'next/link'
 import AssesmentComponent from '../../_components/AssesmentComponent'
 import { Spinner } from '@/components/ui/spinner'
+import FormComponent from '../../_components/FormComponent'
 
 const Page = ({ params }: { params: any }) => {
     const [activeTab, setActiveTab] = useState('practice')
@@ -119,6 +120,16 @@ const Page = ({ params }: { params: any }) => {
                         }`}
                     >
                         Projects
+                    </Button>
+                    <Button
+                        onClick={() => handleTabChange('form')}
+                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
+                            activeTab === 'form'
+                                ? 'bg-secondary  text-white'
+                                : 'bg-gray-200 text-gray-800'
+                        }`}
+                    >
+                        Form
                     </Button>
                 </div>
             )}
@@ -270,6 +281,13 @@ const Page = ({ params }: { params: any }) => {
                             No projects found
                         </div>
                     ))}
+                {activeTab === 'form' && (
+                    <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2 lg:grid-cols-3">
+                        {['A', 'B', 'C'].map((item: any) => (
+                            <FormComponent />
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     )

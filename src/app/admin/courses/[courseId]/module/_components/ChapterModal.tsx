@@ -127,7 +127,7 @@ function ChapterModal({
                     <DialogClose asChild>
                         <div
                             className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
-                            // onClick={() => createChapter(2)}
+                            onClick={() => createChapter(7)}
                         >
                             <Newspaper className="mr-2 h-6 w-6" />
                             <span>Form</span>
