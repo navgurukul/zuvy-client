@@ -71,6 +71,7 @@ function Page({
     const [assessmentSubmitId, setAssessmentSubmitId] = useState<any>()
     const [selectedCodingOutsourseId, setSelectedCodingOutsourseId] =
         useState<any>()
+    const [chapterId, setChapterId] = useState<any>()
 
     const pathname = usePathname()
 
@@ -81,6 +82,13 @@ function Page({
         )
     }
 
+    const completeChapter = () => {
+        api.post(
+            `tracking/updateChapterStatus/${params.viewcourses}/${params.moduleID}?chapterId=${chapterId}`
+        )
+
+    }
+
     useEffect(() => {
         const endTime = parseInt(localStorage.getItem('endTime') || '0', 10)
         const initialTabChangeInstance = parseInt(
@@ -88,6 +96,12 @@ function Page({
             10
         )
         setTabChangeInstance(initialTabChangeInstance)
+
+        const initialFullScreenExitInstance = parseInt(
+            localStorage.getItem('fullScreenExitInstance') || '0',
+            10
+        )
+        setFullScreenExitInstance(initialFullScreenExitInstance)
 
         if (endTime) {
             startTimer(endTime)
@@ -167,7 +181,20 @@ function Page({
             setSelectedQuestionId(id)
             setSelectedCodingOutsourseId(codingOutsourseId)
             requestFullScreen(document.documentElement)
-        } else {
+        }else if(type === 'quiz' && seperateQuizQuestions[0]?.submissionsData.length > 0){
+            toast({
+                title: 'Quiz Already Submitted',
+                description: 'You have already submitted the quiz',
+                className: 'text-left capitalize',
+            })
+
+        } else if( type === 'open-ended' && seperateOpenEndedQuestions[0]?.submissionsData.length > 0){
+            toast({
+                title: 'Open Ended Questions Already Submitted',
+                description: 'You have already submitted the open ended questions',
+                className: 'text-left capitalize',
+            })
+        }  else {
             requestFullScreen(document.documentElement)
         }
     }
@@ -184,6 +211,7 @@ function Page({
             )
             setAssessmentData(res.data)
             setAssessmentSubmitId(res.data.submission.id)
+            setChapterId(res.data.chapterId)
         } catch (e) {
             console.error(e)
         }
@@ -228,25 +256,27 @@ function Page({
     }
 
     if (isSolving) {
-        if (selectedQuesType === 'quiz') {
+        if (selectedQuesType === 'quiz' && seperateQuizQuestions[0]?.submissionsData.length == 0) {
             return (
                 <QuizQuestions
                     onBack={handleBack}
                     remainingTime={remainingTime}
                     questions={seperateQuizQuestions}
                     assessmentSubmitId={assessmentSubmitId}
+                    getSeperateQuizQuestions={getSeperateQuizQuestions}
                 />
             )
-        } else if (selectedQuesType === 'open-ended') {
+        } else if (selectedQuesType === 'open-ended' && seperateOpenEndedQuestions[0]?.submissionsData.length == 0) {
             return (
                 <OpenEndedQuestions
                     onBack={handleBack}
                     remainingTime={remainingTime}
                     questions={seperateOpenEndedQuestions}
                     assessmentSubmitId={assessmentSubmitId}
+                    getSeperateOpenEndedQuestions={getSeperateOpenEndedQuestions}
                 />
             )
-        } else if (
+        }else if (
             selectedQuesType === 'coding' &&
             selectedQuestionId !== null
         ) {
@@ -279,6 +309,8 @@ function Page({
                 className: 'text-left capitalize',
             })
 
+            completeChapter()
+
             const newTabChangeInstance = 0
 
             setTabChangeInstance(newTabChangeInstance)
@@ -293,7 +325,7 @@ function Page({
 
             setTimeout(() => {
                 window.close()
-            }, 5000)
+            }, 4000)
 
         } catch (e) {
             console.error(e)
@@ -396,7 +428,7 @@ function Page({
                                 id={1}
                                 title="Quiz"
                                 description={`${
-                                    assessmentData.Quizzes?.length || 0
+                                    assessmentData.Quizzes || 0
                                 } questions`}
                                 onSolveChallenge={() =>
                                     handleSolveChallenge('quiz')
@@ -411,7 +443,7 @@ function Page({
                                 id={1}
                                 title="Open-Ended Questions"
                                 description={`${
-                                    assessmentData.OpenEndedQuestions?.length ||
+                                    assessmentData.OpenEndedQuestions ||
                                     0
                                 } questions`}
                                 onSolveChallenge={() =>

@@ -78,6 +78,7 @@ const Page = ({ params }: { params: any }) => {
         return () => clearTimeout(timer)
     }, [])
 
+    console.log(assesments)
     return (
         <div className="">
             {loading ? (
@@ -157,105 +158,129 @@ const Page = ({ params }: { params: any }) => {
             </div>
             <div className="w-full">
                 {activeTab === 'practice' &&
-                    submissions
-                        .filter(
-                            ({ moduleChapterData }) =>
-                                moduleChapterData.length > 0
+                    (submissions.length > 0 ? (
+                        submissions.map(({ id, name, moduleChapterData }) =>
+                            moduleChapterData.length > 0 ? (
+                                <PracticeProblems
+                                    key={id}
+                                    courseId={params.courseId}
+                                    name={name}
+                                    totalStudents={totalStudents}
+                                    submission={moduleChapterData}
+                                    moduleId={id}
+                                />
+                            ) : (
+                                <div
+                                    className="text-left font-semibold my-5 "
+                                    key={id}
+                                >
+                                    No practice problems found for {name}
+                                </div>
+                            )
                         )
-                        .map(({ id, name, moduleChapterData }) => (
-                            <PracticeProblems
-                                key={id}
-                                courseId={params.courseId}
-                                name={name}
-                                totalStudents={totalStudents}
-                                submission={moduleChapterData}
-                                moduleId={id}
-                            />
-                        ))}
+                    ) : (
+                        <div>No submissions found</div>
+                    ))}
                 {activeTab === 'assessments' && (
                     <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2">
-                        {Object.keys(assesments).map(
-                            (key: any, index) =>
-                                key !== 'totalStudents' && (
-                                    <div key={index}>
-                                        <h2 className="text-md text-start mb-3 font-semibold text-gray-800  dark:text-white ">
-                                            Module--{key}
-                                        </h2>
-                                        {assesments[key].map(
-                                            (assessment: any) => (
-                                                <AssesmentComponent
-                                                    key={assessment.id}
-                                                    id={assessment.id}
-                                                    title={assessment.title}
-                                                    codingChallenges={
-                                                        assessment.totalCodingQuestions
-                                                    }
-                                                    mcq={
-                                                        assessment.totalQuizzes
-                                                    }
-                                                    openEnded={
-                                                        assessment.totalOpenEndedQuestions
-                                                    }
-                                                    totalSubmissions={
-                                                        assesments.totalStudents
-                                                    }
-                                                    studentsSubmitted={
-                                                        assessment.totalSubmitedAssessments
-                                                    }
-                                                    bootcampId={params.courseId}
-                                                />
-                                            )
-                                        )}
-                                    </div>
+                        {assesments ? (
+                            Object.keys(assesments).length > 0 ? (
+                                Object.keys(assesments).map(
+                                    (key) =>
+                                        key !== 'totalStudents' && (
+                                            <div key={key}>
+                                                <h2 className="text-md text-start mb-3 font-semibold text-gray-800 dark:text-white">
+                                                    Module - {key}
+                                                </h2>
+                                                {assesments[key].map(
+                                                    (assessment: any) => (
+                                                        <AssesmentComponent
+                                                            key={assessment.id}
+                                                            id={assessment.id}
+                                                            title={
+                                                                assessment.title
+                                                            }
+                                                            codingChallenges={
+                                                                assessment.totalCodingQuestions
+                                                            }
+                                                            mcq={
+                                                                assessment.totalQuizzes
+                                                            }
+                                                            openEnded={
+                                                                assessment.totalOpenEndedQuestions
+                                                            }
+                                                            totalSubmissions={
+                                                                assesments.totalStudents
+                                                            }
+                                                            studentsSubmitted={
+                                                                assessment.totalSubmitedAssessments
+                                                            }
+                                                            bootcampId={
+                                                                params.courseId
+                                                            }
+                                                        />
+                                                    )
+                                                )}
+                                            </div>
+                                        )
                                 )
+                            ) : (
+                                <div>No assessments found</div>
+                            )
+                        ) : (
+                            <div>No assessments found</div>
                         )}
                     </div>
                 )}
-                {activeTab === 'projects' && (
-                    <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2 lg:grid-cols-3">
-                        {projectData.map((item: any) => {
-                            return (
-                                <div
-                                    key={item.id}
-                                    className="lg:flex h-[120px] w-[400px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md p-4"
-                                >
-                                    <div className="flex flex-col w-full ">
-                                        <h1 className="font-semibold text-start">
-                                            {item.projectData[0].title}
-                                        </h1>
-                                        <div className="flex items-center gap-2">
-                                            <div className="bg-yellow h-2 w-2 rounded-full" />
-                                            <p className="text-start">
-                                                {
-                                                    item.projectData[0]
-                                                        .submitStudents
-                                                }
-                                                /{totalStudents} Submission
-                                            </p>
+                {activeTab === 'projects' &&
+                    (projectData.length > 0 ? (
+                        <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2 lg:grid-cols-3">
+                            {projectData.map((item: any) => {
+                                return (
+                                    <div
+                                        key={item.id}
+                                        className="lg:flex h-[120px] w-[400px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md p-4"
+                                    >
+                                        <div className="flex flex-col w-full ">
+                                            <h1 className="font-semibold text-start">
+                                                {item.projectData[0].title}
+                                            </h1>
+                                            <div className="flex items-center gap-2">
+                                                <div className="bg-yellow h-2 w-2 rounded-full" />
+                                                <p className="text-start">
+                                                    {
+                                                        item.projectData[0]
+                                                            .submitStudents
+                                                    }
+                                                    /{totalStudents} Submission
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-end ">
+                                            <Link
+                                                href={`/admin/courses/${params.courseId}/submissionProjects/${item.projectData[0].id}`}
+                                            >
+                                                <Button
+                                                    variant={'ghost'}
+                                                    className="text-secondary text-md"
+                                                >
+                                                    View Submission{' '}
+                                                    <ChevronRight
+                                                        className="text-secondary"
+                                                        size={17}
+                                                    />
+                                                </Button>
+                                            </Link>
                                         </div>
                                     </div>
-                                    <div className="flex items-end ">
-                                        <Link
-                                            href={`/admin/courses/${params.courseId}/submissionProjects/${item.projectData[0].id}`}
-                                        >
-                                            <Button
-                                                variant={'ghost'}
-                                                className="text-secondary text-md"
-                                            >
-                                                View Submission{' '}
-                                                <ChevronRight
-                                                    className="text-secondary"
-                                                    size={17}
-                                                />
-                                            </Button>
-                                        </Link>
-                                    </div>
-                                </div>
-                            )
-                        })}
-                    </div>
-                )}
-
+                                )
+                            })}
+                        </div>
+                    ) : (
+                        <div className="text-left font-semibold">
+                            No projects found
+                        </div>
+                    ))}
                 {activeTab === 'form' && (
                     <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2 lg:grid-cols-3">
                         {['A', 'B', 'C'].map((item: any) => (

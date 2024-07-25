@@ -16,7 +16,8 @@ export default function RootLayout({
     const isAssessmentRoute =
         pathname?.includes('/student/courses') &&
         pathname?.includes('/modules') &&
-        pathname?.includes('/assessment')
+        pathname?.includes('/assessment')&&
+        !pathname?.includes('/viewresults')
 
     return (
         <div

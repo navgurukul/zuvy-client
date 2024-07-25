@@ -71,18 +71,14 @@ const PraticeProblems = ({ params }: any) => {
             )
             setSubmissionData(res.data.trackingData)
             setTotalStudents(res.data.totalStudents)
-        } catch (error) {
-            console.error('API Error:', error)
-        }
+        } catch (error) {}
     }, [params.courseId])
 
     const getBootcampHandler = useCallback(async () => {
         try {
             const res = await api.get(`/bootcamp/${params.courseId}`)
             setBootcampData(res.data.bootcamp)
-        } catch (error) {
-            console.error('API Error:', error)
-        }
+        } catch (error) {}
     }, [params.courseId])
 
     const getStudentDetails = useCallback(async () => {
@@ -92,9 +88,7 @@ const PraticeProblems = ({ params }: any) => {
             )
 
             setStudentDetails(res.data.data)
-        } catch (error) {
-            console.error('API Error:', error)
-        }
+        } catch (error) {}
     }, [matchingData?.id, matchingData?.moduleChapterData])
 
     useEffect(() => {
@@ -117,8 +111,6 @@ const PraticeProblems = ({ params }: any) => {
             setMatchingData(null)
         }
     }, [submissionData, params.StudentProblemData])
-
-    console.log(matchingData)
 
     return (
         <>

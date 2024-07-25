@@ -17,18 +17,23 @@ import {
     FormLabel,
     FormMessage,
 } from '@/components/ui/form'
+import { useRouter } from 'next/navigation'
 
 const OpenEndedQuestions = ({
     onBack,
     remainingTime,
     questions,
     assessmentSubmitId,
+    getSeperateOpenEndedQuestions
 }: {
     onBack: () => void
     remainingTime: number
     questions: any[]
     assessmentSubmitId: number
+    getSeperateOpenEndedQuestions: () => void
 }) => {
+    const router = useRouter()
+
     const formSchema = z.object({
         answers: z.array(
             z.string().nonempty({ message: 'This question is required.' })
@@ -68,6 +73,13 @@ const OpenEndedQuestions = ({
                 description: 'Open-ended questions submitted successfully',
                 className: 'text-start capitalize border border-secondary',
             })
+
+            getSeperateOpenEndedQuestions()
+
+            setTimeout(()=>{
+                onBack()
+            }, 3000)
+
         } catch (error: any) {
             toast({
                 title: 'Error',
@@ -89,10 +101,10 @@ const OpenEndedQuestions = ({
                     <ChevronLeft strokeWidth={2} size={24} />
                     <h1 className="font-extrabold"></h1>
                 </div>
-              
+
                 <div className='font-bold text-xl'><TimerDisplay remainingTime={remainingTime} /></div>
                 <div></div>
-             
+
             </div>
             <Separator />
             <Form {...form}>
@@ -125,7 +137,7 @@ const OpenEndedQuestions = ({
                         />
                     ))}
                     <Button type="submit" className="mt-10">
-                        Save Answers
+                        Submit Answers
                     </Button>
                 </form>
             </Form>

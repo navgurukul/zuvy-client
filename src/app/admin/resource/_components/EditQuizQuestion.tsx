@@ -381,7 +381,7 @@ const EditQuizQuestion = ({
                     />
                     <DialogFooter>
                         <Button type="submit" className="w-1/2 ">
-                            Edit Quiz Question
+                            Edit MCQ
                         </Button>
                     </DialogFooter>
                 </form>

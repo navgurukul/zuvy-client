@@ -17,18 +17,22 @@ import {
 } from '@/components/ui/form'
 import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
+import { useRouter } from 'next/navigation'
 
 const QuizQuestions = ({
     onBack,
     remainingTime,
     questions,
     assessmentSubmitId,
+    getSeperateQuizQuestions
 }: {
     onBack: () => void
     remainingTime: number
     questions: any[]
     assessmentSubmitId: number
+    getSeperateQuizQuestions: () => void
 }) => {
+    const router = useRouter()
     // Define the Zod schema for form validation
     const formSchema = z.object({
         answers: z.array(
@@ -68,9 +72,16 @@ const QuizQuestions = ({
             )
             toast({
                 title: 'Success',
-                description: 'Quiz Saved Successfully',
+                description: 'Quiz Submitted Successfully',
                 className: 'text-start capitalize border border-secondary',
             })
+
+            getSeperateQuizQuestions()
+
+            setTimeout(()=>{
+                onBack()
+            }, 3000)
+
         } catch (error: any) {
             toast({
                 title: 'Error',
@@ -142,7 +153,7 @@ const QuizQuestions = ({
                         />
                     ))}
                     <Button type="submit" className="mt-10">
-                        Save Quiz
+                        Submit Quiz
                     </Button>
                 </form>
             </Form>
