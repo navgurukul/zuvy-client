@@ -187,7 +187,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
 
                 <div className="w-full flex flex-col items-center lg:flex-row lg:justify-between gap-8">
                     {upcomingClasses?.length > 0 ? (
-                        <div className="flex flex-col lg:w-[860px]">
+                        <div className="flex flex-col w-full lg:max-w-[860px]">
                             {ongoingClasses.map((classData: any, index) => (
                                 <ClassCard
                                     classData={classData}
@@ -295,7 +295,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                             </p>
                                         </div>
                                     </div>
-                                    <div className=" text-end">
+                                    <div className="text-end">
                                         <Button
                                             variant={'ghost'}
                                             className="text-lg font-bold"

@@ -112,7 +112,10 @@ function ClassCard({
     classType: any
 }) {
     return (
-        <Card className="w-full mb-3 border-none shadow p-6" key={classData.id}>
+        <Card
+            className="w-full mb-3 border-none shadow p-5 shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F]"
+            key={classData.id}
+        >
             <div className="flex items-center justify-between truncate">
                 <div className="flex items-center space-x-4">
                     <div className="font-bold text-lg flex flex-col border rounded-md py-2 px-4 text-muted-foreground border-muted-foreground">
@@ -153,11 +156,27 @@ function ClassCard({
                         </div>
                     </div>
                 </div>
+                <div className="hidden lg:flex text-end">
+                    <Button
+                        variant={'ghost'}
+                        className="text-lg font-bold"
+                        // disabled={classType === 'ongoing' ? false : true}
+                    >
+                        <Link
+                            target="_blank"
+                            href={classData.hangoutLink}
+                            className="gap-3 flex  items-center text-secondary"
+                        >
+                            <p>Join Class</p>
+                            <ChevronRight size={15} />
+                        </Link>
+                    </Button>
+                </div>
             </div>
-            <div className="text-end">
+            <div className="block lg:hidden text-end">
                 <Button
                     variant={'ghost'}
-                    className="text-xl font-bold"
+                    className="text-lg font-bold"
                     // disabled={classType === 'ongoing' ? false : true}
                 >
                     <Link
