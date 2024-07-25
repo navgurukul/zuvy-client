@@ -188,20 +188,28 @@ function Schedule({ className, ...props }: ScheduleProps) {
                 <div className="w-full flex flex-col items-center lg:flex-row lg:justify-between gap-8">
                     {upcomingClasses?.length > 0 ? (
                         <div className="flex flex-col w-full lg:max-w-[860px]">
-                            {ongoingClasses.map((classData: any, index) => (
-                                <ClassCard
-                                    classData={classData}
-                                    classType={classData.status}
-                                    key={index}
-                                />
-                            ))}
-                            {upcomingClasses.map((classData: any, index) => (
-                                <ClassCard
-                                    classData={classData}
-                                    classType={classData.status}
-                                    key={index}
-                                />
-                            ))}
+                                {ongoingClasses.map((classData: any, index) => (
+                                    <ClassCard
+                                        classData={classData}
+                                        classType={classData.status}
+                                        key={index}
+                                        getClasses={() => console.log('')}
+                                        activeTab={'ongoing'}
+                                        studentSide={true}
+                                    />
+                                ))}
+                                {upcomingClasses.map(
+                                    (classData: any, index) => (
+                                        <ClassCard
+                                            classData={classData}
+                                            classType={classData.status}
+                                            key={index}
+                                            getClasses={() => console.log('')}
+                                            activeTab={'ongoing'}
+                                            studentSide={true}
+                                        />
+                                    )
+                                )}
                         </div>
                     ) : (
                         <div className="flex flex-col items-center mt-12 lg:w-[870px]">

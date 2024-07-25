@@ -58,7 +58,7 @@ const OpenEndedResults = ({
     }, [params.assessmentOutSourceId])
 
     if (!openEndedResults.length) {
-        return <div>No Open-Ended Questions For This Assessment</div>
+        return <div><div onClick={()=>router.back()} className='cursor-pointer flex justify-start'><ChevronLeft width={24}/>Back</div> No Open-Ended Questions For This Assessment</div>
     }
 
     const getEvaluation = (answer: string, question: OpenEndedQuestion) => {

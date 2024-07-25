@@ -41,10 +41,10 @@ const Assessment = ({
                     'Failed to open the new window. Please allow pop-ups for this site.'
                 )
             }
-            // Reload the browser after 5 seconds
+            // Reload the browser after 3 seconds
             setTimeout(() => {
                 window.location.reload();
-            }, 5000)
+            }, 3000)
         } catch (error) {
             console.error('Failed to start assessment:', error)
         }
