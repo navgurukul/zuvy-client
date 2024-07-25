@@ -62,9 +62,6 @@ function Page({ params }: any) {
         },
     ]
 
-    // console.log('nextChapterId', nextChapterId)
-    // console.log('activeChapter', activeChapter)
-
     // func
     const fetchChapters = useCallback(async () => {
         try {
@@ -167,7 +164,14 @@ function Page({ params }: any) {
                     />
                 )
             case 7:
-                return <FeedbackForm />
+                return (
+                    <FeedbackForm
+                        content={chapterContent}
+                        moduleId={params.moduleID}
+                        chapterId={chapterId}
+                        bootcampId={viewcourses}
+                    />
+                )
             default:
                 return <h1>No Chapters Available Right Now</h1>
         }
