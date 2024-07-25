@@ -68,7 +68,6 @@ export function Stat({ className, ...props }: CardProps) {
                 const response = await api.get(
                     `/student/leaderboard/${selectedCourse?.id}`
                 )
-                console.log('response', response.data[0].students)
                 setStudents(response.data[0].students)
             } catch (error) {
                 console.error('Error getting enrolled courses:', error)
@@ -87,7 +86,6 @@ export function Stat({ className, ...props }: CardProps) {
                 const response = await api.get(`/student`)
                 setEnrolledCourse(response.data)
                 setSelectedCourse(response.data[0])
-                console.log('responserrrrr', response)
             } catch (error) {
                 console.error('Error getting enrolled courses:', error)
             }
@@ -99,23 +97,10 @@ export function Stat({ className, ...props }: CardProps) {
         const newSelectedCourse: any = enrolledCourse.find(
             (course: any) => course.id === +selectedCourseId
         )
-        console.log('selectedCourseId', selectedCourseId)
-
-        console.log('newSelectedCourse', newSelectedCourse)
         setSelectedCourse(newSelectedCourse)
     }
 
-    console.log('Outside students', students)
-    console.log('Outside selectedCourse', selectedCourse)
-
     return (
-        // <Card
-        //     className={cn(
-        //         'h-full lg:w-[380px] text-start bg-popover-foreground text-white',
-        //         className
-        //     )}
-        //     {...props}
-        // >
         <>
             {students.length > 0 &&
                 (students.length < 4 ? (
