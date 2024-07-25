@@ -123,8 +123,6 @@ function Page({ params }: any) {
         fetchChapters()
     }
 
-    // console.log('chapterContent', chapterContent)
-
     const renderChapterContent = () => {
         switch (topicId) {
             case 1:
@@ -169,7 +167,8 @@ function Page({ params }: any) {
                         content={chapterContent}
                         moduleId={params.moduleID}
                         chapterId={chapterId}
-                        bootcampId={viewcourses}
+                        bootcampId={params.viewcourses}
+                        // bootcampId={viewcourses}
                     />
                 )
             default:

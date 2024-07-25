@@ -41,8 +41,9 @@ const formSchema = z.object({
 type Props = {
     moduleId: string
     chapterId: number
+    bootcampId: number
     content: any
-    bootcampId: string | string[];
+    // bootcampId: string | string[];
     // fetchChapters: any
 }
 
