@@ -73,7 +73,7 @@ function ClassCard({
     return (
         <>
             <Card
-                className="w-full mb-6 border-none shadow p-8 relative"
+                className="w-full mb-6 border-none p-5 shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F] relative"
                 key={classData.id}
             >
                 <div className="flex items-center justify-between truncate">
@@ -111,13 +111,33 @@ function ClassCard({
                             </div>
                         </div>
                     </div>
+                    <div className="hidden lg:flex text-end">
+                        <Button
+                            variant={'ghost'}
+                            className="text-lg font-bold"
+                            // disabled={classType === 'ongoing' ? false : true}
+                        >
+                            <Link
+                                target="_blank"
+                                href={classData.hangoutLink}
+                                className="gap-3 flex  items-center text-secondary"
+                            >
+                                <p>Join Class</p>
+                                <ChevronRight size={15} />
+                            </Link>
+                        </Button>
+                    </div>
                 </div>
-                <div className="text-end mt-4">
-                    <Button variant={'ghost'} className="text-xl font-bold">
+                <div className="block lg:hidden text-end">
+                    <Button
+                        variant={'ghost'}
+                        className="text-lg font-bold"
+                        // disabled={classType === 'ongoing' ? false : true}
+                    >
                         <Link
                             target="_blank"
                             href={classData.hangoutLink}
-                            className="gap-3 flex items-center text-secondary"
+                            className="gap-3 flex  items-center text-secondary"
                         >
                             <p>Join Class</p>
                             <ChevronRight size={15} />

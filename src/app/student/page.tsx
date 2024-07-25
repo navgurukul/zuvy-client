@@ -8,6 +8,8 @@ import Schedule from './_components/schedule'
 import Doubt from './_components/doubt'
 import Image from 'next/image'
 import { Spinner } from '@/components/ui/spinner'
+import { Stat } from './_components/stat'
+import Attendance from './_components/attendance'
 
 function Page() {
     const [loading, setLoading] = useState(true)
@@ -47,14 +49,43 @@ function Page() {
                             to becoming a star programmer. Happy coding!
                         </p>
                     </div>
-                    <div className="flex flex-wrap items-stretch my-3 gap-5">
+                    {/* <div className="flex flex-wrap flex-col items-stretch my-3 gap-5">
                         <div className="flex-1">
                             <Schedule />
                         </div>
-                        {/* <div className="max-sm:w-full">
-          <Stat />
-          <Doubt />
-        </div> */}
+                        <div className="max-sm:w-full">
+                            <Stat />
+                        </div>
+                    </div> */}
+                    {/* <div className="flex flex-wrap items-stretch my-3 gap-5">
+                        <div className="flex-1">
+                            <Schedule />
+                        </div>
+                        <div className="max-md:w-full flex flex-col gap-5">
+                            <Attendance />
+                            <Stat />
+                        </div>
+                    </div> */}
+
+                    {/* For Large screen like Laptop and large tab */}
+                    <div className="hidden lg:flex flex-wrap items-stretch my-3 gap-5">
+                        <div className="flex-1">
+                            <Schedule />
+                        </div>
+                        <div className="max-md:w-full flex flex-col gap-5">
+                            <Attendance />
+                            <Stat />
+                        </div>
+                    </div>
+                    {/* For Small screen like mobile and small tab */}
+                    <div className="block lg:hidden flex flex-wrap items-stretch my-3 gap-5">
+                        <div className="max-md:w-full flex flex-col gap-5">
+                            <Attendance />
+                            <Stat />
+                        </div>
+                        <div className="flex-1">
+                            <Schedule />
+                        </div>
                     </div>
                 </div>
             )}
