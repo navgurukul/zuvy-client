@@ -141,7 +141,7 @@ const Mcqs = (props: Props) => {
                         </div>
                         <Dialog open={isOpen} onOpenChange={setIsOpen}>
                             <DialogTrigger asChild>
-                                <Button>+ Create Quiz Question </Button>
+                                <Button>+ Create MCQ</Button>
                             </DialogTrigger>
                             <DialogContent className="sm:max-w-[500px]">
                                 <DialogHeader>

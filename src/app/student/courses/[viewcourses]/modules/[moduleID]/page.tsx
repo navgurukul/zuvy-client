@@ -14,8 +14,8 @@ import Assignment from '../_components/Assignment'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import { useParams } from 'next/navigation'
 import Assessment from '../_components/Assessment'
+import FeedbackForm from '../_components/FeedbackForm'
 import { getAssessmentShortInfo } from '@/utils/students'
-
 
 interface Chapter {
     id: number
@@ -61,9 +61,6 @@ function Page({ params }: any) {
             isLast: true,
         },
     ]
-
-    // console.log('nextChapterId', nextChapterId)
-    // console.log('activeChapter', activeChapter)
 
     // func
     const fetchChapters = useCallback(async () => {
@@ -126,8 +123,6 @@ function Page({ params }: any) {
         fetchChapters()
     }
 
-    // console.log('chapterContent', chapterContent)
-
     const renderChapterContent = () => {
         switch (topicId) {
             case 1:
@@ -164,6 +159,16 @@ function Page({ params }: any) {
                         assessmentShortInfo={assessmentShortInfo}
                         assessmentOutSourceId={assessmentOutSourceId}
                         submissionId={submissionId}
+                    />
+                )
+            case 7:
+                return (
+                    <FeedbackForm
+                        content={chapterContent}
+                        moduleId={params.moduleID}
+                        chapterId={chapterId}
+                        bootcampId={params.viewcourses}
+                        // bootcampId={viewcourses}
                     />
                 )
             default:

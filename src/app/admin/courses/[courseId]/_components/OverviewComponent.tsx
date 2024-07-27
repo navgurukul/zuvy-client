@@ -48,7 +48,6 @@ const OverviewComponent = (props: Props) => {
                             </div>
                             <div>
                                 <h1 className="text-start font-bold">
-                                    {props.openEndedCorrect}/
                                     {props.totalOpenEnded}
                                 </h1>
                                 <p className="text-gray-500">Open-Ended</p>
@@ -62,7 +61,6 @@ const OverviewComponent = (props: Props) => {
                             <h1 className="text-xl text-start font-semibold text-gray-800  dark:text-white ">
                                 Proctoring Report
                             </h1>
-                            <h1 className="font-bold">Favorable</h1>
                         </div>
                         <div className="flex flex-start p-4 gap-x-4">
                             <div>
