@@ -166,6 +166,8 @@ function Schedule({ className, ...props }: ScheduleProps) {
         getUpcomingSubmissionHandler,
     ])
 
+    console.log('submission', submission)
+
     return (
         <div>
             <div className="flex flex-col items-start mt-6">
@@ -188,28 +190,26 @@ function Schedule({ className, ...props }: ScheduleProps) {
                 <div className="w-full flex flex-col items-center lg:flex-row lg:justify-between gap-8">
                     {upcomingClasses?.length > 0 ? (
                         <div className="flex flex-col w-full lg:max-w-[860px]">
-                                {ongoingClasses.map((classData: any, index) => (
-                                    <ClassCard
-                                        classData={classData}
-                                        classType={classData.status}
-                                        key={index}
-                                        getClasses={() => console.log('')}
-                                        activeTab={'ongoing'}
-                                        studentSide={true}
-                                    />
-                                ))}
-                                {upcomingClasses.map(
-                                    (classData: any, index) => (
-                                        <ClassCard
-                                            classData={classData}
-                                            classType={classData.status}
-                                            key={index}
-                                            getClasses={() => console.log('')}
-                                            activeTab={'ongoing'}
-                                            studentSide={true}
-                                        />
-                                    )
-                                )}
+                            {ongoingClasses.map((classData: any, index) => (
+                                <ClassCard
+                                    classData={classData}
+                                    classType={classData.status}
+                                    key={index}
+                                    getClasses={() => console.log('')}
+                                    activeTab={'ongoing'}
+                                    studentSide={true}
+                                />
+                            ))}
+                            {upcomingClasses.map((classData: any, index) => (
+                                <ClassCard
+                                    classData={classData}
+                                    classType={classData.status}
+                                    key={index}
+                                    getClasses={() => console.log('')}
+                                    activeTab={'ongoing'}
+                                    studentSide={true}
+                                />
+                            ))}
                         </div>
                     ) : (
                         <div className="flex flex-col items-center mt-12 lg:w-[870px]">
@@ -339,7 +339,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
         className="rounded-md border"
       /> */}
             <div className="flex flex-col items-start mt-6">
-                <h1 className="text-xl p-1 text-start font-bold">
+                <h1 className="text-xl p-1 text-start font-bold mb-4">
                     Upcoming Submissions
                 </h1>
                 {/* <div className="flex flex-row"> */}
@@ -350,7 +350,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                             : 'flex flex-row'
                     }
                 > */}
-                <div className="w-full flex flex-col items-center lg:flex-row lg:justify-between gap-8">
+                <div className="flex flex-col w-full lg:max-w-[860px]">
                     {submission.length > 0 ? (
                         submission.map((data) => {
                             return (
