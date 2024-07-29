@@ -46,8 +46,9 @@ function Schedule({ className, ...props }: ScheduleProps) {
     const [nextChapterId, setNextChapterId] = useState([])
     const [upcomingClasses, setUpcomingClasses] = useState([])
     const [ongoingClasses, setOngoingClasses] = useState([])
+    const [upcomingAssignments, setUpcomingAssignments] = useState([])
+    const [lateAssignments, setLateAssignments] = useState([])
     const [attendanceData, setAttendanceData] = useState<any[]>([])
-    const [submission, setSubmission] = useState<any[]>([])
     const [enrolledCourse, setEnrolledCourse] = useState([])
     const [selectedCourse, setSelectedCourse] =
         useState<EnrolledCourse | null>()
@@ -125,8 +126,9 @@ function Schedule({ className, ...props }: ScheduleProps) {
         })
     }, [selectedCourse?.id])
     const getUpcomingSubmissionHandler = useCallback(async () => {
-        await api.get(`/tracking/upcomingSubmission/9`).then((res) => {
-            setSubmission(res.data)
+        await api.get(`/tracking/allupcomingSubmission`).then((res) => {
+            setUpcomingAssignments(res.data.upcomingAssignments)
+            setLateAssignments(res.data.lateAssignments)
         })
     }, [])
 
@@ -165,8 +167,6 @@ function Schedule({ className, ...props }: ScheduleProps) {
         getUpcomingClassesHandler,
         getUpcomingSubmissionHandler,
     ])
-
-    console.log('submission', submission)
 
     return (
         <div>
@@ -339,24 +339,33 @@ function Schedule({ className, ...props }: ScheduleProps) {
         className="rounded-md border"
       /> */}
             <div className="flex flex-col items-start mt-6">
-                <h1 className="text-xl p-1 text-start font-bold mb-4">
-                    Upcoming Submissions
-                </h1>
-                {/* <div className="flex flex-row"> */}
-                {/* <div
-                    className={
-                        upcomingClasses?.length < 1
-                            ? 'w-[75%]'
-                            : 'flex flex-row'
-                    }
-                > */}
+                {lateAssignments.length < 1 &&
+                    upcomingAssignments.length < 1 && (
+                        <h1 className="text-xl p-1 text-start font-bold mb-4">
+                            Upcoming Submissions
+                        </h1>
+                    )}
                 <div className="flex flex-col w-full lg:max-w-[860px]">
-                    {submission.length > 0 ? (
-                        submission.map((data) => {
-                            return (
+                    {lateAssignments.length > 0 ||
+                    upcomingAssignments.length > 0 ? (
+                        <div className="flex flex-col w-full lg:max-w-[860px]">
+                            {lateAssignments.length > 0 && (
+                                <h1 className="text-xl p-1 text-start font-bold mb-4">
+                                    Late Assignments
+                                </h1>
+                            )}
+                            {lateAssignments.map((data: any, index) => (
                                 <SubmissionCard classData={data} key={data} />
-                            )
-                        })
+                            ))}
+                            {upcomingAssignments.length > 0 && (
+                                <h1 className="text-xl p-1 text-start font-bold mb-4">
+                                    Upcoming Assignments
+                                </h1>
+                            )}
+                            {upcomingAssignments.map((data: any, index) => (
+                                <SubmissionCard classData={data} key={data} />
+                            ))}
+                        </div>
                     ) : (
                         <div className="flex flex-col items-center mt-12 lg:w-[870px]">
                             <Image
