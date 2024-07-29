@@ -76,9 +76,10 @@ export function Stat({ className, ...props }: CardProps) {
         if (userID) getStudents()
     }, [userID, selectedCourse])
 
-    const ownRank =
+    const rank =
         students.length > 0 &&
         students.findIndex((item: any) => userID == item.userInfo.id)
+    const ownRank = rank !== false ? rank + 1 : 'N/A'
 
     useEffect(() => {
         const getEnrolledCourses = async () => {
