@@ -250,8 +250,8 @@ const Page = ({ params }: { params: any }) => {
                                                     {option}
                                                     </div>
                                             )} */}
-                                            {item.options.map((option) => (
-                                                <div>
+                                            {item.options.map((option,index) => (
+                                                <div key={index} >
                                                     <Checkbox
                                                         checked={item.answer.includes(
                                                             option
