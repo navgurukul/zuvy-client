@@ -240,9 +240,9 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                 <Card className="w-full mb-3 border-none p-5 shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F]">
                                     <div className="flex flex-row justify-between items-center gap-6">
                                         <div>
-                                            <div className="flex flex-row gap-4">
+                                            <div className="flex flex-row gap-3">
                                                 <BookOpenText className="hidden sm:block mt-2" />
-                                                <h1 className="text-lg p-1 text-start font-bold">
+                                                <h1 className="text-md mt-2 text-start font-bold">
                                                     {
                                                         resumeCourse.newChapter
                                                             ?.title
@@ -289,9 +289,9 @@ function Schedule({ className, ...props }: ScheduleProps) {
                             <div className="w-full">
                                 <Card className="w-full mb-3 border-none p-5 shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F]">
                                     <div>
-                                        <div className="flex flex-row gap-4">
+                                        <div className="flex flex-row gap-3">
                                             <BookOpenText className="mt-2" />
-                                            <h1 className="text-lg p-1 text-start font-bold">
+                                            <h1 className="text-md mt-2 text-start font-bold">
                                                 {resumeCourse.newChapter?.title}
                                             </h1>
                                         </div>
