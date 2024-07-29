@@ -147,6 +147,7 @@ export const columns: ColumnDef<Task>[] = [
                 value: student.batchId.toString(),
                 label: student.batchName,
             }
+            console.log(batchData)
 
             if (oldtransformedData) {
                 return (
