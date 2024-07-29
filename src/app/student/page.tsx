@@ -49,42 +49,24 @@ function Page() {
                             to becoming a star programmer. Happy coding!
                         </p>
                     </div>
-                    {/* <div className="flex flex-wrap flex-col items-stretch my-3 gap-5">
-                        <div className="flex-1">
-                            <Schedule />
-                        </div>
-                        <div className="max-sm:w-full">
-                            <Stat />
-                        </div>
-                    </div> */}
-                    {/* <div className="flex flex-wrap items-stretch my-3 gap-5">
-                        <div className="flex-1">
-                            <Schedule />
-                        </div>
-                        <div className="max-md:w-full flex flex-col gap-5">
-                            <Attendance />
-                            <Stat />
-                        </div>
-                    </div> */}
 
-                    {/* For Large screen like Laptop and large tab */}
-                    <div className="hidden lg:flex flex-wrap items-stretch my-3 gap-5">
-                        <div className="flex-1">
-                            <Schedule />
-                        </div>
-                        <div className="max-md:w-full flex flex-col gap-5">
+                    <div className="flex flex-col lg:flex-row gap-4 my-3">
+                        {/* For Small screen like mobile and small tab */}
+                        <div className="lg:hidden flex flex-col gap-5 w-full">
                             <Attendance />
                             <Stat />
-                        </div>
-                    </div>
-                    {/* For Small screen like mobile and small tab */}
-                    <div className="block lg:hidden flex flex-wrap items-stretch my-3 gap-5">
-                        <div className="max-md:w-full flex flex-col gap-5">
-                            <Attendance />
-                            <Stat />
-                        </div>
-                        <div className="flex-1">
                             <Schedule />
+                        </div>
+
+                        {/* For Large screen like desktop and large tab */}
+                        <div className="hidden lg:flex w-full gap-5">
+                            <div className="w-[70%]">
+                                <Schedule />
+                            </div>
+                            <div className="w-[28%] flex flex-col gap-5">
+                                <Attendance />
+                                <Stat />
+                            </div>
                         </div>
                     </div>
                 </div>
