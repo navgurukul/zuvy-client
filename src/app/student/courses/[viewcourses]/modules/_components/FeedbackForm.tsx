@@ -108,20 +108,28 @@ const FeedbackForm = (props: Props) => {
                 } else if (typeof item.answer === 'string') {
                   chosenOptions = [Number(item.answer)];
                 }
+                return  {
+                    questionId: item.id,
+                    chosenOptions,
+                  };
               } else {
                 // For other types (like paragraph, date, time)
                 answer = item.answer?.toString() || '';
+                return {
+                    questionId: item.id,
+                    answer
+                  };
               }
           
-              return {
-                questionId: item.id,
-                chosenOptions,
-                answer
-              };
+            //   return {
+            //     questionId: item.id,
+            //     chosenOptions,
+            //     answer
+            //   };
             })
           };
       
-        // console.log('Transformed data for submission:', transformedData);
+        console.log('Transformed data for submission:', transformedData);
         // Here you would typically send this data to your API
         try {
             const res = await api.post(

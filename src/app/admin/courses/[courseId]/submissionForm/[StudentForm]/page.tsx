@@ -12,9 +12,13 @@ import { Skeleton } from '@/components/ui/skeleton'
 type Props = {}
 
 const Page = ({ params }: any) => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const moduleId = urlParams.get('moduleId')
     const [assesmentData, setAssesmentData] = useState<any>()
-
-    // const [dataTableAssesment, setDataTableAssesments] = useState<any>([])
+    const [studentStatus, setStudentStatus] = useState<any>()
+    const [totalSubmission, setTotalSubmission] = useState<any>()
+    const [notSubmitted, setNotSubmitted] = useState<any>()
+    const [chapterDetails, setChapterDetails] = useState<any>()
     const [bootcampData, setBootcampData] = useState<any>()
 
     const crumbs = [
@@ -29,55 +33,14 @@ const Page = ({ params }: any) => {
             isLast: false,
         },
         {
-            crumb: 'Submission - Assesments',
+            crumb: 'Submission - Forms',
             href: `/admin/courses/${params.courseId}/submissions`,
             isLast: false,
         },
         {
-            crumb: assesmentData?.title,
-            // href: '',
-            isLast: false,
-        },
-    ]
-
-    const dataTableAssesment = [
-        {
-            email: 'poonambagh@gmail.com',
-            name: 'Poonam Bagh',
-            userId: 1,
-            batchId: 101,
-            bootcampId: 202,
-            profilePicture: null, // or a valid URL string
-            progress: 75,
-            batchName: 'Batch A',
-            attendance: 85,
-            status: 'Active',
-            noOfAttempts: 3,
-            isChecked: true,
-            userEmail: 'poonambagh@gmail.com',
-            projectId: 303,
-            id: 404,
-            userName: 'Poonam Bagh',
-            newId: 505,
-        },
-        {
-            email: 'johndoe@example.com',
-            name: 'John Doe',
-            userId: 2,
-            batchId: 102,
-            bootcampId: 203,
-            profilePicture: 'https://example.com/profile.jpg',
-            progress: 50,
-            batchName: 'Batch B',
-            attendance: 90,
-            status: 'Pending',
-            noOfAttempts: 2,
-            isChecked: false,
-            userEmail: 'johndoe@example.com',
-            projectId: 304,
-            id: 405,
-            userName: 'John Doe',
-            newId: 506,
+            crumb: chapterDetails?.title,
+            href: '',
+            isLast: true,
         },
     ]
 
@@ -89,35 +52,43 @@ const Page = ({ params }: any) => {
             console.error('API Error:', error)
         }
     }, [params.courseId])
-    const getStudentAssesmentDataHandler = useCallback(async () => {
+    const getStudentFormDataHandler = useCallback(async () => {
         await api
             .get(
-                `/admin/assessment/students/assessment_id${params.StudentAssesmentData}`
+                `submission/formsStatus/${params.courseId}/${moduleId}?chapterId=${params.StudentForm}&limit=3&offset=1`
             )
             .then((res) => {
-                setAssesmentData(res.data.ModuleAssessment)
-                const data = res.data
-                data.submitedOutsourseAssessments =
-                    data.submitedOutsourseAssessments.map((assessment: any) => {
-                        return {
-                            ...assessment,
-                            bootcampId: data.bootcampId,
-                            newId: data.id,
-                        }
-                    })
-                // setDataTableAssesments(data.submitedOutsourseAssessments)
+                const allData = [...res.data.data1, ...res.data.data2]
+                const data = allData.map((student: any) => {
+                    return {
+                        ...student,
+                        bootcampId: params.courseId,
+                        moduleId: moduleId,
+                        chapterId: params.StudentForm,
+                        userId: student.id,
+                        email: student.emailId
+                    }
+                })
+                console.log('data', data)
+                setStudentStatus(data)
+                setTotalSubmission(res.data.data1)
+                setNotSubmitted(res.data.data2)
             })
-    }, [params.StudentAssesmentData])
+            await api.get(`/tracking/getChapterDetailsWithStatus/${params.StudentForm}`)
+            .then((res) => {
+                setChapterDetails(res.data.trackingData)
+            })
+    }, [params.StudentAssesmentData, moduleId])
 
     useEffect(() => {
-        getStudentAssesmentDataHandler()
+        getStudentFormDataHandler()
         getBootcampHandler()
-    }, [getStudentAssesmentDataHandler, getBootcampHandler])
+    }, [getStudentFormDataHandler, getBootcampHandler])
 
-    // console.log(dataTableAssesment)
+    console.log('studentStatus', studentStatus)
     return (
         <>
-            {assesmentData ? (
+            {chapterDetails ? (
                 <BreadcrumbComponent crumbs={crumbs} />
             ) : (
                 <Skeleton className="h-4 w-4/6" />
@@ -125,31 +96,28 @@ const Page = ({ params }: any) => {
             <MaxWidthWrapper className="p-4 ">
                 <div className="flex flex-col gap-y-4">
                     <h1 className="text-start text-xl font-bold capitalize text-primary">
-                        {assesmentData?.title}
+                        {chapterDetails?.title}
                     </h1>
 
-                    {assesmentData ? (
+                    {studentStatus ? (
                         <div className="text-start flex gap-x-3">
                             <div className="p-4 rounded-lg shadow-md ">
                                 <h1 className="text-gray-600 font-semibold text-xl">
-                                    {assesmentData?.totalStudents}
+                                    {studentStatus?.length}
                                 </h1>
                                 <p className="text-gray-500 ">Total Students</p>
                             </div>
                             <div className="p-4 rounded-lg shadow-md ">
                                 <h1 className="text-gray-600 font-semibold text-xl">
-                                    {assesmentData?.totalSubmitedStudents}
+                                    {totalSubmission?.length}
                                 </h1>
                                 <p className="text-gray-500 ">
-                                    Submissions Received YEEESSSS
+                                    Submissions Received
                                 </p>
                             </div>
                             <div className="p-4 rounded-lg shadow-md">
                                 <h1 className="text-gray-600 font-semibold text-xl">
-                                    {(
-                                        assesmentData?.totalStudents -
-                                        assesmentData?.totalSubmitedStudents
-                                    ).toString()}
+                                    {notSubmitted?.length}
                                 </h1>
                                 <p className="text-gray-500 ">
                                     Not Yet Submitted
@@ -175,7 +143,9 @@ const Page = ({ params }: any) => {
                             <Search className="text-gray-400" size={20} />
                         </div>
                     </div>
-                    <DataTable data={dataTableAssesment} columns={columns} />
+                    {studentStatus && (
+                        <DataTable data={studentStatus} columns={columns} />
+                    )}
                 </div>
             </MaxWidthWrapper>
         </>

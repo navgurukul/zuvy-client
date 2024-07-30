@@ -3,6 +3,7 @@ import Image from 'next/image'
 
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
+import { Button } from '@/components/ui/button'
 
 import { Task } from '@/utils/data/schema'
 import Link from 'next/link'
@@ -86,8 +87,8 @@ export const columns: ColumnDef<Task>[] = [
             <DataTableColumnHeader column={column} title="Status" />
         ),
         cell: ({ row }) => {
-            // const isChecked = row.original.isChecked
-            const isSubmitted = true
+            const isSubmitted =
+                row.original.status[0] === 'Not Submitted' ? false : true
             return (
                 <div className="flex space-x-2">
                     <div className="max-w-[500px] truncate flex items-center gap-x-2 font-medium">
@@ -105,18 +106,24 @@ export const columns: ColumnDef<Task>[] = [
     {
         id: 'actions',
         cell: ({ row }) => {
-            const { bootcampId, newId, userId, id } = row.original
-            // console.log(row.original)
+            const { bootcampId, moduleId, userId, chapterId } = row.original
+            const isSubmitted =
+                row.original.status[0] !== 'Not Submitted' ? false : true
             return (
                 <div className="flex space-x-2">
-                    <Link
-                        href={`/admin/courses/117/submissionForm/${newId}/IndividualReport/${userId}/Report/${id}`}
-                        // href={`/admin/courses/${bootcampId}/submissionAssesments/${newId}/IndividualReport/${userId}/Report/${id}`}
-                        className="max-w-[500px] text-secondary font-medium flex items-center"
+                    <Button
+                        variant={'ghost'}
+                        className="text-lg font-bold"
+                        disabled={isSubmitted}
                     >
-                        <FileText size={16} />
-                        <p className="text-[15px]"> View Report</p>
-                    </Link>
+                        <Link
+                            href={`/admin/courses/${bootcampId}/submissionForm/${moduleId}/IndividualReport/${userId}/Report/${chapterId}`}
+                            className="max-w-[500px] text-secondary font-medium flex items-center"
+                        >
+                            <FileText size={16} />
+                            <p className="text-[15px]"> View Report</p>
+                        </Link>
+                    </Button>
                 </div>
             )
         },

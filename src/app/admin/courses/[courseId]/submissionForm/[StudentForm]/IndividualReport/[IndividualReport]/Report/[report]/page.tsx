@@ -87,8 +87,11 @@ type newDataType =
 const Page = ({ params }: { params: any }) => {
     const [individualAssesmentData, setIndividualAssesmentData] =
         useState<StudentAssessment>()
+    const [individualFormData, setIndividualFormData] = useState<any>()
+    const [chapterDetails, setChapterDetails] = useState<any>()
     const [bootcampData, setBootcampData] = useState<any>()
     const [assesmentData, setAssesmentData] = useState<any>()
+    const [user, setUser] = useState<any>()
     const crumbs = [
         {
             crumb: 'My Courses',
@@ -102,207 +105,216 @@ const Page = ({ params }: { params: any }) => {
             isLast: false,
         },
         {
-            crumb: 'Submission - Assesments',
+            crumb: 'Submission - Forms',
             href: `/admin/courses/${params.courseId}/submissions`,
             isLast: false,
         },
         {
-            crumb: assesmentData?.title,
-            href: `/admin/courses/${params.courseId}/submissionAssesments/${params.StudentAssesmentData}`,
+            crumb: chapterDetails?.title,
+            href: `/admin/courses/${params.courseId}/submissionForm/${params.report}?moduleId=${params.StudentForm}`,
             isLast: false,
         },
         {
-            crumb: individualAssesmentData && individualAssesmentData.user.name,
-
+            crumb: user && user.name,
             href: '',
             isLast: true,
         },
     ]
 
-    const newContent = {
-        title: 'Class Feedback',
-        description:
-            'We would like to know how you liked this class. Please share your insights with us',
-        section: [
-            {
-                type: 'multiple-choice',
-                question: 'What is your favorite color?',
-                options: ['Red', 'Blue', 'Green', 'Yellow'],
-                answer: 'Blue',
-            },
-            {
-                type: 'paragraph',
-                question: 'How are your?',
-                options: [],
-                answer: 'I am good!',
-            },
-            {
-                type: 'checkbox',
-                question: 'What are your favorite pet animal?',
-                options: ['Dog', 'Cat', 'Squerall', 'Rabbit'],
-                answer: ['Dog', 'Cat', 'Rabbit'],
-            },
-            {
-                type: 'paragraph',
-                question: 'Which course are you studying currently?',
-                options: [],
-                answer: 'I am studying Data Science',
-            },
-            {
-                type: 'time',
-                question: 'When do you start studying?',
-                options: [],
-                answer: '08:00 am',
-            },
-            {
-                type: 'date',
-                question: 'When did you start this course?',
-                options: [],
-                answer: '15th May 2024',
-            },
-        ],
+    function formatDate(isoDateStr: any) {
+        // Create a Date object from the ISO 8601 string
+        const date = new Date(isoDateStr);
+    
+        // Get day, month, and year
+        const day = date.getDate();
+        const year = date.getFullYear();
+        const month = date.toLocaleString('en-US', { month: 'short' });
+    
+        // Return the formatted date string
+        return ` ${day} ${month} ${year}`;
     }
 
-    // const getBootcampHandler = useCallback(async () => {
-    //     try {
-    //         const res = await api.get(`/bootcamp/${params.courseId}`)
-    //         setBootcampData(res.data.bootcamp)
-    //     } catch (error) {
-    //         console.error('API Error:', error)
-    //     }
-    // }, [params.courseId])
-    // const getIndividualStudentAssesmentDataHandler = useCallback(async () => {
-    //     await api
-    //         .get(
-    //             `/admin/assessment/submission/user_id${params.IndividualReport}?submission_id=${params.report}`
-    //         )
-    //         .then((res) => {
-    //             setIndividualAssesmentData(res.data)
-    //         })
-    // }, [params.IndividualReport, params.report])
+    const getBootcampHandler = useCallback(async () => {
+        try {
+            const res = await api.get(`/bootcamp/${params.courseId}`)
+            setBootcampData(res.data.bootcamp)
+        } catch (error) {
+            console.error('API Error:', error)
+        }
+    }, [params.courseId])
+
+    const getIndividualStudentFormDataHandler = useCallback(async () => {
+        const chapterId = params.report
+        const moduleId = params.StudentForm
+        await api
+            .get(
+                `submission/getFormDetailsById/${moduleId}?chapterId=${chapterId}`
+            )
+            .then((res) => {
+                setIndividualFormData(res.data.trackedData)
+                setIndividualAssesmentData(res.data)
+            })
+
+        await api.get(`/tracking/getChapterDetailsWithStatus/${chapterId}`)
+        .then((res) => {
+            setChapterDetails(res.data.trackingData)
+        })
+    }, [params.report])
+
+    const getIndividualStudent = useCallback(async () => {
+        await api.get(
+            `submission/formsStatus/${params.courseId}/${params.StudentForm}?chapterId=${params.report}&limit=3&offset=1`
+        )
+        .then((res) => {
+            const student = res.data.data1.find((item:any) => item.id == params.IndividualReport)
+            setUser(student)
+        })
+    }, [params.report, params.IndividualReport])
+
+    useEffect(() => {
+        getIndividualStudentFormDataHandler()
+        getBootcampHandler()
+        getIndividualStudent()
+    }, [getIndividualStudentFormDataHandler, getBootcampHandler])
 
     return (
         <>
-            {/* {individualAssesmentData ? (
+            {user ? (
                 <BreadcrumbComponent crumbs={crumbs} />
             ) : (
                 <Skeleton className="h-4 w-4/6" />
-            )} */}
+            )}
             <MaxWidthWrapper className="p-4">
                 <div className="flex justify-center">
                     <div className="flex flex-col gap-5 text-left w-1/3">
                         <h1 className="text-xl font-bold text-secondary-foreground">
-                            {newContent.title}
+                            {chapterDetails?.title}
                         </h1>
-                        <p className="text-lg">{newContent.description}</p>
+                        <p className="text-lg">{chapterDetails?.description}</p>
                         <div>
-                            {/* Change the color */}
-                            <p className="text-lg description bg-primary-foreground p-5 rounded-lg">
-                                Submitted on 26 Jun 2024
-                            </p>
+                            {
+                                individualFormData && 
+                                (<p className="text-lg description bg-primary-foreground p-5 rounded-lg">
+                                    Submitted on 
+                                    {formatDate(individualFormData?.[0].formTrackingData[0].updatedAt)}
+                                </p>)
+                            }
                         </div>
-                        {newContent.section.map((item, index) => (
-                            <div key={index} className="space-y-3 text-start">
-                                {item.type === 'multiple-choice' && (
-                                    <div className="mt-6">
-                                        <div className="flex flex-row gap-x-2 font-semibold">
-                                            <p>{index + 1}.</p>
-                                            <p>{item.question}</p>
+                        {individualFormData &&
+                            individualFormData.map((item: any, index: any) => (
+                                <div
+                                    key={index}
+                                    className="space-y-3 text-start"
+                                >
+                                    {item.typeId === 1 && (
+                                        <div className="mt-6">
+                                            <div className="flex flex-row gap-x-2 font-semibold">
+                                                <p>{index + 1}.</p>
+                                                <p>{item.question}</p>
+                                            </div>
+                                            <div className="space-y-3 text-start">
+                                                <RadioGroup value={item.formTrackingData[0].chosenOptions[0]}>
+                                                    {Object.keys(item.options).map((option) => {
+                                                        const answer = item.formTrackingData[0].chosenOptions[0];
+                                                        return (
+                                                            <div
+                                                                key={option}
+                                                                className={`flex space-x-2 mr-4 mt-1 p-3 ${
+                                                                    answer == option &&
+                                                                    'border border-gray-800 border-2 rounded-lg'
+                                                                }`}
+                                                            >
+                                                                <div className="flex items-center w-full space-x-3 space-y-0">
+                                                                    <RadioGroupItem 
+                                                                        value={option} 
+                                                                        checked={answer == option}
+                                                                        disabled
+                                                                    />
+                                                                    <label className="font-normal">
+                                                                        {item.options[option]}
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </RadioGroup>
+                                            </div>
                                         </div>
-                                        <div className="space-y-3 text-start">
-                                            <RadioGroup
-                                            // onValueChange={field.onChange}
-                                            // value={item.answer}
-                                            >
-                                                {item.options.map((option) => (
-                                                    <div
-                                                        key={option}
-                                                        className={`flex space-x-2 mr-4 mt-1 p-3 ${
-                                                            item.answer ===
-                                                                option &&
-                                                            `border border-secondary border-2 rounded-lg`
-                                                        }`}
-                                                    >
-                                                        <div className="flex items-center w-full space-x-3 space-y-0">
-                                                            <RadioGroupItem
-                                                                value={option}
+                                    )}
+
+                                    {item.typeId === 2 && (
+                                        <div className="mt-6">
+                                            <div className="flex flex-row gap-x-2 font-semibold">
+                                                <p>{index + 1}.</p>
+                                                <p>{item.question}</p>
+                                            </div>
+                                            <div className="mt-2">
+                                                {Object.keys(item.options).map((option) => {
+                                                    const answer = item.formTrackingData[0].chosenOptions;
+                                                    const optionNumber = Number(option); 
+                                                    return (
+                                                        <div
+                                                            key={option}
+                                                            className={`flex space-x-2 mr-4 mt-1 p-3 ${
+                                                                answer.includes(optionNumber) &&
+                                                                'border border-gray-800 border-2 rounded-lg'
+                                                            }`}
+                                                        >
+                                                            <Checkbox
+                                                                checked={answer.includes(
+                                                                    optionNumber
+                                                                )}
+                                                                disabled
+                                                                aria-label={option}
+                                                                // className="translate-y-[2px] mr-1"
+                                                                className={`translate-y-[2px] mr-1 ${
+                                                                    answer.includes(optionNumber) && 'bg-green-500'
+                                                                }`}
                                                             />
-                                                            <label className="font-normal">
-                                                                {option}
-                                                            </label>
+                                                            {item.options[option]}
                                                         </div>
-                                                    </div>
-                                                ))}
-                                            </RadioGroup>
+                                                )})}
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
 
-                                {item.type === 'checkbox' && (
-                                    <div className="mt-6">
-                                        <div className="flex flex-row gap-x-2 font-semibold">
-                                            <p>{index + 1}.</p>
-                                            <p>{item.question}</p>
+                                    {item.typeId === 3 && (
+                                        <div className="mt-6">
+                                            <div className="flex flex-row gap-x-2 font-semibold mb-3">
+                                                <p>{index + 1}.</p>
+                                                <p>{item.question}</p>
+                                            </div>
+                                            <p>{item.formTrackingData[0].answer}</p>
                                         </div>
-                                        <div className="mt-2">
-                                            {/* {item.options.map((option) => (
-                                                <div>
-                                                    {option}
-                                                    </div>
-                                            )} */}
-                                            {item.options.map((option) => (
-                                                <div>
-                                                    <Checkbox
-                                                        checked={item.answer.includes(
-                                                            option
-                                                        )}
-                                                        aria-label={option}
-                                                        className="translate-y-[2px] mr-1"
-                                                    />
-                                                    {option}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
+                                    )}
 
-                                {item.type === 'paragraph' && (
-                                    <div className="mt-6">
-                                        <div className="flex flex-row gap-x-2 font-semibold mb-3">
-                                            <p>{index + 1}.</p>
-                                            <p>{item.question}</p>
+                                    {item.typeId === 4 && (
+                                        <div className="mt-6">
+                                            <div className="flex flex-row gap-x-2 font-semibold mb-3">
+                                                <p>{index + 1}.</p>
+                                                <p>{item.question}</p>
+                                            </div>
+                                            <div className="flex flex-row gap-x-1">
+                                                <CalendarIcon className="h-4 w-4 opacity-50 m-1" />
+                                                <p>{item.formTrackingData[0].answer}</p>
+                                            </div>
                                         </div>
-                                        <p>{item.answer}</p>
-                                    </div>
-                                )}
+                                    )}
 
-                                {item.type === 'time' && (
-                                    <div className="mt-6">
-                                        <div className="flex flex-row gap-x-2 font-semibold mb-3">
-                                            <p>{index + 1}.</p>
-                                            <p>{item.question}</p>
+                                    {item.typeId === 5 && (
+                                        <div className="mt-6">
+                                            <div className="flex flex-row gap-x-2 font-semibold mb-3">
+                                                <p>{index + 1}.</p>
+                                                <p>{item.question}</p>
+                                            </div>
+                                            <div className="flex flex-row gap-x-1">
+                                                <Clock className="h-4 w-4 opacity-50 m-1" />
+                                                <p>{item.formTrackingData[0].answer}</p>
+                                            </div>
                                         </div>
-                                        <div className="flex flex-row gap-x-1">
-                                            <Clock className="h-4 w-4 opacity-50 m-1" />
-                                            <p>{item.answer}</p>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {item.type === 'date' && (
-                                    <div className="mt-6">
-                                        <div className="flex flex-row gap-x-2 font-semibold mb-3">
-                                            <p>{index + 1}.</p>
-                                            <p>{item.question}</p>
-                                        </div>
-                                        <div className="flex flex-row gap-x-1">
-                                            <CalendarIcon className="h-4 w-4 opacity-50 m-1" />
-                                            <p>{item.answer}</p>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        ))}
+                                    )}
+                                </div>
+                            ))}
                     </div>
                 </div>
             </MaxWidthWrapper>

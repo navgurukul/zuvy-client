@@ -21,6 +21,7 @@ const Page = ({ params }: { params: any }) => {
     const [totalStudents, setTotalStudents] = useState(0)
     const [assesments, setAssesments] = useState<any>()
     const [projectData, setProjectData] = useState<any>([])
+    const [formData, setFormData] = useState<any>([])
     const [loading, setLoading] = useState(true)
 
     const handleTabChange = (tab: string) => {
@@ -45,11 +46,11 @@ const Page = ({ params }: { params: any }) => {
                 `/admin/bootcampAssessment/bootcamp_id${params.courseId}`
             )
             setAssesments(res.data)
-            // setTotalStudents(res.data.totalStudents)
         } catch (error) {
             console.error('Error fetching assessments:', error)
         }
     }, [params.courseId])
+
     const getProjectsData = useCallback(async () => {
         try {
             const res = await api.get(
@@ -62,11 +63,25 @@ const Page = ({ params }: { params: any }) => {
         }
     }, [params.courseId])
 
+    const getFormData = useCallback(async () => {
+        try {
+            const res = await api.get(
+                `/submission/submissionsOfForms/${params.courseId}`
+            )
+            console.log('res', res.data.trackingData)
+            setFormData(res.data.trackingData)
+            setTotalStudents(res.data.totalStudents)
+        } catch (error) {
+            console.error('Error fetching assessments:', error)
+        }
+    }, [params.courseId])
+
     useEffect(() => {
         if (params.courseId) {
             getSubmissions()
             getAssessments()
             getProjectsData()
+            getFormData()
         }
     }, [getSubmissions, getAssessments, params.courseId, getProjectsData])
 
@@ -283,9 +298,17 @@ const Page = ({ params }: { params: any }) => {
                     ))}
                 {activeTab === 'form' && (
                     <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2 lg:grid-cols-3">
-                        {['A', 'B', 'C'].map((item: any) => (
-                            <FormComponent />
-                        ))}
+                        {formData.map((item: any) => {
+                            return item.moduleChapterData.map((data: any) => (
+                                <FormComponent
+                                    moduleName={item.name}
+                                    moduleId={item.id}
+                                    bootcampId={item.bootcampId}
+                                    data={data}
+                                    totalStudents={totalStudents}
+                                />
+                            ))
+                        })}
                     </div>
                 )}
             </div>
