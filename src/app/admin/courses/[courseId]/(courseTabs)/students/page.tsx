@@ -148,6 +148,7 @@ const Page = ({ params }: { params: any }) => {
     const [limit, setLimit] = useState<number>(10)
     const [search, setSearch] = useState<string>('')
     const debouncedSearch = useDebounce(search, 1000)
+    const { fetchBatches, batchData } = getBatchData()
     const fetchStudentsHandler = useCallback(async () => {
         setLoading(true)
 
@@ -157,7 +158,7 @@ const Page = ({ params }: { params: any }) => {
 
         try {
             const res = await api.get(endpoint)
-            setStudents(res.data.totalStudents || [])
+            setStudents(res.data.modifiedStudentInfo || [])
             setTotalPages(res.data.totalPages || 0)
             setTotalStudents(res.data.totalStudentsCount || 0)
             setCurrentPage(res.data.currentPage || 1)
@@ -174,6 +175,10 @@ const Page = ({ params }: { params: any }) => {
     useEffect(() => {
         fetchStudentsHandler()
     }, [fetchStudentsHandler])
+
+    useEffect(() => {
+        fetchBatches(params.courseId)
+    }, [])
 
     const nextPageHandler = useCallback(() => {
         if (currentPage < totalPages) {
@@ -203,7 +208,6 @@ const Page = ({ params }: { params: any }) => {
     const handleSetSearch = useCallback((e: any) => {
         setSearch(e.target.value)
     }, [])
-    console.log(students)
 
     return (
         <div>
@@ -258,28 +262,30 @@ const Page = ({ params }: { params: any }) => {
                 //                 </TooltipContent>
                 //             </Tooltip>
                 //         </TooltipProvider>
-                //         <Dialog>
-                //             <DialogTrigger asChild>
-                //                 <Button className=" gap-x-2 ">
-                //                     <Plus /> Add Students
-                //                 </Button>
-                //             </DialogTrigger>
-                //             <DialogOverlay />
-                //             <AddStudentsModal
-                //                 message={false}
-                //                 id={params.courseId || 0}
-                //             />
-                //         </Dialog>
                 //     </div>
                 // </div>
             }
             <div>
-                <Input
-                    type="search"
-                    placeholder="search"
-                    className="w-1/3"
-                    onChange={handleSetSearch}
-                />
+                <div className="flex justify-between">
+                    <Input
+                        type="search"
+                        placeholder="search"
+                        className="w-1/3"
+                        onChange={handleSetSearch}
+                    />
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button className=" gap-x-2 ">
+                                <Plus /> Add Students
+                            </Button>
+                        </DialogTrigger>
+                        <DialogOverlay />
+                        <AddStudentsModal
+                            message={false}
+                            id={params.courseId || 0}
+                        />
+                    </Dialog>
+                </div>
 
                 <div>
                     <ul>

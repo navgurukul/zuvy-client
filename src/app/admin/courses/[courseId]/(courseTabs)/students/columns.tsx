@@ -1,4 +1,5 @@
 'use client'
+
 import Image from 'next/image'
 
 import { ColumnDef } from '@tanstack/react-table'
@@ -22,33 +23,9 @@ import {
 } from '@/store/store'
 import { getAttendanceColorClass } from '@/utils/students'
 import { trace } from 'console'
+import { useState } from 'react'
+import { ComboboxStudent } from './comboboxStudentDataTable'
 export const columns: ColumnDef<Task>[] = [
-    // {
-    //     id: 'select',
-    //     header: ({ table }) => (
-    //         <Checkbox
-    //             checked={
-    //                 table.getIsAllPageRowsSelected() ||
-    //                 (table.getIsSomePageRowsSelected() && 'indeterminate')
-    //             }
-    //             onCheckedChange={(value) =>
-    //                 table.toggleAllPageRowsSelected(!!value)
-    //             }
-    //             aria-label="Select all"
-    //             className="translate-y-[2px]"
-    //         />
-    //     ),
-    //     cell: ({ row }) => (
-    //         <Checkbox
-    //             checked={row.getIsSelected()}
-    //             onCheckedChange={(value) => row.toggleSelected(!!value)}
-    //             aria-label="Select row"
-    //             className="translate-y-[2px]"
-    //         />
-    //     ),
-    //     enableSorting: false,
-    //     enableHiding: false,
-    // },
     {
         accessorKey: 'profilePicture',
         header: ({ column }) => (
@@ -118,60 +95,24 @@ export const columns: ColumnDef<Task>[] = [
             <DataTableColumnHeader column={column} title="Batch Assigned To" />
         ),
         cell: ({ row }) => {
-            const student = row.original
+            const { batchName, userId } = row.original
             const { batchData } = getBatchData()
-            const { setStoreStudentData } = getStoreStudentData()
-            const bootcampId = batchData && batchData[0]?.bootcampId
-            const initialvalue = row.original?.batchId?.toString()
-            const oldtransformedData = batchData?.reduce(
-                (transformedData: any[], item: { id: any; name: any }) => {
-                    if (item.id != null) {
-                        const isUnique = !transformedData.some(
-                            (existingItem) =>
-                                existingItem.value === item.id.toString()
-                        )
-
-                        if (isUnique) {
-                            transformedData.push({
-                                value: item.id.toString(),
-                                label: item.name,
-                            })
-                        }
-                    }
-
-                    return transformedData
-                },
-                []
+            const newBatchData = batchData?.map((data) => {
+                return {
+                    value: data.id,
+                    label: data.name,
+                }
+            })
+            console.log(userId)
+            return (
+                <div className="flex">
+                    <ComboboxStudent
+                        batchData={newBatchData}
+                        batchName={batchName}
+                        userId={userId}
+                    />
+                </div>
             )
-            const newtransformedData = {
-                value: student.batchId.toString(),
-                label: student.batchName,
-            }
-            console.log(batchData)
-
-            if (oldtransformedData) {
-                return (
-                    <div className="flex text-start gap-6 my-6 max-w-[200px]">
-                        <Combobox
-                            data={oldtransformedData}
-                            title={'Batch'}
-                            onChange={(selectedValue) => {
-                                onBatchChange(
-                                    selectedValue,
-                                    student,
-                                    initialvalue,
-                                    bootcampId,
-                                    setStoreStudentData,
-                                    fetchStudentData
-                                )
-                            }}
-                            initialValue={initialvalue || ''}
-                            batch={true}
-                            batchChangeData={newtransformedData}
-                        />
-                    </div>
-                )
-            }
         },
     },
     {

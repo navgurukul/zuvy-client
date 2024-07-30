@@ -208,4 +208,9 @@ export async function getAssessmentShortInfo(
     }
 }
 
+export async function getBatchDataNew(bootcampId: number) {
+    const res = await api.get(`/bootcamp/batches/${bootcampId}`)
+    return res.data
+}
+
 // --------------------------------------------
