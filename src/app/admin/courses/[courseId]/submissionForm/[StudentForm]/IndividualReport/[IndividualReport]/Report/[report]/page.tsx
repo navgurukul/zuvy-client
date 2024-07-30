@@ -266,7 +266,6 @@ const Page = ({ params }: { params: any }) => {
                                                                 )}
                                                                 disabled
                                                                 aria-label={option}
-                                                                // className="translate-y-[2px] mr-1"
                                                                 className={`translate-y-[2px] mr-1 ${
                                                                     answer.includes(optionNumber) && 'bg-green-500'
                                                                 }`}
@@ -296,7 +295,9 @@ const Page = ({ params }: { params: any }) => {
                                             </div>
                                             <div className="flex flex-row gap-x-1">
                                                 <CalendarIcon className="h-4 w-4 opacity-50 m-1" />
-                                                <p>{item.formTrackingData[0].answer}</p>
+                                                <p>
+                                                    {formatDate(item.formTrackingData[0].answer)}
+                                                </p>
                                             </div>
                                         </div>
                                     )}
