@@ -8,6 +8,7 @@ import { api } from '@/utils/axios.config'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Skeleton } from '@/components/ui/skeleton'
+import { toast } from '@/components/ui/use-toast'
 
 type Props = {}
 
@@ -49,9 +50,16 @@ const Page = ({ params }: any) => {
             const res = await api.get(`/bootcamp/${params.courseId}`)
             setBootcampData(res.data.bootcamp)
         } catch (error) {
-            console.error('API Error:', error)
+            // console.error('API Error:', error)
+            toast({
+                title: "Error",
+                description: 'Error fetching bootcamps:',
+                className:
+                    'text-start capitalize border border-destructive',
+            })
         }
     }, [params.courseId])
+
     const getStudentFormDataHandler = useCallback(async () => {
         await api
             .get(
@@ -69,14 +77,28 @@ const Page = ({ params }: any) => {
                         email: student.emailId
                     }
                 })
-                console.log('data', data)
                 setStudentStatus(data)
                 setTotalSubmission(res.data.data1)
                 setNotSubmitted(res.data.data2)
+            }).catch(err => {
+                toast({
+                    title: "Error",
+                    description: 'Error fetching Submissions:',
+                    className:
+                        'text-start capitalize border border-destructive',
+                })
             })
+
             await api.get(`/tracking/getChapterDetailsWithStatus/${params.StudentForm}`)
             .then((res) => {
                 setChapterDetails(res.data.trackingData)
+            }).catch(err => {
+                toast({
+                    title: "Error",
+                    description: 'Error fetching Chapter details:',
+                    className:
+                        'text-start capitalize border border-destructive',
+                })
             })
     }, [params.StudentAssesmentData, moduleId])
 
@@ -85,7 +107,6 @@ const Page = ({ params }: any) => {
         getBootcampHandler()
     }, [getStudentFormDataHandler, getBootcampHandler])
 
-    console.log('studentStatus', studentStatus)
     return (
         <>
             {chapterDetails ? (

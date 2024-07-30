@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { ArrowDownToLine, ChevronRight, Search } from 'lucide-react'
+import { toast } from '@/components/ui/use-toast'
 
 import PraticeProblems from '../../_components/PraticeProblems'
 import Assesments from '../../_components/Assesments'
@@ -36,7 +37,13 @@ const Page = ({ params }: { params: any }) => {
             setSubmissions(res.data.trackingData)
             setTotalStudents(res.data.totalStudents)
         } catch (error) {
-            console.error('Error fetching submissions:', error)
+            // console.error('Error fetching submissions:', error)
+            toast({
+                title: "Error",
+                description: 'Error fetching submissions:',
+                className:
+                    'text-start capitalize border border-destructive',
+            })
         }
     }, [params.courseId])
 
@@ -47,7 +54,13 @@ const Page = ({ params }: { params: any }) => {
             )
             setAssesments(res.data)
         } catch (error) {
-            console.error('Error fetching assessments:', error)
+            // console.error('Error fetching assessments:', error)
+            toast({
+                title: "Error",
+                description: 'Error fetching assessments:',
+                className:
+                    'text-start capitalize border border-destructive',
+            })
         }
     }, [params.courseId])
 
@@ -59,7 +72,13 @@ const Page = ({ params }: { params: any }) => {
             setProjectData(res.data.data.bootcampModules)
             setTotalStudents(res.data.totalStudents)
         } catch (error) {
-            console.error('Error fetching assessments:', error)
+            // console.error('Error fetching assessments:', error)
+            toast({
+                title: "Error",
+                description: 'Error fetching assessments:',
+                className:
+                    'text-start capitalize border border-destructive',
+            })
         }
     }, [params.courseId])
 
@@ -68,11 +87,15 @@ const Page = ({ params }: { params: any }) => {
             const res = await api.get(
                 `/submission/submissionsOfForms/${params.courseId}`
             )
-            console.log('res', res.data.trackingData)
             setFormData(res.data.trackingData)
             setTotalStudents(res.data.totalStudents)
         } catch (error) {
-            console.error('Error fetching assessments:', error)
+            toast({
+                title: "Error",
+                description: 'Error fetching form data:',
+                className:
+                    'text-start capitalize border border-destructive',
+            })
         }
     }, [params.courseId])
 

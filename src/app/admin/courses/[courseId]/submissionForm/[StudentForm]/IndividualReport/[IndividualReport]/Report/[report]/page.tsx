@@ -16,6 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Checkbox } from '@/components/ui/checkbox'
 import { CalendarIcon, Clock } from 'lucide-react'
+import { toast } from '@/components/ui/use-toast'
 
 type User = {
     name: string
@@ -139,7 +140,12 @@ const Page = ({ params }: { params: any }) => {
             const res = await api.get(`/bootcamp/${params.courseId}`)
             setBootcampData(res.data.bootcamp)
         } catch (error) {
-            console.error('API Error:', error)
+            toast({
+                title: "Error",
+                description: 'Error fetching bootcamps:',
+                className:
+                    'text-start capitalize border border-destructive',
+            })
         }
     }, [params.courseId])
 
@@ -153,11 +159,25 @@ const Page = ({ params }: { params: any }) => {
             .then((res) => {
                 setIndividualFormData(res.data.trackedData)
                 setIndividualAssesmentData(res.data)
+            }).catch(err => {
+                toast({
+                    title: "Error",
+                    description: 'Error fetching Form details:',
+                    className:
+                        'text-start capitalize border border-destructive',
+                })
             })
 
         await api.get(`/tracking/getChapterDetailsWithStatus/${chapterId}`)
         .then((res) => {
             setChapterDetails(res.data.trackingData)
+        }).catch(err => {
+            toast({
+                title: "Error",
+                description: 'Error fetching Chapter details:',
+                className:
+                    'text-start capitalize border border-destructive',
+            })
         })
     }, [params.report])
 
@@ -168,6 +188,13 @@ const Page = ({ params }: { params: any }) => {
         .then((res) => {
             const student = res.data.data1.find((item:any) => item.id == params.IndividualReport)
             setUser(student)
+        }).catch(err => {
+            toast({
+                title: "Error",
+                description: 'Error fetching Student details:',
+                className:
+                    'text-start capitalize border border-destructive',
+            })
         })
     }, [params.report, params.IndividualReport])
 

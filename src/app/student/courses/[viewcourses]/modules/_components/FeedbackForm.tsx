@@ -25,6 +25,7 @@ import { Button } from '@/components/ui/button'
 import { format } from 'date-fns'
 import { api } from '@/utils/axios.config'
 import { formatDate } from '@/lib/utils'
+import { toast } from '@/components/ui/use-toast'
 
 const formSchema = z.object({
     section: z.array(
@@ -65,9 +66,13 @@ const FeedbackForm = (props: Props) => {
                 setQuestions(res.data.trackedData)
                 setStatus(res.data.status)
             }
-
-            console.log('res', res)
         } catch (error) {
+            toast({
+                title: 'Error',
+                description: 'An error occured while fetching the questions',
+                className:
+                    'text-start capitalize border border-destructive',
+            })
             console.error('Error fetching quiz questions:', error)
         }
     }, [props.moduleId, props.chapterId, submitted])
@@ -124,13 +129,24 @@ const FeedbackForm = (props: Props) => {
                 `/tracking/updateFormStatus/${props.bootcampId}/${props.moduleId}?chapterId=${props.chapterId}`,
                 transformedData
             )
-            await setSubmitted(true)
+            if(res) setSubmitted(true)
             const updateChapterResponse = await api.post(
                 `/tracking/updateChapterStatus/${props.bootcampId}/${props.moduleId}?chapterId=${props.chapterId}`,
                 transformedData
             )
+            toast({
+                title: res.data.status,
+                description: 'Form has been submitted successfully!',
+                className:
+                    'text-start capitalize border border-secondary',
+            })
         } catch (error) {
-            console.error('Error fetching quiz questions:', error)
+            toast({
+                title: "Error",
+                description: 'Error fetching form questions:',
+                className:
+                    'text-start capitalize border border-destructive',
+            })
         }
     }
 
