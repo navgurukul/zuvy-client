@@ -93,6 +93,21 @@ function Page({ params }: any) {
         [batchId, activeTab, debouncedSearch, params.courseId, position]
     )
 
+    const sortClasses = (classes: any) => {
+        return classes.sort((a: any, b: any) => {
+            const dateA = new Date(a.startTime)
+            const dateB = new Date(b.startTime)
+
+            if (dateA > dateB) return -1
+            if (dateA < dateB) return 1
+
+            // If dates are the same, compare times
+            const timeA = dateA.getTime()
+            const timeB = dateB.getTime()
+            return timeB - timeA
+        })
+    }
+
     useEffect(() => {
         if (activeTab === 'upcoming') {
             const classesStartTime = classes.map((cls) => ({
@@ -213,25 +228,26 @@ function Page({ params }: any) {
                             {classes.length > 0 ? (
                                 <>
                                     <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
-                                        {classes.map((classData, index) =>
-                                            activeTab === 'completed' ? (
-                                                <RecordingCard
-                                                    classData={classData}
-                                                    key={index}
-                                                    isAdmin
-                                                />
-                                            ) : (
-                                                <ClassCard
-                                                    classData={classData}
-                                                    key={index}
-                                                    classType={activeTab}
-                                                    getClasses={
-                                                        getHandleAllClasses
-                                                    }
-                                                    activeTab={activeTab}
-                                                    studentSide={false}
-                                                />
-                                            )
+                                        {sortClasses(classes).map(
+                                            (classData: any, index: any) =>
+                                                activeTab === 'completed' ? (
+                                                    <RecordingCard
+                                                        classData={classData}
+                                                        key={index}
+                                                        isAdmin
+                                                    />
+                                                ) : (
+                                                    <ClassCard
+                                                        classData={classData}
+                                                        key={index}
+                                                        classType={activeTab}
+                                                        getClasses={
+                                                            getHandleAllClasses
+                                                        }
+                                                        activeTab={activeTab}
+                                                        studentSide={false}
+                                                    />
+                                                )
                                         )}
                                     </div>
                                     <DataTablePagination

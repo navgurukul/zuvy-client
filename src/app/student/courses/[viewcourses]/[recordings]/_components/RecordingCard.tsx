@@ -76,9 +76,8 @@ function RecordingCard({
     const presentStudents = displayAttendance?.studentsInfo?.present
 
     const handleViewRecording = () => {
-        console.log(classData, "classData");
         if (isVideo) {
-            if (classData.s3link === "not found") {
+            if (classData.s3link === "not found" || !classData.s3link.startsWith("https")) {
                 toast({
                     title: 'Recording not yet updated',
                     variant: 'default',
