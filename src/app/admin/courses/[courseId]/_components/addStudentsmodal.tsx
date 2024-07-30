@@ -18,8 +18,9 @@ import {
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { STUDENT_ONBOARDING_TYPES } from '@/utils/constant'
-import { getStoreStudentData } from '@/store/store'
-import { fetchStudentData } from '@/utils/students'
+import { getStoreStudentDataNew } from '@/store/store'
+import useDebounce from '@/hooks/useDebounce'
+import { useStudentData } from '../(courseTabs)/students/useStudentData'
 
 const AddStudentsModal = ({
     id,
@@ -39,8 +40,7 @@ const AddStudentsModal = ({
     // state and variables
     const [selectedOption, setSelectedOption] = useState('1')
     const [studentData, setStudentData] = useState<StudentDataState | any>({})
-    const { studentsData, setStoreStudentData } = getStoreStudentData()
-
+    const { limit, search, offset } = useStudentData(id)
     // func
     const handleSingleStudent = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
@@ -50,6 +50,8 @@ const AddStudentsModal = ({
     const handleStudentUploadType = (value: string) => {
         setSelectedOption(value)
     }
+
+    const courseId: any = id
 
     // async
     const handleSubmit = async () => {
@@ -71,7 +73,7 @@ const AddStudentsModal = ({
                             className:
                                 'text-start capitalize border border-secondary',
                         })
-                        fetchStudentData(id, setStoreStudentData)
+
                         setStudentData({ name: '', email: '' })
                     })
             } catch (error: any) {

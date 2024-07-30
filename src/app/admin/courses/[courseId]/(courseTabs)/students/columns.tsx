@@ -10,11 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Combobox } from '@/components/ui/combobox'
 
 import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
-import {
-    deleteStudentHandler,
-    fetchStudentData,
-    onBatchChange,
-} from '@/utils/students'
+import { deleteStudentHandler, fetchStudentData } from '@/utils/students'
 import { Task } from '@/utils/data/schema'
 import {
     getBatchData,
@@ -95,7 +91,7 @@ export const columns: ColumnDef<Task>[] = [
             <DataTableColumnHeader column={column} title="Batch Assigned To" />
         ),
         cell: ({ row }) => {
-            const { batchName, userId } = row.original
+            const { batchName, userId, bootcampId } = row.original
             const { batchData } = getBatchData()
             const newBatchData = batchData?.map((data) => {
                 return {
@@ -103,13 +99,13 @@ export const columns: ColumnDef<Task>[] = [
                     label: data.name,
                 }
             })
-            console.log(userId)
             return (
                 <div className="flex">
                     <ComboboxStudent
                         batchData={newBatchData}
                         batchName={batchName}
                         userId={userId}
+                        bootcampId={bootcampId}
                     />
                 </div>
             )

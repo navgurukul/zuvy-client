@@ -47,13 +47,16 @@ export function ComboboxStudent({
     batchData,
     batchName,
     userId,
+    bootcampId,
 }: {
     batchData: any
     batchName: any
     userId: any
+    bootcampId: any
 }) {
     const [open, setOpen] = React.useState(false)
     const [value, setValue] = React.useState('')
+    const [displaybatchName, setDisplayBatchName] = React.useState(batchName)
     const handleSelectBatchChange = async (
         currentValue: any,
         value: any,
@@ -68,21 +71,27 @@ export function ComboboxStudent({
         try {
             await api
                 .patch(
-                    `/batch/reassign/student_id=${userId}/new_batch_id=${selectedValue}?bootcamp_id=9`
+                    `/batch/reassign/student_id=${userId}/new_batch_id=${selectedValue}?bootcamp_id=${bootcampId}`
                 )
                 .then((res) => {
                     toast({
                         title: res.data.status,
-                        description: res.data.messasge,
+                        description: res.data.message,
+                        className:
+                            'text-start capitalize border border-secondary',
                     })
+                    setDisplayBatchName(label)
                 })
-        } catch (e) {
+        } catch (error: any) {
+            toast({
+                title: 'Error',
+                description: error.message,
+                className: 'text-start capitalize border border-destructive',
+            })
         } finally {
         }
-
-        // /batch/reassign/student_id=${student.userId}/new_batch_id=${selectedvalue} //
     }
-
+    console.log(value)
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
@@ -92,7 +101,7 @@ export function ComboboxStudent({
                     aria-expanded={open}
                     className="w-[200px] justify-between"
                 >
-                    {batchName ? batchName : 'Unassigned'}
+                    {displaybatchName ? displaybatchName : 'Unassigned'}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>

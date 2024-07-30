@@ -17,47 +17,47 @@ export const fetchStudentData = async (
     }
 }
 
-export async function onBatchChange(
-    selectedvalue: any,
-    student: any,
-    initialValue: any,
-    bootcampId: any,
-    setStoreStudentData: any,
-    fetchStudentData: any
-) {
-    if (initialValue === selectedvalue) {
-        toast({
-            title: 'Cannot Update the Batch',
-            description: 'Initial Batch And selected batch Are same',
-            className: 'text-start capitalize border border-destructive',
-        })
-    }
+// export async function onBatchChange(
+//     selectedvalue: any,
+//     student: any,
+//     initialValue: any,
+//     bootcampId: any,
+//     setStoreStudentData: any,
+//     fetchStudentData: any
+// ) {
+//     if (initialValue === selectedvalue) {
+//         toast({
+//             title: 'Cannot Update the Batch',
+//             description: 'Initial Batch And selected batch Are same',
+//             className: 'text-start capitalize border border-destructive',
+//         })
+//     }
 
-    try {
-        let url = `/batch/reassign/student_id=${student.userId}/new_batch_id=${selectedvalue}`
+//     try {
+//         let url = `/batch/reassign/student_id=${student.userId}/new_batch_id=${selectedvalue}`
 
-        if (student.batchId && student.batchId !== 'unassigned') {
-            url += `?old_batch_id=${student.batchId}`
-        } else {
-            url += `?bootcamp_id=${bootcampId}`
-        }
+//         if (student.batchId && student.batchId !== 'unassigned') {
+//             url += `?old_batch_id=${student.batchId}`
+//         } else {
+//             url += `?bootcamp_id=${bootcampId}`
+//         }
 
-        const res = await api.patch(url)
+//         const res = await api.patch(url)
 
-        fetchStudentData(bootcampId, setStoreStudentData)
-        toast({
-            title: res.data.status,
-            description: res.data.message,
-            className: 'text-start capitalize border border-secondary',
-        })
-    } catch (error: any) {
-        toast({
-            title: 'Error',
-            description: error.message,
-            className: 'text-start capitalize border border-destructive',
-        })
-    }
-}
+//         fetchStudentData(bootcampId, setStoreStudentData)
+//         toast({
+//             title: res.data.status,
+//             description: res.data.message,
+//             className: 'text-start capitalize border border-secondary',
+//         })
+//     } catch (error: any) {
+//         toast({
+//             title: 'Error',
+//             description: error.message,
+//             className: 'text-start capitalize border border-destructive',
+//         })
+//     }
+// }
 
 export async function deleteStudentHandler(
     userId: any,
