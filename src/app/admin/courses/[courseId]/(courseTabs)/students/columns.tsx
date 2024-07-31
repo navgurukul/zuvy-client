@@ -218,29 +218,15 @@ export const columns: ColumnDef<Task>[] = [
         cell: ({ row }) => {
             const student = row.original
             const { userId, bootcampId } = student
-            // const { onDeleteHandler } = GetdataHandler(bootcampId);
-            const {
-                setDeleteModalOpen,
-                isDeleteModalOpen,
-                deleteStudentId,
-                setDeleteStudentId,
-            } = getDeleteStudentStore()
-            const { setStoreStudentData } = getStoreStudentData()
-
-            let deleteUser = null
-
-            const handleTrashClick = () => {
-                setDeleteModalOpen(true)
-                setDeleteStudentId(userId)
-            }
 
             return (
                 <>
                     <div>
                         <AlertDialogDemo
+                            userId={userId}
+                            bootcampId={bootcampId}
                             title="Are you absolutely sure?"
-                            description="This action cannot be undone. This will permanently delete your account and remove your data from our servers."
-                            onContinue={() => console.log('hi')}
+                            description="This action cannot be undone. This will permanently the student from the bootcamp"
                         />
                     </div>
                 </>
