@@ -68,9 +68,9 @@ function SubmissionCard({ classData }: { classData: any }) {
                         </div>
                         <div className="lg:hidden flex flex-row">
                             <p className="text-md text-start mt-3 mb-2">
-                                {classData?.bootcampName}
+                                {classData.bootcampName}
                                 &nbsp;-&nbsp;
-                                {classData?.moduleName}
+                                {classData.moduleName}
                             </p>
                         </div>
                     </div>
@@ -83,7 +83,7 @@ function SubmissionCard({ classData }: { classData: any }) {
                     >
                         <Link
                             // target="_blank"
-                            href={`/student/courses/9/modules/${classData.moduleId}`}
+                            href={`/student/courses/${classData.bootcampId}/modules/${classData.moduleId}`}
                             className="gap-3 flex  items-center text-secondary"
                         >
                             <p>Start Assignment</p>
@@ -100,7 +100,7 @@ function SubmissionCard({ classData }: { classData: any }) {
                 >
                     <Link
                         // target="_blank"
-                        href={`/student/courses/9/modules/${classData.moduleId}`}
+                        href={`/student/courses/${classData.bootcampId}/modules/${classData.moduleId}`}
                         className="gap-3 flex  items-center text-secondary"
                     >
                         <p>Start Assignment</p>
