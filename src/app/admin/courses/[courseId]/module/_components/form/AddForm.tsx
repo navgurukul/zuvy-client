@@ -118,26 +118,26 @@ const AddForm: React.FC<AddFormProps> = ({
 
     //Delete question key/id wise from section
     const deleteQuestion = (deleteItem: any) => {
-            // console.log('section before delete:', section)
-            // console.log('deleteItem:', deleteItem)
+        // console.log('section before delete:', section)
+        // console.log('deleteItem:', deleteItem)
 
-            let updatedSection
-            let formQuestion = section.filter((item: any) => !item.id)
-            const editFormQuestion = section.filter((item: any) => item.id)
+        let updatedSection
+        let formQuestion = section.filter((item: any) => !item.id)
+        const editFormQuestion = section.filter((item: any) => item.id)
 
-            if (deleteItem.id) {
-                updatedSection = editFormQuestion.filter(
-                    (item: any) => item.id !== deleteItem.id
-                )
-                setSection([...updatedSection, ...formQuestion])
-            } else if (deleteItem.key) {
-                updatedSection = formQuestion.filter(
-                    (item: any) => item.key !== deleteItem.key
-                )
-                setSection([...editFormQuestion, ...updatedSection])
-            }
-            console.log('updatedSection:', updatedSection)
+        if (deleteItem.id) {
+            updatedSection = editFormQuestion.filter(
+                (item: any) => item.id !== deleteItem.id
+            )
+            setSection([...updatedSection, ...formQuestion])
+        } else if (deleteItem.key) {
+            updatedSection = formQuestion.filter(
+                (item: any) => item.key !== deleteItem.key
+            )
+            setSection([...editFormQuestion, ...updatedSection])
         }
+        console.log('updatedSection:', updatedSection)
+    }
 
     useEffect(() => {
         console.log('section state updated:', section)
@@ -269,7 +269,8 @@ const AddForm: React.FC<AddFormProps> = ({
 
                     {section.map((item: any, index: number) => (
                         <FormSection
-                            key={item.key}
+                            // key={item.key}
+                            key={item.id || `form-section-${index}`}
                             item={item}
                             index={index}
                             form={form}

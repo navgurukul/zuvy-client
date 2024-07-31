@@ -35,7 +35,7 @@ import {
 } from '@/components/ui/popover'
 
 type FormSectionProps = {
-    key: any
+    // key: any
     item: any
     index: any
     addQuestion: any
@@ -65,7 +65,7 @@ const getQuestionType = (typeId: number) => {
 }
 
 const FormSection: React.FC<FormSectionProps> = ({
-    key,
+    // key,
     item,
     index,
     form,
@@ -110,11 +110,15 @@ const FormSection: React.FC<FormSectionProps> = ({
                 getQuestionType(questionData.typeId)
             )
 
-            Object.entries(questionData.options || {}).forEach(
-                ([key, value]) => {
-                    form.setValue(`option_${index}_${key}`, value)
-                }
-            )
+            const optionsArray = Object.values(questionData.options || {})
+            optionsArray.forEach((value, optionIndex) => {
+                form.setValue(`option_${index}_${optionIndex}`, value || '')
+            })
+        }else {
+            // Set default values for new questions
+            form.setValue(`question_${index}`, '')
+            form.setValue(`questionType_${index}`, 'Multiple Choice')
+            form.setValue(`option_${index}_0`, '')
         }
     }, [questionData, index, form])
 
@@ -241,7 +245,7 @@ const FormSection: React.FC<FormSectionProps> = ({
     // }, [section])
 
     return (
-        <div key={key}>
+        <div>
             <Select
                 onValueChange={(e) => {
                     handleSectionType(e)
@@ -298,8 +302,12 @@ const FormSection: React.FC<FormSectionProps> = ({
                         <FormControl>
                             <Input
                                 {...field}
+                                value={field.value || ''}
                                 placeholder="Type a question..."
-                                onChange={handleQuestionChange}
+                                onChange={(e) => {
+                                    field.onChange(e)
+                                    handleQuestionChange(e)
+                                }}
                             />
                         </FormControl>
                     </FormItem>
@@ -327,10 +335,12 @@ const FormSection: React.FC<FormSectionProps> = ({
                             render={({ field }) => (
                                 <Input
                                     {...field}
+                                    value={field.value || ''}
                                     placeholder={`Option ${optionIndex + 1}`}
-                                    onChange={(e) =>
+                                    onChange={(e) => {
+                                        field.onChange(e)
                                         handleOptionChange(e, optionIndex)
-                                    }
+                                    }}
                                 />
                             )}
                         />
