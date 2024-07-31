@@ -57,10 +57,10 @@ const AddForm: React.FC<AddFormProps> = ({
     const [forceUpdate, setForceUpdate] = useState(false)
     const [section, setSection] = useState(
         content.formQuestionDetails.length > 0
-            // ? content.formQuestionDetails
-            // ? [...content.formQuestionDetails]
-            ? JSON.parse(JSON.stringify(content.formQuestionDetails))
-            : [
+            ? content.formQuestionDetails
+            : // ? [...content.formQuestionDetails]
+              //   JSON.parse(JSON.stringify(content.formQuestionDetails))
+              [
                   {
                       questionType: 'Multiple Choice',
                       typeId: 1,
@@ -117,8 +117,7 @@ const AddForm: React.FC<AddFormProps> = ({
     // )
 
     //Delete question key/id wise from section
-    const deleteQuestion = useCallback(
-        async (deleteItem: any) => {
+    const deleteQuestion = (deleteItem: any) => {
             // console.log('section before delete:', section)
             // console.log('deleteItem:', deleteItem)
 
@@ -137,19 +136,17 @@ const AddForm: React.FC<AddFormProps> = ({
                 )
                 setSection([...editFormQuestion, ...updatedSection])
             }
+            console.log('updatedSection:', updatedSection)
+        }
 
-            // console.log('updatedSection:', updatedSection)
-        },
-        [section]
-    )
-
-    // useEffect(() => {
-    //     console.log('section state updated:', section)
-    // }, [section])
+    useEffect(() => {
+        console.log('section state updated:', section)
+    }, [section])
 
     // console.log('content', content)
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
+        console.log('section onSubmit', section)
         const questions = section.map((item: any, index: number) => {
             const options = item.options || {}
             const optionsObject = Object.keys(options).reduce((acc, key) => {

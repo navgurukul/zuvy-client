@@ -85,7 +85,7 @@ const FormSection: React.FC<FormSectionProps> = ({
             : ['']
     )
 
-    console.log('item', item)
+    // console.log('item', item)
 
     // get the section with the index to add rest of the things
     // and the slice the section to add the new object section and set is to setSection
@@ -209,7 +209,7 @@ const FormSection: React.FC<FormSectionProps> = ({
         })
     }
 
-    console.log('formData', formData)
+    // console.log('formData', formData)
 
     // useEffect(() => {
     //     console.log('Updated section:', section)
@@ -236,9 +236,9 @@ const FormSection: React.FC<FormSectionProps> = ({
 
     // console.log('section', section)
 
-    useEffect(() => {
-        console.log('Updated section:', section)
-    }, [section])
+    // useEffect(() => {
+    //     console.log('Updated section:', section)
+    // }, [section])
 
     return (
         <div key={key}>

@@ -122,18 +122,18 @@ const Page = ({ params }: { params: any }) => {
         },
     ]
 
-    function formatDate(isoDateStr: any) {
-        // Create a Date object from the ISO 8601 string
-        const date = new Date(isoDateStr);
+    // function formatDate(isoDateStr: any) {
+    //     // Create a Date object from the ISO 8601 string
+    //     const date = new Date(isoDateStr);
     
-        // Get day, month, and year
-        const day = date.getDate();
-        const year = date.getFullYear();
-        const month = date.toLocaleString('en-US', { month: 'short' });
+    //     // Get day, month, and year
+    //     const day = date.getDate();
+    //     const year = date.getFullYear();
+    //     const month = date.toLocaleString('en-US', { month: 'short' });
     
-        // Return the formatted date string
-        return ` ${day} ${month} ${year}`;
-    }
+    //     // Return the formatted date string
+    //     return ` ${day} ${month} ${year}`;
+    // }
 
     const getBootcampHandler = useCallback(async () => {
         try {
@@ -152,9 +152,10 @@ const Page = ({ params }: { params: any }) => {
     const getIndividualStudentFormDataHandler = useCallback(async () => {
         const chapterId = params.report
         const moduleId = params.StudentForm
+        const userId = params.IndividualReport
         await api
             .get(
-                `submission/getFormDetailsById/${moduleId}?chapterId=${chapterId}`
+                `submission/getFormDetailsById/${moduleId}?chapterId=${chapterId}&userId=${userId}`
             )
             .then((res) => {
                 setIndividualFormData(res.data.trackedData)
@@ -222,7 +223,7 @@ const Page = ({ params }: { params: any }) => {
                             {
                                 individualFormData && 
                                 (<p className="text-lg description bg-primary-foreground p-5 rounded-lg">
-                                    Submitted on 
+                                    Submitted on {' '}
                                     {formatDate(individualFormData?.[0].formTrackingData[0].updatedAt)}
                                 </p>)
                             }

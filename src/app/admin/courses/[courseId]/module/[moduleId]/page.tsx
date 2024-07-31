@@ -225,6 +225,8 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                     )
                 } else if (currentModule?.topicName === 'Coding Question') {
                     setChapterContent(response.data)
+                } else if (currentModule?.topicName === 'Form') {
+                    setChapterContent(response.data)
                 } else {
                     setChapterContent(response.data)
                     console.log(response.data, 'chapter content')
