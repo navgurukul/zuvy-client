@@ -73,8 +73,7 @@ const Mcqs = (props: Props) => {
     async function getAllTags() {
         const response = await api.get('Content/allTags')
         if (response) {
-            const allTopics = { id: -1, tagName: 'AllTopics' }
-            setTags([allTopics, ...response.data.allTags])
+            setTags([...response.data.allTags])
         }
     }
 
