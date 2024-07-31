@@ -21,6 +21,7 @@ import { STUDENT_ONBOARDING_TYPES } from '@/utils/constant'
 import { getStoreStudentDataNew } from '@/store/store'
 import useDebounce from '@/hooks/useDebounce'
 import { useStudentData } from '../(courseTabs)/students/useStudentData'
+import { fetchStudentsHandler } from '@/utils/admin'
 
 const AddStudentsModal = ({
     id,
@@ -40,7 +41,16 @@ const AddStudentsModal = ({
     // state and variables
     const [selectedOption, setSelectedOption] = useState('1')
     const [studentData, setStudentData] = useState<StudentDataState | any>({})
-    const { limit, search, offset } = useStudentData(id)
+    const {
+        limit,
+        search,
+        offset,
+        setLoading,
+        setStudents,
+        setTotalPages,
+        setTotalStudents,
+        setCurrentPage,
+    } = useStudentData(id)
     // func
     const handleSingleStudent = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
@@ -73,7 +83,17 @@ const AddStudentsModal = ({
                             className:
                                 'text-start capitalize border border-secondary',
                         })
-
+                        fetchStudentsHandler({
+                            courseId,
+                            limit,
+                            offset,
+                            searchTerm: search,
+                            setLoading,
+                            setStudents,
+                            setTotalPages,
+                            setTotalStudents,
+                            setCurrentPage,
+                        })
                         setStudentData({ name: '', email: '' })
                     })
             } catch (error: any) {

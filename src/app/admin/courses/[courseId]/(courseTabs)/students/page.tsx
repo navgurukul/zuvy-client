@@ -31,95 +31,8 @@ export type StudentData = {
     profilePicture: string
 }
 
+
 const Page = ({ params }: { params: any }) => {
-    // const [position, setPosition] = useState(POSITION)
-    // const { studentsData, setStoreStudentData } = getStoreStudentData()
-    // const [isLoading, setLoading] = useState<boolean>(false)
-    // const [pages, setPages] = useState<number>()
-    // const [offset, setOffset] = useState<number>(OFFSET)
-    // const [currentPage, setCurrentPage] = useState<number>(1)
-    // const [totalStudents, setTotalStudents] = useState<number>(0)
-    // const [search, setSearch] = useState<string | null>(null)
-    // const [attendanceIds, setAttendanceIds] = useState<string[]>()
-    // const debouncedSearch = useDebounce(search, 1000)
-    // const [lastPage, setLastPage] = useState<number>(0)
-    // const { fetchBatches, batchData } = getBatchData()
-
-    // const handleSetsearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    //     setSearch(e.target.value)
-    // }
-
-    // const handleClick = async () => {
-    //     await handleRefreshAttendance()
-    // }
-
-    // const fetchClassesData = useCallback(async (bootcampId: number) => {
-    //     try {
-    //         const res = await api.get(
-    //             `/classes/meetings/${bootcampId}?bootcampId=${bootcampId}`
-    //         )
-    //         setAttendanceIds(res.data.unattendedClassIds)
-    //     } catch (error: any) {
-    //         console.log(error.message)
-    //     }
-    // }, [])
-
-    // const handleRefreshAttendance = async () => {
-    //     setLoading(true)
-    //     const requestBody = { meetingIds: attendanceIds }
-    //     try {
-    //         const res = await api.post(`/classes/analytics/reload`, requestBody)
-    //         toast({
-    //             title: res.data.title,
-    //             description: res.data.message,
-    //             className: 'text-start capitalize border border-secondary',
-    //         })
-    //     } catch (error: any) {
-    //         toast({
-    //             title: 'Error',
-    //             description: 'Could not refresh',
-    //             className: 'text-start capitalize border border-destructive',
-    //         })
-    //     } finally {
-    //         setLoading(false)
-    //     }
-    // }
-
-    // const fetchStudentData = useCallback(
-    //     async (offset: number, searchTerm: string | null = null) => {
-    //         if (params.courseId) {
-    //             try {
-    //                 const searchParam = searchTerm
-    //                     ? `&searchTerm=${encodeURIComponent(searchTerm)}`
-    //                     : ''
-    //                 const response = await api.get(
-    //                     `/bootcamp/students/${params.courseId}?limit=${position}&offset=${offset}${searchParam}`
-    //                 )
-    //                 setStoreStudentData(response.data.totalStudents)
-    //                 setPages(response.data.totalPages)
-    //                 setLastPage(response.data.totalPages)
-    //                 setTotalStudents(response.data.totalStudentsCount)
-    //             } catch (error) {
-    //                 console.error('Error fetching student data:', error)
-    //             }
-    //         }
-    //     },
-    //     [params.courseId, position, setStoreStudentData]
-    // )
-    // useEffect(() => {
-    //     if (params.courseId) {
-    //         fetchClassesData(params.courseId)
-    //     }
-    // }, [params.courseId, fetchClassesData])
-
-    // useEffect(() => {
-    //     fetchBatches(params.courseId)
-    // }, [params.courseId, fetchBatches])
-
-    // useEffect(() => {
-    //     fetchStudentData(offset, debouncedSearch)
-    // }, [offset, position, debouncedSearch, fetchStudentData])
-
     const {
         students,
         totalPages,
@@ -158,9 +71,9 @@ const Page = ({ params }: { params: any }) => {
                 </div>
 
                 <div>
-                    <ul>
+                    <div>
                         <DataTable data={students} columns={columns} />
-                    </ul>
+                    </div>
                     <div className="flex items-center justify-end mt-2 px-2 gap-x-2">
                         <p className="text-sm font-medium">Rows Per Page</p>
                         <DropdownMenu>

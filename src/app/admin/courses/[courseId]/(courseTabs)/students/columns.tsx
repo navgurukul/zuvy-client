@@ -4,10 +4,7 @@ import Image from 'next/image'
 
 import { ColumnDef } from '@tanstack/react-table'
 
-import { Trash2 } from 'lucide-react'
 import { DataTableColumnHeader } from '../../../../../_components/datatable/data-table-column-header'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Combobox } from '@/components/ui/combobox'
 
 import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
 import { deleteStudentHandler, fetchStudentData } from '@/utils/students'
@@ -18,9 +15,10 @@ import {
     getStoreStudentData,
 } from '@/store/store'
 import { getAttendanceColorClass } from '@/utils/students'
-import { trace } from 'console'
-import { useState } from 'react'
+
 import { ComboboxStudent } from './comboboxStudentDataTable'
+
+import { AlertDialogDemo } from './deleteModalNew'
 export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'profilePicture',
@@ -238,31 +236,13 @@ export const columns: ColumnDef<Task>[] = [
 
             return (
                 <>
-                    <Trash2
-                        onClick={() => {
-                            handleTrashClick()
-                        }}
-                        className="text-destructive cursor-pointer"
-                        size={20}
-                    />
-                    <DeleteConfirmationModal
-                        isOpen={isDeleteModalOpen}
-                        onClose={() => setDeleteModalOpen(false)}
-                        onConfirm={() => {
-                            deleteStudentHandler(
-                                deleteStudentId,
-                                bootcampId,
-                                setDeleteModalOpen,
-                                setStoreStudentData
-                            )
-                        }}
-                        modalText="This action cannot be undone. This will permanently delete the
-              student from this bootcamp"
-                        buttonText="Delete Student"
-                        input={false}
-                        modalText2=""
-                        instructorInfo={{}}
-                    />
+                    <div>
+                        <AlertDialogDemo
+                            title="Are you absolutely sure?"
+                            description="This action cannot be undone. This will permanently delete your account and remove your data from our servers."
+                            onContinue={() => console.log('hi')}
+                        />
+                    </div>
                 </>
             )
         },

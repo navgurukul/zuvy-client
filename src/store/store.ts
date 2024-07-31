@@ -454,7 +454,7 @@ type StoreStudentDataNew = {
     setStudents: (newValue: any) => void
     setTotalPages: (newValue: any) => void
     setLoading: (newValue: any) => void
-    setOffset: (newValue: any) => void
+    setOffset: (newValue: number | ((prevValue: number) => number)) => void
     setTotalStudents: (newValue: any) => void
     setCurrentPage: (newValue: any) => void
     setLimit: (newValue: any) => void
@@ -473,7 +473,13 @@ export const getStoreStudentDataNew = create<StoreStudentDataNew>((set) => ({
     setStudents: (newValue: any) => set({ students: newValue }),
     setTotalPages: (newValue: any) => set({ totalPages: newValue }),
     setLoading: (newValue: any) => set({ loading: newValue }),
-    setOffset: (newValue: any) => set({ offset: newValue }),
+    setOffset: (newValue) =>
+        set((state) => ({
+            offset:
+                typeof newValue === 'function'
+                    ? newValue(state.offset)
+                    : newValue,
+        })),
     setTotalStudents: (newValue: any) => set({ totalStudents: newValue }),
     setCurrentPage: (newValue: any) => set({ currentPage: newValue }),
     setLimit: (newValue: any) => set({ limit: newValue }),
