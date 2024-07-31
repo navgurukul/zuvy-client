@@ -287,4 +287,50 @@ export async function getChapterDetailsById(chapterId: any, setChapter: any) {
         console.error('Error:', error)
     }
 }
+
+type FetchStudentsHandlerParams = {
+    courseId: string
+    limit: number
+    offset: number
+    searchTerm: string
+    setLoading: (value: boolean) => void
+    setStudents: (students: any[]) => void
+    setTotalPages: (pages: number) => void
+    setTotalStudents: (total: number) => void
+    setCurrentPage: (page: number) => void
+}
+
+export const fetchStudentsHandler = async ({
+    courseId,
+    limit,
+    offset,
+    searchTerm,
+    setLoading,
+    setStudents,
+    setTotalPages,
+    setTotalStudents,
+    setCurrentPage,
+}: FetchStudentsHandlerParams) => {
+    setLoading(true)
+
+    const endpoint = searchTerm
+        ? `/bootcamp/students/${courseId}?searchTerm=${searchTerm}`
+        : `/bootcamp/students/${courseId}?limit=${limit}&offset=${offset}`
+
+    try {
+        const res = await api.get(endpoint)
+        setStudents(res.data.modifiedStudentInfo || [])
+        setTotalPages(res.data.totalPages || 0)
+        setTotalStudents(res.data.totalStudentsCount || 0)
+        setCurrentPage(res.data.currentPage || 1)
+    } catch (error) {
+        toast({
+            title: 'Error',
+            description: 'Failed to fetch the data',
+        })
+    } finally {
+        setLoading(false)
+    }
+}
+
 // --------------------------
