@@ -55,7 +55,8 @@ function Page({
     const [instructorDetails, setInstructorDetails] = useState<any>()
     const [upcomingClasses, setUpcomingClasses] = useState([])
     const [ongoingClasses, setOngoingClasses] = useState([])
-    const [submission, setSubmission] = useState<any[]>([])
+    const [upcomingAssignments, setUpcomingAssignments] = useState([])
+    const [lateAssignments, setLateAssignments] = useState([])
 
     const [attendenceData, setAttendenceData] = useState<any[]>([])
     // const [completedClasses, setCompletedClasses] = useState([])
@@ -84,9 +85,12 @@ function Page({
     }, [])
     const getUpcomingSubmissionHandler = useCallback(async () => {
         await api
-            .get(`/tracking/upcomingSubmission/${params.viewcourses}`)
+            .get(
+                `/tracking/allupcomingSubmission?bootcampId=${params.viewcourses}`
+            )
             .then((res) => {
-                setSubmission(res.data)
+                setUpcomingAssignments(res.data.upcomingAssignments)
+                setLateAssignments(res.data.lateAssignments)
             })
     }, [params.viewcourses])
     useEffect(() => {
@@ -318,22 +322,41 @@ function Page({
                             </Link>
                         </div>
                         <div className="flex flex-col flex-start">
-                            <h1 className="text-lg p-1 text-start font-bold">
-                                Upcoming Submission
-                            </h1>
                             <div className="w-[800px]">
-                                {submission.length > 0 ? (
-                                    submission.map((data) => {
-                                        return (
-                                            <SubmissionCard
-                                                classData={data}
-                                                key={data}
-                                            />
-                                        )
-                                    })
-                                ) : (
-                                    <div>No upcoming Submission</div>
+                                {(lateAssignments.length > 0 ||
+                                    upcomingAssignments.length > 0) && (
+                                    <div className="flex flex-col w-full lg:max-w-[860px]">
+                                        {lateAssignments.length > 0 && (
+                                            <h1 className="text-xl p-1 text-start font-bold mb-4">
+                                                Late Assignments
+                                            </h1>
+                                        )}
+                                        {lateAssignments.map(
+                                            (data: any, index) => (
+                                                <SubmissionCard
+                                                    classData={data}
+                                                    key={data}
+                                                />
+                                            )
+                                        )}
+                                        {upcomingAssignments.length > 0 && (
+                                            <h1 className="text-xl p-1 text-start font-bold mb-4">
+                                                Upcoming Assignments
+                                            </h1>
+                                        )}
+                                        {upcomingAssignments.map(
+                                            (data: any, index) => (
+                                                <SubmissionCard
+                                                    classData={data}
+                                                    key={data}
+                                                />
+                                            )
+                                        )}
+                                    </div>
                                 )}
+                                {/* : (
+                                     <div>No upcoming Submission</div>
+                                 )} */}
                             </div>
                         </div>
                     </div>
