@@ -19,7 +19,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { useStudentData } from './useStudentData'
+import { useStudentData } from './components/useStudentData'
 export type StudentData = {
     email: string
     name: string
@@ -30,7 +30,6 @@ export type StudentData = {
     progress: number
     profilePicture: string
 }
-
 
 const Page = ({ params }: { params: any }) => {
     const {

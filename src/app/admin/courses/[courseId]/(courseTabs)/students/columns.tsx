@@ -16,9 +16,9 @@ import {
 } from '@/store/store'
 import { getAttendanceColorClass } from '@/utils/students'
 
-import { ComboboxStudent } from './comboboxStudentDataTable'
+import { ComboboxStudent } from './components/comboboxStudentDataTable'
 
-import { AlertDialogDemo } from './deleteModalNew'
+import { AlertDialogDemo } from './components/deleteModalNew'
 export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'profilePicture',

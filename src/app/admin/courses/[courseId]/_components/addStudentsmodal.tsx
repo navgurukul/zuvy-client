@@ -20,7 +20,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { STUDENT_ONBOARDING_TYPES } from '@/utils/constant'
 import { getStoreStudentDataNew } from '@/store/store'
 import useDebounce from '@/hooks/useDebounce'
-import { useStudentData } from '../(courseTabs)/students/useStudentData'
+import { useStudentData } from '../(courseTabs)/students/components/useStudentData'
 import { fetchStudentsHandler } from '@/utils/admin'
 
 const AddStudentsModal = ({
