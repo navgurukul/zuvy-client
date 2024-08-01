@@ -114,11 +114,11 @@ const FormSection: React.FC<FormSectionProps> = ({
             optionsArray.forEach((value, optionIndex) => {
                 form.setValue(`option_${index}_${optionIndex}`, value || '')
             })
-        }else {
-            // Set default values for new questions
-            form.setValue(`question_${index}`, '')
-            form.setValue(`questionType_${index}`, 'Multiple Choice')
-            form.setValue(`option_${index}_0`, '')
+            // }else {
+            //     // Set default values for new questions
+            //     form.setValue(`question_${index}`, '')
+            //     form.setValue(`questionType_${index}`, 'Multiple Choice')
+            //     form.setValue(`option_${index}_0`, '')
         }
     }, [questionData, index, form])
 
