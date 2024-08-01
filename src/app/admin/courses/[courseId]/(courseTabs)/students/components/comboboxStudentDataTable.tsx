@@ -31,10 +31,15 @@ export function ComboboxStudent({
     userId: any
     bootcampId: any
 }) {
-    let batchNameNew = batchName
     const [open, setOpen] = React.useState(false)
     const [value, setValue] = React.useState('')
-    const [displaybatchName, setDisplayBatchName] = React.useState(batchNameNew)
+    const [displaybatchName, setDisplayBatchName] = React.useState(
+        batchName || 'Unassigned'
+    )
+
+    React.useEffect(() => {
+        setDisplayBatchName(batchName || 'Unassigned')
+    }, [batchName])
     const handleSelectBatchChange = async (
         currentValue: any,
         value: any,
@@ -69,7 +74,6 @@ export function ComboboxStudent({
         } finally {
         }
     }
-    console.log(value)
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
@@ -79,7 +83,7 @@ export function ComboboxStudent({
                     aria-expanded={open}
                     className="w-[200px] justify-between"
                 >
-                    {displaybatchName ? displaybatchName : 'Unassigned'}
+                    {displaybatchName}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>

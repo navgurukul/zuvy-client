@@ -485,3 +485,15 @@ export const getStoreStudentDataNew = create<StoreStudentDataNew>((set) => ({
     setLimit: (newValue: any) => set({ limit: newValue }),
     setSearch: (newValue: any) => set({ search: newValue }),
 }))
+
+type storeBatchData = {
+    studentsBatchData: any[]
+    setStoreStudentBatchData: (newValue: any[]) => void
+}
+
+export const getStoreStudentBatchData = create<storeBatchData>((set) => ({
+    studentsBatchData: [],
+    setStoreStudentBatchData: (newValue: any[]) => {
+        set({ studentsBatchData: newValue })
+    },
+}))

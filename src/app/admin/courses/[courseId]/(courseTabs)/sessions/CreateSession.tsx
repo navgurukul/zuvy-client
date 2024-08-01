@@ -249,11 +249,14 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
             <DialogOverlay />
 
             <DialogContent className="w-full p-3">
+                <p className="text-left font-semibold text-sm text-red-400">
+                    *Fill out all the required fields to create session
+                </p>
                 <DialogHeader className="text-lg font-semibold">
                     New Session
                 </DialogHeader>
                 {props.bootcampData.length === 0 && (
-                    <p className="text-left text-red-500 ">
+                    <p className="text-left font-semibold text-sm text-red-400 ">
                         You need to create batches first and assign students to
                         the batches
                     </p>
@@ -588,9 +591,6 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                 )}
                             </DialogClose>
                         </div>
-                        <p className="text-left text-red-400">
-                            *Fill out all the required fields to create session
-                        </p>
                     </form>
                 </Form>
             </DialogContent>

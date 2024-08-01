@@ -65,6 +65,8 @@ const Page = ({ params }: { params: any }) => {
                         <AddStudentsModal
                             message={false}
                             id={params.courseId || 0}
+                            batch={false}
+                            batchId={0}
                         />
                     </Dialog>
                 </div>
