@@ -18,80 +18,10 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { CalendarIcon, Clock } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
 
-type User = {
-    name: string
-    email: string
-}
-
-type OpenEndedQuestion = {
-    id: number
-    question: string
-    difficulty: string
-    tagId: number
-    usage: number
-}
-
-type SubmissionData = {
-    id: number
-    openEndedQuestionId?: number
-    assessmentOutsourseId?: number
-    bootcampId?: number
-    moduleId?: number
-    chapterId?: number
-    createdAt?: string
-    OpenEndedQuestion?: OpenEndedQuestion
-}
-
-type OpenEndedSubmission = {
-    id: number
-    answer: string
-    questionId: number
-    feedback: string | null
-    marks: number
-    submissionData: SubmissionData
-}
-
-type QuizSubmission = {
-    id: number
-    chosenOption: number
-    questionId: number | null
-    attemptCount: number
-    submissionData: null
-}
-
-type CodingSubmission = {}
-
-type StudentAssessment = {
-    id: number
-    userId: number
-    marks: number | null
-    startedAt: string
-    submitedAt: string
-    tabChange: number
-    copyPaste: string
-    embeddedGoogleSearch: number
-    user: User
-    openEndedSubmission: OpenEndedSubmission[]
-    quizSubmission: QuizSubmission[]
-    codingSubmission: CodingSubmission[]
-    totalQuizzes: number
-    totalOpenEndedQuestions: number
-    totalCodingQuestions: number
-}
-type newDataType =
-    | {
-          openEndedSubmission: OpenEndedSubmission[]
-          quizSubmission: QuizSubmission[]
-          codingSubmission: CodingSubmission[]
-      }
-    | any
 const Page = ({ params }: { params: any }) => {
-    const [individualAssesmentData, setIndividualAssesmentData] =
-        useState<StudentAssessment>()
     const [individualFormData, setIndividualFormData] = useState<any>()
     const [chapterDetails, setChapterDetails] = useState<any>()
     const [bootcampData, setBootcampData] = useState<any>()
-    const [assesmentData, setAssesmentData] = useState<any>()
     const [user, setUser] = useState<any>()
     const crumbs = [
         {
@@ -125,12 +55,12 @@ const Page = ({ params }: { params: any }) => {
     // function formatDate(isoDateStr: any) {
     //     // Create a Date object from the ISO 8601 string
     //     const date = new Date(isoDateStr);
-    
+
     //     // Get day, month, and year
     //     const day = date.getDate();
     //     const year = date.getFullYear();
     //     const month = date.toLocaleString('en-US', { month: 'short' });
-    
+
     //     // Return the formatted date string
     //     return ` ${day} ${month} ${year}`;
     // }
@@ -141,10 +71,9 @@ const Page = ({ params }: { params: any }) => {
             setBootcampData(res.data.bootcamp)
         } catch (error) {
             toast({
-                title: "Error",
+                title: 'Error',
                 description: 'Error fetching bootcamps:',
-                className:
-                    'text-start capitalize border border-destructive',
+                className: 'text-start capitalize border border-destructive',
             })
         }
     }, [params.courseId])
@@ -159,44 +88,51 @@ const Page = ({ params }: { params: any }) => {
             )
             .then((res) => {
                 setIndividualFormData(res.data.trackedData)
-                setIndividualAssesmentData(res.data)
-            }).catch(err => {
+            })
+            .catch((err) => {
                 toast({
-                    title: "Error",
+                    title: 'Error',
                     description: 'Error fetching Form details:',
                     className:
                         'text-start capitalize border border-destructive',
                 })
             })
 
-        await api.get(`/tracking/getChapterDetailsWithStatus/${chapterId}`)
-        .then((res) => {
-            setChapterDetails(res.data.trackingData)
-        }).catch(err => {
-            toast({
-                title: "Error",
-                description: 'Error fetching Chapter details:',
-                className:
-                    'text-start capitalize border border-destructive',
+        await api
+            .get(`/tracking/getChapterDetailsWithStatus/${chapterId}`)
+            .then((res) => {
+                setChapterDetails(res.data.trackingData)
             })
-        })
+            .catch((err) => {
+                toast({
+                    title: 'Error',
+                    description: 'Error fetching Chapter details:',
+                    className:
+                        'text-start capitalize border border-destructive',
+                })
+            })
     }, [params.report])
 
     const getIndividualStudent = useCallback(async () => {
-        await api.get(
-            `submission/formsStatus/${params.courseId}/${params.StudentForm}?chapterId=${params.report}&limit=3&offset=1`
-        )
-        .then((res) => {
-            const student = res.data.data1.find((item:any) => item.id == params.IndividualReport)
-            setUser(student)
-        }).catch(err => {
+        try {
+            await api
+                .get(
+                    `submission/formsStatus/${params.courseId}/${params.StudentForm}?chapterId=${params.report}&limit=3&offset=0`
+                )
+                .then((res) => {
+                    const student = res.data.combinedData.find(
+                        (item: any) => item.id == params.IndividualReport
+                    )
+                    setUser(student)
+                })
+        } catch (err) {
             toast({
-                title: "Error",
+                title: 'Error',
                 description: 'Error fetching Student details:',
-                className:
-                    'text-start capitalize border border-destructive',
+                className: 'text-start capitalize border border-destructive',
             })
-        })
+            // console.log('Error fetching Student details:')
+        }
     }, [params.report, params.IndividualReport])
 
     useEffect(() => {
@@ -220,13 +156,15 @@ const Page = ({ params }: { params: any }) => {
                         </h1>
                         <p className="text-lg">{chapterDetails?.description}</p>
                         <div>
-                            {
-                                individualFormData && 
-                                (<p className="text-lg description bg-primary-foreground p-5 rounded-lg">
-                                    Submitted on {' '}
-                                    {formatDate(individualFormData?.[0].formTrackingData[0].updatedAt)}
-                                </p>)
-                            }
+                            {individualFormData && (
+                                <p className="text-lg description bg-primary-foreground p-5 rounded-lg">
+                                    Submitted on{' '}
+                                    {formatDate(
+                                        individualFormData?.[0]
+                                            .formTrackingData[0].updatedAt
+                                    )}
+                                </p>
+                            )}
                         </div>
                         {individualFormData &&
                             individualFormData.map((item: any, index: any) => (
@@ -241,29 +179,50 @@ const Page = ({ params }: { params: any }) => {
                                                 <p>{item.question}</p>
                                             </div>
                                             <div className="space-y-3 text-start">
-                                                <RadioGroup value={item.formTrackingData[0].chosenOptions[0]}>
-                                                    {Object.keys(item.options).map((option) => {
-                                                        const answer = item.formTrackingData[0].chosenOptions[0];
+                                                <RadioGroup
+                                                    value={
+                                                        item.formTrackingData[0]
+                                                            .chosenOptions[0]
+                                                    }
+                                                >
+                                                    {Object.keys(
+                                                        item.options
+                                                    ).map((option) => {
+                                                        const answer =
+                                                            item
+                                                                .formTrackingData[0]
+                                                                .chosenOptions[0]
                                                         return (
                                                             <div
                                                                 key={option}
                                                                 className={`flex space-x-2 mr-4 mt-1 p-3 ${
-                                                                    answer == option &&
+                                                                    answer ==
+                                                                        option &&
                                                                     'border border-gray-800 border-2 rounded-lg'
                                                                 }`}
                                                             >
                                                                 <div className="flex items-center w-full space-x-3 space-y-0">
-                                                                    <RadioGroupItem 
-                                                                        value={option} 
-                                                                        checked={answer == option}
+                                                                    <RadioGroupItem
+                                                                        value={
+                                                                            option
+                                                                        }
+                                                                        checked={
+                                                                            answer ==
+                                                                            option
+                                                                        }
                                                                         disabled
                                                                     />
                                                                     <label className="font-normal">
-                                                                        {item.options[option]}
+                                                                        {
+                                                                            item
+                                                                                .options[
+                                                                                option
+                                                                            ]
+                                                                        }
                                                                     </label>
                                                                 </div>
                                                             </div>
-                                                        );
+                                                        )
                                                     })}
                                                 </RadioGroup>
                                             </div>
@@ -277,30 +236,49 @@ const Page = ({ params }: { params: any }) => {
                                                 <p>{item.question}</p>
                                             </div>
                                             <div className="mt-2">
-                                                {Object.keys(item.options).map((option) => {
-                                                    const answer = item.formTrackingData[0].chosenOptions;
-                                                    const optionNumber = Number(option); 
-                                                    return (
-                                                        <div
-                                                            key={option}
-                                                            className={`flex space-x-2 mr-4 mt-1 p-3 ${
-                                                                answer.includes(optionNumber) &&
-                                                                'border border-gray-800 border-2 rounded-lg'
-                                                            }`}
-                                                        >
-                                                            <Checkbox
-                                                                checked={answer.includes(
-                                                                    optionNumber
-                                                                )}
-                                                                disabled
-                                                                aria-label={option}
-                                                                className={`translate-y-[2px] mr-1 ${
-                                                                    answer.includes(optionNumber) && 'bg-green-500'
+                                                {Object.keys(item.options).map(
+                                                    (option) => {
+                                                        const answer =
+                                                            item
+                                                                .formTrackingData[0]
+                                                                .chosenOptions
+                                                        const optionNumber =
+                                                            Number(option)
+                                                        return (
+                                                            <div
+                                                                key={option}
+                                                                className={`flex space-x-2 mr-4 mt-1 p-3 ${
+                                                                    answer.includes(
+                                                                        optionNumber
+                                                                    ) &&
+                                                                    'border border-gray-800 border-2 rounded-lg'
                                                                 }`}
-                                                            />
-                                                            {item.options[option]}
-                                                        </div>
-                                                )})}
+                                                            >
+                                                                <Checkbox
+                                                                    checked={answer.includes(
+                                                                        optionNumber
+                                                                    )}
+                                                                    disabled
+                                                                    aria-label={
+                                                                        option
+                                                                    }
+                                                                    className={`translate-y-[2px] mr-1 ${
+                                                                        answer.includes(
+                                                                            optionNumber
+                                                                        ) &&
+                                                                        'bg-green-500'
+                                                                    }`}
+                                                                />
+                                                                {
+                                                                    item
+                                                                        .options[
+                                                                        option
+                                                                    ]
+                                                                }
+                                                            </div>
+                                                        )
+                                                    }
+                                                )}
                                             </div>
                                         </div>
                                     )}
@@ -311,7 +289,12 @@ const Page = ({ params }: { params: any }) => {
                                                 <p>{index + 1}.</p>
                                                 <p>{item.question}</p>
                                             </div>
-                                            <p>{item.formTrackingData[0].answer}</p>
+                                            <p>
+                                                {
+                                                    item.formTrackingData[0]
+                                                        .answer
+                                                }
+                                            </p>
                                         </div>
                                     )}
 
@@ -324,7 +307,10 @@ const Page = ({ params }: { params: any }) => {
                                             <div className="flex flex-row gap-x-1">
                                                 <CalendarIcon className="h-4 w-4 opacity-50 m-1" />
                                                 <p>
-                                                    {formatDate(item.formTrackingData[0].answer)}
+                                                    {formatDate(
+                                                        item.formTrackingData[0]
+                                                            .answer
+                                                    )}
                                                 </p>
                                             </div>
                                         </div>
@@ -338,7 +324,12 @@ const Page = ({ params }: { params: any }) => {
                                             </div>
                                             <div className="flex flex-row gap-x-1">
                                                 <Clock className="h-4 w-4 opacity-50 m-1" />
-                                                <p>{item.formTrackingData[0].answer}</p>
+                                                <p>
+                                                    {
+                                                        item.formTrackingData[0]
+                                                            .answer
+                                                    }
+                                                </p>
                                             </div>
                                         </div>
                                     )}

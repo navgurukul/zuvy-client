@@ -55,6 +55,7 @@ const AddForm: React.FC<AddFormProps> = ({
         description: '',
     })
     const [forceUpdate, setForceUpdate] = useState(false)
+    const [renderKey, setRenderKey] = useState(0)
     const [section, setSection] = useState(
         content.formQuestionDetails.length > 0
             ? content.formQuestionDetails
@@ -130,6 +131,7 @@ const AddForm: React.FC<AddFormProps> = ({
                 (item: any) => item.id !== deleteItem.id
             )
             setSection([...updatedSection, ...formQuestion])
+            setRenderKey(prev => prev + 1)
         } else if (deleteItem.key) {
             updatedSection = formQuestion.filter(
                 (item: any) => item.key !== deleteItem.key
@@ -137,7 +139,34 @@ const AddForm: React.FC<AddFormProps> = ({
             setSection([...editFormQuestion, ...updatedSection])
         }
         console.log('updatedSection:', updatedSection)
+        // setSection((prevSection: any) => {
+        //     const updatedSection = prevSection.filter((item: any) => {
+        //         if (deleteItem.id) return item.id !== deleteItem.id
+        //         if (deleteItem.key) return item.key !== deleteItem.key
+        //         return true
+        //     })
+        //     return [...updatedSection]
+        // })
+        // setRenderKey((prev) => prev + 1)
     }
+
+    // const deleteQuestion = (index: number) => {
+    //     setSection((prevSection:any) => {
+    //         const newSection = [...prevSection];
+    //         newSection.splice(index, 1);
+    //         return newSection;
+    //     });
+    // }
+
+    // useEffect(() => {
+    //     setSection((prevSection: any) => 
+    //         prevSection.map((item:any, index:any) => ({
+    //             ...item,
+    //             key: `question_${index}`,
+    //             // If you're using ids, you might want to regenerate them here as well
+    //         }))
+    //     );
+    // }, [section.length]); 
 
     useEffect(() => {
         console.log('section state updated:', section)

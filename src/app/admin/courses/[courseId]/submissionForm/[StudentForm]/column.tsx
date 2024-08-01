@@ -87,8 +87,7 @@ export const columns: ColumnDef<Task>[] = [
             <DataTableColumnHeader column={column} title="Status" />
         ),
         cell: ({ row }) => {
-            const isSubmitted =
-                row.original.status[0] === 'Not Submitted' ? false : true
+            const isSubmitted = row.original.status === 'Submitted'
             return (
                 <div className="flex space-x-2">
                     <div className="max-w-[500px] truncate flex items-center gap-x-2 font-medium">
@@ -107,8 +106,7 @@ export const columns: ColumnDef<Task>[] = [
         id: 'actions',
         cell: ({ row }) => {
             const { bootcampId, moduleId, userId, chapterId } = row.original
-            const isSubmitted =
-                row.original.status[0] !== 'Not Submitted' ? false : true
+            const isSubmitted = row.original.status !== 'Submitted'
             return (
                 <div className="flex space-x-2">
                     <Button

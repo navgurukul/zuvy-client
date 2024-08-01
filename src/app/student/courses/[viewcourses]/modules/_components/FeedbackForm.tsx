@@ -51,7 +51,7 @@ type Props = {
 
 const FeedbackForm = (props: Props) => {
     const [questions, setQuestions] = useState<any[]>([])
-    const [status, setStatus] = useState()
+    const [status, setStatus] = useState("")
     const [submitted, setSubmitted] = useState(false)
 
     const getAllQuizQuestionHandler = useCallback(async () => {
@@ -59,12 +59,12 @@ const FeedbackForm = (props: Props) => {
             const res = await api.get(
                 `/tracking/getAllFormsWithStatus/${props.moduleId}?chapterId=${props.chapterId}`
             )
-            if (Array.isArray(res.data)) {
-                setQuestions(res.data[0].questions)
-                setStatus(res.data[0].status)
+            if (res.data && res.data.questions) {
+                setQuestions(res.data.questions)
+                setStatus("Not completed")
             } else {
                 setQuestions(res.data.trackedData)
-                setStatus(res.data.status)
+                setStatus('Completed')
             }
         } catch (error) {
             toast({

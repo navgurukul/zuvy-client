@@ -13,8 +13,9 @@ import { toast } from '@/components/ui/use-toast'
 type Props = {}
 
 const Page = ({ params }: any) => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const moduleId = urlParams.get('moduleId')
+    const moduleId =
+        typeof window !== 'undefined' &&
+        new URLSearchParams(window.location.search).get('moduleId')
     const [assesmentData, setAssesmentData] = useState<any>()
     const [studentStatus, setStudentStatus] = useState<any>()
     const [totalSubmission, setTotalSubmission] = useState<any>()
@@ -50,12 +51,10 @@ const Page = ({ params }: any) => {
             const res = await api.get(`/bootcamp/${params.courseId}`)
             setBootcampData(res.data.bootcamp)
         } catch (error) {
-            // console.error('API Error:', error)
             toast({
-                title: "Error",
+                title: 'Error',
                 description: 'Error fetching bootcamps:',
-                className:
-                    'text-start capitalize border border-destructive',
+                className: 'text-start capitalize border border-destructive',
             })
         }
     }, [params.courseId])
@@ -63,38 +62,46 @@ const Page = ({ params }: any) => {
     const getStudentFormDataHandler = useCallback(async () => {
         await api
             .get(
-                `submission/formsStatus/${params.courseId}/${moduleId}?chapterId=${params.StudentForm}&limit=3&offset=1`
+                `submission/formsStatus/${params.courseId}/${moduleId}?chapterId=${params.StudentForm}&limit=3&offset=0`
             )
             .then((res) => {
-                const allData = [...res.data.data1, ...res.data.data2]
-                const data = allData.map((student: any) => {
+                const data = res.data.combinedData.map((student: any) => {
                     return {
                         ...student,
                         bootcampId: params.courseId,
-                        moduleId: moduleId,
-                        chapterId: params.StudentForm,
+                        moduleId: res.data.moduleId,
+                        chapterId: res.data.chapterId,
                         userId: student.id,
-                        email: student.emailId
+                        email: student.emailId,
                     }
                 })
+                const submitted = res.data.combinedData.filter(
+                    (student: any) => student.status === 'Submitted'
+                )
+                const notSubmitted = res.data.combinedData.filter(
+                    (student: any) => student.status !== 'Submitted'
+                )
                 setStudentStatus(data)
-                setTotalSubmission(res.data.data1)
-                setNotSubmitted(res.data.data2)
-            }).catch(err => {
+                setTotalSubmission(submitted)
+                setNotSubmitted(notSubmitted)
+            })
+            .catch((err) => {
                 toast({
-                    title: "Error",
+                    title: 'Error',
                     description: 'Error fetching Submissions:',
                     className:
                         'text-start capitalize border border-destructive',
                 })
             })
 
-            await api.get(`/tracking/getChapterDetailsWithStatus/${params.StudentForm}`)
+        await api
+            .get(`/tracking/getChapterDetailsWithStatus/${params.StudentForm}`)
             .then((res) => {
                 setChapterDetails(res.data.trackingData)
-            }).catch(err => {
+            })
+            .catch((err) => {
                 toast({
-                    title: "Error",
+                    title: 'Error',
                     description: 'Error fetching Chapter details:',
                     className:
                         'text-start capitalize border border-destructive',
