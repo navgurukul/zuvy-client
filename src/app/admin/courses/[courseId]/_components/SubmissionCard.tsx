@@ -14,6 +14,7 @@ import {
 import { Button } from '@/components/ui/button'
 
 function SubmissionCard({ classData }: { classData: any }) {
+
     return (
         <Card
             className="w-full mb-6 border-none p-5 shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F]"
@@ -22,8 +23,8 @@ function SubmissionCard({ classData }: { classData: any }) {
             <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                     <div className="font-bold text-lg flex flex-col border rounded-md py-2 px-4 text-muted-foreground border-muted-foreground">
-                        <Moment format="DD">{classData.startTime}</Moment>{' '}
-                        <Moment format="MMM">{classData.startTime}</Moment>
+                        <Moment format="DD">{classData.chapterDeadline}</Moment>{' '}
+                        <Moment format="MMM">{classData.chapterDeadline}</Moment>
                     </div>
                     {/* <Separator
                         orientation="vertical"
