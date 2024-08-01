@@ -27,8 +27,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 
-interface newModuleDialogProps {
+interface editModuleDialogProps {
     moduleData: {
         name: string
         description: string
@@ -38,7 +39,9 @@ interface newModuleDialogProps {
         months: number
         weeks: number
     }
+    editMode: any
     handleModuleChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+    editModule: () => void
     createModule: () => void
     handleTimeAllotedChange: (
         event: React.ChangeEvent<HTMLInputElement>
@@ -56,10 +59,12 @@ const moduleSchema = z.object({
     days: z.number().min(0, { message: 'Days Should not be empty.' })
 })
 
-const NewModuleDialog: React.FC<newModuleDialogProps> = ({
+const EditModuleDialog: React.FC<editModuleDialogProps> = ({
+    editMode,
     moduleData,
     timeData,
     handleModuleChange,
+    editModule,
     createModule,
     handleTimeAllotedChange,
     handleTypeChange,
@@ -72,14 +77,15 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
             moduleType: 'learning-material',
             name: moduleData.name,
             description: moduleData.description,
-            months: 0,
-            weeks: 0,
+            months: timeData.months,
+            weeks: timeData.weeks,
+            days: timeData.days
         }
 
     })
 
     const onSubmit: any = (values: z.infer<typeof moduleSchema>) => {
-        createModule()
+            editModule()    
     }
 
     useEffect(() => {
@@ -91,7 +97,6 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
         form.setValue('days', timeData.days)
     }, [moduleData, timeData, typeId, form])
 
-
     return (
         <Form {...form}>
             <form
@@ -101,7 +106,7 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>
-                            New Module
+                            Edit Module
                         </DialogTitle>
                         <div className="main_container flex items-center align-middle text-center">
                             <div className="flex items-center">
@@ -121,6 +126,7 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                                         checked={typeId === 1 || typeId != 2}
                                                         onChange={handleTypeChange}
                                                         name="moduleType"
+                                                        disabled
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
@@ -152,6 +158,7 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                                         checked={typeId === 2}
                                                         onChange={handleTypeChange}
                                                         name="moduleType"
+                                                        disabled
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
@@ -178,10 +185,8 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                             <FormControl>
                                                 <Input
                                                     type="text"
-                                                    placeholder={
-                                                        typeId === 2 ? 'Project Name' : 'Module Name'
-                                                    }
-                                                    onChange={handleModuleChange}
+                                                    defaultValue={moduleData.name}
+                                                    onChange={(e) => handleModuleChange(e)}
                                                     name="name"
                                                 />
                                             </FormControl>
@@ -208,11 +213,7 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                                 <Input
                                                     type="text"
                                                     id="desc"
-                                                    placeholder={
-                                                        typeId === 2
-                                                            ? 'Project Description'
-                                                            : 'Module Description'
-                                                    }
+                                                    defaultValue={moduleData.description}
                                                     onChange={(e) => handleModuleChange(e)}
                                                     name="description"
                                                 />
@@ -312,9 +313,9 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                     </DialogHeader>
                     <DialogFooter className="sm:justify-end">
                         <DialogClose asChild>
-                            <Button onClick={form.handleSubmit(onSubmit)}>
-                                Create Module
-                            </Button>
+                                <Button onClick={form.handleSubmit(onSubmit)}>
+                                    Edit Module
+                                </Button>
                         </DialogClose>
                     </DialogFooter>
                 </DialogContent>
@@ -323,4 +324,4 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
     )
 }
 
-export default NewModuleDialog
+export default EditModuleDialog

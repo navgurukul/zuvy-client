@@ -36,9 +36,9 @@ export default function SubmissionsList({
         try {
             setLoading(true) // Start loading
             const response = await api.get(
-                `/codingPlatform/allSubmissionsByQuestionId/${questionId}?userId=${userID}`
+                `codingPlatform/practicecode/questionId=${questionId}`
             )
-            setSubmissions(response.data.respond)
+            setSubmissions(response.data.submissions)
         } catch (error) {
             console.error('Error fetching courses:', error)
         } finally {
@@ -46,9 +46,9 @@ export default function SubmissionsList({
         }
     }
 
-    // useEffect(() => {
-    //     getSubmissionsByQuestionId()
-    // }, [])
+    useEffect(() => {
+        getSubmissionsByQuestionId()
+    }, [])
     return (
         <Dialog>
             <DialogTrigger asChild>

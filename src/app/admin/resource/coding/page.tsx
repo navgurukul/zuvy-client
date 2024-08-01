@@ -1,6 +1,6 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-import { Search } from 'lucide-react'
+import { ChevronLeft, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -105,7 +105,7 @@ const CodingProblems = (props: Props) => {
                 </div>
             ) : (
                 <div>
-                    {codingQuestions.length > 0 ? (
+                    {codingQuestions.length > 0 && !isDialogOpen? (
                         <MaxWidthWrapper>
                             <h1 className="text-left font-semibold text-2xl">
                                 Resource Library - Coding Problems
@@ -127,35 +127,10 @@ const CodingProblems = (props: Props) => {
                                         />
                                     </div>
                                 </div>
-                                <Dialog
-                                    onOpenChange={setIsDialogOpen}
-                                    open={isDialogOpen}
-                                >
-                                    <DialogTrigger asChild>
-                                        <Button>+ Create Problems</Button>
-                                    </DialogTrigger>
-                                    <DialogContent className="sm:max-w-[500px]">
-                                        <DialogHeader>
-                                            <DialogTitle>
-                                                New Coding Problem
-                                            </DialogTitle>
-                                        </DialogHeader>
-                                        <div className="w-full">
-                                            <NewCodingProblemForm
-                                                tags={tags}
-                                                setIsDialogOpen={
-                                                    setIsDialogOpen
-                                                }
-                                                getAllCodingQuestions={
-                                                    getAllCodingQuestions
-                                                }
-                                                setCodingQuestions={
-                                                    setCodingQuestions
-                                                }
-                                            />
-                                        </div>
-                                    </DialogContent>
-                                </Dialog>
+                              
+                       <Button onClick={()=>setIsDialogOpen(true)}>+ Create Problems</Button>
+                
+
                             </div>
                             <div className="flex items-center">
                                 <Select
@@ -226,7 +201,10 @@ const CodingProblems = (props: Props) => {
                         </MaxWidthWrapper>
                     ) : (
                         <>
-                            <h1 className="text-left font-semibold text-2xl">
+                          {
+                            !isDialogOpen ? (<>
+                                                     
+                              <h1 className="text-left font-semibold text-2xl">
                                 Resource Library - Coding Problems
                             </h1>
                             <MaxWidthWrapper className="flex flex-col justify-center items-center gap-5">
@@ -242,20 +220,14 @@ const CodingProblems = (props: Props) => {
                                     No coding problems have been created yet.
                                     Start by adding the first one
                                 </h2>
-                                <Dialog
-                                    onOpenChange={setIsDialogOpen}
-                                    open={isDialogOpen}
-                                >
-                                    <DialogTrigger asChild>
-                                        <Button>+ Create Problems</Button>
-                                    </DialogTrigger>
-                                    <DialogContent className="sm:max-w-[500px]">
-                                        <DialogHeader>
-                                            <DialogTitle>
-                                                New Coding Problem
-                                            </DialogTitle>
-                                        </DialogHeader>
-                                        <div className="w-full">
+                                <Button onClick={()=>setIsDialogOpen(true)}>+ Create Problems</Button>
+                   
+                            </MaxWidthWrapper>
+                            </>): (
+                            
+                                
+                            <MaxWidthWrapper className="flex flex-col justify-center items-center gap-5">
+                       <div onClick={()=>setIsDialogOpen(false)} className='text-secondary cursor-pointer self-start flex'> <ChevronLeft/> Coding Problems</div>  
                                             <NewCodingProblemForm
                                                 tags={tags}
                                                 setIsDialogOpen={
@@ -268,10 +240,10 @@ const CodingProblems = (props: Props) => {
                                                     setCodingQuestions
                                                 }
                                             />
-                                        </div>
-                                    </DialogContent>
-                                </Dialog>
-                            </MaxWidthWrapper>
+                                        </MaxWidthWrapper>
+                            
+                            )
+                          }
                         </>
                     )}
                 </div>

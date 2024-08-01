@@ -32,7 +32,6 @@ import {
 } from '@/components/ui/select'
 import SubmissionsList from '../_components/submissions-list'
 import { b64DecodeUnicode, b64EncodeUnicode } from '@/utils/base64'
-import TimerDisplay from '../../courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/TimerDisplay'
 
 interface questionDetails {
     title: string
@@ -42,14 +41,12 @@ interface questionDetails {
 
 interface IDEProps {
     params: { editor: string }
-    onBack?: () => void
     remainingTime?: any
     assessmentSubmitId?: number
 }
 
 const IDE: React.FC<IDEProps> = ({
     params,
-    onBack,
     remainingTime,
     assessmentSubmitId,
 }) => {
@@ -110,7 +107,7 @@ const IDE: React.FC<IDEProps> = ({
         e.preventDefault()
         try {
             const response = await api.post(
-                `/codingPlatform/submit?questionId=${params.editor}&action=${action}&assessmentSubmissionId=${assessmentSubmitId}`,
+                `codingPlatform/practicecode/questionId=${params.editor}?action=${action}`,
                 {
                     languageId: Number(
                         getDataFromField(
@@ -124,19 +121,19 @@ const IDE: React.FC<IDEProps> = ({
                 }
             )
             if (
-                response.data.stderr ||
-                response.data.compile_output ||
-                response.data.stdout
+                response.data.data.stderr ||
+                response.data.data.compile_output ||
+                response.data.data.stdout
             ) {
                 let compileOutput =
-                    response.data.compile_output?.replaceAll('\n', '') ||
-                    response.data.stderr?.replaceAll('\n', '') ||
-                    response.data.stdout?.replaceAll('\n', '')
+                    response.data.data.compile_output?.replaceAll('\n', '') ||
+                    response.data.data.stderr?.replaceAll('\n', '') ||
+                    response.data.data.stdout?.replaceAll('\n', '')
 
                 const encodedResult = b64DecodeUnicode(compileOutput)
                 setResult(encodedResult)
             }
-            if (response.data.status_id === 3) {
+            if (response.data.data.status_id === 3) {
                 toast({
                     title: `Test Cases Passed ${
                         action === 'submit' ? ', Solution submitted' : ''
@@ -190,7 +187,7 @@ const IDE: React.FC<IDEProps> = ({
         <div>
             <div className="flex justify-between mb-2">
                 <div>
-                    <Button variant="ghost" size="icon" onClick={onBack}>
+                    <Button variant="ghost" size="icon" onClick={handleBack}>
                         <ArrowLeft className="h-5 w-5" />
                     </Button>
                     <SubmissionsList questionId={params.editor} />
@@ -211,7 +208,6 @@ const IDE: React.FC<IDEProps> = ({
                         <Upload size={20} />
                         <span className="ml-2 text-lg font-bold">Submit</span>
                     </Button>
-                    <TimerDisplay remainingTime={remainingTime} />
                 </div>
             </div>
 

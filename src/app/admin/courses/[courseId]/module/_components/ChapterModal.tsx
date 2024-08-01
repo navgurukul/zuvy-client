@@ -30,22 +30,22 @@ function ChapterModal({
     const createChapter = async (topicId: number) => {
         await api
             .post(`Content/chapter`, {
-                moduleId: Number(params.moduleId),
-                bootcampId: Number(params.courseId),
+                moduleId: Number(params?.moduleId),
+                bootcampId: Number(params?.courseId),
                 topicId: topicId,
-                order: newChapterOrder,
+                // order: newChapterOrder,
             })
             .then((res) => {
                 toast({
-                    title: res.data.module[0].title,
-                    description: res.data.message,
+                    title: res?.data?.module[0]?.title,
+                    description: res?.data?.message,
                     className: 'text-start capitalize border border-secondary',
                 })
             })
             .catch((error) => {
                 toast({
-                    title: error.data.title,
-                    description: error.data.message,
+                    title: 'Error',
+                    description: error?.response?.data?.message[0],
                     className:
                         'text-start capitalize border border-destructive',
                 })
