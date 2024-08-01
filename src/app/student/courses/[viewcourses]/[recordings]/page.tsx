@@ -49,7 +49,7 @@ function Page({
         { crumb: 'My Courses', href: '/student/courses', isLast: false },
         {
             crumb: `${bootcampData?.bootcamp?.name}` || `Course`,
-            href: `/student/courses/${params.viewcourses}`,
+            href: `/student/courses/${params.viewcourses}/batch/206`,
             isLast: false,
         },
         {

@@ -1,6 +1,8 @@
 import { toast } from '@/components/ui/use-toast'
 import { api } from './axios.config'
 import { OFFSET, POSITION } from './constant'
+import { fetchStudentsHandler } from './admin'
+import { getStoreStudentDataNew } from '@/store/store'
 
 export const fetchStudentData = async (
     id: number,
@@ -59,12 +61,18 @@ export const fetchStudentData = async (
 //     }
 // }
 
-export async function deleteStudentHandler(
-    userId: any,
-    bootcampId: any,
-    setDeleteModalOpen: any,
-    setStudentData: any
-) {
+export async function deleteStudentHandler(userId: any, bootcampId: any) {
+    const {
+        students,
+        setStudents,
+        setTotalPages,
+        setLoading,
+        offset,
+        setTotalStudents,
+        setCurrentPage,
+        limit,
+        search,
+    } = getStoreStudentDataNew()
     try {
         await api.delete(`/student/${userId}/${bootcampId}`).then((res) => {
             toast({
@@ -72,7 +80,17 @@ export async function deleteStudentHandler(
                 description: res.data.message,
                 className: 'text-start capitalize border border-secondary',
             })
-            fetchStudentData(bootcampId, setStudentData)
+            fetchStudentsHandler({
+                courseId: bootcampId,
+                limit,
+                offset,
+                searchTerm: search,
+                setLoading,
+                setStudents,
+                setTotalPages,
+                setTotalStudents,
+                setCurrentPage,
+            })
         })
     } catch (error: any) {
         toast({
@@ -81,7 +99,6 @@ export async function deleteStudentHandler(
             className: 'text-start capitalize border border-destructive',
         })
     }
-    setDeleteModalOpen(false)
 }
 
 export const getAttendanceColorClass = (attendance: number) => {

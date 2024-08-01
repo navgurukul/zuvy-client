@@ -42,15 +42,15 @@ const AddStudentsModal = ({
     const [selectedOption, setSelectedOption] = useState('1')
     const [studentData, setStudentData] = useState<StudentDataState | any>({})
     const {
-        limit,
-        search,
-        offset,
-        setLoading,
         setStudents,
         setTotalPages,
+        setLoading,
+        offset,
         setTotalStudents,
         setCurrentPage,
-    } = useStudentData(id)
+        limit,
+        search,
+    } = getStoreStudentDataNew()
     // func
     const handleSingleStudent = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target

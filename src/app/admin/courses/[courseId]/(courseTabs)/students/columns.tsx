@@ -7,7 +7,7 @@ import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '../../../../../_components/datatable/data-table-column-header'
 
 import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
-import { deleteStudentHandler, fetchStudentData } from '@/utils/students'
+import { fetchStudentData } from '@/utils/students'
 import { Task } from '@/utils/data/schema'
 import {
     getBatchData,

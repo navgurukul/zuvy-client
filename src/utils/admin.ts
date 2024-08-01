@@ -300,6 +300,18 @@ type FetchStudentsHandlerParams = {
     setCurrentPage: (page: number) => void
 }
 
+interface FetchStudentsParams {
+    courseId: string
+    limit: number
+    offset: number
+    searchTerm: string
+    setLoading: (loading: boolean) => void
+    setStudents: (students: any[]) => void
+    setTotalPages: (totalPages: number) => void
+    setTotalStudents: (totalStudents: number) => void
+    setCurrentPage: (currentPage: number) => void
+}
+
 export const fetchStudentsHandler = async ({
     courseId,
     limit,
@@ -310,7 +322,7 @@ export const fetchStudentsHandler = async ({
     setTotalPages,
     setTotalStudents,
     setCurrentPage,
-}: FetchStudentsHandlerParams) => {
+}: FetchStudentsParams) => {
     setLoading(true)
 
     const endpoint = searchTerm

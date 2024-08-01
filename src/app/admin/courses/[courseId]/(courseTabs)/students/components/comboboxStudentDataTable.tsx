@@ -20,29 +20,6 @@ import {
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 
-const batchData = [
-    {
-        value: 'next.js',
-        label: 'Next.js',
-    },
-    {
-        value: 'sveltekit',
-        label: 'SvelteKit',
-    },
-    {
-        value: 'nuxt.js',
-        label: 'Nuxt.js',
-    },
-    {
-        value: 'remix',
-        label: 'Remix',
-    },
-    {
-        value: 'astro',
-        label: 'Astro',
-    },
-]
-
 export function ComboboxStudent({
     batchData,
     batchName,
@@ -54,9 +31,10 @@ export function ComboboxStudent({
     userId: any
     bootcampId: any
 }) {
+    let batchNameNew = batchName
     const [open, setOpen] = React.useState(false)
     const [value, setValue] = React.useState('')
-    const [displaybatchName, setDisplayBatchName] = React.useState(batchName)
+    const [displaybatchName, setDisplayBatchName] = React.useState(batchNameNew)
     const handleSelectBatchChange = async (
         currentValue: any,
         value: any,
