@@ -91,6 +91,7 @@ const CurricullumCard = ({
     }
 
     return (
+        
         <div className="w-full flex items-center justify-between gap-y-2 cursor-pointer">
             <div className="w-full p-2" onClick={handleModuleRoute}>
                 <div className="flex mb-2 w-full justify-between">

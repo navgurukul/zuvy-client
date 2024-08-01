@@ -62,7 +62,7 @@ const CodingPlayground = () => {
     const getQuestions = async () => {
         try {
             await api
-                .get(`/codingPlatform/allQuestions/${userID}`)
+                .get(`/Content/allCodingQuestions`)
                 .then((response) => {
                     setQuestions(response.data)
                 })
@@ -80,7 +80,7 @@ const CodingPlayground = () => {
 
     return (
         <div>
-            <div className="p-4 text-left">
+            {questions.length > 0 ? (<div className="p-4 text-left">
                 <h1 className="text-2xl font-bold mb-4">Coding Playground</h1>
                 <p className="mb-4">
                     Practice problems for AFE + NavGurukul Python Course
@@ -179,9 +179,7 @@ const CodingPlayground = () => {
                         </TableBody>
                     </Table>
                 </div>
-            </div>
-
-            <div>
+            </div>) : (<div>
                 <div className="flex justify-center">
                     <Image
                         src="/emptyStates/coming_soon.svg"
@@ -191,7 +189,7 @@ const CodingPlayground = () => {
                     />
                 </div>
                 <p className="text-lg mt-2 font-semibold">Coming Soon</p>
-            </div>
+            </div>)}
         </div>
     )
 }

@@ -149,7 +149,7 @@ export default function NewCodingProblemForm({
     }
 
     return (
-        <ScrollArea className="h-[calc(100vh-200px)] w-full rounded-md  ">
+       
             <main className="flex  flex-col p-3 ">
                 <Form {...form}>
                     <form
@@ -347,7 +347,7 @@ export default function NewCodingProblemForm({
                             />
                         </div>
                         <div className="flex justify-between gap-2">
-                            {/* <FormField
+                            <FormField
                                 control={form.control}
                                 name="inputFormat"
                                 render={({ field }) => {
@@ -410,7 +410,7 @@ export default function NewCodingProblemForm({
                                         </FormItem>
                                     )
                                 }}
-                            /> */}
+                            />
                         </div>
                         <div className="text-left ">
                             {/* <div className="flex justify-start"> */}
@@ -482,6 +482,6 @@ export default function NewCodingProblemForm({
                     </form>
                 </Form>
             </main>
-        </ScrollArea>
+       
     )
 }
