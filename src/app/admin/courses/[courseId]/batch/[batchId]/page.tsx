@@ -224,7 +224,8 @@ const BatchesInfo = ({
     }
     useEffect(() => {
         const getBootCamp = async () => {
-            await api.get(`/bootcamp/${params.courseId}`)
+            await api
+                .get(`/bootcamp/${params.courseId}`)
                 .then((response) => setBootcamp(response.data.bootcamp))
         }
         getBootCamp()
@@ -237,7 +238,7 @@ const BatchesInfo = ({
                 endpoint += `&searchTerm=${debouncedValue}`
             }
             await api.get(endpoint).then((response) => {
-                setStudentData(response.data.totalStudents)
+                setStudentData(response.data.modifiedStudentInfo)
                 setStoreStudentData(response.data.totalStudents)
                 setLastPage(response.data.totalPages)
                 setPages(response.data.totalPages)
@@ -264,7 +265,7 @@ const BatchesInfo = ({
     const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value)
     }
-
+    console.log(studentData)
     return (
         <>
             <BreadcrumbCmponent crumbs={crumbs} />
@@ -610,19 +611,6 @@ const BatchesInfo = ({
                         />
                     </div>
                 )}
-                {/* <DataTable columns={columns} data={studentsData} />
-
-                <DataTablePagination
-                    totalStudents={totalStudents}
-                    position={position}
-                    setPosition={setPosition}
-                    pages={pages}
-                    lastPage={lastPage}
-                    currentPage={currentPage}
-                    setCurrentPage={setCurrentPage}
-                    fetchStudentData={fetchStudentData}
-                    setOffset={setOffset}
-                /> */}
             </MaxWidthWrapper>
         </>
     )

@@ -87,7 +87,7 @@ const teacherRoutes = [
 ]
 
 const adminRoutes = [
-    { label: 'Home', icon: Home, href: '/admin', subtabs: [] },
+    // { label: 'Home', icon: Home, href: '/admin', subtabs: [] },
     { label: 'Courses', icon: Book, href: '/admin/courses', subtabs: [] },
     {
         label: 'Resource Library',

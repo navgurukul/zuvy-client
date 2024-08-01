@@ -35,6 +35,7 @@ const nextConfig = {
             { hostname: 'images.unsplash.com' },
             { hostname: 'lh5.googleusercontent.com' },
             { hostname: 'lh3.googleusercontent.com' },
+            { hostname: 'lh4.googleusercontent.com' },
         ],
     },
 }

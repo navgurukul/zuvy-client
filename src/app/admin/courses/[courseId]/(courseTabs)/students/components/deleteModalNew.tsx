@@ -14,14 +14,14 @@ import { Button } from '@/components/ui/button'
 import { Trash2 } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
-import { useStudentData } from './useStudentData'
 import { fetchStudentsHandler } from '@/utils/admin'
+import { getStoreStudentDataNew } from '@/store/store'
 
 interface AlertDialogProps {
     title: string
     description: string
     userId: number
-    bootcampId: any
+    bootcampId: number
 }
 
 export const AlertDialogDemo: React.FC<AlertDialogProps> = ({
@@ -31,21 +31,23 @@ export const AlertDialogDemo: React.FC<AlertDialogProps> = ({
     bootcampId,
 }) => {
     const {
-        limit,
-        search,
-        offset,
-        setLoading,
         setStudents,
         setTotalPages,
+        setLoading,
+        offset,
         setTotalStudents,
         setCurrentPage,
-    } = useStudentData(bootcampId)
-    const handleDelete = async () => {
+        limit,
+        search,
+    } = getStoreStudentDataNew()
+
+    async function deleteStudentHandler(userId: any, bootcampId: any) {
         try {
             await api.delete(`/student/${userId}/${bootcampId}`).then((res) => {
                 toast({
-                    title: 'Success',
+                    title: res.data.status,
                     description: res.data.message,
+                    className: 'text-start capitalize border border-secondary',
                 })
                 fetchStudentsHandler({
                     courseId: bootcampId,
@@ -61,8 +63,9 @@ export const AlertDialogDemo: React.FC<AlertDialogProps> = ({
             })
         } catch (error: any) {
             toast({
-                title: 'Error',
-                description: error.message,
+                title: 'Failed',
+                description:
+                    error.response?.data?.message || 'An error occurred.',
                 className: 'text-start capitalize border border-destructive',
             })
         }
@@ -86,7 +89,7 @@ export const AlertDialogDemo: React.FC<AlertDialogProps> = ({
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
                         className="bg-red-500"
-                        onClick={handleDelete}
+                        onClick={() => deleteStudentHandler(userId, bootcampId)}
                     >
                         Continue
                     </AlertDialogAction>
