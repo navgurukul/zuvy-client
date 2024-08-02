@@ -176,7 +176,12 @@ const Page = ({ params }: { params: any }) => {
                         </Button>
                     </DialogTrigger>
                     <DialogOverlay />
-                    <AddStudentsModal message={true} id={courseData?.id || 0} />
+                    <AddStudentsModal
+                        message={true}
+                        id={courseData?.id || 0}
+                        batch={false}
+                        batchId={0}
+                    />
                 </Dialog>
             )
         } else {

@@ -97,6 +97,7 @@ export const columns: ColumnDef<Task>[] = [
                     label: data.name,
                 }
             })
+            console.log(batchName)
             return (
                 <div className="flex">
                     <ComboboxStudent

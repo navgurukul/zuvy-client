@@ -26,9 +26,13 @@ import { fetchStudentsHandler } from '@/utils/admin'
 const AddStudentsModal = ({
     id,
     message,
+    batch,
+    batchId,
 }: {
     id: number
     message: boolean
+    batch: boolean
+    batchId: any
 }) => {
     // misc
     interface Student {
@@ -74,28 +78,29 @@ const AddStudentsModal = ({
         if (transformedObject) {
             const requestBody = transformedObject
             try {
-                await api
-                    .post(`/bootcamp/students/${id}`, requestBody)
-                    .then((response) => {
-                        toast({
-                            title: response.data.status,
-                            description: response.data.message,
-                            className:
-                                'text-start capitalize border border-secondary',
-                        })
-                        fetchStudentsHandler({
-                            courseId,
-                            limit,
-                            offset,
-                            searchTerm: search,
-                            setLoading,
-                            setStudents,
-                            setTotalPages,
-                            setTotalStudents,
-                            setCurrentPage,
-                        })
-                        setStudentData({ name: '', email: '' })
+                const endpoint = batch
+                    ? `/bootcamp/students/${id}?batch_id=${batchId}`
+                    : `/bootcamp/students/${id}`
+                await api.post(endpoint, requestBody).then((response) => {
+                    toast({
+                        title: response.data.status,
+                        description: response.data.message,
+                        className:
+                            'text-start capitalize border border-secondary',
                     })
+                    fetchStudentsHandler({
+                        courseId,
+                        limit,
+                        offset,
+                        searchTerm: search,
+                        setLoading,
+                        setStudents,
+                        setTotalPages,
+                        setTotalStudents,
+                        setCurrentPage,
+                    })
+                    setStudentData({ name: '', email: '' })
+                })
             } catch (error: any) {
                 toast({
                     title: 'Error Adding Students',

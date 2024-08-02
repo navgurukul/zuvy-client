@@ -325,16 +325,18 @@ export const fetchStudentsHandler = async ({
 }: FetchStudentsParams) => {
     setLoading(true)
 
+    console.log('Hello')
+
     const endpoint = searchTerm
         ? `/bootcamp/students/${courseId}?searchTerm=${searchTerm}`
         : `/bootcamp/students/${courseId}?limit=${limit}&offset=${offset}`
 
     try {
         const res = await api.get(endpoint)
-        setStudents(res.data.modifiedStudentInfo || [])
-        setTotalPages(res.data.totalPages || 0)
-        setTotalStudents(res.data.totalStudentsCount || 0)
-        setCurrentPage(res.data.currentPage || 1)
+        setStudents(res.data.modifiedStudentInfo)
+        setTotalPages(res.data.totalPages)
+        setTotalStudents(res.data.totalStudentsCount)
+        setCurrentPage(res.data.currentPage)
     } catch (error) {
         toast({
             title: 'Error',
