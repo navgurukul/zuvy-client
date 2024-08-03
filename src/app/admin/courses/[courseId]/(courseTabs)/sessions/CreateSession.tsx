@@ -48,6 +48,9 @@ interface CreateSessionProps {
     courseId: number
     bootcampData: { value: string; label: string }[]
     getClasses: any
+    students: number
+    onClick: () => void
+    checkopenSessionForm: boolean
 }
 
 const formSchema = z
@@ -81,6 +84,11 @@ const formSchema = z
         message: 'Start Time cannot be after end Time',
         path: ['endTime'],
     })
+    .refine((data) => data.totalClasses >= data.daysOfWeek.length, {
+        message:
+            'Total Classes must be at least equal to the number of selected days of week.',
+        path: ['totalClasses'],
+    })
 
 const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
     const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -92,6 +100,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
     const toggleForm = () => {
         setFormIsOpen(!formIsOpen)
         form.clearErrors()
+        props.onClick()
     }
     const openModal = () => setIsOpen(true)
     const closeModal = () => setIsOpen(false)
@@ -114,6 +123,10 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
         },
         mode: 'onChange',
     })
+    useEffect(() => {
+        const daysCount = form.watch('daysOfWeek').length
+        form.setValue('totalClasses', daysCount)
+    }, [form.watch('daysOfWeek')])
 
     const weekDays = useMemo(
         () => [
@@ -246,354 +259,420 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                     Create Session
                 </Button>
             </DialogTrigger>
-            <DialogOverlay />
 
-            <DialogContent className="w-full p-3">
-                <p className="text-left font-semibold text-sm text-red-400">
-                    *Fill out all the required fields to create session
-                </p>
-                <DialogHeader className="text-lg font-semibold">
-                    New Session
-                </DialogHeader>
-                {props.bootcampData.length === 0 && (
-                    <p className="text-left font-semibold text-sm text-red-400 ">
-                        You need to create batches first and assign students to
-                        the batches
-                    </p>
-                )}
-                <Form {...form}>
-                    <form
-                        onSubmit={form.handleSubmit(onSubmit)}
-                        className="w-full flex flex-col gap-4 "
-                    >
-                        <FormField
-                            control={form.control}
-                            name="sessionTitle"
-                            render={({ field }) => (
-                                <FormItem className="text-left">
-                                    <FormLabel>Session Title</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            placeholder="Session Title"
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="description"
-                            render={({ field }) => (
-                                <FormItem className="text-left">
-                                    <FormLabel>Description</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            placeholder="Description"
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <div className="flex items-center gap-x-4 ">
-                            <FormField
-                                control={form.control}
-                                name="startDate"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-col text-left">
-                                        <FormLabel>
-                                            Classes start date
-                                        </FormLabel>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <FormControl>
-                                                    <Button
-                                                        variant={'outline'}
-                                                        className={`w-[230px]  text-left font-normal ${
-                                                            !field.value &&
-                                                            'text-muted-foreground'
-                                                        }`}
+            {props.checkopenSessionForm && (
+                <>
+                    <DialogOverlay />
+                    <DialogContent className="w-full p-3">
+                        <DialogHeader className="text-lg font-semibold">
+                            New Session
+                        </DialogHeader>
+
+                        <Form {...form}>
+                            <form
+                                onSubmit={form.handleSubmit(onSubmit)}
+                                className="w-full flex flex-col gap-y-4 "
+                            >
+                                <FormField
+                                    control={form.control}
+                                    name="sessionTitle"
+                                    render={({ field }) => (
+                                        <FormItem className="text-left">
+                                            <FormLabel>
+                                                {' '}
+                                                Session Title
+                                                <span className="text-red-500">
+                                                    *
+                                                </span>{' '}
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    placeholder="Session Title"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="description"
+                                    render={({ field }) => (
+                                        <FormItem className="text-left">
+                                            <FormLabel>
+                                                Description
+                                                <span className="text-red-500">
+                                                    *
+                                                </span>
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    placeholder="Description"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <div className="flex items-center gap-x-4 ">
+                                    <FormField
+                                        control={form.control}
+                                        name="startDate"
+                                        render={({ field }) => (
+                                            <FormItem className="flex flex-col text-left">
+                                                <FormLabel>
+                                                    Classes start date
+                                                    <span className="text-red-500">
+                                                        *
+                                                    </span>{' '}
+                                                </FormLabel>
+                                                <Popover>
+                                                    <PopoverTrigger asChild>
+                                                        <FormControl>
+                                                            <Button
+                                                                variant={
+                                                                    'outline'
+                                                                }
+                                                                className={`w-[230px]  text-left font-normal ${
+                                                                    !field.value &&
+                                                                    'text-muted-foreground'
+                                                                }`}
+                                                            >
+                                                                {field.value
+                                                                    ? format(
+                                                                          field.value,
+                                                                          'EEEE, MMMM d, yyyy'
+                                                                      )
+                                                                    : 'Pick a date'}
+                                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                            </Button>
+                                                        </FormControl>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent
+                                                        className="w-auto p-0"
+                                                        align="start"
                                                     >
-                                                        {field.value
-                                                            ? format(
-                                                                  field.value,
-                                                                  'EEEE, MMMM d, yyyy'
-                                                              )
-                                                            : 'Pick a date'}
-                                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                    </Button>
-                                                </FormControl>
-                                            </PopoverTrigger>
-                                            <PopoverContent
-                                                className="w-auto p-0"
-                                                align="start"
-                                            >
-                                                <Calendar
-                                                    mode="single"
-                                                    selected={field.value}
-                                                    onSelect={field.onChange}
-                                                    disabled={(date: any) =>
-                                                        date <=
-                                                        addDays(new Date(), -1)
-                                                    } // Disable past dates
-                                                    initialFocus
-                                                />
-                                            </PopoverContent>
-                                        </Popover>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <div className="flex justify-start w-1/2 gap-x-2">
-                                <FormField
-                                    control={form.control}
-                                    name="startTime"
-                                    render={({ field }) => (
-                                        <FormItem className="flex flex-col text-left   ">
-                                            <FormLabel>Start Time</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    type="time"
-                                                    {...field}
-                                                    className="w-full "
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="endTime"
-                                    render={({ field }) => (
-                                        <FormItem className="flex flex-col text-left">
-                                            <FormLabel>End Time</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    type="time"
-                                                    {...field}
-                                                    className="w-full"
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
-                        </div>
-                        <FormField
-                            control={form.control}
-                            name="batch"
-                            render={({ field }) => (
-                                <FormItem className="text-left">
-                                    <FormLabel>Batches</FormLabel>
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <FormControl>
-                                                <Button
-                                                    variant="outline"
-                                                    role="combobox"
-                                                    aria-expanded={formIsOpen}
-                                                    className={cn(
-                                                        'w-full justify-between',
-                                                        !field.value &&
-                                                            'text-muted-foreground'
-                                                    )}
-                                                >
-                                                    {field.value
-                                                        ? props.bootcampData.find(
-                                                              (bootcamp) =>
-                                                                  bootcamp.value ===
-                                                                  field.value
-                                                          )?.label
-                                                        : 'Select batch...'}
-                                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                                </Button>
-                                            </FormControl>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-[300px] p-0">
-                                            <Command>
-                                                <CommandInput placeholder="Search batch..." />
-                                                <CommandEmpty>
-                                                    No batch found.
-                                                </CommandEmpty>
-                                                <CommandGroup>
-                                                    {props.bootcampData.map(
-                                                        (bootcamp) => (
-                                                            <CommandItem
-                                                                value={
-                                                                    bootcamp.value
-                                                                }
-                                                                key={
-                                                                    bootcamp.value
-                                                                }
-                                                                onSelect={() => {
-                                                                    form.setValue(
-                                                                        'batch',
-                                                                        bootcamp.value
-                                                                    )
-                                                                    form.clearErrors(
-                                                                        'batch'
-                                                                    )
-                                                                }}
-                                                            >
-                                                                <Check
-                                                                    className={cn(
-                                                                        'mr-2 h-4 w-4',
-                                                                        bootcamp.value ===
-                                                                            field.value
-                                                                            ? 'opacity-100'
-                                                                            : 'opacity-0'
-                                                                    )}
-                                                                />
-                                                                {bootcamp.label}
-                                                            </CommandItem>
-                                                        )
-                                                    )}
-                                                </CommandGroup>
-                                            </Command>
-                                        </PopoverContent>
-                                    </Popover>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="daysOfWeek"
-                            render={({ field }) => (
-                                <FormItem className="text-left">
-                                    <FormLabel>Days of Week</FormLabel>
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <FormControl>
-                                                <Button
-                                                    variant="outline"
-                                                    role="combobox"
-                                                    aria-expanded={formIsOpen}
-                                                    className={cn(
-                                                        'w-full justify-between',
-                                                        field.value.length ===
-                                                            0 &&
-                                                            'text-muted-foreground'
-                                                    )}
-                                                >
-                                                    {field.value.length > 0
-                                                        ? field.value.join(' ')
-                                                        : 'Select days...'}
-                                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                                </Button>
-                                            </FormControl>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-[300px] p-0">
-                                            <Command>
-                                                <CommandInput placeholder="Search days..." />
-                                                <CommandEmpty>
-                                                    No day found.
-                                                </CommandEmpty>
-                                                <CommandGroup>
-                                                    {weekDays.map(
-                                                        (day: any) => (
-                                                            <CommandItem
-                                                                value={
-                                                                    day.value
-                                                                }
-                                                                key={day.value}
-                                                                onSelect={() => {
-                                                                    const newValue: any =
-                                                                        field.value.includes(
-                                                                            day.value
-                                                                        )
-                                                                            ? field.value.filter(
-                                                                                  (
-                                                                                      value
-                                                                                  ) =>
-                                                                                      value !==
-                                                                                      day.value
-                                                                              )
-                                                                            : [
-                                                                                  ...field.value,
-                                                                                  day.value,
-                                                                              ]
-                                                                    form.setValue(
-                                                                        'daysOfWeek',
-                                                                        newValue
-                                                                    )
-                                                                    form.clearErrors(
-                                                                        'daysOfWeek'
-                                                                    )
-                                                                }}
-                                                            >
-                                                                <Check
-                                                                    className={cn(
-                                                                        'mr-2 h-4 w-4',
-                                                                        field.value.includes(
-                                                                            day.value
-                                                                        )
-                                                                            ? 'opacity-100'
-                                                                            : 'opacity-0'
-                                                                    )}
-                                                                />
-                                                                {day.label}
-                                                            </CommandItem>
-                                                        )
-                                                    )}
-                                                </CommandGroup>
-                                            </Command>
-                                        </PopoverContent>
-                                    </Popover>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <FormField
-                            control={form.control}
-                            name="totalClasses"
-                            render={({ field }) => (
-                                <FormItem className="text-left flex flex-col">
-                                    <FormLabel>Total Classes</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            placeholder="Total Classes"
-                                            type="number"
-                                            {...field}
-                                            onChange={(e) =>
-                                                field.onChange(
-                                                    Number(e.target.value)
-                                                )
-                                            }
+                                                        <Calendar
+                                                            mode="single"
+                                                            selected={
+                                                                field.value
+                                                            }
+                                                            onSelect={
+                                                                field.onChange
+                                                            }
+                                                            disabled={(
+                                                                date: any
+                                                            ) =>
+                                                                date <=
+                                                                addDays(
+                                                                    new Date(),
+                                                                    -1
+                                                                )
+                                                            } // Disable past dates
+                                                            initialFocus
+                                                        />
+                                                    </PopoverContent>
+                                                </Popover>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <div className="flex justify-start w-1/2 gap-x-2">
+                                        <FormField
+                                            control={form.control}
+                                            name="startTime"
+                                            render={({ field }) => (
+                                                <FormItem className="flex flex-col text-left   ">
+                                                    <FormLabel>
+                                                        Start Time
+                                                        <span className="text-red-500">
+                                                            *
+                                                        </span>
+                                                    </FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            type="time"
+                                                            {...field}
+                                                            className="w-full "
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
                                         />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <div className="flex justify-end">
-                            <DialogClose asChild>
-                                {isLoading ? (
-                                    <Button disabled>
-                                        <RotateCcw className="mr-2 text-black h-4  animate-spin w-1/3" />
-                                        Creating Session
-                                    </Button>
-                                ) : (
-                                    <Button
-                                        disabled={isSubmitDisabled}
-                                        variant={'secondary'}
-                                        onClick={form.handleSubmit(onSubmit)}
-                                        className={`w-1/3`}
-                                    >
-                                        Create Session
-                                    </Button>
-                                )}
-                            </DialogClose>
-                        </div>
-                    </form>
-                </Form>
-            </DialogContent>
+                                        <FormField
+                                            control={form.control}
+                                            name="endTime"
+                                            render={({ field }) => (
+                                                <FormItem className="flex flex-col text-left">
+                                                    <FormLabel>
+                                                        End Time
+                                                        <span className="text-red-500">
+                                                            *
+                                                        </span>
+                                                    </FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            type="time"
+                                                            {...field}
+                                                            className="w-full"
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                </div>
+                                <FormField
+                                    control={form.control}
+                                    name="batch"
+                                    render={({ field }) => (
+                                        <FormItem className="text-left">
+                                            <FormLabel>
+                                                Batches
+                                                <span className="text-red-500">
+                                                    *
+                                                </span>
+                                            </FormLabel>
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <FormControl>
+                                                        <Button
+                                                            variant="outline"
+                                                            role="combobox"
+                                                            aria-expanded={
+                                                                formIsOpen
+                                                            }
+                                                            className={cn(
+                                                                'w-full justify-between',
+                                                                !field.value &&
+                                                                    'text-muted-foreground'
+                                                            )}
+                                                        >
+                                                            {field.value
+                                                                ? props.bootcampData.find(
+                                                                      (
+                                                                          bootcamp
+                                                                      ) =>
+                                                                          bootcamp.value ===
+                                                                          field.value
+                                                                  )?.label
+                                                                : 'Select batch...'}
+                                                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                        </Button>
+                                                    </FormControl>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-[300px] p-0">
+                                                    <Command>
+                                                        <CommandInput placeholder="Search batch..." />
+                                                        <CommandEmpty>
+                                                            No batch found.
+                                                        </CommandEmpty>
+                                                        <CommandGroup>
+                                                            {props.bootcampData.map(
+                                                                (bootcamp) => (
+                                                                    <CommandItem
+                                                                        value={
+                                                                            bootcamp.value
+                                                                        }
+                                                                        key={
+                                                                            bootcamp.value
+                                                                        }
+                                                                        onSelect={() => {
+                                                                            form.setValue(
+                                                                                'batch',
+                                                                                bootcamp.value
+                                                                            )
+                                                                            form.clearErrors(
+                                                                                'batch'
+                                                                            )
+                                                                        }}
+                                                                    >
+                                                                        <Check
+                                                                            className={cn(
+                                                                                'mr-2 h-4 w-4',
+                                                                                bootcamp.value ===
+                                                                                    field.value
+                                                                                    ? 'opacity-100'
+                                                                                    : 'opacity-0'
+                                                                            )}
+                                                                        />
+                                                                        {
+                                                                            bootcamp.label
+                                                                        }
+                                                                    </CommandItem>
+                                                                )
+                                                            )}
+                                                        </CommandGroup>
+                                                    </Command>
+                                                </PopoverContent>
+                                            </Popover>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="daysOfWeek"
+                                    render={({ field }) => (
+                                        <FormItem className="text-left">
+                                            <FormLabel>
+                                                Days of Week
+                                                <span className="text-red-500">
+                                                    *
+                                                </span>
+                                            </FormLabel>
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <FormControl>
+                                                        <Button
+                                                            variant="outline"
+                                                            role="combobox"
+                                                            aria-expanded={
+                                                                formIsOpen
+                                                            }
+                                                            className={cn(
+                                                                'w-full justify-between',
+                                                                field.value
+                                                                    .length ===
+                                                                    0 &&
+                                                                    'text-muted-foreground'
+                                                            )}
+                                                        >
+                                                            {field.value
+                                                                .length > 0
+                                                                ? field.value.join(
+                                                                      ' '
+                                                                  )
+                                                                : 'Select days...'}
+                                                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                        </Button>
+                                                    </FormControl>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-[300px] p-0">
+                                                    <Command>
+                                                        <CommandInput placeholder="Search days..." />
+                                                        <CommandEmpty>
+                                                            No day found.
+                                                        </CommandEmpty>
+                                                        <CommandGroup>
+                                                            {weekDays.map(
+                                                                (day: any) => (
+                                                                    <CommandItem
+                                                                        value={
+                                                                            day.value
+                                                                        }
+                                                                        key={
+                                                                            day.value
+                                                                        }
+                                                                        onSelect={() => {
+                                                                            const newValue: any =
+                                                                                field.value.includes(
+                                                                                    day.value
+                                                                                )
+                                                                                    ? field.value.filter(
+                                                                                          (
+                                                                                              value
+                                                                                          ) =>
+                                                                                              value !==
+                                                                                              day.value
+                                                                                      )
+                                                                                    : [
+                                                                                          ...field.value,
+                                                                                          day.value,
+                                                                                      ]
+                                                                            form.setValue(
+                                                                                'daysOfWeek',
+                                                                                newValue
+                                                                            )
+                                                                            form.clearErrors(
+                                                                                'daysOfWeek'
+                                                                            )
+                                                                        }}
+                                                                    >
+                                                                        <Check
+                                                                            className={cn(
+                                                                                'mr-2 h-4 w-4',
+                                                                                field.value.includes(
+                                                                                    day.value
+                                                                                )
+                                                                                    ? 'opacity-100'
+                                                                                    : 'opacity-0'
+                                                                            )}
+                                                                        />
+                                                                        {
+                                                                            day.label
+                                                                        }
+                                                                    </CommandItem>
+                                                                )
+                                                            )}
+                                                        </CommandGroup>
+                                                    </Command>
+                                                </PopoverContent>
+                                            </Popover>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="totalClasses"
+                                    render={({ field }) => (
+                                        <FormItem className="text-left flex flex-col">
+                                            <FormLabel>
+                                                Total Classes
+                                                <span className="text-red-500">
+                                                    *
+                                                </span>
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    placeholder="Total Classes"
+                                                    type="number"
+                                                    {...field}
+                                                    onChange={(e) =>
+                                                        field.onChange(
+                                                            Number(
+                                                                e.target.value
+                                                            )
+                                                        )
+                                                    }
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <div className="flex justify-end">
+                                    <DialogClose asChild>
+                                        {isLoading ? (
+                                            <Button disabled>
+                                                <RotateCcw className="mr-2 text-black h-4  animate-spin w-1/3" />
+                                                Creating Session
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                disabled={isSubmitDisabled}
+                                                variant={'secondary'}
+                                                onClick={form.handleSubmit(
+                                                    onSubmit
+                                                )}
+                                                className={`w-1/3 mt-3`}
+                                            >
+                                                Create Session
+                                            </Button>
+                                        )}
+                                    </DialogClose>
+                                </div>
+                            </form>
+                        </Form>
+                    </DialogContent>
+                </>
+            )}
         </Dialog>
     )
 }

@@ -109,21 +109,23 @@ const NewMcqProblemForm = ({
             topics: 0,
             questionText: '',
             options: options,
-            selectedOption: 0,
+            selectedOption: 1,
         },
     })
 
     const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-        const emptyOptions = values.options.some(option => option.trim() === '');
+        const emptyOptions = values.options.some(
+            (option) => option.trim() === ''
+        )
 
-    if (emptyOptions) {
-        toast({
-            title: 'Error',
-            description: 'Options cannot be empty',
-            className: 'text-start capitalize border border-destructive',
-        });
-        return;
-    }
+        if (emptyOptions) {
+            toast({
+                title: 'Error',
+                description: 'Options cannot be empty',
+                className: 'text-start capitalize border border-destructive',
+            })
+            return
+        }
         const optionsObject: { [key: number]: string } = options.reduce(
             (acc, option, index) => {
                 acc[index + 1] = option
@@ -305,20 +307,21 @@ const NewMcqProblemForm = ({
                                                     }}
                                                 />
                                             </div>
-                                            {options.length > 2 && index >= 2 && (
-                                                <Button
-                                                    variant={'ghost'}
-                                                    onClick={() =>
-                                                        removeOption(index)
-                                                    }
-                                                    type="button"
-                                                >
-                                                    <X
-                                                        size={20}
-                                                        className="text-destructive"
-                                                    />
-                                                </Button>
-                                            )}
+                                            {options.length > 2 &&
+                                                index >= 2 && (
+                                                    <Button
+                                                        variant={'ghost'}
+                                                        onClick={() =>
+                                                            removeOption(index)
+                                                        }
+                                                        type="button"
+                                                    >
+                                                        <X
+                                                            size={20}
+                                                            className="text-destructive"
+                                                        />
+                                                    </Button>
+                                                )}
                                         </div>
                                     ))}
                                 </RadioGroup>
@@ -340,8 +343,8 @@ const NewMcqProblemForm = ({
                         )}
                     />
 
-                    <Button type="submit" className="w-1/2">
-                        Create MCQ
+                    <Button type="submit" className="w-1/3">
+                        + Create MCQ
                     </Button>
                 </form>
             </Form>
