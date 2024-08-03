@@ -80,7 +80,7 @@ function Page({ params }: any) {
             // )
             // setActiveChapter(nextChapterId || firstPending.id)
             // fetchChapterContent(nextChapterId || firstPending.id)
-            setActiveChapter(firstPending.id)
+            setActiveChapter(firstPending.id - 1)
             fetchChapterContent(firstPending.id)
         } catch (error) {
             console.log(error)

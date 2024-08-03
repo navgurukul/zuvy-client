@@ -82,11 +82,7 @@ const BatchesInfo = ({
         },
         {
             crumb: `${bootcamp?.name}`,
-            href: `/admin/courses/${
-                studentData?.length > 0
-                    ? studentData[0].bootcampId
-                    : params.batchId
-            }/batches`,
+            href: `/admin/courses/${params.courseId}/batches`,
             isLast: false,
         },
         {
