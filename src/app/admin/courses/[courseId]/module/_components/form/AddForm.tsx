@@ -42,6 +42,15 @@ const formSchema = z.object({
     description: z.string().min(4, {
         message: 'Description must be at least 4 characters.',
     }),
+    questions: z.array(
+        z.object({
+            id: z.string().optional(),
+            question: z.string().min(1, { message: 'Question is required' }),
+            typeId: z.number(),
+            isRequired: z.boolean(),
+            options: z.array(z.string()).optional(),
+        })
+    ),
 })
 
 const AddForm: React.FC<AddFormProps> = ({
@@ -50,157 +59,215 @@ const AddForm: React.FC<AddFormProps> = ({
     fetchChapterContent,
     moduleId,
 }) => {
-    const [newContent, setNewContent] = useState<chapterDetails>({
-        title: '',
-        description: '',
-    })
-    const [forceUpdate, setForceUpdate] = useState(false)
-    const [renderKey, setRenderKey] = useState(0)
-    const [section, setSection] = useState(
-        content.formQuestionDetails.length > 0
-            ? content.formQuestionDetails
-            : // ? [...content.formQuestionDetails]
-              //   JSON.parse(JSON.stringify(content.formQuestionDetails))
-              [
-                  {
-                      questionType: 'Multiple Choice',
-                      typeId: 1,
-                      question: 'Question 1',
-                      options: ['Op1'],
-                      isRequired: true,
-                      key: 1,
-                  },
-              ]
-    )
-
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             title: content?.title ?? '',
-            description: content?.title ?? '',
+            description: content?.description ?? '',
+            questions:
+                content.formQuestionDetails.length > 0
+                    ? content.formQuestionDetails
+                    : [
+                          {
+                              questionType: 'Multiple Choice',
+                              typeId: 1,
+                              question: 'Question 1',
+                              options: ['Op1'],
+                              isRequired: true,
+                              id: 'initial-1',
+                          },
+                      ],
         },
         values: {
             title: content?.title ?? '',
             description: content?.description ?? '',
+            questions:
+                content.formQuestionDetails.length > 0
+                    ? content.formQuestionDetails
+                    : [
+                          {
+                              questionType: 'Multiple Choice',
+                              typeId: 1,
+                              question: 'Question 1',
+                              options: ['Op1'],
+                              isRequired: true,
+                              id: 'initial-1',
+                          },
+                      ],
         },
     })
 
+    const questions = form.watch('questions')
+
+    console.log('content.formQuestionDetails', content.formQuestionDetails)
+
+    // const addQuestion = () => {
+    //     const newKey =
+    //         section.length > 0 &&
+    //         section[section.length - 1].hasOwnProperty('key')
+    //             ? section[section.length - 1].key + 1
+    //             : 1
+    //     const newSection = {
+    //         questionType: 'Multiple Choice',
+    //         typeId: 1,
+    //         question: 'Question 1',
+    //         options: ['Op1'],
+    //         isRequired: false,
+    //         key: newKey,
+    //     }
+    //     setSection([...section, newSection])
+    // }
+
     const addQuestion = () => {
-        const newKey =
-            section.length > 0 &&
-            section[section.length - 1].hasOwnProperty('key')
-                ? section[section.length - 1].key + 1
-                : 1
-        const newSection = {
+        const newQuestion = {
             questionType: 'Multiple Choice',
             typeId: 1,
-            question: 'Question 1',
-            options: ['Op1'],
+            question: '',
+            options: [''],
             isRequired: false,
-            key: newKey,
+            id: `new-${Date.now()}`,
         }
-        setSection([...section, newSection])
-    }
-
-    //Delete question index wise from section
-
-    // const deleteQuestion = useCallback(
-    //     (idx: number) => {
-    //         console.log('section', section)
-    //         console.log('idx', idx)
-    //         const updatedSection = section.filter((_, i) => i !== idx)
-    //         console.log('updatedSection', updatedSection)
-    //         setSection((prevSections) =>
-    //             prevSections.filter((_, i) => i !== idx)
-    //         )
-    //     },
-    //     [section]
-    // )
-
-    //Delete question key/id wise from section
-    const deleteQuestion = (deleteItem: any) => {
-        // console.log('section before delete:', section)
-        // console.log('deleteItem:', deleteItem)
-
-        let updatedSection
-        let formQuestion = section.filter((item: any) => !item.id)
-        const editFormQuestion = section.filter((item: any) => item.id)
-
-        if (deleteItem.id) {
-            updatedSection = editFormQuestion.filter(
-                (item: any) => item.id !== deleteItem.id
-            )
-            setSection([...updatedSection, ...formQuestion])
-            setRenderKey(prev => prev + 1)
-        } else if (deleteItem.key) {
-            updatedSection = formQuestion.filter(
-                (item: any) => item.key !== deleteItem.key
-            )
-            setSection([...editFormQuestion, ...updatedSection])
-        }
-        console.log('updatedSection:', updatedSection)
-        // setSection((prevSection: any) => {
-        //     const updatedSection = prevSection.filter((item: any) => {
-        //         if (deleteItem.id) return item.id !== deleteItem.id
-        //         if (deleteItem.key) return item.key !== deleteItem.key
-        //         return true
-        //     })
-        //     return [...updatedSection]
-        // })
-        // setRenderKey((prev) => prev + 1)
+        form.setValue('questions', [
+            ...form.getValues('questions'),
+            newQuestion,
+        ])
     }
 
     // const deleteQuestion = (index: number) => {
-    //     setSection((prevSection:any) => {
-    //         const newSection = [...prevSection];
-    //         newSection.splice(index, 1);
-    //         return newSection;
-    //     });
+    //     const currentQuestions = form.getValues('questions')
+    //     form.setValue(
+    //         'questions',
+    //         currentQuestions.filter((_, i) => i !== index)
+    //     )
     // }
 
-    // useEffect(() => {
-    //     setSection((prevSection: any) => 
-    //         prevSection.map((item:any, index:any) => ({
-    //             ...item,
-    //             key: `question_${index}`,
-    //             // If you're using ids, you might want to regenerate them here as well
-    //         }))
-    //     );
-    // }, [section.length]); 
+    // const deleteQuestion = (index: number) => {
+    //     const currentQuestions = form.getValues('questions')
+    //     console.log('currentQuestions', currentQuestions)
 
-    useEffect(() => {
-        console.log('section state updated:', section)
-    }, [section])
+    //     // Safeguard: Ensure the question exists and has options
+    //     if (
+    //         currentQuestions[index] &&
+    //         Array.isArray(currentQuestions[index].options)
+    //     ) {
+    //         // Unregister all options related to the deleted question
+    //         currentQuestions[index].options.forEach((_, optionIndex) => {
+    //             form.unregister(`questions.${index}.options.${optionIndex}`)
+    //         })
+    //     }
 
-    // console.log('content', content)
+    //     // Remove the question from the form
+    //     const updatedQuestions = currentQuestions.filter((_, i) => i !== index)
+    //     form.setValue('questions', updatedQuestions)
+
+    //     // Re-register options for remaining questions
+    //     // updatedQuestions.forEach((question, qIndex) => {
+    //     //     if (Array.isArray(question.options)) {
+    //     //         question.options.forEach((option, optionIndex) => {
+    //     //             form.register(`questions.${qIndex}.options.${optionIndex}`)
+    //     //         })
+    //     //     }
+    //     // })
+    // }
+
+    // *************** This one is working... Left one empty input field when delete multiple choice *************
+
+    // const deleteQuestion = (id: string) => {
+    //     const currentQuestions = form.getValues('questions');
+
+    //     // Find the index of the question with the given id
+    //     const index = currentQuestions.findIndex((question) => question.id === id);
+
+    //     if (index === -1) {
+    //         console.warn(`Question with id ${id} not found.`);
+    //         return;
+    //     }
+
+    //     // Safeguard: Ensure the question exists and has options
+    //     if (currentQuestions[index] && Array.isArray(currentQuestions[index].options)) {
+    //         // Unregister all options related to the deleted question
+    //         currentQuestions[index].options.forEach((_, optionIndex) => {
+    //             form.unregister(`questions.${index}.options.${optionIndex}`);
+    //         });
+    //     }
+
+    //     // Remove the question from the form
+    //     const updatedQuestions = currentQuestions.filter((question) => question.id !== id);
+    //     form.setValue('questions', updatedQuestions);
+
+    //     // Re-register options for remaining questions
+    //     updatedQuestions.forEach((question, qIndex) => {
+    //         if (Array.isArray(question.options)) {
+    //             question.options.forEach((option, optionIndex) => {
+    //                 form.register(`questions.${qIndex}.options.${optionIndex}`);
+    //             });
+    //         }
+    //     });
+    // };
+
+    const deleteQuestion = (id: string) => {
+        const currentQuestions = form.getValues('questions')
+        const questionIndex = currentQuestions.findIndex((q) => q.id === id)
+
+        if (questionIndex === -1) return
+
+        // Unregister the question's options
+        if (
+            currentQuestions[questionIndex]?.options &&
+            Array.isArray(currentQuestions[questionIndex].options)
+        ) {
+            currentQuestions[questionIndex].options.forEach(
+                (_, optionIndex) => {
+                    form.unregister(
+                        `questions.${questionIndex}.options.${optionIndex}`
+                    )
+                }
+            )
+        }
+
+        // Remove the question
+        const updatedQuestions = currentQuestions.filter(
+            (_, i) => i !== questionIndex
+        )
+        form.setValue('questions', updatedQuestions)
+    }
+
+    // const deleteQuestion = (index: number) => {
+    //     const currentQuestions = form.getValues('questions')
+    //     form.setValue(
+    //         'questions',
+    //         currentQuestions.filter((_, i) => i !== index)
+    //     )
+    //     // After deleting, update the indices of the remaining questions
+    //     const updatedQuestions = form.getValues('questions')
+    //     updatedQuestions.forEach((_, i) => {
+    //         form.setValue(`questions.${i}.id`, `question-${i}`)
+    //     })
+    // }
+
+    console.log('questions', questions)
+
+    form.handleSubmit(onSubmit, (errors) => {
+        console.log('Form errors:', errors)
+    })
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log('section onSubmit', section)
-        const questions = section.map((item: any, index: number) => {
-            const options = item.options || {}
-            const optionsObject = Object.keys(options).reduce((acc, key) => {
-                acc[key] = options[key]
-                return acc
-            }, {} as { [key: string]: string })
+        console.log('value', values)
+        const { title, description, questions } = values
 
-            const { questionType, key, ...rest } = item
-
-            return {
-                ...rest,
-                options: optionsObject,
-            }
-        })
-
-        const formQuestionDto = questions.filter((item: any) => !item.id)
+        const formQuestionDto = questions.filter((item) => !item.id)
         const editFormQuestionDto = questions
-            .filter((item: any) => item.id)
-            .map((question: any) => ({
-                id: question.id,
-                typeId: question.typeId,
-                isRequired: question.isRequired,
-                options: question.options,
-                question: question.question,
+            .filter((item) => item.id && !item.id.startsWith('new-'))
+            .map(({ id, typeId, isRequired, options, question }) => ({
+                id,
+                typeId,
+                isRequired,
+                options,
+                question,
             }))
+
+        console.log('formQuestionDto', formQuestionDto)
+        console.log('editFormQuestionDto', editFormQuestionDto)
 
         let payload = {}
         if (formQuestionDto.length > 0 && editFormQuestionDto.length > 0) {
@@ -296,18 +363,18 @@ const AddForm: React.FC<AddFormProps> = ({
                         )}
                     />
 
-                    {section.map((item: any, index: number) => (
+                    {questions.map((item, index) => (
                         <FormSection
-                            // key={item.key}
                             key={item.id || `form-section-${index}`}
                             item={item}
                             index={index}
                             form={form}
                             addQuestion={addQuestion}
-                            section={section}
-                            setSection={setSection}
+                            // deleteQuestion={() => deleteQuestion(index)}
+                            // deleteQuestion={() => deleteQuestion(item.id)}
                             deleteQuestion={deleteQuestion}
-                            formData={content.formQuestionDetails}
+                            // formData={content.formQuestionDetails}
+                            formData={questions}
                         />
                     ))}
 
