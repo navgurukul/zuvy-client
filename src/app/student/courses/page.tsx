@@ -61,12 +61,12 @@ const Page: React.FC<pageProps> = () => {
                     'tracking/latestUpdatedCourse'
                     // `/tracking/latest/learning/${userID}`
                 )
-                setResumeCourse(response.data)
+                setResumeCourse(response.data.latestCourse)
                 // If we get res, then course started, hence courseStarted: true;
-                if (response?.data?.code === 404) {
-                    setCourseStarted(false)
-                } else {
+                if (response?.data?.code === 200) {
                     setCourseStarted(true)
+                } else {
+                    setCourseStarted(false)
                 }
             } catch (error) {
                 console.error('Error getting resume course:', error)

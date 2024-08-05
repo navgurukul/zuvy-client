@@ -311,7 +311,8 @@ function Page({
 
                         <div className="flex justify-center mt-3">
                             <Link
-                                href={`/student/courses/${params.viewcourses}/recordings`}
+                                // href={`/student/courses/${params.viewcourses}/recordings`}.
+                                href={`/student/courses/${params.viewcourses}/classes`}
                             >
                                 <div className="flex items-center border rounded-md border-secondary px-3 py-1 text-secondary">
                                     <h1 className="text-lg p-1 font-bold">

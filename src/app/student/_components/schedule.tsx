@@ -90,13 +90,13 @@ function Schedule({ className, ...props }: ScheduleProps) {
         const getResumeCourse = async () => {
             try {
                 const response = await api.get('/tracking/latestUpdatedCourse')
-                setResumeCourse(response.data)
-                setNextChapterId(response.data.newChapter.id)
+                setResumeCourse(response.data.latestCourse)
+                setNextChapterId(response.data.latestCourse.newChapter.id)
                 // If we get res, then course started, hence courseStarted: true;
-                if (response?.data?.code === 404) {
-                    setCourseStarted(false)
-                } else {
+                if (response?.data?.code === 200) {
                     setCourseStarted(true)
+                } else {
+                    setCourseStarted(false)
                 }
             } catch (error) {
                 console.error('Error getting resume course:', error)
