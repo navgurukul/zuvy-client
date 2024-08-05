@@ -51,9 +51,7 @@ const Page = ({ params }: { params: any }) => {
         name: z.string().min(2, {
             message: 'Batch name must be at least 2 characters.',
         }),
-        instructorId: z
-            .string()
-            .refine((instructorId) => !isNaN(parseInt(instructorId))),
+        instructorEmail: z.string().email(),
         bootcampId: z
             .string()
             .refine((bootcampId) => !isNaN(parseInt(bootcampId))),
@@ -73,13 +71,13 @@ const Page = ({ params }: { params: any }) => {
         resolver: zodResolver(formSchema),
         defaultValues: {
             name: '',
-            instructorId: '',
+            instructorEmail: '',
             bootcampId: courseData?.id.toString() ?? '',
             capEnrollment: '',
         },
         values: {
             name: '',
-            instructorId: '',
+            instructorEmail: '',
             bootcampId: courseData?.id.toString() ?? '',
             capEnrollment: '',
         },
@@ -89,7 +87,7 @@ const Page = ({ params }: { params: any }) => {
         try {
             const convertedData = {
                 ...values,
-                instructorId: +values.instructorId,
+                instructorEmail: values.instructorEmail,
                 bootcampId: +values.bootcampId,
                 capEnrollment: +values.capEnrollment,
             }
@@ -101,7 +99,7 @@ const Page = ({ params }: { params: any }) => {
                     convertedName === batchDataItem.name.toLowerCase()
             )
 
-            console.log(convertedName)
+            // console.log(convertedData)
 
             if (matchedBatchData) {
                 toast({
@@ -231,15 +229,15 @@ const Page = ({ params }: { params: any }) => {
                                     />
                                     <FormField
                                         control={form.control}
-                                        name="instructorId"
+                                        name="instructorEmail"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>
-                                                    Instructor Id
+                                                    Instructor Email
                                                 </FormLabel>
                                                 <FormControl>
                                                     <Input
-                                                        placeholder="20230"
+                                                        placeholder="instructor@navgurukul.org"
                                                         type="name"
                                                         {...field}
                                                     />

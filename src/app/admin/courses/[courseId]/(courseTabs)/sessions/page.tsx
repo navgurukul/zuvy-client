@@ -15,6 +15,7 @@ import { OFFSET, POSITION } from '@/utils/constant'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import useDebounce from '@/hooks/useDebounce'
 import { Spinner } from '@/components/ui/spinner'
+import { toast } from '@/components/ui/use-toast'
 
 type ClassType = 'active' | 'upcoming' | 'complete'
 
@@ -38,6 +39,7 @@ interface State {
 
 function Page({ params }: any) {
     const [classes, setClasses] = useState<any[]>([])
+    const [students, setStudents] = useState<number>(0)
     const { setbatchValueData } = setStoreBatchValue()
     const [position, setPosition] = useState(POSITION)
     const [bootcampData, setBootcampData] = useState<any>([])
@@ -50,6 +52,7 @@ function Page({ params }: any) {
     const [lastPage, setLastPage] = useState<number>(0)
     const [search, setSearch] = useState<string>('')
     const [loading, setLoading] = useState(true)
+    const [checkopenSessionForm, setOpenSessionForm] = useState(true)
     const debouncedSearch = useDebounce(search, 1000)
 
     const handleComboboxChange = (value: string) => {
@@ -109,6 +112,21 @@ function Page({ params }: any) {
     }
 
     useEffect(() => {
+        const fetchStudents = async () => {
+            try {
+                await api
+                    .get(`bootcamp/students/${params.courseId}`)
+                    .then((res) => {
+                        setStudents(res.data.totalNumberOfStudents)
+                    })
+            } catch (error) {
+                console.log(error)
+            }
+        }
+
+        fetchStudents()
+    }, [params.courseId])
+    useEffect(() => {
         if (activeTab === 'upcoming') {
             const classesStartTime = classes.map((cls) => ({
                 startTime: cls.startTime,
@@ -166,6 +184,26 @@ function Page({ params }: any) {
         getHandleAllBootcampBatches()
     }, [getHandleAllBootcampBatches])
 
+    const onClickHandler = () => {
+        if (bootcampData.length === 0) {
+            toast({
+                title: 'Caution',
+                description:
+                    'There are no batches currently please create them and assign students to them first',
+            })
+            setOpenSessionForm(false)
+        }
+
+        if (students === 0) {
+            toast({
+                title: 'Caution',
+                description:
+                    'There are no batches currently please create them and assign students to them first',
+            })
+            setOpenSessionForm(false)
+        }
+    }
+
     return (
         <>
             {loading ? (
@@ -197,11 +235,16 @@ function Page({ params }: any) {
                                 onChange={handleSetSearch}
                             />
                         </div>
-                        <CreateSessionDialog
-                            courseId={params?.courseId || 0}
-                            bootcampData={bootcampData}
-                            getClasses={getHandleAllClasses}
-                        />
+                        {
+                            <CreateSessionDialog
+                                courseId={params?.courseId || 0}
+                                bootcampData={bootcampData}
+                                getClasses={getHandleAllClasses}
+                                students={students}
+                                checkopenSessionForm={checkopenSessionForm}
+                                onClick={onClickHandler}
+                            />
+                        }
                     </div>
                     <div className="flex justify-start gap-6 my-6">
                         {tabs.map((tab) => (
@@ -281,6 +324,11 @@ function Page({ params }: any) {
                                         courseId={params.courseId || 0}
                                         bootcampData={bootcampData}
                                         getClasses={getHandleAllClasses}
+                                        students={students}
+                                        onClick={onClickHandler}
+                                        checkopenSessionForm={
+                                            checkopenSessionForm
+                                        }
                                     />
                                 </div>
                             )}
