@@ -99,6 +99,16 @@ function ClassCard({
                                         {classData.title}
                                     </TooltipContent>
                                 </Tooltip>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <h3 className="font-semibold">
+                                            {classData.bootcampName}
+                                        </h3>
+                                    </TooltipTrigger>
+                                    <TooltipContent className="font-semibold">
+                                        {classData.bootcampName}
+                                    </TooltipContent>
+                                </Tooltip>
                             </TooltipProvider>
                             <div className="text-md flex w-[250px] capitalize items-center">
                                 <Moment format="hh:mm A">

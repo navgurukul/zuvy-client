@@ -1,16 +1,8 @@
 'use client'
-import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
 import React, { useState, useEffect, useCallback } from 'react'
 import { api } from '@/utils/axios.config'
 import { useLazyLoadedStudentData } from '@/store/store'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-// import UpcomingClasses from './_components/UpcomingClasses'
+import UpcomingClasses from './_components/UpcomingClasses'
 import BreadcrumbCmponent from '@/app/_components/breadcrumbCmponent'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import { OFFSET, CLASS_CARD_POSITION } from '@/utils/constant'
@@ -40,11 +32,10 @@ interface BootcampData {
 function Page({
     params,
 }: {
-    params: { viewcourses: string; moduleID: string }
+    params: { viewcourses: string; batchId: string }
 }) {
     const [upcomingClasses, setUpcomingClasses] = useState([])
     const [ongoingClasses, setOngoingClasses] = useState([])
-    const [completedClasses, setCompletedClasses] = useState([])
     const [search, setSearch] = useState('')
     const [position, setPosition] = useState(CLASS_CARD_POSITION)
     const [pages, setPages] = useState<number>()
@@ -61,23 +52,20 @@ function Page({
         { crumb: 'My Courses', href: '/student/courses', isLast: false },
         {
             crumb: `${bootcampData?.bootcamp?.name}` || `Course`,
-            href: `/student/courses/${params.viewcourses}/batch/206`,
+            href: `/student/courses/${params.viewcourses}/batch/${params.batchId}`,
             isLast: false,
         },
         {
             crumb: 'Upcoming Classes',
-            // href: `/student/courses/${params.viewcourses}/recordings`,
+            href: '',
             isLast: true,
         },
     ]
 
-    const batchId = 302
-
     const fetchRecordings = useCallback(
         async (offset: number) => {
             try {
-                let baseUrl = `/student/Dashboard/classes?limit=${position}&offset=${offset}`
-                // `student/Dashboard/classes?limit=2&offset=0`
+                let baseUrl = `/student/Dashboard/classes/?batch_id=${params.batchId}&limit=${position}&offset=${offset}`
 
                 if (debouncedSearch) {
                     baseUrl += `&searchTerm=${encodeURIComponent(
@@ -106,39 +94,14 @@ function Page({
                 console.error('Error getting completed classes:', error)
             }
         },
-        [userID, batchId, debouncedSearch, position]
+        [userID, params.batchId, debouncedSearch, position]
     )
 
     useEffect(() => {
         if (userID) {
-            // api.get(`/bootcamp/studentClasses/${params.viewcourses}`, {
-            //     params: {
-            //         userId: userID,
-            //     },
-            // })
-            //     .then((response) => {
-            //         const {
-            //             upcomingClasses,
-            //             ongoingClasses,
-            //             completedClasses,
-            //         } = response.data
-            //         setUpcomingClasses(upcomingClasses)
-            //         setOngoingClasses(ongoingClasses)
-            //         setCompletedClasses(completedClasses)
-            //     })
-
-            // api.get(`/student/Dashboard/classes/?batch_id=${batchId}`)
-            // api.get(`/student/Dashboard/classes`)
-            //     .then((res) => {
-            //         setUpcomingClasses(res.data.upcoming)
-            //         setOngoingClasses(res.data.ongoing)
-            //     })
-            //     .catch((error) => {
-            //         console.log('Error fetching classes:', error)
-            //     })
             fetchRecordings(offset)
         }
-    }, [userID, batchId, fetchRecordings, offset])
+    }, [userID, params.batchId, fetchRecordings, offset])
 
     useEffect(() => {
         api.get(`/bootcamp/${params.viewcourses}`)
@@ -150,18 +113,15 @@ function Page({
             })
     }, [params.viewcourses])
 
-    console.log('ongoingClasses', ongoingClasses)
-    console.log('upcomingClasses', upcomingClasses)
-
     return (
         <>
             <BreadcrumbCmponent crumbs={crumbs} />
-            {/* <div className="w-1/2 mt-10">
+            <div className="w-full md:p-10 p-3 mt-10">
                 <UpcomingClasses
                     ongoingClasses={ongoingClasses}
                     upcomingClasses={upcomingClasses}
                 />
-            </div> */}
+            </div>
             <DataTablePagination
                 totalStudents={totalStudents}
                 position={position}

@@ -72,7 +72,9 @@ function Page({
     // setIsParamBatchId(params.batchId)
     const getUpcomingClassesHandler = useCallback(async () => {
         await api
-            .get(`/student/Dashboard/classes/?batch_id=${params.batchId}`)
+            .get(
+                `/student/Dashboard/classes/?batch_id=${params.batchId}&limit=2&offset=0`
+            )
             .then((res) => {
                 setUpcomingClasses(res.data.upcoming)
                 setOngoingClasses(res.data.ongoing)
@@ -163,7 +165,7 @@ function Page({
         if (userID) getCourseProgress()
     }, [userID, params.viewcourses])
 
-    // console.log(instructorDetails)
+    console.log('upcomingClasses', upcomingClasses)
 
     return (
         <MaxWidthWrapper>
@@ -189,22 +191,14 @@ function Page({
                     </div>
 
                     <div className="gap-y-3 flex flex-col">
-                        <div className="flex left-0  ">
-                            <p
-                                className="text-lg p-1 font-bold"
-                                onClick={() =>
-                                    console.log('first', upcomingClasses)
-                                }
-                            >
+                        <div className="flex left-0">
+                            <p className="text-lg p-1 font-bold">
                                 Upcoming Classes
                             </p>
                         </div>
                         <div className="flex flex-col justify-between">
                             {upcomingClasses?.length > 0 ? (
                                 <div className="flex flex-col">
-                                    {/* <p className="text-lg p-1 text-start font-bold">
-                                        Upcoming Classes
-                                    </p> */}
                                     <div className="w-[800px]">
                                         {ongoingClasses.map(
                                             (classData: any, index) => (
@@ -249,79 +243,22 @@ function Page({
                                     </p>
                                 </div>
                             )}
-
-                            {/* Other components can be placed here */}
-
-                            {/* Example card component for future use */}
-                            {/* <Card className="text-start">
-            <CardHeader className="bg-muted">
-                <CardTitle>Pick up where you left</CardTitle>
-            </CardHeader>
-            <CardContent className="p-3 grid gap-4">
-                <div className="flex flex-wrap items-center p-4 justify-between gap-8">
-                    <div className="flex items-center">
-                        <BookOpenText className="hidden sm:block" />
-                        <div className="flex-1 ml-2 space-y-1">
-                            <p className="text-sm font-medium leading-none">
-                            {resumeCourse?.bootcamp_name}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                                {resumeCourse.module_name}
-                            </p>
                         </div>
-                    </div>
-                    <Link
-                        href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`}
-                    >
-                        <Button>Continue</Button>
-                        </Link>
-                        </div>
-                        </CardContent>
-                    </Card> */}
 
-                            {/* <div className="w-[400px] h-[200px] flex flex-col bg-gray-100 rounded-lg items-center justify-center ">
-                                <h1 className="mt-6 text-xl font-semibold">
-                                    Attendance
-                                </h1>
-                                <div className="flex flex-col gap-2 items-center">
-                                    <div className="flex items-center gap-2">
-                                        <div
-                                            className={`w-[10px] h-[10px] rounded-full  ${getAttendanceColorClass(
-                                                attendenceData[0]?.attendance
-                                            )}`}
-                                        />
-                                        <h1>
-                                            {attendenceData[0]?.attendance}%
+                        {upcomingClasses?.length > 0 && (
+                            <div className="flex justify-center mt-3 w-1/2 ml-20">
+                                <Link
+                                    href={`/student/courses/${params.viewcourses}/batch/${params.batchId}/classes`}
+                                >
+                                    <div className="flex items-center border rounded-md border-secondary px-3 py-1 text-secondary">
+                                        <h1 className="text-lg p-1 font-bold">
+                                            See All Classes
                                         </h1>
+                                        <ChevronRight size={20} />
                                     </div>
-                                    <div className="flex">
-                                        <p className="text-md font-semibold">
-                                            {' '}
-                                            {
-                                                attendenceData[0]
-                                                    ?.attendedClasses
-                                            }{' '}
-                                            of {attendenceData[0]?.totalClasses}{' '}
-                                            Classes Attended
-                                        </p>
-                                    </div>
-                                </div>
-                            </div> */}
-                        </div>
-
-                        <div className="flex justify-center mt-3">
-                            <Link
-                                // href={`/student/courses/${params.viewcourses}/recordings`}.
-                                href={`/student/courses/${params.viewcourses}/classes`}
-                            >
-                                <div className="flex items-center border rounded-md border-secondary px-3 py-1 text-secondary">
-                                    <h1 className="text-lg p-1 font-bold">
-                                        See All Classes
-                                    </h1>
-                                    <ChevronRight size={20} />
-                                </div>
-                            </Link>
-                        </div>
+                                </Link>
+                            </div>
+                        )}
                         <div className="flex flex-col flex-start">
                             <div className="w-[800px]">
                                 {(lateAssignments.length > 0 ||

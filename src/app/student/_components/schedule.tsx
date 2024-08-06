@@ -112,10 +112,12 @@ function Schedule({ className, ...props }: ScheduleProps) {
     }, [userID])
 
     const getUpcomingClassesHandler = useCallback(async () => {
-        await api.get(`/student/Dashboard/classes/`).then((res) => {
-            setUpcomingClasses(res.data.upcoming)
-            setOngoingClasses(res.data.ongoing)
-        })
+        await api
+            .get(`/student/Dashboard/classes?limit=2&offset=0`)
+            .then((res) => {
+                setUpcomingClasses(res.data.upcoming)
+                setOngoingClasses(res.data.ongoing)
+            })
     }, [])
     const getAttendanceHandler = useCallback(async () => {
         await api.get(`/student/Dashboard/attendance`).then((res) => {
@@ -225,6 +227,18 @@ function Schedule({ className, ...props }: ScheduleProps) {
                         </div>
                     )}
                 </div>
+                {upcomingClasses?.length > 0 && (
+                    <div className="flex justify-center mt-3 bg-blue-200">
+                        <Link href="/student/classes">
+                            <div className="flex items-center border rounded-md border-secondary px-3 py-1 text-secondary">
+                                <h1 className="text-lg p-1 font-bold">
+                                    See All Classes
+                                </h1>
+                                <ChevronRight size={20} />
+                            </div>
+                        </Link>
+                    </div>
+                )}
             </div>
 
             {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */}

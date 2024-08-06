@@ -15,6 +15,7 @@ export const STUDENT_ONBOARDING_TYPES = [
 ]
 export const ROWS_PER_PAGE = ['10', '20', '50']
 
+export const CLASS_CARD_POSITION = '6'
 export const POSITION = '10'
 export const OFFSET = 0
 

@@ -9,7 +9,8 @@ function UpcomingClasses({
     upcomingClasses: any
 }) {
     return (
-        <div className="flex flex-col gap-y-3">
+        // <div className="flex flex-col gap-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-4">
             {ongoingClasses?.length > 0
                 ? ongoingClasses.map((classObj: any) => (
                       <ClassCard
