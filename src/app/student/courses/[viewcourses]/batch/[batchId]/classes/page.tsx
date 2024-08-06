@@ -74,22 +74,11 @@ function Page({
                 }
 
                 const response = await api.get(baseUrl)
-                console.log('response', response)
-                setUpcomingClasses(response.data.upcoming)
-                setOngoingClasses(response.data.ongoing)
-                // setCompletedClasses(response.data.classes)
-                // const classes = [
-                //     ...response.data.ongoing,
-                //     ...response.data.upcoming,
-                // ]
-                // setTotalStudents(classes?.length)
-                // console.log('classes?.length', classes?.length)
-                // console.log('total_pages', classes?.length / Number(position))
-                // setPages(Math.ceil(classes?.length / Number(position)))
-                // setLastPage(Math.ceil(classes?.length / Number(position)))
-                // setTotalStudents(response.data.total_items)
-                // setPages(response.data.total_pages)
-                // setLastPage(response.data.total_pages)
+                setUpcomingClasses(response.data.filterClasses.upcoming)
+                setOngoingClasses(response.data.filterClasses.ongoing)
+                setTotalStudents(response.data.totalClasses)
+                setPages(response.data.totalPages)
+                setLastPage(response.data.totalPages)
             } catch (error) {
                 console.error('Error getting completed classes:', error)
             }

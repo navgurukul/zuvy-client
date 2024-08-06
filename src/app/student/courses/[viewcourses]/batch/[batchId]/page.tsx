@@ -76,8 +76,8 @@ function Page({
                 `/student/Dashboard/classes/?batch_id=${params.batchId}&limit=2&offset=0`
             )
             .then((res) => {
-                setUpcomingClasses(res.data.upcoming)
-                setOngoingClasses(res.data.ongoing)
+                setUpcomingClasses(res.data.filterClasses.upcoming)
+                setOngoingClasses(res.data.filterClasses.ongoing)
             })
     }, [params.batchId])
     const getAttendanceHandler = useCallback(async () => {
@@ -113,25 +113,6 @@ function Page({
         getAttendanceHandler,
         setIsParamBatchId,
     ])
-    // useEffect(() => {
-    //     // const userIdLocal = JSON.parse(localStorage.getItem("AUTH") || "");
-    //     if (userID) {
-    //         api.get(`/bootcamp/studentClasses/${params.viewcourses}`, {
-    //             params: {
-    //                 userId: userID,
-    //             },
-    //         })
-    //             .then((response) => {
-    //                 const { upcomingClasses, ongoingClasses } = response.data
-    //                 setUpcomingClasses(upcomingClasses)
-    //                 setOngoingClasses(ongoingClasses)
-    //                 // setCompletedClasses(completedClasses)
-    //             })
-    //             .catch((error) => {
-    //                 console.log('Error fetching classes:', error)
-    //             })
-    //     }
-    // }, [userID])
 
     useEffect(() => {
         const getModulesProgress = async () => {
@@ -157,15 +138,12 @@ function Page({
                 )
                 setCourseProgress(response.data.data)
                 setInstructorDetails(response.data.instructorDetails)
-                // console.log('first', response.data.instructorDetails)
             } catch (error) {
                 console.error('Error getting course progress:', error)
             }
         }
         if (userID) getCourseProgress()
     }, [userID, params.viewcourses])
-
-    console.log('upcomingClasses', upcomingClasses)
 
     return (
         <MaxWidthWrapper>
@@ -245,14 +223,14 @@ function Page({
                             )}
                         </div>
 
-                        {upcomingClasses?.length > 0 && (
+                        {upcomingClasses?.length >= 2 && (
                             <div className="flex justify-center mt-3 w-1/2 ml-20">
                                 <Link
                                     href={`/student/courses/${params.viewcourses}/batch/${params.batchId}/classes`}
                                 >
                                     <div className="flex items-center border rounded-md border-secondary px-3 py-1 text-secondary">
                                         <h1 className="text-lg p-1 font-bold">
-                                            See All Classes
+                                            See All Upcoming Classes
                                         </h1>
                                         <ChevronRight size={20} />
                                     </div>
@@ -265,7 +243,7 @@ function Page({
                                     upcomingAssignments.length > 0) && (
                                     <div className="flex flex-col w-full lg:max-w-[860px]">
                                         {upcomingAssignments.length > 0 && (
-                                            <h1 className="text-xl p-1 text-start font-bold mb-4">
+                                            <h1 className="text-lg p-1 text-start font-bold mb-4">
                                                 Upcoming Assignments
                                             </h1>
                                         )}
@@ -277,6 +255,7 @@ function Page({
                                                     status={
                                                         'upcomingAssignment'
                                                     }
+                                                    view={'course'}
                                                 />
                                             )
                                         )}
@@ -387,14 +366,13 @@ function Page({
                             </div>
                         )}
                     </div>
-                    <h1>Hi</h1>
-                    <div className="flex flex-col flex-start">
+                    <div className="flex flex-col flex-start mt-5">
                         <div className="w-full">
                             {(lateAssignments.length > 0 ||
                                 upcomingAssignments.length > 0) && (
                                 <div className="flex flex-col w-full lg:max-w-[860px]">
                                     {lateAssignments.length > 0 && (
-                                        <h1 className="text-xl p-1 text-start font-bold mb-4">
+                                        <h1 className="text-lg p-1 text-start font-bold mb-4">
                                             Late Assignments
                                         </h1>
                                     )}
@@ -403,6 +381,7 @@ function Page({
                                             classData={data}
                                             key={data}
                                             status={'lateAssignmet'}
+                                            view={'course'}
                                         />
                                     ))}
                                 </div>

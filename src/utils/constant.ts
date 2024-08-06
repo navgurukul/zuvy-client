@@ -13,7 +13,7 @@ export const STUDENT_ONBOARDING_TYPES = [
         label: 'One at a time',
     },
 ]
-export const ROWS_PER_PAGE = ['10', '20', '50']
+export const ROWS_PER_PAGE = ['6', '10', '20', '50']
 
 export const CLASS_CARD_POSITION = '6'
 export const POSITION = '10'

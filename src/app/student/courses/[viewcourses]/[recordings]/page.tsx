@@ -12,9 +12,6 @@ import { useLazyLoadedStudentData } from '@/store/store'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 // import UpcomingClasses from './_components/UpcomingClasses'
 import BreadcrumbCmponent from '@/app/_components/breadcrumbCmponent'
-import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
-import { OFFSET, CLASS_CARD_POSITION } from '@/utils/constant'
-import useDebounce from '@/hooks/useDebounce'
 
 interface Bootcamp {
     id: number
@@ -45,17 +42,9 @@ function Page({
     const [upcomingClasses, setUpcomingClasses] = useState([])
     const [ongoingClasses, setOngoingClasses] = useState([])
     const [completedClasses, setCompletedClasses] = useState([])
-    const [search, setSearch] = useState('')
-    const [position, setPosition] = useState(CLASS_CARD_POSITION)
-    const [pages, setPages] = useState<number>()
-    const [offset, setOffset] = useState<number>(OFFSET)
-    const [currentPage, setCurrentPage] = useState<number>(1)
-    const [totalStudents, setTotalStudents] = useState<number>(0)
-    const [lastPage, setLastPage] = useState<number>(0)
     const { studentData } = useLazyLoadedStudentData()
     const [bootcampData, setBootcampData] = useState({} as BootcampData)
     const userID = studentData?.id && studentData?.id
-    const debouncedSearch = useDebounce(search, 1000)
 
     const crumbs = [
         { crumb: 'My Courses', href: '/student/courses', isLast: false },
@@ -71,75 +60,6 @@ function Page({
         },
     ]
 
-    const batchId = 302
-
-    const fetchRecordings = useCallback(
-        async (offset: number) => {
-            try {
-                let baseUrl = `/student/Dashboard/classes?limit=${position}&offset=${offset}`
-                // `student/Dashboard/classes?limit=2&offset=0`
-
-                if (debouncedSearch) {
-                    baseUrl += `&searchTerm=${encodeURIComponent(
-                        debouncedSearch
-                    )}`
-                }
-
-                const response = await api.get(baseUrl)
-                console.log('response', response)
-                setUpcomingClasses(response.data.upcoming)
-                setOngoingClasses(response.data.ongoing)
-                // setCompletedClasses(response.data.classes)
-                // const classes = [
-                //     ...response.data.ongoing,
-                //     ...response.data.upcoming,
-                // ]
-                // setTotalStudents(classes?.length)
-                // console.log('classes?.length', classes?.length)
-                // console.log('total_pages', classes?.length / Number(position))
-                // setPages(Math.ceil(classes?.length / Number(position)))
-                // setLastPage(Math.ceil(classes?.length / Number(position)))
-                // setTotalStudents(response.data.total_items)
-                // setPages(response.data.total_pages)
-                // setLastPage(response.data.total_pages)
-            } catch (error) {
-                console.error('Error getting completed classes:', error)
-            }
-        },
-        [userID, batchId, debouncedSearch, position]
-    )
-
-    useEffect(() => {
-        if (userID) {
-            // api.get(`/bootcamp/studentClasses/${params.viewcourses}`, {
-            //     params: {
-            //         userId: userID,
-            //     },
-            // })
-            //     .then((response) => {
-            //         const {
-            //             upcomingClasses,
-            //             ongoingClasses,
-            //             completedClasses,
-            //         } = response.data
-            //         setUpcomingClasses(upcomingClasses)
-            //         setOngoingClasses(ongoingClasses)
-            //         setCompletedClasses(completedClasses)
-            //     })
-
-            // api.get(`/student/Dashboard/classes/?batch_id=${batchId}`)
-            // api.get(`/student/Dashboard/classes`)
-            //     .then((res) => {
-            //         setUpcomingClasses(res.data.upcoming)
-            //         setOngoingClasses(res.data.ongoing)
-            //     })
-            //     .catch((error) => {
-            //         console.log('Error fetching classes:', error)
-            //     })
-            fetchRecordings(offset)
-        }
-    }, [userID, batchId, fetchRecordings, offset])
-
     useEffect(() => {
         api.get(`/bootcamp/${params.viewcourses}`)
             .then((response) => {
@@ -150,9 +70,6 @@ function Page({
             })
     }, [params.viewcourses])
 
-    console.log('ongoingClasses', ongoingClasses)
-    console.log('upcomingClasses', upcomingClasses)
-
     return (
         <>
             <BreadcrumbCmponent crumbs={crumbs} />
@@ -162,17 +79,6 @@ function Page({
                     upcomingClasses={upcomingClasses}
                 />
             </div> */}
-            <DataTablePagination
-                totalStudents={totalStudents}
-                position={position}
-                setPosition={setPosition}
-                pages={pages}
-                lastPage={lastPage}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                fetchStudentData={fetchRecordings}
-                setOffset={setOffset}
-            />
         </>
     )
 }

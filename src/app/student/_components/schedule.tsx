@@ -53,39 +53,6 @@ function Schedule({ className, ...props }: ScheduleProps) {
     const [selectedCourse, setSelectedCourse] =
         useState<EnrolledCourse | null>()
 
-    // const [ongoingClasses, setOngoingClasses] = useState([])
-    // const [completedClasses, setCompletedClasses] = useState([])
-    // useEffect(() => {
-    //     if (userID) {
-    //         api.get(`/student/${userID}`)
-    //             .then((res) => {
-    //                 api.get(`/bootcamp/studentClasses/${res.data[0].id}`, {
-    //                     params: {
-    //                         userId: userID,
-    //                     },
-    //                 })
-    //                     .then((response) => {
-    //                         const {
-    //                             upcomingClasses,
-    //                             ongoingClasses,
-    //                             completedClasses,
-    //                         } = response.data
-    //                         setUpcomingClasses(upcomingClasses)
-    //                         setOngoingClasses(ongoingClasses)
-    //                         setCompletedClasses(completedClasses)
-    //                     })
-    //                     .catch((error) => {
-    //                         console.log('Error fetching classes:', error)
-    //                     })
-    //             })
-    //             .catch((error) => {
-    //                 console.log('Error fetching classes:', error)
-    //             })
-    //     }
-    // }, [userID])
-
-    // useEffect(() => {}, [upcomingClasses, ongoingClasses, completedClasses])
-
     useEffect(() => {
         const getResumeCourse = async () => {
             try {
@@ -115,8 +82,8 @@ function Schedule({ className, ...props }: ScheduleProps) {
         await api
             .get(`/student/Dashboard/classes?limit=2&offset=0`)
             .then((res) => {
-                setUpcomingClasses(res.data.upcoming)
-                setOngoingClasses(res.data.ongoing)
+                setUpcomingClasses(res.data.filterClasses.upcoming)
+                setOngoingClasses(res.data.filterClasses.ongoing)
             })
     }, [])
     const getAttendanceHandler = useCallback(async () => {
@@ -227,12 +194,12 @@ function Schedule({ className, ...props }: ScheduleProps) {
                         </div>
                     )}
                 </div>
-                {upcomingClasses?.length > 0 && (
+                {upcomingClasses?.length >= 2 && (
                     <div className="w-full flex justify-center mt-3">
                         <Link href="/student/classes">
                             <div className="flex items-center border rounded-md border-secondary px-3 py-1 text-secondary">
                                 <h1 className="text-lg p-1 font-bold">
-                                    See All Classes
+                                    See All Upcoming Classes
                                 </h1>
                                 <ChevronRight size={20} />
                             </div>
@@ -369,7 +336,12 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                 </h1>
                             )}
                             {lateAssignments.map((data: any, index) => (
-                                <SubmissionCard classData={data} key={data} status={'lateAssignmet'}/>
+                                <SubmissionCard
+                                    classData={data}
+                                    key={data}
+                                    status={'lateAssignmet'}
+                                    view={'dashboard'}
+                                />
                             ))}
                             {upcomingAssignments.length > 0 && (
                                 <h1 className="text-xl p-1 text-start font-bold mb-4">
@@ -377,7 +349,12 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                 </h1>
                             )}
                             {upcomingAssignments.map((data: any, index) => (
-                                <SubmissionCard classData={data} key={data}  status={'upcomingAssignment'}/>
+                                <SubmissionCard
+                                    classData={data}
+                                    key={data}
+                                    status={'upcomingAssignment'}
+                                    view={'dashboard'}
+                                />
                             ))}
                         </div>
                     ) : (

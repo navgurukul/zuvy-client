@@ -16,9 +16,11 @@ import { Button } from '@/components/ui/button'
 function SubmissionCard({
     classData,
     status,
+    view,
 }: {
     classData: any
     status: any
+    view: any
 }) {
     return (
         <Card
@@ -57,16 +59,6 @@ function SubmissionCard({
                                 </TooltipContent>
                             </Tooltip>
                         </TooltipProvider>
-                        {/* <div className="text-md flex w-[200px] capitalize items-center">
-                            <Clock3 className="mr-2" width={20} height={20} />
-                            <Moment format="hh:mm A">
-                                {classData.startTime}
-                            </Moment>
-                            <p className="mx-2">-</p>
-                            <Moment format="hh:mm A">
-                                {classData.endTime}
-                            </Moment>
-                        </div> */}
 
                         {status !== 'lateAssignmet' && (
                             <div className="hidden lg:flex flex-row gap-4">
@@ -98,7 +90,7 @@ function SubmissionCard({
                         </div>
                     </div>
                 </div>
-                {/* {status !== 'lateAssignmet' && (
+                {(status !== 'lateAssignmet' || view !== 'course') && (
                     <div className="hidden lg:flex text-end">
                         <Button variant={'ghost'} className="text-lg font-bold">
                             <Link
@@ -110,8 +102,8 @@ function SubmissionCard({
                             </Link>
                         </Button>
                     </div>
-                )} */}
-                <div className="hidden lg:flex text-end">
+                )}
+                {/* <div className="hidden lg:flex text-end">
                     <Button variant={'ghost'} className="text-lg font-bold">
                         <Link
                             href={`/student/courses/${classData.bootcampId}/modules/${classData.moduleId}`}
@@ -121,9 +113,9 @@ function SubmissionCard({
                             <ChevronRight size={15} />
                         </Link>
                     </Button>
-                </div>
+                </div> */}
             </div>
-            {/* {status === 'lateAssignmet' && (
+            {status === 'lateAssignmet' && view === 'course' && (
                 <div className="hidden lg:flex w-full justify-end lg:justify-end lg:w-autotext-end">
                     <Button variant={'ghost'} className="text-lg font-bold">
                         <Link
@@ -135,7 +127,7 @@ function SubmissionCard({
                         </Link>
                     </Button>
                 </div>
-            )} */}
+            )}
             <div className="block lg:hidden text-end">
                 <Button variant={'ghost'} className="text-lg font-bold">
                     <Link
