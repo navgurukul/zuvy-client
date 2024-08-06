@@ -264,19 +264,6 @@ function Page({
                                 {(lateAssignments.length > 0 ||
                                     upcomingAssignments.length > 0) && (
                                     <div className="flex flex-col w-full lg:max-w-[860px]">
-                                        {lateAssignments.length > 0 && (
-                                            <h1 className="text-xl p-1 text-start font-bold mb-4">
-                                                Late Assignments
-                                            </h1>
-                                        )}
-                                        {lateAssignments.map(
-                                            (data: any, index) => (
-                                                <SubmissionCard
-                                                    classData={data}
-                                                    key={data}
-                                                />
-                                            )
-                                        )}
                                         {upcomingAssignments.length > 0 && (
                                             <h1 className="text-xl p-1 text-start font-bold mb-4">
                                                 Upcoming Assignments
@@ -287,14 +274,14 @@ function Page({
                                                 <SubmissionCard
                                                     classData={data}
                                                     key={data}
+                                                    status={
+                                                        'upcomingAssignment'
+                                                    }
                                                 />
                                             )
                                         )}
                                     </div>
                                 )}
-                                {/* : (
-                                     <div>No upcoming Submission</div>
-                                 )} */}
                             </div>
                         </div>
                     </div>
@@ -399,6 +386,28 @@ function Page({
                                 </p>
                             </div>
                         )}
+                    </div>
+                    <h1>Hi</h1>
+                    <div className="flex flex-col flex-start">
+                        <div className="w-full">
+                            {(lateAssignments.length > 0 ||
+                                upcomingAssignments.length > 0) && (
+                                <div className="flex flex-col w-full lg:max-w-[860px]">
+                                    {lateAssignments.length > 0 && (
+                                        <h1 className="text-xl p-1 text-start font-bold mb-4">
+                                            Late Assignments
+                                        </h1>
+                                    )}
+                                    {lateAssignments.map((data: any, index) => (
+                                        <SubmissionCard
+                                            classData={data}
+                                            key={data}
+                                            status={'lateAssignmet'}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* <div className="flex flex-start">

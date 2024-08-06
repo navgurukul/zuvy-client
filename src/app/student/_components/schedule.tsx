@@ -228,7 +228,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                     )}
                 </div>
                 {upcomingClasses?.length > 0 && (
-                    <div className="flex justify-center mt-3 bg-blue-200">
+                    <div className="w-full flex justify-center mt-3">
                         <Link href="/student/classes">
                             <div className="flex items-center border rounded-md border-secondary px-3 py-1 text-secondary">
                                 <h1 className="text-lg p-1 font-bold">
@@ -369,7 +369,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                 </h1>
                             )}
                             {lateAssignments.map((data: any, index) => (
-                                <SubmissionCard classData={data} key={data} />
+                                <SubmissionCard classData={data} key={data} status={'lateAssignmet'}/>
                             ))}
                             {upcomingAssignments.length > 0 && (
                                 <h1 className="text-xl p-1 text-start font-bold mb-4">
@@ -377,7 +377,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                 </h1>
                             )}
                             {upcomingAssignments.map((data: any, index) => (
-                                <SubmissionCard classData={data} key={data} />
+                                <SubmissionCard classData={data} key={data}  status={'upcomingAssignment'}/>
                             ))}
                         </div>
                     ) : (
