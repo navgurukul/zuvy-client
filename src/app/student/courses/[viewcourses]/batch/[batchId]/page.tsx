@@ -76,8 +76,8 @@ function Page({
                 `/student/Dashboard/classes/?batch_id=${params.batchId}&limit=2&offset=0`
             )
             .then((res) => {
-                setUpcomingClasses(res.data.filterClasses.upcoming)
-                setOngoingClasses(res.data.filterClasses.ongoing)
+                setUpcomingClasses(res.data.data.filterClasses.upcoming)
+                setOngoingClasses(res.data.data.filterClasses.ongoing)
             })
     }, [params.batchId])
     const getAttendanceHandler = useCallback(async () => {
@@ -91,8 +91,8 @@ function Page({
                 `/tracking/allupcomingSubmission?bootcampId=${params.viewcourses}`
             )
             .then((res) => {
-                setUpcomingAssignments(res.data.upcomingAssignments)
-                setLateAssignments(res.data.lateAssignments)
+                setUpcomingAssignments(res.data?.data?.upcomingAssignments)
+                setLateAssignments(res.data?.data?.lateAssignments)
             })
     }, [params.viewcourses])
     useEffect(() => {
@@ -239,28 +239,28 @@ function Page({
                         )}
                         <div className="flex flex-col flex-start">
                             <div className="w-[800px]">
-                                {(lateAssignments.length > 0 ||
-                                    upcomingAssignments.length > 0) && (
-                                    <div className="flex flex-col w-full lg:max-w-[860px]">
-                                        {upcomingAssignments.length > 0 && (
-                                            <h1 className="text-lg p-1 text-start font-bold mb-4">
-                                                Upcoming Assignments
-                                            </h1>
-                                        )}
-                                        {upcomingAssignments.map(
-                                            (data: any, index) => (
-                                                <SubmissionCard
-                                                    classData={data}
-                                                    key={data}
-                                                    status={
-                                                        'upcomingAssignment'
-                                                    }
-                                                    view={'course'}
-                                                />
-                                            )
-                                        )}
-                                    </div>
-                                )}
+                                {upcomingAssignments &&
+                                    upcomingAssignments.length > 0 && (
+                                        <div className="flex flex-col w-full lg:max-w-[860px]">
+                                            {upcomingAssignments.length > 0 && (
+                                                <h1 className="text-lg p-1 text-start font-bold mb-4">
+                                                    Upcoming Assignments
+                                                </h1>
+                                            )}
+                                            {upcomingAssignments.map(
+                                                (data: any, index) => (
+                                                    <SubmissionCard
+                                                        classData={data}
+                                                        key={data}
+                                                        status={
+                                                            'upcomingAssignment'
+                                                        }
+                                                        view={'course'}
+                                                    />
+                                                )
+                                            )}
+                                        </div>
+                                    )}
                             </div>
                         </div>
                     </div>
@@ -368,8 +368,7 @@ function Page({
                     </div>
                     <div className="flex flex-col flex-start mt-5">
                         <div className="w-full">
-                            {(lateAssignments.length > 0 ||
-                                upcomingAssignments.length > 0) && (
+                            {lateAssignments && (
                                 <div className="flex flex-col w-full lg:max-w-[860px]">
                                     {lateAssignments.length > 0 && (
                                         <h1 className="text-lg p-1 text-start font-bold mb-4">

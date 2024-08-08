@@ -50,6 +50,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
     const [lateAssignments, setLateAssignments] = useState([])
     const [attendanceData, setAttendanceData] = useState<any[]>([])
     const [enrolledCourse, setEnrolledCourse] = useState([])
+    const [submissionMessage, setSubmissionMessage] = useState()
     const [selectedCourse, setSelectedCourse] =
         useState<EnrolledCourse | null>()
 
@@ -57,22 +58,19 @@ function Schedule({ className, ...props }: ScheduleProps) {
         const getResumeCourse = async () => {
             try {
                 const response = await api.get('/tracking/latestUpdatedCourse')
-                setResumeCourse(response.data.latestCourse)
-                setNextChapterId(response.data.latestCourse.newChapter.id)
                 // If we get res, then course started, hence courseStarted: true;
-                if (response?.data?.code === 200) {
-                    setCourseStarted(true)
+                if (Array.isArray(response.data.data)) {
+                    setCourseStarted(false)
+                    setSubmissionMessage(response.data.message)
                 } else {
                     setCourseStarted(false)
+                    setCourseStarted(true)
+                    setResumeCourse(response.data.data)
+                    setNextChapterId(response.data.data.newChapter.id)
                 }
             } catch (error) {
                 console.error('Error getting resume course:', error)
-                if (
-                    (error as any)?.response?.data?.message ===
-                    `Cannot read properties of undefined (reading 'moduleId')`
-                ) {
-                    setCourseStarted(false)
-                }
+                setCourseStarted(false)
             }
         }
         if (userID) getResumeCourse()
@@ -82,8 +80,8 @@ function Schedule({ className, ...props }: ScheduleProps) {
         await api
             .get(`/student/Dashboard/classes?limit=2&offset=0`)
             .then((res) => {
-                setUpcomingClasses(res.data.filterClasses.upcoming)
-                setOngoingClasses(res.data.filterClasses.ongoing)
+                setUpcomingClasses(res.data.data.filterClasses.upcoming)
+                setOngoingClasses(res.data.data.filterClasses.ongoing)
             })
     }, [])
     const getAttendanceHandler = useCallback(async () => {
@@ -96,8 +94,8 @@ function Schedule({ className, ...props }: ScheduleProps) {
     }, [selectedCourse?.id])
     const getUpcomingSubmissionHandler = useCallback(async () => {
         await api.get(`/tracking/allupcomingSubmission`).then((res) => {
-            setUpcomingAssignments(res.data.upcomingAssignments)
-            setLateAssignments(res.data.lateAssignments)
+            setUpcomingAssignments(res.data.data.upcomingAssignments)
+            setLateAssignments(res.data.data.lateAssignments)
         })
     }, [])
 
@@ -126,9 +124,11 @@ function Schedule({ className, ...props }: ScheduleProps) {
             await Promise.all([
                 getUpcomingClassesHandler(),
                 getAttendanceHandler(),
-                getUpcomingSubmissionHandler(),
+                // getUpcomingSubmissionHandler(),
             ])
         }
+
+        if (courseStarted) getUpcomingSubmissionHandler()
 
         fetchData()
     }, [
@@ -320,15 +320,15 @@ function Schedule({ className, ...props }: ScheduleProps) {
         className="rounded-md border"
       /> */}
             <div className="flex flex-col items-start mt-6">
-                {lateAssignments.length < 1 &&
-                    upcomingAssignments.length < 1 && (
-                        <h1 className="text-xl p-1 text-start font-bold mb-4">
-                            Upcoming Submissions
-                        </h1>
-                    )}
+                {!courseStarted && (
+                    <h1 className="text-xl p-1 text-start font-bold mb-4">
+                        Upcoming Submissions
+                    </h1>
+                )}
                 <div className="flex flex-col w-full lg:max-w-[860px]">
-                    {lateAssignments.length > 0 ||
-                    upcomingAssignments.length > 0 ? (
+                    {courseStarted &&
+                    (lateAssignments.length > 0 ||
+                        upcomingAssignments.length > 0) ? (
                         <div className="flex flex-col w-full lg:max-w-[860px]">
                             {lateAssignments.length > 0 && (
                                 <h1 className="text-xl p-1 text-start font-bold mb-4">
@@ -366,7 +366,8 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                 height={240}
                             />
                             <p className="text-lg mt-3 text-center">
-                                There are no upcoming Submission
+                                {submissionMessage ??
+                                    'There are no upcoming Submission'}
                             </p>
                         </div>
                     )}

@@ -57,25 +57,17 @@ const Page: React.FC<pageProps> = () => {
     useEffect(() => {
         const getResumeCourse = async () => {
             try {
-                const response = await api.get(
-                    'tracking/latestUpdatedCourse'
-                    // `/tracking/latest/learning/${userID}`
-                )
-                setResumeCourse(response.data.latestCourse)
-                // If we get res, then course started, hence courseStarted: true;
-                if (response?.data?.code === 200) {
-                    setCourseStarted(true)
+                const response = await api.get('tracking/latestUpdatedCourse')
+                if (Array.isArray(response.data.data)) {
+                    setCourseStarted(false)
                 } else {
                     setCourseStarted(false)
+                    setCourseStarted(true)
+                    setResumeCourse(response.data.data)
                 }
             } catch (error) {
                 console.error('Error getting resume course:', error)
-                if (
-                    (error as any)?.response?.data?.message ===
-                    `Cannot read properties of undefined (reading 'moduleId')`
-                ) {
-                    setCourseStarted(false)
-                }
+                setCourseStarted(false)
             }
         }
         if (userID) getResumeCourse()
