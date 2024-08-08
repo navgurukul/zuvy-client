@@ -338,7 +338,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                             {lateAssignments.map((data: any, index) => (
                                 <SubmissionCard
                                     classData={data}
-                                    key={data}
+                                    key={index}
                                     status={'lateAssignmet'}
                                     view={'dashboard'}
                                 />
@@ -351,7 +351,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                             {upcomingAssignments.map((data: any, index) => (
                                 <SubmissionCard
                                     classData={data}
-                                    key={data}
+                                    key={index}
                                     status={'upcomingAssignment'}
                                     view={'dashboard'}
                                 />

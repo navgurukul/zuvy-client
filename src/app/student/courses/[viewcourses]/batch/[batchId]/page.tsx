@@ -251,7 +251,7 @@ function Page({
                                                 (data: any, index) => (
                                                     <SubmissionCard
                                                         classData={data}
-                                                        key={data}
+                                                        key={index}
                                                         status={
                                                             'upcomingAssignment'
                                                         }
@@ -378,7 +378,7 @@ function Page({
                                     {lateAssignments.map((data: any, index) => (
                                         <SubmissionCard
                                             classData={data}
-                                            key={data}
+                                            key={index}
                                             status={'lateAssignmet'}
                                             view={'course'}
                                         />
