@@ -175,7 +175,7 @@ const Page = ({ params }: any) => {
                             <Search className="text-gray-400" size={20} />
                         </div>
                     </div>
-                    <DataTable data={dataTableAssesment} columns={columns} />
+                    <DataTable data={dataTableAssesment} column={columns} />
                 </div>
             </MaxWidthWrapper>
         </>
