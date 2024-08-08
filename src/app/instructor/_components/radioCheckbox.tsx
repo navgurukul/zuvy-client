@@ -11,12 +11,21 @@ import { Combobox } from '@/components/ui/combobox'
 
 export interface RadioCheckboxProps {
     fetchSessions: (data: any) => void
+    offset: number
+    position: any
+    setTotalSessions: any
+    setPages: any
+    setLastPage: any
 }
 
 const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
     fetchSessions,
+    offset,
+    position,
+    setTotalSessions,
+    setPages,
+    setLastPage,
 }: RadioCheckboxProps) => {
-    // let batches = true
     const [batches, setBatches] = useState<any[]>([])
     const [batchId, setBatchId] = useState<any>()
     const [timeFrame, setTimeFrame] = useState<string>('all')
@@ -27,7 +36,6 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
         setbatchValueData(value)
     }
 
-    console.log('batchId', batchId)
     const getBatches = useCallback(async () => {
         try {
             const response = await api.get(`/instructor/batchOfInstructor`)
@@ -39,52 +47,44 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
                 })
             )
             setBatchId(response.data.data[0].batchId)
-            // setbatchValueData(transformedData[0])
-            console.log('transformedData[0]', transformedData[0])
-            console.log('transformedData', transformedData)
             setBatches(transformedData)
         } catch (error) {
             console.error('Error fetching courses:', error)
         }
     }, [])
 
-    const getSessions = useCallback(async () => {
-        try {
-            const response = await api.get(
-                `/instructor/getAllUpcomingClasses?limit=10&offset=0&timeFrame=${timeFrame}&batchId=${batchId}`
-            )
-            console.log('response', response.data.data.responses)
-            fetchSessions(response.data.data.responses)
-            // const transformedData = response.data.data.map(
-            //     (item: { batchId: any; batchName: any }) => ({
-            //         value: item.batchId.toString(),
-            //         label: item.batchName,
-            //     })
-            // )
-            // setBatchId(response.data.data[0].batchId)
-            // // setbatchValueData(transformedData[0])
-            // console.log('transformedData[0]', transformedData[0])
-            // console.log('transformedData', transformedData)
-            // setBatches(transformedData)
-        } catch (error) {
-            console.error('Error fetching courses:', error)
-        }
-    }, [batchId, timeFrame])
+    const getSessions = useCallback(
+        async (offset: number) => {
+            try {
+                const response = await api.get(
+                    `/instructor/getAllUpcomingClasses?limit=${position}&offset=${offset}&timeFrame=${timeFrame}&batchId=${batchId}`
+                )
+                console.log('response', response.data.data)
+                fetchSessions(response.data.data.responses)
+                setTotalSessions(response.data.data.totalUpcomingClasses)
+                setPages(response.data.data.totalUpcomingPages)
+                setLastPage(response.data.data.totalUpcomingPages)
+            } catch (error) {
+                console.error('Error fetching courses:', error)
+            }
+        },
+        [batchId, timeFrame]
+    )
 
     useEffect(() => {
         getBatches()
     }, [getBatches])
 
     useEffect(() => {
-        getSessions()
-    }, [batchId, timeFrame])
+        getSessions(offset)
+    }, [batchId, timeFrame, offset])
 
     console.log('timeFrame', timeFrame)
 
     return (
-        <div className="flex items-center justify-between p-3 w-1/2">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between p-3 w-full lg:w-1/2 gap-y-6 lg:gap-y-0">
             {batches && (
-                <div className=" flex  flex-col gap-y-3 items-start">
+                <div className="flex flex-col gap-y-3 items-start w-full lg:w-auto">
                     <h1 className="font-semibold">Batches</h1>
                     <Combobox
                         data={batches}
@@ -95,14 +95,14 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
                     />
                 </div>
             )}
-            <div className="flex  flex-col gap-y-3 items-start">
+            <div className="flex flex-col gap-y-3 items-start w-full lg:w-auto lg:ml-6">
                 <h1 className="font-semibold">Time Period</h1>
-                <div className="flex items-center space-x-2">
+                <div className="flex flex-col lg:flex-row items-start lg:items-center space-y-2 lg:space-y-0 lg:space-x-2 mt-2">
                     <RadioGroup
-                        className="flex items-center "
+                        className="flex flex-col lg:flex-row items-start lg:items-center"
                         defaultValue="comfortable"
                     >
-                        <div className="flex  space-x-2">
+                        <div className="flex space-x-2">
                             <RadioGroupItem
                                 value="comfortable"
                                 id="r1"
@@ -110,7 +110,7 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
                             />
                             <Label htmlFor="r1">All Time</Label>
                         </div>
-                        <div className="flex  space-x-2">
+                        <div className="flex space-x-2">
                             <RadioGroupItem
                                 value="default"
                                 id="r2"

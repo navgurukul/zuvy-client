@@ -1,15 +1,19 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
-import CurricullumCard from '../_components/curricullumCard'
 import { api } from '@/utils/axios.config'
+import CurricullumCard from '../../../../_components/curricullumCard'
+import { getCourseData } from '@/store/store'
 
-const Curricullum = () => {
+const Module = () => {
+    const { courseData } = getCourseData()
+    console.log('courseData', courseData)
+
     const [allCourses, setAllCourses] = useState<any[]>([])
 
     const getAllCourses = useCallback(async () => {
         try {
-            const response = await api.get(`Content/allModules/117`)
+            const response = await api.get(`Content/allModules/${117}`)
             console.log('response', response.data)
             setAllCourses(response.data)
         } catch (error) {
@@ -29,19 +33,19 @@ const Curricullum = () => {
                 </h1>
             </div>
 
-            {allCourses.map((item) => (
+            {/* {allCourses.map((item) => (
                 <div key={item.id} className="w-1/2">
                     <div
                         className={`${
-                            item.typeId === 2 ? 'bg-yellow/50' : 'bg-muted'
-                        } my-3 p-3  flex rounded-xl`}
+                            item.typeId === 2 ? 'bg-yellow/50' : 'bg-popover'
+                        } my-3 p-3  flex rounded-xl border-none shadow-[0_1px_5px_0_rgba(74,74,74,0.10),0_2px_1px_0_rgba(74,74,74,0.06),0_1px_2px_0_rgba(74,74,74,0.08)]`}
                     >
                         <CurricullumCard key={item} course={item} />
                     </div>
                 </div>
-            ))}
+            ))} */}
         </div>
     )
 }
 
-export default Curricullum
+export default Module

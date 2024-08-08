@@ -5,19 +5,25 @@ import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import InstructorCard from './_components/instructorCard'
 import RadioCheckbox from './_components/radioCheckbox'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
-
+import { OFFSET, POSITION } from '@/utils/constant'
+import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import { useLazyLoadedStudentData } from '@/store/store'
 
 const InstructorPage = () => {
     const { studentData } = useLazyLoadedStudentData()
     const [ongoingSessions, setOngoingSessions] = useState<any[]>([])
     const [upcomingSessions, setUpcomingSessions] = useState<any[]>([])
+    const [position, setPosition] = useState(POSITION)
+    const [pages, setPages] = useState<number>()
+    const [offset, setOffset] = useState<number>(OFFSET)
+    const [currentPage, setCurrentPage] = useState<number>(1)
+    const [totalSessions, setTotalSessions] = useState<number>(0)
+    const [lastPage, setLastPage] = useState<number>(0)
+
     const username: string[] | undefined = studentData?.name?.split(' ')
     const newUserName: string | undefined =
         username?.[0]?.charAt(0)?.toUpperCase() +
         (username?.[0]?.slice(1)?.toLowerCase() || '')
-    let batches = true
-    const arr1 = [1, 2, 3, 4, 5]
 
     const fetchSessions = (data: any) => {
         setUpcomingSessions(data.ongoing)
@@ -36,7 +42,14 @@ const InstructorPage = () => {
                     {`Hi, ${newUserName}! Here's Your Schedule`}
                 </p>
             </div>
-            <RadioCheckbox fetchSessions={fetchSessions} />
+            <RadioCheckbox
+                fetchSessions={fetchSessions}
+                offset={offset}
+                position={position}
+                setTotalSessions={setTotalSessions}
+                setPages={setPages}
+                setLastPage={setLastPage}
+            />
             <div className="p-3">
                 <h1 className="text-start font-semibold ">
                     5 Upcoming Classes{' '}
@@ -70,6 +83,17 @@ const InstructorPage = () => {
                     })}
                 </div>
             </div>
+            <DataTablePagination
+                totalStudents={totalSessions}
+                position={position}
+                setPosition={setPosition}
+                pages={pages}
+                lastPage={lastPage}
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+                fetchStudentData={fetchSessions}
+                setOffset={setOffset}
+            />
         </MaxWidthWrapper>
     )
 }
