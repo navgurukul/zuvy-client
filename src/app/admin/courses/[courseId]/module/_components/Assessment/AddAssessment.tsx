@@ -41,18 +41,10 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         content.ModuleAssessment.title
     )
     const [questionType, setQuestionType] = useState<string>('coding')
-    const [selectedCodingQuestions, setSelectedCodingQuestions] = useState<
-        any[]
-    >(content.CodingQuestions || [])
-    const [selectedQuizQuestions, setSelectedQuizQuestions] = useState<any[]>(
-        content.Quizzes || []
-    )
-    const [selectedOpenEndedQuestions, setSelectedOpenEndedQuestions] =
-        useState<any[]>(content.OpenEndedQuestions || [])
-
-    const [selectedCodingQuesIds, setSelectedCodingQuesIds] = useState<
-        number[]
-    >([])
+    const [selectedCodingQuestions, setSelectedCodingQuestions] = useState<any[]>([])
+    const [selectedQuizQuestions, setSelectedQuizQuestions] = useState<any[]>([])
+    const [selectedOpenEndedQuestions, setSelectedOpenEndedQuestions] = useState<any[]>([])
+    const [selectedCodingQuesIds, setSelectedCodingQuesIds] = useState<number[]>([])
     const [selectedQuizQuesIds, setSelectedQuizQuesIds] = useState<number[]>([])
     const [selectedOpenEndedQuesIds, setSelectedOpenEndedQuesIds] = useState<
         number[]
@@ -126,29 +118,44 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     }
 
     useEffect(() => {
-        setChapterTitle(content.ModuleAssessment.title)
-        setSelectedCodingQuestions(content.CodingQuestions || [])
-        setSelectedQuizQuestions(content.Quizzes || [])
-        setSelectedOpenEndedQuestions(content.OpenEndedQuestions || [])
-    }, [content])
+        setChapterTitle(content.ModuleAssessment.title);
+    
+        // Ensure unique coding questions
+        const uniqueCodingQuestions = Array.from(
+            new Set(content.CodingQuestions?.map((question:any) => question.id))
+        ).map((id) => content.CodingQuestions.find((question:any) => question.id === id));
+        setSelectedCodingQuestions(uniqueCodingQuestions || []);
+    
+        // Ensure unique quiz questions
+        const uniqueQuizQuestions = Array.from(
+            new Set(content.Quizzes?.map((question:any) => question.id))
+        ).map((id) => content.Quizzes.find((question:any) => question.id === id));
+        setSelectedQuizQuestions(uniqueQuizQuestions || []);
+    
+        // Ensure unique open-ended questions
+        const uniqueOpenEndedQuestions = Array.from(
+            new Set(content.OpenEndedQuestions?.map((question:any) => question.id))
+        ).map((id) => content.OpenEndedQuestions.find((question:any) => question.id === id));
+        setSelectedOpenEndedQuestions(uniqueOpenEndedQuestions || []);
+    }, [content]);
 
     useEffect(() => {
         setSelectedCodingQuesIds(
-            selectedCodingQuestions.map((question) => question.id)
-        )
-    }, [selectedCodingQuestions])
-
+            Array.from(new Set(selectedCodingQuestions.map((question) => question.id)))
+        );
+    }, [selectedCodingQuestions]);
+    
     useEffect(() => {
         setSelectedQuizQuesIds(
-            selectedQuizQuestions.map((question) => question.id)
-        )
-    }, [selectedQuizQuestions])
-
+            Array.from(new Set(selectedQuizQuestions.map((question) => question.id)))
+        );
+    }, [selectedQuizQuestions]);
+    
     useEffect(() => {
         setSelectedOpenEndedQuesIds(
-            selectedOpenEndedQuestions.map((question) => question.id)
-        )
-    }, [selectedOpenEndedQuestions])
+            Array.from(new Set(selectedOpenEndedQuestions.map((question) => question.id)))
+        );
+    }, [selectedOpenEndedQuestions]);
 
     useEffect(() => {
         fetchChapterContent(chapterData.chapterId)
