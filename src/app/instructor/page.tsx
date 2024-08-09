@@ -51,9 +51,6 @@ const InstructorPage = () => {
                 setLastPage={setLastPage}
             />
             <div className="p-3">
-                <h1 className="text-start font-semibold ">
-                    5 Upcoming Classes{' '}
-                </h1>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-x-8 gap-y-6">
                     {ongoingSessions.map((item) => {
                         return (

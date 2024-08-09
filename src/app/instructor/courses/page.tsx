@@ -18,7 +18,6 @@ const Page = (props: Props) => {
         const getEnrolledCourses = async () => {
             try {
                 const response = await api.get(`/instructor/allCourses`)
-                console.log('response', response)
                 setEnrolledCourse(response.data.data)
             } catch (error) {
                 console.error('Error getting enrolled courses:', error)

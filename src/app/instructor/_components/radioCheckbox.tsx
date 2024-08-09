@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useState, useEffect, useCallback } from 'react'
 
 import { Checkbox } from '@/components/ui/checkbox'
@@ -76,7 +78,7 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
     }, [getBatches])
 
     useEffect(() => {
-        getSessions(offset)
+        if (batchId) getSessions(offset)
     }, [batchId, timeFrame, offset])
 
     console.log('timeFrame', timeFrame)
