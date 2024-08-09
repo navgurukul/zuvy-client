@@ -29,13 +29,15 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 
 const formSchema = z.object({
-    questionDescription: z.string(),
+    questionDescription: z.string().min(5, {
+        message: 'Description must be at least 5 characters long',
+    }),
     marks: z
         .string()
         .refine((val) => !isNaN(Number(val)), { message: 'Must be a number' })
         .transform((val) => Number(val)),
-    topics: z.number(),
-    difficulty: z.string(),
+    topics: z.number().min(1, { message: 'You must select a topic' }), 
+    difficulty: z.string()
 })
 
 function NewOpenEndedQuestionForm({
