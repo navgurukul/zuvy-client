@@ -83,11 +83,11 @@ function ClassCard({
                             <Moment format="MMM">{classData.startTime}</Moment>
                         </div>
                         <div className="text-start">
-                            {classType === 'ongoing' ? (
+                            {/* {classType === 'ongoing' ? (
                                 <Badge variant="yellow" className="mb-3">
                                     Ongoing
                                 </Badge>
-                            ) : null}
+                            ) : null} */}
                             <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
@@ -97,6 +97,16 @@ function ClassCard({
                                     </TooltipTrigger>
                                     <TooltipContent className="font-semibold">
                                         {classData.title}
+                                    </TooltipContent>
+                                </Tooltip>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <h3 className="font-semibold">
+                                            Course: {classData.bootcampName}
+                                        </h3>
+                                    </TooltipTrigger>
+                                    <TooltipContent className="font-semibold">
+                                        Course: {classData.bootcampName}
                                     </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
@@ -111,21 +121,29 @@ function ClassCard({
                             </div>
                         </div>
                     </div>
-                    <div className="hidden lg:flex text-end">
-                        <Button
-                            variant={'ghost'}
-                            className="text-lg font-bold"
-                            // disabled={classType === 'ongoing' ? false : true}
-                        >
-                            <Link
-                                target="_blank"
-                                href={classData.hangoutLink}
-                                className="gap-3 flex  items-center text-secondary"
+                    <div>
+                        {classType === 'ongoing' ? (
+                            <Badge variant="yellow" className="mb-3">
+                                Ongoing
+                            </Badge>
+                        ) : null}
+
+                        <div className="hidden lg:flex text-end">
+                            <Button
+                                variant={'ghost'}
+                                className="text-lg font-bold"
+                                // disabled={classType === 'ongoing' ? false : true}
                             >
-                                <p>Join Class</p>
-                                <ChevronRight size={15} />
-                            </Link>
-                        </Button>
+                                <Link
+                                    target="_blank"
+                                    href={classData.hangoutLink}
+                                    className="gap-3 flex  items-center text-secondary"
+                                >
+                                    <p>Join Class</p>
+                                    <ChevronRight size={15} />
+                                </Link>
+                            </Button>
+                        </div>
                     </div>
                 </div>
                 <div className="block lg:hidden text-end">

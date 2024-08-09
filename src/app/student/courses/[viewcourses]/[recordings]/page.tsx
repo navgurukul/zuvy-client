@@ -6,11 +6,11 @@ import {
     BreadcrumbList,
     BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { api } from '@/utils/axios.config'
 import { useLazyLoadedStudentData } from '@/store/store'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import UpcomingClasses from './_components/UpcomingClasses'
+// import UpcomingClasses from './_components/UpcomingClasses'
 import BreadcrumbCmponent from '@/app/_components/breadcrumbCmponent'
 
 interface Bootcamp {
@@ -45,6 +45,7 @@ function Page({
     const { studentData } = useLazyLoadedStudentData()
     const [bootcampData, setBootcampData] = useState({} as BootcampData)
     const userID = studentData?.id && studentData?.id
+
     const crumbs = [
         { crumb: 'My Courses', href: '/student/courses', isLast: false },
         {
@@ -60,29 +61,6 @@ function Page({
     ]
 
     useEffect(() => {
-        if (userID) {
-            api.get(`/bootcamp/studentClasses/${params.viewcourses}`, {
-                params: {
-                    userId: userID,
-                },
-            })
-                .then((response) => {
-                    const {
-                        upcomingClasses,
-                        ongoingClasses,
-                        completedClasses,
-                    } = response.data
-                    setUpcomingClasses(upcomingClasses)
-                    setOngoingClasses(ongoingClasses)
-                    setCompletedClasses(completedClasses)
-                })
-                .catch((error) => {
-                    console.log('Error fetching classes:', error)
-                })
-        }
-    }, [userID, params.viewcourses])
-
-    useEffect(() => {
         api.get(`/bootcamp/${params.viewcourses}`)
             .then((response) => {
                 setBootcampData(response.data)
@@ -95,13 +73,12 @@ function Page({
     return (
         <>
             <BreadcrumbCmponent crumbs={crumbs} />
-
-            <div className="mt-10">
+            {/* <div className="w-1/2 mt-10">
                 <UpcomingClasses
                     ongoingClasses={ongoingClasses}
                     upcomingClasses={upcomingClasses}
                 />
-            </div>
+            </div> */}
         </>
     )
 }

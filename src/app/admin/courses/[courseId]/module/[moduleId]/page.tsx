@@ -240,24 +240,30 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                 console.error('Error fetching chapter content:', error)
             }
         },
-        [moduleData]
+        [moduleData, params.courseId, params.moduleId]
     )
 
     const renderChapterContent = () => {
+        if (chapterContent.length === 0) {
+            return <h1>Create New Chapter</h1>
+        }
+
         switch (topicId) {
             case 1:
                 return (
                     <AddVideo
+                        key={chapterId}
                         moduleId={params.moduleId}
                         content={chapterContent}
                         fetchChapterContent={fetchChapterContent}
                     />
                 )
             case 2:
-                return <AddArticle content={chapterContent} />
+                return <AddArticle key={chapterId} content={chapterContent} />
             case 3:
                 return (
                     <CodingChallenge
+                        key={chapterId}
                         moduleId={params.moduleId}
                         content={chapterContent}
                         activeChapterTitle={activeChapterTitle}
@@ -266,16 +272,18 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
             case 4:
                 return (
                     <Quiz
+                        key={chapterId}
                         chapterId={chapterId}
                         moduleId={params.moduleId}
                         content={chapterContent}
                     />
                 )
             case 5:
-                return <Assignment content={chapterContent} />
+                return <Assignment key={chapterId} content={chapterContent} />
             case 6:
                 return (
                     <AddAssessment
+                        key={chapterId}
                         chapterData={currentChapter}
                         content={chapterContent}
                         fetchChapterContent={fetchChapterContent}
@@ -285,6 +293,7 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
             case 7:
                 return (
                     <AddForm
+                        key={chapterId}
                         chapterData={currentChapter}
                         content={chapterContent}
                         fetchChapterContent={fetchChapterContent}
@@ -325,6 +334,11 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
         if (chapterData.length > 0) {
             const firstChapterId = chapterData[0].chapterId
             fetchChapterContent(firstChapterId)
+        } else {
+            setActiveChapter(0)
+            setChapterContent([])
+            setActiveChapterTitle('')
+            setTopicId(0)
         }
     }, [chapterData, fetchChapterContent])
 

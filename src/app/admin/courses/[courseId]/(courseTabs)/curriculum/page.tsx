@@ -273,15 +273,18 @@ function Page() {
     }
 
     return (
-        <div>
+        <div className='w-full '>
             {curriculum.length > 0 && (
-                <div className="flex justify-end ">
-                    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                <div className=" w-full flex justify-end pr-4 ">
+                    <div>
+                    <Dialog  open={isOpen} onOpenChange={setIsOpen}>
                         <DialogTrigger asChild>
-                            <Button className="text-white bg-secondary">
+                            <Button className="text-white bg-secondary  ">
                                 Add Module
                             </Button>
+                        
                         </DialogTrigger>
+    
                         <DialogOverlay />
                         <NewModuleDialog
                             moduleData={moduleData}
@@ -293,6 +296,7 @@ function Page() {
                             typeId={typeId}
                         />
                     </Dialog>
+                    </div>
                 </div>
             )}
            {
@@ -395,7 +399,7 @@ function Page() {
                             <Dialog>
                                 <DialogTrigger asChild>
                                     <Button className="text-white bg-secondary">
-                                        Add Module
+                                        Add module 
                                     </Button>
                                 </DialogTrigger>
                                 <DialogOverlay />
