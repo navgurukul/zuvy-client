@@ -162,25 +162,27 @@ function Page({}: any) {
                 <Input
                     value={search}
                     onChange={handleSetSearch}
-                    className="w-1/5"
+                    className="lg:w-1/5 w-full"
                     placeholder="Search Class Recordings"
                 />
             </div>
 
             <div className=" mt-10 ">
-                <Recordings completedClasses={completedClasses} />\{' '}
+                <Recordings completedClasses={completedClasses} />{' '}
             </div>
-            <DataTablePagination
-                totalStudents={totalStudents}
-                position={position}
-                setPosition={setPosition}
-                pages={pages}
-                lastPage={lastPage}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                fetchStudentData={fetchRecordings}
-                setOffset={setOffset}
-            />
+            {completedClasses.length > 0 && (
+                <DataTablePagination
+                    totalStudents={totalStudents}
+                    position={position}
+                    setPosition={setPosition}
+                    pages={pages}
+                    lastPage={lastPage}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    fetchStudentData={fetchRecordings}
+                    setOffset={setOffset}
+                />
+            )}
         </>
     )
 }
