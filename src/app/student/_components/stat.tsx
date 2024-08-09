@@ -73,7 +73,7 @@ export function Stat({ className, ...props }: CardProps) {
                 console.error('Error getting enrolled courses:', error)
             }
         }
-        if (userID) getStudents()
+        if (userID && selectedCourse) getStudents()
     }, [userID, selectedCourse])
 
     const rank =
