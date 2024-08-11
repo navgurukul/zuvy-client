@@ -20,6 +20,8 @@ export const taskSchema = z.object({
     id: z.number(),
     userName: z.string(),
     newId: z.number(),
+    emailId: z.string(),
+    chapterId: z.number(),
 })
 
 export const testCaseSchema = z.object({
