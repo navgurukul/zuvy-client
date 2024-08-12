@@ -50,72 +50,39 @@ function Schedule({ className, ...props }: ScheduleProps) {
     const [lateAssignments, setLateAssignments] = useState([])
     const [attendanceData, setAttendanceData] = useState<any[]>([])
     const [enrolledCourse, setEnrolledCourse] = useState([])
+    const [submissionMessage, setSubmissionMessage] = useState()
     const [selectedCourse, setSelectedCourse] =
         useState<EnrolledCourse | null>()
-
-    // const [ongoingClasses, setOngoingClasses] = useState([])
-    // const [completedClasses, setCompletedClasses] = useState([])
-    // useEffect(() => {
-    //     if (userID) {
-    //         api.get(`/student/${userID}`)
-    //             .then((res) => {
-    //                 api.get(`/bootcamp/studentClasses/${res.data[0].id}`, {
-    //                     params: {
-    //                         userId: userID,
-    //                     },
-    //                 })
-    //                     .then((response) => {
-    //                         const {
-    //                             upcomingClasses,
-    //                             ongoingClasses,
-    //                             completedClasses,
-    //                         } = response.data
-    //                         setUpcomingClasses(upcomingClasses)
-    //                         setOngoingClasses(ongoingClasses)
-    //                         setCompletedClasses(completedClasses)
-    //                     })
-    //                     .catch((error) => {
-    //                         console.log('Error fetching classes:', error)
-    //                     })
-    //             })
-    //             .catch((error) => {
-    //                 console.log('Error fetching classes:', error)
-    //             })
-    //     }
-    // }, [userID])
-
-    // useEffect(() => {}, [upcomingClasses, ongoingClasses, completedClasses])
 
     useEffect(() => {
         const getResumeCourse = async () => {
             try {
                 const response = await api.get('/tracking/latestUpdatedCourse')
-                setResumeCourse(response.data)
-                setNextChapterId(response.data.newChapter.id)
                 // If we get res, then course started, hence courseStarted: true;
-                if (response?.data?.code === 404) {
+                if (Array.isArray(response.data.data)) {
                     setCourseStarted(false)
+                    setSubmissionMessage(response.data.message)
                 } else {
+                    setCourseStarted(false)
                     setCourseStarted(true)
+                    setResumeCourse(response.data.data)
+                    setNextChapterId(response.data.data.newChapter.id)
                 }
             } catch (error) {
                 console.error('Error getting resume course:', error)
-                if (
-                    (error as any)?.response?.data?.message ===
-                    `Cannot read properties of undefined (reading 'moduleId')`
-                ) {
-                    setCourseStarted(false)
-                }
+                setCourseStarted(false)
             }
         }
         if (userID) getResumeCourse()
     }, [userID])
 
     const getUpcomingClassesHandler = useCallback(async () => {
-        await api.get(`/student/Dashboard/classes/`).then((res) => {
-            setUpcomingClasses(res.data.upcoming)
-            setOngoingClasses(res.data.ongoing)
-        })
+        await api
+            .get(`/student/Dashboard/classes?limit=2&offset=0`)
+            .then((res) => {
+                setUpcomingClasses(res.data.data.filterClasses.upcoming)
+                setOngoingClasses(res.data.data.filterClasses.ongoing)
+            })
     }, [])
     const getAttendanceHandler = useCallback(async () => {
         await api.get(`/student/Dashboard/attendance`).then((res) => {
@@ -127,8 +94,8 @@ function Schedule({ className, ...props }: ScheduleProps) {
     }, [selectedCourse?.id])
     const getUpcomingSubmissionHandler = useCallback(async () => {
         await api.get(`/tracking/allupcomingSubmission`).then((res) => {
-            setUpcomingAssignments(res.data.upcomingAssignments)
-            setLateAssignments(res.data.lateAssignments)
+            setUpcomingAssignments(res.data.data.upcomingAssignments)
+            setLateAssignments(res.data.data.lateAssignments)
         })
     }, [])
 
@@ -157,9 +124,11 @@ function Schedule({ className, ...props }: ScheduleProps) {
             await Promise.all([
                 getUpcomingClassesHandler(),
                 getAttendanceHandler(),
-                getUpcomingSubmissionHandler(),
+                // getUpcomingSubmissionHandler(),
             ])
         }
+
+        if (courseStarted) getUpcomingSubmissionHandler()
 
         fetchData()
     }, [
@@ -225,6 +194,18 @@ function Schedule({ className, ...props }: ScheduleProps) {
                         </div>
                     )}
                 </div>
+                {upcomingClasses?.length >= 2 && (
+                    <div className="w-full flex justify-center mt-3">
+                        <Link href="/student/classes">
+                            <div className="flex items-center border rounded-md border-secondary px-3 py-1 text-secondary">
+                                <h1 className="text-lg p-1 font-bold">
+                                    See All Upcoming Classes
+                                </h1>
+                                <ChevronRight size={20} />
+                            </div>
+                        </Link>
+                    </div>
+                )}
             </div>
 
             {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */}
@@ -284,7 +265,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                             </div>
                         </div>
                     </div>
-                    <div className="block lg:hidden flex flex-col justify-between gap-6">
+                    <div className="lg:hidden flex flex-col justify-between gap-6">
                         <div className="flex flex-col">
                             <div className="w-full">
                                 <Card className="w-full mb-3 border-none p-5 shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F]">
@@ -339,31 +320,41 @@ function Schedule({ className, ...props }: ScheduleProps) {
         className="rounded-md border"
       /> */}
             <div className="flex flex-col items-start mt-6">
-                {lateAssignments.length < 1 &&
+                {lateAssignments?.length < 1 &&
                     upcomingAssignments.length < 1 && (
                         <h1 className="text-xl p-1 text-start font-bold mb-4">
                             Upcoming Submissions
                         </h1>
                     )}
                 <div className="flex flex-col w-full lg:max-w-[860px]">
-                    {lateAssignments.length > 0 ||
-                    upcomingAssignments.length > 0 ? (
+                    {lateAssignments?.length > 0 ||
+                    upcomingAssignments?.length > 0 ? (
                         <div className="flex flex-col w-full lg:max-w-[860px]">
-                            {lateAssignments.length > 0 && (
+                            {lateAssignments?.length > 0 && (
                                 <h1 className="text-xl p-1 text-start font-bold mb-4">
                                     Late Assignments
                                 </h1>
                             )}
                             {lateAssignments.map((data: any, index) => (
-                                <SubmissionCard classData={data} key={data} />
+                                <SubmissionCard
+                                    classData={data}
+                                    key={index}
+                                    status={'lateAssignmet'}
+                                    view={'dashboard'}
+                                />
                             ))}
-                            {upcomingAssignments.length > 0 && (
+                            {upcomingAssignments?.length > 0 && (
                                 <h1 className="text-xl p-1 text-start font-bold mb-4">
                                     Upcoming Assignments
                                 </h1>
                             )}
                             {upcomingAssignments.map((data: any, index) => (
-                                <SubmissionCard classData={data} key={data} />
+                                <SubmissionCard
+                                    classData={data}
+                                    key={index}
+                                    status={'upcomingAssignment'}
+                                    view={'dashboard'}
+                                />
                             ))}
                         </div>
                     ) : (
@@ -375,7 +366,8 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                 height={240}
                             />
                             <p className="text-lg mt-3 text-center">
-                                There are no upcoming Submission
+                                {submissionMessage ??
+                                    'There are no upcoming Submission'}
                             </p>
                         </div>
                     )}

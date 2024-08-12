@@ -1,21 +1,29 @@
 'use client'
-import React, { useCallback, useEffect, useState } from 'react'
-import { Input } from '@/components/ui/input'
-import { Search } from 'lucide-react'
-import { columns } from './column'
+import React, { useState, useEffect, useCallback } from 'react'
 import { DataTable } from '@/app/_components/datatable/data-table'
-import { api } from '@/utils/axios.config'
-import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
+import { columns } from './column'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Input } from '@/components/ui/input'
+import { Search } from 'lucide-react'
+import { title } from 'process'
+import { api } from '@/utils/axios.config'
+import { toast } from '@/components/ui/use-toast'
+import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 
 type Props = {}
 
-const Page = ({ params }: any) => {
-    const [assesmentData, setAssesmentData] = useState<any>()
+const assesmentData = {
+    title: 'Random Tile',
+    totalStudents: 90,
+    totalSubmitedStudents: 67,
+}
 
-    // const [dataTableAssesment, setDataTableAssesments] = useState<any>([])
-    const [bootcampData, setBootcampData] = useState<any>()
+const Page = ({ params }: { params: any }) => {
+    const [assignmentData, setAssignmentData] = useState([])
+    const [bootcampData, setBootcampData] = useState<any>({})
+    const [assignmentTitle, setAssignmentTitle] = useState<string>('')
+    const [submittedStudents, setSubmittedStudents] = useState<number>(0)
 
     const crumbs = [
         {
@@ -29,55 +37,14 @@ const Page = ({ params }: any) => {
             isLast: false,
         },
         {
-            crumb: 'Submission - Assesments',
+            crumb: 'Submission - Assignments',
             href: `/admin/courses/${params.courseId}/submissions`,
             isLast: false,
         },
         {
-            crumb: assesmentData?.title,
+            crumb: assignmentTitle,
             // href: '',
-            isLast: false,
-        },
-    ]
-
-    const dataTableAssesment = [
-        {
-            email: 'poonambagh@gmail.com',
-            name: 'Poonam Bagh',
-            userId: 1,
-            batchId: 101,
-            bootcampId: 202,
-            profilePicture: null, // or a valid URL string
-            progress: 75,
-            batchName: 'Batch A',
-            attendance: 85,
-            status: 'Active',
-            noOfAttempts: 3,
-            isChecked: true,
-            userEmail: 'poonambagh@gmail.com',
-            projectId: 303,
-            id: 404,
-            userName: 'Poonam Bagh',
-            newId: 505,
-        },
-        {
-            email: 'johndoe@example.com',
-            name: 'John Doe',
-            userId: 2,
-            batchId: 102,
-            bootcampId: 203,
-            profilePicture: 'https://example.com/profile.jpg',
-            progress: 50,
-            batchName: 'Batch B',
-            attendance: 90,
-            status: 'Pending',
-            noOfAttempts: 2,
-            isChecked: false,
-            userEmail: 'johndoe@example.com',
-            projectId: 304,
-            id: 405,
-            userName: 'John Doe',
-            newId: 506,
+            isLast: true,
         },
     ]
 
@@ -85,39 +52,44 @@ const Page = ({ params }: any) => {
         try {
             const res = await api.get(`/bootcamp/${params.courseId}`)
             setBootcampData(res.data.bootcamp)
-        } catch (error) {
-            console.error('API Error:', error)
-        }
+        } catch (error) {}
     }, [params.courseId])
-    const getStudentAssesmentDataHandler = useCallback(async () => {
-        await api
-            .get(
-                `/admin/assessment/students/assessment_id${params.StudentAssesmentData}`
-            )
-            .then((res) => {
-                setAssesmentData(res.data.ModuleAssessment)
-                const data = res.data
-                data.submitedOutsourseAssessments =
-                    data.submitedOutsourseAssessments.map((assessment: any) => {
-                        return {
-                            ...assessment,
-                            bootcampId: data.bootcampId,
-                            newId: data.id,
-                        }
+
+    const fetchAssignmentDataHandler = useCallback(async () => {
+        try {
+            await api
+                .get(
+                    `/submission/assignmentStatus?chapterId=${params.assignmentData}&limit=5&offset=0`
+                )
+                .then((res) => {
+                    const assignmentData: any = res?.data?.data
+                    const chapterId = assignmentData?.chapterId
+                    assignmentData.data.forEach((data: any) => {
+                        data.chapterId = chapterId
                     })
-                // setDataTableAssesments(data.submitedOutsourseAssessments)
+                    setAssignmentData(assignmentData.data)
+                    setSubmittedStudents(res?.data?.data?.data.length)
+                    setAssignmentTitle(res?.data?.data?.chapterName)
+                })
+        } catch (error) {
+            toast({
+                title: 'Error',
+                description: 'Error Fetching Assignment Data',
             })
-    }, [params.StudentAssesmentData])
+        } finally {
+        }
+    }, [params.assignmentData])
 
     useEffect(() => {
-        getStudentAssesmentDataHandler()
-        getBootcampHandler()
-    }, [getStudentAssesmentDataHandler, getBootcampHandler])
+        Promise.all([getBootcampHandler(), fetchAssignmentDataHandler()])
+    }, [getBootcampHandler, fetchAssignmentDataHandler])
 
-    // console.log(dataTableAssesment)
+    const totalStudents =
+        bootcampData?.students_in_bootcamp - bootcampData?.unassigned_students
+
     return (
         <>
-            {assesmentData ? (
+            {assignmentData ? (
                 <BreadcrumbComponent crumbs={crumbs} />
             ) : (
                 <Skeleton className="h-4 w-4/6" />
@@ -125,31 +97,28 @@ const Page = ({ params }: any) => {
             <MaxWidthWrapper className="p-4 ">
                 <div className="flex flex-col gap-y-4">
                     <h1 className="text-start text-xl font-bold capitalize text-primary">
-                        {assesmentData?.title}
+                        {assignmentTitle}
                     </h1>
 
                     {assesmentData ? (
                         <div className="text-start flex gap-x-3">
                             <div className="p-4 rounded-lg shadow-md ">
                                 <h1 className="text-gray-600 font-semibold text-xl">
-                                    {assesmentData?.totalStudents}
+                                    {totalStudents}
                                 </h1>
                                 <p className="text-gray-500 ">Total Students</p>
                             </div>
                             <div className="p-4 rounded-lg shadow-md ">
                                 <h1 className="text-gray-600 font-semibold text-xl">
-                                    {assesmentData?.totalSubmitedStudents}
+                                    {submittedStudents}
                                 </h1>
                                 <p className="text-gray-500 ">
-                                    Submissions Received YEEESSSS
+                                    Submissions Received:
                                 </p>
                             </div>
                             <div className="p-4 rounded-lg shadow-md">
                                 <h1 className="text-gray-600 font-semibold text-xl">
-                                    {(
-                                        assesmentData?.totalStudents -
-                                        assesmentData?.totalSubmitedStudents
-                                    ).toString()}
+                                    {totalStudents - submittedStudents}
                                 </h1>
                                 <p className="text-gray-500 ">
                                     Not Yet Submitted
@@ -175,7 +144,7 @@ const Page = ({ params }: any) => {
                             <Search className="text-gray-400" size={20} />
                         </div>
                     </div>
-                    {/* <DataTable data={dataTableAssesment} column={columns} /> */}
+                    <DataTable data={assignmentData} columns={columns} />
                 </div>
             </MaxWidthWrapper>
         </>

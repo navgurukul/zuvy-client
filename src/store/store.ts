@@ -329,6 +329,8 @@ export const getEditOpenEndedDialogs = create<editOpenEndedDialogs>((set) => ({
 type editCodingQuestionDialogs = {
     isCodingDialogOpen: boolean
     setIsCodingDialogOpen: (newValue: boolean) => void
+    isCodingEditDialogOpen: boolean
+    setIsCodingEditDialogOpen: (newValue: boolean) => void
     editCodingQuestionId: null
     setEditCodingQuestionId: (newValue: any) => void
 }
@@ -338,6 +340,10 @@ export const getEditCodingQuestionDialogs = create<editCodingQuestionDialogs>(
         isCodingDialogOpen: false,
         setIsCodingDialogOpen: (newValue: boolean) => {
             set({ isCodingDialogOpen: newValue })
+        },
+        isCodingEditDialogOpen: false,
+        setIsCodingEditDialogOpen: (newValue: boolean) => {
+            set({ isCodingEditDialogOpen: newValue })
         },
         editCodingQuestionId: null,
         setEditCodingQuestionId: (newValue: any) => {

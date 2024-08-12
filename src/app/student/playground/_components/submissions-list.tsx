@@ -36,7 +36,7 @@ export default function SubmissionsList({
         try {
             setLoading(true) // Start loading
             const response = await api.get(
-                `codingPlatform/practicecode/questionId=${questionId}`
+                `codingPlatform/get-coding-question/${questionId}`
             )
             setSubmissions(response.data.submissions)
         } catch (error) {
