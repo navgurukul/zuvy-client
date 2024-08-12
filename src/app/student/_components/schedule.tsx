@@ -169,7 +169,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                 </div> */}
 
                 <div className="w-full flex flex-col items-center lg:flex-row lg:justify-between gap-8">
-                    {upcomingClasses?.length > 0 ? (
+                    {allClasses?.length > 0 ? (
                         <div className="flex flex-col w-full lg:max-w-[860px]">
                             {ongoingClasses.map((classData: any, index) => (
                                 <ClassCard

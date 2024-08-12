@@ -165,7 +165,7 @@ function Page({
             <BreadcrumbCmponent crumbs={crumbs} />
 
             <div className="md:grid grid-cols-2 lg:grid-cols-3 gap-10  my-10">
-                <div className="lg:col-span-2">
+                <div className="lg:col-span-2 w-full">
                     <div className="flex items-center gap-3 mt-2 mb-10">
                         <div>
                             <Image
@@ -192,7 +192,7 @@ function Page({
                         <div className="flex flex-col justify-between">
                             {isCourseStarted && allClasses?.length > 0 ? (
                                 <div className="flex flex-col">
-                                    <div className="w-[800px]">
+                                    <div className="w-full lg:max-w-[850px]">
                                         {ongoingClasses.map(
                                             (classData: any, index) => (
                                                 <ClassCard
@@ -253,10 +253,10 @@ function Page({
                             </div>
                         )}
                         <div className="flex flex-col flex-start">
-                            <div className="w-[800px]">
+                            <div className="w-full lg:max-w-[850px]">
                                 {upcomingAssignments &&
                                     upcomingAssignments.length > 0 && (
-                                        <div className="flex flex-col w-full lg:max-w-[860px]">
+                                        <div className="flex flex-col">
                                             {upcomingAssignments.length > 0 && (
                                                 <h1 className="text-lg p-1 text-start font-bold mb-4">
                                                     Upcoming Assignments
@@ -280,7 +280,7 @@ function Page({
                         </div>
                     </div>
 
-                    <div className="mt-10">
+                    <div className="mt-10 w-full lg:max-w-[860px]">
                         <div className="flex flex-start">
                             <p className="text-lg p-1 font-bold">
                                 Course Modules

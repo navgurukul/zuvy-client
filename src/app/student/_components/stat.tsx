@@ -277,7 +277,8 @@ export function Stat({ className, ...props }: CardProps) {
                                     <span className="text-sm font-medium  mr-2">
                                         Your rank
                                     </span>
-                                    <ChevronUp color="#518672" />
+                                    {/* Use ChevronUp when it is functional */}
+                                    {/* <ChevronUp color="#518672" /> */}
                                     {/* </a> */}
                                 </div>
                             </div>
