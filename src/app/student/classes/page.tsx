@@ -43,11 +43,11 @@ function Page() {
                 }
 
                 const response = await api.get(baseUrl)
-                setUpcomingClasses(response.data.filterClasses.upcoming)
-                setOngoingClasses(response.data.filterClasses.ongoing)
-                setTotalStudents(response.data.totalClasses)
-                setPages(response.data.totalPages)
-                setLastPage(response.data.totalPages)
+                setUpcomingClasses(response.data.data.filterClasses.upcoming)
+                setOngoingClasses(response.data.data.filterClasses.ongoing)
+                setTotalStudents(response.data.data.totalClasses)
+                setPages(response.data.data.totalPages)
+                setLastPage(response.data.data.totalPages)
             } catch (error) {
                 console.error('Error getting completed classes:', error)
             }

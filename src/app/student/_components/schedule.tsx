@@ -44,6 +44,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
     const userID = studentData?.id && studentData?.id
     const [resumeCourse, setResumeCourse] = useState<ResumeCourse>({})
     const [nextChapterId, setNextChapterId] = useState([])
+    const [allClasses, setAllClasses] = useState<any[]>([])
     const [upcomingClasses, setUpcomingClasses] = useState([])
     const [ongoingClasses, setOngoingClasses] = useState([])
     const [upcomingAssignments, setUpcomingAssignments] = useState([])
@@ -77,12 +78,23 @@ function Schedule({ className, ...props }: ScheduleProps) {
     }, [userID])
 
     const getUpcomingClassesHandler = useCallback(async () => {
-        await api
-            .get(`/student/Dashboard/classes?limit=2&offset=0`)
-            .then((res) => {
-                setUpcomingClasses(res.data.data.filterClasses.upcoming)
-                setOngoingClasses(res.data.data.filterClasses.ongoing)
-            })
+        const response = await api.get(`/student/Dashboard/classes`)
+        if (Array.isArray(response.data.data)) {
+            setCourseStarted(false)
+        } else {
+            setCourseStarted(true)
+            const classes = [
+                ...response.data.data.filterClasses.ongoing,
+                ...response.data.data.filterClasses.upcoming,
+            ]
+            setAllClasses(classes)
+            await api
+                .get(`/student/Dashboard/classes?limit=2&offset=0`)
+                .then((res) => {
+                    setUpcomingClasses(res.data.data.filterClasses.upcoming)
+                    setOngoingClasses(res.data.data.filterClasses.ongoing)
+                })
+        }
     }, [])
     const getAttendanceHandler = useCallback(async () => {
         await api.get(`/student/Dashboard/attendance`).then((res) => {
@@ -194,7 +206,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                         </div>
                     )}
                 </div>
-                {upcomingClasses?.length >= 2 && (
+                {allClasses?.length > 2 && (
                     <div className="w-full flex justify-center mt-3">
                         <Link href="/student/classes">
                             <div className="flex items-center border rounded-md border-secondary px-3 py-1 text-secondary">
