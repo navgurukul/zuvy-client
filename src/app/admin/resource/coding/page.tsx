@@ -25,7 +25,7 @@ import { columns } from '@/app/admin/resource/coding/column'
 import NewCodingProblemForm from '@/app/admin/resource/_components/NewCodingProblemForm'
 import { api } from '@/utils/axios.config'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
-import { getCodingQuestionTags, getcodingQuestionState } from '@/store/store'
+import { getCodingQuestionTags, getEditCodingQuestionDialogs, getcodingQuestionState } from '@/store/store'
 import { getAllCodingQuestions } from '@/utils/admin'
 import Image from 'next/image'
 import { Spinner } from '@/components/ui/spinner'
@@ -36,7 +36,13 @@ const CodingProblems = (props: Props) => {
     const { codingQuestions, setCodingQuestions } = getcodingQuestionState()
 
     const [searchTerm, setSearchTerm] = useState('')
-    const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const {
+        setEditCodingQuestionId,
+        isCodingEditDialogOpen,
+        setIsCodingEditDialogOpen,
+        isCodingDialogOpen,
+        setIsCodingDialogOpen
+    } = getEditCodingQuestionDialogs()
     const { tags, setTags } = getCodingQuestionTags()
     const [selectedTag, setSelectedTag] = useState({
         tagName: 'AllTopics',
@@ -105,7 +111,7 @@ const CodingProblems = (props: Props) => {
                 </div>
             ) : (
                 <div>
-                    {codingQuestions.length > 0 && !isDialogOpen? (
+                    {codingQuestions.length > 0 && !isCodingDialogOpen? (
                         <MaxWidthWrapper>
                             <h1 className="text-left font-semibold text-2xl">
                                 Resource Library - Coding Problems
@@ -128,7 +134,7 @@ const CodingProblems = (props: Props) => {
                                     </div>
                                 </div>
                               
-                       <Button onClick={()=>setIsDialogOpen(true)}>+ Create Problems</Button>
+                       <Button onClick={()=>setIsCodingDialogOpen(true)}>+ Create Problems</Button>
                 
 
                             </div>
@@ -202,7 +208,7 @@ const CodingProblems = (props: Props) => {
                     ) : (
                         <>
                           {
-                            !isDialogOpen ? (<>
+                            !isCodingDialogOpen && codingQuestions.length == 0 ? (<>
                                                      
                               <h1 className="text-left font-semibold text-2xl">
                                 Resource Library - Coding Problems
@@ -220,28 +226,28 @@ const CodingProblems = (props: Props) => {
                                     No coding problems have been created yet.
                                     Start by adding the first one
                                 </h2>
-                                <Button onClick={()=>setIsDialogOpen(true)}>+ Create Problems</Button>
+                                <Button onClick={()=>setIsCodingDialogOpen(true)}>+ Create Problems</Button>
                    
                             </MaxWidthWrapper>
                             </>): (
-                            
-                                
-                            <MaxWidthWrapper className="flex flex-col justify-center items-center gap-5">
-                       <div onClick={()=>setIsDialogOpen(false)} className='text-secondary cursor-pointer self-start flex'> <ChevronLeft/> Coding Problems</div>  
-                                            <NewCodingProblemForm
-                                                tags={tags}
-                                                setIsDialogOpen={
-                                                    setIsDialogOpen
-                                                }
-                                                getAllCodingQuestions={
-                                                    getAllCodingQuestions
-                                                }
-                                                setCodingQuestions={
-                                                    setCodingQuestions
-                                                }
-                                            />
-                                        </MaxWidthWrapper>
-                            
+                                isCodingDialogOpen && !isCodingEditDialogOpen && (
+                                    <MaxWidthWrapper className="flex flex-col justify-center items-center gap-5">
+                               <div onClick={()=>setIsCodingDialogOpen(false)} className='text-secondary cursor-pointer self-start flex'> <ChevronLeft/> Coding Problems</div>  
+                                                    <NewCodingProblemForm
+                                                        tags={tags}
+                                                        setIsDialogOpen={
+                                                            setIsCodingDialogOpen
+                                                        }
+                                                        getAllCodingQuestions={
+                                                            getAllCodingQuestions
+                                                        }
+                                                        setCodingQuestions={
+                                                            setCodingQuestions
+                                                        }
+                                                    />
+                                                </MaxWidthWrapper>
+                                    
+                                    ) 
                             )
                           }
                         </>

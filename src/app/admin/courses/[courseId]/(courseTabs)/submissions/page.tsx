@@ -14,6 +14,7 @@ import Link from 'next/link'
 import AssesmentComponent from '../../_components/AssesmentComponent'
 import { Spinner } from '@/components/ui/spinner'
 import FormComponent from '../../_components/FormComponent'
+import Assignments from './components/assignments'
 
 const Page = ({ params }: { params: any }) => {
     const [activeTab, setActiveTab] = useState('practice')
@@ -78,7 +79,6 @@ const Page = ({ params }: { params: any }) => {
         return () => clearTimeout(timer)
     }, [])
 
-    console.log(assesments)
     return (
         <div className="">
             {loading ? (
@@ -130,6 +130,16 @@ const Page = ({ params }: { params: any }) => {
                         }`}
                     >
                         Form
+                    </Button>
+                    <Button
+                        onClick={() => handleTabChange('assignments')}
+                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
+                            activeTab === 'assignments'
+                                ? 'bg-secondary  text-white'
+                                : 'bg-gray-200 text-gray-800'
+                        }`}
+                    >
+                        Assignments
                     </Button>
                 </div>
             )}
@@ -283,10 +293,13 @@ const Page = ({ params }: { params: any }) => {
                     ))}
                 {activeTab === 'form' && (
                     <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2 lg:grid-cols-3">
-                        {['A', 'B', 'C'].map((item: any, index:any) => (
+                        {['A', 'B', 'C'].map((item: any, index: any) => (
                             <FormComponent key={index} />
                         ))}
                     </div>
+                )}
+                {activeTab === 'assignments' && (
+                    <Assignments courseId={params.courseId} />
                 )}
             </div>
         </div>

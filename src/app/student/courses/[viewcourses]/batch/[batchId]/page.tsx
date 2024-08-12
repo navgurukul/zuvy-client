@@ -53,10 +53,12 @@ function Page({
     )
     const { setIsParamBatchId } = getParamBatchId()
     const [instructorDetails, setInstructorDetails] = useState<any>()
+    const [allClasses, setAllClasses] = useState<any[]>([])
     const [upcomingClasses, setUpcomingClasses] = useState([])
     const [ongoingClasses, setOngoingClasses] = useState([])
     const [upcomingAssignments, setUpcomingAssignments] = useState([])
     const [lateAssignments, setLateAssignments] = useState([])
+    const [isCourseStarted, setIsCourseStarted] = useState(false)
 
     const [attendenceData, setAttendenceData] = useState<any[]>([])
     // const [completedClasses, setCompletedClasses] = useState([])
@@ -71,14 +73,27 @@ function Page({
 
     // setIsParamBatchId(params.batchId)
     const getUpcomingClassesHandler = useCallback(async () => {
-        await api
-            .get(
-                `/student/Dashboard/classes/?batch_id=${params.batchId}&limit=2&offset=0`
-            )
-            .then((res) => {
-                setUpcomingClasses(res.data.data.filterClasses.upcoming)
-                setOngoingClasses(res.data.data.filterClasses.ongoing)
-            })
+        const response = await api.get(
+            `/student/Dashboard/classes/?batch_id=${params.batchId}`
+        )
+        if (Array.isArray(response.data.data)) {
+            setIsCourseStarted(false)
+        } else {
+            setIsCourseStarted(true)
+            const classes = [
+                ...response.data.data.filterClasses.ongoing,
+                ...response.data.data.filterClasses.upcoming,
+            ]
+            setAllClasses(classes)
+            await api
+                .get(
+                    `/student/Dashboard/classes/?batch_id=${params.batchId}&limit=2&offset=0`
+                )
+                .then((res) => {
+                    setUpcomingClasses(res.data.data.filterClasses.upcoming)
+                    setOngoingClasses(res.data.data.filterClasses.ongoing)
+                })
+        }
     }, [params.batchId])
     const getAttendanceHandler = useCallback(async () => {
         await api.get(`/student/Dashboard/attendance`).then((res) => {
@@ -175,7 +190,7 @@ function Page({
                             </p>
                         </div>
                         <div className="flex flex-col justify-between">
-                            {upcomingClasses?.length > 0 ? (
+                            {isCourseStarted && allClasses?.length > 0 ? (
                                 <div className="flex flex-col">
                                     <div className="w-full lg:max-w-[850px]">
                                         {ongoingClasses.map(
@@ -223,8 +238,8 @@ function Page({
                             )}
                         </div>
 
-                        {upcomingClasses?.length >= 2 && (
-                            <div className="flex justify-center mt-3 w-1/2 ml-20">
+                        {allClasses?.length > 2 && (
+                            <div className="flex justify-center mt-3 w-3/4">
                                 <Link
                                     href={`/student/courses/${params.viewcourses}/batch/${params.batchId}/classes`}
                                 >

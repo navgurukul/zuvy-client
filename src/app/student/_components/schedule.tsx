@@ -44,6 +44,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
     const userID = studentData?.id && studentData?.id
     const [resumeCourse, setResumeCourse] = useState<ResumeCourse>({})
     const [nextChapterId, setNextChapterId] = useState([])
+    const [allClasses, setAllClasses] = useState<any[]>([])
     const [upcomingClasses, setUpcomingClasses] = useState([])
     const [ongoingClasses, setOngoingClasses] = useState([])
     const [upcomingAssignments, setUpcomingAssignments] = useState([])
@@ -77,12 +78,23 @@ function Schedule({ className, ...props }: ScheduleProps) {
     }, [userID])
 
     const getUpcomingClassesHandler = useCallback(async () => {
-        await api
-            .get(`/student/Dashboard/classes?limit=2&offset=0`)
-            .then((res) => {
-                setUpcomingClasses(res.data.data.filterClasses.upcoming)
-                setOngoingClasses(res.data.data.filterClasses.ongoing)
-            })
+        const response = await api.get(`/student/Dashboard/classes`)
+        if (Array.isArray(response.data.data)) {
+            setCourseStarted(false)
+        } else {
+            setCourseStarted(true)
+            const classes = [
+                ...response.data.data.filterClasses.ongoing,
+                ...response.data.data.filterClasses.upcoming,
+            ]
+            setAllClasses(classes)
+            await api
+                .get(`/student/Dashboard/classes?limit=2&offset=0`)
+                .then((res) => {
+                    setUpcomingClasses(res.data.data.filterClasses.upcoming)
+                    setOngoingClasses(res.data.data.filterClasses.ongoing)
+                })
+        }
     }, [])
     const getAttendanceHandler = useCallback(async () => {
         await api.get(`/student/Dashboard/attendance`).then((res) => {
@@ -194,7 +206,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                         </div>
                     )}
                 </div>
-                {upcomingClasses?.length >= 2 && (
+                {allClasses?.length > 2 && (
                     <div className="w-full flex justify-center mt-3">
                         <Link href="/student/classes">
                             <div className="flex items-center border rounded-md border-secondary px-3 py-1 text-secondary">
@@ -265,7 +277,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                             </div>
                         </div>
                     </div>
-                    <div className="block lg:hidden flex flex-col justify-between gap-6">
+                    <div className="lg:hidden flex flex-col justify-between gap-6">
                         <div className="flex flex-col">
                             <div className="w-full">
                                 <Card className="w-full mb-3 border-none p-5 shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F]">
@@ -320,17 +332,17 @@ function Schedule({ className, ...props }: ScheduleProps) {
         className="rounded-md border"
       /> */}
             <div className="flex flex-col items-start mt-6">
-                {!courseStarted && (
-                    <h1 className="text-xl p-1 text-start font-bold mb-4">
-                        Upcoming Submissions
-                    </h1>
-                )}
+                {lateAssignments?.length < 1 &&
+                    upcomingAssignments.length < 1 && (
+                        <h1 className="text-xl p-1 text-start font-bold mb-4">
+                            Upcoming Submissions
+                        </h1>
+                    )}
                 <div className="flex flex-col w-full lg:max-w-[860px]">
-                    {courseStarted &&
-                    (lateAssignments.length > 0 ||
-                        upcomingAssignments.length > 0) ? (
+                    {lateAssignments?.length > 0 ||
+                    upcomingAssignments?.length > 0 ? (
                         <div className="flex flex-col w-full lg:max-w-[860px]">
-                            {lateAssignments.length > 0 && (
+                            {lateAssignments?.length > 0 && (
                                 <h1 className="text-xl p-1 text-start font-bold mb-4">
                                     Late Assignments
                                 </h1>
@@ -343,7 +355,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                     view={'dashboard'}
                                 />
                             ))}
-                            {upcomingAssignments.length > 0 && (
+                            {upcomingAssignments?.length > 0 && (
                                 <h1 className="text-xl p-1 text-start font-bold mb-4">
                                     Upcoming Assignments
                                 </h1>
