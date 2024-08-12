@@ -1,20 +1,12 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { Card, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from '@/components/ui/dialog'
+
 import {
     ResizablePanelGroup,
     ResizablePanel,
     ResizableHandle,
 } from '@/components/ui/resizable'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Code, Lock, Play, Upload } from 'lucide-react'
 import { useLazyLoadedStudentData } from '@/store/store'
 import { api } from '@/utils/axios.config'
@@ -121,23 +113,19 @@ const IDE: React.FC<IDEProps> = ({
                     sourceCode: b64EncodeUnicode(currentCode),
                 }
             )
-            if (
-                response.data.data.stderr ||
-                response.data.data.compile_output ||
-                response.data.data.stdout
-            ) {
-                let compileOutput =
-                    response.data.data.compile_output?.replaceAll('\n', '') ||
-                    response.data.data.stderr?.replaceAll('\n', '') ||
-                    response.data.data.stdOut
+            setResult(b64DecodeUnicode(response.data.data[0].stdOut))
+            const testCases = response.data.data
+            const allTestCasesPassed = testCases.every(
+                (testCase: any) => testCase.status === 'Accepted'
+            )
 
-                const encodedResult = b64DecodeUnicode(compileOutput)
-                setResult(b64DecodeUnicode(response.data.data.stdOut))
-            }
-            if (response.data.data.status_id === 3) {
+            setResult(b64DecodeUnicode(testCases[0].stdOut))
+
+            if (allTestCasesPassed) {
                 toast({
-                    title: `Test Cases Passed ${action === 'submit' ? ', Solution submitted' : ''
-                        }`,
+                    title: `Test Cases Passed${
+                        action === 'submit' ? ', Solution submitted' : ''
+                    }`,
                     className: 'text-start capitalize border border-secondary',
                 })
             } else {
@@ -164,7 +152,8 @@ const IDE: React.FC<IDEProps> = ({
     }
     const getQuestionDetails = async () => {
         try {
-            await api.get(`codingPlatform/get-coding-question/${params.editor}`)
+            await api
+                .get(`codingPlatform/get-coding-question/${params.editor}`)
                 .then((response) => {
                     setQuestionDetails(response?.data.data)
                     setTestCases(response?.data?.data?.testCases)
@@ -184,14 +173,11 @@ const IDE: React.FC<IDEProps> = ({
         router.back()
     }
 
-    useEffect(()=>{
-        if(templates?.[language]?.template){
+    useEffect(() => {
+        if (templates?.[language]?.template) {
             setCurrentCode(b64DecodeUnicode(templates?.[language]?.template))
         }
-        
-    },[language])
-
-
+    }, [language])
 
     return (
         <div>
@@ -235,19 +221,55 @@ const IDE: React.FC<IDEProps> = ({
                                     </h1>
                                     <p>{questionDetails?.description}</p>
 
-                                    {testCases?.slice(0, 2).map((testCase: any, index: any) => (
-                                        <div key={index} className="bg-gray-200 shadow-sm rounded-lg p-4 my-4">
-                                            <h2 className="text-xl font-semibold mb-2">Test Case {index + 1}</h2>
-                                            {testCase.inputs.map((input: any, idx: any) => (
-                                                <p key={idx} className="text-gray-700">
-                                                    <span className="font-medium">Input {idx + 1}:</span> {input.parameterName} ({input.parameterType}) = {input.parameterValue}
+                                    {testCases
+                                        ?.slice(0, 2)
+                                        .map((testCase: any, index: any) => (
+                                            <div
+                                                key={index}
+                                                className="bg-gray-200 shadow-sm rounded-lg p-4 my-4"
+                                            >
+                                                <h2 className="text-xl font-semibold mb-2">
+                                                    Test Case {index + 1}
+                                                </h2>
+                                                {testCase.inputs.map(
+                                                    (input: any, idx: any) => (
+                                                        <p
+                                                            key={idx}
+                                                            className="text-gray-700"
+                                                        >
+                                                            <span className="font-medium">
+                                                                Input {idx + 1}:
+                                                            </span>{' '}
+                                                            {
+                                                                input.parameterName
+                                                            }{' '}
+                                                            (
+                                                            {
+                                                                input.parameterType
+                                                            }
+                                                            ) ={' '}
+                                                            {
+                                                                input.parameterValue
+                                                            }
+                                                        </p>
+                                                    )
+                                                )}
+                                                <p className="text-gray-700 mt-2">
+                                                    <span className="font-medium">
+                                                        Expected Output:
+                                                    </span>{' '}
+                                                    {
+                                                        testCase.expectedOutput
+                                                            .parameterType
+                                                    }{' '}
+                                                    ={' '}
+                                                    {
+                                                        testCase.expectedOutput
+                                                            .parameterValue
+                                                    }
                                                 </p>
-                                            ))}
-                                            <p className="text-gray-700 mt-2">
-                                                <span className="font-medium">Expected Output:</span> {testCase.expectedOutput.parameterType} = {testCase.expectedOutput.parameterValue}
-                                            </p>
-                                        </div>
-                                    ))}
+                                            </div>
+                                        ))}
                                 </div>
                             </div>
                         </div>
@@ -310,7 +332,7 @@ const IDE: React.FC<IDEProps> = ({
                                                         handleEditorChange
                                                     }
                                                     className="p-2"
-                                                    defaultValue='Please select a language above!'
+                                                    defaultValue="Please select a language above!"
                                                 />
                                             </div>
                                         </form>
@@ -326,7 +348,7 @@ const IDE: React.FC<IDEProps> = ({
                                                 Output Window
                                             </p>
                                             <div>
-                                                <Dialog>
+                                                {/* <Dialog>
                                                     <DialogTrigger asChild>
                                                         <Button
                                                             variant="outline"
@@ -409,7 +431,7 @@ const IDE: React.FC<IDEProps> = ({
                                                             </DialogTitle>
                                                         </DialogHeader>
                                                     </DialogContent>
-                                                </Dialog>
+                                                </Dialog> */}
                                             </div>
                                         </div>
                                         <div className="h-full p-2 bg-accent text-white overflow-y-auto">

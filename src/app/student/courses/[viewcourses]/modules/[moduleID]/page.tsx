@@ -291,7 +291,7 @@ function Page({ params }: any) {
     return (
         <>
             <BreadcrumbComponent crumbs={crumbs} />
-            <Chapters />
+            <Chapters params={params} />
         </>
     )
 }
