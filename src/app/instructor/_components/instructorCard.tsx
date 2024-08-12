@@ -54,7 +54,9 @@ const InstructorCard: React.FC<Props> = ({
                             <Moment format="MMM">{startTime}</Moment>
                         </div>
                         <div className="px-3 flex flex-col gap-y-3 ">
-                            <h1 className="font-semibold">{topicTitle}</h1>
+                            <h1 className="font-semibold text-left">
+                                {topicTitle}
+                            </h1>
                             {/* <h1 className="">{classesTiming}</h1> */}
                             <div className="text-md flex">
                                 <Moment format="hh:mm A">{startTime}</Moment>
