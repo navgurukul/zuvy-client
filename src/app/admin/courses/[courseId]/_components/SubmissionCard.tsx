@@ -12,6 +12,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'
+import StartAssignmentButton from './StartAssignmentButton'
 
 function SubmissionCard({
     classData,
@@ -60,7 +61,21 @@ function SubmissionCard({
                             </Tooltip>
                         </TooltipProvider>
 
-                        {status !== 'lateAssignmet' && (
+                        {/* Upcoming assignment for desktop */}
+                        {status !== 'lateAssignmet' && view === 'course' && (
+                            <div className="hidden lg:flex flex-row gap-4">
+                                {/* <p className="text-md text-start mt-3 mb-2 ">
+                                    {classData?.bootcampName}
+                                </p>
+                                <span className="w-[5px] h-[5px] bg-gray-500 rounded-full self-center"></span> */}
+                                <p className="text-md text-start mt-3 mb-2 ">
+                                    {classData?.moduleName}
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Upcoming assignment for desktop */}
+                        {status !== 'lateAssignmet' && view === 'dashboard' && (
                             <div className="hidden lg:flex flex-row gap-4">
                                 <p className="text-md text-start mt-3 mb-2 ">
                                     {classData?.bootcampName}
@@ -72,7 +87,16 @@ function SubmissionCard({
                             </div>
                         )}
 
-                        {status === 'lateAssignmet' && (
+                        {/* Late assignment for desktop in course */}
+                        {status === 'lateAssignmet' && view === 'course' && (
+                            <div className="hidden lg:flex flex-row gap-4">
+                                <p className="text-md text-start mt-3 mb-2">
+                                    {classData.moduleName}
+                                </p>
+                            </div>
+                        )}
+                        {/* Late assignment for desktop in dashboard*/}
+                        {status === 'lateAssignmet' && view !== 'course' && (
                             <div className="hidden lg:flex flex-row gap-4">
                                 <p className="text-md text-start mt-3 mb-2">
                                     {classData.bootcampName}
@@ -81,16 +105,29 @@ function SubmissionCard({
                                 </p>
                             </div>
                         )}
-                        <div className="lg:hidden flex flex-row">
-                            <p className="text-md text-start mt-3 mb-2">
-                                {classData.bootcampName}
-                                &nbsp;-&nbsp;
-                                {classData.moduleName}
-                            </p>
-                        </div>
+
+                        {/* Submission in Dashboard for mobile*/}
+                        {view === 'dashboard' && (
+                            <div className="lg:hidden flex flex-row">
+                                <p className="text-md text-start mt-3 mb-2">
+                                    {classData.bootcampName}
+                                    &nbsp;-&nbsp;
+                                    {classData.moduleName}
+                                </p>
+                            </div>
+                        )}
+                        {/* Submission in Course for mobile*/}
+                        {view === 'course' && (
+                            <div className="lg:hidden flex flex-row">
+                                <p className="text-md text-start mt-3 mb-2">
+                                    {classData.moduleName}
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
-                {(status !== 'lateAssignmet' || view !== 'course') && (
+                {/* Upcoming submission in dashboard */}
+                {status === 'upcomingAssignment' && (
                     <div className="hidden lg:flex text-end">
                         <Button variant={'ghost'} className="text-lg font-bold">
                             <Link
@@ -103,20 +140,69 @@ function SubmissionCard({
                         </Button>
                     </div>
                 )}
-                {/* <div className="hidden lg:flex text-end">
-                    <Button variant={'ghost'} className="text-lg font-bold">
+                {/* Late assignment in dashboard */}
+                {status === 'lateAssignmet' && view !== 'course' && (
+                    <div className="hidden lg:flex text-end">
+                        <Button
+                            variant="destructive"
+                            className="bg-transparent border-none text-red-500 hover:bg-red-50 text-lg font-bold"
+                        >
+                            <Link
+                                href={`/student/courses/${classData.bootcampId}/modules/${classData.moduleId}`}
+                                className="gap-3 flex items-center text-red-500"
+                            >
+                                <p>Start Assignment</p>
+                                <ChevronRight size={15} />
+                            </Link>
+                        </Button>
+                        {/* <StartAssignmentButton
+                            classData={classData}
+                            // status={status}
+                            // view={view}
+                            buttonClass="bg-transparent border-none text-red-500 hover:bg-red-50 text-lg font-bold"
+                            variant="destructive"
+                        /> */}
+                    </div>
+                )}
+            </div>
+            {/* For late submission on the course */}
+            {status === 'lateAssignmet' && view === 'course' && (
+                <div className="hidden lg:flex w-full justify-end lg:justify-end lg:w-autotext-end">
+                    <Button
+                        variant="destructive"
+                        className="bg-transparent border-none text-red-500 hover:bg-red-50 text-lg font-bold"
+                    >
                         <Link
                             href={`/student/courses/${classData.bootcampId}/modules/${classData.moduleId}`}
-                            className="gap-3 flex  items-center text-secondary"
+                            className="gap-3 flex items-center text-red-500"
                         >
                             <p>Start Assignment</p>
                             <ChevronRight size={15} />
                         </Link>
                     </Button>
-                </div> */}
-            </div>
-            {status === 'lateAssignmet' && view === 'course' && (
-                <div className="hidden lg:flex w-full justify-end lg:justify-end lg:w-autotext-end">
+                </div>
+            )}
+            {/* For late submission on the phone */}
+            {status === 'lateAssignmet' && (
+                <div className="block lg:hidden text-end">
+                    <Button
+                        variant="destructive"
+                        className="bg-transparent border-none text-red-500 hover:bg-red-50 text-lg font-bold"
+                    >
+                        <Link
+                            href={`/student/courses/${classData.bootcampId}/modules/${classData.moduleId}`}
+                            className="gap-3 flex items-center text-red-500"
+                        >
+                            <p>Start Assignment</p>
+                            <ChevronRight size={15} />
+                        </Link>
+                    </Button>
+                </div>
+            )}
+
+            {/* For upcoming submission on the phone */}
+            {status !== 'lateAssignmet' && (
+                <div className="block lg:hidden text-end">
                     <Button variant={'ghost'} className="text-lg font-bold">
                         <Link
                             href={`/student/courses/${classData.bootcampId}/modules/${classData.moduleId}`}
@@ -128,17 +214,6 @@ function SubmissionCard({
                     </Button>
                 </div>
             )}
-            <div className="block lg:hidden text-end">
-                <Button variant={'ghost'} className="text-lg font-bold">
-                    <Link
-                        href={`/student/courses/${classData.bootcampId}/modules/${classData.moduleId}`}
-                        className="gap-3 flex  items-center text-secondary"
-                    >
-                        <p>Start Assignment</p>
-                        <ChevronRight size={15} />
-                    </Link>
-                </Button>
-            </div>
         </Card>
     )
 }
