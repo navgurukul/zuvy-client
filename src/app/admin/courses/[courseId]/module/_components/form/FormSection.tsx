@@ -35,14 +35,10 @@ import {
 } from '@/components/ui/popover'
 
 type FormSectionProps = {
-    // key: any
     item: any
     index: any
     addQuestion: any
-    // deleteQuestion: (id: number) => void
     form: any
-    // section: any
-    // setSection: any
     deleteQuestion: any
     formData: any
 }
@@ -64,32 +60,28 @@ const getQuestionType = (typeId: number) => {
     }
 }
 
-const getTypeId = (questionType: string) => {
-    switch (questionType) {
-        case 'Multiple Choice':
-            return 1
-        case 'Checkboxes':
-            return 2
-        case 'Long Text Answer':
-            return 3
-        case 'Date':
-            return 4
-        case 'Time':
-            return 5
-        default:
-            return 1
-    }
-}
+// const getTypeId = (questionType: string) => {
+//     switch (questionType) {
+//         case 'Multiple Choice':
+//             return 1
+//         case 'Checkboxes':
+//             return 2
+//         case 'Long Text Answer':
+//             return 3
+//         case 'Date':
+//             return 4
+//         case 'Time':
+//             return 5
+//         default:
+//             return 1
+//     }
+// }
 
 const FormSection: React.FC<FormSectionProps> = ({
-    // key,
     item,
     index,
     form,
     addQuestion,
-    // section,
-    // setSection,
-    // deleteQuestion,
     deleteQuestion,
     formData,
 }) => {
@@ -153,15 +145,10 @@ const FormSection: React.FC<FormSectionProps> = ({
         }
     }
 
-    const handleQuestionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newValue = e.target.value
-        form.setValue(`question_${index}`, newValue)
-        // setSection((prevSection: any) => {
-        //     const newSection = [...prevSection]
-        //     newSection[index] = { ...newSection[index], question: newValue }
-        //     return newSection
-        // })
-    }
+    // const handleQuestionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     const newValue = e.target.value
+    //     form.setValue(`question_${index}`, newValue)
+    // }
 
     const handleOptionChange = (
         e: React.ChangeEvent<HTMLInputElement>,
@@ -171,28 +158,21 @@ const FormSection: React.FC<FormSectionProps> = ({
         const newOptions = [...options]
         newOptions[optionIndex] = newValue
         setOptions(newOptions)
-        // form.setValue(`option_${index}_${optionIndex + 1}`, e.target.value)
-        // form.setValue(`option_${index}_${optionIndex}`, e.target.value)
         form.setValue(`questions.${index}.options.${optionIndex}`, newValue)
-        // setSection((prevSection: any) => {
-        //     const newSection = [...prevSection]
-        //     newSection[index] = { ...newSection[index], options: newOptions }
-        //     return newSection
-        // })
     }
 
     const addOption = () => {
         setOptions([...options, ''])
     }
 
-    const handleRequiredQuestion = (index: number) => {
-        // const newSection = [...section]
-        // newSection[index] = {
-        //     ...newSection[index],
-        //     isRequired: !newSection[index].isRequired,
-        // }
-        // setSection(newSection)
-    }
+    // const handleRequiredQuestion = (index: number) => {
+    //     // const newSection = [...section]
+    //     // newSection[index] = {
+    //     //     ...newSection[index],
+    //     //     isRequired: !newSection[index].isRequired,
+    //     // }
+    //     // setSection(newSection)
+    // }
 
     const removeOption = (idx: number) => {
         // Remove the option from the state
