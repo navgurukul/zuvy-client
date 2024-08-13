@@ -44,11 +44,13 @@ const formSchema = z.object({
     }),
     questions: z.array(
         z.object({
-            id: z.string().optional(),
+            id: z.string().optional() || z.number().optional(),
             question: z.string().min(1, { message: 'Question is required' }),
             typeId: z.number(),
             isRequired: z.boolean(),
             options: z.array(z.string()).optional(),
+            //  ||
+            // z.object({ 0: z.string() }).optional(),
         })
     ),
 })
@@ -66,15 +68,22 @@ const AddForm: React.FC<AddFormProps> = ({
             description: content?.description ?? '',
             questions:
                 content.formQuestionDetails.length > 0
-                    ? content.formQuestionDetails
+                    ? content.formQuestionDetails.map((q: any) => ({
+                          id: q.id.toString(),
+                          question: q.question,
+                          typeId: q.typeId,
+                          isRequired: q.isRequired,
+                          //   options: Object.values(q.options || {}),
+                          options: q.options ? Object.values(q.options) : [],
+                      }))
                     : [
                           {
-                              questionType: 'Multiple Choice',
-                              typeId: 1,
+                              //   id: 'initial-1',
+                              id: 'new-1',
                               question: 'Question 1',
-                              options: ['Op1'],
+                              typeId: 1,
                               isRequired: true,
-                              id: 'initial-1',
+                              options: ['Op1'],
                           },
                       ],
         },
@@ -83,40 +92,28 @@ const AddForm: React.FC<AddFormProps> = ({
             description: content?.description ?? '',
             questions:
                 content.formQuestionDetails.length > 0
-                    ? content.formQuestionDetails
+                    ? content.formQuestionDetails.map((q: any) => ({
+                          id: q.id.toString(),
+                          question: q.question,
+                          typeId: q.typeId,
+                          isRequired: q.isRequired,
+                          //   options: Object.values(q.options || {}),
+                          options: q.options ? Object.values(q.options) : [],
+                      }))
                     : [
                           {
-                              questionType: 'Multiple Choice',
-                              typeId: 1,
+                              //   id: 'initial-1',
+                              id: 'new-1',
                               question: 'Question 1',
-                              options: ['Op1'],
+                              typeId: 1,
                               isRequired: true,
-                              id: 'initial-1',
+                              options: ['Op1'],
                           },
                       ],
         },
     })
 
     const questions = form.watch('questions')
-
-    console.log('content.formQuestionDetails', content.formQuestionDetails)
-
-    // const addQuestion = () => {
-    //     const newKey =
-    //         section.length > 0 &&
-    //         section[section.length - 1].hasOwnProperty('key')
-    //             ? section[section.length - 1].key + 1
-    //             : 1
-    //     const newSection = {
-    //         questionType: 'Multiple Choice',
-    //         typeId: 1,
-    //         question: 'Question 1',
-    //         options: ['Op1'],
-    //         isRequired: false,
-    //         key: newKey,
-    //     }
-    //     setSection([...section, newSection])
-    // }
 
     const addQuestion = () => {
         const newQuestion = {
@@ -132,43 +129,6 @@ const AddForm: React.FC<AddFormProps> = ({
             newQuestion,
         ])
     }
-
-    // const deleteQuestion = (index: number) => {
-    //     const currentQuestions = form.getValues('questions')
-    //     form.setValue(
-    //         'questions',
-    //         currentQuestions.filter((_, i) => i !== index)
-    //     )
-    // }
-
-    // const deleteQuestion = (index: number) => {
-    //     const currentQuestions = form.getValues('questions')
-    //     console.log('currentQuestions', currentQuestions)
-
-    //     // Safeguard: Ensure the question exists and has options
-    //     if (
-    //         currentQuestions[index] &&
-    //         Array.isArray(currentQuestions[index].options)
-    //     ) {
-    //         // Unregister all options related to the deleted question
-    //         currentQuestions[index].options.forEach((_, optionIndex) => {
-    //             form.unregister(`questions.${index}.options.${optionIndex}`)
-    //         })
-    //     }
-
-    //     // Remove the question from the form
-    //     const updatedQuestions = currentQuestions.filter((_, i) => i !== index)
-    //     form.setValue('questions', updatedQuestions)
-
-    //     // Re-register options for remaining questions
-    //     // updatedQuestions.forEach((question, qIndex) => {
-    //     //     if (Array.isArray(question.options)) {
-    //     //         question.options.forEach((option, optionIndex) => {
-    //     //             form.register(`questions.${qIndex}.options.${optionIndex}`)
-    //     //         })
-    //     //     }
-    //     // })
-    // }
 
     // *************** This one is working... Left one empty input field when delete multiple choice *************
 
@@ -207,7 +167,7 @@ const AddForm: React.FC<AddFormProps> = ({
 
     const deleteQuestion = (id: string) => {
         const currentQuestions = form.getValues('questions')
-        const questionIndex = currentQuestions.findIndex((q) => q.id === id)
+        const questionIndex = currentQuestions.findIndex((q) => q.id == id)
 
         if (questionIndex === -1) return
 
@@ -217,7 +177,7 @@ const AddForm: React.FC<AddFormProps> = ({
             Array.isArray(currentQuestions[questionIndex].options)
         ) {
             currentQuestions[questionIndex].options.forEach(
-                (_, optionIndex) => {
+                (_: any, optionIndex: any) => {
                     form.unregister(
                         `questions.${questionIndex}.options.${optionIndex}`
                     )
@@ -232,42 +192,37 @@ const AddForm: React.FC<AddFormProps> = ({
         form.setValue('questions', updatedQuestions)
     }
 
-    // const deleteQuestion = (index: number) => {
-    //     const currentQuestions = form.getValues('questions')
-    //     form.setValue(
-    //         'questions',
-    //         currentQuestions.filter((_, i) => i !== index)
-    //     )
-    //     // After deleting, update the indices of the remaining questions
-    //     const updatedQuestions = form.getValues('questions')
-    //     updatedQuestions.forEach((_, i) => {
-    //         form.setValue(`questions.${i}.id`, `question-${i}`)
-    //     })
-    // }
-
-    console.log('questions', questions)
-
-    form.handleSubmit(onSubmit, (errors) => {
-        console.log('Form errors:', errors)
-    })
-
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log('value', values)
         const { title, description, questions } = values
 
-        const formQuestionDto = questions.filter((item) => !item.id)
-        const editFormQuestionDto = questions
-            .filter((item) => item.id && !item.id.startsWith('new-'))
-            .map(({ id, typeId, isRequired, options, question }) => ({
-                id,
-                typeId,
-                isRequired,
-                options,
-                question,
+        const formQuestionDto = questions
+            .filter((item) => item.id && item.id.startsWith('new-'))
+            .map((item) => ({
+                isRequired: item.isRequired,
+                question: item.question,
+                typeId: item.typeId,
+                options: item.options?.reduce<Record<number, string>>(
+                    (acc, option, index) => {
+                        acc[index] = option
+                        return acc
+                    },
+                    {}
+                ),
             }))
 
-        console.log('formQuestionDto', formQuestionDto)
-        console.log('editFormQuestionDto', editFormQuestionDto)
+        const editFormQuestionDto = questions
+            .filter((item) => item.id && !item.id.startsWith('new-'))
+            .map((item) => ({
+                ...item,
+                id: item.id && Number(item.id),
+                options: item.options?.reduce<Record<number, string>>(
+                    (acc, option, index) => {
+                        acc[index] = option
+                        return acc
+                    },
+                    {}
+                ),
+            }))
 
         let payload = {}
         if (formQuestionDto.length > 0 && editFormQuestionDto.length > 0) {
@@ -293,12 +248,10 @@ const AddForm: React.FC<AddFormProps> = ({
             }
         }
 
-        // console.log('payload', payload)
-        // console.log('questions', questions)
         try {
             const editChapterResponse = await api.put(
                 `Content/editChapterOfModule/${moduleId}?chapterId=${content.id}`,
-                values
+                { title, description }
             )
 
             const questionsRespons = await api.post(

@@ -18,7 +18,6 @@ const FormComponent = (props: Props) => {
         props.totalStudents,
         props.data.submitStudents
     )
-    console.log('props.data', props.data)
     return (
         <div className="lg:flex h-[220px] w-full shadow-[0_4px_4px_rgb(0,0,0,0.12)] my-5 rounded-md p-4">
             <div className="flex flex-col w-full justify-between py-2 lg:mx-2">
