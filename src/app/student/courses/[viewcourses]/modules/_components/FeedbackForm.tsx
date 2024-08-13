@@ -51,7 +51,7 @@ type Props = {
 
 const FeedbackForm = (props: Props) => {
     const [questions, setQuestions] = useState<any[]>([])
-    const [status, setStatus] = useState("")
+    const [status, setStatus] = useState('')
     const [submitted, setSubmitted] = useState(false)
 
     const getAllQuizQuestionHandler = useCallback(async () => {
@@ -61,7 +61,7 @@ const FeedbackForm = (props: Props) => {
             )
             if (res.data && res.data.questions) {
                 setQuestions(res.data.questions)
-                setStatus("Not completed")
+                setStatus('Not completed')
             } else {
                 setQuestions(res.data.trackedData)
                 setStatus('Completed')
@@ -70,8 +70,7 @@ const FeedbackForm = (props: Props) => {
             toast({
                 title: 'Error',
                 description: 'An error occured while fetching the questions',
-                className:
-                    'text-start capitalize border border-destructive',
+                className: 'text-start capitalize border border-destructive',
             })
             console.error('Error fetching quiz questions:', error)
         }
@@ -89,13 +88,12 @@ const FeedbackForm = (props: Props) => {
     })
 
     useEffect(() => {
-        if (questions.length > 0) {
+        if (questions?.length > 0) {
             form.reset({ section: questions })
         }
     }, [questions, form])
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-
         const transformedData = {
             submitForm: values.section.map((item) => {
                 let chosenOptions: number[] = []
@@ -129,7 +127,7 @@ const FeedbackForm = (props: Props) => {
                 `/tracking/updateFormStatus/${props.bootcampId}/${props.moduleId}?chapterId=${props.chapterId}`,
                 transformedData
             )
-            if(res) setSubmitted(true)
+            if (res) setSubmitted(true)
             const updateChapterResponse = await api.post(
                 `/tracking/updateChapterStatus/${props.bootcampId}/${props.moduleId}?chapterId=${props.chapterId}`,
                 transformedData
@@ -137,15 +135,13 @@ const FeedbackForm = (props: Props) => {
             toast({
                 title: res.data.status,
                 description: 'Form has been submitted successfully!',
-                className:
-                    'text-start capitalize border border-secondary',
+                className: 'text-start capitalize border border-secondary',
             })
         } catch (error) {
             toast({
-                title: "Error",
+                title: 'Error',
                 description: 'Error fetching form questions:',
-                className:
-                    'text-start capitalize border border-destructive',
+                className: 'text-start capitalize border border-destructive',
             })
         }
     }
@@ -161,7 +157,7 @@ const FeedbackForm = (props: Props) => {
                     <div className="description bg-blue-100 p-5 rounded-lg">
                         {status === 'Completed' ? (
                             <p className="text-lg">
-                               You answers has been submitted..!
+                                You answers has been submitted..!
                             </p>
                         ) : (
                             <p className="text-lg">
@@ -174,7 +170,7 @@ const FeedbackForm = (props: Props) => {
 
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)}>
-                            {questions.map((item, index) => (
+                            {questions?.map((item, index) => (
                                 <div
                                     key={index}
                                     className="space-y-3 text-start"
@@ -187,82 +183,106 @@ const FeedbackForm = (props: Props) => {
                                             </div>
                                             {status === 'Completed' ? (
                                                 <div className="space-y-3 text-start mt-2 mb-10">
-                                                    <RadioGroup value={item.formTrackingData[0].chosenOptions[0]}>
-                                                        {Object.keys(item.options).map((option) => {
-                                                            const answer = item.formTrackingData[0].chosenOptions[0];
+                                                    <RadioGroup
+                                                        value={
+                                                            item
+                                                                .formTrackingData[0]
+                                                                .chosenOptions[0]
+                                                        }
+                                                    >
+                                                        {Object.keys(
+                                                            item.options
+                                                        ).map((option) => {
+                                                            const answer =
+                                                                item
+                                                                    .formTrackingData[0]
+                                                                    .chosenOptions[0]
                                                             return (
                                                                 <div
                                                                     key={option}
                                                                     className={`flex space-x-2 mr-4 mt-1 p-3 ${
-                                                                        answer == option &&
+                                                                        answer ==
+                                                                            option &&
                                                                         'border border-gray-800 border-2 rounded-lg'
                                                                     }`}
                                                                 >
                                                                     <div className="flex items-center w-full space-x-3 space-y-0">
-                                                                        <RadioGroupItem 
-                                                                            value={option} 
-                                                                            checked={answer == option}
+                                                                        <RadioGroupItem
+                                                                            value={
+                                                                                option
+                                                                            }
+                                                                            checked={
+                                                                                answer ==
+                                                                                option
+                                                                            }
                                                                             disabled
                                                                         />
                                                                         <label className="font-normal">
-                                                                            {item.options[option]}
+                                                                            {
+                                                                                item
+                                                                                    .options[
+                                                                                    option
+                                                                                ]
+                                                                            }
                                                                         </label>
                                                                     </div>
                                                                 </div>
-                                                            );
+                                                            )
                                                         })}
                                                     </RadioGroup>
                                                 </div>
                                             ) : (
-                                            <FormField
-                                                control={form.control}
-                                                name={`section.${index}.answer`}
-                                                render={({ field }) => (
-                                                    <div className="space-y-3 text-start">
-                                                        <RadioGroup
-                                                            onValueChange={
-                                                                field.onChange
-                                                            }
-                                                            value={
-                                                                field.value as string
-                                                            }
-                                                        >
-                                                            {Object.keys(
-                                                                item.options
-                                                            ).map(
-                                                                (optionKey) => (
-                                                                    <div
-                                                                        key={
-                                                                            optionKey
-                                                                        }
-                                                                        className={`flex space-x-2 mr-4 mt-1 p-3 ${
-                                                                            (field.value as string) ===
-                                                                                optionKey &&
-                                                                            `border border-secondary border-2 rounded-lg`
-                                                                        }`}
-                                                                    >
-                                                                        <div className="flex items-center w-full space-x-3 space-y-0">
-                                                                            <RadioGroupItem
-                                                                                value={
-                                                                                    optionKey
-                                                                                }
-                                                                            />
-                                                                            <label className="font-normal">
-                                                                                {
-                                                                                    item
-                                                                                        .options[
+                                                <FormField
+                                                    control={form.control}
+                                                    name={`section.${index}.answer`}
+                                                    render={({ field }) => (
+                                                        <div className="space-y-3 text-start">
+                                                            <RadioGroup
+                                                                onValueChange={
+                                                                    field.onChange
+                                                                }
+                                                                value={
+                                                                    field.value as string
+                                                                }
+                                                            >
+                                                                {Object.keys(
+                                                                    item.options
+                                                                ).map(
+                                                                    (
+                                                                        optionKey
+                                                                    ) => (
+                                                                        <div
+                                                                            key={
+                                                                                optionKey
+                                                                            }
+                                                                            className={`flex space-x-2 mr-4 mt-1 p-3 ${
+                                                                                (field.value as string) ===
+                                                                                    optionKey &&
+                                                                                `border border-secondary border-2 rounded-lg`
+                                                                            }`}
+                                                                        >
+                                                                            <div className="flex items-center w-full space-x-3 space-y-0">
+                                                                                <RadioGroupItem
+                                                                                    value={
                                                                                         optionKey
-                                                                                    ]
-                                                                                }
-                                                                            </label>
+                                                                                    }
+                                                                                />
+                                                                                <label className="font-normal">
+                                                                                    {
+                                                                                        item
+                                                                                            .options[
+                                                                                            optionKey
+                                                                                        ]
+                                                                                    }
+                                                                                </label>
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                )
-                                                            )}
-                                                        </RadioGroup>
-                                                    </div>
-                                                )}
-                                            />
+                                                                    )
+                                                                )}
+                                                            </RadioGroup>
+                                                        </div>
+                                                    )}
+                                                />
                                             )}
                                         </div>
                                     )}
@@ -275,14 +295,22 @@ const FeedbackForm = (props: Props) => {
                                             </div>
                                             {status === 'Completed' ? (
                                                 <div className="mt-2 mb-10">
-                                                    {Object.keys(item.options).map((option) => {
-                                                        const answer = item.formTrackingData[0].chosenOptions;
-                                                        const optionNumber = Number(option); 
+                                                    {Object.keys(
+                                                        item.options
+                                                    ).map((option) => {
+                                                        const answer =
+                                                            item
+                                                                .formTrackingData[0]
+                                                                .chosenOptions
+                                                        const optionNumber =
+                                                            Number(option)
                                                         return (
                                                             <div
                                                                 key={option}
                                                                 className={`flex space-x-2 mr-4 mt-1 p-3 ${
-                                                                    answer.includes(optionNumber) &&
+                                                                    answer.includes(
+                                                                        optionNumber
+                                                                    ) &&
                                                                     'border border-gray-800 border-2 rounded-lg'
                                                                 }`}
                                                             >
@@ -291,19 +319,31 @@ const FeedbackForm = (props: Props) => {
                                                                         optionNumber
                                                                     )}
                                                                     disabled
-                                                                    aria-label={option}
+                                                                    aria-label={
+                                                                        option
+                                                                    }
                                                                     className={`translate-y-[2px] mr-1 ${
-                                                                        answer.includes(optionNumber) && 'bg-green-500'
+                                                                        answer.includes(
+                                                                            optionNumber
+                                                                        ) &&
+                                                                        'bg-green-500'
                                                                     }`}
                                                                 />
-                                                                {item.options[option]}
+                                                                {
+                                                                    item
+                                                                        .options[
+                                                                        option
+                                                                    ]
+                                                                }
                                                             </div>
-                                                    )})}
+                                                        )
+                                                    })}
                                                 </div>
                                             ) : (
-                                            <div className="mt-2">
-                                                {Object.keys(item.options).map(
-                                                    (optionKey) => (
+                                                <div className="mt-2">
+                                                    {Object.keys(
+                                                        item.options
+                                                    ).map((optionKey) => (
                                                         <FormField
                                                             key={optionKey}
                                                             control={
@@ -379,9 +419,8 @@ const FeedbackForm = (props: Props) => {
                                                                 )
                                                             }}
                                                         />
-                                                    )
-                                                )}
-                                            </div>
+                                                    ))}
+                                                </div>
                                             )}
                                         </div>
                                     )}
@@ -393,7 +432,11 @@ const FeedbackForm = (props: Props) => {
                                                 <p>{item.question}</p>
                                             </div>
                                             {status === 'Completed' ? (
-                                                <p className='mt-2 mb-10'>{item.formTrackingData[0].answer}</p>
+                                                <p className="mt-2 mb-10">
+                                                    {
+                                                        item.formTrackingData[0]?.answer
+                                                    }
+                                                </p>
                                             ) : (
                                                 <FormField
                                                     control={form.control}
@@ -425,7 +468,7 @@ const FeedbackForm = (props: Props) => {
                                                 />
                                             )}
                                         </div>
-                                    )} 
+                                    )}
 
                                     {item.typeId === 4 && (
                                         <div className="mt-6">
@@ -436,7 +479,12 @@ const FeedbackForm = (props: Props) => {
                                             {status === 'Completed' ? (
                                                 <div className="flex flex-row gap-x-1 mt-2 mb-10">
                                                     <CalendarIcon className="h-4 w-4 opacity-50 m-1" />
-                                                    <p>{formatDate(item.formTrackingData[0].answer)}</p>
+                                                    <p>
+                                                        {formatDate(
+                                                            item
+                                                                .formTrackingData[0]?.answer
+                                                        )}
+                                                    </p>
                                                 </div>
                                             ) : (
                                                 <div className="flex flex-row gap-x-2">
@@ -526,7 +574,12 @@ const FeedbackForm = (props: Props) => {
                                             {status === 'Completed' ? (
                                                 <div className="flex flex-row gap-x-1 mt-2 mb-10">
                                                     <Clock className="h-4 w-4 opacity-50 m-1" />
-                                                    <p>{item.formTrackingData[0].answer}</p>
+                                                    <p>
+                                                        {
+                                                            item
+                                                                .formTrackingData[0]?.answer
+                                                        }
+                                                    </p>
                                                 </div>
                                             ) : (
                                                 <FormField

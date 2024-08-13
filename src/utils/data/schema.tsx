@@ -22,6 +22,7 @@ export const taskSchema = z.object({
     newId: z.number(),
     moduleId: z.number(),
     chapterId: z.number(),
+    emailId: z.string(),
 })
 
 export const testCaseSchema = z.object({

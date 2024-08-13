@@ -40,10 +40,9 @@ const Page = ({ params }: { params: any }) => {
         } catch (error) {
             // console.error('Error fetching submissions:', error)
             toast({
-                title: "Error",
+                title: 'Error',
                 description: 'Error fetching submissions:',
-                className:
-                    'text-start capitalize border border-destructive',
+                className: 'text-start capitalize border border-destructive',
             })
         }
     }, [params.courseId])
@@ -57,10 +56,9 @@ const Page = ({ params }: { params: any }) => {
         } catch (error) {
             // console.error('Error fetching assessments:', error)
             toast({
-                title: "Error",
+                title: 'Error',
                 description: 'Error fetching assessments:',
-                className:
-                    'text-start capitalize border border-destructive',
+                className: 'text-start capitalize border border-destructive',
             })
         }
     }, [params.courseId])
@@ -75,10 +73,9 @@ const Page = ({ params }: { params: any }) => {
         } catch (error) {
             // console.error('Error fetching assessments:', error)
             toast({
-                title: "Error",
+                title: 'Error',
                 description: 'Error fetching assessments:',
-                className:
-                    'text-start capitalize border border-destructive',
+                className: 'text-start capitalize border border-destructive',
             })
         }
     }, [params.courseId])
@@ -92,10 +89,9 @@ const Page = ({ params }: { params: any }) => {
             setTotalStudents(res.data.totalStudents)
         } catch (error) {
             toast({
-                title: "Error",
+                title: 'Error',
                 description: 'Error fetching form data:',
-                className:
-                    'text-start capitalize border border-destructive',
+                className: 'text-start capitalize border border-destructive',
             })
         }
     }, [params.courseId])
@@ -332,15 +328,18 @@ const Page = ({ params }: { params: any }) => {
                 {activeTab === 'form' && (
                     <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2 lg:grid-cols-3">
                         {formData.map((item: any) => {
-                            return item.moduleChapterData.map((data: any) => (
-                                <FormComponent
-                                    moduleName={item.name}
-                                    moduleId={item.id}
-                                    bootcampId={item.bootcampId}
-                                    data={data}
-                                    totalStudents={totalStudents}
-                                />
-                            ))
+                            return item.moduleChapterData.map(
+                                (data: any, index: any) => (
+                                    <FormComponent
+                                        key={index}
+                                        moduleName={item.name}
+                                        moduleId={item.id}
+                                        bootcampId={item.bootcampId}
+                                        data={data}
+                                        totalStudents={totalStudents}
+                                    />
+                                )
+                            )
                         })}
                     </div>
                 )}

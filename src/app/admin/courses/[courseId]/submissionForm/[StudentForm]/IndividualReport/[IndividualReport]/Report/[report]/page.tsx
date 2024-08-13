@@ -291,8 +291,7 @@ const Page = ({ params }: { params: any }) => {
                                             </div>
                                             <p>
                                                 {
-                                                    item.formTrackingData[0]
-                                                        .answer
+                                                    item.formTrackingData[0]?.answer
                                                 }
                                             </p>
                                         </div>
@@ -308,8 +307,7 @@ const Page = ({ params }: { params: any }) => {
                                                 <CalendarIcon className="h-4 w-4 opacity-50 m-1" />
                                                 <p>
                                                     {formatDate(
-                                                        item.formTrackingData[0]
-                                                            .answer
+                                                        item.formTrackingData[0]?.answer
                                                     )}
                                                 </p>
                                             </div>
@@ -326,8 +324,7 @@ const Page = ({ params }: { params: any }) => {
                                                 <Clock className="h-4 w-4 opacity-50 m-1" />
                                                 <p>
                                                     {
-                                                        item.formTrackingData[0]
-                                                            .answer
+                                                        item.formTrackingData[0]?.answer
                                                     }
                                                 </p>
                                             </div>

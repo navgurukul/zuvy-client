@@ -37,7 +37,6 @@ import {
 type FormSectionProps = {
     item: any
     index: any
-    addQuestion: any
     form: any
     deleteQuestion: any
     formData: any
@@ -60,28 +59,10 @@ const getQuestionType = (typeId: number) => {
     }
 }
 
-// const getTypeId = (questionType: string) => {
-//     switch (questionType) {
-//         case 'Multiple Choice':
-//             return 1
-//         case 'Checkboxes':
-//             return 2
-//         case 'Long Text Answer':
-//             return 3
-//         case 'Date':
-//             return 4
-//         case 'Time':
-//             return 5
-//         default:
-//             return 1
-//     }
-// }
-
 const FormSection: React.FC<FormSectionProps> = ({
     item,
     index,
     form,
-    addQuestion,
     deleteQuestion,
     formData,
 }) => {
@@ -145,11 +126,6 @@ const FormSection: React.FC<FormSectionProps> = ({
         }
     }
 
-    // const handleQuestionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    //     const newValue = e.target.value
-    //     form.setValue(`question_${index}`, newValue)
-    // }
-
     const handleOptionChange = (
         e: React.ChangeEvent<HTMLInputElement>,
         optionIndex: number
@@ -164,15 +140,6 @@ const FormSection: React.FC<FormSectionProps> = ({
     const addOption = () => {
         setOptions([...options, ''])
     }
-
-    // const handleRequiredQuestion = (index: number) => {
-    //     // const newSection = [...section]
-    //     // newSection[index] = {
-    //     //     ...newSection[index],
-    //     //     isRequired: !newSection[index].isRequired,
-    //     // }
-    //     // setSection(newSection)
-    // }
 
     const removeOption = (idx: number) => {
         // Remove the option from the state
@@ -217,11 +184,6 @@ const FormSection: React.FC<FormSectionProps> = ({
             }
         }
     }, [selectedSection, index, form, questionData])
-
-    useEffect(() => {
-        console.log('Updated selectedSection:', selectedSection)
-        console.log('questionData', questionData)
-    }, [questionData])
 
     return (
         <div>

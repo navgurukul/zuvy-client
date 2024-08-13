@@ -172,17 +172,13 @@ const AddForm: React.FC<AddFormProps> = ({
         if (questionIndex === -1) return
 
         // Unregister the question's options
-        if (
-            currentQuestions[questionIndex]?.options &&
-            Array.isArray(currentQuestions[questionIndex].options)
-        ) {
-            currentQuestions[questionIndex].options.forEach(
-                (_: any, optionIndex: any) => {
-                    form.unregister(
-                        `questions.${questionIndex}.options.${optionIndex}`
-                    )
-                }
-            )
+        const question = currentQuestions[questionIndex]
+        if (question?.options && Array.isArray(question.options)) {
+            question.options.forEach((_: any, optionIndex: any) => {
+                form.unregister(
+                    `questions.${questionIndex}.options.${optionIndex}`
+                )
+            })
         }
 
         // Remove the question
@@ -322,11 +318,7 @@ const AddForm: React.FC<AddFormProps> = ({
                             item={item}
                             index={index}
                             form={form}
-                            addQuestion={addQuestion}
-                            // deleteQuestion={() => deleteQuestion(index)}
-                            // deleteQuestion={() => deleteQuestion(item.id)}
                             deleteQuestion={deleteQuestion}
-                            // formData={content.formQuestionDetails}
                             formData={questions}
                         />
                     ))}
