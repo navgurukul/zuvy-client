@@ -73,12 +73,13 @@ export function Stat({ className, ...props }: CardProps) {
                 console.error('Error getting enrolled courses:', error)
             }
         }
-        if (userID) getStudents()
+        if (userID && selectedCourse) getStudents()
     }, [userID, selectedCourse])
 
-    const ownRank =
+    const rank =
         students.length > 0 &&
         students.findIndex((item: any) => userID == item.userInfo.id)
+    const ownRank = rank !== false ? rank + 1 : 'N/A'
 
     useEffect(() => {
         const getEnrolledCourses = async () => {
@@ -276,7 +277,8 @@ export function Stat({ className, ...props }: CardProps) {
                                     <span className="text-sm font-medium  mr-2">
                                         Your rank
                                     </span>
-                                    <ChevronUp color="#518672" />
+                                    {/* Use ChevronUp when it is functional */}
+                                    {/* <ChevronUp color="#518672" /> */}
                                     {/* </a> */}
                                 </div>
                             </div>

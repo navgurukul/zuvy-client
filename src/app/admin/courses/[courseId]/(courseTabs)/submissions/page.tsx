@@ -15,6 +15,7 @@ import Link from 'next/link'
 import AssesmentComponent from '../../_components/AssesmentComponent'
 import { Spinner } from '@/components/ui/spinner'
 import FormComponent from '../../_components/FormComponent'
+import Assignments from './components/assignments'
 
 const Page = ({ params }: { params: any }) => {
     const [activeTab, setActiveTab] = useState('practice')
@@ -116,7 +117,6 @@ const Page = ({ params }: { params: any }) => {
         return () => clearTimeout(timer)
     }, [])
 
-    console.log(assesments)
     return (
         <div className="">
             {loading ? (
@@ -168,6 +168,16 @@ const Page = ({ params }: { params: any }) => {
                         }`}
                     >
                         Form
+                    </Button>
+                    <Button
+                        onClick={() => handleTabChange('assignments')}
+                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
+                            activeTab === 'assignments'
+                                ? 'bg-secondary  text-white'
+                                : 'bg-gray-200 text-gray-800'
+                        }`}
+                    >
+                        Assignments
                     </Button>
                 </div>
             )}
@@ -333,6 +343,9 @@ const Page = ({ params }: { params: any }) => {
                             ))
                         })}
                     </div>
+                )}
+                {activeTab === 'assignments' && (
+                    <Assignments courseId={params.courseId} />
                 )}
             </div>
         </div>

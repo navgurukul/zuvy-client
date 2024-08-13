@@ -53,7 +53,7 @@ const AddAssignent = ({ content }: AssignmentProps) => {
 
     const editor = useEditor({
         extensions,
-        content,
+        content
     })
 
     const [title, setTitle] = useState('')
@@ -73,7 +73,7 @@ const AddAssignent = ({ content }: AssignmentProps) => {
             )
             const contentDetails = response.data.contentDetails[0]
             setTitle(contentDetails.title)
-            editor?.commands.setContent(contentDetails.content)
+            contentDetails && editor?.commands.setContent(contentDetails.content)
         } catch (error) {
             console.error('Error fetching assignment content:', error)
         }
@@ -81,10 +81,10 @@ const AddAssignent = ({ content }: AssignmentProps) => {
 
     const editAssignmentContent = async () => {
         try {
-            const assignmentContent = [editor?.getJSON()]
+            const articleContent = [editor?.getJSON()]
             const data = {
                 title,
-                assignmentContent,
+                articleContent,
             }
 
             await api.put(
@@ -93,7 +93,7 @@ const AddAssignent = ({ content }: AssignmentProps) => {
             )
             toast({
                 title: 'Success',
-                description: 'Article Chapter Edited Successfully',
+                description: 'Assignment Chapter Edited Successfully',
                 className: 'text-start capitalize border border-secondary',
             })
         } catch (error: any) {
@@ -110,7 +110,8 @@ const AddAssignent = ({ content }: AssignmentProps) => {
     // async
     useEffect(() => {
         getAssignmentContent()
-    }, [content])
+        console.log('content', content?.contentDetails[0].content)
+    }, [content, editor])
 
     return (
         <div>

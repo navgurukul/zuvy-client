@@ -52,11 +52,9 @@ const CurricullumCard = ({
 }: Props) => {
     // states and variables
     const router = useRouter()
-    
+
     // Calculate time in weeks and days
-    const timeAllotedInWeeks = Math.ceil(timeAlloted / 604800) 
-
-
+    const timeAllotedInWeeks = Math.ceil(timeAlloted / 604800)
 
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
 
@@ -93,6 +91,7 @@ const CurricullumCard = ({
     }
 
     return (
+        
         <div className="w-full flex items-center justify-between gap-y-2 cursor-pointer">
             <div className="w-full p-2" onClick={handleModuleRoute}>
                 <div className="flex mb-2 w-full justify-between">
@@ -120,7 +119,9 @@ const CurricullumCard = ({
                     <div className="flex items-center justify-start gap-x-2">
                         <Clock1 size={15} />
                         <p className="text-md font-semibold capitalize text-gray-600">
-                           {timeAllotedInWeeks  > 1 ? `${timeAllotedInWeeks} weeks` : `${timeAllotedInWeeks} week`}
+                            {timeAllotedInWeeks > 1
+                                ? `${timeAllotedInWeeks} weeks`
+                                : `${timeAllotedInWeeks} week`}
                         </p>
                     </div>
                     {articlesCount > 0 ? (

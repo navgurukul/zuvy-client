@@ -53,9 +53,12 @@ function Page({
     )
     const { setIsParamBatchId } = getParamBatchId()
     const [instructorDetails, setInstructorDetails] = useState<any>()
+    const [allClasses, setAllClasses] = useState<any[]>([])
     const [upcomingClasses, setUpcomingClasses] = useState([])
     const [ongoingClasses, setOngoingClasses] = useState([])
-    const [submission, setSubmission] = useState<any[]>([])
+    const [upcomingAssignments, setUpcomingAssignments] = useState([])
+    const [lateAssignments, setLateAssignments] = useState([])
+    const [isCourseStarted, setIsCourseStarted] = useState(false)
 
     const [attendenceData, setAttendenceData] = useState<any[]>([])
     // const [completedClasses, setCompletedClasses] = useState([])
@@ -70,12 +73,27 @@ function Page({
 
     // setIsParamBatchId(params.batchId)
     const getUpcomingClassesHandler = useCallback(async () => {
-        await api
-            .get(`/student/Dashboard/classes/?batch_id=${params.batchId}`)
-            .then((res) => {
-                setUpcomingClasses(res.data.upcoming)
-                setOngoingClasses(res.data.ongoing)
-            })
+        const response = await api.get(
+            `/student/Dashboard/classes/?batch_id=${params.batchId}`
+        )
+        if (Array.isArray(response.data.data)) {
+            setIsCourseStarted(false)
+        } else {
+            setIsCourseStarted(true)
+            const classes = [
+                ...response.data.data.filterClasses.ongoing,
+                ...response.data.data.filterClasses.upcoming,
+            ]
+            setAllClasses(classes)
+            await api
+                .get(
+                    `/student/Dashboard/classes/?batch_id=${params.batchId}&limit=2&offset=0`
+                )
+                .then((res) => {
+                    setUpcomingClasses(res.data.data.filterClasses.upcoming)
+                    setOngoingClasses(res.data.data.filterClasses.ongoing)
+                })
+        }
     }, [params.batchId])
     const getAttendanceHandler = useCallback(async () => {
         await api.get(`/student/Dashboard/attendance`).then((res) => {
@@ -84,9 +102,12 @@ function Page({
     }, [])
     const getUpcomingSubmissionHandler = useCallback(async () => {
         await api
-            .get(`/tracking/upcomingSubmission/${params.viewcourses}`)
+            .get(
+                `/tracking/allupcomingSubmission?bootcampId=${params.viewcourses}`
+            )
             .then((res) => {
-                setSubmission(res.data)
+                setUpcomingAssignments(res.data?.data?.upcomingAssignments)
+                setLateAssignments(res.data?.data?.lateAssignments)
             })
     }, [params.viewcourses])
     useEffect(() => {
@@ -107,25 +128,6 @@ function Page({
         getAttendanceHandler,
         setIsParamBatchId,
     ])
-    // useEffect(() => {
-    //     // const userIdLocal = JSON.parse(localStorage.getItem("AUTH") || "");
-    //     if (userID) {
-    //         api.get(`/bootcamp/studentClasses/${params.viewcourses}`, {
-    //             params: {
-    //                 userId: userID,
-    //             },
-    //         })
-    //             .then((response) => {
-    //                 const { upcomingClasses, ongoingClasses } = response.data
-    //                 setUpcomingClasses(upcomingClasses)
-    //                 setOngoingClasses(ongoingClasses)
-    //                 // setCompletedClasses(completedClasses)
-    //             })
-    //             .catch((error) => {
-    //                 console.log('Error fetching classes:', error)
-    //             })
-    //     }
-    // }, [userID])
 
     useEffect(() => {
         const getModulesProgress = async () => {
@@ -151,7 +153,6 @@ function Page({
                 )
                 setCourseProgress(response.data.data)
                 setInstructorDetails(response.data.instructorDetails)
-                // console.log('first', response.data.instructorDetails)
             } catch (error) {
                 console.error('Error getting course progress:', error)
             }
@@ -159,14 +160,12 @@ function Page({
         if (userID) getCourseProgress()
     }, [userID, params.viewcourses])
 
-    // console.log(instructorDetails)
-
     return (
         <MaxWidthWrapper>
             <BreadcrumbCmponent crumbs={crumbs} />
 
             <div className="md:grid grid-cols-2 lg:grid-cols-3 gap-10  my-10">
-                <div className="lg:col-span-2">
+                <div className="lg:col-span-2 w-full">
                     <div className="flex items-center gap-3 mt-2 mb-10">
                         <div>
                             <Image
@@ -185,23 +184,15 @@ function Page({
                     </div>
 
                     <div className="gap-y-3 flex flex-col">
-                        <div className="flex left-0  ">
-                            <p
-                                className="text-lg p-1 font-bold"
-                                onClick={() =>
-                                    console.log('first', upcomingClasses)
-                                }
-                            >
+                        <div className="flex left-0">
+                            <p className="text-lg p-1 font-bold">
                                 Upcoming Classes
                             </p>
                         </div>
                         <div className="flex flex-col justify-between">
-                            {upcomingClasses?.length > 0 ? (
+                            {isCourseStarted && allClasses?.length > 0 ? (
                                 <div className="flex flex-col">
-                                    {/* <p className="text-lg p-1 text-start font-bold">
-                                        Upcoming Classes
-                                    </p> */}
-                                    <div className="w-[800px]">
+                                    <div className="w-full lg:max-w-[850px]">
                                         {ongoingClasses.map(
                                             (classData: any, index) => (
                                                 <ClassCard
@@ -245,100 +236,51 @@ function Page({
                                     </p>
                                 </div>
                             )}
-
-                            {/* Other components can be placed here */}
-
-                            {/* Example card component for future use */}
-                            {/* <Card className="text-start">
-            <CardHeader className="bg-muted">
-                <CardTitle>Pick up where you left</CardTitle>
-            </CardHeader>
-            <CardContent className="p-3 grid gap-4">
-                <div className="flex flex-wrap items-center p-4 justify-between gap-8">
-                    <div className="flex items-center">
-                        <BookOpenText className="hidden sm:block" />
-                        <div className="flex-1 ml-2 space-y-1">
-                            <p className="text-sm font-medium leading-none">
-                            {resumeCourse?.bootcamp_name}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                                {resumeCourse.module_name}
-                            </p>
                         </div>
-                    </div>
-                    <Link
-                        href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`}
-                    >
-                        <Button>Continue</Button>
-                        </Link>
-                        </div>
-                        </CardContent>
-                    </Card> */}
 
-                            {/* <div className="w-[400px] h-[200px] flex flex-col bg-gray-100 rounded-lg items-center justify-center ">
-                                <h1 className="mt-6 text-xl font-semibold">
-                                    Attendance
-                                </h1>
-                                <div className="flex flex-col gap-2 items-center">
-                                    <div className="flex items-center gap-2">
-                                        <div
-                                            className={`w-[10px] h-[10px] rounded-full  ${getAttendanceColorClass(
-                                                attendenceData[0]?.attendance
-                                            )}`}
-                                        />
-                                        <h1>
-                                            {attendenceData[0]?.attendance}%
+                        {allClasses?.length > 2 && (
+                            <div className="flex justify-center mt-3 w-3/4">
+                                <Link
+                                    href={`/student/courses/${params.viewcourses}/batch/${params.batchId}/classes`}
+                                >
+                                    <div className="flex items-center border rounded-md border-secondary px-3 py-1 text-secondary">
+                                        <h1 className="text-lg p-1 font-bold">
+                                            See All Upcoming Classes
                                         </h1>
+                                        <ChevronRight size={20} />
                                     </div>
-                                    <div className="flex">
-                                        <p className="text-md font-semibold">
-                                            {' '}
-                                            {
-                                                attendenceData[0]
-                                                    ?.attendedClasses
-                                            }{' '}
-                                            of {attendenceData[0]?.totalClasses}{' '}
-                                            Classes Attended
-                                        </p>
-                                    </div>
-                                </div>
-                            </div> */}
-                        </div>
-
-                        <div className="flex justify-center mt-3">
-                            <Link
-                                href={`/student/courses/${params.viewcourses}/recordings`}
-                            >
-                                <div className="flex items-center border rounded-md border-secondary px-3 py-1 text-secondary">
-                                    <h1 className="text-lg p-1 font-bold">
-                                        See All Classes
-                                    </h1>
-                                    <ChevronRight size={20} />
-                                </div>
-                            </Link>
-                        </div>
+                                </Link>
+                            </div>
+                        )}
                         <div className="flex flex-col flex-start">
-                            <h1 className="text-lg p-1 text-start font-bold">
-                                Upcoming Submission
-                            </h1>
-                            <div className="w-[800px]">
-                                {submission.length > 0 ? (
-                                    submission.map((data) => {
-                                        return (
-                                            <SubmissionCard
-                                                classData={data}
-                                                key={data}
-                                            />
-                                        )
-                                    })
-                                ) : (
-                                    <div>No upcoming Submission</div>
-                                )}
+                            <div className="w-full lg:max-w-[850px]">
+                                {upcomingAssignments &&
+                                    upcomingAssignments.length > 0 && (
+                                        <div className="flex flex-col">
+                                            {upcomingAssignments.length > 0 && (
+                                                <h1 className="text-lg p-1 text-start font-bold mb-4">
+                                                    Upcoming Assignments
+                                                </h1>
+                                            )}
+                                            {upcomingAssignments.map(
+                                                (data: any, index) => (
+                                                    <SubmissionCard
+                                                        classData={data}
+                                                        key={index}
+                                                        status={
+                                                            'upcomingAssignment'
+                                                        }
+                                                        view={'course'}
+                                                    />
+                                                )
+                                            )}
+                                        </div>
+                                    )}
                             </div>
                         </div>
                     </div>
 
-                    <div className="mt-10">
+                    <div className="mt-10 w-full lg:max-w-[860px]">
                         <div className="flex flex-start">
                             <p className="text-lg p-1 font-bold">
                                 Course Modules
@@ -438,6 +380,27 @@ function Page({
                                 </p>
                             </div>
                         )}
+                    </div>
+                    <div className="flex flex-col flex-start mt-5">
+                        <div className="w-full">
+                            {lateAssignments && (
+                                <div className="flex flex-col w-full lg:max-w-[860px]">
+                                    {lateAssignments.length > 0 && (
+                                        <h1 className="text-lg p-1 text-start font-bold mb-4">
+                                            Late Assignments
+                                        </h1>
+                                    )}
+                                    {lateAssignments.map((data: any, index) => (
+                                        <SubmissionCard
+                                            classData={data}
+                                            key={index}
+                                            status={'lateAssignmet'}
+                                            view={'course'}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* <div className="flex flex-start">

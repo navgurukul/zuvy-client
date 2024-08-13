@@ -67,7 +67,7 @@ function Attendance() {
 
     return (
         <div>
-            <div className="flex flex-col flex-start mt-6">
+            <div className="lg:w-[380px] flex flex-col flex-start mt-6">
                 <div className="flex flex-row justify-between gap-8">
                     {enrolledCourse?.length > 0 && (
                         // <div

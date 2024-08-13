@@ -7,11 +7,7 @@ import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-co
 import { Checkbox } from '@/components/ui/checkbox'
 
 import { Task } from '@/utils/data/schema'
-import {
-    deleteStudentHandler,
-    getAttendanceColorClass,
-    onBatchChange,
-} from '@/utils/students'
+import { deleteStudentHandler, getAttendanceColorClass } from '@/utils/students'
 import {
     getBatchData,
     getDeleteStudentStore,

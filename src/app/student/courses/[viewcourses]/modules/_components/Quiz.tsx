@@ -93,7 +93,6 @@ function Quiz(props: Props) {
         const transformedBody = {
             submitQuiz: mappedAnswers,
         }
-        console.log(transformedBody)
         await api
             .post(
                 `/tracking/updateQuizAndAssignmentStatus/${props.bootcampId}/${props.moduleId}?chapterId=${props.chapterId}`,
@@ -108,7 +107,6 @@ function Quiz(props: Props) {
                 getAllQuizQuestionHandler()
             })
     }
-    console.log(props)
 
     return (
         <div>

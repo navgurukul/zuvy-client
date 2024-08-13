@@ -56,12 +56,12 @@ const formSchema = z.object({
 })
 
 export default function EditCodingQuestionForm({
-    setIsCodingDialogOpen,
+    setIsCodingEditDialogOpen,
     getAllCodingQuestions,
     setCodingQuestions,
     codingQuestions,
 }: {
-    setIsCodingDialogOpen: any
+    setIsCodingEditDialogOpen: any
     getAllCodingQuestions: any
     setCodingQuestions: any
     codingQuestions: any
@@ -121,7 +121,7 @@ export default function EditCodingQuestionForm({
                 description: 'Question Edited Successfully',
                 className: 'text-start capitalize border border-secondary',
             })
-            setIsCodingDialogOpen(false)
+            setIsCodingEditDialogOpen(false)
         } catch (error: any) {
             toast({
                 title: 'Error',

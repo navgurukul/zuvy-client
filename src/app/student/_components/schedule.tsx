@@ -44,77 +44,57 @@ function Schedule({ className, ...props }: ScheduleProps) {
     const userID = studentData?.id && studentData?.id
     const [resumeCourse, setResumeCourse] = useState<ResumeCourse>({})
     const [nextChapterId, setNextChapterId] = useState([])
+    const [allClasses, setAllClasses] = useState<any[]>([])
     const [upcomingClasses, setUpcomingClasses] = useState([])
     const [ongoingClasses, setOngoingClasses] = useState([])
+    const [upcomingAssignments, setUpcomingAssignments] = useState([])
+    const [lateAssignments, setLateAssignments] = useState([])
     const [attendanceData, setAttendanceData] = useState<any[]>([])
-    const [submission, setSubmission] = useState<any[]>([])
     const [enrolledCourse, setEnrolledCourse] = useState([])
+    const [submissionMessage, setSubmissionMessage] = useState()
     const [selectedCourse, setSelectedCourse] =
         useState<EnrolledCourse | null>()
-
-    // const [ongoingClasses, setOngoingClasses] = useState([])
-    // const [completedClasses, setCompletedClasses] = useState([])
-    // useEffect(() => {
-    //     if (userID) {
-    //         api.get(`/student/${userID}`)
-    //             .then((res) => {
-    //                 api.get(`/bootcamp/studentClasses/${res.data[0].id}`, {
-    //                     params: {
-    //                         userId: userID,
-    //                     },
-    //                 })
-    //                     .then((response) => {
-    //                         const {
-    //                             upcomingClasses,
-    //                             ongoingClasses,
-    //                             completedClasses,
-    //                         } = response.data
-    //                         setUpcomingClasses(upcomingClasses)
-    //                         setOngoingClasses(ongoingClasses)
-    //                         setCompletedClasses(completedClasses)
-    //                     })
-    //                     .catch((error) => {
-    //                         console.log('Error fetching classes:', error)
-    //                     })
-    //             })
-    //             .catch((error) => {
-    //                 console.log('Error fetching classes:', error)
-    //             })
-    //     }
-    // }, [userID])
-
-    // useEffect(() => {}, [upcomingClasses, ongoingClasses, completedClasses])
 
     useEffect(() => {
         const getResumeCourse = async () => {
             try {
                 const response = await api.get('/tracking/latestUpdatedCourse')
-                setResumeCourse(response.data)
-                setNextChapterId(response.data.newChapter.id)
                 // If we get res, then course started, hence courseStarted: true;
-                if (response?.data?.code === 404) {
+                if (Array.isArray(response.data.data)) {
                     setCourseStarted(false)
+                    setSubmissionMessage(response.data.message)
                 } else {
+                    setCourseStarted(false)
                     setCourseStarted(true)
+                    setResumeCourse(response.data.data)
+                    setNextChapterId(response.data.data.newChapter.id)
                 }
             } catch (error) {
                 console.error('Error getting resume course:', error)
-                if (
-                    (error as any)?.response?.data?.message ===
-                    `Cannot read properties of undefined (reading 'moduleId')`
-                ) {
-                    setCourseStarted(false)
-                }
+                setCourseStarted(false)
             }
         }
         if (userID) getResumeCourse()
     }, [userID])
 
     const getUpcomingClassesHandler = useCallback(async () => {
-        await api.get(`/student/Dashboard/classes/`).then((res) => {
-            setUpcomingClasses(res.data.upcoming)
-            setOngoingClasses(res.data.ongoing)
-        })
+        const response = await api.get(`/student/Dashboard/classes`)
+        if (Array.isArray(response.data.data)) {
+            setCourseStarted(false)
+        } else {
+            setCourseStarted(true)
+            const classes = [
+                ...response.data.data.filterClasses.ongoing,
+                ...response.data.data.filterClasses.upcoming,
+            ]
+            setAllClasses(classes)
+            await api
+                .get(`/student/Dashboard/classes?limit=2&offset=0`)
+                .then((res) => {
+                    setUpcomingClasses(res.data.data.filterClasses.upcoming)
+                    setOngoingClasses(res.data.data.filterClasses.ongoing)
+                })
+        }
     }, [])
     const getAttendanceHandler = useCallback(async () => {
         await api.get(`/student/Dashboard/attendance`).then((res) => {
@@ -125,8 +105,9 @@ function Schedule({ className, ...props }: ScheduleProps) {
         })
     }, [selectedCourse?.id])
     const getUpcomingSubmissionHandler = useCallback(async () => {
-        await api.get(`/tracking/upcomingSubmission/9`).then((res) => {
-            setSubmission(res.data)
+        await api.get(`/tracking/allupcomingSubmission`).then((res) => {
+            setUpcomingAssignments(res.data.data.upcomingAssignments)
+            setLateAssignments(res.data.data.lateAssignments)
         })
     }, [])
 
@@ -155,9 +136,11 @@ function Schedule({ className, ...props }: ScheduleProps) {
             await Promise.all([
                 getUpcomingClassesHandler(),
                 getAttendanceHandler(),
-                getUpcomingSubmissionHandler(),
+                // getUpcomingSubmissionHandler(),
             ])
         }
+
+        if (courseStarted) getUpcomingSubmissionHandler()
 
         fetchData()
     }, [
@@ -186,30 +169,28 @@ function Schedule({ className, ...props }: ScheduleProps) {
                 </div> */}
 
                 <div className="w-full flex flex-col items-center lg:flex-row lg:justify-between gap-8">
-                    {upcomingClasses?.length > 0 ? (
+                    {allClasses?.length > 0 ? (
                         <div className="flex flex-col w-full lg:max-w-[860px]">
-                                {ongoingClasses.map((classData: any, index) => (
-                                    <ClassCard
-                                        classData={classData}
-                                        classType={classData.status}
-                                        key={index}
-                                        getClasses={() => console.log('')}
-                                        activeTab={'ongoing'}
-                                        studentSide={true}
-                                    />
-                                ))}
-                                {upcomingClasses.map(
-                                    (classData: any, index) => (
-                                        <ClassCard
-                                            classData={classData}
-                                            classType={classData.status}
-                                            key={index}
-                                            getClasses={() => console.log('')}
-                                            activeTab={'ongoing'}
-                                            studentSide={true}
-                                        />
-                                    )
-                                )}
+                            {ongoingClasses.map((classData: any, index) => (
+                                <ClassCard
+                                    classData={classData}
+                                    classType={classData.status}
+                                    key={index}
+                                    getClasses={() => console.log('')}
+                                    activeTab={'ongoing'}
+                                    studentSide={true}
+                                />
+                            ))}
+                            {upcomingClasses.map((classData: any, index) => (
+                                <ClassCard
+                                    classData={classData}
+                                    classType={classData.status}
+                                    key={index}
+                                    getClasses={() => console.log('')}
+                                    activeTab={'ongoing'}
+                                    studentSide={true}
+                                />
+                            ))}
                         </div>
                     ) : (
                         <div className="flex flex-col items-center mt-12 lg:w-[870px]">
@@ -225,6 +206,18 @@ function Schedule({ className, ...props }: ScheduleProps) {
                         </div>
                     )}
                 </div>
+                {allClasses?.length > 2 && (
+                    <div className="w-full flex justify-center mt-3">
+                        <Link href="/student/classes">
+                            <div className="flex items-center border rounded-md border-secondary px-3 py-1 text-secondary">
+                                <h1 className="text-lg p-1 font-bold">
+                                    See All Upcoming Classes
+                                </h1>
+                                <ChevronRight size={20} />
+                            </div>
+                        </Link>
+                    </div>
+                )}
             </div>
 
             {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */}
@@ -240,9 +233,9 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                 <Card className="w-full mb-3 border-none p-5 shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F]">
                                     <div className="flex flex-row justify-between items-center gap-6">
                                         <div>
-                                            <div className="flex flex-row gap-4">
+                                            <div className="flex flex-row gap-3">
                                                 <BookOpenText className="hidden sm:block mt-2" />
-                                                <h1 className="text-lg p-1 text-start font-bold">
+                                                <h1 className="text-md mt-2 text-start font-bold">
                                                     {
                                                         resumeCourse.newChapter
                                                             ?.title
@@ -284,14 +277,14 @@ function Schedule({ className, ...props }: ScheduleProps) {
                             </div>
                         </div>
                     </div>
-                    <div className="block lg:hidden flex flex-col justify-between gap-6">
+                    <div className="lg:hidden flex flex-col justify-between gap-6">
                         <div className="flex flex-col">
                             <div className="w-full">
                                 <Card className="w-full mb-3 border-none p-5 shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F]">
                                     <div>
-                                        <div className="flex flex-row gap-4">
+                                        <div className="flex flex-row gap-3">
                                             <BookOpenText className="mt-2" />
-                                            <h1 className="text-lg p-1 text-start font-bold">
+                                            <h1 className="text-md mt-2 text-start font-bold">
                                                 {resumeCourse.newChapter?.title}
                                             </h1>
                                         </div>
@@ -339,24 +332,43 @@ function Schedule({ className, ...props }: ScheduleProps) {
         className="rounded-md border"
       /> */}
             <div className="flex flex-col items-start mt-6">
-                <h1 className="text-xl p-1 text-start font-bold">
-                    Upcoming Submissions
-                </h1>
-                {/* <div className="flex flex-row"> */}
-                {/* <div
-                    className={
-                        upcomingClasses?.length < 1
-                            ? 'w-[75%]'
-                            : 'flex flex-row'
-                    }
-                > */}
-                <div className="w-full flex flex-col items-center lg:flex-row lg:justify-between gap-8">
-                    {submission.length > 0 ? (
-                        submission.map((data) => {
-                            return (
-                                <SubmissionCard classData={data} key={data} />
-                            )
-                        })
+                {lateAssignments?.length < 1 &&
+                    upcomingAssignments.length < 1 && (
+                        <h1 className="text-xl p-1 text-start font-bold mb-4">
+                            Upcoming Submissions
+                        </h1>
+                    )}
+                <div className="flex flex-col w-full lg:max-w-[860px]">
+                    {lateAssignments?.length > 0 ||
+                    upcomingAssignments?.length > 0 ? (
+                        <div className="flex flex-col w-full lg:max-w-[860px]">
+                            {lateAssignments?.length > 0 && (
+                                <h1 className="text-xl p-1 text-start font-bold mb-4">
+                                    Late Assignments
+                                </h1>
+                            )}
+                            {lateAssignments.map((data: any, index) => (
+                                <SubmissionCard
+                                    classData={data}
+                                    key={index}
+                                    status={'lateAssignmet'}
+                                    view={'dashboard'}
+                                />
+                            ))}
+                            {upcomingAssignments?.length > 0 && (
+                                <h1 className="text-xl p-1 text-start font-bold mb-4">
+                                    Upcoming Assignments
+                                </h1>
+                            )}
+                            {upcomingAssignments.map((data: any, index) => (
+                                <SubmissionCard
+                                    classData={data}
+                                    key={index}
+                                    status={'upcomingAssignment'}
+                                    view={'dashboard'}
+                                />
+                            ))}
+                        </div>
                     ) : (
                         <div className="flex flex-col items-center mt-12 lg:w-[870px]">
                             <Image
@@ -366,7 +378,8 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                 height={240}
                             />
                             <p className="text-lg mt-3 text-center">
-                                There are no upcoming Submission
+                                {submissionMessage ??
+                                    'There are no upcoming Submission'}
                             </p>
                         </div>
                     )}

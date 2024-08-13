@@ -135,7 +135,6 @@ type assessmentStore = {
     setFullScreenExitInstance: (newValue: number) => void
     copyPasteAttempt: number
     setCopyPasteAttempt: (newValue: number) => void
-
 }
 
 export const getAssessmentStore = create<assessmentStore>((set) => ({
@@ -151,10 +150,8 @@ export const getAssessmentStore = create<assessmentStore>((set) => ({
     setCopyPasteAttempt: (newValue: number) => {
         set({ copyPasteAttempt: newValue })
     },
-
 }))
 // ------------------------------
-
 
 type storeStudentData = {
     studentsData: any[]
@@ -305,7 +302,7 @@ export const getParamBatchId = create<saveParam>((set) => ({
     setIsParamBatchId: (newvalue: number) => {
         set({ paramBatchId: newvalue })
     },
-}))  
+}))
 
 // ------------------------------
 type editOpenEndedDialogs = {
@@ -332,6 +329,8 @@ export const getEditOpenEndedDialogs = create<editOpenEndedDialogs>((set) => ({
 type editCodingQuestionDialogs = {
     isCodingDialogOpen: boolean
     setIsCodingDialogOpen: (newValue: boolean) => void
+    isCodingEditDialogOpen: boolean
+    setIsCodingEditDialogOpen: (newValue: boolean) => void
     editCodingQuestionId: null
     setEditCodingQuestionId: (newValue: any) => void
 }
@@ -341,6 +340,10 @@ export const getEditCodingQuestionDialogs = create<editCodingQuestionDialogs>(
         isCodingDialogOpen: false,
         setIsCodingDialogOpen: (newValue: boolean) => {
             set({ isCodingDialogOpen: newValue })
+        },
+        isCodingEditDialogOpen: false,
+        setIsCodingEditDialogOpen: (newValue: boolean) => {
+            set({ isCodingEditDialogOpen: newValue })
         },
         editCodingQuestionId: null,
         setEditCodingQuestionId: (newValue: any) => {
@@ -442,5 +445,61 @@ export const getProctoringDataStore = create<proctoringDataType>((set) => ({
             .then((res) => {
                 set({ proctoringData: res.data })
             })
+    },
+}))
+
+type StoreStudentDataNew = {
+    students: any
+    totalPages: any
+    loading: any
+    offset: any
+    totalStudents: any
+    currentPage: any
+    limit: any
+    search: any
+    setStudents: (newValue: any) => void
+    setTotalPages: (newValue: any) => void
+    setLoading: (newValue: any) => void
+    setOffset: (newValue: number | ((prevValue: number) => number)) => void
+    setTotalStudents: (newValue: any) => void
+    setCurrentPage: (newValue: any) => void
+    setLimit: (newValue: any) => void
+    setSearch: (newValue: any) => void
+}
+
+export const getStoreStudentDataNew = create<StoreStudentDataNew>((set) => ({
+    students: [],
+    totalPages: 0,
+    loading: false,
+    offset: 0,
+    totalStudents: 0,
+    currentPage: 1,
+    limit: 10,
+    search: '',
+    setStudents: (newValue: any) => set({ students: newValue }),
+    setTotalPages: (newValue: any) => set({ totalPages: newValue }),
+    setLoading: (newValue: any) => set({ loading: newValue }),
+    setOffset: (newValue) =>
+        set((state) => ({
+            offset:
+                typeof newValue === 'function'
+                    ? newValue(state.offset)
+                    : newValue,
+        })),
+    setTotalStudents: (newValue: any) => set({ totalStudents: newValue }),
+    setCurrentPage: (newValue: any) => set({ currentPage: newValue }),
+    setLimit: (newValue: any) => set({ limit: newValue }),
+    setSearch: (newValue: any) => set({ search: newValue }),
+}))
+
+type storeBatchData = {
+    studentsBatchData: any[]
+    setStoreStudentBatchData: (newValue: any[]) => void
+}
+
+export const getStoreStudentBatchData = create<storeBatchData>((set) => ({
+    studentsBatchData: [],
+    setStoreStudentBatchData: (newValue: any[]) => {
+        set({ studentsBatchData: newValue })
     },
 }))

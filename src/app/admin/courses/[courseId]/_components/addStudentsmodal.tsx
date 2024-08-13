@@ -18,15 +18,21 @@ import {
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { STUDENT_ONBOARDING_TYPES } from '@/utils/constant'
-import { getStoreStudentData } from '@/store/store'
-import { fetchStudentData } from '@/utils/students'
+import { getStoreStudentDataNew } from '@/store/store'
+import useDebounce from '@/hooks/useDebounce'
+import { useStudentData } from '../(courseTabs)/students/components/useStudentData'
+import { fetchStudentsHandler } from '@/utils/admin'
 
 const AddStudentsModal = ({
     id,
     message,
+    batch,
+    batchId,
 }: {
     id: number
     message: boolean
+    batch: boolean
+    batchId: any
 }) => {
     // misc
     interface Student {
@@ -39,8 +45,16 @@ const AddStudentsModal = ({
     // state and variables
     const [selectedOption, setSelectedOption] = useState('1')
     const [studentData, setStudentData] = useState<StudentDataState | any>({})
-    const { studentsData, setStoreStudentData } = getStoreStudentData()
-
+    const {
+        setStudents,
+        setTotalPages,
+        setLoading,
+        offset,
+        setTotalStudents,
+        setCurrentPage,
+        limit,
+        search,
+    } = getStoreStudentDataNew()
     // func
     const handleSingleStudent = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
@@ -50,6 +64,8 @@ const AddStudentsModal = ({
     const handleStudentUploadType = (value: string) => {
         setSelectedOption(value)
     }
+
+    const courseId: any = id
 
     // async
     const handleSubmit = async () => {
@@ -62,18 +78,29 @@ const AddStudentsModal = ({
         if (transformedObject) {
             const requestBody = transformedObject
             try {
-                await api
-                    .post(`/bootcamp/students/${id}`, requestBody)
-                    .then((response) => {
-                        toast({
-                            title: response.data.status,
-                            description: response.data.message,
-                            className:
-                                'text-start capitalize border border-secondary',
-                        })
-                        fetchStudentData(id, setStoreStudentData)
-                        setStudentData({ name: '', email: '' })
+                const endpoint = batch
+                    ? `/bootcamp/students/${id}?batch_id=${batchId}`
+                    : `/bootcamp/students/${id}`
+                await api.post(endpoint, requestBody).then((response) => {
+                    toast({
+                        title: response.data.status,
+                        description: response.data.message,
+                        className:
+                            'text-start capitalize border border-secondary',
                     })
+                    fetchStudentsHandler({
+                        courseId,
+                        limit,
+                        offset,
+                        searchTerm: search,
+                        setLoading,
+                        setStudents,
+                        setTotalPages,
+                        setTotalStudents,
+                        setCurrentPage,
+                    })
+                    setStudentData({ name: '', email: '' })
+                })
             } catch (error: any) {
                 toast({
                     title: 'Error Adding Students',

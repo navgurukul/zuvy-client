@@ -13,6 +13,7 @@ import NewModuleDialog from '@/app/admin/courses/[courseId]/_components/newModul
 import { Reorder } from 'framer-motion'
 import { toast } from '@/components/ui/use-toast'
 import { Spinner } from '@/components/ui/spinner'
+import EditModuleDialog from '../../_components/EditModuleDialog'
 
 interface CurriculumItem {
     id: number
@@ -38,11 +39,12 @@ function Page() {
     // state and variables
     const [curriculum, setCurriculum] = useState([])
     const { courseData } = getCourseData()
-    const [typeId, setTypeId] = useState(0)
+    const [typeId, setTypeId] = useState(1)
     const [loading, setLoading] = useState(true)
     const [editMode, setEditMode] = useState(false)
     const [moduleId, setModuleId] = useState(0)
     const [isOpen, setIsOpen] = useState(false)
+    const [isEditOpen, setIsEditOpen] = useState(false)
     const [selectedModuleData, setSelectedModuleData] =
         useState<ModuleData | null>(null)
     const [moduleData, setModuleData] = useState({
@@ -64,6 +66,7 @@ function Page() {
 
     const handleModuleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
+        console.log(name, value)
         setModuleData((prev) => ({ ...prev, [name]: value }))
     }
 
@@ -84,15 +87,16 @@ function Page() {
     const editHandle = (module: any) => {
         setEditMode(true)
         setModuleId(module)
-        setIsOpen(true)
+        setIsEditOpen(true)
     }
 
+    // Convert seconds to months, weeks and days:-
     const convertSeconds = (seconds: number) => {
         const SECONDS_IN_A_MINUTE = 60
         const SECONDS_IN_AN_HOUR = 60 * SECONDS_IN_A_MINUTE
         const SECONDS_IN_A_DAY = 24 * SECONDS_IN_AN_HOUR
         const SECONDS_IN_A_WEEK = 7 * SECONDS_IN_A_DAY
-        const SECONDS_IN_A_MONTH = 30.44 * SECONDS_IN_A_DAY
+        const SECONDS_IN_A_MONTH = 28 * SECONDS_IN_A_DAY
 
         const months = Math.floor(seconds / SECONDS_IN_A_MONTH)
         seconds %= SECONDS_IN_A_MONTH
@@ -125,12 +129,13 @@ function Page() {
         }
     }, [selectedModuleData])
 
+
+//  Edit Module Function:-
     const editModule = () => {
         const { days, weeks, months } = timeData
 
-        const totalSeconds = moment
-            .duration({ days, weeks, months })
-            .asSeconds()
+        const totalDays = days + (weeks * 7) + (months * 28)
+        const totalSeconds = totalDays * 86400
 
         const moduleDto = {
             ...moduleData,
@@ -138,55 +143,74 @@ function Page() {
             isLock: false,
         }
 
-        api.put(
-            `/content/editModuleOfBootcamp/${courseData?.id}?moduleId=${moduleId}`,
-            { moduleDto }
-        )
-            .then((res) => {
-                toast({
-                    title: 'Success',
-                    description: 'Module Edited Successfully',
-                    className: 'text-start capitalize border border-secondary',
-                })
-                fetchCourseModules()
+        if(totalSeconds == 0){
+            toast({
+                title: 'Duration cannot be 0',
+                description: 'Please enter a valid duration',
+                className: 'text-start capitalize border border-destructive',
             })
-            .catch((error) => {
-                toast({
-                    title: 'Error',
-                    description: 'Error creating module',
-                    className:
-                        'text-start capitalize border border-destructive',
+        }else{
+            api.put(
+                `/content/editModuleOfBootcamp/${courseData?.id}?moduleId=${moduleId}`,
+                { moduleDto }
+            )
+                .then((res) => {
+                    toast({
+                        title: 'Success',
+                        description: 'Module Edited Successfully',
+                        className: 'text-start capitalize border border-secondary',
+                    })
+                    fetchCourseModules()
+                    setIsEditOpen(false)
                 })
-            })
+                .catch((error) => {
+                    toast({
+                        title: 'Error',
+                        description: 'Error creating module',
+                        className:
+                            'text-start capitalize border border-destructive',
+                    })
+                })
+        }
+
+
     }
 
     const createModule = () => {
         const { days, weeks, months } = timeData
 
-        const totalSeconds = moment
-            .duration({ days, weeks, months })
-            .asSeconds()
+        const totalDays = days + (weeks * 7) + (months * 28)
+        const totalSeconds = totalDays * 86400
 
-        api.post(`/content/modules/${courseData?.id}?typeId=${typeId}`, {
-            ...moduleData,
-            timeAlloted: totalSeconds,
-        })
-            .then((res) => {
-                toast({
-                    title: 'Success',
-                    description: 'Module Created Successfully',
-                    className: 'text-start capitalize border border-secondary',
-                })
-                fetchCourseModules()
+        if(totalSeconds == 0){
+            toast({
+                title: 'Duration cannot be 0',
+                description: 'Please enter a valid duration',
+                className: 'text-start capitalize border border-destructive',
             })
-            .catch((error) => {
-                toast({
-                    title: 'Error',
-                    description: 'Error creating module',
-                    className:
-                        'text-start capitalize border border-destructive',
-                })
+        }else{
+            api.post(`/content/modules/${courseData?.id}?typeId=${typeId}`, {
+                ...moduleData,
+                timeAlloted: totalSeconds,
             })
+                .then((res) => {
+                    toast({
+                        title: 'Success',
+                        description: 'Module Created Successfully',
+                        className: 'text-start capitalize border border-secondary',
+                    })
+                    fetchCourseModules()
+                    setIsOpen(false)
+                })
+                .catch((error) => {
+                    toast({
+                        title: 'Error',
+                        description: 'Error creating module',
+                        className:
+                            'text-start capitalize border border-destructive',
+                    })
+                })
+        }
     }
 
     const fetchCourseModules = async () => {
@@ -249,43 +273,49 @@ function Page() {
     }
 
     return (
-        <div>
+        <div className='w-full '>
             {curriculum.length > 0 && (
-                <div className="flex justify-end ">
-                    <Dialog>
+                <div className=" w-full flex justify-end pr-4 ">
+                    <div>
+                    <Dialog  open={isOpen} onOpenChange={setIsOpen}>
                         <DialogTrigger asChild>
-                            <Button className="text-white bg-secondary">
+                            <Button className="text-white bg-secondary  ">
                                 Add Module
                             </Button>
+                        
                         </DialogTrigger>
+    
                         <DialogOverlay />
                         <NewModuleDialog
-                            editMode={editMode}
                             moduleData={moduleData}
                             timeData={timeData}
                             createModule={createModule}
-                            editModule={editModule}
                             handleModuleChange={handleModuleChange}
                             handleTimeAllotedChange={handleTimeAllotedChange}
                             handleTypeChange={handleTypeChange}
                             typeId={typeId}
                         />
                     </Dialog>
+                    </div>
                 </div>
             )}
-            <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                <NewModuleDialog
-                    editMode={editMode}
-                    moduleData={moduleData}
-                    timeData={timeData}
-                    createModule={createModule}
-                    editModule={editModule}
-                    handleModuleChange={handleModuleChange}
-                    handleTimeAllotedChange={handleTimeAllotedChange}
-                    handleTypeChange={handleTypeChange}
-                    typeId={typeId}
-                />
-            </Dialog>
+           {
+                isEditOpen && (
+                    <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+                    <EditModuleDialog
+                        editMode={editMode}
+                        moduleData={moduleData}
+                        timeData={timeData}
+                        createModule={createModule}
+                        editModule={editModule}
+                        handleModuleChange={handleModuleChange}
+                        handleTimeAllotedChange={handleTimeAllotedChange}
+                        handleTypeChange={handleTypeChange}
+                        typeId={typeId}
+                    />
+                </Dialog>
+                )
+           }
             {loading ? (
                 <div className="my-5 flex justify-center items-center">
                     <div className="absolute h-screen">
@@ -369,15 +399,13 @@ function Page() {
                             <Dialog>
                                 <DialogTrigger asChild>
                                     <Button className="text-white bg-secondary">
-                                        Add Module
+                                        Add module 
                                     </Button>
                                 </DialogTrigger>
                                 <DialogOverlay />
                                 <NewModuleDialog
-                                    editMode={editMode}
                                     moduleData={moduleData}
                                     createModule={createModule}
-                                    editModule={editModule}
                                     handleModuleChange={handleModuleChange}
                                     handleTimeAllotedChange={
                                         handleTimeAllotedChange
