@@ -45,6 +45,7 @@ const Assignments = ({
 }: Props) => {
     const [projectData, setProjectData] = useState<any>([])
     const [deadlineDate, setDeadlineDate] = useState<string>('')
+    const [submittedDate, setSubmittedDate] = useState<string>('')
     const [status, setStatus] = useState<string>('')
     const [title, setTitle] = useState<string>('')
     const [icon, setIcon] = useState<JSX.Element>(
@@ -68,6 +69,10 @@ const Assignments = ({
                 .then((res) => {
                     setProjectData(res.data.data.assignmentTracking[0])
                     setDeadlineDate(res.data.data.chapterDetails.completionDate)
+                    setSubmittedDate(
+                        res.data.data.assignmentTracking[0].createdAt
+                    )
+                    setStatus(res.data.data.status)
                 })
         } catch (error: any) {
             console.log(error.message)
@@ -154,13 +159,53 @@ const Assignments = ({
 
     const formattedDate = date.toLocaleDateString('en-US', options)
 
+    function getSubmissionStatus(
+        submittedDate: string | null,
+        deadlineDate: string
+    ): JSX.Element {
+        if (!submittedDate) {
+            return <span className="text-orange-500">Not Submitted Yet</span>
+        }
+
+        const submitted = new Date(submittedDate)
+        const deadline = new Date(deadlineDate)
+
+        if (submitted > deadline) {
+            return <span className="text-red-500">Late Submitted</span>
+        } else {
+            return <span className="text-secondary">Submitted on Time</span>
+        }
+    }
+
+    const AssignmentStatus = getSubmissionStatus(submittedDate, deadlineDate)
+
     return (
         <div className="flex flex-col gap-y-3 ">
             <h1 className="text-left text-xl font-semibold flex flex-col ">
-                <span>{content?.title}</span>
-                <span className="font-light">
+                <span className="flex items-center gap-x-2 ">
+                    {content?.title}{' '}
+                    {status === 'Completed' && (
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="lucide lucide-circle-check-big text-primary"
+                        >
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                            <path d="m9 11 3 3L22 4" />
+                        </svg>
+                    )}
+                </span>
+                <span className=" text-[14px]">
                     Assignment Deadline :- {formattedDate}
                 </span>
+                <span className=" text-[14px]">{AssignmentStatus}</span>
             </h1>
             <div>{editor && <TiptapEditor editor={editor} />}</div>
             <Form {...form}>
@@ -191,30 +236,9 @@ const Assignments = ({
                         )}
                     />
                     <div className="flex justify-end">
-                        {status === 'Completed' ? (
-                            <Button className="flex flex-row gap-2" disabled>
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className="lucide lucide-circle-check-big text-primary"
-                                >
-                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                                    <path d="m9 11 3 3L22 4" />
-                                </svg>{' '}
-                                <span>Already Submitted</span>
-                            </Button>
-                        ) : (
-                            <Button className="w-1/6" type="submit">
-                                Submit
-                            </Button>
-                        )}
+                        <Button className="w-1/6" type="submit">
+                            Submit
+                        </Button>
                     </div>
                 </form>
             </Form>

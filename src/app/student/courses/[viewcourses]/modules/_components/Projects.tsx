@@ -45,6 +45,8 @@ const Projects = ({
     const [status, setStatus] = useState<string>('')
     const [title, setTitle] = useState<string>('')
     const [content, setContent] = useState<any>('')
+    const [deadlineDate, setDeadlineDate] = useState<string>('')
+    const [submittedDate, setSubmittedDate] = useState<string>('')
 
     const [icon, setIcon] = useState<JSX.Element>(
         <Link className="mr-2 h-4 w-4" />
@@ -78,6 +80,10 @@ const Projects = ({
                 res.data.data.projectData[0].instruction.description[0]
             )
             setStatus(res.data.data.status)
+            setDeadlineDate(res.data.data.projectData[0].deadline)
+            setSubmittedDate(
+                res.data.data.projectData[0].projectTrackingData[0].createdAt
+            )
         } catch (error: any) {
             console.log(error.message)
         }
@@ -86,14 +92,6 @@ const Projects = ({
     useEffect(() => {
         fetchProjectDetails()
     }, [fetchProjectDetails])
-
-    // useEffect(() => {
-    //     if (editor && content?.articleContent?.[0]) {
-    //
-    //     } else if (editor) {
-    //         editor.commands.setContent('<h1>No Content Added Yet</h1>')
-    //     }
-    // }, [editor, content])
 
     useEffect(() => {
         form.setValue('link', content)
@@ -137,9 +135,51 @@ const Projects = ({
             })
     }
 
+    const timestamp = deadlineDate
+    const date = new Date(timestamp)
+
+    const options: any = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZone: 'UTC',
+        timeZoneName: 'short',
+    }
+
+    const formattedDate = date.toLocaleDateString('en-US', options)
+
+    function getSubmissionStatus(
+        submittedDate: string | null,
+        deadlineDate: string
+    ): JSX.Element {
+        if (!submittedDate) {
+            return <span className="text-orange-500">Not Submitted Yet</span>
+        }
+
+        const submitted = new Date(submittedDate)
+        const deadline = new Date(deadlineDate)
+
+        if (submitted > deadline) {
+            return <span className="text-red-500">Late Submitted</span>
+        } else {
+            return <span className="text-secondary">Submitted on Time</span>
+        }
+    }
+
+    const ProjectStatus = getSubmissionStatus(submittedDate, deadlineDate)
+
     return (
         <div className="flex flex-col gap-y-3 ">
-            <h1 className="text-left text-xl font-semibold ">{title}</h1>
+            <h1 className="text-left text-xl font-semibold flex flex-col ">
+                <span>Project:- {title}</span>
+                <span className=" text-[14px]">
+                    Assignment Deadline :- {formattedDate}
+                </span>
+                <span className=" text-[14px]">{ProjectStatus}</span>
+            </h1>
             <div>{editor && <TiptapEditor editor={editor} />}</div>
             <Form {...form}>
                 <form

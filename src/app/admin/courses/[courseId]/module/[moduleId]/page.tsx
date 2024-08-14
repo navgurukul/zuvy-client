@@ -229,7 +229,7 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                     setChapterContent(response.data)
                 } else {
                     setChapterContent(response.data)
-                    console.log(response.data, 'chapter content')
+                    // console.log(response.data, 'chapter content')
                 }
 
                 setTopicId(currentModule?.topicId)

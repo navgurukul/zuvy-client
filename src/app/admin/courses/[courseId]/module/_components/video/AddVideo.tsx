@@ -73,10 +73,11 @@ const AddVideo = ({
 }) => {
     const [showVideo, setShowVideo] = useState(true)
     const fileInputRef = useRef<HTMLInputElement>(null)
+
     const [newContent, setNewContent] = useState<chapterDetails>({
-        title: content?.contentDetails[0]?.title ?? '',
-        description: content?.contentDetails[0]?.description ?? '',
-        links: content?.contentDetails[0]?.links ?? [],
+        title: content?.contentDetails?.[0]?.title ?? '',
+        description: content?.contentDetails?.[0]?.description ?? '',
+        links: content?.contentDetails?.[0]?.links ?? [],
     })
 
     const handleUploadClick = () => {
