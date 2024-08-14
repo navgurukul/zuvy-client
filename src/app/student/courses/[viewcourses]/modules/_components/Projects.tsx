@@ -25,7 +25,6 @@ type Props = {
     moduleId: number
     bootcampId: number
     completeChapter: () => void
-    content: any
 }
 const FormSchema = z.object({
     link: z
@@ -36,17 +35,17 @@ const FormSchema = z.object({
         }),
 })
 
-const Assignments = ({
+const Projects = ({
     projectId,
     moduleId,
     bootcampId,
     completeChapter,
-    content,
 }: Props) => {
-    const [projectData, setProjectData] = useState<any>([])
-    const [deadlineDate, setDeadlineDate] = useState<string>('')
+    const [projectData, setProjectData] = useState<any>(null)
     const [status, setStatus] = useState<string>('')
     const [title, setTitle] = useState<string>('')
+    const [content, setContent] = useState<any>('')
+
     const [icon, setIcon] = useState<JSX.Element>(
         <Link className="mr-2 h-4 w-4" />
     )
@@ -55,46 +54,50 @@ const Assignments = ({
         defaultValues: {
             link: '',
         },
-
         mode: 'onChange',
     })
 
-    const getProjectData = useCallback(async () => {
-        try {
-            await api
-                .get(
-                    `/tracking/getQuizAndAssignmentWithStatus?chapterId=${content.id}`
-                )
-                .then((res) => {
-                    setProjectData(res.data.data.assignmentTracking[0])
-                    setDeadlineDate(res.data.data.chapterDetails.completionDate)
-                })
-        } catch (error: any) {
-            console.log(error.message)
-        } finally {
-        }
-    }, [content.id])
-
-    const editor = useEditor({
+    const editor: any = useEditor({
         extensions,
         content: '<h1>No Content Added Yet</h1>',
         editable: false,
     })
 
-    useEffect(() => {
-        if (editor && content?.articleContent?.[0]) {
-            editor.commands.setContent(content.articleContent[0])
-        } else if (editor) {
-            editor.commands.setContent('<h1>No Content Added Yet</h1>')
+    const fetchProjectDetails = useCallback(async () => {
+        if (projectId === 0 || projectId === null) return
+        try {
+            const res = await api.get(
+                `/tracking/getProjectDetailsWithStatus/${projectId}/${moduleId}`
+            )
+            setProjectData(res.data)
+            setTitle(res.data?.data.projectData[0].title)
+            setContent(
+                res.data.data.projectData[0].projectTrackingData[0].projectLink
+            )
+            editor.commands.setContent(
+                res.data.data.projectData[0].instruction.description[0]
+            )
+            setStatus(res.data.data.status)
+        } catch (error: any) {
+            console.log(error.message)
         }
-    }, [editor, content])
+    }, [moduleId, projectId, editor])
 
     useEffect(() => {
-        getProjectData()
-    }, [getProjectData])
+        fetchProjectDetails()
+    }, [fetchProjectDetails])
+
+    // useEffect(() => {
+    //     if (editor && content?.articleContent?.[0]) {
+    //
+    //     } else if (editor) {
+    //         editor.commands.setContent('<h1>No Content Added Yet</h1>')
+    //     }
+    // }, [editor, content])
+
     useEffect(() => {
-        form.setValue('link', projectData?.projectUrl)
-    }, [form, projectData])
+        form.setValue('link', content)
+    }, [content, form])
 
     const updateIcon = (link: string) => {
         if (link.includes('github')) {
@@ -115,53 +118,28 @@ const Assignments = ({
     }
 
     async function onSubmit(data: z.infer<typeof FormSchema>) {
-        ///tracking/updateQuizAndAssignmentStatus/8/31?chapterId=1212
-        const today = new Date()
-        const isoString = today.toISOString().split('.')[0] + 'Z'
+        //dev.api.zuvy.org/tracking/updateProject/54?moduleId=429&bootcampId=117
         const transFormedBody = {
-            submitAssignment: {
-                projectUrl: data.link,
-                timeLimit: isoString,
-            },
+            projectLink: data.link,
         }
         await api
             .post(
-                `tracking/updateQuizAndAssignmentStatus/${bootcampId}/${moduleId}?chapterId=${content.id}`,
+                `/tracking/updateProject/${projectId}?moduleId=${moduleId}&bootcampId=${bootcampId}`,
                 transFormedBody
             )
             .then(() => {
                 toast({
                     title: 'Success',
-                    description: 'Assignment Link Submitted SuccesFully',
+                    description: 'Project Link Submitted SuccesFully',
                 })
+                fetchProjectDetails()
                 completeChapter()
             })
     }
 
-    const timestamp = deadlineDate
-    const date = new Date(timestamp)
-
-    const options: any = {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        timeZone: 'UTC',
-        timeZoneName: 'short',
-    }
-
-    const formattedDate = date.toLocaleDateString('en-US', options)
-
     return (
         <div className="flex flex-col gap-y-3 ">
-            <h1 className="text-left text-xl font-semibold flex flex-col ">
-                <span>{content?.title}</span>
-                <span className="font-light">
-                    Assignment Deadline :- {formattedDate}
-                </span>
-            </h1>
+            <h1 className="text-left text-xl font-semibold ">{title}</h1>
             <div>{editor && <TiptapEditor editor={editor} />}</div>
             <Form {...form}>
                 <form
@@ -177,7 +155,7 @@ const Assignments = ({
                                     <div className="flex items-center">
                                         {icon}
                                         <Input
-                                            placeholder="Paste your Assignment Link Here"
+                                            placeholder="Paste your Project Link Here"
                                             {...field}
                                             onChange={(e) => {
                                                 field.onChange(e)
@@ -191,37 +169,14 @@ const Assignments = ({
                         )}
                     />
                     <div className="flex justify-end">
-                        {status === 'Completed' ? (
-                            <Button className="flex flex-row gap-2" disabled>
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className="lucide lucide-circle-check-big text-primary"
-                                >
-                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                                    <path d="m9 11 3 3L22 4" />
-                                </svg>{' '}
-                                <span>Already Submitted</span>
-                            </Button>
-                        ) : (
-                            <Button className="w-1/6" type="submit">
-                                Submit
-                            </Button>
-                        )}
+                        <Button className="w-1/6" type="submit">
+                            Submit
+                        </Button>
                     </div>
                 </form>
             </Form>
-
-            <div></div>
         </div>
     )
 }
 
-export default Assignments
+export default Projects

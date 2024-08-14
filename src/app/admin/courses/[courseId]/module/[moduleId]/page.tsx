@@ -89,7 +89,7 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
     const [moduleName, setModuleName] = useState('')
     const [activeChapter, setActiveChapter] = useState(0)
     const [chapterContent, setChapterContent] = useState<any>([])
-    const [topicId, setTopicId] = useState(0)
+    const [topicId, setTopicId] = useState(1)
     const [chapterId, setChapterId] = useState<number>(0)
     const [key, setKey] = useState(0)
     const { courseId, moduleId } = useParams()
@@ -246,10 +246,6 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
     )
 
     const renderChapterContent = () => {
-        if (chapterContent.length === 0) {
-            return <h1>Create New Chapter</h1>
-        }
-
         switch (topicId) {
             case 1:
                 return (
@@ -377,6 +373,7 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
             })
         }
     }
+
     return (
         <>
             <BreadcrumbComponent crumbs={crumbs} />

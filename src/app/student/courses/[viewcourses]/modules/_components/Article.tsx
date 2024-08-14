@@ -21,7 +21,7 @@ function Article({
         content: content.articleContent[0] || `<h1>No Content Added Yet</h1>`,
         editable: false,
     })
-
+    console.log(content.articleContent[0])
     return (
         <>
             <TiptapEditor editor={editor} />

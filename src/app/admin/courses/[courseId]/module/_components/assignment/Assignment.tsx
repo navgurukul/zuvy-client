@@ -53,7 +53,7 @@ const AddAssignent = ({ content }: AssignmentProps) => {
 
     const editor = useEditor({
         extensions,
-        content
+        content,
     })
 
     const [title, setTitle] = useState('')
@@ -73,7 +73,8 @@ const AddAssignent = ({ content }: AssignmentProps) => {
             )
             const contentDetails = response.data.contentDetails[0]
             setTitle(contentDetails.title)
-            contentDetails && editor?.commands.setContent(contentDetails.content)
+            contentDetails &&
+                editor?.commands.setContent(contentDetails.content)
         } catch (error) {
             console.error('Error fetching assignment content:', error)
         }
@@ -110,7 +111,6 @@ const AddAssignent = ({ content }: AssignmentProps) => {
     // async
     useEffect(() => {
         getAssignmentContent()
-        console.log('content', content?.contentDetails[0].content)
     }, [content, editor])
 
     return (
