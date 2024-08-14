@@ -35,14 +35,9 @@ import {
 } from '@/components/ui/popover'
 
 type FormSectionProps = {
-    key: any
     item: any
     index: any
-    addQuestion: any
-    // deleteQuestion: () => void
     form: any
-    section: any
-    setSection: any
     deleteQuestion: any
     formData: any
 }
@@ -65,13 +60,9 @@ const getQuestionType = (typeId: number) => {
 }
 
 const FormSection: React.FC<FormSectionProps> = ({
-    key,
     item,
     index,
     form,
-    addQuestion,
-    section,
-    setSection,
     deleteQuestion,
     formData,
 }) => {
@@ -85,18 +76,18 @@ const FormSection: React.FC<FormSectionProps> = ({
             : ['']
     )
 
-    console.log('item', item)
-
     // get the section with the index to add rest of the things
     // and the slice the section to add the new object section and set is to setSection
 
-    const sectionType = [
+    const sectionType: { questionType: string; typeId: number }[] = [
         { questionType: 'Multiple Choice', typeId: 1 },
         { questionType: 'Checkboxes', typeId: 2 },
         { questionType: 'Long Text Answer', typeId: 3 },
         { questionType: 'Date', typeId: 4 },
         { questionType: 'Time', typeId: 5 },
     ]
+
+    // *************** This one is working... Left one empty input field when delete multiple choice *************
 
     useEffect(() => {
         if (questionData && Object.keys(questionData).length > 0) {
@@ -110,44 +101,29 @@ const FormSection: React.FC<FormSectionProps> = ({
                 getQuestionType(questionData.typeId)
             )
 
-            Object.entries(questionData.options || {}).forEach(
-                ([key, value]) => {
-                    form.setValue(`option_${index}_${key}`, value)
-                }
-            )
+            const optionsArray = Object.values(questionData.options || {})
+            optionsArray.forEach((value, optionIndex) => {
+                form.setValue(`option_${index}_${optionIndex}`, value || '')
+            })
+            // }else {
+            //     // Set default values for new questions
+            //     form.setValue(`question_${index}`, '')
+            //     form.setValue(`questionType_${index}`, 'Multiple Choice')
+            //     form.setValue(`option_${index}_0`, '')
         }
     }, [questionData, index, form])
 
-    const handleSectionType = (type: string) => {
-        setSelectedSection(type)
-        form.setValue(`questionType_${index}`, type)
+    // *******************************************************************************
 
-        setSection((prevSection: any) => {
-            const newSection = [...prevSection]
-            newSection[index] = {
-                ...newSection[index],
-                questionType: type,
-                typeId: sectionType.find((item) => item.questionType === type)
-                    ?.typeId,
-            }
-            return newSection
-        })
+    const { setValue, watch } = form
 
-        if (type === 'Multiple Choice' || type === 'Checkboxes') {
-            setOptions(options.length ? options : [''])
-        } else {
-            setOptions([])
+    const handleSectionType = (questionType: string, index: number) => {
+        const selectedType = sectionType.find(
+            (section) => section.questionType === questionType
+        )
+        if (selectedType) {
+            setValue(`questions.${index}.typeId`, selectedType.typeId)
         }
-    }
-
-    const handleQuestionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newValue = e.target.value
-        form.setValue(`question_${index}`, newValue)
-        setSection((prevSection: any) => {
-            const newSection = [...prevSection]
-            newSection[index] = { ...newSection[index], question: newValue }
-            return newSection
-        })
     }
 
     const handleOptionChange = (
@@ -158,99 +134,70 @@ const FormSection: React.FC<FormSectionProps> = ({
         const newOptions = [...options]
         newOptions[optionIndex] = newValue
         setOptions(newOptions)
-        // form.setValue(`option_${index}_${optionIndex + 1}`, e.target.value)
-        form.setValue(`option_${index}_${optionIndex}`, e.target.value)
-        setSection((prevSection: any) => {
-            const newSection = [...prevSection]
-            newSection[index] = { ...newSection[index], options: newOptions }
-            return newSection
-        })
+        form.setValue(`questions.${index}.options.${optionIndex}`, newValue)
     }
 
     const addOption = () => {
         setOptions([...options, ''])
     }
 
-    const handleRequiredQuestion = (index: number) => {
-        const newSection = [...section]
-        newSection[index] = {
-            ...newSection[index],
-            isRequired: !newSection[index].isRequired,
-        }
-        setSection(newSection)
-    }
-
     const removeOption = (idx: number) => {
+        // Remove the option from the state
         setOptions((prevOptions) => {
             const updatedOptions = prevOptions.filter(
                 (_, optionIndex) => optionIndex !== idx
             )
 
-            setSection((prevSections: any) => {
-                const updatedSections = [...prevSections]
-                updatedSections[index] = {
-                    ...updatedSections[index],
-                    options: updatedOptions,
-                }
-                return updatedSections
+            // Update form values accordingly
+            updatedOptions.forEach((option, optionIndex) => {
+                form.setValue(
+                    `questions.${index}.options.${optionIndex}`,
+                    option
+                )
             })
+
+            // Remove any leftover options from the form values
+            form.unregister(
+                `questions.${index}.options.${updatedOptions.length}`
+            )
 
             return updatedOptions
         })
-
-        // Update form values
-        options.forEach((_, optionIndex) => {
-            if (optionIndex >= idx) {
-                form.setValue(
-                    `option_${index}_${optionIndex}`,
-                    options[optionIndex + 1] || ''
-                )
-            }
-        })
     }
 
-    console.log('formData', formData)
-
-    // useEffect(() => {
-    //     console.log('Updated section:', section)
-    // }, [section])
-
-    // const deleteQuestion = useCallback(
-    //     (deleteItem: any) => {
-    //         console.log('deleteItem', deleteItem)
-    //         const newData = section.filter(
-    //             (question: any) => question.key !== deleteItem.key
-    //         )
-    //         console.log('newData', newData)
-
-    //         setSection(newData)
-    //         // setSection((prevOptions: any) => {
-    //         //     const updatedOptions = prevOptions.filter(
-    //         //         (_: any, optionIndex: any) => optionIndex !== deleteIndex
-    //         //     )
-    //         //     return updatedOptions
-    //         // })
-    //     },
-    //     [section]
-    // )
-
-    // console.log('section', section)
-
+    // I DON'T THINK THIS IS NEEDED
     useEffect(() => {
-        console.log('Updated section:', section)
-    }, [section])
+        // Reset options when the question type changes
+        if (
+            selectedSection !== 'Multiple Choice' &&
+            selectedSection !== 'Checkboxes'
+        ) {
+            setOptions([])
+            form.setValue(`questions.${index}.options`, [])
+        } else if (
+            selectedSection === 'Multiple Choice' ||
+            selectedSection === 'Checkboxes'
+        ) {
+            // Ensure options exist when the type is Multiple Choice or Checkboxes
+            if (options.length === 0) {
+                setOptions([''])
+            }
+        }
+    }, [selectedSection, index, form, questionData])
 
     return (
-        <div key={key}>
+        <div>
             <Select
                 onValueChange={(e) => {
-                    handleSectionType(e)
+                    handleSectionType(e, index)
                 }}
             >
                 <div className="flex flex-row justify-between">
                     <div className="mt-5">
                         <SelectTrigger className="w-[175px] focus:ring-0 mb-3">
-                            <SelectValue placeholder={selectedSection} />
+                            <SelectValue
+                                placeholder={getQuestionType(item.typeId)}
+                            />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectGroup>
@@ -265,13 +212,11 @@ const FormSection: React.FC<FormSectionProps> = ({
                             </SelectGroup>
                         </SelectContent>
                     </div>
-                    {/* <button onClick={() => deleteQuestion(index)}> */}
                     <button
-                        type="button" // Set the type to button to prevent form submission
+                        type="button"
                         onClick={(e) => {
-                            e.preventDefault() // Prevent form submission
-                            deleteQuestion(item)
-                            // deleteQuestion(item.key)
+                            e.preventDefault()
+                            deleteQuestion(item.id)
                             // deleteQuestion(index)
                         }}
                     >
@@ -282,35 +227,40 @@ const FormSection: React.FC<FormSectionProps> = ({
 
             <FormField
                 control={form.control}
-                name={`question_${index}`}
+                name={`questions.${index}.question`}
                 render={({ field }) => (
                     <FormItem>
                         <div className="flex flex-row justify-between">
                             <FormLabel className="flex text-left text-md font-semibold mb-1">
                                 Question {index + 1}
                             </FormLabel>
-                            <Switch
-                                checked={section[index].isRequired}
-                                onClick={() => handleRequiredQuestion(index)}
-                                // className="m-1 w-[50px]" // Adjust height as needed
+                            <FormField
+                                control={form.control}
+                                name={`questions.${index}.isRequired`}
+                                render={({ field }) => (
+                                    <Switch
+                                        // checked={field.value}
+                                        checked={questionData.isRequired}
+                                        onCheckedChange={field.onChange}
+                                    />
+                                )}
                             />
                         </div>
                         <FormControl>
                             <Input
                                 {...field}
                                 placeholder="Type a question..."
-                                onChange={handleQuestionChange}
                             />
                         </FormControl>
+                        <FormMessage />
                     </FormItem>
                 )}
             />
 
-            {(selectedSection === 'Multiple Choice' ||
-                selectedSection === 'Checkboxes') &&
+            {(questionData.typeId === 1 || questionData.typeId === 2) &&
                 options.map((option, optionIndex) => (
                     <div key={optionIndex} className="flex space-x-2 mr-4 mt-1">
-                        {selectedSection === 'Multiple Choice' ? (
+                        {questionData.typeId === 1 ? (
                             <RadioGroup>
                                 <RadioGroupItem
                                     value={option}
@@ -322,15 +272,17 @@ const FormSection: React.FC<FormSectionProps> = ({
                         )}
                         <FormField
                             control={form.control}
-                            // name={`option_${index}_${optionIndex + 1}`}
-                            name={`option_${index}_${optionIndex}`}
+                            name={`questions.${index}.options.${optionIndex}`}
                             render={({ field }) => (
                                 <Input
                                     {...field}
+                                    // value={field.value || ''}
+                                    value={options[optionIndex]}
                                     placeholder={`Option ${optionIndex + 1}`}
-                                    onChange={(e) =>
+                                    onChange={(e) => {
+                                        field.onChange(e)
                                         handleOptionChange(e, optionIndex)
-                                    }
+                                    }}
                                 />
                             )}
                         />
@@ -343,8 +295,7 @@ const FormSection: React.FC<FormSectionProps> = ({
                     </div>
                 ))}
 
-            {(selectedSection === 'Multiple Choice' ||
-                selectedSection === 'Checkboxes') && (
+            {(questionData.typeId === 1 || questionData.typeId === 2) && (
                 <div className="flex justify-end">
                     <Button
                         variant={'secondary'}
@@ -357,7 +308,7 @@ const FormSection: React.FC<FormSectionProps> = ({
                 </div>
             )}
 
-            {selectedSection === 'Long Text Answer' && (
+            {questionData.typeId === 3 && (
                 <FormField
                     control={form.control}
                     name={`answer ${index}`}
@@ -377,7 +328,7 @@ const FormSection: React.FC<FormSectionProps> = ({
                 />
             )}
 
-            {selectedSection === 'Date' && (
+            {questionData.typeId === 4 && (
                 <div className="flex justify-start mt-2">
                     <FormField
                         control={form.control}
@@ -418,7 +369,7 @@ const FormSection: React.FC<FormSectionProps> = ({
                 </div>
             )}
 
-            {selectedSection === 'Time' && (
+            {questionData.typeId === 5 && (
                 <FormField
                     control={form.control}
                     name={`Question ${index}`}

@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { ArrowDownToLine, ChevronRight, Search } from 'lucide-react'
+import { toast } from '@/components/ui/use-toast'
 
 import PraticeProblems from '../../_components/PraticeProblems'
 import Assesments from '../../_components/Assesments'
@@ -22,6 +23,7 @@ const Page = ({ params }: { params: any }) => {
     const [totalStudents, setTotalStudents] = useState(0)
     const [assesments, setAssesments] = useState<any>()
     const [projectData, setProjectData] = useState<any>([])
+    const [formData, setFormData] = useState<any>([])
     const [loading, setLoading] = useState(true)
 
     const handleTabChange = (tab: string) => {
@@ -36,7 +38,12 @@ const Page = ({ params }: { params: any }) => {
             setSubmissions(res.data.trackingData)
             setTotalStudents(res.data.totalStudents)
         } catch (error) {
-            console.error('Error fetching submissions:', error)
+            // console.error('Error fetching submissions:', error)
+            toast({
+                title: 'Error',
+                description: 'Error fetching submissions:',
+                className: 'text-start capitalize border border-destructive',
+            })
         }
     }, [params.courseId])
 
@@ -46,11 +53,16 @@ const Page = ({ params }: { params: any }) => {
                 `/admin/bootcampAssessment/bootcamp_id${params.courseId}`
             )
             setAssesments(res.data)
-            // setTotalStudents(res.data.totalStudents)
         } catch (error) {
-            console.error('Error fetching assessments:', error)
+            // console.error('Error fetching assessments:', error)
+            toast({
+                title: 'Error',
+                description: 'Error fetching assessments:',
+                className: 'text-start capitalize border border-destructive',
+            })
         }
     }, [params.courseId])
+
     const getProjectsData = useCallback(async () => {
         try {
             const res = await api.get(
@@ -59,7 +71,28 @@ const Page = ({ params }: { params: any }) => {
             setProjectData(res.data.data.bootcampModules)
             setTotalStudents(res.data.totalStudents)
         } catch (error) {
-            console.error('Error fetching assessments:', error)
+            // console.error('Error fetching assessments:', error)
+            toast({
+                title: 'Error',
+                description: 'Error fetching assessments:',
+                className: 'text-start capitalize border border-destructive',
+            })
+        }
+    }, [params.courseId])
+
+    const getFormData = useCallback(async () => {
+        try {
+            const res = await api.get(
+                `/submission/submissionsOfForms/${params.courseId}`
+            )
+            setFormData(res.data.trackingData)
+            setTotalStudents(res.data.totalStudents)
+        } catch (error) {
+            toast({
+                title: 'Error',
+                description: 'Error fetching form data:',
+                className: 'text-start capitalize border border-destructive',
+            })
         }
     }, [params.courseId])
 
@@ -68,6 +101,7 @@ const Page = ({ params }: { params: any }) => {
             getSubmissions()
             getAssessments()
             getProjectsData()
+            getFormData()
         }
     }, [getSubmissions, getAssessments, params.courseId, getProjectsData])
 
@@ -293,9 +327,20 @@ const Page = ({ params }: { params: any }) => {
                     ))}
                 {activeTab === 'form' && (
                     <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2 lg:grid-cols-3">
-                        {['A', 'B', 'C'].map((item: any, index: any) => (
-                            <FormComponent key={index} />
-                        ))}
+                        {formData.map((item: any) => {
+                            return item.moduleChapterData.map(
+                                (data: any, index: any) => (
+                                    <FormComponent
+                                        key={index}
+                                        moduleName={item.name}
+                                        moduleId={item.id}
+                                        bootcampId={item.bootcampId}
+                                        data={data}
+                                        totalStudents={totalStudents}
+                                    />
+                                )
+                            )
+                        })}
                     </div>
                 )}
                 {activeTab === 'assignments' && (

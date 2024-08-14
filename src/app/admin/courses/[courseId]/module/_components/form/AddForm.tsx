@@ -42,6 +42,17 @@ const formSchema = z.object({
     description: z.string().min(4, {
         message: 'Description must be at least 4 characters.',
     }),
+    questions: z.array(
+        z.object({
+            id: z.string().optional() || z.number().optional(),
+            question: z.string().min(1, { message: 'Question is required' }),
+            typeId: z.number(),
+            isRequired: z.boolean(),
+            options: z.array(z.string()).optional(),
+            //  ||
+            // z.object({ 0: z.string() }).optional(),
+        })
+    ),
 })
 
 const AddForm: React.FC<AddFormProps> = ({
@@ -50,130 +61,163 @@ const AddForm: React.FC<AddFormProps> = ({
     fetchChapterContent,
     moduleId,
 }) => {
-    const [newContent, setNewContent] = useState<chapterDetails>({
-        title: '',
-        description: '',
-    })
-    const [forceUpdate, setForceUpdate] = useState(false)
-    const [section, setSection] = useState(
-        content.formQuestionDetails.length > 0
-            // ? content.formQuestionDetails
-            // ? [...content.formQuestionDetails]
-            ? JSON.parse(JSON.stringify(content.formQuestionDetails))
-            : [
-                  {
-                      questionType: 'Multiple Choice',
-                      typeId: 1,
-                      question: 'Question 1',
-                      options: ['Op1'],
-                      isRequired: true,
-                      key: 1,
-                  },
-              ]
-    )
-
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             title: content?.title ?? '',
-            description: content?.title ?? '',
+            description: content?.description ?? '',
+            questions:
+                content.formQuestionDetails.length > 0
+                    ? content.formQuestionDetails.map((q: any) => ({
+                          id: q.id.toString(),
+                          question: q.question,
+                          typeId: q.typeId,
+                          isRequired: q.isRequired,
+                          //   options: Object.values(q.options || {}),
+                          options: q.options ? Object.values(q.options) : [],
+                      }))
+                    : [
+                          {
+                              //   id: 'initial-1',
+                              id: 'new-1',
+                              question: 'Question 1',
+                              typeId: 1,
+                              isRequired: true,
+                              options: ['Op1'],
+                          },
+                      ],
         },
         values: {
             title: content?.title ?? '',
             description: content?.description ?? '',
+            questions:
+                content.formQuestionDetails.length > 0
+                    ? content.formQuestionDetails.map((q: any) => ({
+                          id: q.id.toString(),
+                          question: q.question,
+                          typeId: q.typeId,
+                          isRequired: q.isRequired,
+                          //   options: Object.values(q.options || {}),
+                          options: q.options ? Object.values(q.options) : [],
+                      }))
+                    : [
+                          {
+                              //   id: 'initial-1',
+                              id: 'new-1',
+                              question: 'Question 1',
+                              typeId: 1,
+                              isRequired: true,
+                              options: ['Op1'],
+                          },
+                      ],
         },
     })
 
+    const questions = form.watch('questions')
+
     const addQuestion = () => {
-        const newKey =
-            section.length > 0 &&
-            section[section.length - 1].hasOwnProperty('key')
-                ? section[section.length - 1].key + 1
-                : 1
-        const newSection = {
+        const newQuestion = {
             questionType: 'Multiple Choice',
             typeId: 1,
-            question: 'Question 1',
-            options: ['Op1'],
+            question: '',
+            options: [''],
             isRequired: false,
-            key: newKey,
+            id: `new-${Date.now()}`,
         }
-        setSection([...section, newSection])
+        form.setValue('questions', [
+            ...form.getValues('questions'),
+            newQuestion,
+        ])
     }
 
-    //Delete question index wise from section
+    // *************** This one is working... Left one empty input field when delete multiple choice *************
 
-    // const deleteQuestion = useCallback(
-    //     (idx: number) => {
-    //         console.log('section', section)
-    //         console.log('idx', idx)
-    //         const updatedSection = section.filter((_, i) => i !== idx)
-    //         console.log('updatedSection', updatedSection)
-    //         setSection((prevSections) =>
-    //             prevSections.filter((_, i) => i !== idx)
-    //         )
-    //     },
-    //     [section]
-    // )
+    // const deleteQuestion = (id: string) => {
+    //     const currentQuestions = form.getValues('questions');
 
-    //Delete question key/id wise from section
-    const deleteQuestion = useCallback(
-        async (deleteItem: any) => {
-            // console.log('section before delete:', section)
-            // console.log('deleteItem:', deleteItem)
+    //     // Find the index of the question with the given id
+    //     const index = currentQuestions.findIndex((question) => question.id === id);
 
-            let updatedSection
-            let formQuestion = section.filter((item: any) => !item.id)
-            const editFormQuestion = section.filter((item: any) => item.id)
+    //     if (index === -1) {
+    //         console.warn(`Question with id ${id} not found.`);
+    //         return;
+    //     }
 
-            if (deleteItem.id) {
-                updatedSection = editFormQuestion.filter(
-                    (item: any) => item.id !== deleteItem.id
+    //     // Safeguard: Ensure the question exists and has options
+    //     if (currentQuestions[index] && Array.isArray(currentQuestions[index].options)) {
+    //         // Unregister all options related to the deleted question
+    //         currentQuestions[index].options.forEach((_, optionIndex) => {
+    //             form.unregister(`questions.${index}.options.${optionIndex}`);
+    //         });
+    //     }
+
+    //     // Remove the question from the form
+    //     const updatedQuestions = currentQuestions.filter((question) => question.id !== id);
+    //     form.setValue('questions', updatedQuestions);
+
+    //     // Re-register options for remaining questions
+    //     updatedQuestions.forEach((question, qIndex) => {
+    //         if (Array.isArray(question.options)) {
+    //             question.options.forEach((option, optionIndex) => {
+    //                 form.register(`questions.${qIndex}.options.${optionIndex}`);
+    //             });
+    //         }
+    //     });
+    // };
+
+    const deleteQuestion = (id: string) => {
+        const currentQuestions = form.getValues('questions')
+        const questionIndex = currentQuestions.findIndex((q) => q.id == id)
+
+        if (questionIndex === -1) return
+
+        // Unregister the question's options
+        const question = currentQuestions[questionIndex]
+        if (question?.options && Array.isArray(question.options)) {
+            question.options.forEach((_: any, optionIndex: any) => {
+                form.unregister(
+                    `questions.${questionIndex}.options.${optionIndex}`
                 )
-                setSection([...updatedSection, ...formQuestion])
-            } else if (deleteItem.key) {
-                updatedSection = formQuestion.filter(
-                    (item: any) => item.key !== deleteItem.key
-                )
-                setSection([...editFormQuestion, ...updatedSection])
-            }
+            })
+        }
 
-            // console.log('updatedSection:', updatedSection)
-        },
-        [section]
-    )
-
-    // useEffect(() => {
-    //     console.log('section state updated:', section)
-    // }, [section])
-
-    // console.log('content', content)
+        // Remove the question
+        const updatedQuestions = currentQuestions.filter(
+            (_, i) => i !== questionIndex
+        )
+        form.setValue('questions', updatedQuestions)
+    }
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        const questions = section.map((item: any, index: number) => {
-            const options = item.options || {}
-            const optionsObject = Object.keys(options).reduce((acc, key) => {
-                acc[key] = options[key]
-                return acc
-            }, {} as { [key: string]: string })
+        const { title, description, questions } = values
 
-            const { questionType, key, ...rest } = item
+        const formQuestionDto = questions
+            .filter((item) => item.id && item.id.startsWith('new-'))
+            .map((item) => ({
+                isRequired: item.isRequired,
+                question: item.question,
+                typeId: item.typeId,
+                options: item.options?.reduce<Record<number, string>>(
+                    (acc, option, index) => {
+                        acc[index] = option
+                        return acc
+                    },
+                    {}
+                ),
+            }))
 
-            return {
-                ...rest,
-                options: optionsObject,
-            }
-        })
-
-        const formQuestionDto = questions.filter((item: any) => !item.id)
         const editFormQuestionDto = questions
-            .filter((item: any) => item.id)
-            .map((question: any) => ({
-                id: question.id,
-                typeId: question.typeId,
-                isRequired: question.isRequired,
-                options: question.options,
-                question: question.question,
+            .filter((item) => item.id && !item.id.startsWith('new-'))
+            .map((item) => ({
+                ...item,
+                id: item.id && Number(item.id),
+                options: item.options?.reduce<Record<number, string>>(
+                    (acc, option, index) => {
+                        acc[index] = option
+                        return acc
+                    },
+                    {}
+                ),
             }))
 
         let payload = {}
@@ -200,12 +244,10 @@ const AddForm: React.FC<AddFormProps> = ({
             }
         }
 
-        // console.log('payload', payload)
-        // console.log('questions', questions)
         try {
             const editChapterResponse = await api.put(
                 `Content/editChapterOfModule/${moduleId}?chapterId=${content.id}`,
-                values
+                { title, description }
             )
 
             const questionsRespons = await api.post(
@@ -270,17 +312,14 @@ const AddForm: React.FC<AddFormProps> = ({
                         )}
                     />
 
-                    {section.map((item: any, index: number) => (
+                    {questions.map((item, index) => (
                         <FormSection
-                            key={item.key}
+                            key={item.id || `form-section-${index}`}
                             item={item}
                             index={index}
                             form={form}
-                            addQuestion={addQuestion}
-                            section={section}
-                            setSection={setSection}
                             deleteQuestion={deleteQuestion}
-                            formData={content.formQuestionDetails}
+                            formData={questions}
                         />
                     ))}
 
