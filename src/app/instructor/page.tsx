@@ -26,11 +26,9 @@ const InstructorPage = () => {
         (username?.[0]?.slice(1)?.toLowerCase() || '')
 
     const fetchSessions = (data: any) => {
-        setUpcomingSessions(data.ongoing)
+        setOngoingSessions(data.ongoing)
         setUpcomingSessions(data.upcoming)
     }
-
-    console.log('upcomingSessions', upcomingSessions)
 
     return (
         <MaxWidthWrapper className="">

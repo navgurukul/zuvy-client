@@ -10,6 +10,7 @@ import { getCourseData, setStoreBatchValue } from '@/store/store'
 
 import { ComboboxStudent } from '@/app/admin/courses/[courseId]/(courseTabs)/students/components/comboboxStudentDataTable'
 import { Combobox } from '@/components/ui/combobox'
+import { usePathname } from 'next/navigation'
 
 export interface RadioCheckboxProps {
     fetchSessions: (data: any) => void
@@ -32,6 +33,8 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
     const [batchId, setBatchId] = useState<any>()
     const [timeFrame, setTimeFrame] = useState<string>('all')
     const { setbatchValueData } = setStoreBatchValue()
+    const pathname = usePathname()
+    const classRecordings = pathname?.includes('/recording')
 
     const handleComboboxChange = (value: string) => {
         setBatchId(value)
@@ -41,7 +44,6 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
     const getBatches = useCallback(async () => {
         try {
             const response = await api.get(`/instructor/batchOfInstructor`)
-            console.log('response', response.data.data)
             const transformedData = response.data.data.map(
                 (item: { batchId: any; batchName: any }) => ({
                     value: item.batchId.toString(),
@@ -61,11 +63,30 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
                 const response = await api.get(
                     `/instructor/getAllUpcomingClasses?limit=${position}&offset=${offset}&timeFrame=${timeFrame}&batchId=${batchId}`
                 )
-                console.log('response', response.data.data)
+                // console.log('response', response.data.data)
                 fetchSessions(response.data.data.responses)
                 setTotalSessions(response.data.data.totalUpcomingClasses)
                 setPages(response.data.data.totalUpcomingPages)
                 setLastPage(response.data.data.totalUpcomingPages)
+            } catch (error) {
+                console.error('Error fetching courses:', error)
+            }
+        },
+        [batchId, timeFrame]
+    )
+
+    const getSessionsRecording = useCallback(
+        async (offset: number) => {
+            try {
+                const response = await api.get(
+                    `/classes/all/117?status=completed&limit=${position}&offset=${offset}`
+                    // `/classes/all/117?status=completed&limit=3&offset=0`
+                )
+                // console.log('response', response.data)
+                fetchSessions(response.data.classes)
+                setTotalSessions(response.data.total_items)
+                setPages(response.data.total_pages)
+                setLastPage(response.data.total_pages)
             } catch (error) {
                 console.error('Error fetching courses:', error)
             }
@@ -78,10 +99,14 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
     }, [getBatches])
 
     useEffect(() => {
-        if (batchId) getSessions(offset)
+        if (batchId) {
+            if (classRecordings) {
+                getSessionsRecording(offset)
+            } else {
+                getSessions(offset)
+            }
+        }
     }, [batchId, timeFrame, offset])
-
-    console.log('timeFrame', timeFrame)
 
     return (
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between p-3 w-full lg:w-1/2 gap-y-6 lg:gap-y-0">

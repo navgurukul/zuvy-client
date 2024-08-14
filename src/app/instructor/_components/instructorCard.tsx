@@ -3,6 +3,8 @@ import Link from 'next/link'
 import Moment from 'react-moment'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/components/ui/use-toast'
+import Image from 'next/image'
+import { usePathname } from 'next/navigation'
 
 import { Copy } from 'lucide-react'
 
@@ -23,6 +25,8 @@ const InstructorCard: React.FC<Props> = ({
     typeClass,
     classLink,
 }: Props) => {
+    const pathname = usePathname()
+    const classRecordings = pathname?.includes('/recording')
     const handleCopyToClipboard = (link: string) => {
         navigator.clipboard
             .writeText(link)
@@ -49,10 +53,20 @@ const InstructorCard: React.FC<Props> = ({
                         {batchName}
                     </p>
                     <div className="px-1 py-4 m-2 flex h-2/3">
-                        <div className="font-bold text-lg flex flex-col border rounded-md py-3 px-5 text-muted-foreground border-muted-foreground">
-                            <Moment format="DD">{startTime}</Moment>
-                            <Moment format="MMM">{startTime}</Moment>
-                        </div>
+                        {classRecordings ? (
+                            <Image
+                                src="/recording.svg"
+                                alt="No classes"
+                                width={50}
+                                height={50}
+                            />
+                        ) : (
+                            <div className="font-bold text-lg flex flex-col border rounded-md py-3 px-5 text-muted-foreground border-muted-foreground">
+                                <Moment format="DD">{startTime}</Moment>
+                                <Moment format="MMM">{startTime}</Moment>
+                            </div>
+                        )}
+
                         <div className="px-3 flex flex-col gap-y-3 ">
                             <h1 className="font-semibold text-left">
                                 {topicTitle}
@@ -63,26 +77,26 @@ const InstructorCard: React.FC<Props> = ({
                                 <p className="mx-2">-</p>
                                 <Moment format="hh:mm A">{endTime}</Moment>
                             </div>
-                            <div className="flex">
-                                <Link
-                                    className="font-bold flex items-center text-secondary"
-                                    href={classLink}
-                                >
-                                    {typeClass === 'upcoming'
-                                        ? 'Class Link'
-                                        : 'Join Meeting'}
-                                </Link>
-                                <Button
-                                    variant="ghost"
-                                    onClick={(e) => {
-                                        e.preventDefault() // Prevent navigation
-                                        handleCopyToClipboard(classLink)
-                                    }}
-                                >
-                                    <Copy size={15} />
-                                </Button>
-                            </div>
                         </div>
+                    </div>
+                    <div className="flex justify-end">
+                        <Link
+                            className="font-bold flex items-center text-secondary"
+                            href={classLink}
+                        >
+                            {typeClass === 'upcoming'
+                                ? 'Class Link'
+                                : 'Join Meeting'}
+                        </Link>
+                        <Button
+                            variant="ghost"
+                            onClick={(e) => {
+                                e.preventDefault() // Prevent navigation
+                                handleCopyToClipboard(classLink)
+                            }}
+                        >
+                            <Copy size={15} />
+                        </Button>
                     </div>
                 </div>
             </div>

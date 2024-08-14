@@ -6,11 +6,10 @@ import { OFFSET, POSITION } from '@/utils/constant'
 import { Input } from '@/components/ui/input'
 import RadioCheckbox from '../_components/radioCheckbox'
 import InstructorCard from '../_components/instructorCard'
+import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 
 const Recordings = () => {
-    const arr1 = [1, 2, 3, 4, 5]
-    const [ongoingSessions, setOngoingSessions] = useState<any[]>([])
-    const [upcomingSessions, setUpcomingSessions] = useState<any[]>([])
+    const [classRecordings, setClassRecordings] = useState<any[]>([])
     const [position, setPosition] = useState(POSITION)
     const [pages, setPages] = useState<number>()
     const [offset, setOffset] = useState<number>(OFFSET)
@@ -19,9 +18,9 @@ const Recordings = () => {
     const [lastPage, setLastPage] = useState<number>(0)
 
     const fetchSessions = (data: any) => {
-        setUpcomingSessions(data.ongoing)
-        setUpcomingSessions(data.upcoming)
+        setClassRecordings(data)
     }
+
     return (
         <div>
             <h1 className="text-start text-lg font-semibold ">
@@ -40,22 +39,34 @@ const Recordings = () => {
                 setPages={setPages}
                 setLastPage={setLastPage}
             />
-            {/* <RadioCheckbox />
-      <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4'>
-        {arr1.map((item) => {
-          return (
-            <InstructorCard
-              key={item}
-              batchName={"AFE + Navgurukul Basics"}
-              date1={26}
-              month={"Jan"}
-              topicTitle={"1:1 Meet With Karan Singh"}
-              classesTiming={"4:00 PM - 5:00 PM"}
-              typeClass={"View"}
+            <div className="p-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-x-8 gap-y-6">
+                    {classRecordings.map((item) => {
+                        return (
+                            <InstructorCard
+                                key={item.batchId}
+                                batchName={item.bootcampName}
+                                topicTitle={item.title}
+                                startTime={item.startTime}
+                                endTime={item.endTime}
+                                typeClass={item.status}
+                                classLink={item.hangoutLink}
+                            />
+                        )
+                    })}
+                </div>
+            </div>
+            <DataTablePagination
+                totalStudents={totalSessions}
+                position={position}
+                setPosition={setPosition}
+                pages={pages}
+                lastPage={lastPage}
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+                fetchStudentData={fetchSessions}
+                setOffset={setOffset}
             />
-          );
-        })}
-      </div> */}
         </div>
     )
 }
