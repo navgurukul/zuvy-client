@@ -172,7 +172,7 @@ const Projects = ({
     const ProjectStatus = getSubmissionStatus(submittedDate, deadlineDate)
 
     return (
-        <div className="flex flex-col gap-y-3 ">
+        <div className="flex flex-col gap-y-3 w-full">
             <h1 className="text-left text-xl font-semibold flex flex-col ">
                 <span>Project:- {title}</span>
                 <span className=" text-[14px]">

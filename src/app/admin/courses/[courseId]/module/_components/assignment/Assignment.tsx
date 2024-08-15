@@ -185,7 +185,7 @@ const AddAssignent = ({ content }: AssignmentProps) => {
                             control={form.control}
                             name="startDate"
                             render={({ field }) => (
-                                <FormItem className="flex items-center gap-x-2 text-left">
+                                <FormItem className="flex flex-col justify-start gap-x-2 text-left">
                                     <FormLabel className="m-0">
                                         <span className="text-xl">
                                             Choose Deadline Date
