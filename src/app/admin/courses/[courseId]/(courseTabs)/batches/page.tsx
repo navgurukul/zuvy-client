@@ -169,7 +169,7 @@ const Page = ({ params }: { params: any }) => {
             return (
                 <Dialog>
                     <DialogTrigger asChild>
-                        <Button>
+                        <Button className="lg:max-w-[150px] w-full mt-5">
                             {emptyState ? '+ Create Batch' : 'New Batch'}
                         </Button>
                     </DialogTrigger>
@@ -186,7 +186,7 @@ const Page = ({ params }: { params: any }) => {
             return (
                 <Dialog>
                     <DialogTrigger asChild>
-                        <Button>
+                        <Button className="lg:max-w-[150px] w-full mt-5">
                             {emptyState ? '+ Create Batch' : 'New Batch'}
                         </Button>
                     </DialogTrigger>
@@ -291,12 +291,12 @@ const Page = ({ params }: { params: any }) => {
     if (courseData?.id) {
         return (
             <div>
-                <div className=" relative flex items-center justify-between mb-6">
+                <div className="relative flex flex-col lg:flex-row items-center justify-between mb-6">
                     {batchData?.length ?? 0 > 0 ? (
                         <Input
                             type="search"
                             placeholder="Search"
-                            className="w-[400px]"
+                            className="lg:w-[400px] w-full"
                             value={search}
                             onChange={handleSetSearch}
                         />

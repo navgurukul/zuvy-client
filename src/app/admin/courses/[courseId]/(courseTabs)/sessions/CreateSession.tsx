@@ -254,7 +254,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
             <DialogTrigger asChild>
                 <Button
                     onClick={toggleForm}
-                    className="text-white bg-secondary"
+                    className="text-white bg-secondary lg:max-w-[150px] w-full lg:mt-2 mt-5"
                 >
                     Create Session
                 </Button>

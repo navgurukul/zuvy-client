@@ -194,18 +194,18 @@ const Courses: React.FC = () => {
                                 </Button>
                             </Alert>
                         ) : null}
-                        <div className={styles.searchContainer}>
+                        <div className="flex flex-col lg:flex-row justify-between items-center mt-6">
                             <Input
                                 type="text"
                                 placeholder="Search"
                                 // className={styles.searchInput}
-                                className="max-w-[500px]"
+                                className="lg:max-w-[500px] w-full"
                                 value={searchQuery}
                                 onChange={handleSearchChange}
                             />
                             <Dialog>
                                 <DialogTrigger asChild>
-                                    <Button className="text-white bg-secondary">
+                                    <Button className="text-white bg-secondary lg:max-w-[150px] w-full mt-5">
                                         <Plus className="w-5 mr-2" />
                                         <p>New Course</p>
                                     </Button>
