@@ -14,6 +14,7 @@ import { useParams } from 'next/navigation'
 import Assessment from './Assessment'
 import FeedbackForm from './FeedbackForm'
 import { getAssessmentShortInfo } from '@/utils/students'
+import Projects from './Projects'
 
 interface Chapter {
     id: number
@@ -27,7 +28,7 @@ function Chapters({ params }: any) {
     // misc
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
-    const { viewcourses, moduleID } = params
+    const { viewcourses, moduleID } = useParams()
     const urlParams = new URLSearchParams(window.location.search)
     const nextChapterId = Number(urlParams.get('nextChapterId'))
     // state and variables
@@ -36,7 +37,7 @@ function Chapters({ params }: any) {
     const [topicId, setTopicId] = useState(0)
     const [chapterContent, setChapterContent] = useState<any>({})
     const [chapterId, setChapterId] = useState<number>(0)
-
+    const [projectId, setProjectId] = useState<number>(0)
     const [assessmentShortInfo, setAssessmentShortInfo] = useState<any>({})
     const [assessmentOutSourceId, setAssessmentOutSourceId] = useState<any>()
     const [submissionId, setSubmissionId] = useState<any>()
@@ -58,6 +59,7 @@ function Chapters({ params }: any) {
             // )
             // setActiveChapter(nextChapterId || firstPending.id)
             // fetchChapterContent(nextChapterId || firstPending.id)
+            setProjectId(response.data.moduleDetails[0].projectId)
             setActiveChapter(firstPending.id)
             fetchChapterContent(firstPending.id)
         } catch (error) {
@@ -92,17 +94,29 @@ function Chapters({ params }: any) {
         [userID]
     )
 
-    const completeChapter = () => {
-        api.post(
-            `tracking/updateChapterStatus/${viewcourses}/${moduleID}?chapterId=${activeChapter}`
-            // `tracking/updateChapterStatus/${viewcourses}/${moduleID}?chapterId=${nextChapterId}`
-        )
-
-        fetchChapters()
+    const completeChapter = async () => {
+        try {
+            await api.post(
+                `tracking/updateChapterStatus/${viewcourses}/${moduleID}?chapterId=${activeChapter}`
+            )
+            await fetchChapters()
+        } catch (error) {
+            console.error('Error updating chapter status:', error)
+        }
     }
 
     const renderChapterContent = () => {
         switch (topicId) {
+            case 0:
+                return (
+                    <Projects
+                        moduleId={+moduleID}
+                        projectId={projectId}
+                        bootcampId={+viewcourses}
+                        completeChapter={completeChapter}
+                    />
+                )
+
             case 1:
                 return (
                     <Video
@@ -123,15 +137,23 @@ function Chapters({ params }: any) {
                 return (
                     <Quiz
                         content={chapterContent}
-                        moduleId={moduleID}
+                        moduleId={moduleID.toString()}
                         // moduleId={moduleIdString}
                         chapterId={chapterId}
-                        bootcampId={viewcourses}
-                        fetchChapters={fetchChapters}
+                        bootcampId={+viewcourses}
+                        fetchChapters={completeChapter}
                     />
                 )
             case 5:
-                return <Assignment />
+                return (
+                    <Assignment
+                        content={chapterContent}
+                        moduleId={+moduleID}
+                        projectId={projectId}
+                        bootcampId={+viewcourses}
+                        completeChapter={completeChapter}
+                    />
+                )
             case 6:
                 return (
                     <Assessment
@@ -144,10 +166,10 @@ function Chapters({ params }: any) {
                 return (
                     <FeedbackForm
                         content={chapterContent}
-                        moduleId={moduleID}
+                        moduleId={moduleID.toString()}
                         // moduleId={moduleIdString}
                         chapterId={chapterId}
-                        bootcampId={viewcourses}
+                        bootcampId={+viewcourses}
                         // bootcampId={viewcourses}
                     />
                 )

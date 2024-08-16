@@ -29,6 +29,7 @@ function Quiz(props: Props) {
     ) => {
         setSelectedAnswers((prev) => ({ ...prev, [questionId]: optionId }))
     }
+
     const allQuestionsAnswered = () => {
         return (
             questions?.length > 0 &&
@@ -37,29 +38,29 @@ function Quiz(props: Props) {
             )
         )
     }
+
     const getAllQuizQuestionHandler = useCallback(async () => {
         try {
             const res = await api.get(
-                `/tracking/getAllQuizAndAssignmentWithStatus/${props.moduleId}?chapterId=${props.chapterId}`
+                `/tracking/getQuizAndAssignmentWithStatus?chapterId=${props.chapterId}`
             )
 
-            if (res.data.status === 'success') {
-                const updatedQuestions = res.data.trackedData.map(
+            if (res.data.isSuccess) {
+                const updatedQuestions = res.data.data.quizDetails.map(
                     (item: any) => ({
                         ...item,
-                        status: item.quizTrackingData[0].status,
+                        status: item.quizTrackingData[0]?.status ?? 'pending',
                     })
                 )
                 setQuestions(updatedQuestions)
-                setStatus(true)
+                setStatus(res.data.data.status === 'Completed')
             } else {
-                setQuestions(res.data[0].questions)
-                setStatus(false)
+                console.error('Failed to fetch quiz details')
             }
         } catch (error) {
             console.error('Error fetching quiz questions:', error)
         }
-    }, [props.moduleId, props.chapterId])
+    }, [props.chapterId])
 
     const updateQuizChapterHandler = useCallback(async () => {
         try {
@@ -75,9 +76,9 @@ function Quiz(props: Props) {
                     props.fetchChapters()
                 })
         } catch (error) {
-            console.error('Error fetching quiz questions:', error)
+            console.error('Error updating chapter status:', error)
         }
-    }, [])
+    }, [props])
 
     useEffect(() => {
         getAllQuizQuestionHandler()
