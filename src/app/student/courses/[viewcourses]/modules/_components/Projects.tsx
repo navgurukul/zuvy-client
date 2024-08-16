@@ -74,7 +74,8 @@ const Projects = ({
             setProjectData(res.data)
             setTitle(res.data?.data.projectData[0].title)
             setContent(
-                res.data.data.projectData[0].projectTrackingData[0].projectLink
+                res?.data?.data?.projectData[0]?.projectTrackingData[0]
+                    ?.projectLink
             )
             editor.commands.setContent(
                 res.data.data.projectData[0].instruction.description[0]
@@ -137,6 +138,7 @@ const Projects = ({
 
     const timestamp = deadlineDate
     const date = new Date(timestamp)
+    const submittedProjectDate = new Date(submittedDate)
 
     const options: any = {
         year: 'numeric',
@@ -150,6 +152,10 @@ const Projects = ({
     }
 
     const formattedDate = date.toLocaleDateString('en-US', options)
+    const formattedSubmittedDate = submittedProjectDate.toLocaleString(
+        'en-US',
+        options
+    )
 
     function getSubmissionStatus(
         submittedDate: string | null,
@@ -171,16 +177,27 @@ const Projects = ({
 
     const ProjectStatus = getSubmissionStatus(submittedDate, deadlineDate)
 
+    // You have submitted on :- 20 Aug 2024 (Late submitted)
+
     return (
         <div className="flex flex-col gap-y-3 w-full">
             <h1 className="text-left text-xl font-semibold flex flex-col ">
                 <span>Project:- {title}</span>
                 <span className=" text-[14px]">
-                    Assignment Deadline :- {formattedDate}
+                    Deadline :- {formattedDate}
                 </span>
-                <span className=" text-[14px]">{ProjectStatus}</span>
+                <span className=" text-xl font-semibold">
+                    You have submitted on:- {formattedSubmittedDate} ({' '}
+                    {ProjectStatus})
+                </span>
             </h1>
-            <div>{editor && <TiptapEditor editor={editor} />}</div>
+            <div>
+                <h1 className="text-xl text-left font-semibold">
+                    {' '}
+                    Project Description
+                </h1>
+                {editor && <TiptapEditor editor={editor} />}
+            </div>
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}

@@ -70,7 +70,7 @@ const Assignments = ({
                     setProjectData(res.data.data.assignmentTracking[0])
                     setDeadlineDate(res.data.data.chapterDetails.completionDate)
                     setSubmittedDate(
-                        res.data.data.assignmentTracking[0].createdAt
+                        res?.data?.data?.assignmentTracking[0]?.createdAt
                     )
                     setStatus(res.data.data.status)
                 })
@@ -145,6 +145,7 @@ const Assignments = ({
 
     const timestamp = deadlineDate
     const date = new Date(timestamp)
+    const submittedProjectDate = new Date(submittedDate)
 
     const options: any = {
         year: 'numeric',
@@ -158,6 +159,10 @@ const Assignments = ({
     }
 
     const formattedDate = date.toLocaleDateString('en-US', options)
+    const formattedSubmittedDate = submittedProjectDate.toLocaleString(
+        'en-US',
+        options
+    )
 
     function getSubmissionStatus(
         submittedDate: string | null,
@@ -203,11 +208,20 @@ const Assignments = ({
                     )}
                 </span>
                 <span className=" text-[14px]">
-                    Assignment Deadline :- {formattedDate}
+                    Deadline :- {formattedDate}
                 </span>
-                <span className=" text-[14px]">{AssignmentStatus}</span>
+                <span className=" text-xl font-semibold">
+                    You have submitted on:- {formattedSubmittedDate} ({' '}
+                    {AssignmentStatus})
+                </span>
             </h1>
-            <div>{editor && <TiptapEditor editor={editor} />}</div>
+            <div>
+                <h1 className="text-xl text-left font-semibold">
+                    {' '}
+                    Assignment Description
+                </h1>
+                {editor && <TiptapEditor editor={editor} />}
+            </div>
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
