@@ -94,13 +94,15 @@ function Chapters({ params }: any) {
         [userID]
     )
 
-    const completeChapter = () => {
-        api.post(
-            `tracking/updateChapterStatus/${viewcourses}/${moduleID}?chapterId=${activeChapter}`
-            // `tracking/updateChapterStatus/${viewcourses}/${moduleID}?chapterId=${nextChapterId}`
-        )
-
-        fetchChapters()
+    const completeChapter = async () => {
+        try {
+            await api.post(
+                `tracking/updateChapterStatus/${viewcourses}/${moduleID}?chapterId=${activeChapter}`
+            )
+            await fetchChapters()
+        } catch (error) {
+            console.error('Error updating chapter status:', error)
+        }
     }
 
     const renderChapterContent = () => {
