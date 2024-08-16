@@ -211,8 +211,14 @@ const Assignments = ({
                     Deadline :- {formattedDate}
                 </span>
                 <span className=" text-xl font-semibold">
-                    You have submitted on:- {formattedSubmittedDate} ({' '}
-                    {AssignmentStatus})
+                    {formattedSubmittedDate === 'Invalid Date' ? (
+                        AssignmentStatus
+                    ) : (
+                        <>
+                            You have submitted on: {formattedSubmittedDate} (
+                            {AssignmentStatus})
+                        </>
+                    )}
                 </span>
             </h1>
             <div>
