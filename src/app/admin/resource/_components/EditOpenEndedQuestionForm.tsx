@@ -86,14 +86,16 @@ function EditOpenEndedQuestionForm({
             toast({
                 title: 'Success',
                 description: response.data.message,
-                className: 'text-start capitalize border border-secondary',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
         } catch (error: any) {
             toast({
                 title: 'Error',
                 description:
                     error?.response?.data?.message || 'An error occurred',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -219,7 +221,7 @@ function EditOpenEndedQuestionForm({
                                     </FormLabel>
                                     <FormControl>
                                         <Input
-                                        className='no-spinners'
+                                            className="no-spinners"
                                             type="number"
                                             min="0"
                                             placeholder="Enter the Marks for the Question"

@@ -101,7 +101,8 @@ export default function NewCodingProblemForm({
             toast({
                 title: 'Success',
                 description: 'Question Created Successfully',
-                className: 'text-start capitalize border border-secondary',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
             setIsDialogOpen(false)
         } catch (error: any) {
@@ -109,7 +110,8 @@ export default function NewCodingProblemForm({
                 title: 'Error',
                 description:
                     error?.response?.data?.message || 'An error occurred',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -131,7 +133,7 @@ export default function NewCodingProblemForm({
         }
 
         const generateParameterName = (index: number) => {
-            return String.fromCharCode(97 + index);
+            return String.fromCharCode(97 + index)
         }
 
         const formattedData = {
@@ -141,35 +143,46 @@ export default function NewCodingProblemForm({
             tagId: values.topics,
             constraints: values.constraints,
             testCases: values.testCases.map((testCase) => {
-                const processedInput = processInput(testCase.input, values.inputFormat);
-                let inputs;
+                const processedInput = processInput(
+                    testCase.input,
+                    values.inputFormat
+                )
+                let inputs
 
                 if (Array.isArray(processedInput)) {
-                    inputs = [{
-                        parameterType: values.inputFormat,
-                        parameterValue: processedInput,
-                        parameterName: 'a'
-                    }];
+                    inputs = [
+                        {
+                            parameterType: values.inputFormat,
+                            parameterValue: processedInput,
+                            parameterName: 'a',
+                        },
+                    ]
                 } else {
-                    const inputValues = testCase.input.trim().split(' ').filter(Boolean);
+                    const inputValues = testCase.input
+                        .trim()
+                        .split(' ')
+                        .filter(Boolean)
                     inputs = inputValues.map((value, index) => ({
                         parameterType: values.inputFormat,
                         parameterValue: processInput(value, values.inputFormat),
-                        parameterName: generateParameterName(index)
-                    }));
+                        parameterName: generateParameterName(index),
+                    }))
                 }
 
                 return {
                     inputs,
                     expectedOutput: {
                         parameterType: values.outputFormat,
-                        parameterValue: processInput(testCase.output, values.outputFormat)
-                    }
-                };
+                        parameterValue: processInput(
+                            testCase.output,
+                            values.outputFormat
+                        ),
+                    },
+                }
             }),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
-            content: {}
+            content: {},
         }
         createCodingQuestion(formattedData)
         getAllCodingQuestions(setCodingQuestions)
@@ -189,10 +202,7 @@ export default function NewCodingProblemForm({
                             <FormItem className="text-left">
                                 <FormLabel>Title</FormLabel>
                                 <FormControl>
-                                    <Input
-                                        placeholder="Title"
-                                        {...field}
-                                    />
+                                    <Input placeholder="Title" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -330,11 +340,21 @@ export default function NewCodingProblemForm({
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="str">String</SelectItem>
-                                            <SelectItem value="int">Number</SelectItem>
-                                            <SelectItem value="float">Float</SelectItem>
-                                            <SelectItem value="arrayOfnum">Array Of Numbers</SelectItem>
-                                            <SelectItem value="arrayOfStr">Array Of Strings</SelectItem>
+                                            <SelectItem value="str">
+                                                String
+                                            </SelectItem>
+                                            <SelectItem value="int">
+                                                Number
+                                            </SelectItem>
+                                            <SelectItem value="float">
+                                                Float
+                                            </SelectItem>
+                                            <SelectItem value="arrayOfnum">
+                                                Array Of Numbers
+                                            </SelectItem>
+                                            <SelectItem value="arrayOfStr">
+                                                Array Of Strings
+                                            </SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -347,18 +367,31 @@ export default function NewCodingProblemForm({
                             render={({ field }) => (
                                 <FormItem className="text-left w-full">
                                     <FormLabel>Output Format</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        defaultValue={String(field.value)}
+                                    >
                                         <FormControl>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Choose Output Format" />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="str">String</SelectItem>
-                                            <SelectItem value="int">Number</SelectItem>
-                                            <SelectItem value="float">Float</SelectItem>
-                                            <SelectItem value="arrayOfnum">Array Of Numbers</SelectItem>
-                                            <SelectItem value="arrayOfStr">Array Of Strings</SelectItem>
+                                            <SelectItem value="str">
+                                                String
+                                            </SelectItem>
+                                            <SelectItem value="int">
+                                                Number
+                                            </SelectItem>
+                                            <SelectItem value="float">
+                                                Float
+                                            </SelectItem>
+                                            <SelectItem value="arrayOfnum">
+                                                Array Of Numbers
+                                            </SelectItem>
+                                            <SelectItem value="arrayOfStr">
+                                                Array Of Strings
+                                            </SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -385,7 +418,10 @@ export default function NewCodingProblemForm({
                                                 onChange={field.onChange}
                                             />
                                             <p className="text-sm text-gray-500 mt-1">
-                                                {form.watch('inputFormat') === 'arrayOfnum' || form.watch('inputFormat') === 'arrayOfStr'
+                                                {form.watch('inputFormat') ===
+                                                    'arrayOfnum' ||
+                                                form.watch('inputFormat') ===
+                                                    'arrayOfStr'
                                                     ? 'Enter values separated by commas (e.g., 1,2,3,4)'
                                                     : 'Enter values separated by spaces (e.g., 2 3 4)'}
                                             </p>
@@ -404,7 +440,10 @@ export default function NewCodingProblemForm({
                                                 onChange={field.onChange}
                                             />
                                             <p className="text-sm text-gray-500 mt-1">
-                                                {form.watch('outputFormat') === 'arrayOfnum' || form.watch('outputFormat') === 'arrayOfStr'
+                                                {form.watch('outputFormat') ===
+                                                    'arrayOfnum' ||
+                                                form.watch('outputFormat') ===
+                                                    'arrayOfStr'
                                                     ? 'Enter values separated by commas (e.g., 1,2,3,4)'
                                                     : 'Enter values separated by spaces (e.g., 2 3 4)'}
                                             </p>
@@ -415,7 +454,9 @@ export default function NewCodingProblemForm({
                                 {index !== 0 && (
                                     <X
                                         className="cursor-pointer"
-                                        onClick={() => handleRemoveTestCase(testCase.id)}
+                                        onClick={() =>
+                                            handleRemoveTestCase(testCase.id)
+                                        }
                                     />
                                 )}
                             </div>

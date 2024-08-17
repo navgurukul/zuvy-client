@@ -128,7 +128,8 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
                     title: 'Session Updated',
                     description: 'Session updated successfully',
                     variant: 'default',
-                    className: 'text-start capitalize border border-secondary',
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
                 props.getClasses() // Refresh the class list
                 props.onClose() // Close the dialog

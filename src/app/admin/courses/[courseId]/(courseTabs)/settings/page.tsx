@@ -49,7 +49,8 @@ const Page = ({ params }: { params: any }) => {
                 toast({
                     title: res.data.status,
                     description: `Bootcamp type updated to ${type}`,
-                    className: 'text-start capitalize border border-secondary',
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
             })
             .catch((error) => {
@@ -57,7 +58,7 @@ const Page = ({ params }: { params: any }) => {
                     title: error.data.status,
                     description: error.data.message,
                     className:
-                        'text-start capitalize border border-destructive',
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             })
     }
@@ -67,7 +68,8 @@ const Page = ({ params }: { params: any }) => {
                 toast({
                     title: res.data.status,
                     description: res.data.message,
-                    className: 'text-start capitalize border border-secondary',
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
             })
             router.push('/admin/courses')
@@ -75,7 +77,8 @@ const Page = ({ params }: { params: any }) => {
             toast({
                 title: error.data.status,
                 description: error.data.message,
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
         setDeleteModalOpen(false)

@@ -86,7 +86,7 @@ const AddStudentsModal = ({
                         title: response.data.status,
                         description: response.data.message,
                         className:
-                            'text-start capitalize border border-secondary',
+                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     fetchStudentsHandler({
                         courseId,
@@ -106,7 +106,7 @@ const AddStudentsModal = ({
                     title: 'Error Adding Students',
                     description: error?.response.data.message,
                     className:
-                        'text-start capitalize border border-destructive',
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
                 console.error('Error', error.message)
             }

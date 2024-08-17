@@ -126,13 +126,14 @@ const IDE: React.FC<IDEProps> = ({
                     title: `Test Cases Passed${
                         action === 'submit' ? ', Solution submitted' : ''
                     }`,
-                    className: 'text-start capitalize border border-secondary',
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
             } else {
                 toast({
                     title: 'Test Cases Failed',
                     className:
-                        'text-start capitalize border border-destructive',
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             }
             setCodeError('')
@@ -141,7 +142,8 @@ const IDE: React.FC<IDEProps> = ({
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'An error occurred.',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
             setCodeError(error?.message)
         }

@@ -53,7 +53,7 @@ const AddAssignent = ({ content }: AssignmentProps) => {
 
     const editor = useEditor({
         extensions,
-        content
+        content,
     })
 
     const [title, setTitle] = useState('')
@@ -73,7 +73,8 @@ const AddAssignent = ({ content }: AssignmentProps) => {
             )
             const contentDetails = response.data.contentDetails[0]
             setTitle(contentDetails.title)
-            contentDetails && editor?.commands.setContent(contentDetails.content)
+            contentDetails &&
+                editor?.commands.setContent(contentDetails.content)
         } catch (error) {
             console.error('Error fetching assignment content:', error)
         }
@@ -94,14 +95,16 @@ const AddAssignent = ({ content }: AssignmentProps) => {
             toast({
                 title: 'Success',
                 description: 'Assignment Chapter Edited Successfully',
-                className: 'text-start capitalize border border-secondary',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
         } catch (error: any) {
             toast({
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'An error occurred.',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 variant: 'destructive',
             })
         }

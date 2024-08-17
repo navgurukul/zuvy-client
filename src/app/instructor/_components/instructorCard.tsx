@@ -31,7 +31,8 @@ const InstructorCard: React.FC<Props> = ({
                 toast({
                     title: 'Copied!',
                     description: 'Link copied to clipboard!',
-                    className: 'text-start capitalize border border-secondary',
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
                 console.log('link', link)
             })

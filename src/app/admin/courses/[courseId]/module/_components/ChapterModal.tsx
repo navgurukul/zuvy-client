@@ -21,7 +21,7 @@ import { toast } from '@/components/ui/use-toast'
 function ChapterModal({
     params,
     fetchChapters,
-    newChapterOrder
+    newChapterOrder,
 }: {
     params: { moduleId: string; courseId: string }
     fetchChapters: () => void
@@ -39,7 +39,8 @@ function ChapterModal({
                 toast({
                     title: res?.data?.module[0]?.title,
                     description: res?.data?.message,
-                    className: 'text-start capitalize border border-secondary',
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
             })
             .catch((error) => {
@@ -47,7 +48,7 @@ function ChapterModal({
                     title: 'Error',
                     description: error?.response?.data?.message[0],
                     className:
-                        'text-start capitalize border border-destructive',
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             })
         fetchChapters()

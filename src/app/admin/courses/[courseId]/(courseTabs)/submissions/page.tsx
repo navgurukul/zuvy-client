@@ -42,7 +42,8 @@ const Page = ({ params }: { params: any }) => {
             toast({
                 title: 'Error',
                 description: 'Error fetching submissions:',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }, [params.courseId])
@@ -58,7 +59,8 @@ const Page = ({ params }: { params: any }) => {
             toast({
                 title: 'Error',
                 description: 'Error fetching assessments:',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }, [params.courseId])
@@ -75,7 +77,8 @@ const Page = ({ params }: { params: any }) => {
             toast({
                 title: 'Error',
                 description: 'Error fetching assessments:',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }, [params.courseId])
@@ -91,7 +94,8 @@ const Page = ({ params }: { params: any }) => {
             toast({
                 title: 'Error',
                 description: 'Error fetching form data:',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }, [params.courseId])

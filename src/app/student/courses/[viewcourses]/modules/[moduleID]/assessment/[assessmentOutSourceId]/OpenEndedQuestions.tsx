@@ -24,7 +24,7 @@ const OpenEndedQuestions = ({
     remainingTime,
     questions,
     assessmentSubmitId,
-    getSeperateOpenEndedQuestions
+    getSeperateOpenEndedQuestions,
 }: {
     onBack: () => void
     remainingTime: number
@@ -71,21 +71,23 @@ const OpenEndedQuestions = ({
             toast({
                 title: 'Success',
                 description: 'Open-ended questions submitted successfully',
-                className: 'text-start capitalize border border-secondary',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
 
             getSeperateOpenEndedQuestions()
 
-            setTimeout(()=>{
+            setTimeout(() => {
                 onBack()
             }, 3000)
-
         } catch (error: any) {
             toast({
                 title: 'Error',
                 description:
                     error?.response?.data?.message || 'An error occurred',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+
                 variant: 'destructive',
             })
         }
@@ -102,9 +104,10 @@ const OpenEndedQuestions = ({
                     <h1 className="font-extrabold"></h1>
                 </div>
 
-                <div className='font-bold text-xl'><TimerDisplay remainingTime={remainingTime} /></div>
+                <div className="font-bold text-xl">
+                    <TimerDisplay remainingTime={remainingTime} />
+                </div>
                 <div></div>
-
             </div>
             <Separator />
             <Form {...form}>

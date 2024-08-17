@@ -146,7 +146,8 @@ function Page() {
             toast({
                 title: 'Duration cannot be 0',
                 description: 'Please enter a valid duration',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         } else {
             api.put(
@@ -158,7 +159,7 @@ function Page() {
                         title: 'Success',
                         description: 'Module Edited Successfully',
                         className:
-                            'text-start capitalize border border-secondary',
+                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     fetchCourseModules()
                     setIsEditOpen(false)
@@ -168,7 +169,7 @@ function Page() {
                         title: 'Error',
                         description: 'Error creating module',
                         className:
-                            'text-start capitalize border border-destructive',
+                            'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                     })
                 })
         }
@@ -184,7 +185,8 @@ function Page() {
             toast({
                 title: 'Duration cannot be 0',
                 description: 'Please enter a valid duration',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         } else {
             api.post(`/content/modules/${courseData?.id}?typeId=${typeId}`, {
@@ -196,7 +198,7 @@ function Page() {
                         title: 'Success',
                         description: 'Module Created Successfully',
                         className:
-                            'text-start capitalize border border-secondary',
+                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     fetchCourseModules()
                     setIsOpen(false)
@@ -206,7 +208,7 @@ function Page() {
                         title: 'Error',
                         description: 'Error creating module',
                         className:
-                            'text-start capitalize border border-destructive',
+                            'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                     })
                 })
         }
@@ -223,7 +225,8 @@ function Page() {
             toast({
                 title: 'Error',
                 description: 'Failed to fetch course Modules',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -262,7 +265,8 @@ function Page() {
             toast({
                 title: 'Error',
                 description: 'Error updating module order',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
