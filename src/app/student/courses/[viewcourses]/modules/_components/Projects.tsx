@@ -83,7 +83,7 @@ const Projects = ({
             setStatus(res.data.data.status)
             setDeadlineDate(res.data.data.projectData[0].deadline)
             setSubmittedDate(
-                res.data.data.projectData[0].projectTrackingData[0].createdAt
+                res.data.data.projectData[0].projectTrackingData[0].updatedAt
             )
         } catch (error: any) {
             console.log(error.message)
@@ -151,10 +151,16 @@ const Projects = ({
         timeZoneName: 'short',
     }
 
+    const options2: any = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    }
+
     const formattedDate = date.toLocaleDateString('en-US', options)
     const formattedSubmittedDate = submittedProjectDate.toLocaleString(
         'en-US',
-        options
+        options2
     )
 
     function getSubmissionStatus(
@@ -189,7 +195,7 @@ const Projects = ({
                 </span>
                 <span className="text-xl font-semibold">
                     {formattedSubmittedDate === 'Invalid Date' ? (
-                        <>{ProjectStatus}</>
+                        ProjectStatus
                     ) : (
                         <>
                             You have submitted on: {formattedSubmittedDate} (

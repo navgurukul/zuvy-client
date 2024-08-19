@@ -13,8 +13,8 @@ const ShowMore: React.FC<ShowMoreProps> = ({ description = '' }) => {
     const halfwayIndex = Math.ceil(description.length / 2)
 
     // Split the description into two parts
-    const firstHalf = description.substring(0, halfwayIndex)
-    const secondHalf = description.substring(halfwayIndex)
+    const firstHalf = description?.substring(0, halfwayIndex)
+    const secondHalf = description?.substring(halfwayIndex)
 
     return (
         <div className="flex items-center gap-x-2">

@@ -16,6 +16,7 @@ import dynamic from 'next/dynamic'
 
 import { api } from '@/utils/axios.config'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
+import { cn, difficultyColor } from '@/lib/utils'
 
 type Props = {}
 
@@ -57,7 +58,9 @@ const Page = ({ params }: { params: paramsType }) => {
             isLast: false,
         },
         {
-            crumb: codingQuestionData && codingQuestionData?.title,
+            crumb:
+                codingSubmissionData &&
+                codingSubmissionData.questionDetail.title,
             isLast: true,
         },
     ]
@@ -89,14 +92,15 @@ const Page = ({ params }: { params: paramsType }) => {
     }, [params.StudentAssesmentData])
 
     const fetchCodingSubmissionData = useCallback(async () => {
+        // ;/codingPlatform/egt - practice - code / 35
         try {
             await api
                 .get(
-                    `/codingPlatform/PracticeCode?studentId=${params.IndividualReport}&codingOutsourseId=${params.CodingSolution}`
+                    `/codingPlatform/get-practice-code/${params.CodingSolution}`
                 )
                 .then((res) => {
-                    setCodingSubmissionData(res.data.shapecode)
-                    setcodingQuestionData(res.data.questionInfo)
+                    setCodingSubmissionData(res.data.data)
+                    setcodingQuestionData(res.data)
                 })
         } catch (error) {
             toast({
@@ -123,23 +127,24 @@ const Page = ({ params }: { params: paramsType }) => {
         getStudentAssesmentDataHandler,
     ])
 
-    console.log(params)
-    useEffect(() => {
-        if (proctoringData) {
-            setLoading(false)
-        }
-    }, [proctoringData])
+    // console.log(codingSubmissionData.questionDetail.title)
+    // useEffect(() => {
+    //     if (proctoringData) {
+    //         setLoading(false)
+    //     }
+    // }, [proctoringData])
 
-    const sourceCodeDecoder = (sourceCode: string) => {
-        if (!codingSubmissionData) return
-        const decodedString = atob(sourceCode)
+    // const sourceCodeDecoder = (sourceCode: string) => {
+    //     if (!codingSubmissionData) return
+    //     const decodedString = atob(sourceCode)
 
-        return decodedString
-    }
-    const decodedString = sourceCodeDecoder(codingSubmissionData?.source_code)
+    //     return decodedString
+    // }
+    // const decodedString = sourceCodeDecoder(codingSubmissionData?.source_code)
     const { tabChange, copyPaste, PracticeCode, user } = proctoringData
-    const cheatingClass =
-        tabChange > 0 && tabChange > 0 ? 'bg-red-600' : 'bg-green-400'
+
+    // const cheatingClass =
+    //     tabChange > 0 && tabChange > 0 ? 'bg-red-600' : 'bg-green-400'
 
     console.log(codingQuestionData)
 
@@ -158,13 +163,28 @@ const Page = ({ params }: { params: paramsType }) => {
                                 />
                                 <AvatarFallback>CN</AvatarFallback>
                             </Avatar>
-                            <h1 className="text-left font-semibold text-lg">
-                                {user?.name}- Coding Questions Report
-                            </h1>
+                            <div className="flex flex-col items-start ">
+                                <h1 className="font-semibold flex  ">
+                                    Status :-
+                                    <span
+                                        className={`${
+                                            codingSubmissionData?.status ===
+                                            'Accepted'
+                                                ? 'text-secondary'
+                                                : 'text-gray-600'
+                                        } mx-3`}
+                                    >
+                                        {codingSubmissionData?.status}
+                                    </span>
+                                </h1>
+                                <h1 className="font-semibold">
+                                    Coding Submission Report :- {user?.name}
+                                </h1>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div className="lg:flex h-[150px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md w-2/5 ">
+                {/* <div className="lg:flex h-[150px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md w-2/5 ">
                     <div className="flex flex-col w-full justify-between   ">
                         <div
                             className={`flex items-center justify-between p-4 rounded-md ${cheatingClass} `}
@@ -198,7 +218,9 @@ const Page = ({ params }: { params: paramsType }) => {
                             </div>
                             <div>
                                 <h1 className="text-start font-bold">
-                                    {cheatingClass ? 'Yes' : 'No'}
+                                    {tabChange === 1 && copyPaste === 0
+                                        ? 'No'
+                                        : 'Yes'}
                                 </h1>
                                 <p className="text-gray-500">
                                     Cheating Detected
@@ -206,7 +228,7 @@ const Page = ({ params }: { params: paramsType }) => {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> */}
                 {/* <div className="my-5 flex flex-col gap-y-3 text-left ">
                 <h1 className="text-left font-semibold">Student Answers</h1>
                 <div className="flex font-semibold gap-x-3 ">
@@ -216,27 +238,42 @@ const Page = ({ params }: { params: paramsType }) => {
             </div> */}
                 <ResizablePanelGroup
                     direction="horizontal"
-                    className="w-full max-w-12xl rounded-lg "
+                    className="w-full max-w-12xl rounded-lg"
                 >
                     <ResizablePanel defaultSize={50}>
                         <div className="flex  w-full h-[90vh] my-6">
                             <div className=" flex flex-col items-start space-y-4">
                                 <h1 className="text-2xl font-bold capitalize ">
-                                    {codingQuestionData?.title}
+                                    {
+                                        codingSubmissionData?.questionDetail
+                                            ?.title
+                                    }
+
+                                    <span
+                                        className={cn(
+                                            `font-semibold text-secondary`
+                                            // difficultyColor(data.difficulty)
+                                        )}
+                                    ></span>
                                 </h1>
 
-                                <div>
-                                    <h2 className="text-xl text-left font-semibold">
+                                <div className="flex items-center gap-x-2 ">
+                                    <h2 className=" text-left font-semibold">
                                         Description:
                                     </h2>
-                                    <p>{codingQuestionData?.description}</p>
+                                    <p className="capitalize font-semibold">
+                                        {
+                                            codingSubmissionData?.questionDetail
+                                                ?.description
+                                        }
+                                    </p>
                                 </div>
 
                                 <div className="flex ">
                                     <h2 className="text-xl font-semibold">
                                         Examples:
                                     </h2>
-                                    {codingQuestionData?.examples.map(
+                                    {/* {codingQuestionData?.examples.map(
                                         (example: any, index: number) => (
                                             <div
                                                 key={index}
@@ -252,14 +289,14 @@ const Page = ({ params }: { params: paramsType }) => {
                                                 </p>
                                             </div>
                                         )
-                                    )}
+                                    )} */}
                                 </div>
 
                                 <div className="flex">
                                     <h2 className="text-xl font-semibold">
                                         Test Cases:
                                     </h2>
-                                    {codingQuestionData?.testCases.map(
+                                    {/* {codingQuestionData?.testCases.map(
                                         (testCase: any, index: number) => (
                                             <div
                                                 key={index}
@@ -275,7 +312,7 @@ const Page = ({ params }: { params: paramsType }) => {
                                                 </p>
                                             </div>
                                         )
-                                    )}
+                                    )} */}
                                 </div>
 
                                 <div className="flex items-center gap-x-2">
@@ -283,9 +320,9 @@ const Page = ({ params }: { params: paramsType }) => {
                                         Expected Output:
                                     </h2>
                                     <p>
-                                        {codingQuestionData?.expectedOutput.join(
+                                        {/* {codingQuestionData?.expectedOutput.join(
                                             ', '
-                                        )}
+                                        )} */}
                                     </p>
                                 </div>
                             </div>
@@ -300,7 +337,7 @@ const Page = ({ params }: { params: paramsType }) => {
                                         <form>
                                             <div>
                                                 {/* <div className="flex justify-between p-2"></div */}
-                                                <Editor
+                                                {/* <Editor
                                                     height="52vh"
                                                     theme="vs-dark"
                                                     value={decodedString}
@@ -308,7 +345,7 @@ const Page = ({ params }: { params: paramsType }) => {
                                                     options={{
                                                         readOnly: true,
                                                     }}
-                                                />
+                                                /> */}
                                             </div>
                                         </form>
                                     </div>

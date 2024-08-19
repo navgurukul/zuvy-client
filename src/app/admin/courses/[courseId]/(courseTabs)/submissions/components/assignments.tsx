@@ -57,7 +57,7 @@ const Assignments = ({ courseId }: Props) => {
 
                         if (moduleDataLength > 0)
                             return (
-                                <div className=" " key={data.id}>
+                                <div className="" key={data.id}>
                                     <div className="w-full flex flex-col gap-y-5 ">
                                         <h1 className="w-full text-[20px] text-left font-semibold">
                                             Title: {data.name}
@@ -73,7 +73,7 @@ const Assignments = ({ courseId }: Props) => {
                                             (data: any) => {
                                                 return (
                                                     <div
-                                                        className="lg:flex h-[220px] w-full shadow-[0_4px_4px_rgb(1,1,0,0.12)] my-4 rounded-md p-3"
+                                                        className="lg:flex h-[160px] w-full shadow-[0_4px_4px_rgb(1,1,0,0.12)] my-4 rounded-md p-3"
                                                         key={data.id}
                                                     >
                                                         <div className=" font-semibold flex w-full">

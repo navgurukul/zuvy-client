@@ -72,7 +72,6 @@ const Page = ({ params }: any) => {
         getBootcampHandler()
     }, [getStudentAssesmentDataHandler, getBootcampHandler])
 
-    // console.log(dataTableAssesment)
     return (
         <>
             {assesmentData ? (

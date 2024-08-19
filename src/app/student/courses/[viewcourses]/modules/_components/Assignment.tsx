@@ -157,11 +157,16 @@ const Assignments = ({
         timeZone: 'UTC',
         timeZoneName: 'short',
     }
+    const options2: any = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    }
 
     const formattedDate = date.toLocaleDateString('en-US', options)
     const formattedSubmittedDate = submittedProjectDate.toLocaleString(
         'en-US',
-        options
+        options2
     )
 
     function getSubmissionStatus(
@@ -183,6 +188,8 @@ const Assignments = ({
     }
 
     const AssignmentStatus = getSubmissionStatus(submittedDate, deadlineDate)
+
+    console.log(formattedSubmittedDate)
 
     return (
         <div className="flex flex-col gap-y-3 ">

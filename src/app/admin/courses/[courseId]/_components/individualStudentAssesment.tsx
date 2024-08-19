@@ -3,7 +3,11 @@ import IndividualStudent from './IndividualStudent'
 import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { getAssesmentBackgroundColorClass } from '@/lib/utils'
+import {
+    cn,
+    difficultyColor,
+    getAssesmentBackgroundColorClass,
+} from '@/lib/utils'
 import { color } from 'framer-motion'
 
 type Props = {}
@@ -32,7 +36,7 @@ const IndividualStudentAssesment = ({
             case 'codingSubmission':
                 return {
                     title: 'Coding Questions',
-                    link: `/admin/courses/${courseId}/submissionAssesments/${StudentAssesmentData}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionCodingQuestion/${codingOutsourseId}`,
+                    link: `/admin/courses/${courseId}/submissionAssesments/${StudentAssesmentData}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionCodingQuestion/${data.submissions[0].id}`,
                 }
             default:
                 return {
@@ -49,14 +53,24 @@ const IndividualStudentAssesment = ({
                 <div className="flex items-start flex-col p-4 gap-y-7 justify-betweenrounded-md">
                     <h1 className="text-[20px] capitalize text-start font-semibold text-gray-600  dark:text-white ">
                         {type === 'codingSubmission'
-                            ? data.title
+                            ? data.title && (
+                                  <h1
+                                      className={cn(
+                                          `font-semibold text-secondary`,
+                                          difficultyColor(data.difficulty)
+                                      )}
+                                  >
+                                      Difficulty :- {data.difficulty}
+                                  </h1>
+                              )
                             : questionInfo.title}
                     </h1>
                     <div className="flex items-center gap-x-2">
-                        {/* <div
-                            className={`w-2 h-2 rounded-full flex items-center justify-center cursor-pointer ${color}`}
-                        ></div> */}
-                        {/* <h1>Score: 2/25</h1> */}
+                        {type === 'codingSubmission' && (
+                            <h1 className="font-semibold">
+                                Description:- {data.description}
+                            </h1>
+                        )}
                     </div>
                 </div>
             </div>

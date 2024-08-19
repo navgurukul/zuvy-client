@@ -311,23 +311,15 @@ const Page = ({ params }: { params: any }) => {
                     <div className="flex gap-x-20  ">
                         <div>
                             <Skeleton className="h-[175px] w-[700px] rounded-xl" />
-                            <div className="space-y-2 ">
-                                {/* <Skeleton className="h-4 w-[500px]" /> */}
-                            </div>
+                            <div className="space-y-2 "></div>
                         </div>
                         <div>
                             <Skeleton className="h-[175px] w-[700px] rounded-xl" />
-                            <div className="space-y-2 ">
-                                {/* <Skeleton className="h-4 w-[500px]" /> */}
-                            </div>
+                            <div className="space-y-2 "></div>
                         </div>
                     </div>
                 )}
 
-                {/* <h1 className="text-start  font-bold text-xl ">
-                Coding Challenges
-            </h1>
-            <IndividualStudentAssesment /> */}
                 <div className="grid grid-cols-1   gap-20 mt-4 md:mt-8 md:grid-cols-2">
                     {newData ? (
                         <>
@@ -380,21 +372,6 @@ const Page = ({ params }: { params: any }) => {
                             </div>
                         </>
                     ) : (
-                        // Object.keys(newData).map((key: string, index) => (
-                        //     <div key={index}>
-                        //         <h2 className="text-md capitalize text-start mb-3 font-semibold text-gray-800  dark:text-white ">
-                        //             {key}
-                        //         </h2>
-                        //         {newData[key].map((data: newDataType) => (
-                        //             <div key={key}>
-                        //                 <IndividualStudentAssesment
-                        //                     data={data}
-                        //                     type={key}
-                        //                 />
-                        //             </div>
-                        //         ))}
-                        //     </div>
-                        // ))
                         <div className="absolute w-full flex justify-start items-center">
                             <div className="grid grid-cols-1   gap-20 mt-4 md:mt-8 md:grid-cols-2 ">
                                 <div>
@@ -425,55 +402,6 @@ const Page = ({ params }: { params: any }) => {
                         </div>
                     )}
                 </div>
-
-                {/* {individualAssesmentData ? (
-                <div>
-                    <h2 className="text-start text-[20px] font-semibold">
-                        Open Ended Submission
-                    </h2>
-                    <div className="grid grid-cols-1  gap-20 mt-4 md:mt-8 md:grid-cols-2">
-                        {individualAssesmentData.openEndedSubmission.map(
-                            (submission: any) => (
-                                <div className="" key={submission.id}>
-                                    <IndividualStudentAssesment
-                                        data={submission}
-                                    />
-                                </div>
-                            )
-                        )}
-                    </div>
-
-                    <h2 className="text-start text-[20px] font-semibold">
-                        Quiz Submission
-                    </h2>
-                    {individualAssesmentData.quizSubmission.map(
-                        (submission: any) => (
-                            <div className="" key={submission.id}>
-                                <IndividualStudentAssesment data={submission} />
-                            </div>
-                        )
-                    )}
-
-                    <h2 className="text-start text-[20px] font-semibold">
-                        Coding Submission
-                    </h2>
-                    {individualAssesmentData.codingSubmission.length === 0 ? (
-                        <p>No coding submissions</p>
-                    ) : (
-                        individualAssesmentData.codingSubmission.map(
-                            (submission: any, index: number) => (
-                                <div className="" key={submission.id}>
-                                    <IndividualStudentAssesment
-                                        data={submission}
-                                    />
-                                </div>
-                            )
-                        )
-                    )}
-                </div>
-            ) : (
-                <Spinner />
-            )} */}
             </MaxWidthWrapper>
         </>
     )
