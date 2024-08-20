@@ -48,6 +48,7 @@ function ClassCard({
     const handleCloseDialog = () => setIsDialogOpen(false)
     const pathname = usePathname()
     const dashboard = pathname === '/student'
+    const admin = pathname.includes('/admin')
 
     const handleDelete = async () => {
         try {
@@ -170,12 +171,14 @@ function ClassCard({
                 <div className="absolute top-4 right-4">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            {activeTab === 'ongoing' ? null : (
-                                <MoreVertical
-                                    size={20}
-                                    className="text-secondary cursor-pointer "
-                                />
-                            )}
+                            {activeTab === 'ongoing'
+                                ? null
+                                : admin && (
+                                      <MoreVertical
+                                          size={20}
+                                          className="text-secondary cursor-pointer "
+                                      />
+                                  )}
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-full">
                             <DropdownMenuGroup>
