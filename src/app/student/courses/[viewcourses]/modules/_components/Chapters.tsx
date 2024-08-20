@@ -34,13 +34,14 @@ function Chapters({ params }: any) {
     // state and variables
     const [chapters, setChapters] = useState<any>([])
     const [activeChapter, setActiveChapter] = useState(0)
-    const [topicId, setTopicId] = useState(0)
+    const [topicId, setTopicId] = useState<any>(null)
     const [chapterContent, setChapterContent] = useState<any>({})
     const [chapterId, setChapterId] = useState<number>(0)
     const [projectId, setProjectId] = useState<number>(0)
     const [assessmentShortInfo, setAssessmentShortInfo] = useState<any>({})
     const [assessmentOutSourceId, setAssessmentOutSourceId] = useState<any>()
     const [submissionId, setSubmissionId] = useState<any>()
+    const [typeId, setTypeId] = useState<any>(null)
 
     // func [viewcourses]   [courseId]
     const fetchChapters = useCallback(async () => {
@@ -59,9 +60,10 @@ function Chapters({ params }: any) {
             // )
             // setActiveChapter(nextChapterId || firstPending.id)
             // fetchChapterContent(nextChapterId || firstPending.id)
-            setProjectId(response.data.moduleDetails[0].projectId)
-            setActiveChapter(firstPending.id)
-            fetchChapterContent(firstPending.id)
+            setProjectId(response?.data.moduleDetails[0]?.projectId)
+            setActiveChapter(firstPending?.id)
+            fetchChapterContent(firstPending?.id)
+            setTypeId(response?.data.moduleDetails[0]?.typeId)
         } catch (error) {
             console.log(error)
         }
@@ -106,17 +108,17 @@ function Chapters({ params }: any) {
     }
 
     const renderChapterContent = () => {
-        switch (topicId) {
-            case 0:
-                return (
-                    <Projects
-                        moduleId={+moduleID}
-                        projectId={projectId}
-                        bootcampId={+viewcourses}
-                        completeChapter={completeChapter}
-                    />
-                )
+        if (typeId === 2)
+            return (
+                <Projects
+                    moduleId={+moduleID}
+                    projectId={projectId}
+                    bootcampId={+viewcourses}
+                    completeChapter={completeChapter}
+                />
+            )
 
+        switch (topicId) {
             case 1:
                 return (
                     <Video

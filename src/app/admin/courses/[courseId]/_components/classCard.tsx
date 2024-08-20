@@ -41,13 +41,15 @@ function ClassCard({
     studentSide: any
 }) {
     const [isDialogOpen, setIsDialogOpen] = useState(false)
-    const { setDeleteModalOpen, isDeleteModalOpen } = getDeleteStudentStore()
+    const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
+    const [loading, setLoading] = useState(false)
 
     const handleOpenDialog = () => setIsDialogOpen(true)
     const handleCloseDialog = () => setIsDialogOpen(false)
 
     const handleDelete = async () => {
         try {
+            setLoading(true)
             await api
                 .delete(`/classes/delete/${classData.meetingId}`, {})
                 .then(() => {
@@ -67,11 +69,13 @@ function ClassCard({
                 description: 'Unable to delete the Session',
                 variant: 'destructive',
             })
+        } finally {
+            setLoading(false)
         }
     }
-    const onclick = () => {
-        console.log(classData.id)
-    }
+    // const onclick = () => {
+    //     console.log(classData)
+    // }
 
     return (
         <>
@@ -79,10 +83,7 @@ function ClassCard({
                 className="w-full mb-6 border-none p-5 shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F] relative"
                 key={classData.id}
             >
-                <div
-                    className="flex items-center justify-between truncate"
-                    onClick={onclick}
-                >
+                <div className="flex items-center justify-between truncate">
                     <div className="flex items-center space-x-6">
                         <div className="font-bold text-lg flex flex-col border rounded-md py-3 px-5 text-muted-foreground border-muted-foreground">
                             <Moment format="DD">{classData.startTime}</Moment>{' '}
@@ -231,6 +232,7 @@ function ClassCard({
                 input={false}
                 buttonText="Delete Session"
                 instructorInfo={''}
+                loading={loading}
             />
         </>
     )
