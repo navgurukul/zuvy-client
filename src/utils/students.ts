@@ -141,7 +141,7 @@ export function handleVisibilityChange(
             newTabChangeInstance.toString()
         )
         setTabChangeInstance(newTabChangeInstance)
-             if (newTabChangeInstance > 100000) {
+             if (newTabChangeInstance > 5) {
             // Check if the current page is the submitAssessment page
             if (isCurrentPageSubmitAssessment()) {
                 // Submit the assessment
@@ -150,7 +150,7 @@ export function handleVisibilityChange(
                     title: 'Test Ended -> Tab will close now',
                     description: 'You have changed the tab multiple times.',
                     className:
-                        'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-red-600 text-white',
+                        'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-destructive text-white',
                 })
             }
         }else{
@@ -158,7 +158,7 @@ export function handleVisibilityChange(
                 title: 'WARNING',
                 description:
                     'You have changed the tab. If you change the tab again, your test may get submitted automatically.',
-                className: 'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-red-600 text-white',
+                className: 'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-destructive text-white',
             })
         }
 
@@ -184,7 +184,7 @@ export function handleFullScreenChange(
         )
         setFullScreenExitInstance(newFullScreenExitInstance)
 
-          if (newFullScreenExitInstance > 10000) {
+          if (newFullScreenExitInstance > 5) {
             // Check if the current page is the submitAssessment page
             if (isCurrentPageSubmitAssessment()) {
                 // Submit the assessment
@@ -193,7 +193,7 @@ export function handleFullScreenChange(
                     title: 'Test Ended',
                     description: 'You have exited full screen multiple times.',
                     className:
-                        'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-red-400 text-white',
+                        'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-destructive text-white',
                 })
             }
         }else{
@@ -201,7 +201,7 @@ export function handleFullScreenChange(
                 title: 'WARNING',
                 description:
                     'You have exited full screen. If you exit full screen again, your test may get submitted automatically.',
-                className: 'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-red-600 text-white',
+                className: 'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-destructive text-white',
             })
         }
       
