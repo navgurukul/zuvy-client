@@ -11,6 +11,7 @@ import { getCourseData, setStoreBatchValue } from '@/store/store'
 import { ComboboxStudent } from '@/app/admin/courses/[courseId]/(courseTabs)/students/components/comboboxStudentDataTable'
 import { Combobox } from '@/components/ui/combobox'
 import { usePathname } from 'next/navigation'
+import MultipleSelector from '@/components/ui/multiple-selector'
 
 export interface RadioCheckboxProps {
     fetchSessions: (data: any) => void
@@ -30,15 +31,16 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
     setLastPage,
 }: RadioCheckboxProps) => {
     const [batches, setBatches] = useState<any[]>([])
-    const [batchId, setBatchId] = useState<any>()
+    const [batchId, setBatchId] = useState<any[]>([])
     const [timeFrame, setTimeFrame] = useState<string>('all')
+    const [selectedBatches, setSelectedBatches] = useState<any[]>([])
     const { setbatchValueData } = setStoreBatchValue()
     const pathname = usePathname()
     const classRecordings = pathname?.includes('/recording')
 
-    const handleComboboxChange = (value: string) => {
-        setBatchId(value)
-        setbatchValueData(value)
+    const handleChange = (selected: any) => {
+        setSelectedBatches(selected)
+        setBatchId(selected)
     }
 
     const getBatches = useCallback(async () => {
@@ -50,7 +52,8 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
                     label: item.batchName,
                 })
             )
-            setBatchId(response.data.data[0].batchId)
+            setBatchId([transformedData[0]])
+            setSelectedBatches([transformedData[0]])
             setBatches(transformedData)
         } catch (error) {
             console.error('Error fetching courses:', error)
@@ -60,10 +63,11 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
     const getSessions = useCallback(
         async (offset: number) => {
             try {
+                let ids = ''
+                batchId.map((item) => (ids += '&batchId=' + item.value))
                 const response = await api.get(
-                    `/instructor/getAllUpcomingClasses?limit=${position}&offset=${offset}&timeFrame=${timeFrame}&batchId=${batchId}`
+                    `/instructor/getAllUpcomingClasses?limit=${position}&offset=${offset}&timeFrame=${timeFrame}${ids}`
                 )
-                // console.log('response', response.data.data)
                 fetchSessions(response.data.data.responses)
                 setTotalSessions(response.data.data.totalUpcomingClasses)
                 setPages(response.data.data.totalUpcomingPages)
@@ -82,7 +86,6 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
                     `/classes/all/117?status=completed&limit=${position}&offset=${offset}`
                     // `/classes/all/117?status=completed&limit=3&offset=0`
                 )
-                // console.log('response', response.data)
                 fetchSessions(response.data.classes)
                 setTotalSessions(response.data.total_items)
                 setPages(response.data.total_pages)
@@ -111,14 +114,12 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
     return (
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between p-3 w-full lg:w-1/2 gap-y-6 lg:gap-y-0">
             {batches && (
-                <div className="flex flex-col gap-y-3 items-start w-full lg:w-auto">
+                <div className="flex flex-col gap-y-3 items-start w-full lg:w-[350px]">
                     <h1 className="font-semibold">Batches</h1>
-                    <Combobox
-                        data={batches}
-                        title={'Batch'}
-                        onChange={handleComboboxChange}
-                        batch={batches.length > 0}
-                        batchChangeData={batches[0]}
+                    <MultipleSelector
+                        options={batches}
+                        value={selectedBatches}
+                        onChange={handleChange}
                     />
                 </div>
             )}
