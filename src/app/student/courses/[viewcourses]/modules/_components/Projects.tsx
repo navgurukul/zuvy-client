@@ -72,18 +72,19 @@ const Projects = ({
                 `/tracking/getProjectDetailsWithStatus/${projectId}/${moduleId}`
             )
             setProjectData(res.data)
-            setTitle(res.data?.data.projectData[0].title)
+            setTitle(res?.data?.data?.projectData[0]?.title)
             setContent(
                 res?.data?.data?.projectData[0]?.projectTrackingData[0]
                     ?.projectLink
             )
             editor.commands.setContent(
-                res.data.data.projectData[0].instruction.description[0]
+                res?.data?.data?.projectData[0]?.instruction?.description[0]
             )
-            setStatus(res.data.data.status)
-            setDeadlineDate(res.data.data.projectData[0].deadline)
+            setStatus(res?.data?.data?.status)
+            setDeadlineDate(res?.data?.data?.projectData[0]?.deadline)
             setSubmittedDate(
-                res.data.data.projectData[0].projectTrackingData[0].updatedAt
+                res?.data?.data?.projectData[0]?.projectTrackingData[0]
+                    ?.updatedAt
             )
         } catch (error: any) {
             console.log(error.message)
@@ -182,9 +183,6 @@ const Projects = ({
     }
 
     const ProjectStatus = getSubmissionStatus(submittedDate, deadlineDate)
-
-    // You have submitted on :- 20 Aug 2024 (Late submitted)
-    console.log(formattedSubmittedDate)
 
     return (
         <div className="flex flex-col gap-y-3 w-full">
