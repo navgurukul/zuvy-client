@@ -69,7 +69,7 @@ const Assessment = ({
                             <h2 className="font-bold">
                                 {assessmentShortInfo?.totalCodingQuestions}
                             </h2>
-                            <p>Coding Challenges</p>
+                            <p>Coding </p>
                         </div>
                         <div className="mcq ">
                             <h2 className="font-bold">
@@ -81,12 +81,12 @@ const Assessment = ({
                             <h2 className="font-bold">
                                 {assessmentShortInfo?.totalOpenEndedQuestions}
                             </h2>
-                            <p>Open-Ended Questions</p>
+                            <p>Open-Ended</p>
                         </div>
                     </div>
-                    <p className="description">
+                    {/* <p className="description">
                         {assessmentShortInfo?.ModuleAssessment?.description}
-                    </p>
+                    </p> */}
                     <p className="deadline flex items-center gap-2">
                         <Clock size={18} />
                         {assessmentShortInfo.deadline

@@ -268,7 +268,6 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                     setChapterContent(response.data)
                 } else {
                     setChapterContent(response.data)
-                    // console.log(response.data, 'chapter content')
                 }
 
                 setTopicId(currentModule?.topicId)
@@ -285,6 +284,7 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
     )
 
     const renderChapterContent = () => {
+
         switch (topicId) {
             case 1:
                 return (

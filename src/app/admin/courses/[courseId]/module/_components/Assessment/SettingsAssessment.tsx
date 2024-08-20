@@ -75,12 +75,12 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                 content.passPercentage != null
                     ? content.passPercentage.toString()
                     : '70',
-            copyPaste: content.copyPaste == null ? false : content.copyPaste,
+            copyPaste: content.copyPaste == null ? true : content.copyPaste,
             embeddedGoogleSearch:
                 content.embeddedGoogleSearch == null
                     ? false
                     : content.embeddedGoogleSearch,
-            tabChange: content.tabChange == null ? false : content.tabChange,
+            tabChange: content.tabChange == null ? true : content.tabChange,
             screenRecord:
                 content.screenRecord == null ? false : content.screenRecord,
             webCamera: content.webCamera == null ? false : content.webCamera,
@@ -95,12 +95,12 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                 content.passPercentage != null
                     ? content.passPercentage.toString()
                     : '70',
-            copyPaste: content.copyPaste == null ? false : content.copyPaste,
+            copyPaste: content.copyPaste == null ? true : content.copyPaste,
             embeddedGoogleSearch:
                 content.embeddedGoogleSearch == null
                     ? false
                     : content.embeddedGoogleSearch,
-            tabChange: content.tabChange == null ? false : content.tabChange,
+            tabChange: content.tabChange == null ? true : content.tabChange,
             screenRecord:
                 content.screenRecord == null ? false : content.screenRecord,
             webCamera: content.webCamera == null ? false : content.webCamera,

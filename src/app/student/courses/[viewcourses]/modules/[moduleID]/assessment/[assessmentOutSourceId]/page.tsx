@@ -163,6 +163,17 @@ function Page({
                 0
             )
             setRemainingTime(newRemainingTime)
+
+                // Show toast when remaining time is 5 minutes
+                if (newRemainingTime === 300) {
+                    toast({
+                        title: 'WARNING',
+                        description: 'Hurry up less than 5 minutes remaining now!',
+                        className: 'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-red-600 text-white',
+                    })
+                }
+
+
             if (newRemainingTime === 0 && newIntervalId) {
                 clearInterval(newIntervalId)
             }
@@ -244,16 +255,16 @@ function Page({
         getSeperateOpenEndedQuestions()
     }, [decodedParams.assessmentOutSourceId])
 
-    const formatTime = (seconds: number) => {
-        const h = Math.floor(seconds / 3600)
-            .toString()
-            .padStart(2, '0')
-        const m = Math.floor((seconds % 3600) / 60)
-            .toString()
-            .padStart(2, '0')
-        const s = (seconds % 60).toString().padStart(2, '0')
-        return `${h}:${m}:${s}`
-    }
+    // const formatTime = (seconds: number) => {
+    //     const h = Math.floor(seconds / 3600)
+    //         .toString()
+    //         .padStart(2, '0')
+    //     const m = Math.floor((seconds % 3600) / 60)
+    //         .toString()
+    //         .padStart(2, '0')
+    //     const s = (seconds % 60).toString().padStart(2, '0')
+    //     return `${h}:${m}:${s}`
+    // }
 
     if (isSolving) {
         if (selectedQuesType === 'quiz' && seperateQuizQuestions[0]?.submissionsData.length == 0) {
@@ -301,6 +312,7 @@ function Page({
                     tabChange: tabChangeInstance,
                     copyPaste: copyPasteAttempt,
                     embeddedGoogleSearch: 0,
+                    "typeOfsubmission": "studentSubmit"
                 }
             )
             toast({
@@ -421,7 +433,9 @@ function Page({
                             )}
                         </div>
                     </div>
-                    <div className="flex justify-center">
+                   {
+                    assessmentData.Quizzes > 0 && (
+                        <div className="flex justify-center">
                         <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
                             <h2 className="font-bold">MCQs</h2>
                             <QuestionCard
@@ -436,22 +450,26 @@ function Page({
                             />
                         </div>
                     </div>
-                    <div className="flex justify-center">
-                        <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
-                            <h2 className="font-bold">Open-Ended Questions</h2>
-                            <QuestionCard
-                                id={1}
-                                title="Open-Ended Questions"
-                                description={`${
-                                    assessmentData.OpenEndedQuestions ||
-                                    0
-                                } questions`}
-                                onSolveChallenge={() =>
-                                    handleSolveChallenge('open-ended')
-                                }
-                            />
-                        </div>
-                    </div>
+                    )
+                   }
+                   {assessmentData.OpenEndedQuestions > 0 && (
+                     <div className="flex justify-center">
+                     <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
+                         <h2 className="font-bold">Open-Ended Questions</h2>
+                         <QuestionCard
+                             id={1}
+                             title="Open-Ended Questions"
+                             description={`${
+                                 assessmentData.OpenEndedQuestions ||
+                                 0
+                             } questions`}
+                             onSolveChallenge={() =>
+                                 handleSolveChallenge('open-ended')
+                             }
+                         />
+                     </div>
+                 </div>
+                   )}
                     <Button onClick={submitAssessment} disabled={disableSubmit}>
                         Submit Assessment
                     </Button>
