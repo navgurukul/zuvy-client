@@ -212,7 +212,7 @@ const Page = ({ params }: { params: paramsType }) => {
                             </div>
                             <div>
                                 <h1 className="text-start font-bold">
-                                    {cheatingClass ? 'Yes' : 'No'}
+                                    {cheatingClass ? 'No' : 'Yes'}
                                 </h1>
                                 <p className="text-gray-500">
                                     Cheating Detected
