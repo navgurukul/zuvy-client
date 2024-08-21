@@ -48,7 +48,7 @@ const Curricullum = () => {
                 </div>
 
                 {allCourses.map((item) => (
-                    <div key={item.id} className="w-1/2">
+                    <div key={item.id} className="lg:w-1/2 w-full">
                         <div
                             className={`${
                                 item.typeId === 2

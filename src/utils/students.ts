@@ -78,7 +78,8 @@ export async function deleteStudentHandler(userId: any, bootcampId: any) {
             toast({
                 title: res.data.status,
                 description: res.data.message,
-                className: 'text-start capitalize border border-secondary',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
             fetchStudentsHandler({
                 courseId: bootcampId,
@@ -96,7 +97,8 @@ export async function deleteStudentHandler(userId: any, bootcampId: any) {
         toast({
             title: 'Failed',
             description: error.response?.data?.message || 'An error occurred.',
-            className: 'text-start capitalize border border-destructive',
+            className:
+                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
         })
     }
 }
@@ -145,7 +147,8 @@ export function handleVisibilityChange(
             title: 'WARNING',
             description:
                 'You have changed the tab. If you change the tab again, your test will get submitted automatically.',
-            className: 'text-start capitalize border border-destructive',
+            className:
+                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
         })
 
         if (newTabChangeInstance > 4) {
@@ -156,7 +159,7 @@ export function handleVisibilityChange(
                     title: 'Test Ended',
                     description: 'You have changed the tab multiple times.',
                     className:
-                        'text-start capitalize border border-destructive',
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
                 submitAssessment()
             }
@@ -183,7 +186,8 @@ export function handleFullScreenChange(
             title: 'WARNING',
             description:
                 'You have exited full screen. If you exit full screen, your test will get submitted automatically.',
-            className: 'text-start capitalize border border-destructive',
+            className:
+                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
         })
 
         if (newFullScreenExitInstance > 4) {
@@ -194,7 +198,7 @@ export function handleFullScreenChange(
                     title: 'Test Ended',
                     description: 'You have exited full screen multiple times.',
                     className:
-                        'text-start capitalize border border-destructive',
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
                 submitAssessment()
             }

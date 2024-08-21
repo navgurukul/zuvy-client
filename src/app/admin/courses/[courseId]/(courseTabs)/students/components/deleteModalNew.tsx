@@ -47,7 +47,8 @@ export const AlertDialogDemo: React.FC<AlertDialogProps> = ({
                 toast({
                     title: res.data.status,
                     description: res.data.message,
-                    className: 'text-start capitalize border border-secondary',
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
                 fetchStudentsHandler({
                     courseId: bootcampId,
@@ -66,7 +67,8 @@ export const AlertDialogDemo: React.FC<AlertDialogProps> = ({
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'An error occurred.',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }

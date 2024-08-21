@@ -17,7 +17,8 @@ export function handleDelete(
             toast({
                 title: 'Success',
                 description: res.data.message,
-                className: 'text-start capitalize border border-secondary',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
             getAllCodingQuestions(setCodingQuestions)
         })
@@ -26,7 +27,8 @@ export function handleDelete(
                 title: 'Error',
                 description:
                     error.response?.data?.message || 'An error occurred',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         })
 }
@@ -47,7 +49,8 @@ export function deleteOpenEndedQuestion(
             toast({
                 title: 'Success',
                 description: res.data.message,
-                className: 'text-start capitalize border border-secondary',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
             getAllOpenEndedQuestions(setOpenEndedQuestions)
         })
@@ -56,7 +59,8 @@ export function deleteOpenEndedQuestion(
                 title: 'Error',
                 description:
                     error?.response?.data?.message || 'An error occurred',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         })
 }
@@ -109,7 +113,8 @@ export function handleQuizDelete(
             toast({
                 title: 'Success',
                 description: res.data.message,
-                className: 'text-start capitalize border border-secondary',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
             getAllQUizQuestions(setQuizQuestions)
         })
@@ -118,7 +123,8 @@ export function handleQuizDelete(
                 title: 'Error',
                 description:
                     error.response?.data?.message || 'An error occurred',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         })
 }
@@ -341,6 +347,8 @@ export const fetchStudentsHandler = async ({
         toast({
             title: 'Error',
             description: 'Failed to fetch the data',
+            className:
+                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
         })
     } finally {
         setLoading(false)

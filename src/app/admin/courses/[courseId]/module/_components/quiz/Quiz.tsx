@@ -77,7 +77,8 @@ function Quiz(props: any) {
                 toast({
                     title: 'Success',
                     description: res.message,
-                    className: 'text-start capitalize border border-secondary',
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
             })
             .catch((error: any) => {
@@ -86,7 +87,7 @@ function Quiz(props: any) {
                     description:
                         'An error occurred while saving the chapter the chapter.',
                     className:
-                        'text-start capitalize border border-destructive',
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             })
     }

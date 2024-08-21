@@ -36,8 +36,8 @@ const formSchema = z.object({
         .string()
         .refine((val) => !isNaN(Number(val)), { message: 'Must be a number' })
         .transform((val) => Number(val)),
-    topics: z.number().min(1, { message: 'You must select a topic' }), 
-    difficulty: z.string()
+    topics: z.number().min(1, { message: 'You must select a topic' }),
+    difficulty: z.string(),
 })
 
 function NewOpenEndedQuestionForm({
@@ -70,7 +70,8 @@ function NewOpenEndedQuestionForm({
             toast({
                 title: 'Success',
                 description: 'Open-Ended Question Created Successfully',
-                className: 'text-start capitalize border border-secondary',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
             setIsDialogOpen(false)
         } catch (error: any) {
@@ -78,7 +79,8 @@ function NewOpenEndedQuestionForm({
                 title: 'Error',
                 description:
                     error?.response?.data?.message || 'An error occurred',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -198,7 +200,7 @@ function NewOpenEndedQuestionForm({
                                     </FormLabel>
                                     <FormControl>
                                         <Input
-                                        className='no-spinners'
+                                            className="no-spinners"
                                             type="number"
                                             min="0"
                                             placeholder="Enter the Marks for the Question"

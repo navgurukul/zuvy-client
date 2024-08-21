@@ -54,7 +54,8 @@ const Page = ({ params }: any) => {
             toast({
                 title: 'Error',
                 description: 'Error fetching bootcamps:',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }, [params.courseId])
@@ -90,7 +91,7 @@ const Page = ({ params }: any) => {
                     title: 'Error',
                     description: 'Error fetching Submissions:',
                     className:
-                        'text-start capitalize border border-destructive',
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             })
 
@@ -104,7 +105,7 @@ const Page = ({ params }: any) => {
                     title: 'Error',
                     description: 'Error fetching Chapter details:',
                     className:
-                        'text-start capitalize border border-destructive',
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             })
     }, [params.StudentAssesmentData, moduleId])

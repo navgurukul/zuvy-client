@@ -61,7 +61,7 @@ export function ComboboxStudent({
                         title: res.data.status,
                         description: res.data.message,
                         className:
-                            'text-start capitalize border border-secondary',
+                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     setDisplayBatchName(label)
                 })
@@ -69,7 +69,8 @@ export function ComboboxStudent({
             toast({
                 title: 'Error',
                 description: error.message,
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         } finally {
         }
