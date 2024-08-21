@@ -106,7 +106,7 @@ const Page = ({ params }: { params: any }) => {
                     title: 'Cannot Create New Batch',
                     description: 'This Batch Name Already Exists',
                     className:
-                        'text-start capitalize border border-destructive',
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             } else {
                 const res = await api.post(`/batch`, convertedData)
@@ -118,7 +118,8 @@ const Page = ({ params }: { params: any }) => {
                 toast({
                     title: res.data.status,
                     description: res.data.message,
-                    className: 'text-start capitalize border border-secondary',
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
             }
         } catch (error: any) {
@@ -126,7 +127,8 @@ const Page = ({ params }: { params: any }) => {
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'An error occurred.',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 variant: 'destructive',
             })
             console.error('Error creating batch:', error)
@@ -169,7 +171,7 @@ const Page = ({ params }: { params: any }) => {
             return (
                 <Dialog>
                     <DialogTrigger asChild>
-                        <Button>
+                        <Button className="lg:max-w-[150px] w-full mt-5">
                             {emptyState ? '+ Create Batch' : 'New Batch'}
                         </Button>
                     </DialogTrigger>
@@ -186,7 +188,7 @@ const Page = ({ params }: { params: any }) => {
             return (
                 <Dialog>
                     <DialogTrigger asChild>
-                        <Button>
+                        <Button className="lg:max-w-[150px] w-full mt-5">
                             {emptyState ? '+ Create Batch' : 'New Batch'}
                         </Button>
                     </DialogTrigger>
@@ -204,7 +206,7 @@ const Page = ({ params }: { params: any }) => {
                                             description:
                                                 'Entered Corect values',
                                             className:
-                                                'text-start capitalize border border-destructive',
+                                                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                                         })
                                     }
                                     className="space-y-8"
@@ -291,12 +293,12 @@ const Page = ({ params }: { params: any }) => {
     if (courseData?.id) {
         return (
             <div>
-                <div className=" relative flex items-center justify-between mb-6">
+                <div className="relative flex flex-col lg:flex-row items-center justify-between mb-6">
                     {batchData?.length ?? 0 > 0 ? (
                         <Input
                             type="search"
                             placeholder="Search"
-                            className="w-[400px]"
+                            className="lg:w-[400px] w-full"
                             value={search}
                             onChange={handleSetSearch}
                         />

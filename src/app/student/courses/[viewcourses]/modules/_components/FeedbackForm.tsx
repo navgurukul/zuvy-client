@@ -70,7 +70,8 @@ const FeedbackForm = (props: Props) => {
             toast({
                 title: 'Error',
                 description: 'An error occured while fetching the questions',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
             console.error('Error fetching quiz questions:', error)
         }
@@ -135,13 +136,15 @@ const FeedbackForm = (props: Props) => {
             toast({
                 title: res.data.status,
                 description: 'Form has been submitted successfully!',
-                className: 'text-start capitalize border border-secondary',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
         } catch (error) {
             toast({
                 title: 'Error',
                 description: 'Error fetching form questions:',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -434,7 +437,8 @@ const FeedbackForm = (props: Props) => {
                                             {status === 'Completed' ? (
                                                 <p className="mt-2 mb-10">
                                                     {
-                                                        item.formTrackingData[0]?.answer
+                                                        item.formTrackingData[0]
+                                                            ?.answer
                                                     }
                                                 </p>
                                             ) : (
@@ -482,7 +486,8 @@ const FeedbackForm = (props: Props) => {
                                                     <p>
                                                         {formatDate(
                                                             item
-                                                                .formTrackingData[0]?.answer
+                                                                .formTrackingData[0]
+                                                                ?.answer
                                                         )}
                                                     </p>
                                                 </div>
@@ -577,7 +582,8 @@ const FeedbackForm = (props: Props) => {
                                                     <p>
                                                         {
                                                             item
-                                                                .formTrackingData[0]?.answer
+                                                                .formTrackingData[0]
+                                                                ?.answer
                                                         }
                                                     </p>
                                                 </div>

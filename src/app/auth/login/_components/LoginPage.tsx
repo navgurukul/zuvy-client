@@ -47,7 +47,7 @@ function LoginPage({}: Props) {
                         title: 'Login Successful',
                         description: 'Welcome to Zuvy Dashboard',
                         className:
-                            'text-start capitalize border border-secondary',
+                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                 }
 
@@ -77,7 +77,7 @@ function LoginPage({}: Props) {
                     description:
                         err.response?.data?.message || 'An error occurred.',
                     className:
-                        'text-start capitalize border border-destructive',
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             }
         }

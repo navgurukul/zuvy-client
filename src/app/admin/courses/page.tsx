@@ -112,7 +112,8 @@ const Courses: React.FC = () => {
             toast({
                 title: 'Cannot Create A New Course',
                 description: 'Course Name Already Exists',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         } else {
             try {
@@ -123,7 +124,7 @@ const Courses: React.FC = () => {
                             title: response.data.status,
                             description: response.data.message,
                             className:
-                                'text-start capitalize border border-secondary',
+                                'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                         })
                     })
                 getBootcamp(offset)
@@ -132,7 +133,7 @@ const Courses: React.FC = () => {
                     title: error.data.status,
                     description: error.data.message,
                     className:
-                        'text-start capitalize border border-destructive',
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             }
         }
@@ -194,18 +195,18 @@ const Courses: React.FC = () => {
                                 </Button>
                             </Alert>
                         ) : null}
-                        <div className={styles.searchContainer}>
+                        <div className="flex flex-col lg:flex-row justify-between items-center mt-6">
                             <Input
                                 type="text"
                                 placeholder="Search"
                                 // className={styles.searchInput}
-                                className="max-w-[500px]"
+                                className="lg:max-w-[500px] w-full"
                                 value={searchQuery}
                                 onChange={handleSearchChange}
                             />
                             <Dialog>
                                 <DialogTrigger asChild>
-                                    <Button className="text-white bg-secondary">
+                                    <Button className="text-white bg-secondary lg:max-w-[150px] w-full mt-5">
                                         <Plus className="w-5 mr-2" />
                                         <p>New Course</p>
                                     </Button>

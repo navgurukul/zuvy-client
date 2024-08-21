@@ -225,16 +225,16 @@ function Page({ params }: any) {
                             batchChangeData={{}}
                         />
                     </div>
-                    <div className="flex justify-between">
-                        <div className="w-[400px] pr-3">
-                            <Input
-                                type="text"
-                                placeholder="Search Classes"
-                                className="max-w-[500px]"
-                                value={search}
-                                onChange={handleSetSearch}
-                            />
-                        </div>
+                    <div className="flex flex-col lg:flex-row justify-between items-center">
+                        {/* <div className="w-[400px] pr-3"> */}
+                        <Input
+                            type="text"
+                            placeholder="Search Classes"
+                            className="lg:max-w-[500px] w-full"
+                            value={search}
+                            onChange={handleSetSearch}
+                        />
+                        {/* </div> */}
                         {
                             <CreateSessionDialog
                                 courseId={params?.courseId || 0}

@@ -72,6 +72,8 @@ function Quiz(props: Props) {
                     toast({
                         title: 'Success',
                         description: 'Chapter Status Updated',
+                        className:
+                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     props.fetchChapters()
                 })
@@ -103,6 +105,8 @@ function Quiz(props: Props) {
                 toast({
                     title: 'Success',
                     description: 'Submitted Quiz Successfully',
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
                 updateQuizChapterHandler()
                 getAllQuizQuestionHandler()

@@ -129,12 +129,11 @@ function Page() {
         }
     }, [selectedModuleData])
 
-
-//  Edit Module Function:-
+    //  Edit Module Function:-
     const editModule = () => {
         const { days, weeks, months } = timeData
 
-        const totalDays = days + (weeks * 7) + (months * 28)
+        const totalDays = days + weeks * 7 + months * 28
         const totalSeconds = totalDays * 86400
 
         const moduleDto = {
@@ -143,13 +142,14 @@ function Page() {
             isLock: false,
         }
 
-        if(totalSeconds == 0){
+        if (totalSeconds == 0) {
             toast({
                 title: 'Duration cannot be 0',
                 description: 'Please enter a valid duration',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
-        }else{
+        } else {
             api.put(
                 `/content/editModuleOfBootcamp/${courseData?.id}?moduleId=${moduleId}`,
                 { moduleDto }
@@ -158,7 +158,8 @@ function Page() {
                     toast({
                         title: 'Success',
                         description: 'Module Edited Successfully',
-                        className: 'text-start capitalize border border-secondary',
+                        className:
+                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     fetchCourseModules()
                     setIsEditOpen(false)
@@ -168,27 +169,26 @@ function Page() {
                         title: 'Error',
                         description: 'Error creating module',
                         className:
-                            'text-start capitalize border border-destructive',
+                            'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                     })
                 })
         }
-
-
     }
 
     const createModule = () => {
         const { days, weeks, months } = timeData
 
-        const totalDays = days + (weeks * 7) + (months * 28)
+        const totalDays = days + weeks * 7 + months * 28
         const totalSeconds = totalDays * 86400
 
-        if(totalSeconds == 0){
+        if (totalSeconds == 0) {
             toast({
                 title: 'Duration cannot be 0',
                 description: 'Please enter a valid duration',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
-        }else{
+        } else {
             api.post(`/content/modules/${courseData?.id}?typeId=${typeId}`, {
                 ...moduleData,
                 timeAlloted: totalSeconds,
@@ -197,7 +197,8 @@ function Page() {
                     toast({
                         title: 'Success',
                         description: 'Module Created Successfully',
-                        className: 'text-start capitalize border border-secondary',
+                        className:
+                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     fetchCourseModules()
                     setIsOpen(false)
@@ -207,7 +208,7 @@ function Page() {
                         title: 'Error',
                         description: 'Error creating module',
                         className:
-                            'text-start capitalize border border-destructive',
+                            'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                     })
                 })
         }
@@ -224,7 +225,8 @@ function Page() {
             toast({
                 title: 'Error',
                 description: 'Failed to fetch course Modules',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -263,7 +265,8 @@ function Page() {
             toast({
                 title: 'Error',
                 description: 'Error updating module order',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -273,35 +276,35 @@ function Page() {
     }
 
     return (
-        <div className='w-full '>
+        <div className="w-full ">
             {curriculum.length > 0 && (
                 <div className=" w-full flex justify-end pr-4 ">
                     <div>
-                    <Dialog  open={isOpen} onOpenChange={setIsOpen}>
-                        <DialogTrigger asChild>
-                            <Button className="text-white bg-secondary  ">
-                                Add Module
-                            </Button>
-                        
-                        </DialogTrigger>
-    
-                        <DialogOverlay />
-                        <NewModuleDialog
-                            moduleData={moduleData}
-                            timeData={timeData}
-                            createModule={createModule}
-                            handleModuleChange={handleModuleChange}
-                            handleTimeAllotedChange={handleTimeAllotedChange}
-                            handleTypeChange={handleTypeChange}
-                            typeId={typeId}
-                        />
-                    </Dialog>
+                        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                            <DialogTrigger asChild>
+                                <Button className="text-white bg-secondary  ">
+                                    Add Module
+                                </Button>
+                            </DialogTrigger>
+
+                            <DialogOverlay />
+                            <NewModuleDialog
+                                moduleData={moduleData}
+                                timeData={timeData}
+                                createModule={createModule}
+                                handleModuleChange={handleModuleChange}
+                                handleTimeAllotedChange={
+                                    handleTimeAllotedChange
+                                }
+                                handleTypeChange={handleTypeChange}
+                                typeId={typeId}
+                            />
+                        </Dialog>
                     </div>
                 </div>
             )}
-           {
-                isEditOpen && (
-                    <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+            {isEditOpen && (
+                <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
                     <EditModuleDialog
                         editMode={editMode}
                         moduleData={moduleData}
@@ -314,8 +317,7 @@ function Page() {
                         typeId={typeId}
                     />
                 </Dialog>
-                )
-           }
+            )}
             {loading ? (
                 <div className="my-5 flex justify-center items-center">
                     <div className="absolute h-screen">
@@ -328,7 +330,7 @@ function Page() {
                 <div className="flex flex-col items-center justify-center">
                     {curriculum.length > 0 ? (
                         <Reorder.Group
-                            className="w-1/2"
+                            className="lg:w-1/2 w-full"
                             values={curriculum}
                             onReorder={handleReorderModules}
                         >
@@ -399,7 +401,7 @@ function Page() {
                             <Dialog>
                                 <DialogTrigger asChild>
                                     <Button className="text-white bg-secondary">
-                                        Add module 
+                                        Add module
                                     </Button>
                                 </DialogTrigger>
                                 <DialogOverlay />

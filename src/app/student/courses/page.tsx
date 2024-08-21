@@ -61,7 +61,6 @@ const Page: React.FC<pageProps> = () => {
                 if (Array.isArray(response.data.data)) {
                     setCourseStarted(false)
                 } else {
-                    setCourseStarted(false)
                     setCourseStarted(true)
                     setResumeCourse(response.data.data)
                 }

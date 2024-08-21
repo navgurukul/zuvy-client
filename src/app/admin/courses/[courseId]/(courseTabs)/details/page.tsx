@@ -126,7 +126,7 @@ function Page({ params }: { params: any }) {
                         title: res.data.status,
                         description: res.data.message,
                         className:
-                            'text-start capitalize border border-secondary',
+                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                 })
         } catch (error) {
@@ -134,7 +134,8 @@ function Page({ params }: { params: any }) {
                 title: 'Failed',
                 variant: 'destructive',
                 // description: error.message,
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -174,7 +175,7 @@ function Page({ params }: { params: any }) {
                     description:
                         'There was an error while uploading the image. Please try again.',
                     className:
-                        'text-start capitalize border border-destructive',
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             }
         }
