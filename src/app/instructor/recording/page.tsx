@@ -24,7 +24,7 @@ const Recordings = () => {
     return (
         <div>
             <h1 className="text-start text-lg font-semibold ">
-                1:1 Meeting Recordings
+                Class Recordings
             </h1>
             <Input
                 type="search"

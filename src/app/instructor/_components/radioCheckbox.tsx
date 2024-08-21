@@ -6,6 +6,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { api } from '@/utils/axios.config'
 import { usePathname } from 'next/navigation'
 import MultipleSelector from '@/components/ui/multiple-selector'
+import { toast } from '@/components/ui/use-toast'
 
 export interface RadioCheckboxProps {
     fetchSessions: (data: any) => void
@@ -49,7 +50,13 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
             setSelectedBatches([transformedData[0]])
             setBatches(transformedData)
         } catch (error) {
-            console.error('Error fetching courses:', error)
+            toast({
+                title: 'Error fetching Batches:',
+                description:
+                    'There is an error fetching batches: contact Admin.',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+            })
         }
     }, [])
 
@@ -66,7 +73,13 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
                 setPages(response.data.data.totalUpcomingPages)
                 setLastPage(response.data.data.totalUpcomingPages)
             } catch (error) {
-                console.error('Error fetching courses:', error)
+                toast({
+                    title: 'Error fetching Classes:',
+                    description:
+                        'There is an error fetching classes: contact Admin.',
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                })
             }
         },
         [batchId, timeFrame]
@@ -85,7 +98,13 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
                 setPages(response.data.data.totalPages)
                 setLastPage(response.data.data.totalPages)
             } catch (error) {
-                console.error('Error fetching courses:', error)
+                toast({
+                    title: 'Error fetching Class Recordings:',
+                    description:
+                        'There is an error fetching class recordings: contact Admin.',
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                })
             }
         },
         [batchId, timeFrame]
