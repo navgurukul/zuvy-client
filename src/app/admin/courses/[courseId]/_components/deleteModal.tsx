@@ -4,6 +4,7 @@ import { Fragment, useEffect, useState } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { RotateCcw } from 'lucide-react'
 
 interface DeleteConfirmationModalProps {
     isOpen: boolean
@@ -14,6 +15,7 @@ interface DeleteConfirmationModalProps {
     input: boolean
     modalText2?: string
     instructorInfo?: any
+    loading?: boolean
 }
 
 const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
@@ -25,6 +27,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
     input,
     modalText2,
     instructorInfo,
+    loading,
 }) => {
     const [inputValue, setInputValue] = useState<string>('')
     const [error, setError] = useState<string | null>(null)
@@ -148,14 +151,21 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                 >
                                     {input ? 'Cancel' : 'Cancel'}
                                 </Button>
-                                <Button
-                                    variant={'destructive'}
-                                    type="button"
-                                    className=" p-2 inline-flex justify-center  rounded-md border border-transparent shadow-sm px-4  bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm"
-                                    onClick={handleConfirm}
-                                >
-                                    {buttonText}
-                                </Button>
+                                {loading ? (
+                                    <Button variant={'destructive'} disabled>
+                                        <RotateCcw className="mr-2 text-black h-4  animate-spin w-1/3" />
+                                        Deleting Session
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        variant={'destructive'}
+                                        type="button"
+                                        className=" p-2 inline-flex justify-center  rounded-md border border-transparent shadow-sm px-4  bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm"
+                                        onClick={handleConfirm}
+                                    >
+                                        {buttonText}
+                                    </Button>
+                                )}
                             </div>
                         </div>
                     </Transition.Child>
