@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState } from 'react'
 import { OFFSET, POSITION } from '@/utils/constant'
 
 import { Input } from '@/components/ui/input'
@@ -44,13 +44,14 @@ const Recordings = () => {
                     {classRecordings.map((item) => {
                         return (
                             <InstructorCard
-                                key={item.batchId}
-                                batchName={item.bootcampName}
+                                key={item.id}
+                                batchName={item.bootcampDetail.name}
                                 topicTitle={item.title}
                                 startTime={item.startTime}
                                 endTime={item.endTime}
                                 typeClass={item.status}
                                 classLink={item.hangoutLink}
+                                status={item.status}
                             />
                         )
                     })}

@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState } from 'react'
 
 import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import InstructorCard from './_components/instructorCard'
@@ -53,26 +53,28 @@ const InstructorPage = () => {
                     {ongoingSessions.map((item) => {
                         return (
                             <InstructorCard
-                                key={item.batchId}
+                                key={item.id}
                                 batchName={item.bootcampName}
                                 topicTitle={item.title}
                                 startTime={item.startTime}
                                 endTime={item.endTime}
                                 typeClass={item.status}
                                 classLink={item.hangoutLink}
+                                status={item.status}
                             />
                         )
                     })}
                     {upcomingSessions.map((item) => {
                         return (
                             <InstructorCard
-                                key={item.batchId}
+                                key={item.id}
                                 batchName={item.bootcampName}
                                 topicTitle={item.title}
                                 startTime={item.startTime}
                                 endTime={item.endTime}
                                 typeClass={item.status}
                                 classLink={item.hangoutLink}
+                                status={item.status}
                             />
                         )
                     })}

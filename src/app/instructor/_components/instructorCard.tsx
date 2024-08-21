@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { toast } from '@/components/ui/use-toast'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-
+import { Badge } from '@/components/ui/badge'
 import { Copy } from 'lucide-react'
 
 type Props = {
@@ -15,6 +15,7 @@ type Props = {
     endTime: string
     typeClass: string
     classLink: string
+    status: string
 }
 
 const InstructorCard: React.FC<Props> = ({
@@ -24,6 +25,7 @@ const InstructorCard: React.FC<Props> = ({
     endTime,
     typeClass,
     classLink,
+    status,
 }: Props) => {
     const pathname = usePathname()
     const classRecordings = pathname?.includes('/recording')
@@ -46,12 +48,17 @@ const InstructorCard: React.FC<Props> = ({
     return (
         <div className="">
             <div className="py-2">
-                {/* <div className="rounded-lg border-none p-5 shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F]"> */}
                 <div className="rounded-lg border-none p-5 shadow-[0_1px_5px_0_rgba(74,74,74,0.10),0_2px_1px_0_rgba(74,74,74,0.06),0_1px_2px_0_rgba(74,74,74,0.08)]">
-                    {/* <div className="rounded-lg border-none p-5 shadow-[0_1px_5px_0_#4A4A4A14,0_2px_1px_0_#4A4A4A0A,0_1px_2px_0_#4A4A4A0F]"> */}
-                    <p className="bg-[#FFC374] rounded-xl w-1/2 p-1 text-sm">
-                        {batchName}
-                    </p>
+                    <div className="flex justify-between items-center">
+                        <p className="bg-[#FFC374] rounded-xl w-1/2 p-1 text-sm">
+                            {batchName}
+                        </p>
+                        {status === 'ongoing' && (
+                            <Badge variant="yellow" className="mb-3">
+                                Ongoing
+                            </Badge>
+                        )}
+                    </div>
                     <div className="px-1 py-4 m-2 flex h-2/3">
                         {classRecordings ? (
                             <Image
@@ -71,7 +78,6 @@ const InstructorCard: React.FC<Props> = ({
                             <h1 className="font-semibold text-left">
                                 {topicTitle}
                             </h1>
-                            {/* <h1 className="">{classesTiming}</h1> */}
                             <div className="text-md flex">
                                 <Moment format="hh:mm A">{startTime}</Moment>
                                 <p className="mx-2">-</p>

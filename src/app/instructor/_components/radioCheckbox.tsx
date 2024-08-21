@@ -1,15 +1,9 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
-
-import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { api } from '@/utils/axios.config'
-import { getCourseData, setStoreBatchValue } from '@/store/store'
-
-import { ComboboxStudent } from '@/app/admin/courses/[courseId]/(courseTabs)/students/components/comboboxStudentDataTable'
-import { Combobox } from '@/components/ui/combobox'
 import { usePathname } from 'next/navigation'
 import MultipleSelector from '@/components/ui/multiple-selector'
 
@@ -32,9 +26,8 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
 }: RadioCheckboxProps) => {
     const [batches, setBatches] = useState<any[]>([])
     const [batchId, setBatchId] = useState<any[]>([])
-    const [timeFrame, setTimeFrame] = useState<string>('all')
+    const [timeFrame, setTimeFrame] = useState<any>('all')
     const [selectedBatches, setSelectedBatches] = useState<any[]>([])
-    const { setbatchValueData } = setStoreBatchValue()
     const pathname = usePathname()
     const classRecordings = pathname?.includes('/recording')
 
@@ -82,14 +75,15 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
     const getSessionsRecording = useCallback(
         async (offset: number) => {
             try {
+                let ids = ''
+                batchId.map((item) => (ids += '&batchId=' + item.value))
                 const response = await api.get(
-                    `/classes/all/117?status=completed&limit=${position}&offset=${offset}`
-                    // `/classes/all/117?status=completed&limit=3&offset=0`
+                    `/instructor/getAllCompletedClasses?limit=${position}&offset=${offset}&timeFrame=${timeFrame}${ids}`
                 )
-                fetchSessions(response.data.classes)
-                setTotalSessions(response.data.total_items)
-                setPages(response.data.total_pages)
-                setLastPage(response.data.total_pages)
+                fetchSessions(response.data.data.classDetails)
+                setTotalSessions(response.data.data.totalCompletedClass)
+                setPages(response.data.data.totalPages)
+                setLastPage(response.data.data.totalPages)
             } catch (error) {
                 console.error('Error fetching courses:', error)
             }
@@ -134,7 +128,11 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
                             <RadioGroupItem
                                 value="comfortable"
                                 id="r1"
-                                onClick={() => setTimeFrame('all')}
+                                onClick={() =>
+                                    classRecordings
+                                        ? setTimeFrame(0)
+                                        : setTimeFrame('all')
+                                }
                             />
                             <Label htmlFor="r1">All Time</Label>
                         </div>
@@ -142,7 +140,11 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
                             <RadioGroupItem
                                 value="default"
                                 id="r2"
-                                onClick={() => setTimeFrame('1 week')}
+                                onClick={() =>
+                                    classRecordings
+                                        ? setTimeFrame(1)
+                                        : setTimeFrame('1 week')
+                                }
                             />
                             <Label htmlFor="r2">1 Week</Label>
                         </div>
@@ -150,7 +152,11 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
                             <RadioGroupItem
                                 value="compact"
                                 id="r3"
-                                onClick={() => setTimeFrame('2 week')}
+                                onClick={() =>
+                                    classRecordings
+                                        ? setTimeFrame(2)
+                                        : setTimeFrame('2 week')
+                                }
                             />
                             <Label htmlFor="r3">2 Weeks</Label>
                         </div>
