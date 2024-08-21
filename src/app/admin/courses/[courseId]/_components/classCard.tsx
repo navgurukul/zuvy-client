@@ -42,7 +42,8 @@ function ClassCard({
     studentSide: any
 }) {
     const [isDialogOpen, setIsDialogOpen] = useState(false)
-    const { setDeleteModalOpen, isDeleteModalOpen } = getDeleteStudentStore()
+    const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
+    const [loading, setLoading] = useState(false)
 
     const handleOpenDialog = () => setIsDialogOpen(true)
     const handleCloseDialog = () => setIsDialogOpen(false)
@@ -52,6 +53,7 @@ function ClassCard({
 
     const handleDelete = async () => {
         try {
+            setLoading(true)
             await api
                 .delete(`/classes/delete/${classData.meetingId}`, {})
                 .then(() => {
@@ -73,6 +75,8 @@ function ClassCard({
                     'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 variant: 'destructive',
             })
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -235,6 +239,7 @@ function ClassCard({
                 input={false}
                 buttonText="Delete Session"
                 instructorInfo={''}
+                loading={loading}
             />
         </>
     )

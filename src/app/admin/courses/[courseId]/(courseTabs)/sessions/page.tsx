@@ -127,35 +127,34 @@ function Page({ params }: any) {
         fetchStudents()
     }, [params.courseId])
     useEffect(() => {
-        if (activeTab === 'upcoming') {
-            const classesStartTime = classes.map((cls) => ({
-                startTime: cls.startTime,
-            }))
+        let timeouts: NodeJS.Timeout[] = []
 
-            const currentTimes = classesStartTime.map((newcls) => {
-                const date = new Date(newcls.startTime)
-                const timeString = date.toTimeString().split(' ')[0]
-                return {
-                    date: date,
-                    time: timeString,
-                }
-            })
+        if (activeTab === 'upcoming' && classes.length > 0) {
+            const currentTimes = classes.map((cls) => ({
+                date: new Date(cls.startTime),
+                time: new Date(cls.startTime).toTimeString().split(' ')[0],
+            }))
 
             currentTimes.forEach((item) => {
                 const now = new Date()
                 const delay = item.date.getTime() - now.getTime()
 
                 if (delay > 0) {
-                    setTimeout(() => {
+                    const timeout = setTimeout(() => {
                         console.log('Class started at', item.time)
                         getHandleAllClasses(offset)
                     }, delay)
+                    timeouts.push(timeout)
                 } else {
                     console.log('Start time is in the past for', item.time)
                 }
             })
         }
-    }, [activeTab, classes, offset, getHandleAllClasses])
+
+        return () => {
+            timeouts.forEach(clearTimeout)
+        }
+    }, [activeTab, offset, getHandleAllClasses])
 
     const getHandleAllBootcampBatches = useCallback(async () => {
         if (params.courseId) {

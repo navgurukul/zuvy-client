@@ -157,11 +157,16 @@ const Assignments = ({
         timeZone: 'UTC',
         timeZoneName: 'short',
     }
+    const options2: any = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    }
 
     const formattedDate = date.toLocaleDateString('en-US', options)
     const formattedSubmittedDate = submittedProjectDate.toLocaleString(
         'en-US',
-        options
+        options2
     )
 
     function getSubmissionStatus(
