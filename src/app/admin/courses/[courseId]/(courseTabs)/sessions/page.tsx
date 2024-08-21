@@ -96,21 +96,6 @@ function Page({ params }: any) {
         [batchId, activeTab, debouncedSearch, params.courseId, position]
     )
 
-    const sortClasses = (classes: any) => {
-        return classes.sort((a: any, b: any) => {
-            const dateA = new Date(a.startTime)
-            const dateB = new Date(b.startTime)
-
-            if (dateA > dateB) return -1
-            if (dateA < dateB) return 1
-
-            // If dates are the same, compare times
-            const timeA = dateA.getTime()
-            const timeB = dateB.getTime()
-            return timeB - timeA
-        })
-    }
-
     useEffect(() => {
         const fetchStudents = async () => {
             try {
@@ -270,7 +255,7 @@ function Page({ params }: any) {
                             {classes.length > 0 ? (
                                 <>
                                     <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
-                                        {sortClasses(classes).map(
+                                        {classes.map(
                                             (classData: any, index: any) =>
                                                 activeTab === 'completed' ? (
                                                     <RecordingCard
