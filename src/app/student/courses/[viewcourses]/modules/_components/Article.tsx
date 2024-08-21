@@ -12,19 +12,15 @@ function Article({
     content: any
     completeChapter: () => void
 }) {
-    // if (content.articleContent === null) {
-    //     return <div>Article Content Not Added Yet</div>
-    // }
+    // const editor = useEditor({
+    //     extensions,
+    //     content: content.articleContent[0],
+    //     editable: false,
+    // })
 
-    const editor = useEditor({
-        extensions,
-        content: content.articleContent[0] || `<h1>No Content Added Yet</h1>`,
-        editable: false,
-    })
-    console.log(content.articleContent[0])
     return (
         <>
-            <TiptapEditor editor={editor} />
+            {/* <TiptapEditor editor={editor} /> */}
             <div className="mt-2 text-end">
                 <Button onClick={completeChapter}>Mark as Done</Button>
             </div>

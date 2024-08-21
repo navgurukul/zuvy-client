@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 
 const UseTimer = (startImmediately: boolean = false) => {
     const [elapsedTime, setElapsedTime] = useState<number>(() => {
-        const savedTime = localStorage.getItem('elapsedTime')
+        const savedTime = 0
         return savedTime ? parseInt(savedTime, 10) : 0
     })
     const [isRunning, setIsRunning] = useState(startImmediately)
@@ -13,30 +13,12 @@ const UseTimer = (startImmediately: boolean = false) => {
         if (isRunning) {
             const startTime = Date.now() - elapsedTime
             timer = setInterval(() => {
-                const newElapsedTime = Date.now() - startTime
-                setElapsedTime(newElapsedTime)
-                localStorage.setItem('elapsedTime', newElapsedTime.toString())
+                setElapsedTime(Date.now() - startTime)
             }, 1000)
         }
 
-        const handleVisibilityChange = () => {
-            if (document.hidden && isRunning) {
-                setIsRunning(false)
-            } else if (!document.hidden && !isRunning) {
-                setIsRunning(true)
-            }
-        }
-
-        document.addEventListener('visibilitychange', handleVisibilityChange)
-
-        return () => {
-            clearInterval(timer)
-            document.removeEventListener(
-                'visibilitychange',
-                handleVisibilityChange
-            )
-        }
-    }, [isRunning, elapsedTime])
+        return () => clearInterval(timer)
+    }, [isRunning])
 
     const startTimer = () => setIsRunning(true)
     const stopTimer = () => setIsRunning(false)

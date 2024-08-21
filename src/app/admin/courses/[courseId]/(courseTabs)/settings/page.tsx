@@ -10,12 +10,9 @@ import { api } from '@/utils/axios.config'
 import DeleteConfirmationModal from '../../_components/deleteModal'
 import { getCourseData } from '@/store/store'
 import ToggleSwitch from '../../_components/SwitchSettings'
-import { Spinner } from '@/components/ui/spinner'
-
 const Page = ({ params }: { params: any }) => {
     // misc
     const router = useRouter()
-    const [loading, setLoading] = useState(true)
     const { courseData } = getCourseData()
     // state and variables
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
@@ -85,82 +82,58 @@ const Page = ({ params }: { params: any }) => {
         fetchBootCampSettings()
     }, [params.courseId, fetchBootCampSettings])
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setLoading(false)
-        }, 700)
-
-        return () => clearTimeout(timer)
-    }, [])
-
     return (
-        <>
-            {loading ? (
-                <div className="flex justify-center items-center h-screen">
-                    <div className="my-5 flex justify-center items-center">
-                        <div className="absolute h-screen">
-                            <div className="relative top-[25%]">
-                                <Spinner className="text-secondary" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            ) : (
+        <div>
+            <div className=" w-full text-start mb-5">
                 <div>
-                    <div className=" w-full text-start mb-5">
-                        <div>
-                            <h1 className="text-lg font-semibold">
-                                Course Type
-                            </h1>
-                            <div className="flex mt-2 flex-col gap-y-3 items-start">
-                                <div className="flex items-center  w-1/2 space-x-4  ">
-                                    {/* <SwitchForm bootcampId={params.courseId} /> */}
-                                    <ToggleSwitch
-                                        // isChecked={isChecked}
-                                        onToggle={handleToggle}
-                                        bootcampId={params.courseId}
-                                    />{' '}
-                                </div>
-                            </div>
+                    <h1 className="text-lg font-semibold">Course Type</h1>
+                    <div className="flex mt-2 flex-col gap-y-3 items-start">
+                        <div className="flex items-center  w-1/2 space-x-4  ">
+                            {/* <SwitchForm bootcampId={params.courseId} /> */}
+                            <ToggleSwitch
+                                // isChecked={isChecked}
+                                onToggle={handleToggle}
+                                bootcampId={params.courseId}
+                            />{' '}
                         </div>
-
-                        <h1 className="text-lg font-semibold">Course Status</h1>
-                        <p>
-                            This course has not been published yet. You will
-                            able to unpublish it at any time if new enrollments
-                            have to be stopped
-                        </p>
-                    </div>
-                    <div className="w-full text-start my-5">
-                        <div className="mb-3 text-start">
-                            <h1 className="text-lg font-semibold">
-                                Permanant Deletion
-                            </h1>
-                            <p>
-                                Courses can only be deleted if they didn’t have
-                                any enrollment since the start
-                            </p>
-                        </div>
-                        <Button
-                            variant={'destructive'}
-                            onClick={() => setDeleteModalOpen(true)}
-                        >
-                            Delete Course
-                        </Button>
-                        <DeleteConfirmationModal
-                            isOpen={isDeleteModalOpen}
-                            onClose={() => setDeleteModalOpen(false)}
-                            onConfirm={handleDelete}
-                            modalText="Are you sure you want to delete this Bootcamp?"
-                            buttonText="Delete Course"
-                            input={false}
-                            modalText2=""
-                            instructorInfo={{}}
-                        />
                     </div>
                 </div>
-            )}
-        </>
+
+                <h1 className="text-lg font-semibold">Course Status</h1>
+                <p>
+                    This course has not been published yet. You will able to
+                    unpublish it at any time if new enrollments have to be
+                    stopped
+                </p>
+            </div>
+            <div className="w-full text-start my-5">
+                <div className="mb-3 text-start">
+                    <h1 className="text-lg font-semibold">
+                        Permanant Deletion
+                    </h1>
+                    <p>
+                        Courses can only be deleted if they didn’t have any
+                        enrollment since the start
+                    </p>
+                </div>
+                <Button
+                    variant={'destructive'}
+                    onClick={() => setDeleteModalOpen(true)}
+                >
+                    Delete Course
+                </Button>
+                <DeleteConfirmationModal
+                    isOpen={isDeleteModalOpen}
+                    onClose={() => setDeleteModalOpen(false)}
+                    onConfirm={handleDelete}
+                    modalText="Are you sure you want to delete this Bootcamp?"
+                    buttonText="Delete Course"
+                    input={false}
+                    modalText2=""
+                    instructorInfo={{}}
+                />
+            </div>
+        </div>
     )
 }
 

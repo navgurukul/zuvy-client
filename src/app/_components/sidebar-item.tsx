@@ -33,15 +33,13 @@ export const SidebarItem = ({
             Logout()
         } else if (href) {
             router.push(href)
-            if (label !== 'Resource Library') {
-                setOpen(false)
-            }
         } else if (subtabs) {
             setOpen(!open)
         }
     }
 
-    const content = (
+    return (
+        // <SheetClose asChild>
         <div>
             <button
                 onClick={onClick}
@@ -97,7 +95,6 @@ export const SidebarItem = ({
                 </div>
             ) : null}
         </div>
+        // </SheetClose>
     )
-
-    return label === 'Resource Library' ? content : <SheetClose asChild>{content}</SheetClose>
 }

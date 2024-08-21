@@ -24,10 +24,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
-import { Button } from '@/components/ui/button'
-import { getCodingQuestionTags } from '@/store/store'
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
-import { getAllOpenEndedQuestions, getAllTags } from '@/utils/admin'
+
 interface Question {
     title: string
     status: string
@@ -39,17 +36,12 @@ const CodingPlayground = () => {
     // misc
     const router = useRouter()
     const { studentData } = useLazyLoadedStudentData()
-    const userID = studentData?.id
+    const userID = studentData?.id && studentData?.id
 
     // state and variables
     const [searchTerm, setSearchTerm] = useState('')
-    const [selectedTopic, setSelectedTopic] = useState({
-        tagName: 'All Topics',
-        id: -1,
-    })
-    const [selectedDifficulty, setSelectedDifficulty] = useState('All')
+    const [selectedTopic, setSelectedTopic] = useState('')
     const [questions, setQuestions] = useState([])
-    const { tags, setTags } = getCodingQuestionTags()
 
     // const difficultyColors = {
     //     Easy: 'secondary',
@@ -70,7 +62,7 @@ const CodingPlayground = () => {
     const getQuestions = async () => {
         try {
             await api
-                .get(`/Content/allCodingQuestions`)
+                .get(`/codingPlatform/allQuestions/${userID}`)
                 .then((response) => {
                     setQuestions(response.data)
                 })
@@ -86,151 +78,81 @@ const CodingPlayground = () => {
         }
     }, [userID])
 
-    useEffect(() => {
-        getAllTags(setTags)
-    }, [])
-
-    const handleTopicClick = (tag: any) => {
-        setSelectedTopic(tag)
-    }
-
-    const handleAllTopicsClick = () => {
-        setSelectedTopic({ id: -1, tagName: 'All Topics' })
-    }
-
-    const filteredQuestions = questions.filter((question: any) => {
-        return (
-            (selectedDifficulty === 'All' ||
-                question.difficulty === selectedDifficulty) &&
-            (selectedTopic.id === -1 || question.tagId === selectedTopic.id) &&
-            (searchTerm === '' ||
-                question.title.toLowerCase().includes(searchTerm.toLowerCase()))
-        )
-    })
-
     return (
         <div>
-            {questions.length > 0 ? (
-                <div className="p-4 text-left">
-                    <h1 className="text-2xl font-bold mb-4">
-                        Coding Playground
-                    </h1>
-                    <p className="mb-4">
-                        Practice problems for AFE + NavGurukul Python Course
-                    </p>
-                    <div className="flex mb-2 w-1/4">
-                        <Input
-                            type="text"
-                            placeholder="Problem Name..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-                    <div className="flex mb-2">
-                        <Select
-                            // value={selectedTopic.tagName}
-                            // onValueChange={(value) =>
-                            //     setSelectedTopic(
-                            //         tags.find((tag) => tag.tagName === value)
-                            //     )
-                            // }
-                            value={selectedDifficulty}
-                            onValueChange={(value) =>
-                                setSelectedDifficulty(value)
-                            }
+            <div className="p-4 text-left">
+                <h1 className="text-2xl font-bold mb-4">Coding Playground</h1>
+                <p className="mb-4">
+                    Practice problems for AFE + NavGurukul Python Course
+                </p>
+                <div className="flex mb-2 w-1/4">
+                    <Input
+                        type="text"
+                        placeholder="Problem Name..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+                <div className="flex mb-2">
+                    <Select
+                        value={selectedTopic}
+                        onValueChange={setSelectedTopic}
+                    >
+                        <SelectTrigger className="border border-secondary w-[180px]">
+                            <SelectValue placeholder="Difficulty" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Easy">Easy</SelectItem>
+                            <SelectItem value="Medium">Medium</SelectItem>
+                            <SelectItem value="Hard">Hard</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <ToggleGroup type="multiple" className="mx-2">
+                        <ToggleGroupItem
+                            value="All Topics"
+                            aria-label="Toggle All Topics"
                         >
-                            <SelectTrigger className="border border-secondary w-[180px]">
-                                <SelectValue placeholder="Difficulty" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="All">
-                                    Select Difficulty Level
-                                </SelectItem>
-                                <SelectItem value="Easy">Easy</SelectItem>
-                                <SelectItem value="Medium">Medium</SelectItem>
-                                <SelectItem value="Hard">Hard</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <ScrollArea className="flex text-nowrap mx-2">
-                            <ScrollBar orientation="horizontal" />
-                            <Button
-                                className={`mx-3 rounded-3xl ${
-                                    selectedTopic.tagName === 'All Topics'
-                                        ? 'bg-secondary text-white'
-                                        : 'bg-gray-200 text-black'
-                                }`}
-                                onClick={handleAllTopicsClick}
-                            >
-                                All Topics
-                            </Button>
-                            {tags.map((tag: any) => (
-                                <Button
-                                    className={`mx-3 rounded-3xl ${
-                                        selectedTopic === tag
-                                            ? 'bg-secondary text-white'
-                                            : 'bg-gray-200 text-black'
-                                    }`}
-                                    key={tag.id}
-                                    onClick={() => handleTopicClick(tag)}
-                                >
-                                    {tag.tagName}
-                                </Button>
-                            ))}
-                        </ScrollArea>
-                    </div>
-                    <div className="mt-10">
-                        <Table>
-                            <TableHeader className="bg-muted">
-                                <TableRow>
-                                    <TableHead className="font-bold text-black">
-                                        ID
-                                    </TableHead>
-                                    <TableHead className="font-bold text-black">
-                                        Problem Title
-                                    </TableHead>
-                                    <TableHead className="font-bold text-black">
-                                        Difficulty
-                                    </TableHead>
-                                    <TableHead className="font-bold text-black">
-                                        Solution Status
-                                    </TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody className="w-full max-w-4xl">
-                                {/* {questions &&
-                                    questions.map(
-                                        ({ id, title, difficulty, status }) => (
-                                            <TableRow
-                                                key={id}
-                                                className={`w-full max-w-4xl cursor-pointer font-medium hover:bg-secondary/20 `}
-                                                onClick={() =>
-                                                    handleQuestionRoute(id)
-                                                }
-                                            >
-                                                <TableCell>{id}</TableCell>
-                                                <TableCell>{title}</TableCell>
-                                                <TableCell
-                                                    className={difficultyColor(
-                                                        difficulty
-                                                    )}
-                                                >
-                                                    {difficulty}
-                                                </TableCell>
-                                                <TableCell
-                                                    className={`text-${statusColors[status]}`}
-                                                >
-                                                    {status
-                                                        ? status
-                                                        : 'Not Appeared Yet'}
-                                                </TableCell>
-                                            </TableRow>
-                                        )
-                                    )} */}
-                                {filteredQuestions.map(
+                            All Topics
+                        </ToggleGroupItem>
+                        <ToggleGroupItem
+                            value="Arrays"
+                            aria-label="Toggle Arrays"
+                        >
+                            Arrays
+                        </ToggleGroupItem>
+                        <ToggleGroupItem
+                            value="Linked Lists"
+                            aria-label="Toggle Linked Lists"
+                        >
+                            Linked Lists
+                        </ToggleGroupItem>
+                    </ToggleGroup>
+                </div>
+                <div className="mt-10">
+                    <Table>
+                        <TableHeader className="bg-muted">
+                            <TableRow>
+                                <TableHead className="font-bold text-black">
+                                    ID
+                                </TableHead>
+                                <TableHead className="font-bold text-black">
+                                    Problem Title
+                                </TableHead>
+                                <TableHead className="font-bold text-black">
+                                    Difficulty
+                                </TableHead>
+                                <TableHead className="font-bold text-black">
+                                    Solution Status
+                                </TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody className="w-full max-w-4xl">
+                            {questions &&
+                                questions.map(
                                     ({ id, title, difficulty, status }) => (
                                         <TableRow
                                             key={id}
-                                            className={`w-full max-w-4xl cursor-pointer font-medium hover:bg-secondary/20`}
+                                            className={`w-full max-w-4xl cursor-pointer font-medium hover:bg-secondary/20 `}
                                             onClick={() =>
                                                 handleQuestionRoute(id)
                                             }
@@ -254,23 +176,22 @@ const CodingPlayground = () => {
                                         </TableRow>
                                     )
                                 )}
-                            </TableBody>
-                        </Table>
-                    </div>
+                        </TableBody>
+                    </Table>
                 </div>
-            ) : (
-                <div>
-                    <div className="flex justify-center">
-                        <Image
-                            src="/emptyStates/coming_soon.svg"
-                            alt="Coding Playground"
-                            width={250}
-                            height={250}
-                        />
-                    </div>
-                    <p className="text-lg mt-2 font-semibold">Coming Soon</p>
+            </div>
+
+            <div>
+                <div className="flex justify-center">
+                    <Image
+                        src="/emptyStates/coming_soon.svg"
+                        alt="Coding Playground"
+                        width={250}
+                        height={250}
+                    />
                 </div>
-            )}
+                <p className="text-lg mt-2 font-semibold">Coming Soon</p>
+            </div>
         </div>
     )
 }

@@ -41,21 +41,22 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         content.ModuleAssessment.title
     )
     const [questionType, setQuestionType] = useState<string>('coding')
-    const [selectedCodingQuestions, setSelectedCodingQuestions] = useState<any[]>([])
-    const [selectedQuizQuestions, setSelectedQuizQuestions] = useState<any[]>([])
-    const [selectedOpenEndedQuestions, setSelectedOpenEndedQuestions] = useState<any[]>([])
-    const [selectedCodingQuesIds, setSelectedCodingQuesIds] = useState<number[]>([])
+    const [selectedCodingQuestions, setSelectedCodingQuestions] = useState<
+        any[]
+    >(content.CodingQuestions || [])
+    const [selectedQuizQuestions, setSelectedQuizQuestions] = useState<any[]>(
+        content.Quizzes || []
+    )
+    const [selectedOpenEndedQuestions, setSelectedOpenEndedQuestions] =
+        useState<any[]>(content.OpenEndedQuestions || [])
+
+    const [selectedCodingQuesIds, setSelectedCodingQuesIds] = useState<
+        number[]
+    >([])
     const [selectedQuizQuesIds, setSelectedQuizQuesIds] = useState<number[]>([])
     const [selectedOpenEndedQuesIds, setSelectedOpenEndedQuesIds] = useState<
         number[]
     >([])
-
-    const [saveSettings, setSaveSettings] = useState(false)
-
-    const handleSaveSettings = () => {
-        setQuestionType('settings')
-        setSaveSettings(true)
-    }
 
     useEffect(() => {}, [content])
 
@@ -118,44 +119,29 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     }
 
     useEffect(() => {
-        setChapterTitle(content.ModuleAssessment.title);
-    
-        // Ensure unique coding questions
-        const uniqueCodingQuestions = Array.from(
-            new Set(content.CodingQuestions?.map((question:any) => question.id))
-        ).map((id) => content.CodingQuestions.find((question:any) => question.id === id));
-        setSelectedCodingQuestions(uniqueCodingQuestions || []);
-    
-        // Ensure unique quiz questions
-        const uniqueQuizQuestions = Array.from(
-            new Set(content.Quizzes?.map((question:any) => question.id))
-        ).map((id) => content.Quizzes.find((question:any) => question.id === id));
-        setSelectedQuizQuestions(uniqueQuizQuestions || []);
-    
-        // Ensure unique open-ended questions
-        const uniqueOpenEndedQuestions = Array.from(
-            new Set(content.OpenEndedQuestions?.map((question:any) => question.id))
-        ).map((id) => content.OpenEndedQuestions.find((question:any) => question.id === id));
-        setSelectedOpenEndedQuestions(uniqueOpenEndedQuestions || []);
-    }, [content]);
+        setChapterTitle(content.ModuleAssessment.title)
+        setSelectedCodingQuestions(content.CodingQuestions || [])
+        setSelectedQuizQuestions(content.Quizzes || [])
+        setSelectedOpenEndedQuestions(content.openEndedQuestions || [])
+    }, [content])
 
     useEffect(() => {
         setSelectedCodingQuesIds(
-            Array.from(new Set(selectedCodingQuestions.map((question) => question.id)))
-        );
-    }, [selectedCodingQuestions]);
-    
+            selectedCodingQuestions.map((question) => question.id)
+        )
+    }, [selectedCodingQuestions])
+
     useEffect(() => {
         setSelectedQuizQuesIds(
-            Array.from(new Set(selectedQuizQuestions.map((question) => question.id)))
-        );
-    }, [selectedQuizQuestions]);
-    
+            selectedQuizQuestions.map((question) => question.id)
+        )
+    }, [selectedQuizQuestions])
+
     useEffect(() => {
         setSelectedOpenEndedQuesIds(
-            Array.from(new Set(selectedOpenEndedQuestions.map((question) => question.id)))
-        );
-    }, [selectedOpenEndedQuestions]);
+            selectedOpenEndedQuestions.map((question) => question.id)
+        )
+    }, [selectedOpenEndedQuestions])
 
     useEffect(() => {
         fetchChapterContent(chapterData.chapterId)
@@ -219,12 +205,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                 >
                     Settings
                 </Button>
-
-                <Button onClick={handleSaveSettings} className="ml-auto">
-                    Save Assessment
-                </Button>
             </div>
-
             {/* DropDown Filters for questions:- */}
             {questionType !== 'settings' && (
                 <>
@@ -287,8 +268,6 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                 fetchChapterContent={fetchChapterContent}
                                 chapterData={chapterData}
                                 chapterTitle={chapterTitle}
-                                saveSettings={saveSettings}
-                                setSaveSettings={setSaveSettings}
                             />
                         )}
                     </ScrollArea>

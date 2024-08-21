@@ -39,6 +39,9 @@ interface Content {
 const AddArticle = ({ content }: { content: any }) => {
     // state
     const [title, setTitle] = useState('')
+    const [contentDetails, setContentDetails] = useState(
+        content.contentDetails[0].content
+    )
     // misc
     const formSchema = z.object({
         title: z.string().min(2, {
@@ -61,12 +64,14 @@ const AddArticle = ({ content }: { content: any }) => {
 
     // functions
     const getArticleContent = async () => {
+        console.log('asdfl')
         try {
             const response = await api.get(
                 `/Content/chapterDetailsById/${content.id}`
             )
-            setTitle(response.data.title)
-            editor?.commands.setContent(response.data.contentDetails[0].content)
+            setContentDetails(response.data.contentDetails[0].content)
+            setTitle(content.title)
+            contentDetails && editor?.commands.setContent(contentDetails)
         } catch (error) {
             console.error('Error fetching article content:', error)
         }

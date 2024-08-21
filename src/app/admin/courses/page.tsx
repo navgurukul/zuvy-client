@@ -186,12 +186,10 @@ const Courses: React.FC = () => {
                                 {/* <AlertCircle className="h-4 w-4" /> */}
                                 <AlertTitle>Error</AlertTitle>
                                 <AlertDescription>
-                                    Your calendar access has expired. Please log
-                                    in again to gain access to the courses
+                                    Your calendar access has expired. Please log in
+                                    again to gain access to the courses
                                 </AlertDescription>
-                                <Button onClick={calendarAccess}>
-                                    Give access
-                                </Button>
+                        <Button onClick={calendarAccess}>Give access</Button>
                             </Alert>
                         ) : null}
                         <div className={styles.searchContainer}>
@@ -235,8 +233,7 @@ const Courses: React.FC = () => {
                                                         No Course Found
                                                     </AlertTitle>
                                                     <AlertDescription>
-                                                        No course found with the
-                                                        name{' '}
+                                                        No course found with the name{' '}
                                                         <span className="font-semibold">
                                                             {debouncedSearch}
                                                         </span>

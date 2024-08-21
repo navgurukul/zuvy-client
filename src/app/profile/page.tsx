@@ -18,14 +18,14 @@ function Page({}: Props) {
     }
     return (
         <div>
-            <MaxWidthWrapper className="flex flex-col items-center justify-between">
-                <div className="flex items-start justify-between w-full">
-                    <Button variant={'ghost'} onClick={handleBack}>
-                        <ArrowLeft />
-                    </Button>
-                </div>
-                <div className="flex items-start justify-between w-full">
-                    <div className="flex flex-col items-center mx-auto justify-center w-full">
+            <MaxWidthWrapper className="flex flex-col items-center justify-between sm:flex-col ">
+                <div className="flex items-start justify-between min-w-full ">
+                    <div>
+                        <Button variant={'ghost'} onClick={handleBack}>
+                            <ArrowLeft />
+                        </Button>
+                    </div>
+                    <div className="flex flex-col items-center mx-auto justify-center">
                         <div className="relative">
                             <Avatar className="h-40 w-40 flex flex-col justify-center items-center">
                                 <AvatarImage
@@ -37,34 +37,34 @@ function Page({}: Props) {
                                 <Camera />
                             </button>
                         </div>
-                        <div className="flex items-start justify-center flex-col lg:w-[420px] w-full">
-                            <p className="mt-2">Name</p>
+                        <div className="flex items-start justify-center flex-col ">
+                            <p className="mt-2  ">Name</p>
                             <input
-                                className="flex h-18 w-full rounded-md mt-4 border border-black/30 bg-transparent px-2 py-2 text-sm placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-black/30 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
+                                className="flex h-18 w-[420px] rounded-md mt-4 border border-black/30 bg-transparent px-2 py-2 text-sm placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-black/30 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
                                 type="name"
                                 placeholder={studentData?.name}
                                 disabled
                             />
                         </div>
-                        <div className="flex items-start justify-center flex-col lg:w-[420px] w-full">
+                        <div className="flex items-start justify-center flex-col ">
                             <p className="mt-2  ">Email</p>
                             <input
-                                className="flex h-18 w-full rounded-md mt-4 border border-black/30 bg-transparent px-2 py-2 text-sm placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-black/30 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
+                                className="flex h-18 w-[420px] rounded-md mt-4 border border-black/30 bg-transparent px-2 py-2 text-sm placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-black/30 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
                                 type="email"
                                 placeholder={studentData?.email}
                                 disabled
                             />
                         </div>
                         {/* <div className='flex items-start justify-center flex-col '>
-                        <p className='mt-2  '>Phone Number</p>
-                        <input
-                            className='flex h-18 w-[420px] rounded-md mt-4 border border-black/30 bg-transparent px-2 py-2 text-sm placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-black/30 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50'
-                            type='mumber'
-                            placeholder=' +14567892145'
-                            disabled
-                        />
-                        </div> */}
-                        <button className="bg-[#f0f0f0] rounded p-3 mt-3 h-30  lg:w-[180px] w-full">
+              <p className='mt-2  '>Phone Number</p>
+              <input
+                className='flex h-18 w-[420px] rounded-md mt-4 border border-black/30 bg-transparent px-2 py-2 text-sm placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-black/30 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50'
+                type='mumber'
+                placeholder=' +14567892145'
+                disabled
+              />
+            </div> */}
+                        <button className="bg-[#f0f0f0] rounded p-3 mt-3 h-30  w-[180px]">
                             <Link href="/profile">
                                 <span className="text-sm text-gray-700  font-semibold">
                                     Update Profile

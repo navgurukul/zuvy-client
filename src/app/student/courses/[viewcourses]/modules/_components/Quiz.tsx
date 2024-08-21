@@ -29,7 +29,6 @@ function Quiz(props: Props) {
     ) => {
         setSelectedAnswers((prev) => ({ ...prev, [questionId]: optionId }))
     }
-
     const allQuestionsAnswered = () => {
         return (
             questions?.length > 0 &&
@@ -38,29 +37,29 @@ function Quiz(props: Props) {
             )
         )
     }
-
     const getAllQuizQuestionHandler = useCallback(async () => {
         try {
             const res = await api.get(
-                `/tracking/getQuizAndAssignmentWithStatus?chapterId=${props.chapterId}`
+                `/tracking/getAllQuizAndAssignmentWithStatus/${props.moduleId}?chapterId=${props.chapterId}`
             )
 
-            if (res.data.isSuccess) {
-                const updatedQuestions = res.data.data.quizDetails.map(
+            if (res.data.status === 'success') {
+                const updatedQuestions = res.data.trackedData.map(
                     (item: any) => ({
                         ...item,
-                        status: item.quizTrackingData[0]?.status ?? 'pending',
+                        status: item.quizTrackingData[0].status,
                     })
                 )
                 setQuestions(updatedQuestions)
-                setStatus(res.data.data.status === 'Completed')
+                setStatus(true)
             } else {
-                console.error('Failed to fetch quiz details')
+                setQuestions(res.data[0].questions)
+                setStatus(false)
             }
         } catch (error) {
             console.error('Error fetching quiz questions:', error)
         }
-    }, [props.chapterId])
+    }, [props.moduleId, props.chapterId])
 
     const updateQuizChapterHandler = useCallback(async () => {
         try {
@@ -76,9 +75,9 @@ function Quiz(props: Props) {
                     props.fetchChapters()
                 })
         } catch (error) {
-            console.error('Error updating chapter status:', error)
+            console.error('Error fetching quiz questions:', error)
         }
-    }, [props])
+    }, [])
 
     useEffect(() => {
         getAllQuizQuestionHandler()
@@ -94,6 +93,7 @@ function Quiz(props: Props) {
         const transformedBody = {
             submitQuiz: mappedAnswers,
         }
+        console.log(transformedBody)
         await api
             .post(
                 `/tracking/updateQuizAndAssignmentStatus/${props.bootcampId}/${props.moduleId}?chapterId=${props.chapterId}`,
@@ -108,6 +108,7 @@ function Quiz(props: Props) {
                 getAllQuizQuestionHandler()
             })
     }
+    console.log(props)
 
     return (
         <div>

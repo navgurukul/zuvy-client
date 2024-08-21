@@ -21,7 +21,6 @@ import {
     getAllCodingQuestions,
     handleEditCodingQuestion,
 } from '@/utils/admin'
-
 import {
     Dialog,
     DialogContent,
@@ -79,7 +78,7 @@ export const columns: ColumnDef<CodingQuestion>[] = [
 
             return (
                 <div className="flex items-center">
-                    {codingQuestion?.usage ? codingQuestion?.usage + ' times' : 0 + ' times'}
+                    {codingQuestion.usage + ' times'}
                 </div>
             )
         },
@@ -100,8 +99,8 @@ export const columns: ColumnDef<CodingQuestion>[] = [
 
             const {
                 setEditCodingQuestionId,
-                isCodingEditDialogOpen,
-                setIsCodingEditDialogOpen,
+                isCodingDialogOpen,
+                setIsCodingDialogOpen,
             } = getEditCodingQuestionDialogs()
 
             const { codingQuestions, setCodingQuestions } =
@@ -111,8 +110,8 @@ export const columns: ColumnDef<CodingQuestion>[] = [
                 <>
                     <div className="flex">
                         <Dialog
-                            onOpenChange={setIsCodingEditDialogOpen}
-                            open={isCodingEditDialogOpen}
+                            onOpenChange={setIsCodingDialogOpen}
+                            open={isCodingDialogOpen}
                         >
                             <DialogTrigger>
                                 <Pencil
@@ -121,7 +120,7 @@ export const columns: ColumnDef<CodingQuestion>[] = [
                                     onClick={() => {
                                         handleEditCodingQuestion(
                                             codingQuestion,
-                                            setIsCodingEditDialogOpen,
+                                            setIsCodingDialogOpen,
                                             setEditCodingQuestionId
                                         )
                                     }}
@@ -135,8 +134,8 @@ export const columns: ColumnDef<CodingQuestion>[] = [
                                 </DialogHeader>
                                 <div className="w-full">
                                     <EditCodingQuestionForm
-                                        setIsCodingEditDialogOpen={
-                                            setIsCodingEditDialogOpen
+                                        setIsCodingDialogOpen={
+                                            setIsCodingDialogOpen
                                         }
                                         getAllCodingQuestions={
                                             getAllCodingQuestions

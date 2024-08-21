@@ -44,7 +44,7 @@ export type Tag = {
 const Mcqs = (props: Props) => {
     const [isOpen, setIsOpen] = useState(false)
     const [search, setSearch] = useState('')
-    const debouncedSearch = useDebounce(search, 500)
+    const debouncedSearch = useDebounce(search, 1000)
     const [difficulty, setDifficulty] = useState<string>('')
     const { tags, setTags } = getCodingQuestionTags()
     const { quizData, setStoreQuizData } = getAllQuizData()
@@ -73,7 +73,8 @@ const Mcqs = (props: Props) => {
     async function getAllTags() {
         const response = await api.get('Content/allTags')
         if (response) {
-            setTags([...response.data.allTags])
+            const allTopics = { id: -1, tagName: 'AllTopics' }
+            setTags([allTopics, ...response.data.allTags])
         }
     }
 
@@ -140,7 +141,7 @@ const Mcqs = (props: Props) => {
                         </div>
                         <Dialog open={isOpen} onOpenChange={setIsOpen}>
                             <DialogTrigger asChild>
-                                <Button>+ Create MCQ</Button>
+                                <Button>+ Create Quiz Question </Button>
                             </DialogTrigger>
                             <DialogContent className="sm:max-w-[500px]">
                                 <DialogHeader>

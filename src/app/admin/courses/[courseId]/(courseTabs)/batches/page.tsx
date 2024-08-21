@@ -51,7 +51,9 @@ const Page = ({ params }: { params: any }) => {
         name: z.string().min(2, {
             message: 'Batch name must be at least 2 characters.',
         }),
-        instructorEmail: z.string().email(),
+        instructorId: z
+            .string()
+            .refine((instructorId) => !isNaN(parseInt(instructorId))),
         bootcampId: z
             .string()
             .refine((bootcampId) => !isNaN(parseInt(bootcampId))),
@@ -71,13 +73,13 @@ const Page = ({ params }: { params: any }) => {
         resolver: zodResolver(formSchema),
         defaultValues: {
             name: '',
-            instructorEmail: '',
+            instructorId: '',
             bootcampId: courseData?.id.toString() ?? '',
             capEnrollment: '',
         },
         values: {
             name: '',
-            instructorEmail: '',
+            instructorId: '',
             bootcampId: courseData?.id.toString() ?? '',
             capEnrollment: '',
         },
@@ -87,7 +89,7 @@ const Page = ({ params }: { params: any }) => {
         try {
             const convertedData = {
                 ...values,
-                instructorEmail: values.instructorEmail,
+                instructorId: +values.instructorId,
                 bootcampId: +values.bootcampId,
                 capEnrollment: +values.capEnrollment,
             }
@@ -99,7 +101,7 @@ const Page = ({ params }: { params: any }) => {
                     convertedName === batchDataItem.name.toLowerCase()
             )
 
-            // console.log(convertedData)
+            console.log(convertedName)
 
             if (matchedBatchData) {
                 toast({
@@ -174,12 +176,7 @@ const Page = ({ params }: { params: any }) => {
                         </Button>
                     </DialogTrigger>
                     <DialogOverlay />
-                    <AddStudentsModal
-                        message={true}
-                        id={courseData?.id || 0}
-                        batch={false}
-                        batchId={0}
-                    />
+                    <AddStudentsModal message={true} id={courseData?.id || 0} />
                 </Dialog>
             )
         } else {
@@ -229,15 +226,15 @@ const Page = ({ params }: { params: any }) => {
                                     />
                                     <FormField
                                         control={form.control}
-                                        name="instructorEmail"
+                                        name="instructorId"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>
-                                                    Instructor Email
+                                                    Instructor Id
                                                 </FormLabel>
                                                 <FormControl>
                                                     <Input
-                                                        placeholder="instructor@navgurukul.org"
+                                                        placeholder="20230"
                                                         type="name"
                                                         {...field}
                                                     />

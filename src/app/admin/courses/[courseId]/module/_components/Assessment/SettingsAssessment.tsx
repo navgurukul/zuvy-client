@@ -51,8 +51,6 @@ type SettingsAssessmentProps = {
     fetchChapterContent: (chapterId: number) => void
     chapterData: any
     chapterTitle: string
-    saveSettings: boolean
-    setSaveSettings: (value: boolean) => void
 }
 
 const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
@@ -63,24 +61,22 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     fetchChapterContent,
     chapterData,
     chapterTitle,
-    saveSettings,
-    setSaveSettings,
 }) => {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            hour: content.timeLimit ? Math.floor(content.timeLimit / 3600) : 2,
+            hour: Math.floor(content.timeLimit / 3600),
             minute: (content.timeLimit / 60) % 60,
             passPercentage:
                 content.passPercentage != null
                     ? content.passPercentage.toString()
-                    : '70',
-            copyPaste: content.copyPaste == null ? true : content.copyPaste,
+                    : '0',
+            copyPaste: content.copyPaste == null ? false : content.copyPaste,
             embeddedGoogleSearch:
                 content.embeddedGoogleSearch == null
                     ? false
                     : content.embeddedGoogleSearch,
-            tabChange: content.tabChange == null ? true : content.tabChange,
+            tabChange: content.tabChange == null ? false : content.tabChange,
             screenRecord:
                 content.screenRecord == null ? false : content.screenRecord,
             webCamera: content.webCamera == null ? false : content.webCamera,
@@ -89,30 +85,23 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
 
     useEffect(() => {
         form.reset({
-            hour: content.timeLimit ? Math.floor(content.timeLimit / 3600) : 2,
+            hour: Math.floor(content.timeLimit / 3600),
             minute: (content.timeLimit / 60) % 60,
             passPercentage:
                 content.passPercentage != null
                     ? content.passPercentage.toString()
-                    : '70',
-            copyPaste: content.copyPaste == null ? true : content.copyPaste,
+                    : '0',
+            copyPaste: content.copyPaste == null ? false : content.copyPaste,
             embeddedGoogleSearch:
                 content.embeddedGoogleSearch == null
                     ? false
                     : content.embeddedGoogleSearch,
-            tabChange: content.tabChange == null ? true : content.tabChange,
+            tabChange: content.tabChange == null ? false : content.tabChange,
             screenRecord:
                 content.screenRecord == null ? false : content.screenRecord,
             webCamera: content.webCamera == null ? false : content.webCamera,
         })
     }, [content])
-
-    useEffect(() => {
-        if (saveSettings) {
-            form.handleSubmit(handleSubmit)()
-            setSaveSettings(false)
-        }
-    }, [saveSettings])
 
     const handleSubmit = async (values: any) => {
         const timeLimit = values.hour * 3600 + values.minute * 60
@@ -370,6 +359,11 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                 </FormItem>
                             )}
                         />
+                    </div>
+                    <div className="flex justify-end">
+                        <Button type="submit" className="w-1/3 mt-5">
+                            Save Settings
+                        </Button>
                     </div>
                 </form>
             </Form>

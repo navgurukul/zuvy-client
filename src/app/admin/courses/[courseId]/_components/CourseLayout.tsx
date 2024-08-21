@@ -74,41 +74,14 @@ function CourseLayout() {
             <h1 className="text-3xl text-start font-bold my-6">
                 {courseData?.name}
             </h1>
-
-            <div className="relative w-full">
+            <div className={styles.contentContainer}>
                 <Tabs defaultValue="generalDetails" className="w-full">
-                    <div
-                        className="relative border-b-2 border-muted flex justify-start overflow-x-auto overflow-y-hidden"
-                        style={{
-                            scrollbarWidth: 'none', // Firefox
-                            msOverflowStyle: 'none', // IE and Edge
-                        }}
-                    >
-                        <div
-                            className="flex w-max"
-                            style={{
-                                flex: '0 0 auto', // Prevent flex from shrinking or expanding
-                            }}
-                        >
-                            <TabsList className="rounded-none rounded-t-sm flex-nowrap">
-                                {courseMenu.map(({ title, href }) => (
-                                    <TabItem
-                                        key={href}
-                                        title={title}
-                                        href={href}
-                                    />
-                                ))}
-                            </TabsList>
-                        </div>
-                        <div
-                            className="absolute top-0 right-0 h-full"
-                            style={{
-                                width: '20px', // Width of the gradient hint
-                                background:
-                                    'linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.8) 100%)',
-                                pointerEvents: 'none', // Ensure it doesn’t block clicks
-                            }}
-                        />
+                    <div className="text-start border-b-2 border-muted">
+                        <TabsList className="rounded-none rounded-t-sm ">
+                            {courseMenu.map(({ title, href }) => (
+                                <TabItem key={href} title={title} href={href} />
+                            ))}
+                        </TabsList>
                     </div>
                 </Tabs>
             </div>

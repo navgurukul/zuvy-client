@@ -1,96 +1,47 @@
-import React from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { isPlural } from '@/lib/utils'
+import React from "react";
 
-import {
-    BookOpenText,
-    Clock1,
-    SquareCode,
-    FileQuestion,
-    PencilLine,
-} from 'lucide-react'
+import Link from "next/link";
+
+import { Book, Clock, FileText } from "lucide-react";
+import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 
 type Props = {
-    course: any
-}
+  chapterTitle: string;
+  chapterdescription: string;
+  time: string;
+  assignments: number;
+  quiz: number;
+};
 
-const CurricullumCard = ({ course }: Props) => {
-    const router = useRouter()
-    const timeAllotedInWeeks = Math.ceil(course.timeAlloted / 604800)
-
-    const handleModuleRoute = () => {
-        router.push(`/instructor/courses/${117}/module/${course.id}`)
-    }
-
-    return (
-        // <Link href={''}>
-        // </Link>
-        <div className="w-full flex items-center justify-between gap-y-2 cursor-pointer">
-            <div className="w-full p-2" onClick={handleModuleRoute}>
-                <div className="flex mb-2 w-full justify-between">
-                    <p className="text-md font-semibold capitalize text-black text-start">
-                        {`Module ${course.order}`} : {course.name}
-                    </p>
-                </div>
-                <div className="flex flex-wrap justify-start gap-x-4">
-                    <div className="flex items-center justify-start gap-x-2">
-                        <Clock1 size={15} />
-                        <p className="text-md font-semibold capitalize text-gray-600">
-                            {timeAllotedInWeeks > 1
-                                ? `${timeAllotedInWeeks} weeks`
-                                : `${timeAllotedInWeeks} week`}
-                        </p>
-                    </div>
-                    {course.articlesCount > 0 ? (
-                        <div className="flex items-center justify-start gap-x-2">
-                            <BookOpenText size={15} />
-                            <p className="text-md font-semibold capitalize text-gray-600">
-                                {course.articlesCount}{' '}
-                                {isPlural(course.articlesCount)
-                                    ? 'Articles'
-                                    : 'Article'}
-                            </p>
-                        </div>
-                    ) : null}
-                    {course.assignmentCount > 0 ? (
-                        <div className="flex items-center justify-start gap-x-2">
-                            <PencilLine size={15} />
-                            <p className="text-md font-semibold capitalize text-gray-600">
-                                {course.assignmentCount}{' '}
-                                {isPlural(course.assignmentCount)
-                                    ? 'Assignments'
-                                    : 'Assignment'}
-                            </p>
-                        </div>
-                    ) : null}
-                    {course.quizCount > 0 ? (
-                        <div className="flex items-center justify-start gap-x-2">
-                            <FileQuestion size={15} />
-                            <p className="text-md font-semibold capitalize text-gray-600">
-                                {course.quizCount}{' '}
-                                {isPlural(course.quizCount)
-                                    ? 'Quizzes'
-                                    : 'Quiz'}
-                            </p>
-                        </div>
-                    ) : null}
-                    {course.codingProblemsCount > 0 ? (
-                        <div className="flex items-center justify-start gap-x-2">
-                            <SquareCode size={15} />
-                            <p className="text-md font-semibold capitalize text-gray-600">
-                                {course.codingProblemsCount}{' '}
-                                {isPlural(course.codingProblemsCount)
-                                    ? 'Coding Problems'
-                                    : 'Coding Problem'}
-                            </p>
-                        </div>
-                    ) : null}
-                </div>
-                <p className="text-start mt-2">{course.description}</p>
-            </div>
+const CurricullumCard = ({
+  chapterTitle,
+  chapterdescription,
+  time,
+  assignments,
+  quiz,
+}: Props) => (
+  <Link href={""}>
+    <MaxWidthWrapper className='flex flex-col items-center '>
+      <div className=' rounded-lg px-2 py-2 gap-y-2 '>
+        <div className='bg-gray-200 rounded-lg px-5 py-6 gap-y-5'>
+          <h1 className='text-start font-semibold'>{chapterTitle}</h1>
+          <p>{chapterdescription}</p>
+          <div className='flex justify-between w-2/3 p-5'>
+            <span className='flex items-center'>
+              <Clock size={15} className='mx-2' /> {time}
+            </span>
+            <span className='flex items-center'>
+              <FileText size={15} className='mx-2' />
+              {assignments} Assignments
+            </span>{" "}
+            <span className='flex items-center'>
+              <Book size={15} className='mx-2' /> {quiz} Quiz
+            </span>
+          </div>
         </div>
-    )
-}
+      </div>
+    </MaxWidthWrapper>
+  </Link>
+);
 
-export default CurricullumCard
+export default CurricullumCard;

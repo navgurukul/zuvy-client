@@ -24,14 +24,6 @@ import { z } from 'zod'
 import { toast } from '@/components/ui/use-toast'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
-    format,
-    addDays,
-    setHours,
-    setMinutes,
-    setSeconds,
-    setMilliseconds,
-} from 'date-fns'
-import {
     Form,
     FormControl,
     FormField,
@@ -41,14 +33,6 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import AddAssessment from '@/app/admin/courses/[courseId]/module/_components/Assessment/AddAssessment'
-import AddForm from '../_components/form/AddForm'
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover'
-import { CalendarIcon } from 'lucide-react'
-import { Calendar } from '@/components/ui/calendar'
 
 // Interfaces:-
 type Chapter = {
@@ -104,7 +88,7 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
     const [moduleName, setModuleName] = useState('')
     const [activeChapter, setActiveChapter] = useState(0)
     const [chapterContent, setChapterContent] = useState<any>([])
-    const [topicId, setTopicId] = useState(1)
+    const [topicId, setTopicId] = useState(0)
     const [chapterId, setChapterId] = useState<number>(0)
     const [key, setKey] = useState(0)
     const { courseId, moduleId } = useParams()
@@ -140,20 +124,11 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
         title: z.string().min(2, {
             message: 'Title must be at least 2 characters.',
         }),
-        startDate: z.date({
-            required_error: 'A start date is required.',
-        }),
     })
 
     const form = useForm({
         resolver: zodResolver(formSchema),
-        values: {
-            title: title,
-            startDate: setHours(
-                setMinutes(setSeconds(setMilliseconds(new Date(), 0), 0), 0),
-                0
-            ),
-        },
+        values: { title: title },
         mode: 'onChange',
     })
 
@@ -183,29 +158,14 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
         }
     }
 
-    async function editProject(data: any) {
-        function convertToISO(dateString: string): string {
-            const date = new Date(dateString)
-
-            if (isNaN(date.getTime())) {
-                throw new Error('Invalid date string')
-            }
-
-            date.setDate(date.getDate() + 1)
-
-            const isoString = date.toISOString()
-
-            return isoString
-        }
-        const deadlineDate = convertToISO(data.startDate)
-
+    async function editProject() {
         try {
             const projectContent = [editor?.getJSON()]
             await api.patch(`/Content/updateProjects/${projectId}`, {
                 title,
                 instruction: { description: projectContent },
                 isLock: projectData?.project[0].isLock,
-                deadline: deadlineDate,
+                deadline: projectData?.project[0].deadline,
             })
             toast({
                 title: 'Success',
@@ -264,10 +224,9 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                     )
                 } else if (currentModule?.topicName === 'Coding Question') {
                     setChapterContent(response.data)
-                } else if (currentModule?.topicName === 'Form') {
-                    setChapterContent(response.data)
                 } else {
                     setChapterContent(response.data)
+                    console.log(response.data, 'chapter content')
                 }
 
                 setTopicId(currentModule?.topicId)
@@ -280,27 +239,24 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                 console.error('Error fetching chapter content:', error)
             }
         },
-        [moduleData, params.courseId, params.moduleId]
+        [moduleData]
     )
 
     const renderChapterContent = () => {
-
         switch (topicId) {
             case 1:
                 return (
                     <AddVideo
-                        key={chapterId}
                         moduleId={params.moduleId}
                         content={chapterContent}
                         fetchChapterContent={fetchChapterContent}
                     />
                 )
             case 2:
-                return <AddArticle key={chapterId} content={chapterContent} />
+                return <AddArticle content={chapterContent} />
             case 3:
                 return (
                     <CodingChallenge
-                        key={chapterId}
                         moduleId={params.moduleId}
                         content={chapterContent}
                         activeChapterTitle={activeChapterTitle}
@@ -309,28 +265,16 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
             case 4:
                 return (
                     <Quiz
-                        key={chapterId}
                         chapterId={chapterId}
                         moduleId={params.moduleId}
                         content={chapterContent}
                     />
                 )
             case 5:
-                return <Assignment key={chapterId} content={chapterContent} />
+                return <Assignment content={chapterContent} />
             case 6:
                 return (
                     <AddAssessment
-                        key={chapterId}
-                        chapterData={currentChapter}
-                        content={chapterContent}
-                        fetchChapterContent={fetchChapterContent}
-                        moduleId={params.moduleId}
-                    />
-                )
-            case 7:
-                return (
-                    <AddForm
-                        key={chapterId}
                         chapterData={currentChapter}
                         content={chapterContent}
                         fetchChapterContent={fetchChapterContent}
@@ -371,11 +315,6 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
         if (chapterData.length > 0) {
             const firstChapterId = chapterData[0].chapterId
             fetchChapterContent(firstChapterId)
-        } else {
-            setActiveChapter(0)
-            setChapterContent([])
-            setActiveChapterTitle('')
-            setTopicId(0)
         }
     }, [chapterData, fetchChapterContent])
 
@@ -412,7 +351,6 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
             })
         }
     }
-
     return (
         <>
             <BreadcrumbComponent crumbs={crumbs} />
@@ -434,7 +372,6 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                                 <ChapterModal
                                     params={params}
                                     fetchChapters={fetchChapters}
-                                    newChapterOrder={chapterData.length}
                                 />
                             </Dialog>
                         </div>
@@ -487,12 +424,6 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                     </div>
                     <div className="col-span-3 mx-4">
                         {renderChapterContent()}
-                        {/* <AddForm
-                            chapterData={currentChapter}
-                            content={chapterContent}
-                            fetchChapterContent={fetchChapterContent}
-                            moduleId={params.moduleId}
-                        /> */}
                     </div>
                 </div>
             ) : (
@@ -522,64 +453,6 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                                                 />
                                             </FormControl>
                                             <FormMessage className="h-5" />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="startDate"
-                                    render={({ field }) => (
-                                        <FormItem className="flex flex-col justify-start gap-x-2 text-left">
-                                            <FormLabel className="m-0">
-                                                <span className="text-xl">
-                                                    Choose Deadline Date
-                                                </span>
-                                                <span className="text-red-500">
-                                                    *
-                                                </span>{' '}
-                                            </FormLabel>
-                                            <Popover>
-                                                <PopoverTrigger asChild>
-                                                    <FormControl>
-                                                        <Button
-                                                            variant={'outline'}
-                                                            className={`w-[230px]  text-left font-normal ${
-                                                                !field.value &&
-                                                                'text-muted-foreground'
-                                                            }`}
-                                                        >
-                                                            {field.value
-                                                                ? format(
-                                                                      field.value,
-                                                                      'EEEE, MMMM d, yyyy'
-                                                                  )
-                                                                : 'Pick a date'}
-                                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                        </Button>
-                                                    </FormControl>
-                                                </PopoverTrigger>
-                                                <PopoverContent
-                                                    className="w-auto p-0"
-                                                    align="start"
-                                                >
-                                                    <Calendar
-                                                        mode="single"
-                                                        selected={field.value}
-                                                        onSelect={
-                                                            field.onChange
-                                                        }
-                                                        disabled={(date: any) =>
-                                                            date <=
-                                                            addDays(
-                                                                new Date(),
-                                                                -1
-                                                            )
-                                                        } // Disable past dates
-                                                        initialFocus
-                                                    />
-                                                </PopoverContent>
-                                            </Popover>
-                                            <FormMessage />
                                         </FormItem>
                                     )}
                                 />

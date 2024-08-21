@@ -1,12 +1,20 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-
+import { Card, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog'
 import {
     ResizablePanelGroup,
     ResizablePanel,
     ResizableHandle,
 } from '@/components/ui/resizable'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Code, Lock, Play, Upload } from 'lucide-react'
 import { useLazyLoadedStudentData } from '@/store/store'
 import { api } from '@/utils/axios.config'
@@ -24,6 +32,7 @@ import {
 } from '@/components/ui/select'
 import SubmissionsList from '../_components/submissions-list'
 import { b64DecodeUnicode, b64EncodeUnicode } from '@/utils/base64'
+import TimerDisplay from '../../courses/[viewcourses]/modules/[moduleID]/assessment/TimerDisplay'
 
 interface questionDetails {
     title: string
@@ -33,15 +42,10 @@ interface questionDetails {
 
 interface IDEProps {
     params: { editor: string }
-    remainingTime?: any
-    assessmentSubmitId?: number
+    onBack?: () => void
 }
 
-const IDE: React.FC<IDEProps> = ({
-    params,
-    remainingTime,
-    assessmentSubmitId,
-}) => {
+const IDE: React.FC<IDEProps> = ({ params, onBack }) => {
     const [questionDetails, setQuestionDetails] = useState<questionDetails>({
         title: '',
         description: '',
@@ -52,16 +56,13 @@ const IDE: React.FC<IDEProps> = ({
     })
     const [currentCode, setCurrentCode] = useState('')
     const [result, setResult] = useState('')
-    const [languageId, setLanguageId] = useState(93)
+    const [languageId, setLanguageId] = useState(48)
     const [codeError, setCodeError] = useState('')
-    const [language, setLanguage] = useState('')
+    const [language, setLanguage] = useState('c')
     const [testCases, setTestCases] = useState<any>([])
-    const [templates, setTemplates] = useState<any>([])
     const [examples, setExamples] = useState<any>([])
     const router = useRouter()
     const { toast } = useToast()
-
-    const [codeResult, setCodeResult] = useState([])
 
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
@@ -102,32 +103,35 @@ const IDE: React.FC<IDEProps> = ({
         e.preventDefault()
         try {
             const response = await api.post(
-                `codingPlatform/practicecode/questionId=${params.editor}?action=${action}`,
+                `/codingPlatform/submit?userId=${userID}&questionId=${params.editor}&action=${action}`,
                 {
-                    languageId: Number(
-                        getDataFromField(
-                            editorLanguages,
-                            languageId,
-                            'lang',
-                            'id'
-                        )
+                    languageId: getDataFromField(
+                        editorLanguages,
+                        languageId,
+                        'lang',
+                        'id'
                     ),
                     sourceCode: b64EncodeUnicode(currentCode),
                 }
             )
-            setResult(b64DecodeUnicode(response.data.data[0].stdOut))
-            setCodeResult(response.data.data)
-            const testCases = response.data.data
-            const allTestCasesPassed = testCases.every(
-                (testCase: any) => testCase.status === 'Accepted'
-            )
+            if (
+                response.data.stderr ||
+                response.data.compile_output ||
+                response.data.stdout
+            ) {
+                let compileOutput =
+                    response.data.compile_output?.replaceAll('\n', '') ||
+                    response.data.stderr?.replaceAll('\n', '') ||
+                    response.data.stdout?.replaceAll('\n', '')
 
-            setResult(b64DecodeUnicode(testCases[0].stdOut))
-
-            if (allTestCasesPassed) {
+                const encodedResult = b64DecodeUnicode(compileOutput)
+                setResult(encodedResult)
+            }
+            if (response.data.status_id === 3) {
                 toast({
-                    title: `Test Cases Passed${action === 'submit' ? ', Solution submitted' : ''
-                        }`,
+                    title: `Test Cases Passed ${
+                        action === 'submit' ? ', Solution submitted' : ''
+                    }`,
                     className: 'text-start capitalize border border-secondary',
                 })
             } else {
@@ -155,12 +159,11 @@ const IDE: React.FC<IDEProps> = ({
     const getQuestionDetails = async () => {
         try {
             await api
-                .get(`codingPlatform/get-coding-question/${params.editor}`)
+                .get(`/codingPlatform/questionById/${params.editor}`)
                 .then((response) => {
-                    setQuestionDetails(response?.data.data)
-                    setTestCases(response?.data?.data?.testCases)
-                    setTemplates(response?.data?.data?.templates)
-                    setExamples(response?.data[0].examples)
+                    setQuestionDetails(response.data[0])
+                    setTestCases(response.data[0].testCases[0])
+                    setExamples(response.data[0].examples)
                 })
         } catch (error) {
             console.error('Error fetching courses:', error)
@@ -169,23 +172,16 @@ const IDE: React.FC<IDEProps> = ({
 
     useEffect(() => {
         getQuestionDetails()
-    }, [language])
-
+    }, [])
     const handleBack = () => {
         router.back()
     }
-
-    useEffect(() => {
-        if (templates?.[language]?.template) {
-            setCurrentCode(b64DecodeUnicode(templates?.[language]?.template))
-        }
-    }, [language])
 
     return (
         <div>
             <div className="flex justify-between mb-2">
                 <div>
-                    <Button variant="ghost" size="icon" onClick={handleBack}>
+                    <Button variant="ghost" size="icon" onClick={onBack}>
                         <ArrowLeft className="h-5 w-5" />
                     </Button>
                     <SubmissionsList questionId={params.editor} />
@@ -206,6 +202,7 @@ const IDE: React.FC<IDEProps> = ({
                         <Upload size={20} />
                         <span className="ml-2 text-lg font-bold">Submit</span>
                     </Button>
+                    <TimerDisplay />
                 </div>
             </div>
 
@@ -218,60 +215,15 @@ const IDE: React.FC<IDEProps> = ({
                         <div className="flex h-[90vh]">
                             <div className="w-full max-w-12xl p-2  bg-muted text-left">
                                 <div className="p-2">
-                                    <h1 className="text-xl font-bold">
+                                    <h1 className="text-xl">
                                         {questionDetails?.title}
                                     </h1>
                                     <p>{questionDetails?.description}</p>
-
-                                    {testCases
-                                        ?.slice(0, 2)
-                                        .map((testCase: any, index: any) => (
-                                            <div
-                                                key={index}
-                                                className="bg-gray-200 shadow-sm rounded-lg p-4 my-4"
-                                            >
-                                                <h2 className="text-xl font-semibold mb-2">
-                                                    Test Case {index + 1}
-                                                </h2>
-                                                {testCase.inputs.map(
-                                                    (input: any, idx: any) => (
-                                                        <p
-                                                            key={idx}
-                                                            className="text-gray-700"
-                                                        >
-                                                            <span className="font-medium">
-                                                                Input {idx + 1}:
-                                                            </span>{' '}
-                                                            {
-                                                                input.parameterName
-                                                            }{' '}
-                                                            (
-                                                            {
-                                                                input.parameterType
-                                                            }
-                                                            ) ={' '}
-                                                            {
-                                                                input.parameterValue
-                                                            }
-                                                        </p>
-                                                    )
-                                                )}
-                                                <p className="text-gray-700 mt-2">
-                                                    <span className="font-medium">
-                                                        Expected Output:
-                                                    </span>{' '}
-                                                    {
-                                                        testCase.expectedOutput
-                                                            .parameterType
-                                                    }{' '}
-                                                    ={' '}
-                                                    {
-                                                        testCase.expectedOutput
-                                                            .parameterValue
-                                                    }
-                                                </p>
-                                            </div>
-                                        ))}
+                                    <p>
+                                        Examples : Input -{' '}
+                                        {examples[0]?.input.join(',')} ; Output
+                                        : {examples[0]?.output}
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -303,7 +255,7 @@ const IDE: React.FC<IDEProps> = ({
                                                         }
                                                     >
                                                         <SelectTrigger className="border border-secondary w-[180px]">
-                                                            <SelectValue placeholder="Select Language" />
+                                                            <SelectValue placeholder="Difficulty" />
                                                         </SelectTrigger>
                                                         <SelectContent>
                                                             {editorLanguages.map(
@@ -334,7 +286,6 @@ const IDE: React.FC<IDEProps> = ({
                                                         handleEditorChange
                                                     }
                                                     className="p-2"
-                                                    defaultValue="Please select a language above!"
                                                 />
                                             </div>
                                         </form>
@@ -349,70 +300,97 @@ const IDE: React.FC<IDEProps> = ({
                                             <p className="text-lg">
                                                 Output Window
                                             </p>
+                                            <div>
+                                                <Dialog>
+                                                    <DialogTrigger asChild>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                        >
+                                                            Test Cases
+                                                        </Button>
+                                                    </DialogTrigger>
+                                                    <DialogContent className="sm:max-w-[465px]">
+                                                        <DialogHeader>
+                                                            <DialogTitle>
+                                                                <Tabs
+                                                                    defaultValue="Test Case 1"
+                                                                    className="w-[400px]"
+                                                                >
+                                                                    <TabsList className="grid w-full grid-cols-3">
+                                                                        <TabsTrigger value="test case 1">
+                                                                            Test
+                                                                            Case
+                                                                            1
+                                                                        </TabsTrigger>
+                                                                        <TabsTrigger
+                                                                            value="test case 2"
+                                                                            disabled
+                                                                        >
+                                                                            Test
+                                                                            Case
+                                                                            2
+                                                                        </TabsTrigger>
+                                                                        <TabsTrigger
+                                                                            value="test case 3"
+                                                                            disabled
+                                                                        >
+                                                                            Test
+                                                                            Case
+                                                                            3
+                                                                        </TabsTrigger>
+                                                                    </TabsList>
+                                                                    <TabsContent value="test case 1">
+                                                                        <Card>
+                                                                            <CardHeader>
+                                                                                <CardTitle>
+                                                                                    Input
+                                                                                    -
+                                                                                    [
+                                                                                    {testCases.input?.join(
+                                                                                        ','
+                                                                                    )}
+                                                                                    ];
+                                                                                    Output
+                                                                                    -
+                                                                                    [
+                                                                                    {
+                                                                                        testCases.output
+                                                                                    }
 
+                                                                                    ]
+                                                                                </CardTitle>
+                                                                            </CardHeader>
+                                                                        </Card>
+                                                                    </TabsContent>
+                                                                    <TabsContent value="test case 2">
+                                                                        <Card>
+                                                                            <CardHeader>
+                                                                                <CardTitle>
+                                                                                    <Lock />
+                                                                                </CardTitle>
+                                                                            </CardHeader>
+                                                                        </Card>
+                                                                    </TabsContent>
+                                                                    <TabsContent value="test case 3">
+                                                                        <Card>
+                                                                            <CardHeader>
+                                                                                <CardTitle>
+                                                                                    <Lock />
+                                                                                </CardTitle>
+                                                                            </CardHeader>
+                                                                        </Card>
+                                                                    </TabsContent>
+                                                                </Tabs>
+                                                            </DialogTitle>
+                                                        </DialogHeader>
+                                                    </DialogContent>
+                                                </Dialog>
+                                            </div>
                                         </div>
                                         <div className="h-full p-2 bg-accent text-white overflow-y-auto">
-                                            <code>{result}</code>
-                                            {result && codeResult?.map((testCase: any, index: any) => (
-                                                <div
-                                                    key={index}
-                                                    className="shadow-sm rounded-lg p-4 my-4"
-                                                >
-                                                    {index < 2 ? (
-                                                        <>
-                                                            <h2 className="text-xl font-semibold mb-2">
-                                                                Test Case {index + 1}
-                                                            </h2>
-                                                            {testCase.input.map(
-                                                                (input: any, idx: any) => (
-                                                                    <p
-                                                                        key={idx}
-                                                                        className=""
-                                                                    >
-                                                                        <span className="font-medium">
-                                                                            Input {idx + 1}:
-                                                                        </span>{' '}
-                                                                        {
-                                                                            input.parameterName
-                                                                        }{' '}
-                                                                        (
-                                                                        {
-                                                                            input.parameterType
-                                                                        }
-                                                                        ) ={' '}
-                                                                        {
-                                                                            input.parameterValue
-                                                                        }
-                                                                    </p>
-                                                                )
-                                                            )}
-                                                            <p className="mt-2">
-                                                                <span className="font-medium">
-                                                                    Expected Output:
-                                                                </span>{' '}
-                                                                {
-                                                                    testCase.output
-                                                                        .parameterType
-                                                                }{' '}
-                                                                ={' '}
-                                                                {
-                                                                    testCase.output
-                                                                        .parameterValue
-                                                                }
-                                                            </p>
-                                                            <p>Your Output: {result}</p>
-                                                            status: {testCase.status}
-                                                        </>
-                                                    ) : (
-                                                        <p className="font-medium">
-                                                            Test Case {index + 1} status: {testCase.status}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                            ))}
+                                            <pre>{result}</pre>
                                         </div>
-
-
                                     </div>
                                 </div>
                             </ResizablePanel>

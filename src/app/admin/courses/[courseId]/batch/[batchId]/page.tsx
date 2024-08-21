@@ -4,7 +4,7 @@ import { useParams, useRouter, usePathname, notFound } from 'next/navigation'
 import ErrorPage from 'next/error'
 
 import { Input } from '@/components/ui/input'
-import { Plus, Trash2 } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 import { Pencil } from 'lucide-react'
 
 import { toast } from '@/components/ui/use-toast'
@@ -25,7 +25,6 @@ import {
     DialogClose,
     DialogContent,
     DialogHeader,
-    DialogOverlay,
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
@@ -46,7 +45,6 @@ import { DataTable } from '@/app/_components/datatable/data-table'
 import { Spinner } from '@/components/ui/spinner'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import BreadcrumbCmponent from '@/app/_components/breadcrumbCmponent'
-import AddStudentsModal from '../../_components/addStudentsmodal'
 
 const BatchesInfo = ({
     params,
@@ -82,7 +80,11 @@ const BatchesInfo = ({
         },
         {
             crumb: `${bootcamp?.name}`,
-            href: `/admin/courses/${params.courseId}/batches`,
+            href: `/admin/courses/${
+                studentData?.length > 0
+                    ? studentData[0].bootcampId
+                    : params.batchId
+            }/batches`,
             isLast: false,
         },
         {
@@ -222,8 +224,7 @@ const BatchesInfo = ({
     }
     useEffect(() => {
         const getBootCamp = async () => {
-            await api
-                .get(`/bootcamp/${params.courseId}`)
+            await api.get(`/bootcamp/${params.courseId}`)
                 .then((response) => setBootcamp(response.data.bootcamp))
         }
         getBootCamp()
@@ -236,8 +237,8 @@ const BatchesInfo = ({
                 endpoint += `&searchTerm=${debouncedValue}`
             }
             await api.get(endpoint).then((response) => {
-                setStudentData(response.data.modifiedStudentInfo)
-                setStoreStudentData(response.data.modifiedStudentInfo)
+                setStudentData(response.data.totalStudents)
+                setStoreStudentData(response.data.totalStudents)
                 setLastPage(response.data.totalPages)
                 setPages(response.data.totalPages)
                 setTotalStudents(response.data.totalStudentsCount)
@@ -263,7 +264,7 @@ const BatchesInfo = ({
     const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value)
     }
-    console.log(studentData)
+
     return (
         <>
             <BreadcrumbCmponent crumbs={crumbs} />
@@ -563,7 +564,7 @@ const BatchesInfo = ({
                                 </DialogContent>
                             </Dialog>
                         </div>
-                        <div className="flex items-center gap-x-5 text-sm">
+                        <div className="flex items-center text-sm">
                             <Trash2
                                 onClick={() => setDeleteModalOpen(true)}
                                 className="text-destructive cursor-pointer"
@@ -586,20 +587,6 @@ const BatchesInfo = ({
                                 buttonText="Delete Batch"
                                 instructorInfo={instructorsInfo}
                             />
-                            <Dialog>
-                                <DialogTrigger asChild>
-                                    <Button className=" gap-x-2 ">
-                                        <Plus /> Add Students
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogOverlay />
-                                <AddStudentsModal
-                                    message={false}
-                                    id={+params.courseId || 0}
-                                    batch={true}
-                                    batchId={params.batchId}
-                                />
-                            </Dialog>
                         </div>
                     </div>
                 </div>
@@ -623,6 +610,19 @@ const BatchesInfo = ({
                         />
                     </div>
                 )}
+                {/* <DataTable columns={columns} data={studentsData} />
+
+                <DataTablePagination
+                    totalStudents={totalStudents}
+                    position={position}
+                    setPosition={setPosition}
+                    pages={pages}
+                    lastPage={lastPage}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    fetchStudentData={fetchStudentData}
+                    setOffset={setOffset}
+                /> */}
             </MaxWidthWrapper>
         </>
     )

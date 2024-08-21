@@ -61,13 +61,10 @@ function LoginPage({}: Props) {
 
                     return router.push('/student')
                 } else if (resp.data.user.rolesList[0]) {
-                    const userRole = resp.data.user.rolesList[0]
                     setCookie(
                         'secure_typeuser',
                         JSON.stringify(btoa(resp.data.user.rolesList[0]))
                     )
-                    if (userRole === 'admin')
-                        return router.push('/admin/courses')
 
                     return router.push(`/${resp.data.user.rolesList[0]}`)
                 }

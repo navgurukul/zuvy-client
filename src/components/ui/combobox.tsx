@@ -51,7 +51,7 @@ export function Combobox({
                     disabled={isDisabled}
                 >
                     {batch
-                        ? batchChangeData?.label
+                        ? batchChangeData.label
                         : value
                         ? data.find((item: any) => item.value === value)
                               ?.label ?? 'No Batch is Assigned'
