@@ -77,7 +77,19 @@ function RecordingCard({
 
     const handleViewRecording = () => {
         if (isVideo) {
-            window.open(classData.s3link, '_blank')
+            if (
+                classData.s3link === 'not found' ||
+                !classData.s3link.startsWith('https')
+            ) {
+                toast({
+                    title: 'Recording not yet updated',
+                    variant: 'default',
+                    className:
+                        'text-start capitalize border border-destructive',
+                })
+            } else {
+                window.open(classData.s3link, '_blank')
+            }
         } else {
             toast({
                 title: 'Recording not yet updated',

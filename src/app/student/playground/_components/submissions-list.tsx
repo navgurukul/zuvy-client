@@ -36,9 +36,9 @@ export default function SubmissionsList({
         try {
             setLoading(true) // Start loading
             const response = await api.get(
-                `/codingPlatform/allSubmissionsByQuestionId/${questionId}?userId=${userID}`
+                `codingPlatform/submissions/${questionId}`
             )
-            setSubmissions(response.data.respond)
+            setSubmissions(response?.data?.data)
         } catch (error) {
             console.error('Error fetching courses:', error)
         } finally {
@@ -46,9 +46,9 @@ export default function SubmissionsList({
         }
     }
 
-    // useEffect(() => {
-    //     getSubmissionsByQuestionId()
-    // }, [])
+    useEffect(() => {
+        getSubmissionsByQuestionId()
+    }, [])
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -64,7 +64,7 @@ export default function SubmissionsList({
             </DialogTrigger>
             <DialogContent className="sm:max-w-4xl h-1/2 overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>Accepted submissions</DialogTitle>
+                    <DialogTitle>All Submissions</DialogTitle>
                 </DialogHeader>
                 {loading ? (
                     <div className="flex justify-center">
@@ -73,32 +73,40 @@ export default function SubmissionsList({
                 ) : (
                     <Accordion type="single" collapsible className="w-full">
                         {submissions ? (
-                            submissions.map((ele: any) => (
+                            submissions?.map((ele: any) => (
                                 <AccordionItem
-                                    key={ele?.finished_at}
-                                    value={ele?.finished_at}
+                                    key={ele?.createdAt}
+                                    value={ele?.createdAt}
                                 >
                                     <AccordionTrigger className="flex justify-between">
                                         Submitted on:{' '}
                                         {new Date(
-                                            ele.finished_at
+                                            ele.createdAt
                                         ).toLocaleString()}
-                                        <Badge variant="secondary">
-                                            {ele.language.name}
+                                        <Badge
+                                            variant={
+                                                ele.status === 'Accepted'
+                                                    ? 'secondary'
+                                                    : 'destructive'
+                                            }
+                                        >
+                                            {/* {ele.language.name} */}
+                                            {ele.status}
                                         </Badge>
-                                        {ele.status_id === 3 ? (
+                                        {ele.status === 'Accepted' ? (
                                             <Badge variant="secondary">
-                                                {ele.status.description}
+                                                {/* {ele.status.description} */}
+                                                {ele.questionDetail.title}
                                             </Badge>
                                         ) : (
                                             <Badge variant="destructive">
-                                                {ele.status.description}
+                                                {ele.questionDetail.title}
                                             </Badge>
                                         )}
                                     </AccordionTrigger>
-                                    <AccordionContent className="h-full p-2 bg-accent text-white overflow-y-auto">
+                                    <AccordionContent className="h-full p-2 overflow-y-auto">
                                         <pre>
-                                            {b64DecodeUnicode(ele.source_code)}
+                                            {ele.questionDetail.description}
                                         </pre>
                                     </AccordionContent>
                                 </AccordionItem>

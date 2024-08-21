@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { api } from '@/utils/axios.config'
 import { useLazyLoadedStudentData } from '@/store/store'
-import Recordings from '../courses/[viewcourses]/[recordings]/_components/Recordings'
 import {
     Select,
     SelectContent,
@@ -16,6 +15,7 @@ import { Input } from '@/components/ui/input'
 import useDebounce from '@/hooks/useDebounce'
 import { OFFSET, POSITION } from '@/utils/constant'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
+import Recordings from '../courses/[viewcourses]/[recordings]/_components/Recordings'
 // Interfaces:-
 interface Bootcamp {
     id: number
@@ -162,25 +162,27 @@ function Page({}: any) {
                 <Input
                     value={search}
                     onChange={handleSetSearch}
-                    className="w-1/5"
+                    className="lg:w-1/5 w-full"
                     placeholder="Search Class Recordings"
                 />
             </div>
 
             <div className=" mt-10 ">
-                <Recordings completedClasses={completedClasses} />
+                <Recordings completedClasses={completedClasses} />{' '}
             </div>
-            <DataTablePagination
-                totalStudents={totalStudents}
-                position={position}
-                setPosition={setPosition}
-                pages={pages}
-                lastPage={lastPage}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                fetchStudentData={fetchRecordings}
-                setOffset={setOffset}
-            />
+            {completedClasses.length > 0 && (
+                <DataTablePagination
+                    totalStudents={totalStudents}
+                    position={position}
+                    setPosition={setPosition}
+                    pages={pages}
+                    lastPage={lastPage}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    fetchStudentData={fetchRecordings}
+                    setOffset={setOffset}
+                />
+            )}
         </>
     )
 }

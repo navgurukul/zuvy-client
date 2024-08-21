@@ -69,14 +69,14 @@ const NewMcqProblemForm = ({
     getAllQuizQuesiton: any
 }) => {
     const [selectedOption, setSelectedOption] = useState<string>('')
-    const [options, setOptions] = useState<string[]>([''])
+    const [options, setOptions] = useState<string[]>(['', ''])
 
     const addOption = () => {
         setOptions([...options, ''])
     }
 
     const removeOption = (index: number) => {
-        if (options.length > 1) {
+        if (options.length > 2) {
             const newOptions = options.filter((_, i) => i !== index)
             setOptions(newOptions)
             form.setValue('options', newOptions)
@@ -109,11 +109,23 @@ const NewMcqProblemForm = ({
             topics: 0,
             questionText: '',
             options: options,
-            selectedOption: 0,
+            selectedOption: 1,
         },
     })
 
     const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+        const emptyOptions = values.options.some(
+            (option) => option.trim() === ''
+        )
+
+        if (emptyOptions) {
+            toast({
+                title: 'Error',
+                description: 'Options cannot be empty',
+                className: 'text-start capitalize border border-destructive',
+            })
+            return
+        }
         const optionsObject: { [key: number]: string } = options.reduce(
             (acc, option, index) => {
                 acc[index + 1] = option
@@ -252,8 +264,10 @@ const NewMcqProblemForm = ({
                         control={form.control}
                         name="options"
                         render={({ field }) => (
-                            <FormItem className="space-y-3">
-                                <FormLabel className="mt-5">Options</FormLabel>
+                            <FormItem className="space-y-3 ">
+                                <FormLabel className="  mt-5">
+                                    <h1 className="text-left"> Options</h1>
+                                </FormLabel>
                                 <RadioGroup
                                     onValueChange={(value) => {
                                         setSelectedOption(value)
@@ -293,20 +307,21 @@ const NewMcqProblemForm = ({
                                                     }}
                                                 />
                                             </div>
-                                            {options.length > 1 && (
-                                                <Button
-                                                    variant={'ghost'}
-                                                    onClick={() =>
-                                                        removeOption(index)
-                                                    }
-                                                    type="button"
-                                                >
-                                                    <X
-                                                        size={20}
-                                                        className="text-secondary"
-                                                    />
-                                                </Button>
-                                            )}
+                                            {options.length > 2 &&
+                                                index >= 2 && (
+                                                    <Button
+                                                        variant={'ghost'}
+                                                        onClick={() =>
+                                                            removeOption(index)
+                                                        }
+                                                        type="button"
+                                                    >
+                                                        <X
+                                                            size={20}
+                                                            className="text-destructive"
+                                                        />
+                                                    </Button>
+                                                )}
                                         </div>
                                     ))}
                                 </RadioGroup>
@@ -328,8 +343,8 @@ const NewMcqProblemForm = ({
                         )}
                     />
 
-                    <Button type="submit" className="w-1/2">
-                        Create Quiz Question
+                    <Button type="submit" className="w-1/3">
+                        + Create MCQ
                     </Button>
                 </form>
             </Form>

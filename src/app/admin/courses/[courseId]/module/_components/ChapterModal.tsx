@@ -21,29 +21,31 @@ import { toast } from '@/components/ui/use-toast'
 function ChapterModal({
     params,
     fetchChapters,
+    newChapterOrder
 }: {
     params: { moduleId: string; courseId: string }
     fetchChapters: () => void
+    newChapterOrder: number
 }) {
     const createChapter = async (topicId: number) => {
         await api
             .post(`Content/chapter`, {
-                moduleId: Number(params.moduleId),
-                bootcampId: Number(params.courseId),
+                moduleId: Number(params?.moduleId),
+                bootcampId: Number(params?.courseId),
                 topicId: topicId,
-                order: 1,
+                // order: newChapterOrder,
             })
             .then((res) => {
                 toast({
-                    title: res.data.module[0].title,
-                    description: res.data.message,
+                    title: res?.data?.module[0]?.title,
+                    description: res?.data?.message,
                     className: 'text-start capitalize border border-secondary',
                 })
             })
             .catch((error) => {
                 toast({
-                    title: error.data.title,
-                    description: error.data.message,
+                    title: 'Error',
+                    description: error?.response?.data?.message[0],
                     className:
                         'text-start capitalize border border-destructive',
                 })
@@ -125,7 +127,7 @@ function ChapterModal({
                     <DialogClose asChild>
                         <div
                             className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
-                            // onClick={() => createChapter(2)}
+                            onClick={() => createChapter(7)}
                         >
                             <Newspaper className="mr-2 h-6 w-6" />
                             <span>Form</span>

@@ -1,6 +1,8 @@
 import { toast } from '@/components/ui/use-toast'
 import { api } from './axios.config'
 import { OFFSET, POSITION } from './constant'
+import { fetchStudentsHandler } from './admin'
+import { getStoreStudentDataNew } from '@/store/store'
 
 export const fetchStudentData = async (
     id: number,
@@ -17,54 +19,60 @@ export const fetchStudentData = async (
     }
 }
 
-export async function onBatchChange(
-    selectedvalue: any,
-    student: any,
-    initialValue: any,
-    bootcampId: any,
-    setStoreStudentData: any,
-    fetchStudentData: any
-) {
-    if (initialValue === selectedvalue) {
-        toast({
-            title: 'Cannot Update the Batch',
-            description: 'Initial Batch And selected batch Are same',
-            className: 'text-start capitalize border border-destructive',
-        })
-    }
+// export async function onBatchChange(
+//     selectedvalue: any,
+//     student: any,
+//     initialValue: any,
+//     bootcampId: any,
+//     setStoreStudentData: any,
+//     fetchStudentData: any
+// ) {
+//     if (initialValue === selectedvalue) {
+//         toast({
+//             title: 'Cannot Update the Batch',
+//             description: 'Initial Batch And selected batch Are same',
+//             className: 'text-start capitalize border border-destructive',
+//         })
+//     }
 
-    try {
-        let url = `/batch/reassign/student_id=${student.userId}/new_batch_id=${selectedvalue}`
+//     try {
+//         let url = `/batch/reassign/student_id=${student.userId}/new_batch_id=${selectedvalue}`
 
-        if (student.batchId && student.batchId !== 'unassigned') {
-            url += `?old_batch_id=${student.batchId}`
-        } else {
-            url += `?bootcamp_id=${bootcampId}`
-        }
+//         if (student.batchId && student.batchId !== 'unassigned') {
+//             url += `?old_batch_id=${student.batchId}`
+//         } else {
+//             url += `?bootcamp_id=${bootcampId}`
+//         }
 
-        const res = await api.patch(url)
+//         const res = await api.patch(url)
 
-        fetchStudentData(bootcampId, setStoreStudentData)
-        toast({
-            title: res.data.status,
-            description: res.data.message,
-            className: 'text-start capitalize border border-secondary',
-        })
-    } catch (error: any) {
-        toast({
-            title: 'Error',
-            description: error.message,
-            className: 'text-start capitalize border border-destructive',
-        })
-    }
-}
+//         fetchStudentData(bootcampId, setStoreStudentData)
+//         toast({
+//             title: res.data.status,
+//             description: res.data.message,
+//             className: 'text-start capitalize border border-secondary',
+//         })
+//     } catch (error: any) {
+//         toast({
+//             title: 'Error',
+//             description: error.message,
+//             className: 'text-start capitalize border border-destructive',
+//         })
+//     }
+// }
 
-export async function deleteStudentHandler(
-    userId: any,
-    bootcampId: any,
-    setDeleteModalOpen: any,
-    setStudentData: any
-) {
+export async function deleteStudentHandler(userId: any, bootcampId: any) {
+    const {
+        students,
+        setStudents,
+        setTotalPages,
+        setLoading,
+        offset,
+        setTotalStudents,
+        setCurrentPage,
+        limit,
+        search,
+    } = getStoreStudentDataNew()
     try {
         await api.delete(`/student/${userId}/${bootcampId}`).then((res) => {
             toast({
@@ -72,7 +80,17 @@ export async function deleteStudentHandler(
                 description: res.data.message,
                 className: 'text-start capitalize border border-secondary',
             })
-            fetchStudentData(bootcampId, setStudentData)
+            fetchStudentsHandler({
+                courseId: bootcampId,
+                limit,
+                offset,
+                searchTerm: search,
+                setLoading,
+                setStudents,
+                setTotalPages,
+                setTotalStudents,
+                setCurrentPage,
+            })
         })
     } catch (error: any) {
         toast({
@@ -81,7 +99,6 @@ export async function deleteStudentHandler(
             className: 'text-start capitalize border border-destructive',
         })
     }
-    setDeleteModalOpen(false)
 }
 
 export const getAttendanceColorClass = (attendance: number) => {
@@ -110,20 +127,113 @@ export function requestFullScreen(element: HTMLElement) {
     }
 }
 
-    // tab change event listener
-   export function handleVisibilityChange() {
-        if (document.hidden) {
-            console.log('The Page is no longer visible. Test ended.')
-        }
-    }
-
-        // Request full screen as full screen is only allowed by user click
-
-    export function handleFullScreenChange() {
-            if (!document.fullscreenElement) {
-                alert('User has exited full screen. Test ended.')
-                // Here you could end the test, show a warning, etc.
+// tab change event listener
+export function handleVisibilityChange(
+    setTabChangeInstance: any,
+    tabChangeInstance: any,
+    submitAssessment: () => void,
+    isCurrentPageSubmitAssessment: () => Boolean
+) {
+    if (document.hidden) {
+        const newTabChangeInstance = tabChangeInstance + 1
+        localStorage.setItem(
+            'tabChangeInstance',
+            newTabChangeInstance.toString()
+        )
+        setTabChangeInstance(newTabChangeInstance)
+             if (newTabChangeInstance > 5) {
+            // Check if the current page is the submitAssessment page
+            if (isCurrentPageSubmitAssessment()) {
+                // Submit the assessment
+                submitAssessment()
+               return toast({
+                    title: 'Test Ended -> Tab will close now',
+                    description: 'You have changed the tab multiple times.',
+                    className:
+                        'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-destructive text-white',
+                })
             }
+        }else{
+           return toast({
+                title: 'WARNING',
+                description:
+                    'You have changed the tab. If you change the tab again, your test may get submitted automatically.',
+                className: 'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-destructive text-white',
+            })
         }
+
+       
+
+   
+    }
+}
+
+// Request full screen as full screen is only allowed by user click
+
+export function handleFullScreenChange(
+    setFullScreenExitInstance: any,
+    fullScreenExitInstance: any,
+    submitAssessment: () => void,
+    isCurrentPageSubmitAssessment: () => Boolean
+) {
+    if (!document.fullscreenElement) {
+        const newFullScreenExitInstance = fullScreenExitInstance + 1
+        localStorage.setItem(
+            'fullScreenExitInstance',
+            newFullScreenExitInstance.toString()
+        )
+        setFullScreenExitInstance(newFullScreenExitInstance)
+
+          if (newFullScreenExitInstance > 5) {
+            // Check if the current page is the submitAssessment page
+            if (isCurrentPageSubmitAssessment()) {
+                // Submit the assessment
+                submitAssessment()
+               return toast({
+                    title: 'Test Ended',
+                    description: 'You have exited full screen multiple times.',
+                    className:
+                        'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-destructive text-white',
+                })
+            }
+        }else{
+            return toast({
+                title: 'WARNING',
+                description:
+                    'You have exited full screen. If you exit full screen again, your test may get submitted automatically.',
+                className: 'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-destructive text-white',
+            })
+        }
+      
+    }
+}
+
+export async function getAssessmentShortInfo(
+    assessmentId: any,
+    moduleID: any,
+    viewcourses: any,
+    chapterId: any,
+    setAssessmentShortInfo: any,
+    setAssessmentOutSourceId: any,
+    setSubmissionId: any
+) {
+    try {
+        const res = await api.get(
+            `Content/students/assessmentId=${assessmentId}?moduleId=${moduleID}&bootcampId=${viewcourses}&chapterId=${chapterId}`
+        )
+        setAssessmentShortInfo(res.data)
+        setAssessmentOutSourceId(res.data.id)
+        if (res.data.submitedOutsourseAssessments.length > 0) {
+            setSubmissionId(res.data.submitedOutsourseAssessments[0].id)
+        }
+    } catch (e) {
+        console.error(e)
+    }
+}
+
+export async function getBatchDataNew(bootcampId: number) {
+    const res = await api.get(`/bootcamp/batches/${bootcampId}`)
+    return res.data
+}
 
 // --------------------------------------------

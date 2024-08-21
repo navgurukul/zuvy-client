@@ -7,14 +7,15 @@ import { Button } from '@/components/ui/button'
 import { Combobox } from '@/components/ui/combobox'
 import ClassCard from '../../_components/classCard'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
-import CreateSession from './CreateSession'
+import CreateSessionDialog from './CreateSession'
 import { api } from '@/utils/axios.config'
-import { getCourseData } from '@/store/store'
+import { getCourseData, setStoreBatchValue } from '@/store/store'
 import RecordingCard from '@/app/student/courses/[viewcourses]/[recordings]/_components/RecordingCard'
 import { OFFSET, POSITION } from '@/utils/constant'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import useDebounce from '@/hooks/useDebounce'
 import { Spinner } from '@/components/ui/spinner'
+import { toast } from '@/components/ui/use-toast'
 
 type ClassType = 'active' | 'upcoming' | 'complete'
 
@@ -38,6 +39,8 @@ interface State {
 
 function Page({ params }: any) {
     const [classes, setClasses] = useState<any[]>([])
+    const [students, setStudents] = useState<number>(0)
+    const { setbatchValueData } = setStoreBatchValue()
     const [position, setPosition] = useState(POSITION)
     const [bootcampData, setBootcampData] = useState<any>([])
     const [batchId, setBatchId] = useState<any>()
@@ -49,10 +52,12 @@ function Page({ params }: any) {
     const [lastPage, setLastPage] = useState<number>(0)
     const [search, setSearch] = useState<string>('')
     const [loading, setLoading] = useState(true)
+    const [checkopenSessionForm, setOpenSessionForm] = useState(true)
     const debouncedSearch = useDebounce(search, 1000)
 
     const handleComboboxChange = (value: string) => {
         setBatchId(value)
+        setbatchValueData(value)
     }
     const handleTabChange = (tab: string) => {
         setActiveTab(tab)
@@ -91,6 +96,36 @@ function Page({ params }: any) {
         [batchId, activeTab, debouncedSearch, params.courseId, position]
     )
 
+    const sortClasses = (classes: any) => {
+        return classes.sort((a: any, b: any) => {
+            const dateA = new Date(a.startTime)
+            const dateB = new Date(b.startTime)
+
+            if (dateA > dateB) return -1
+            if (dateA < dateB) return 1
+
+            // If dates are the same, compare times
+            const timeA = dateA.getTime()
+            const timeB = dateB.getTime()
+            return timeB - timeA
+        })
+    }
+
+    useEffect(() => {
+        const fetchStudents = async () => {
+            try {
+                await api
+                    .get(`bootcamp/students/${params.courseId}`)
+                    .then((res) => {
+                        setStudents(res.data.totalNumberOfStudents)
+                    })
+            } catch (error) {
+                console.log(error)
+            }
+        }
+
+        fetchStudents()
+    }, [params.courseId])
     useEffect(() => {
         if (activeTab === 'upcoming') {
             const classesStartTime = classes.map((cls) => ({
@@ -149,6 +184,26 @@ function Page({ params }: any) {
         getHandleAllBootcampBatches()
     }, [getHandleAllBootcampBatches])
 
+    const onClickHandler = () => {
+        if (bootcampData.length === 0) {
+            toast({
+                title: 'Caution',
+                description:
+                    'There are no batches currently please create them and assign students to them first',
+            })
+            setOpenSessionForm(false)
+        }
+
+        if (students === 0) {
+            toast({
+                title: 'Caution',
+                description:
+                    'There are no batches currently please create them and assign students to them first',
+            })
+            setOpenSessionForm(false)
+        }
+    }
+
     return (
         <>
             {loading ? (
@@ -180,11 +235,16 @@ function Page({ params }: any) {
                                 onChange={handleSetSearch}
                             />
                         </div>
-                        <CreateSession
-                            courseId={params?.courseId || 0}
-                            bootcampData={bootcampData}
-                            getClasses={getHandleAllClasses}
-                        />
+                        {
+                            <CreateSessionDialog
+                                courseId={params?.courseId || 0}
+                                bootcampData={bootcampData}
+                                getClasses={getHandleAllClasses}
+                                students={students}
+                                checkopenSessionForm={checkopenSessionForm}
+                                onClick={onClickHandler}
+                            />
+                        }
                     </div>
                     <div className="flex justify-start gap-6 my-6">
                         {tabs.map((tab) => (
@@ -211,20 +271,26 @@ function Page({ params }: any) {
                             {classes.length > 0 ? (
                                 <>
                                     <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
-                                        {classes.map((classData, index) =>
-                                            activeTab === 'completed' ? (
-                                                <RecordingCard
-                                                    classData={classData}
-                                                    key={index}
-                                                    isAdmin
-                                                />
-                                            ) : (
-                                                <ClassCard
-                                                    classData={classData}
-                                                    key={index}
-                                                    classType={activeTab}
-                                                />
-                                            )
+                                        {sortClasses(classes).map(
+                                            (classData: any, index: any) =>
+                                                activeTab === 'completed' ? (
+                                                    <RecordingCard
+                                                        classData={classData}
+                                                        key={index}
+                                                        isAdmin
+                                                    />
+                                                ) : (
+                                                    <ClassCard
+                                                        classData={classData}
+                                                        key={index}
+                                                        classType={activeTab}
+                                                        getClasses={
+                                                            getHandleAllClasses
+                                                        }
+                                                        activeTab={activeTab}
+                                                        studentSide={false}
+                                                    />
+                                                )
                                         )}
                                     </div>
                                     <DataTablePagination
@@ -254,10 +320,15 @@ function Page({ params }: any) {
                                         with the learners for course lessons or
                                         doubts
                                     </p>
-                                    <CreateSession
+                                    <CreateSessionDialog
                                         courseId={params.courseId || 0}
                                         bootcampData={bootcampData}
                                         getClasses={getHandleAllClasses}
+                                        students={students}
+                                        onClick={onClickHandler}
+                                        checkopenSessionForm={
+                                            checkopenSessionForm
+                                        }
                                     />
                                 </div>
                             )}

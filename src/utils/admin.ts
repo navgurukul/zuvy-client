@@ -287,4 +287,64 @@ export async function getChapterDetailsById(chapterId: any, setChapter: any) {
         console.error('Error:', error)
     }
 }
+
+type FetchStudentsHandlerParams = {
+    courseId: string
+    limit: number
+    offset: number
+    searchTerm: string
+    setLoading: (value: boolean) => void
+    setStudents: (students: any[]) => void
+    setTotalPages: (pages: number) => void
+    setTotalStudents: (total: number) => void
+    setCurrentPage: (page: number) => void
+}
+
+interface FetchStudentsParams {
+    courseId: string
+    limit: number
+    offset: number
+    searchTerm: string
+    setLoading: (loading: boolean) => void
+    setStudents: (students: any[]) => void
+    setTotalPages: (totalPages: number) => void
+    setTotalStudents: (totalStudents: number) => void
+    setCurrentPage: (currentPage: number) => void
+}
+
+export const fetchStudentsHandler = async ({
+    courseId,
+    limit,
+    offset,
+    searchTerm,
+    setLoading,
+    setStudents,
+    setTotalPages,
+    setTotalStudents,
+    setCurrentPage,
+}: FetchStudentsParams) => {
+    setLoading(true)
+
+    console.log('Hello')
+
+    const endpoint = searchTerm
+        ? `/bootcamp/students/${courseId}?searchTerm=${searchTerm}`
+        : `/bootcamp/students/${courseId}?limit=${limit}&offset=${offset}`
+
+    try {
+        const res = await api.get(endpoint)
+        setStudents(res.data.modifiedStudentInfo)
+        setTotalPages(res.data.totalPages)
+        setTotalStudents(res.data.totalStudentsCount)
+        setCurrentPage(res.data.currentPage)
+    } catch (error) {
+        toast({
+            title: 'Error',
+            description: 'Failed to fetch the data',
+        })
+    } finally {
+        setLoading(false)
+    }
+}
+
 // --------------------------

@@ -45,7 +45,7 @@ export function DataTable<TData, TValue>({
         React.useState<ColumnFiltersState>([])
     const [sorting, setSorting] = React.useState<SortingState>([])
     const table = useReactTable({
-        data,
+        data: data,
         columns,
         state: {
             sorting,
@@ -64,6 +64,7 @@ export function DataTable<TData, TValue>({
         getFacetedRowModel: getFacetedRowModel(),
         getFacetedUniqueValues: getFacetedUniqueValues(),
     })
+
     return (
         <div className="space-y-4">
             <DataTableToolbar table={table} />
