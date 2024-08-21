@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import DeleteConfirmationModal from './deleteModal'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
+import { usePathname } from 'next/navigation'
 
 function ClassCard({
     classData,
@@ -45,6 +46,9 @@ function ClassCard({
 
     const handleOpenDialog = () => setIsDialogOpen(true)
     const handleCloseDialog = () => setIsDialogOpen(false)
+    const pathname = usePathname()
+    const dashboard = pathname === '/student'
+    const admin = pathname.includes('/admin')
 
     const handleDelete = async () => {
         try {
@@ -101,16 +105,18 @@ function ClassCard({
                                         {classData.title}
                                     </TooltipContent>
                                 </Tooltip>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <h3 className="font-semibold">
+                                {dashboard && (
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <h3 className="font-semibold">
+                                                Course: {classData.bootcampName}
+                                            </h3>
+                                        </TooltipTrigger>
+                                        <TooltipContent className="font-semibold">
                                             Course: {classData.bootcampName}
-                                        </h3>
-                                    </TooltipTrigger>
-                                    <TooltipContent className="font-semibold">
-                                        Course: {classData.bootcampName}
-                                    </TooltipContent>
-                                </Tooltip>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                )}
                             </TooltipProvider>
                             <div className="text-md flex w-[250px] capitalize items-center">
                                 <Moment format="hh:mm A">
@@ -167,12 +173,14 @@ function ClassCard({
                 <div className="absolute top-4 right-4">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            {activeTab === 'ongoing' ? null : (
-                                <MoreVertical
-                                    size={20}
-                                    className="text-secondary cursor-pointer "
-                                />
-                            )}
+                            {activeTab === 'ongoing'
+                                ? null
+                                : admin && (
+                                      <MoreVertical
+                                          size={20}
+                                          className="text-secondary cursor-pointer "
+                                      />
+                                  )}
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-full">
                             <DropdownMenuGroup>

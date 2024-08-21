@@ -64,7 +64,6 @@ function Schedule({ className, ...props }: ScheduleProps) {
                     setCourseStarted(false)
                     setSubmissionMessage(response.data.message)
                 } else {
-                    setCourseStarted(false)
                     setCourseStarted(true)
                     setResumeCourse(response.data.data)
                     setNextChapterId(response.data.data.newChapter.id)
@@ -80,9 +79,9 @@ function Schedule({ className, ...props }: ScheduleProps) {
     const getUpcomingClassesHandler = useCallback(async () => {
         const response = await api.get(`/student/Dashboard/classes`)
         if (Array.isArray(response.data.data)) {
-            setCourseStarted(false)
+            // setCourseStarted(false)
         } else {
-            setCourseStarted(true)
+            // setCourseStarted(true)
             const classes = [
                 ...response.data.data.filterClasses.ongoing,
                 ...response.data.data.filterClasses.upcoming,
