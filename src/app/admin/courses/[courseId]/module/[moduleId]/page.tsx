@@ -24,6 +24,14 @@ import { z } from 'zod'
 import { toast } from '@/components/ui/use-toast'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
+    format,
+    addDays,
+    setHours,
+    setMinutes,
+    setSeconds,
+    setMilliseconds,
+} from 'date-fns'
+import {
     Form,
     FormControl,
     FormField,
@@ -34,6 +42,13 @@ import {
 import { Input } from '@/components/ui/input'
 import AddAssessment from '@/app/admin/courses/[courseId]/module/_components/Assessment/AddAssessment'
 import AddForm from '../_components/form/AddForm'
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover'
+import { CalendarIcon } from 'lucide-react'
+import { Calendar } from '@/components/ui/calendar'
 
 // Interfaces:-
 type Chapter = {
@@ -89,7 +104,7 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
     const [moduleName, setModuleName] = useState('')
     const [activeChapter, setActiveChapter] = useState(0)
     const [chapterContent, setChapterContent] = useState<any>([])
-    const [topicId, setTopicId] = useState(0)
+    const [topicId, setTopicId] = useState(1)
     const [chapterId, setChapterId] = useState<number>(0)
     const [key, setKey] = useState(0)
     const { courseId, moduleId } = useParams()
@@ -125,11 +140,20 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
         title: z.string().min(2, {
             message: 'Title must be at least 2 characters.',
         }),
+        startDate: z.date({
+            required_error: 'A start date is required.',
+        }),
     })
 
     const form = useForm({
         resolver: zodResolver(formSchema),
-        values: { title: title },
+        values: {
+            title: title,
+            startDate: setHours(
+                setMinutes(setSeconds(setMilliseconds(new Date(), 0), 0), 0),
+                0
+            ),
+        },
         mode: 'onChange',
     })
 
@@ -159,26 +183,43 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
         }
     }
 
-    async function editProject() {
+    async function editProject(data: any) {
+        function convertToISO(dateString: string): string {
+            const date = new Date(dateString)
+
+            if (isNaN(date.getTime())) {
+                throw new Error('Invalid date string')
+            }
+
+            date.setDate(date.getDate() + 1)
+
+            const isoString = date.toISOString()
+
+            return isoString
+        }
+        const deadlineDate = convertToISO(data.startDate)
+
         try {
             const projectContent = [editor?.getJSON()]
             await api.patch(`/Content/updateProjects/${projectId}`, {
                 title,
                 instruction: { description: projectContent },
                 isLock: projectData?.project[0].isLock,
-                deadline: projectData?.project[0].deadline,
+                deadline: deadlineDate,
             })
             toast({
                 title: 'Success',
                 description: 'Project Edited Successfully',
-                className: 'text-start capitalize border border-secondary',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
         } catch (error: any) {
             toast({
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'An error occurred.',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 variant: 'destructive',
             })
         }
@@ -229,7 +270,6 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                     setChapterContent(response.data)
                 } else {
                     setChapterContent(response.data)
-                    console.log(response.data, 'chapter content')
                 }
 
                 setTopicId(currentModule?.topicId)
@@ -246,9 +286,6 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
     )
 
     const renderChapterContent = () => {
-        if (chapterContent.length === 0) {
-            return <h1>Create New Chapter</h1>
-        }
 
         switch (topicId) {
             case 1:
@@ -363,7 +400,8 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
             toast({
                 title: 'Success',
                 description: 'Content Edited Successfully',
-                className: 'text-start capitalize border border-secondary',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
             if (response.data) {
                 setChapterData(newOrderChapters)
@@ -373,10 +411,12 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'An error occurred.',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
+
     return (
         <>
             <BreadcrumbComponent crumbs={crumbs} />
@@ -486,6 +526,64 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                                                 />
                                             </FormControl>
                                             <FormMessage className="h-5" />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="startDate"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col justify-start gap-x-2 text-left">
+                                            <FormLabel className="m-0">
+                                                <span className="text-xl">
+                                                    Choose Deadline Date
+                                                </span>
+                                                <span className="text-red-500">
+                                                    *
+                                                </span>{' '}
+                                            </FormLabel>
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <FormControl>
+                                                        <Button
+                                                            variant={'outline'}
+                                                            className={`w-[230px]  text-left font-normal ${
+                                                                !field.value &&
+                                                                'text-muted-foreground'
+                                                            }`}
+                                                        >
+                                                            {field.value
+                                                                ? format(
+                                                                      field.value,
+                                                                      'EEEE, MMMM d, yyyy'
+                                                                  )
+                                                                : 'Pick a date'}
+                                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                        </Button>
+                                                    </FormControl>
+                                                </PopoverTrigger>
+                                                <PopoverContent
+                                                    className="w-auto p-0"
+                                                    align="start"
+                                                >
+                                                    <Calendar
+                                                        mode="single"
+                                                        selected={field.value}
+                                                        onSelect={
+                                                            field.onChange
+                                                        }
+                                                        disabled={(date: any) =>
+                                                            date <=
+                                                            addDays(
+                                                                new Date(),
+                                                                -1
+                                                            )
+                                                        } // Disable past dates
+                                                        initialFocus
+                                                    />
+                                                </PopoverContent>
+                                            </Popover>
+                                            <FormMessage />
                                         </FormItem>
                                     )}
                                 />

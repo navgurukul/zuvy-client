@@ -42,7 +42,8 @@ const Page = ({ params }: { params: any }) => {
             toast({
                 title: 'Error',
                 description: 'Error fetching submissions:',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }, [params.courseId])
@@ -58,7 +59,8 @@ const Page = ({ params }: { params: any }) => {
             toast({
                 title: 'Error',
                 description: 'Error fetching assessments:',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }, [params.courseId])
@@ -75,7 +77,8 @@ const Page = ({ params }: { params: any }) => {
             toast({
                 title: 'Error',
                 description: 'Error fetching assessments:',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }, [params.courseId])
@@ -91,7 +94,8 @@ const Page = ({ params }: { params: any }) => {
             toast({
                 title: 'Error',
                 description: 'Error fetching form data:',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }, [params.courseId])
@@ -124,7 +128,7 @@ const Page = ({ params }: { params: any }) => {
                     </div>
                 </div>
             ) : (
-                <div className="flex items-start gap-x-3">
+                <div className="flex justify-start overflow-x-auto overflow-y-hidden items-start gap-x-3">
                     <Button
                         onClick={() => handleTabChange('practice')}
                         className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
@@ -177,11 +181,11 @@ const Page = ({ params }: { params: any }) => {
                     </Button>
                 </div>
             )}
-            <div className="flex justify-between">
+            <div className="flex flex-col lg:flex-row justify-between">
                 <div className="relative w-full mr-2">
                     <Input
-                        placeholder="Search for Name, Email"
-                        className="w-1/3 my-6 input-with-icon pl-8 "
+                        placeholder="Search for Name, Email bkhnkj"
+                        className="lg:w-1/3 w-full my-6 input-with-icon pl-8 "
                     />
                     <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
                         <Search className="text-gray-400" size={20} />
@@ -189,14 +193,14 @@ const Page = ({ params }: { params: any }) => {
                 </div>
                 {activeTab === 'assessments' && (
                     <Button>
-                        <ArrowDownToLine size={20} className="mr-2" /> Download
-                        Full Report
+                        <ArrowDownToLine size={20} className="mr-2" />
+                        Download Full Report
                     </Button>
                 )}
                 {activeTab === 'projects' && (
                     <Button>
-                        <ArrowDownToLine size={20} className="mr-2" /> Download
-                        Full Report
+                        <ArrowDownToLine size={20} className="mr-2" />
+                        Download Full Report
                     </Button>
                 )}
             </div>

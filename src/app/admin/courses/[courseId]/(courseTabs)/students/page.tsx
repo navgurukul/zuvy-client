@@ -48,16 +48,16 @@ const Page = ({ params }: { params: any }) => {
     return (
         <div>
             <div>
-                <div className="flex justify-between">
+                <div className="flex flex-col lg:flex-row justify-between">
                     <Input
                         type="search"
                         placeholder="search"
-                        className="w-1/4"
+                        className="lg:w-1/4 w-full"
                         onChange={handleSetSearch}
                     />
                     <Dialog>
                         <DialogTrigger asChild>
-                            <Button className=" gap-x-2 ">
+                            <Button className="gap-x-2 mt-5">
                                 <Plus /> Add Students
                             </Button>
                         </DialogTrigger>

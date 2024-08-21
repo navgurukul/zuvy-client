@@ -71,7 +71,8 @@ const CurricullumCard = ({
                 toast({
                     title: 'Success',
                     description: 'Module Deleted Successfully',
-                    className: 'text-start capitalize border border-secondary',
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
                 fetchCourseModules()
             })
@@ -81,7 +82,7 @@ const CurricullumCard = ({
                     description:
                         'There was an error while deleting. Please try again.',
                     className:
-                        'text-start capitalize border border-destructive',
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             })
     }
@@ -91,7 +92,6 @@ const CurricullumCard = ({
     }
 
     return (
-        
         <div className="w-full flex items-center justify-between gap-y-2 cursor-pointer">
             <div className="w-full p-2" onClick={handleModuleRoute}>
                 <div className="flex mb-2 w-full justify-between">

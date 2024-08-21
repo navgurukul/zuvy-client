@@ -89,7 +89,8 @@ const NewMcqProblemForm = ({
                 toast({
                     title: res.data.status || 'Success',
                     description: res.data.message || 'Quiz Question Created',
-                    className: 'text-start capitalize border border-secondary',
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
             })
         } catch (error) {
@@ -97,7 +98,8 @@ const NewMcqProblemForm = ({
                 title: 'Error',
                 description:
                     'There was an error creating the quiz question. Please try again.',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -122,7 +124,8 @@ const NewMcqProblemForm = ({
             toast({
                 title: 'Error',
                 description: 'Options cannot be empty',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
             return
         }

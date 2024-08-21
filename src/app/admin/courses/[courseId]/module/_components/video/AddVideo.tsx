@@ -73,10 +73,11 @@ const AddVideo = ({
 }) => {
     const [showVideo, setShowVideo] = useState(true)
     const fileInputRef = useRef<HTMLInputElement>(null)
+
     const [newContent, setNewContent] = useState<chapterDetails>({
-        title: content.contentDetails[0]?.title ?? '',
-        description: content.contentDetails[0]?.description ?? '',
-        links: content.contentDetails[0]?.links ?? [],
+        title: content?.contentDetails?.[0]?.title ?? '',
+        description: content?.contentDetails?.[0]?.description ?? '',
+        links: content?.contentDetails?.[0]?.links ?? [],
     })
 
     const handleUploadClick = () => {
@@ -92,11 +93,11 @@ const AddVideo = ({
             description: '',
             links: '',
         },
-        values: {
-            videoTitle: newContent?.title ?? '',
-            description: newContent?.description ?? '',
-            links: newContent?.links[0] ?? '',
-        },
+        // values: {
+        //     videoTitle: newContent?.title ?? '',
+        //     description: newContent?.description ?? '',
+        //     links: newContent?.links[0] ?? '',
+        // },
     })
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -116,7 +117,7 @@ const AddVideo = ({
                         title: res.data.status,
                         description: res.data.message,
                         className:
-                            'text-start capitalize border border-secondary',
+                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     fetchChapterContent(content.id)
                 })
@@ -124,13 +125,14 @@ const AddVideo = ({
             toast({
                 title: 'Error',
                 description: "Couldn't Update the Chapter Module",
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
-    useEffect(() => {
-        setShowVideo(newContent.links.length > 0)
-    }, [newContent.links])
+    // useEffect(() => {
+    //     setShowVideo(newContent.links.length > 0)
+    // }, [newContent.links])
 
     const handleClose = () => {
         setShowVideo(false)

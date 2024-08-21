@@ -71,7 +71,7 @@ function AssessmentItem({
                         title: res.data.title,
                         description: res.data.message,
                         className:
-                            'text-start capitalize border border-secondary',
+                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     fetchChapters()
                 })
@@ -80,7 +80,7 @@ function AssessmentItem({
                         title: error.data.title,
                         description: error.data.message,
                         className:
-                            'text-start capitalize border border-destructive',
+                            'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                     })
                 })
         } catch (error) {

@@ -73,7 +73,8 @@ const Page = ({ params }: { params: any }) => {
             toast({
                 title: 'Error',
                 description: 'Error fetching bootcamps:',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }, [params.courseId])
@@ -94,7 +95,7 @@ const Page = ({ params }: { params: any }) => {
                     title: 'Error',
                     description: 'Error fetching Form details:',
                     className:
-                        'text-start capitalize border border-destructive',
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             })
 
@@ -108,7 +109,7 @@ const Page = ({ params }: { params: any }) => {
                     title: 'Error',
                     description: 'Error fetching Chapter details:',
                     className:
-                        'text-start capitalize border border-destructive',
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             })
     }, [params.report])
@@ -129,7 +130,8 @@ const Page = ({ params }: { params: any }) => {
             toast({
                 title: 'Error',
                 description: 'Error fetching Student details:',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
             // console.log('Error fetching Student details:')
         }
@@ -291,7 +293,8 @@ const Page = ({ params }: { params: any }) => {
                                             </div>
                                             <p>
                                                 {
-                                                    item.formTrackingData[0]?.answer
+                                                    item.formTrackingData[0]
+                                                        ?.answer
                                                 }
                                             </p>
                                         </div>
@@ -307,7 +310,8 @@ const Page = ({ params }: { params: any }) => {
                                                 <CalendarIcon className="h-4 w-4 opacity-50 m-1" />
                                                 <p>
                                                     {formatDate(
-                                                        item.formTrackingData[0]?.answer
+                                                        item.formTrackingData[0]
+                                                            ?.answer
                                                     )}
                                                 </p>
                                             </div>
@@ -324,7 +328,8 @@ const Page = ({ params }: { params: any }) => {
                                                 <Clock className="h-4 w-4 opacity-50 m-1" />
                                                 <p>
                                                     {
-                                                        item.formTrackingData[0]?.answer
+                                                        item.formTrackingData[0]
+                                                            ?.answer
                                                     }
                                                 </p>
                                             </div>

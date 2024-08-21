@@ -128,7 +128,8 @@ const EditQuizQuestion = ({
                 toast({
                     title: res.data.status || 'Success',
                     description: res.data.message || 'Quiz Question Created',
-                    className: 'text-start capitalize border border-secondary',
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
             })
             setIsEditModalOpen(false)
@@ -137,21 +138,25 @@ const EditQuizQuestion = ({
                 title: 'Error',
                 description:
                     'There was an error creating the quiz question. Please try again.',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
 
     const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-        const emptyOptions = values.options.some(option => option.trim() === '');
+        const emptyOptions = values.options.some(
+            (option) => option.trim() === ''
+        )
 
         if (emptyOptions) {
             toast({
                 title: 'Error',
                 description: 'Options cannot be empty',
-                className: 'text-start capitalize border border-destructive',
-            });
-            return;
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+            })
+            return
         }
         const optionsObject: { [key: number]: string } = options.reduce(
             (acc, option, index) => {
@@ -345,20 +350,21 @@ const EditQuizQuestion = ({
                                                     }}
                                                 />
                                             </div>
-                                            {options.length > 2 && index >= 2 && (
-                                                <Button
-                                                    variant={'ghost'}
-                                                    onClick={() =>
-                                                        removeOption(index)
-                                                    }
-                                                    type="button"
-                                                >
-                                                    <X
-                                                        size={20}
-                                                        className="text-secondary"
-                                                    />
-                                                </Button>
-                                            )}
+                                            {options.length > 2 &&
+                                                index >= 2 && (
+                                                    <Button
+                                                        variant={'ghost'}
+                                                        onClick={() =>
+                                                            removeOption(index)
+                                                        }
+                                                        type="button"
+                                                    >
+                                                        <X
+                                                            size={20}
+                                                            className="text-secondary"
+                                                        />
+                                                    </Button>
+                                                )}
                                         </div>
                                     ))}
                                 </RadioGroup>
