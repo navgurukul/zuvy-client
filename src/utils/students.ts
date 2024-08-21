@@ -143,27 +143,29 @@ export function handleVisibilityChange(
             newTabChangeInstance.toString()
         )
         setTabChangeInstance(newTabChangeInstance)
-        toast({
-            title: 'WARNING',
-            description:
-                'You have changed the tab. If you change the tab again, your test will get submitted automatically.',
-            className:
-                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-        })
-
-        if (newTabChangeInstance > 4) {
+             if (newTabChangeInstance > 5) {
             // Check if the current page is the submitAssessment page
             if (isCurrentPageSubmitAssessment()) {
                 // Submit the assessment
-                toast({
-                    title: 'Test Ended',
+                submitAssessment()
+               return toast({
+                    title: 'Test Ended -> Tab will close now',
                     description: 'You have changed the tab multiple times.',
                     className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                        'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-destructive text-white',
                 })
-                submitAssessment()
             }
+        }else{
+           return toast({
+                title: 'WARNING',
+                description:
+                    'You have changed the tab. If you change the tab again, your test may get submitted automatically.',
+                className: 'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-destructive text-white',
+            })
         }
+
+    
+   
     }
 }
 
@@ -182,27 +184,28 @@ export function handleFullScreenChange(
             newFullScreenExitInstance.toString()
         )
         setFullScreenExitInstance(newFullScreenExitInstance)
-        toast({
-            title: 'WARNING',
-            description:
-                'You have exited full screen. If you exit full screen, your test will get submitted automatically.',
-            className:
-                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-        })
 
-        if (newFullScreenExitInstance > 4) {
+          if (newFullScreenExitInstance > 5) {
             // Check if the current page is the submitAssessment page
             if (isCurrentPageSubmitAssessment()) {
                 // Submit the assessment
-                toast({
+                submitAssessment()
+               return toast({
                     title: 'Test Ended',
                     description: 'You have exited full screen multiple times.',
                     className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                        'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-destructive text-white',
                 })
-                submitAssessment()
             }
+        }else{
+            return toast({
+                title: 'WARNING',
+                description:
+                    'You have exited full screen. If you exit full screen again, your test may get submitted automatically.',
+                className: 'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-destructive text-white',
+            })
         }
+      
     }
 }
 

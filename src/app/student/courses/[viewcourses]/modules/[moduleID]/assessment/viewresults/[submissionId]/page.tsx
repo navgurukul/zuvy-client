@@ -80,10 +80,10 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
         )
     }
 
-    function viewCodingSubmission(codingOutSourceId: any) {
+    function viewCodingSubmission(codingOutSourceId: any, assessmentSubmissionId:any) {
         if (codingOutSourceId) {
             router.push(
-                `/student/courses/${params.viewcourses}/modules/${params.moduleID}/assessment/codingresults/${codingOutSourceId}`
+                `/student/courses/${params.viewcourses}/modules/${params.moduleID}/assessment/codingresults/${codingOutSourceId}/show/${assessmentSubmissionId}`
             )
         } else {
             toast({
@@ -160,25 +160,9 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                                 Description: {codingQuestion.description}
                             </div>
                             <div className={`text-xl mt-2 text-start `}>
-                                Status:{' '}
-                                <span
-                                    className={`ml-2 ${
-                                        lastSubmission?.status === 'Accepted'
-                                            ? 'text-green-400'
-                                            : 'text-destructive'
-                                    }`}
-                                >
-                                    {lastSubmission?.status}
-                                </span>
+                                Status: <span className={`ml-2 ${lastSubmission?.status === 'Accepted' ? 'text-green-400' : 'text-destructive'}`}>{lastSubmission?.status || 'No Coding Submission Found'}</span>
                             </div>
-                            <div
-                                onClick={() =>
-                                    viewCodingSubmission(
-                                        lastSubmission?.codingOutsourseId
-                                    )
-                                }
-                                className="cursor-pointer mt-4 flex justify-end text-secondary font-bold"
-                            >
+                            <div onClick={() => viewCodingSubmission(lastSubmission?.codingOutsourseId, params.submissionId)} className="cursor-pointer mt-4 flex justify-end text-secondary font-bold">
                                 View Submission <ChevronRight />
                             </div>
                         </div>
@@ -201,7 +185,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                     </div>
                 </div>
                 <div className="text-xl mt-2 text-start">
-                    Attempted {quizScore}/{totalQuizScore}
+                    Attempted {viewResultsData?.quizSubmission?.quizTotalAttemted}/{viewResultsData?.totalQuizzes}
                 </div>
                 <div
                     onClick={viewQuizSubmission}
@@ -223,7 +207,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                     </div>
                 </div>
                 <div className="text-xl mt-2 text-start">
-                    Attempted {openEndedScore}/{totalOpenEndedScore}
+                    Attempted {viewResultsData?.openEndedSubmission?.openTotalAttemted}/{viewResultsData?.totalOpenEndedQuestions}
                 </div>
                 <div
                     onClick={viewOpenEndedSubmission}
