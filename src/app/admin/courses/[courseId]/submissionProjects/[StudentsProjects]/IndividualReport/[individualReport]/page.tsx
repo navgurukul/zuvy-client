@@ -11,13 +11,16 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from '@/components/ui/accordion'
-import ShowMore from '../../../../_components/descriptionHandler'
+import { useEditor } from '@tiptap/react'
+import extensions from '@/app/_components/editor/TiptapExtensions'
+import TiptapEditor from '@/app/_components/editor/TiptapEditor'
 
 type Props = {}
 
 const Page = ({ params }: any) => {
     const [indiviDualStudentData, setIndividualStudentData] = useState<any>([])
     const [bootcampData, setBootcampData] = useState<any>()
+    const [submittedDate, setSubmittedDate] = useState<string>('')
 
     const crumbs = [
         {
@@ -46,15 +49,37 @@ const Page = ({ params }: any) => {
             isLast: true,
         },
     ]
+
+    const editor: any = useEditor({
+        extensions,
+        content: '<h1>No Content Added Yet</h1>',
+        editable: false,
+    })
+
     const getIndividualStudentData = useCallback(async () => {
         await api
             .get(
                 `/submission/projectDetail/${params.individualReport}?projectId=${params.StudentsProjects}&bootcampId=${params.courseId}`
             )
             .then((res) => {
-                setIndividualStudentData(res.data)
+                setIndividualStudentData(res?.data)
+                if (editor && editor.commands) {
+                    editor.commands.setContent(
+                        res?.data?.projectSubmissionDetails?.instruction
+                            ?.description[0]
+                    )
+                }
+                setSubmittedDate(
+                    res?.data.projectSubmissionDetails?.projectTrackingData[0]
+                        ?.updatedAt
+                )
             })
-    }, [params.individualReport, params.courseId, params.StudentsProjects])
+    }, [
+        params.individualReport,
+        params.courseId,
+        params.StudentsProjects,
+        editor,
+    ])
     const getBootcampHandler = useCallback(async () => {
         try {
             const res = await api.get(`/bootcamp/${params.courseId}`)
@@ -68,6 +93,39 @@ const Page = ({ params }: any) => {
         getIndividualStudentData()
         getBootcampHandler()
     }, [getIndividualStudentData, getBootcampHandler])
+
+    const dateString = submittedDate
+    const date = new Date(dateString?.toString())
+    const dayNames = [
+        'Sunday',
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+    ]
+    const monthNames = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+    ]
+
+    const dayOfWeek = dayNames[date.getUTCDay()]
+    const day = date.getUTCDate()
+    const month = monthNames[date.getUTCMonth()]
+    const year = date.getUTCFullYear()
+
+    const formattedDate = `${dayOfWeek} ${day} ${month} ${year}`
 
     if (indiviDualStudentData) {
         return (
@@ -95,8 +153,8 @@ const Page = ({ params }: any) => {
                                 </h1>
                             </div>
                             <div>
-                                <h3 className="text-left">
-                                    Submitted on 12 April 2024
+                                <h3 className="text-left font-semibold ">
+                                    Submitted on {formattedDate}
                                 </h3>
                             </div>
                         </div>
@@ -104,33 +162,29 @@ const Page = ({ params }: any) => {
                     <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2">
                         <div className="p-4 bg-white rounded shadow">
                             <h2 className="text-xl text-left font-bold mb-2">
+                                Title:-{' '}
                                 {
                                     indiviDualStudentData
                                         ?.projectSubmissionDetails?.title
                                 }
                             </h2>
-                            <h3 className="text-md text-left  mb-2">
-                                Problem Statement:
-                            </h3>
-                            <div className="w-full flex flex-start">
-                                <ShowMore
-                                    description={
-                                        indiviDualStudentData
-                                            ? indiviDualStudentData
-                                                  ?.projectSubmissionDetails
-                                                  ?.instruction.description
-                                            : ''
-                                    }
-                                />
+                            <div></div>
+                            <div className="w-full flex flex-col flex-start">
+                                <h3 className="text-md  font-semibold text-left  mb-2">
+                                    Problem Description:
+                                </h3>
+
+                                {editor && <TiptapEditor editor={editor} />}
                             </div>
                         </div>
                         <div className="p-4 flex flex-col gap-y-3 bg-white rounded shadow">
                             <h2 className="text-lg text-left font-bold mb-2">
-                                Github Link
+                                Project Link
                             </h2>
                             <Link
                                 href={`${indiviDualStudentData?.projectSubmissionDetails?.projectTrackingData[0].projectLink}`}
-                                className="text-blue-600 text-left"
+                                className="text-blue-600 text-left hover:underline"
+                                target="_blank"
                             >
                                 <h2 className="text-left">
                                     {
@@ -143,9 +197,9 @@ const Page = ({ params }: any) => {
                             <h2 className="text-lg text-left font-bold mb-2">
                                 Video Walkthrough
                             </h2>
-                            <div className="">
+                            {/* <div className="">
                                 <p>Video Walk through</p>
-                            </div>
+                            </div> */}
                             <h2 className="text-lg text-left font-bold mb-2">
                                 Grading
                             </h2>

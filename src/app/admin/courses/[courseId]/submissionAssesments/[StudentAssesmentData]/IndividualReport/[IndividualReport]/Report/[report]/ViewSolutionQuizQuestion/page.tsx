@@ -41,8 +41,8 @@ type QuizDetails = {
 }
 const Page = ({ params }: { params: paramsType }) => {
     const { proctoringData, fetchProctoringData } = getProctoringDataStore()
-    const [individualAssesmentData, setIndividualAssesmentData] =
-        useState<any>()
+    // const [individualAssesmentData, setIndividualAssesmentData] =
+    //     useState<any>()
     const [bootcampData, setBootcampData] = useState<any>()
     const [assesmentData, setAssesmentData] = useState<any>()
     const [quizQuestionDetails, setQuizQuiestionDetails] = useState<
@@ -72,7 +72,7 @@ const Page = ({ params }: { params: paramsType }) => {
             isLast: false,
         },
         {
-            crumb: individualAssesmentData && individualAssesmentData.user.name,
+            crumb: 'individualAssesmentData && individualAssesmentData.user.name',
             href: `/admin/courses/${params.courseId}/submissionAssesments/${params.StudentAssesmentData}/IndividualReport/${params.IndividualReport}/Report/${params.report}`,
             isLast: false,
         },
@@ -89,15 +89,15 @@ const Page = ({ params }: { params: paramsType }) => {
             console.error('API Error:', error)
         }
     }, [params.courseId])
-    const getIndividualStudentAssesmentDataHandler = useCallback(async () => {
-        await api
-            .get(
-                `/admin/assessment/submission/user_id${params.IndividualReport}?submission_id=${params.report}`
-            )
-            .then((res) => {
-                setIndividualAssesmentData(res.data)
-            })
-    }, [params.IndividualReport, params.report])
+    // const getIndividualStudentAssesmentDataHandler = useCallback(async () => {
+    //     await api
+    //         .get(
+    //             `/admin/assessment/submission/user_id${params.IndividualReport}?submission_id=${params.report}`
+    //         )
+    //         .then((res) => {
+    //             setIndividualAssesmentData(res.data)
+    //         })
+    // }, [params.IndividualReport, params.report])
     const getStudentAssesmentDataHandler = useCallback(async () => {
         await api
             .get(
@@ -129,13 +129,11 @@ const Page = ({ params }: { params: paramsType }) => {
     useEffect(() => {
         fetchProctoringData(params.report, params.IndividualReport)
         fetchQuizQuestionDetails()
-        getIndividualStudentAssesmentDataHandler()
         getBootcampHandler()
         getStudentAssesmentDataHandler()
     }, [
         getBootcampHandler,
         getStudentAssesmentDataHandler,
-        getIndividualStudentAssesmentDataHandler,
         fetchQuizQuestionDetails,
         fetchProctoringData,
         params,
@@ -174,7 +172,7 @@ const Page = ({ params }: { params: paramsType }) => {
                 <h1 className="text-left font-semibold text-[20px]">
                     Overview
                 </h1>
-                <div className="lg:flex h-[150px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md w-2/5 ">
+                {/* <div className="lg:flex h-[150px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md w-2/5 ">
                     <div className="flex flex-col w-full justify-between   ">
                         <div
                             className={`flex items-center justify-between p-4 rounded-md ${cheatingClass} `}
@@ -220,7 +218,7 @@ const Page = ({ params }: { params: paramsType }) => {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> */}
                 <div>
                     {quizQuestionDetails.map((quizDetail, index) => {
                         const { Quiz, submissionsData } = quizDetail

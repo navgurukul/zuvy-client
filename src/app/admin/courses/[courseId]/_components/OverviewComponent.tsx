@@ -13,6 +13,7 @@ type Props = {
     score: number
     copyPaste: string
     tabchanges: number
+    embeddedSearch: number
 }
 
 const OverviewComponent = (props: Props) => {
@@ -23,16 +24,13 @@ const OverviewComponent = (props: Props) => {
                     <div className="flex flex-col w-full justify-between   ">
                         <div className="flex items-center p-4 justify-between bg-orange-300 rounded-md">
                             <h1 className="text-xl text-start font-semibold text-gray-800  dark:text-white ">
-                                Total Score
+                                Total Percentage Obtained
                             </h1>
-                            <h1 className="font-bold">
-                                {props.score}/{props.totalScore}
-                            </h1>
+                            <h1 className="font-bold">{props.score}</h1>
                         </div>
                         <div className="flex flex-start gap-x-4 p-4">
                             <div>
                                 <h1 className="text-start font-bold">
-                                    {props.correctedCodingChallenges}/
                                     {props.totalCodingChallenges}
                                 </h1>
                                 <p className="text-gray-500 text-start">
@@ -41,7 +39,6 @@ const OverviewComponent = (props: Props) => {
                             </div>
                             <div>
                                 <h1 className="text-start font-bold">
-                                    {props.correctedMcqs}/
                                     {props.totalCorrectedMcqs}
                                 </h1>
                                 <p className="text-gray-500 text-start">MCQs</p>
@@ -76,6 +73,14 @@ const OverviewComponent = (props: Props) => {
                                     {props.tabchanges}
                                 </h1>
                                 <p className="text-gray-500">Tab Changes</p>
+                            </div>
+                            <div>
+                                <h1 className="text-start font-bold">
+                                    {props.embeddedSearch}
+                                </h1>
+                                <p className="text-gray-500">
+                                    Embedded Google Search
+                                </p>
                             </div>
                         </div>
                     </div>
