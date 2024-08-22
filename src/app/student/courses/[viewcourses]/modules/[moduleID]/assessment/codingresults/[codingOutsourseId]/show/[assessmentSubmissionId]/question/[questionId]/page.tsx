@@ -5,15 +5,9 @@ import { api } from '@/utils/axios.config'
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ChevronLeft } from 'lucide-react'
-import { ScrollBar } from '@/components/ui/scroll-area'
-import { ScrollArea } from '@radix-ui/react-scroll-area'
+import { decodeBase64 } from '@/utils/students'
 
 import Editor from '@monaco-editor/react'
-
-const decodeBase64 = (data: string) => {
-    if (!data) return ''
-    return Buffer.from(data, 'base64').toString('utf-8')
-}
 
 const CodingSubmissionPage = ({ params }: { params: any }) => {
     const { studentData } = useLazyLoadedStudentData()
@@ -76,7 +70,7 @@ const CodingSubmissionPage = ({ params }: { params: any }) => {
   
                         <div>
                             <Editor
-                                height="52vh"
+                                height="72vh"
                                 width={'85vh'}
                                 theme="vs-dark"
                                 value={decodeBase64(sourceCode)}
@@ -84,7 +78,8 @@ const CodingSubmissionPage = ({ params }: { params: any }) => {
                                 
                                 options={{
                                     readOnly: true,
-                                    cursorStyle: 'line-thin'                                
+                                    cursorStyle: 'line-thin',
+                                    fontSize: 15,                                
                                 }}
                             />
                         </div>

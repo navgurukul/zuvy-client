@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import moment from 'moment'
-
 import { api } from '@/utils/axios.config'
 import { getCourseData } from '@/store/store'
 import { Button } from '@/components/ui/button'
@@ -14,7 +13,6 @@ import { Reorder } from 'framer-motion'
 import { toast } from '@/components/ui/use-toast'
 import { Spinner } from '@/components/ui/spinner'
 import EditModuleDialog from '../../_components/EditModuleDialog'
-
 interface CurriculumItem {
     id: number
     name: string
@@ -34,12 +32,11 @@ interface ModuleData {
     type: string
     timeAlloted: number
 }
-
 function Page() {
     // state and variables
     const [curriculum, setCurriculum] = useState([])
     const { courseData } = getCourseData()
-    const [typeId, setTypeId] = useState(1)
+    const [typeId, setTypeId] = useState(0)
     const [loading, setLoading] = useState(true)
     const [editMode, setEditMode] = useState(false)
     const [moduleId, setModuleId] = useState(0)
@@ -51,45 +48,38 @@ function Page() {
         name: '',
         description: '',
     })
-
     const [timeData, setTimeData] = useState({
         months: -1,
         weeks: -1,
         days: -1,
     })
-
     // func
     const handleTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { value } = event.target
         setTypeId(value === 'learning-material' ? 1 : 2)
     }
-
     const handleModuleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
         console.log(name, value)
         setModuleData((prev) => ({ ...prev, [name]: value }))
     }
-
     const handleTimeAllotedChange = (
         e: React.ChangeEvent<HTMLInputElement>
     ) => {
         const { name, value } = e.target
         setTimeData((prev) => ({ ...prev, [name]: parseInt(value, 10) }))
     }
-
     useEffect(() => {
         api.get(`/content/allModules/${courseData?.id}`).then((res) => {
             const data = res.data.find((item: any) => moduleId === item.id)
             setSelectedModuleData(data)
         })
     }, [moduleId])
-
     const editHandle = (module: any) => {
         setEditMode(true)
         setModuleId(module)
         setIsEditOpen(true)
     }
-
     // Convert seconds to months, weeks and days:-
     const convertSeconds = (seconds: number) => {
         const SECONDS_IN_A_MINUTE = 60
@@ -97,59 +87,78 @@ function Page() {
         const SECONDS_IN_A_DAY = 24 * SECONDS_IN_AN_HOUR
         const SECONDS_IN_A_WEEK = 7 * SECONDS_IN_A_DAY
         const SECONDS_IN_A_MONTH = 28 * SECONDS_IN_A_DAY
-
         const months = Math.floor(seconds / SECONDS_IN_A_MONTH)
         seconds %= SECONDS_IN_A_MONTH
-
         const weeks = Math.floor(seconds / SECONDS_IN_A_WEEK)
         seconds %= SECONDS_IN_A_WEEK
-
         const days = Math.floor(seconds / SECONDS_IN_A_DAY)
         seconds %= SECONDS_IN_A_DAY
-
         return {
             months: months,
             weeks: weeks,
             days: days,
         }
     }
-
     useEffect(() => {
-        if (selectedModuleData) {
+        if (isOpen) {
+        
             setModuleData({
-                name: selectedModuleData.name || '',
-                description: selectedModuleData.description || '',
+                name: '',
+                description: '',
             })
-            const result = convertSeconds(selectedModuleData.timeAlloted)
             setTimeData({
-                days: result.days,
-                weeks: result.weeks,
-                months: result.months,
+                months: -1,
+                weeks: -1,
+                days: -1,
             })
         }
-    }, [selectedModuleData])
-
-    //  Edit Module Function:-
+    }, [isOpen])
+    
+    useEffect(() => {
+        if (isEditOpen) {
+            if (selectedModuleData) {
+                setModuleData({
+                    name: selectedModuleData.name || '',
+                    description: selectedModuleData.description || '',
+                })
+                const result = convertSeconds(selectedModuleData.timeAlloted)
+                setTimeData({
+                    days: result.days,
+                    weeks: result.weeks,
+                    months: result.months,
+                })
+            }
+        } else {
+        
+            setModuleData({
+                name: '',
+                description: '',
+            })
+            setTimeData({
+                months: -1,
+                weeks: -1,
+                days: -1,
+            })
+        }
+    }, [isEditOpen, selectedModuleData])
+    
+//  Edit Module Function:-
     const editModule = () => {
         const { days, weeks, months } = timeData
-
-        const totalDays = days + weeks * 7 + months * 28
+        const totalDays = days + (weeks * 7) + (months * 28)
         const totalSeconds = totalDays * 86400
-
         const moduleDto = {
             ...moduleData,
             timeAlloted: totalSeconds,
             isLock: false,
         }
-
-        if (totalSeconds == 0) {
+        if(totalSeconds == 0){
             toast({
                 title: 'Duration cannot be 0',
                 description: 'Please enter a valid duration',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                className: 'text-start capitalize border border-destructive',
             })
-        } else {
+        }else{
             api.put(
                 `/content/editModuleOfBootcamp/${courseData?.id}?moduleId=${moduleId}`,
                 { moduleDto }
@@ -158,8 +167,7 @@ function Page() {
                     toast({
                         title: 'Success',
                         description: 'Module Edited Successfully',
-                        className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+                        className: 'text-start capitalize border border-secondary',
                     })
                     fetchCourseModules()
                     setIsEditOpen(false)
@@ -169,26 +177,22 @@ function Page() {
                         title: 'Error',
                         description: 'Error creating module',
                         className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                            'text-start capitalize border border-destructive',
                     })
                 })
         }
     }
-
     const createModule = () => {
         const { days, weeks, months } = timeData
-
-        const totalDays = days + weeks * 7 + months * 28
+        const totalDays = days + (weeks * 7) + (months * 28)
         const totalSeconds = totalDays * 86400
-
-        if (totalSeconds == 0) {
+        if(totalSeconds == 0){
             toast({
                 title: 'Duration cannot be 0',
                 description: 'Please enter a valid duration',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                className: 'text-start capitalize border border-destructive',
             })
-        } else {
+        }else{
             api.post(`/content/modules/${courseData?.id}?typeId=${typeId}`, {
                 ...moduleData,
                 timeAlloted: totalSeconds,
@@ -197,8 +201,7 @@ function Page() {
                     toast({
                         title: 'Success',
                         description: 'Module Created Successfully',
-                        className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+                        className: 'text-start capitalize border border-secondary',
                     })
                     fetchCourseModules()
                     setIsOpen(false)
@@ -208,12 +211,11 @@ function Page() {
                         title: 'Error',
                         description: 'Error creating module',
                         className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                            'text-start capitalize border border-destructive',
                     })
                 })
         }
     }
-
     const fetchCourseModules = async () => {
         try {
             const response = await api.get(
@@ -225,19 +227,16 @@ function Page() {
             toast({
                 title: 'Error',
                 description: 'Failed to fetch course Modules',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                className: 'text-start capitalize border border-destructive',
             })
         }
     }
-
     //   async
     useEffect(() => {
         if (courseData?.id) {
             fetchCourseModules()
         }
     }, [courseData?.id])
-
     async function handleReorder(newOrderModules: any) {
         newOrderModules = newOrderModules.map((item: any, index: any) => ({
             ...item,
@@ -265,46 +264,43 @@ function Page() {
             toast({
                 title: 'Error',
                 description: 'Error updating module order',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                className: 'text-start capitalize border border-destructive',
             })
         }
     }
-
     const handleReorderModules = async (newOrderModules: any) => {
         handleReorder(newOrderModules)
     }
-
     return (
-        <div className="w-full ">
+        <div className='w-full '>
             {curriculum.length > 0 && (
                 <div className=" w-full flex justify-end pr-4 ">
                     <div>
-                        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                            <DialogTrigger asChild>
-                                <Button className="text-white bg-secondary  ">
-                                    Add Module
-                                </Button>
-                            </DialogTrigger>
-
-                            <DialogOverlay />
-                            <NewModuleDialog
-                                moduleData={moduleData}
-                                timeData={timeData}
-                                createModule={createModule}
-                                handleModuleChange={handleModuleChange}
-                                handleTimeAllotedChange={
-                                    handleTimeAllotedChange
-                                }
-                                handleTypeChange={handleTypeChange}
-                                typeId={typeId}
-                            />
-                        </Dialog>
+                    <Dialog  open={isOpen} onOpenChange={setIsOpen}>
+                        <DialogTrigger asChild>
+                            <Button className="text-white bg-secondary  ">
+                                Add Module
+                            </Button>
+                        
+                        </DialogTrigger>
+    
+                        <DialogOverlay />
+                        <NewModuleDialog
+                            moduleData={moduleData}
+                            timeData={timeData}
+                            createModule={createModule}
+                            handleModuleChange={handleModuleChange}
+                            handleTimeAllotedChange={handleTimeAllotedChange}
+                            handleTypeChange={handleTypeChange}
+                            typeId={typeId}
+                        />
+                    </Dialog>
                     </div>
                 </div>
             )}
-            {isEditOpen && (
-                <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+           {
+                isEditOpen && (
+                    <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
                     <EditModuleDialog
                         editMode={editMode}
                         moduleData={moduleData}
@@ -317,7 +313,8 @@ function Page() {
                         typeId={typeId}
                     />
                 </Dialog>
-            )}
+                )
+           }
             {loading ? (
                 <div className="my-5 flex justify-center items-center">
                     <div className="absolute h-screen">
@@ -330,7 +327,7 @@ function Page() {
                 <div className="flex flex-col items-center justify-center">
                     {curriculum.length > 0 ? (
                         <Reorder.Group
-                            className="lg:w-1/2 w-full"
+                            className="w-1/2"
                             values={curriculum}
                             onReorder={handleReorderModules}
                         >
@@ -393,7 +390,6 @@ function Page() {
                                 width={200}
                                 height={200}
                             />
-
                             <p>
                                 Create new modules for the curriculum on Strapi
                                 CMS
@@ -401,7 +397,7 @@ function Page() {
                             <Dialog>
                                 <DialogTrigger asChild>
                                     <Button className="text-white bg-secondary">
-                                        Add module
+                                        Add module 
                                     </Button>
                                 </DialogTrigger>
                                 <DialogOverlay />
@@ -424,5 +420,4 @@ function Page() {
         </div>
     )
 }
-
 export default Page
