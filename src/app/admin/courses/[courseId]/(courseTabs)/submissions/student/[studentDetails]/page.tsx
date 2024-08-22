@@ -60,7 +60,7 @@ const Page = ({ params }: { params: any }) => {
             </div>
 
             <h1 className="text-start ml-6 font-bold text-xl ">Overview</h1>
-            <OverviewComponent
+            {/* <OverviewComponent
                 totalCodingChallenges={30}
                 correctedCodingChallenges={20}
                 correctedMcqs={10}
@@ -71,7 +71,7 @@ const Page = ({ params }: { params: any }) => {
                 totalScore={100}
                 copyPaste={'None'}
                 tabchanges={0}
-            />
+            /> */}
 
             <h1 className="text-start ml-6 font-bold text-xl ">
                 Coding Challenges

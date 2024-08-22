@@ -1,12 +1,17 @@
 'use client'
-import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
-import MaxWidthWrapper from '@/components/MaxWidthWrapper'
+import React, { useState, useEffect, useCallback } from 'react'
+import Link from 'next/link'
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Spinner } from '@/components/ui/spinner'
 import { toast } from '@/components/ui/use-toast'
+import extensions from '@/app/_components/editor/TiptapExtensions'
+
+import { useEditor } from '@tiptap/react'
 import { api } from '@/utils/axios.config'
-import Link from 'next/link'
-import React, { useState, useEffect, useCallback } from 'react'
+import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
+import MaxWidthWrapper from '@/components/MaxWidthWrapper'
+import TiptapEditor from '@/app/_components/editor/TiptapEditor'
 
 type Props = {}
 
@@ -43,6 +48,11 @@ const Page = ({ params }: any) => {
             isLast: true,
         },
     ]
+    const editor: any = useEditor({
+        extensions,
+        content: '<h1>No Content Added Yet</h1>',
+        editable: false,
+    })
     const getBootcampHandler = useCallback(async () => {
         try {
             const res = await api.get(`/bootcamp/${params.courseId}`)
@@ -53,30 +63,56 @@ const Page = ({ params }: any) => {
     useEffect(() => {
         const fetchIndividualStudentStatus = async () => {
             try {
-                await api
-                    .get(
-                        `/submission/getAssignmentDetailForAUser?chapterId=${params.assignmentData}&userId=${params.individualStatus}`
-                    )
-                    .then((res) => {
-                        setIndividualStudentData(
-                            res.data.data.chapterTrackingDetails[0]
-                        )
-                        setUrl(
-                            res.data.data.chapterTrackingDetails[0].user
-                                .studentAssignmentStatus.projectUrl
-                        )
-                        setAssignmentTItle(res.data.data.title)
-                    })
-            } catch (error) {
+                const res = await api.get(
+                    `/submission/getAssignmentDetailForAUser?chapterId=${params.assignmentData}&userId=${params.individualStatus}`
+                )
+
+                const data = res?.data?.data
+                if (data) {
+                    const chapterTrackingDetails =
+                        data.chapterTrackingDetails?.[0]
+                    const articleContent = data.articleContent?.[0]
+
+                    if (
+                        chapterTrackingDetails &&
+                        articleContent &&
+                        editor &&
+                        editor.commands
+                    ) {
+                        setIndividualStudentData(chapterTrackingDetails)
+                        editor.commands.setContent(articleContent)
+
+                        const projectUrl =
+                            chapterTrackingDetails.user?.studentAssignmentStatus
+                                ?.projectUrl
+                        if (projectUrl) {
+                            setUrl(projectUrl)
+                        }
+
+                        setAssignmentTItle(data.title)
+                    } else {
+                        console.log('Incomplete data received')
+                    }
+                } else {
+                    throw new Error('No data found')
+                }
+            } catch (error: any) {
                 toast({
                     title: 'Error',
-                    description: 'Error fetching in Student Details',
+                    description:
+                        error.message || 'Error fetching Student Details',
                 })
             }
         }
+
         fetchIndividualStudentStatus()
         getBootcampHandler()
-    }, [params.assignmentData, params.individualStatus, getBootcampHandler])
+    }, [
+        params.assignmentData,
+        params.individualStatus,
+        getBootcampHandler,
+        editor,
+    ])
 
     const dateString = individualStudentData?.completedAt
     const date = new Date(dateString?.toString())
@@ -111,7 +147,6 @@ const Page = ({ params }: any) => {
 
     const formattedDate = `${dayOfWeek} ${day} ${month} ${year}`
     // const url = individualStudentData?.user?.studentAssignmentStatus?.projectUrl
-    // console.log(url)
 
     return (
         <>
@@ -154,13 +189,34 @@ const Page = ({ params }: any) => {
                         </div>
                     </div>
                 </div>
-                <h1 className="text-left font-semibold text-[20px]">
-                    Overview
-                </h1>
+                <div>
+                    <h1 className="text-left font-semibold text-[20px]">
+                        Overview
+                    </h1>
+                    <div>
+                        <h1 className="text-left font-semibold">
+                            Title:- {assignmentTitle}
+                        </h1>
+                        <div className="flex flex-col ">
+                            <h1 className="text-left font-semibold">
+                                Assignment Description
+                            </h1>
+                            <div className="w-2/3 ">
+                                {editor && <TiptapEditor editor={editor} />}
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <div className="text-left flex font-semibold gap-x-2">
                     <h1>Assignment Link:-</h1>
-                    <Link href={url}>Project Link</Link>
+                    <Link
+                        target="_blank"
+                        className="hover:text-blue-400 hover:underline "
+                        href={url}
+                    >
+                        Project Link
+                    </Link>
                 </div>
 
                 <div className="my-5 flex flex-col gap-y-3 text-left ">

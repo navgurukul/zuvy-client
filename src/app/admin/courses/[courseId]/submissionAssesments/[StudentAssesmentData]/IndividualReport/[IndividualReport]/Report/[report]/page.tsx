@@ -120,16 +120,21 @@ interface CodingQuestion {
     updatedAt: string | null
     usage: number
     submissions: Submission[]
+    codingOutsourseId: number
 }
 
 const Page = ({ params }: { params: any }) => {
-    const [individualAssesmentData, setIndividualAssesmentData] =
-        useState<StudentAssessment>()
     const [bootcampData, setBootcampData] = useState<any>()
     const [assesmentData, setAssesmentData] = useState<any>()
     const [codingdata, setCodingData] = useState<CodingQuestion[]>([])
-    const { proctoringData, fetchProctoringData } = getProctoringDataStore()
+    const [username, setUsername] = useState<string>('')
+    const [moduleId, setmoduleId] = useState<number>(0)
     const [loading, setLoading] = useState<boolean>(true)
+    const [totalQuestions, setTotalQuestion] = useState({
+        totalCodingQuestion: 0,
+        totalMcqQuestion: 0,
+        totalOpenEnded: 0,
+    })
 
     const crumbs = [
         {
@@ -149,12 +154,12 @@ const Page = ({ params }: { params: any }) => {
             isLast: false,
         },
         {
-            crumb: assesmentData?.title,
+            crumb: `Assesment for Module ${moduleId}`,
             href: `/admin/courses/${params.courseId}/submissionAssesments/${params.StudentAssesmentData}`,
             isLast: false,
         },
         {
-            crumb: individualAssesmentData && individualAssesmentData.user.name,
+            crumb: username,
 
             href: '',
             isLast: true,
@@ -169,15 +174,6 @@ const Page = ({ params }: { params: any }) => {
             console.error('API Error:', error)
         }
     }, [params.courseId])
-    const getIndividualStudentAssesmentDataHandler = useCallback(async () => {
-        await api
-            .get(
-                `/admin/assessment/submission/user_id${params.IndividualReport}?submission_id=${params.report}`
-            )
-            .then((res) => {
-                setIndividualAssesmentData(res.data)
-            })
-    }, [params.IndividualReport, params.report])
 
     const getIndividualCodingDataHandler = useCallback(async () => {
         try {
@@ -186,7 +182,17 @@ const Page = ({ params }: { params: any }) => {
                     `/tracking/assessment/submissionId=${params.report}?studentId=${params.IndividualReport}`
                 )
                 .then((res) => {
-                    setCodingData(res.data.codingSubmission)
+                    setCodingData(res?.data?.PracticeCode)
+                    setUsername(res?.data?.user?.name)
+                    setmoduleId(
+                        res?.data?.submitedOutsourseAssessment?.moduleId
+                    )
+                    setAssesmentData(res?.data)
+                    setTotalQuestion({
+                        totalCodingQuestion: res?.data?.codingQuestionCount,
+                        totalMcqQuestion: res?.data?.mcqQuestionCount,
+                        totalOpenEnded: res?.data?.openEndedQuestionCount,
+                    })
                 })
         } catch (error) {
             toast({
@@ -194,57 +200,28 @@ const Page = ({ params }: { params: any }) => {
                 description: 'Error in fetching the data',
             })
         } finally {
-            setLoading(false)
+            // setLoading(false)
         }
     }, [params])
 
-    const getStudentAssesmentDataHandler = useCallback(async () => {
-        await api
-            .get(
-                `/admin/assessment/students/assessment_id${params.StudentAssesmentData}`
-            )
-            .then((res) => {
-                setAssesmentData(res.data.ModuleAssessment)
-            })
-    }, [params.StudentAssesmentData])
-
     useEffect(() => {
         getBootcampHandler()
-        getIndividualStudentAssesmentDataHandler()
-        getStudentAssesmentDataHandler()
         getIndividualCodingDataHandler()
-        fetchProctoringData(params.report, params.IndividualReport)
-    }, [
-        getIndividualStudentAssesmentDataHandler,
-        getBootcampHandler,
-        getStudentAssesmentDataHandler,
-        getIndividualCodingDataHandler,
-        params,
-        fetchProctoringData,
-    ])
+    }, [getBootcampHandler, getIndividualCodingDataHandler, params])
 
-    const newDatafuntion = (data: StudentAssessment | undefined) => {
-        if (data) {
-            return {
-                openEndedSubmission: data.openEndedSubmission,
-                quizSubmission: data.quizSubmission,
-                codingSubmission: data.PracticeCode,
-            }
-        }
-        return null
+    const timestamp = assesmentData?.submitedAt
+    const date = new Date(timestamp)
+    const options2: any = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
     }
+    const formattedDate = date.toLocaleDateString('en-US', options2)
+    console.log(assesmentData)
 
-    const newData: newDataType = newDatafuntion(individualAssesmentData)
-
-    const quizScore = proctoringData?.quizSubmission?.quizScore || 0
-    const totalQuizScore = proctoringData?.quizSubmission?.totalQuizScore || 0
-    const needCodingScore = proctoringData?.PracticeCode?.needCodingScore || 0
-    const totalCodingScore = proctoringData?.PracticeCode?.totalCodingScore || 0
-    const openTotalAttemted =
-        proctoringData?.openEndedSubmission?.openTotalAttemted || 0
     return (
         <>
-            {individualAssesmentData ? (
+            {loading ? (
                 <BreadcrumbComponent crumbs={crumbs} />
             ) : (
                 <Skeleton className="h-4 w-4/6" />
@@ -252,8 +229,8 @@ const Page = ({ params }: { params: any }) => {
             <MaxWidthWrapper className="p-4">
                 <div className="flex flex-col relative items-start">
                     <div className="flex items-center">
-                        {individualAssesmentData ? (
-                            <Avatar className="w-5 h-5">
+                        {loading ? (
+                            <Avatar className="w-10 h-10">
                                 <AvatarImage
                                     src="https://github.com/shadcn.png"
                                     alt="@shadcn"
@@ -264,8 +241,31 @@ const Page = ({ params }: { params: any }) => {
                             <Skeleton className="h-6 w-6 rounded-full" />
                         )}
                         <h1 className="text-start flex ml-6 font-bold text-xl ">
-                            {individualAssesmentData ? (
-                                individualAssesmentData.user.name
+                            {codingdata ? (
+                                <div>
+                                    <div className="flex gap-x-4 ">
+                                        <span>Individual Report:- </span>
+                                        <span>{username} </span>
+                                    </div>
+                                    <div className="flex gap-x-4 ">
+                                        <span>Status:- </span>
+                                        <span className="flex flex-row">
+                                            {assesmentData?.isPassed ? (
+                                                <h1 className="text-secondary">
+                                                    Passed
+                                                </h1>
+                                            ) : (
+                                                <h1 className="text-red-500">
+                                                    Failed
+                                                </h1>
+                                            )}
+                                        </span>
+                                    </div>
+                                    <div className="flex gap-x-4 ">
+                                        <span>Submitted At :-</span>
+                                        <span>{formattedDate} </span>
+                                    </div>
+                                </div>
                             ) : (
                                 <div className="flex items-center space-x-4">
                                     <div className="space-y-2">
@@ -273,63 +273,46 @@ const Page = ({ params }: { params: any }) => {
                                     </div>
                                 </div>
                             )}
-
-                            {individualAssesmentData ? (
-                                '-Individual Report'
-                            ) : (
-                                <Skeleton className="h-4 w-[100px]" />
-                            )}
                         </h1>
                     </div>
-                    <h1 className="flex  mb-10 text-gray-600">
-                        {individualAssesmentData ? (
-                            <p>
-                                Submitted on:{' '}
-                                {formatDate(individualAssesmentData.submitedAt)}
-                            </p>
-                        ) : (
-                            <Skeleton className="h-4 w-[400px]" />
-                        )}
-                    </h1>
                 </div>
 
-                <h1 className="text-start font-bold text-xl ">Overview</h1>
-                {individualAssesmentData ? (
+                <h1 className="text-start font-bold text-xl mt-4">Overview</h1>
+                {codingdata ? (
                     <OverviewComponent
-                        totalCodingChallenges={totalCodingScore}
-                        correctedCodingChallenges={needCodingScore}
-                        correctedMcqs={quizScore}
-                        totalCorrectedMcqs={totalQuizScore}
+                        totalCodingChallenges={
+                            assesmentData?.attemptedCodingQuestions
+                        }
+                        correctedCodingChallenges={9}
+                        correctedMcqs={9}
+                        totalCorrectedMcqs={
+                            assesmentData?.attemptedMCQQuestions
+                        }
                         openEndedCorrect={1}
-                        totalOpenEnded={openTotalAttemted}
-                        score={50}
+                        totalOpenEnded={
+                            assesmentData?.attemptedOpenEndedQuestions
+                        }
+                        score={assesmentData?.percentage}
                         totalScore={100}
-                        copyPaste={individualAssesmentData.copyPaste}
-                        tabchanges={individualAssesmentData.tabChange}
+                        copyPaste={assesmentData?.copyPaste}
+                        tabchanges={assesmentData?.tabChange}
+                        embeddedSearch={assesmentData?.embeddedGoogleSearch}
                     />
                 ) : (
                     <div className="flex gap-x-20  ">
                         <div>
                             <Skeleton className="h-[175px] w-[700px] rounded-xl" />
-                            <div className="space-y-2 ">
-                                {/* <Skeleton className="h-4 w-[500px]" /> */}
-                            </div>
+                            <div className="space-y-2 "></div>
                         </div>
                         <div>
                             <Skeleton className="h-[175px] w-[700px] rounded-xl" />
-                            <div className="space-y-2 ">
-                                {/* <Skeleton className="h-4 w-[500px]" /> */}
-                            </div>
+                            <div className="space-y-2 "></div>
                         </div>
                     </div>
                 )}
 
-                {/* <h1 className="text-start  font-bold text-xl ">
-                Coding Challenges
-            </h1>
-            <IndividualStudentAssesment /> */}
                 <div className="grid grid-cols-1   gap-20 mt-4 md:mt-8 md:grid-cols-2">
-                    {newData ? (
+                    {codingdata ? (
                         <>
                             <div className="w-full">
                                 <h1 className="text-left font-semibold ">
@@ -344,8 +327,7 @@ const Page = ({ params }: { params: any }) => {
                                             params={params}
                                             type={'codingSubmission'}
                                             codingOutsourseId={
-                                                data.submissions[0]
-                                                    ?.codingOutsourseId
+                                                data.codingOutsourseId
                                             }
                                         />
                                     ))
@@ -380,21 +362,6 @@ const Page = ({ params }: { params: any }) => {
                             </div>
                         </>
                     ) : (
-                        // Object.keys(newData).map((key: string, index) => (
-                        //     <div key={index}>
-                        //         <h2 className="text-md capitalize text-start mb-3 font-semibold text-gray-800  dark:text-white ">
-                        //             {key}
-                        //         </h2>
-                        //         {newData[key].map((data: newDataType) => (
-                        //             <div key={key}>
-                        //                 <IndividualStudentAssesment
-                        //                     data={data}
-                        //                     type={key}
-                        //                 />
-                        //             </div>
-                        //         ))}
-                        //     </div>
-                        // ))
                         <div className="absolute w-full flex justify-start items-center">
                             <div className="grid grid-cols-1   gap-20 mt-4 md:mt-8 md:grid-cols-2 ">
                                 <div>
@@ -425,55 +392,6 @@ const Page = ({ params }: { params: any }) => {
                         </div>
                     )}
                 </div>
-
-                {/* {individualAssesmentData ? (
-                <div>
-                    <h2 className="text-start text-[20px] font-semibold">
-                        Open Ended Submission
-                    </h2>
-                    <div className="grid grid-cols-1  gap-20 mt-4 md:mt-8 md:grid-cols-2">
-                        {individualAssesmentData.openEndedSubmission.map(
-                            (submission: any) => (
-                                <div className="" key={submission.id}>
-                                    <IndividualStudentAssesment
-                                        data={submission}
-                                    />
-                                </div>
-                            )
-                        )}
-                    </div>
-
-                    <h2 className="text-start text-[20px] font-semibold">
-                        Quiz Submission
-                    </h2>
-                    {individualAssesmentData.quizSubmission.map(
-                        (submission: any) => (
-                            <div className="" key={submission.id}>
-                                <IndividualStudentAssesment data={submission} />
-                            </div>
-                        )
-                    )}
-
-                    <h2 className="text-start text-[20px] font-semibold">
-                        Coding Submission
-                    </h2>
-                    {individualAssesmentData.codingSubmission.length === 0 ? (
-                        <p>No coding submissions</p>
-                    ) : (
-                        individualAssesmentData.codingSubmission.map(
-                            (submission: any, index: number) => (
-                                <div className="" key={submission.id}>
-                                    <IndividualStudentAssesment
-                                        data={submission}
-                                    />
-                                </div>
-                            )
-                        )
-                    )}
-                </div>
-            ) : (
-                <Spinner />
-            )} */}
             </MaxWidthWrapper>
         </>
     )

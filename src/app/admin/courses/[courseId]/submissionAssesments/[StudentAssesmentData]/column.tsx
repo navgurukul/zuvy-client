@@ -81,23 +81,43 @@ export const columns: ColumnDef<Task>[] = [
     },
 
     {
-        accessorKey: 'Status',
+        accessorKey: 'isPassed',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Status" />
+            <DataTableColumnHeader column={column} title="Qualified" />
         ),
         cell: ({ row }) => {
             // const isChecked = row.original.isChecked
-            const isSubmitted = true
+            const isQualified = row.original.isPassed
             return (
                 <div className="flex space-x-2">
                     <div className="max-w-[500px] truncate flex items-center gap-x-2 font-medium">
-                        {isSubmitted ? (
+                        {isQualified ? (
                             <div className="bg-secondary h-3 w-3 rounded-full" />
                         ) : (
                             <div className="bg-red-600 h-3 w-3 rounded-full " />
                         )}
-                        {isSubmitted ? ' Submitted' : ' Not Submitted'}
+                        {isQualified ? ' Passed' : 'Failed'}
                     </div>
+                </div>
+            )
+        },
+    },
+    {
+        accessorKey: 'percentage',
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                column={column}
+                title="Percentage Obtained"
+            />
+        ),
+        cell: ({ row }) => {
+            // const isChecked = row.original.isChecked
+            const percentage = row.original.percentage
+            return (
+                <div className="flex items-center">
+                    <span className=" mx-6 font-semibold w-full flex ">
+                        {percentage}%
+                    </span>
                 </div>
             )
         },

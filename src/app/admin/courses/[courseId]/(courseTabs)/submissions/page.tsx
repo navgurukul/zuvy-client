@@ -6,22 +6,18 @@ import { Button } from '@/components/ui/button'
 import { ArrowDownToLine, ChevronRight, Search } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
 
-import PraticeProblems from '../../_components/PraticeProblems'
-import Assesments from '../../_components/Assesments'
-import Projects from '../../_components/Projects'
 import { api } from '@/utils/axios.config'
 import PracticeProblems from '../../_components/PraticeProblems'
 import Link from 'next/link'
-import AssesmentComponent from '../../_components/AssesmentComponent'
 import { Spinner } from '@/components/ui/spinner'
 import FormComponent from '../../_components/FormComponent'
 import Assignments from './components/assignments'
+import AssesmentSubmissionComponent from './components/AssesmentSubmission'
 
 const Page = ({ params }: { params: any }) => {
     const [activeTab, setActiveTab] = useState('practice')
     const [submissions, setSubmissions] = useState<any[]>([])
     const [totalStudents, setTotalStudents] = useState(0)
-    const [assesments, setAssesments] = useState<any>()
     const [projectData, setProjectData] = useState<any>([])
     const [formData, setFormData] = useState<any>([])
     const [loading, setLoading] = useState(true)
@@ -42,23 +38,6 @@ const Page = ({ params }: { params: any }) => {
             toast({
                 title: 'Error',
                 description: 'Error fetching submissions:',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-            })
-        }
-    }, [params.courseId])
-
-    const getAssessments = useCallback(async () => {
-        try {
-            const res = await api.get(
-                `/admin/bootcampAssessment/bootcamp_id${params.courseId}`
-            )
-            setAssesments(res.data)
-        } catch (error) {
-            // console.error('Error fetching assessments:', error)
-            toast({
-                title: 'Error',
-                description: 'Error fetching assessments:',
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
@@ -103,11 +82,10 @@ const Page = ({ params }: { params: any }) => {
     useEffect(() => {
         if (params.courseId) {
             getSubmissions()
-            getAssessments()
             getProjectsData()
             getFormData()
         }
-    }, [getSubmissions, getAssessments, params.courseId, getProjectsData])
+    }, [getSubmissions, params.courseId, getProjectsData, getFormData])
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -206,79 +184,36 @@ const Page = ({ params }: { params: any }) => {
             </div>
             <div className="w-full">
                 {activeTab === 'practice' &&
-                    (submissions.length > 0 ? (
-                        submissions.map(({ id, name, moduleChapterData }) =>
-                            moduleChapterData.length > 0 ? (
-                                <PracticeProblems
-                                    key={id}
-                                    courseId={params.courseId}
-                                    name={name}
-                                    totalStudents={totalStudents}
-                                    submission={moduleChapterData}
-                                    moduleId={id}
-                                />
-                            ) : (
-                                <div
-                                    className="text-left font-semibold my-5 "
-                                    key={id}
-                                >
-                                    No practice problems found for {name}
+                    (() => {
+                        const allEmpty = submissions.every(
+                            ({ moduleChapterData }) =>
+                                moduleChapterData.length === 0
+                        )
+
+                        if (allEmpty) {
+                            return (
+                                <div className="text-left font-semibold my-5">
+                                    No practice problems found.
                                 </div>
                             )
-                        )
-                    ) : (
-                        <div>No submissions found</div>
-                    ))}
-                {activeTab === 'assessments' && (
-                    <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2">
-                        {assesments ? (
-                            Object.keys(assesments).length > 0 ? (
-                                Object.keys(assesments).map(
-                                    (key) =>
-                                        key !== 'totalStudents' && (
-                                            <div key={key}>
-                                                <h2 className="text-md text-start mb-3 font-semibold text-gray-800 dark:text-white">
-                                                    Module - {key}
-                                                </h2>
-                                                {assesments[key].map(
-                                                    (assessment: any) => (
-                                                        <AssesmentComponent
-                                                            key={assessment.id}
-                                                            id={assessment.id}
-                                                            title={
-                                                                assessment.title
-                                                            }
-                                                            codingChallenges={
-                                                                assessment.totalCodingQuestions
-                                                            }
-                                                            mcq={
-                                                                assessment.totalQuizzes
-                                                            }
-                                                            openEnded={
-                                                                assessment.totalOpenEndedQuestions
-                                                            }
-                                                            totalSubmissions={
-                                                                assesments.totalStudents
-                                                            }
-                                                            studentsSubmitted={
-                                                                assessment.totalSubmitedAssessments
-                                                            }
-                                                            bootcampId={
-                                                                params.courseId
-                                                            }
-                                                        />
-                                                    )
-                                                )}
-                                            </div>
-                                        )
-                                )
-                            ) : (
-                                <div>No assessments found</div>
+                        } else {
+                            return submissions.map(
+                                ({ id, name, moduleChapterData }) =>
+                                    moduleChapterData.length > 0 ? (
+                                        <PracticeProblems
+                                            key={id}
+                                            courseId={params.courseId}
+                                            name={name}
+                                            totalStudents={totalStudents}
+                                            submission={moduleChapterData}
+                                            moduleId={id}
+                                        />
+                                    ) : null
                             )
-                        ) : (
-                            <div>No assessments found</div>
-                        )}
-                    </div>
+                        }
+                    })()}
+                {activeTab === 'assessments' && (
+                    <AssesmentSubmissionComponent courseId={params.courseId} />
                 )}
                 {activeTab === 'projects' &&
                     (projectData.length > 0 ? (
@@ -331,7 +266,7 @@ const Page = ({ params }: { params: any }) => {
                     ))}
                 {activeTab === 'form' && (
                     <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2 lg:grid-cols-3">
-                        {formData.map((item: any) => {
+                        {formData?.map((item: any) => {
                             return item.moduleChapterData.map(
                                 (data: any, index: any) => (
                                     <FormComponent

@@ -23,6 +23,8 @@ export const taskSchema = z.object({
     moduleId: z.number(),
     chapterId: z.number(),
     emailId: z.string(),
+    isPassed: z.boolean(),
+    percentage: z.number(),
 })
 
 export const testCaseSchema = z.object({

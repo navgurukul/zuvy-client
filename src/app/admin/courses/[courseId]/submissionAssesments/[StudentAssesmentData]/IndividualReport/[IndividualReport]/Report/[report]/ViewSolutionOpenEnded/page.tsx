@@ -77,7 +77,7 @@ const Page = ({ params }: { params: paramsType }) => {
             isLast: false,
         },
         {
-            crumb: individualAssesmentData && individualAssesmentData.user.name,
+            crumb: proctoringData?.user?.name,
             href: `/admin/courses/${params.courseId}/submissionAssesments/${params.StudentAssesmentData}/IndividualReport/${params.IndividualReport}/Report/${params.report}`,
             isLast: false,
         },
@@ -94,15 +94,7 @@ const Page = ({ params }: { params: paramsType }) => {
             console.error('API Error:', error)
         }
     }, [params.courseId])
-    const getIndividualStudentAssesmentDataHandler = useCallback(async () => {
-        await api
-            .get(
-                `/admin/assessment/submission/user_id${params.IndividualReport}?submission_id=${params.report}`
-            )
-            .then((res) => {
-                setIndividualAssesmentData(res.data)
-            })
-    }, [params.IndividualReport, params.report])
+
     const getStudentAssesmentDataHandler = useCallback(async () => {
         await api
             .get(
@@ -134,7 +126,6 @@ const Page = ({ params }: { params: paramsType }) => {
     useEffect(() => {
         fetchOpenEndedQuestionsDetails()
         fetchProctoringData(params.report, params.IndividualReport)
-        getIndividualStudentAssesmentDataHandler()
         getBootcampHandler()
         getStudentAssesmentDataHandler()
     }, [
@@ -142,7 +133,6 @@ const Page = ({ params }: { params: paramsType }) => {
         fetchProctoringData,
         params,
         getBootcampHandler,
-        getIndividualStudentAssesmentDataHandler,
         getStudentAssesmentDataHandler,
     ])
 
@@ -189,7 +179,7 @@ const Page = ({ params }: { params: paramsType }) => {
                 <h1 className="text-left font-semibold text-[20px]">
                     Overview
                 </h1>
-                <div className="lg:flex h-[150px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md w-2/5 ">
+                {/* <div className="lg:flex h-[150px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md w-2/5 ">
                     <div className="flex flex-col w-full justify-between   ">
                         <div
                             className={`flex items-center justify-between p-4 rounded-md ${cheatingClass} `}
@@ -230,7 +220,7 @@ const Page = ({ params }: { params: paramsType }) => {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> */}
                 <div className="my-5 flex flex-col gap-y-3 text-left ">
                     <h1 className="text-left font-semibold">Student Answers</h1>
                     {getquestionAnswerData.map(

@@ -12,9 +12,9 @@ import { Skeleton } from '@/components/ui/skeleton'
 type Props = {}
 
 const Page = ({ params }: any) => {
-    const [assesmentData, setAssesmentData] = useState<any>()
+    const [assesmentData, setAssessmentData] = useState<any>()
 
-    const [dataTableAssesment, setDataTableAssesments] = useState<any>([])
+    const [dataTableAssesment, setDataTableAssessments] = useState<any>([])
     const [bootcampData, setBootcampData] = useState<any>()
 
     const crumbs = [
@@ -47,32 +47,45 @@ const Page = ({ params }: any) => {
             console.error('API Error:', error)
         }
     }, [params.courseId])
+
     const getStudentAssesmentDataHandler = useCallback(async () => {
-        await api
-            .get(
+        try {
+            const res = await api.get(
                 `/admin/assessment/students/assessment_id${params.StudentAssesmentData}`
             )
-            .then((res) => {
-                setAssesmentData(res.data.ModuleAssessment)
-                const data = res.data
-                data.submitedOutsourseAssessments =
-                    data.submitedOutsourseAssessments.map((assessment: any) => {
-                        return {
-                            ...assessment,
-                            bootcampId: data.bootcampId,
-                            newId: data.id,
-                        }
-                    })
-                setDataTableAssesments(data.submitedOutsourseAssessments)
-            })
+            const data = res.data
+            setAssessmentData(data.ModuleAssessment)
+
+            const updatedAssessments = data.submitedOutsourseAssessments.map(
+                (assessment: any) => ({
+                    ...assessment,
+                    bootcampId: data.bootcampId,
+                    newId: data.id,
+                })
+            )
+            setDataTableAssessments(updatedAssessments)
+        } catch (error) {
+            console.error('API Error:', error)
+        }
     }, [params.StudentAssesmentData])
 
     useEffect(() => {
-        getStudentAssesmentDataHandler()
-        getBootcampHandler()
+        const fetchData = async () => {
+            try {
+                await Promise.all([
+                    getStudentAssesmentDataHandler(),
+                    getBootcampHandler(),
+                ])
+            } catch (error) {
+                console.error('Error in fetching data:', error)
+            }
+        }
+
+        fetchData()
     }, [getStudentAssesmentDataHandler, getBootcampHandler])
 
-    // console.log(dataTableAssesment)
+    console.log(dataTableAssesment)
+
     return (
         <>
             {assesmentData ? (

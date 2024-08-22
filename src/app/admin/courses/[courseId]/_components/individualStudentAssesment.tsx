@@ -1,10 +1,12 @@
 import React from 'react'
-import IndividualStudent from './IndividualStudent'
 import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { getAssesmentBackgroundColorClass } from '@/lib/utils'
-import { color } from 'framer-motion'
+import {
+    cn,
+    difficultyColor,
+    getAssesmentBackgroundColorClass,
+} from '@/lib/utils'
 
 type Props = {}
 
@@ -16,7 +18,6 @@ const IndividualStudentAssesment = ({
 }: any) => {
     const { courseId, StudentAssesmentData, IndividualReport, report } = params
     const color = getAssesmentBackgroundColorClass(25, 5)
-    console.log(data)
     const renderQuestion = () => {
         switch (type) {
             case 'openEndedSubmission':
@@ -32,7 +33,7 @@ const IndividualStudentAssesment = ({
             case 'codingSubmission':
                 return {
                     title: 'Coding Questions',
-                    link: `/admin/courses/${courseId}/submissionAssesments/${StudentAssesmentData}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionCodingQuestion/${codingOutsourseId}`,
+                    link: `/admin/courses/${courseId}/submissionAssesments/${StudentAssesmentData}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionCodingQuestion/${codingOutsourseId}?id=${data?.questionId}`,
                 }
             default:
                 return {
@@ -44,31 +45,72 @@ const IndividualStudentAssesment = ({
     const questionInfo = renderQuestion()
 
     return (
-        <div className="lg:flex h-[200px] my-3 p-3 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md ">
-            <div className="flex flex-col w-full justify-between   ">
-                <div className="flex items-start flex-col p-4 gap-y-7 justify-betweenrounded-md">
-                    <h1 className="text-[20px] capitalize text-start font-semibold text-gray-600  dark:text-white ">
+        <div
+            className={`flex flex-col h-auto lg:h-[220px] p-3 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md overflow-hidden mt-3 ${
+                type === 'quizSubmission' || type === 'openEndedSubmission'
+                    ? 'w-4/5'
+                    : 'w-full'
+            }`}
+        >
+            <div className="flex flex-col w-full h-full justify-between relative">
+                <div className="absolute top-3 right-3">
+                    <Button variant={'ghost'} className="w-full lg:w-auto">
+                        <Link
+                            className="text-secondary text-md flex items-center w-full truncate"
+                            href={questionInfo.link}
+                        >
+                            View Solution
+                            <ChevronRight size={20} className="ml-1" />
+                        </Link>
+                    </Button>
+                </div>
+                <div className="flex flex-col p-4 gap-y-4 lg:gap-y-7 overflow-hidden">
+                    <h1 className="text-[18px] md:text-[20px] capitalize text-start font-semibold text-gray-600 dark:text-white truncate w-full">
+                        Title :-{' '}
                         {type === 'codingSubmission'
-                            ? data.title
+                            ? data.questionDetail.title
                             : questionInfo.title}
                     </h1>
-                    <div className="flex items-center gap-x-2">
-                        {/* <div
-                            className={`w-2 h-2 rounded-full flex items-center justify-center cursor-pointer ${color}`}
-                        ></div> */}
-                        {/* <h1>Score: 2/25</h1> */}
+                    <div className="flex flex-col gap-3 md:gap-4 lg:gap-5 overflow-hidden">
+                        {type === 'codingSubmission' && (
+                            <div className="flex flex-col gap-3 md:gap-4 lg:gap-5 w-full">
+                                <div className="flex font-semibold gap-2 flex-wrap overflow-hidden">
+                                    <h1>Description:</h1>
+                                    <h1 className="truncate">
+                                        {data.questionDetail.description}
+                                    </h1>
+                                </div>
+                                <div className="flex font-semibold gap-2 flex-wrap overflow-hidden">
+                                    <h1>Difficulty:</h1>
+                                    <h1
+                                        className={cn(
+                                            `font-semibold text-secondary`,
+                                            difficultyColor(
+                                                data.questionDetail.difficulty
+                                            )
+                                        )}
+                                    >
+                                        {data.questionDetail.difficulty}
+                                    </h1>
+                                </div>
+                                <div className="flex font-semibold gap-2 flex-wrap overflow-hidden">
+                                    <h1>Submission Status:</h1>
+                                    <h1
+                                        className={cn(
+                                            `font-semibold ${
+                                                data.status === 'Accepted'
+                                                    ? 'text-secondary'
+                                                    : 'text-destructive'
+                                            }`
+                                        )}
+                                    >
+                                        {data.status}
+                                    </h1>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
-            </div>
-            <div className="flex justify-end items-end">
-                <Button variant={'ghost'}>
-                    <Link
-                        className="text-secondary text-md flex items-center "
-                        href={questionInfo.link}
-                    >
-                        View Solution <ChevronRight size={20} />
-                    </Link>
-                </Button>
             </div>
         </div>
     )
