@@ -221,104 +221,144 @@ function Schedule({ className, ...props }: ScheduleProps) {
 
             {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */}
 
-            {courseStarted && (
+            {(submissionMessage || courseStarted) && (
                 <div className="flex flex-col flex-start mt-6">
                     <h1 className="text-xl p-1 text-start font-bold mb-4">
                         Start From Where You Left Off
                     </h1>
-                    <div className="hidden lg:flex flex-row justify-between gap-6">
-                        <div className="flex flex-col">
-                            <div className="lg:w-[860px]">
-                                <Card className="w-full mb-3 border-none p-5 shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F]">
-                                    <div className="flex flex-row justify-between items-center gap-6">
-                                        <div>
-                                            <div className="flex flex-row gap-3">
-                                                <BookOpenText className="hidden sm:block mt-2" />
-                                                <h1 className="text-md mt-2 text-start font-bold">
-                                                    {
-                                                        resumeCourse.newChapter
-                                                            ?.title
-                                                    }
-                                                </h1>
+                    {courseStarted ? (
+                        <>
+                            <div className="hidden lg:flex flex-row justify-between gap-6">
+                                <div className="flex flex-col">
+                                    <div className="lg:w-[860px]">
+                                        <Card className="w-full mb-3 border-none p-5 shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F]">
+                                            <div className="flex flex-row justify-between items-center gap-6">
+                                                <div>
+                                                    <div className="flex flex-row gap-3">
+                                                        <BookOpenText className="hidden sm:block mt-2" />
+                                                        <h1
+                                                            className={`${
+                                                                resumeCourse
+                                                                    .newChapter
+                                                                    ?.title
+                                                                    ? 'text-md'
+                                                                    : 'text-lg text-destructive'
+                                                            } mt-2 text-start font-bold`}
+                                                        >
+                                                            {resumeCourse
+                                                                .newChapter
+                                                                ?.title ||
+                                                                resumeCourse.newChapter}
+                                                        </h1>
+                                                    </div>
+                                                    <div className="flex flex-row gap-4">
+                                                        <p className="text-md text-start mt-3 mb-2 ">
+                                                            {
+                                                                resumeCourse?.bootcampName
+                                                            }
+                                                        </p>
+                                                        <span className="w-[5px] h-[5px] bg-gray-500 rounded-full self-center"></span>
+                                                        <p className="text-md text-start mt-3 mb-2 ">
+                                                            {
+                                                                resumeCourse?.moduleName
+                                                            }
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex item-center text-end">
+                                                    <Button
+                                                        variant={'ghost'}
+                                                        className="text-lg font-bold"
+                                                    >
+                                                        <Link
+                                                            className="gap-3 flex items-center text-secondary"
+                                                            // href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`}
+                                                            href={{
+                                                                pathname: `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`,
+                                                                query: {
+                                                                    nextChapterId,
+                                                                },
+                                                            }}
+                                                        >
+                                                            <p>
+                                                                Resume Learning
+                                                            </p>
+                                                            <ChevronRight
+                                                                size={15}
+                                                            />
+                                                        </Link>
+                                                    </Button>
+                                                </div>
                                             </div>
-                                            <div className="flex flex-row gap-4">
-                                                <p className="text-md text-start mt-3 mb-2 ">
-                                                    {resumeCourse?.bootcampName}
-                                                </p>
-                                                <span className="w-[5px] h-[5px] bg-gray-500 rounded-full self-center"></span>
-                                                <p className="text-md text-start mt-3 mb-2 ">
-                                                    {resumeCourse?.moduleName}
-                                                </p>
+                                        </Card>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="lg:hidden flex flex-col justify-between gap-6">
+                                <div className="flex flex-col">
+                                    <div className="w-full">
+                                        <Card className="w-full mb-3 border-none p-5 shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F]">
+                                            <div>
+                                                <div className="flex flex-row gap-3">
+                                                    <BookOpenText className="mt-2" />
+                                                    <h1
+                                                        className={`${
+                                                            resumeCourse
+                                                                .newChapter
+                                                                ?.title
+                                                                ? 'text-md'
+                                                                : 'text-lg text-destructive'
+                                                        } mt-2 text-start font-bold`}
+                                                    >
+                                                        {resumeCourse.newChapter
+                                                            ?.title ||
+                                                            resumeCourse.newChapter}
+                                                    </h1>
+                                                </div>
+                                                <div className="flex flex-row">
+                                                    <p className="text-md text-start mt-3 mb-2 ">
+                                                        {
+                                                            resumeCourse?.bootcampName
+                                                        }
+                                                        &nbsp;-&nbsp;
+                                                        {
+                                                            resumeCourse?.moduleName
+                                                        }
+                                                    </p>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div className="flex item-center text-end">
-                                            <Button
-                                                variant={'ghost'}
-                                                className="text-lg font-bold"
-                                            >
-                                                <Link
-                                                    className="gap-3 flex items-center text-secondary"
-                                                    // href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`}
-                                                    href={{
-                                                        pathname: `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`,
-                                                        query: {
-                                                            nextChapterId,
-                                                        },
-                                                    }}
+                                            <div className="text-end">
+                                                <Button
+                                                    variant={'ghost'}
+                                                    className="text-lg font-bold"
                                                 >
-                                                    <p>Resume Learning</p>
-                                                    <ChevronRight size={15} />
-                                                </Link>
-                                            </Button>
-                                        </div>
+                                                    <Link
+                                                        className="gap-3 flex items-center text-secondary"
+                                                        // href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`}
+                                                        href={{
+                                                            pathname: `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`,
+                                                            query: {
+                                                                nextChapterId,
+                                                            },
+                                                        }}
+                                                    >
+                                                        <p>Resume Learning</p>
+                                                        <ChevronRight
+                                                            size={15}
+                                                        />
+                                                    </Link>
+                                                </Button>
+                                            </div>
+                                        </Card>
                                     </div>
-                                </Card>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    <div className="lg:hidden flex flex-col justify-between gap-6">
-                        <div className="flex flex-col">
-                            <div className="w-full">
-                                <Card className="w-full mb-3 border-none p-5 shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F]">
-                                    <div>
-                                        <div className="flex flex-row gap-3">
-                                            <BookOpenText className="mt-2" />
-                                            <h1 className="text-md mt-2 text-start font-bold">
-                                                {resumeCourse.newChapter?.title}
-                                            </h1>
-                                        </div>
-                                        <div className="flex flex-row">
-                                            <p className="text-md text-start mt-3 mb-2 ">
-                                                {resumeCourse?.bootcampName}
-                                                &nbsp;-&nbsp;
-                                                {resumeCourse?.moduleName}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="text-end">
-                                        <Button
-                                            variant={'ghost'}
-                                            className="text-lg font-bold"
-                                        >
-                                            <Link
-                                                className="gap-3 flex items-center text-secondary"
-                                                // href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`}
-                                                href={{
-                                                    pathname: `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`,
-                                                    query: {
-                                                        nextChapterId,
-                                                    },
-                                                }}
-                                            >
-                                                <p>Resume Learning</p>
-                                                <ChevronRight size={15} />
-                                            </Link>
-                                        </Button>
-                                    </div>
-                                </Card>
-                            </div>
-                        </div>
-                    </div>
+                        </>
+                    ) : (
+                        <h1 className="text-lg p-1 text-start font-semiBold text-destructive mb-4">
+                            {submissionMessage}
+                        </h1>
+                    )}
                 </div>
             )}
 
