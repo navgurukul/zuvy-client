@@ -47,6 +47,7 @@ type Props = {
     chapterId: number
     bootcampId: number
     content: any
+    completeChapter: () => void
 }
 
 const FeedbackForm = (props: Props) => {
@@ -133,6 +134,7 @@ const FeedbackForm = (props: Props) => {
                 `/tracking/updateChapterStatus/${props.bootcampId}/${props.moduleId}?chapterId=${props.chapterId}`,
                 transformedData
             )
+            props.completeChapter()
             toast({
                 title: res.data.status,
                 description: 'Form has been submitted successfully!',
