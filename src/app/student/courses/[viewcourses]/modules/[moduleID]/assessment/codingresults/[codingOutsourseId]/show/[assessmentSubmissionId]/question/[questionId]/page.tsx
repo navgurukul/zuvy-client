@@ -8,6 +8,8 @@ import { ChevronLeft } from 'lucide-react'
 import { ScrollBar } from '@/components/ui/scroll-area'
 import { ScrollArea } from '@radix-ui/react-scroll-area'
 
+import Editor from '@monaco-editor/react'
+
 const decodeBase64 = (data: string) => {
     if (!data) return ''
     return Buffer.from(data, 'base64').toString('utf-8')
@@ -67,13 +69,25 @@ const CodingSubmissionPage = ({ params }: { params: any }) => {
             </div>
             <div className="w-full mx-auto p-4 flex justify-center">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-7xl">
-                   <div className="bg-white shadow-lg rounded-lg p-6">
+                    <div className="bg-white shadow-lg rounded-lg p-6">
                         <h2 className="text-xl font-bold mb-4 text-gray-800">
                             Submitted Code
                         </h2>
-                        <pre className="bg-gray-900 text-white p-4 rounded-lg overflow-y-auto text-sm max-h-[400px]">
-                            {decodeBase64(sourceCode)}     
-                        </pre>
+  
+                        <div>
+                            <Editor
+                                height="52vh"
+                                width={'85vh'}
+                                theme="vs-dark"
+                                value={decodeBase64(sourceCode)}
+                                className={`p-6 `}
+                                
+                                options={{
+                                    readOnly: true,
+                                    cursorStyle: 'line-thin'                                
+                                }}
+                            />
+                        </div>
                     </div>
                     <div className="bg-white shadow-lg rounded-lg p-6">
                         <h3 className="text-xl font-semibold mb-4 text-gray-800">
