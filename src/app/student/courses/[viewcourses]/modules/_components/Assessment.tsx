@@ -64,19 +64,19 @@ const Assessment = ({
                     <h1 className="text-2xl font-bold text-gray-800">{assessmentShortInfo?.ModuleAssessment?.title}</h1>
                     <div className="flex gap-6 justify-between text-center">
                         <div className="p-4 bg-white rounded-lg shadow-md w-1/3">
-                            <h2 className="text-lg font-semibold text-indigo-600">
+                            <h2 className="text-lg font-semibold text-secondary">
                                 {assessmentShortInfo?.totalCodingQuestions}
                             </h2>
                             <p className="text-sm text-gray-600">Coding</p>
                         </div>
                         <div className="p-4 bg-white rounded-lg shadow-md w-1/3">
-                            <h2 className="text-lg font-semibold text-indigo-600">
+                            <h2 className="text-lg font-semibold text-secondary">
                                 {assessmentShortInfo?.totalQuizzes}
                             </h2>
                             <p className="text-sm text-gray-600">MCQs</p>
                         </div>
                         <div className="p-4 bg-white rounded-lg shadow-md w-1/3">
-                            <h2 className="text-lg font-semibold text-indigo-600">
+                            <h2 className="text-lg font-semibold text-secondary">
                                 {assessmentShortInfo?.totalOpenEndedQuestions}
                             </h2>
                             <p className="text-sm text-gray-600">Open-Ended</p>
@@ -108,6 +108,7 @@ const Assessment = ({
                     <li>If you change the tabs during assessment, your assessment may get submitted automatically.</li>
                     <li>If you exit full screen mode during assessment, your assessment may get submitted automatically.</li>
                     <li>Do not close the browser during the assessment as you wont be able to resume the assessment once you close the tab or browser.</li>
+                    <li>Mcqs & Open-ended Questions can be submitted only once.</li>
                 </ul>
             </div>
                     </>
@@ -116,11 +117,11 @@ const Assessment = ({
             <div className="mt-8 flex justify-center">
                 {assessmentShortInfo?.submitedOutsourseAssessments?.[0]
                     ?.startedAt ? (
-                    <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md shadow-md" onClick={handleViewResults}>
+                    <Button className="bg-secondary hover:bg-green-700 text-white px-6 py-2 rounded-md shadow-md" onClick={handleViewResults}>
                         View Results
                     </Button>
                 ) : (
-                    <Button className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md shadow-md" onClick={handleStartAssessment}>
+                    <Button className="bg-secondary hover:bg-green-700 text-white px-6 py-2 rounded-md shadow-md" onClick={handleStartAssessment}>
                         Start Assessment
                     </Button>
                 )}

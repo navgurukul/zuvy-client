@@ -172,10 +172,10 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                     placeholder={chapterTitle}
                     className="p-0 text-3xl w-2/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize"
                 />
-                <div className="text-secondary flex font-semibold items-center">
+                {/* <div className="text-secondary flex font-semibold items-center">
                     <h6 className="mr-2 text-sm">Preview</h6>
                     <ExternalLink size={15} />
-                </div>
+                </div> */}
             </div>
             {/* select type of questions */}
             <div className="flex gap-2 mb-5">

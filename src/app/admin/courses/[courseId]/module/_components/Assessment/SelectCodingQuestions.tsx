@@ -32,7 +32,7 @@ const SelectCodingQuestions = ({
                                                 )
                                             )}
                                         >
-                                            {question.difficulty}
+                                            {question.difficulty} - Coding
                                         </span>
                                     </div>
                                     <div className="w-full">

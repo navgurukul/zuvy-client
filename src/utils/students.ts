@@ -143,7 +143,7 @@ export function handleVisibilityChange(
             newTabChangeInstance.toString()
         )
         setTabChangeInstance(newTabChangeInstance)
-             if (newTabChangeInstance > 5) {
+             if (newTabChangeInstance > 10000) {
             // Check if the current page is the submitAssessment page
             if (isCurrentPageSubmitAssessment()) {
                 // Submit the assessment
@@ -185,7 +185,7 @@ export function handleFullScreenChange(
         )
         setFullScreenExitInstance(newFullScreenExitInstance)
 
-          if (newFullScreenExitInstance > 5) {
+          if (newFullScreenExitInstance > 10000) {
             // Check if the current page is the submitAssessment page
             if (isCurrentPageSubmitAssessment()) {
                 // Submit the assessment

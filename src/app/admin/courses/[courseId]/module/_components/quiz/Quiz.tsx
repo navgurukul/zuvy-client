@@ -110,13 +110,13 @@ function Quiz(props: any) {
                     placeholder="Untitled Quiz"
                     className="p-0 text-3xl w-1/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize"
                 />
-                <Link
+                {/* <Link
                     className="text-secondary font-semibold flex mt-2"
                     href=""
                 >
                     Preview
                     <ExternalLink size={20} />
-                </Link>
+                </Link> */}
             </div>
 
             <div className="flex gap-x-2">
