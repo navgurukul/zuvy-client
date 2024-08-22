@@ -83,13 +83,27 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
     }
 
     useEffect(() => {
-        form.setValue('moduleType', 'learning-material')
-        form.setValue('name', moduleData.name)
-        form.setValue('description', moduleData.description)
-        form.setValue('months', timeData.months)
-        form.setValue('weeks', timeData.weeks)
-        form.setValue('days', timeData.days)
-    }, [moduleData, timeData, typeId, form])
+        // Check if typeId is not -1, which means it's a new form
+        if (typeId === -1) {
+            form.reset({
+                moduleType: 'learning-material',
+                name: '',
+                description: '',
+                months: 0,
+                weeks: 0,
+                days: 0,
+            });
+
+        } else {
+            form.setValue('moduleType', 'learning-material');
+            form.setValue('name', moduleData.name);
+            form.setValue('description', moduleData.description);
+            form.setValue('months', timeData.months);
+            form.setValue('weeks', timeData.weeks);
+            form.setValue('days', timeData.days);
+        }
+
+    }, [moduleData, timeData, typeId, form]);
 
 
     return (

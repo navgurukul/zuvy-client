@@ -32,7 +32,7 @@ const SelectOpenEndedQuestions = ({
                                                 )
                                             )}
                                         >
-                                            {question.difficulty}
+                                            {question.difficulty} - OpenEnded
                                         </span>
                                     </div>
                                     <div className="w-full">

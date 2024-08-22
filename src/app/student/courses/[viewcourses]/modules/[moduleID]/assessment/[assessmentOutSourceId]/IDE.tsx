@@ -121,20 +121,19 @@ const IDE: React.FC<IDEProps> = ({
                 }
             )
 
-            setResult(b64DecodeUnicode(response.data.data[0].stdOut))
+            setResult(response.data.data[0].stdOut)
             setCodeResult(response.data.data)
             const testCases = response.data.data
             const allTestCasesPassed = testCases.every(
                 (testCase: any) => testCase.status === 'Accepted'
             )
 
-            setResult(b64DecodeUnicode(testCases[0].stdOut))
+            setResult(testCases[0].stdOut)
 
             if (allTestCasesPassed) {
                 toast({
-                    title: `Test Cases Passed${
-                        action === 'submit' ? ', Solution submitted' : ''
-                    }`,
+                    title: `Test Cases Passed${action === 'submit' ? ', Solution submitted' : ''
+                        }`,
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
@@ -147,6 +146,7 @@ const IDE: React.FC<IDEProps> = ({
             }
             setCodeError('')
         } catch (error: any) {
+
             toast({
                 title: 'Failed',
                 description:
@@ -154,7 +154,7 @@ const IDE: React.FC<IDEProps> = ({
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
-            setCodeError(error?.message)
+            setCodeError(error.response.data.data[0].stderr)
         }
     }
 
@@ -356,75 +356,67 @@ const IDE: React.FC<IDEProps> = ({
                             </ResizablePanel>
                             <ResizableHandle withHandle />
                             <ResizablePanel defaultSize={30}>
-                                <div className="flex h-full ">
-                                    <div className="w-full max-w-5xl  p-2  bg-muted  ">
-                                        <div className="flex justify-between p-2">
-                                            <p className="text-lg">
-                                                Output Window
-                                            </p>
+                                <div className="flex h-full">
+                                    <div className="w-full max-w-5xl p-2 bg-gray-900">
+                                        <div className="flex justify-between p-2 bg-gray-800 border-b border-gray-700">
+                                            <p className="text-lg text-gray-300">Output Window</p>
                                         </div>
-                                        <div className="h-full p-2 bg-accent text-white overflow-y-auto">
-                                            <code>{result}</code>
-                                            {result && codeResult?.map((testCase: any, index: any) => (
-                                                <div
-                                                    key={index}
-                                                    className="shadow-sm rounded-lg p-4 my-4"
-                                                >
-                                                    {index < 2 ? (
-                                                        <>
-                                                            <h2 className="text-xl font-semibold mb-2">
-                                                                Test Case {index + 1}
-                                                            </h2>
-                                                            {testCase.input.map(
-                                                                (input: any, idx: any) => (
-                                                                    <p
-                                                                        key={idx}
-                                                                        className=""
-                                                                    >
-                                                                        <span className="font-medium">
+                                        <div className="h-full p-4 text-start text-gray-100 overflow-y-auto font-mono bg-gray-900 border border-gray-700 rounded-b-lg">
+                                            <code className="block whitespace-pre-wrap">
+                                                {codeError ? (
+                                                    <span className="text-red-500">{codeError}</span>
+                                                ) : (
+                                                    result
+                                                )}
+                                            </code>
+                                            {result &&
+                                                codeResult?.map((testCase: any, index: any) => (
+                                                    <div
+                                                        key={index}
+                                                        className="shadow-sm rounded-lg p-4 my-4 bg-gray-800 border border-gray-700"
+                                                    >
+                                                        {index < 2 ? (
+                                                            <>
+                                                                <h2 className="text-xl font-semibold mb-2 text-gray-300">
+                                                                    Test Case {index + 1}
+                                                                </h2>
+                                                                {testCase.input.map((input: any, idx: any) => (
+                                                                    <p key={idx} className="text-gray-300">
+                                                                        <span className="font-medium text-gray-400">
                                                                             Input {idx + 1}:
                                                                         </span>{' '}
-                                                                        {
-                                                                            input.parameterName
-                                                                        }{' '}
-                                                                        (
-                                                                        {
-                                                                            input.parameterType
-                                                                        }
-                                                                        ) ={' '}
-                                                                        {
-                                                                            input.parameterValue
-                                                                        }
+                                                                        {input.parameterName} ({input.parameterType}) ={' '}
+                                                                        {input.parameterValue}
                                                                     </p>
-                                                                )
-                                                            )}
-                                                            <p className="mt-2">
-                                                                <span className="font-medium">
-                                                                    Expected Output:
-                                                                </span>{' '}
-                                                                {
-                                                                    testCase.output
-                                                                        .parameterType
-                                                                }{' '}
-                                                                ={' '}
-                                                                {
-                                                                    testCase.output
-                                                                        .parameterValue
-                                                                }
+                                                                ))}
+                                                                <p className="mt-2 text-gray-300">
+                                                                    <span className="font-medium text-gray-400">
+                                                                        Expected Output:
+                                                                    </span>{' '}
+                                                                    {testCase.output.parameterType} ={' '}
+                                                                    {testCase.output.parameterValue}
+                                                                </p>
+                                                                <p className="text-gray-300">
+                                                                    <span className="font-medium text-gray-400">
+                                                                        Your Output:
+                                                                    </span>{' '}
+                                                                    {result}
+                                                                </p>
+                                                                <p className={`text-gray-300 ${testCase.status === 'Accepted' ? 'text-green-500' : 'text-red-500'}`}>
+                                                                    Status: {testCase.status}
+                                                                </p>
+                                                            </>
+                                                        ) : (
+                                                            <p className="font-medium text-gray-300">
+                                                                Test Case {index + 1} status: {testCase.status}
                                                             </p>
-                                                            <p>Your Output: {result}</p>
-                                                            <p>status: {testCase.status}</p>
-                                                        </>
-                                                    ) : (
-                                                        <p className="font-medium">
-                                                            Test Case {index + 1} status: {testCase.status}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                            ))}
+                                                        )}
+                                                    </div>
+                                                ))}
                                         </div>
                                     </div>
                                 </div>
+
                             </ResizablePanel>
                         </ResizablePanelGroup>
                     </ResizablePanel>

@@ -85,11 +85,11 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
     })
 
     const onSubmit: any = (values: z.infer<typeof moduleSchema>) => {
-            editModule()    
+        editModule()
     }
 
     useEffect(() => {
-        form.setValue('moduleType', 'learning-material')
+        form.setValue('moduleType', typeId === 2 ? 'project' : 'learning-material')  // Ensure moduleType reflects typeId
         form.setValue('name', moduleData.name)
         form.setValue('description', moduleData.description)
         form.setValue('months', timeData.months)
@@ -185,8 +185,11 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                                             <FormControl>
                                                 <Input
                                                     type="text"
-                                                    defaultValue={moduleData.name}
-                                                    onChange={(e) => handleModuleChange(e)}
+                                                    value={field.value}
+                                                    onChange={(e) => {
+                                                        field.onChange(e)
+                                                        handleModuleChange(e)
+                                                    }}
                                                     name="name"
                                                 />
                                             </FormControl>
@@ -213,8 +216,11 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                                                 <Input
                                                     type="text"
                                                     id="desc"
-                                                    defaultValue={moduleData.description}
-                                                    onChange={(e) => handleModuleChange(e)}
+                                                    value={field.value}
+                                                    onChange={(e) => {
+                                                        field.onChange(e)
+                                                        handleModuleChange(e)
+                                                    }}
                                                     name="description"
                                                 />
                                             </FormControl>
@@ -238,13 +244,11 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                                                         className="no-spinners focus-visible:ring-muted"
                                                         type="number"
                                                         id="months"
-                                                        placeholder="Months"
-                                                        value={
-                                                            timeData?.months > -1
-                                                                ? timeData?.months
-                                                                : undefined
-                                                        }
-                                                        onChange={handleTimeAllotedChange}
+                                                        value={field.value}  // Use field value
+                                                        onChange={(e) => {
+                                                            field.onChange(e) // Sync field state
+                                                            handleTimeAllotedChange(e) // External change handler
+                                                        }}
                                                         name="months"
                                                     />
                                                 </FormControl>
@@ -265,14 +269,11 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                                                         className="no-spinners focus-visible:ring-muted"
                                                         type="number"
                                                         id="weeks"
-
-                                                        placeholder="Weeks"
-                                                        value={
-                                                            timeData?.weeks > -1
-                                                                ? timeData?.weeks
-                                                                : undefined
-                                                        }
-                                                        onChange={handleTimeAllotedChange}
+                                                        value={field.value}  // Use field value
+                                                        onChange={(e) => {
+                                                            field.onChange(e) // Sync field state
+                                                            handleTimeAllotedChange(e) // External change handler
+                                                        }}
                                                         name="weeks"
                                                     />
                                                 </FormControl>
@@ -293,12 +294,11 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                                                         className="no-spinners focus-visible:ring-muted"
                                                         type="number"
                                                         id="days"
-
-                                                        placeholder="Days"
-                                                        value={
-                                                            timeData?.days > -1 ? timeData?.days : undefined
-                                                        }
-                                                        onChange={handleTimeAllotedChange}
+                                                        value={field.value}  // Use field value
+                                                        onChange={(e) => {
+                                                            field.onChange(e) // Sync field state
+                                                            handleTimeAllotedChange(e) // External change handler
+                                                        }}
                                                         name="days"
                                                     />
                                                 </FormControl>
@@ -313,9 +313,9 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                     </DialogHeader>
                     <DialogFooter className="sm:justify-end">
                         <DialogClose asChild>
-                                <Button onClick={form.handleSubmit(onSubmit)}>
-                                    Edit Module
-                                </Button>
+                            <Button onClick={form.handleSubmit(onSubmit)}>
+                                Edit Module
+                            </Button>
                         </DialogClose>
                     </DialogFooter>
                 </DialogContent>

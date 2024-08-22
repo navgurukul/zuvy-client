@@ -111,10 +111,10 @@ function CodingChallenge({
                     className="p-0 text-3xl w-2/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize"
                 />
 
-                <div className="text-secondary flex font-semibold items-center">
+                {/* <div className="text-secondary flex font-semibold items-center">
                     <h6 className="mr-2 text-sm">Preview</h6>
                     <ExternalLink size={15} />
-                </div>
+                </div> */}
             </div>
             <div className="grid grid-cols-2">
                 <div>
