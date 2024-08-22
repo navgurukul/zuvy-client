@@ -208,27 +208,36 @@ function Chapters({ params }: any) {
     }, [topicId, chapterId])
 
     return (
-        <div className="grid  grid-cols-4 mt-5">
-            <div className=" col-span-1">
-                <ScrollArea className="h-dvh pr-4">
-                    {chapters &&
-                        chapters?.map((item: any, index: any) => {
-                            return (
-                                <StudentChapterItem
-                                    key={item.id}
-                                    chapterId={item.id}
-                                    title={item.title}
-                                    topicId={item.topicId}
-                                    fetchChapterContent={fetchChapterContent}
-                                    activeChapter={activeChapter}
-                                    status={item.status}
-                                />
-                            )
-                        })}
-                </ScrollArea>
-            </div>
-            <div className="col-span-3 mx-4">{renderChapterContent()}</div>
-        </div>
+        <>
+            {chapters.length > 0 ? (
+                <div className="grid  grid-cols-4 mt-5">
+                    <div className=" col-span-1">
+                        <ScrollArea className="h-dvh pr-4">
+                            {chapters?.map((item: any, index: any) => {
+                                return (
+                                    <StudentChapterItem
+                                        key={item.id}
+                                        chapterId={item.id}
+                                        title={item.title}
+                                        topicId={item.topicId}
+                                        fetchChapterContent={
+                                            fetchChapterContent
+                                        }
+                                        activeChapter={activeChapter}
+                                        status={item.status}
+                                    />
+                                )
+                            })}
+                        </ScrollArea>
+                    </div>
+                    <div className="col-span-3 mx-4">
+                        {renderChapterContent()}
+                    </div>
+                </div>
+            ) : (
+                <h1 className="mt-5">No Chapters Available Right Now</h1>
+            )}
+        </>
     )
 }
 
