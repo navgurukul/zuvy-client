@@ -44,7 +44,7 @@ const SelectQuizQuestions = ({
                                                 )
                                             )}
                                         >
-                                            {question.difficulty}
+                                            {question.difficulty} - Mcq
                                         </span>
                                     </div>
                                     <div className="w-full">

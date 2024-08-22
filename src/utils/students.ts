@@ -143,7 +143,7 @@ export function handleVisibilityChange(
             newTabChangeInstance.toString()
         )
         setTabChangeInstance(newTabChangeInstance)
-             if (newTabChangeInstance > 5) {
+             if (newTabChangeInstance > 10000) {
             // Check if the current page is the submitAssessment page
             if (isCurrentPageSubmitAssessment()) {
                 // Submit the assessment
@@ -185,7 +185,7 @@ export function handleFullScreenChange(
         )
         setFullScreenExitInstance(newFullScreenExitInstance)
 
-          if (newFullScreenExitInstance > 5) {
+          if (newFullScreenExitInstance > 10000) {
             // Check if the current page is the submitAssessment page
             if (isCurrentPageSubmitAssessment()) {
                 // Submit the assessment
@@ -238,3 +238,8 @@ export async function getBatchDataNew(bootcampId: number) {
 }
 
 // --------------------------------------------
+
+export const decodeBase64 = (data: string) => {
+    if (!data) return ''
+    return Buffer.from(data, 'base64').toString('utf-8')
+}
