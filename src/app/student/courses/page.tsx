@@ -39,6 +39,7 @@ const Page: React.FC<pageProps> = () => {
     const [enrolledCourse, setEnrolledCourse] = useState<EnrolledCourse[]>([])
     const [resumeCourse, setResumeCourse] = useState<ResumeCourse>({})
     const [courseStarted, setCourseStarted] = useState<boolean>(false)
+    const [message, setMessage] = useState()
     const userID = studentData?.id && studentData?.id
 
     // async
@@ -60,6 +61,7 @@ const Page: React.FC<pageProps> = () => {
                 const response = await api.get('tracking/latestUpdatedCourse')
                 if (Array.isArray(response.data.data)) {
                     setCourseStarted(false)
+                    setMessage(response.data.message)
                 } else {
                     setCourseStarted(true)
                     setResumeCourse(response.data.data)
@@ -79,101 +81,129 @@ const Page: React.FC<pageProps> = () => {
             </div>
             <div className="px-2 py-2 md:px-6 md:py-10 ">
                 {/* If Course Already Started then Below Message will be displayed: */}
-                {enrolledCourse?.length > 0 && courseStarted ? (
+                {(message || (enrolledCourse?.length > 0 && courseStarted)) && (
                     <div className="flex flex-col flex-start">
                         <h1 className="text-xl p-1 text-start font-bold mb-4">
                             Start From Where You Left Off
                         </h1>
-                        <div className="flex flex-col lg:flex-row lg:justify-between gap-6">
-                            <div className="flex flex-col">
-                                <div className="w-full lg:w-[860px]">
-                                    <Card className="w-full mb-3 border-none p-5 shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F]">
-                                        {/* For Large screen like Laptop and large tab */}
-                                        <div className="hidden lg:flex flex-row justify-between items-center gap-6">
-                                            <div>
-                                                <div className="flex flex-row gap-3">
-                                                    <BookOpenText className="hidden sm:block mt-2 w-6 h-6" />
-                                                    <h1 className="text-md mt-2 text-start font-bold">
-                                                        {
+                        {courseStarted ? (
+                            <div className="flex flex-col lg:flex-row lg:justify-between gap-6">
+                                <div className="flex flex-col">
+                                    <div className="w-full lg:w-[860px]">
+                                        <Card className="w-full mb-3 border-none p-5 shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F]">
+                                            {/* For Large screen like Laptop and large tab */}
+                                            <div className="hidden lg:flex flex-row justify-between items-center gap-6">
+                                                <div>
+                                                    <div className="flex flex-row gap-3">
+                                                        <BookOpenText className="hidden sm:block mt-2 w-6 h-6" />
+                                                        <h1
+                                                            className={`${
+                                                                resumeCourse
+                                                                    .newChapter
+                                                                    ?.title
+                                                                    ? 'text-md'
+                                                                    : 'text-lg text-destructive'
+                                                            } mt-2 text-start font-bold`}
+                                                        >
+                                                            {resumeCourse
+                                                                .newChapter
+                                                                ?.title ||
+                                                                resumeCourse.newChapter}
+                                                        </h1>
+                                                    </div>
+                                                    <div className="flex flex-row gap-4">
+                                                        <p className="text-md text-start mt-3 mb-2">
+                                                            {
+                                                                resumeCourse?.bootcampName
+                                                            }
+                                                        </p>
+                                                        <span className="w-[5px] h-[5px] bg-gray-500 rounded-full self-center"></span>
+                                                        <p className="text-md text-start mt-3 mb-2">
+                                                            {
+                                                                resumeCourse?.moduleName
+                                                            }
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center text-end">
+                                                    <Button
+                                                        variant={'ghost'}
+                                                        className="text-lg font-bold"
+                                                    >
+                                                        <Link
+                                                            className="gap-3 flex items-center text-secondary"
+                                                            href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`}
+                                                        >
+                                                            <p>
+                                                                Resume Learning
+                                                            </p>
+                                                            <ChevronRight
+                                                                size={15}
+                                                            />
+                                                        </Link>
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                            {/* For Small screen like mobile and small tab */}
+                                            <div className="lg:hidden">
+                                                <div className="flex flex-row gap-4">
+                                                    <BookOpenText className="mt-2 w-6 h-6" />
+                                                    <h1
+                                                        className={`${
                                                             resumeCourse
                                                                 .newChapter
                                                                 ?.title
-                                                        }
+                                                                ? 'text-md'
+                                                                : 'text-lg text-destructive'
+                                                        } mt-2 text-start font-bold`}
+                                                    >
+                                                        {resumeCourse.newChapter
+                                                            ?.title ||
+                                                            resumeCourse.newChapter}
                                                     </h1>
                                                 </div>
-                                                <div className="flex flex-row gap-4">
+                                                <div className="flex flex-row">
                                                     <p className="text-md text-start mt-3 mb-2">
                                                         {
                                                             resumeCourse?.bootcampName
                                                         }
-                                                    </p>
-                                                    <span className="w-[5px] h-[5px] bg-gray-500 rounded-full self-center"></span>
-                                                    <p className="text-md text-start mt-3 mb-2">
+                                                        &nbsp;-&nbsp;
                                                         {
                                                             resumeCourse?.moduleName
                                                         }
                                                     </p>
                                                 </div>
-                                            </div>
-                                            <div className="flex items-center text-end">
-                                                <Button
-                                                    variant={'ghost'}
-                                                    className="text-lg font-bold"
-                                                >
-                                                    <Link
-                                                        className="gap-3 flex items-center text-secondary"
-                                                        href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`}
+                                                <div className="text-end">
+                                                    <Button
+                                                        variant={'ghost'}
+                                                        className="text-lg font-bold"
                                                     >
-                                                        <p>Resume Learning</p>
-                                                        <ChevronRight
-                                                            size={15}
-                                                        />
-                                                    </Link>
-                                                </Button>
+                                                        <Link
+                                                            className="gap-3 flex items-center text-secondary"
+                                                            href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`}
+                                                        >
+                                                            <p>
+                                                                Resume Learning
+                                                            </p>
+                                                            <ChevronRight
+                                                                size={15}
+                                                            />
+                                                        </Link>
+                                                    </Button>
+                                                </div>
                                             </div>
-                                        </div>
-                                        {/* For Small screen like mobile and small tab */}
-                                        <div className="lg:hidden">
-                                            <div className="flex flex-row gap-4">
-                                                <BookOpenText className="mt-2 w-6 h-6" />
-                                                <h1 className="text-md mt-2 text-start font-bold">
-                                                    {
-                                                        resumeCourse.newChapter
-                                                            ?.title
-                                                    }
-                                                </h1>
-                                            </div>
-                                            <div className="flex flex-row">
-                                                <p className="text-md text-start mt-3 mb-2">
-                                                    {resumeCourse?.bootcampName}
-                                                    &nbsp;-&nbsp;
-                                                    {resumeCourse?.moduleName}
-                                                </p>
-                                            </div>
-                                            <div className="text-end">
-                                                <Button
-                                                    variant={'ghost'}
-                                                    className="text-lg font-bold"
-                                                >
-                                                    <Link
-                                                        className="gap-3 flex items-center text-secondary"
-                                                        href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`}
-                                                    >
-                                                        <p>Resume Learning</p>
-                                                        <ChevronRight
-                                                            size={15}
-                                                        />
-                                                    </Link>
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    </Card>
+                                        </Card>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        ) : (
+                            // If No Course Started then Below Message will be displayed:
+                            <h1 className="text-lg p-1 text-start font-semiBold text-destructive mb-4">
+                                {message}
+                            </h1>
+                        )}
                     </div>
-                ) : // If No Course Started then Below Message will be displayed:
-                null}
+                )}
 
                 <div className=" flex flex-col items-center justify-center mt-6">
                     <div className="x-5 flex items-center justify-start w-full">

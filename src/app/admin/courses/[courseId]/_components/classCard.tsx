@@ -86,18 +86,21 @@ function ClassCard({
                 className="w-full mb-6 border-none p-5 shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F] relative"
                 key={classData.id}
             >
-                <div className="flex items-center justify-between truncate">
+                <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-6">
                         <div className="font-bold text-lg flex flex-col border rounded-md py-3 px-5 text-muted-foreground border-muted-foreground">
                             <Moment format="DD">{classData.startTime}</Moment>{' '}
                             <Moment format="MMM">{classData.startTime}</Moment>
                         </div>
                         <div className="text-start">
-                            {/* {classType === 'ongoing' ? (
-                                <Badge variant="yellow" className="mb-3">
+                            {classType === 'ongoing' ? (
+                                <Badge
+                                    variant="yellow"
+                                    className="mb-3 inline-block lg:hidden"
+                                >
                                     Ongoing
                                 </Badge>
-                            ) : null} */}
+                            ) : null}
                             <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
@@ -135,12 +138,14 @@ function ClassCard({
                     </div>
                     <div>
                         {classType === 'ongoing' ? (
-                            <Badge variant="yellow" className="mb-3">
+                            <Badge
+                                variant="yellow"
+                                className="mb-3 hidden lg:inline-block absolute top-4 right-5"
+                            >
                                 Ongoing
                             </Badge>
                         ) : null}
-
-                        <div className="hidden lg:flex text-end">
+                        <div className="hidden lg:flex text-end absolute right-1">
                             <Button
                                 variant={'ghost'}
                                 className="text-lg font-bold"
