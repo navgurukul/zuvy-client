@@ -172,6 +172,7 @@ function Chapters({ params }: any) {
                         // moduleId={moduleIdString}
                         chapterId={chapterId}
                         bootcampId={+viewcourses}
+                        completeChapter={completeChapter}
                         // bootcampId={viewcourses}
                     />
                 )
