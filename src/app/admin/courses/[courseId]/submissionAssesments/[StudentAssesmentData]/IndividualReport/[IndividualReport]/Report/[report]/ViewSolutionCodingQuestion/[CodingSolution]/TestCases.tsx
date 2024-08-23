@@ -46,7 +46,7 @@ const TestCaseResults = ({ testCases }: any) => {
 
                         <div className="mt-4">
                             <h1 className="font-semibold">
-                                Student's out: {'decodedString'}
+                                Students out: {'decodedString'}
                             </h1>
 
                             <h3 className="font-semibold text-lg text-gray-600">

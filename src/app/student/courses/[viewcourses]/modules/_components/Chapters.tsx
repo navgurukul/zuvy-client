@@ -131,6 +131,7 @@ function Chapters({ params }: any) {
                     <Article
                         content={chapterContent}
                         completeChapter={completeChapter}
+                        key={chapterContent.id}
                     />
                 )
             case 3:

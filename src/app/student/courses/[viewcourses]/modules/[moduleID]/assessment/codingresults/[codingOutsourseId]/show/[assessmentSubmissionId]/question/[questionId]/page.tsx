@@ -111,11 +111,11 @@ const CodingSubmissionPage = ({ params }: { params: any }) => {
                                     <strong>Expected Output:</strong> {submission.testCases.expectedOutput.parameterValue}
                                 </p>
                                 <p className="text-gray-600">
-                                    <strong>Your Output:</strong> {decodeBase64(submission.stdout) || 'N/A'}
+                                    <strong>Your Output:</strong> {submission.stdout || 'N/A'}
                                 </p>
                                 {submission.stderr && (
                                     <div className="text-red-500 mt-2">
-                                        <strong>Error Output:</strong> {decodeBase64(submission.stderr)}
+                                        <strong>Error Output:</strong> {submission.stderr}
                                     </div>
                                 )}
                                 <p className="text-gray-600">
