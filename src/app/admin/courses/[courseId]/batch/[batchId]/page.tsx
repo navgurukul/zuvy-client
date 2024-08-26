@@ -98,8 +98,8 @@ const BatchesInfo = ({
         name: z.string().min(2, {
             message: 'Batch name must be at least 2 characters.',
         }),
-        instructorId: z.string().min(2, {
-            message: 'Instructor ID must be at least 2 characters.',
+        instructorEmail: z.string().min(2, {
+            message: 'Instructor email must be at least 2 characters.',
         }),
         capEnrollment: z.string().refine(
             (capEnrollment) => {
@@ -119,14 +119,17 @@ const BatchesInfo = ({
         resolver: zodResolver(formSchema),
         defaultValues: {
             name: instructorsInfo.name || '',
-            instructorId: instructorsInfo.instructorId || '',
+            instructorEmail: instructorsInfo.instructorEmail || '',
             capEnrollment: instructorsInfo.capEnrollment || '',
         },
         mode: 'onChange',
     })
     useEffect(() => {
         form.setValue('name', instructorsInfo?.name || '')
-        form.setValue('instructorId', `${instructorsInfo?.instructorId || ''}`)
+        form.setValue(
+            'instructorEmail',
+            `${instructorsInfo?.instructorEmail || ''}`
+        )
         form.setValue(
             'capEnrollment',
             `${instructorsInfo?.capEnrollment || ''}`
@@ -189,7 +192,7 @@ const BatchesInfo = ({
         const convertedData = {
             ...values,
             name: values.name,
-            instructorId: +values.instructorId,
+            instructorEmail: values.instructorEmail,
             capEnrollment: +values.capEnrollment,
         }
         try {
@@ -266,7 +269,6 @@ const BatchesInfo = ({
     const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value)
     }
-    console.log(studentData)
     return (
         <>
             <BreadcrumbCmponent crumbs={crumbs} />
@@ -510,15 +512,15 @@ const BatchesInfo = ({
                                                 />
                                                 <FormField
                                                     control={form.control}
-                                                    name="instructorId"
+                                                    name="instructorEmail"
                                                     render={({ field }) => (
                                                         <FormItem>
                                                             <FormLabel>
-                                                                Instructor Id
+                                                                Instructor Email
                                                             </FormLabel>
                                                             <FormControl>
                                                                 <Input
-                                                                    placeholder="Instructor Id"
+                                                                    placeholder="Instructor Email"
                                                                     type="name"
                                                                     {...field}
                                                                 />
