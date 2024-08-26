@@ -557,6 +557,7 @@ const BatchesInfo = ({
                                                         <Button
                                                             className="w-1/2"
                                                             type="submit"
+                                                            disabled={!form.formState.isValid}
                                                         >
                                                             Update batch
                                                         </Button>
