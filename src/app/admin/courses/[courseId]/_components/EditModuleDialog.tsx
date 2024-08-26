@@ -70,7 +70,6 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
     handleTypeChange,
     typeId,
 }) => {
-
     const form = useForm<z.infer<typeof moduleSchema>>({
         resolver: zodResolver(moduleSchema),
         defaultValues: {
@@ -111,7 +110,6 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                         <div className="main_container flex items-center align-middle text-center">
                             <div className="flex items-center">
                                 <div>
-
                                     <FormField
                                         control={form.control}
                                         name="moduleType"
@@ -123,7 +121,7 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                                                         id="learning-material"
                                                         className="size-4"
                                                         value="learning-material"
-                                                        checked={typeId === 1 || typeId != 2}
+                                                        checked={typeId === 1}
                                                         onChange={handleTypeChange}
                                                         name="moduleType"
                                                         disabled
@@ -143,7 +141,6 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
 
                             <div className="flex items-center ">
                                 <div>
-
                                     <FormField
                                         control={form.control}
                                         name="moduleType"
@@ -307,7 +304,6 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                                         )}
                                     />
                                 </div>
-
                             </div>
                         </div>
                     </DialogHeader>

@@ -132,7 +132,7 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                                         id="learning-material"
                                                         className="size-4"
                                                         value="learning-material"
-                                                        checked={typeId === 1 || typeId != 2}
+                                                        checked={typeId === 1}
                                                         onChange={handleTypeChange}
                                                         name="moduleType"
                                                     />
