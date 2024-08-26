@@ -150,9 +150,6 @@ function Schedule({ className, ...props }: ScheduleProps) {
         getUpcomingSubmissionHandler,
     ])
 
-    console.log('courseStarted', courseStarted)
-    console.log('submissionMessage', submissionMessage)
-
     return (
         <div>
             <div className="flex flex-col items-start mt-6">

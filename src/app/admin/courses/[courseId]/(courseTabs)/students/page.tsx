@@ -72,7 +72,7 @@ const Page = ({ params }: { params: any }) => {
                 </div>
 
                 <div>
-                    <div>
+                    <div className="mt-5">
                         <DataTable data={students} columns={columns} />
                     </div>
                     <div className="flex items-center justify-end mt-2 px-2 gap-x-2">

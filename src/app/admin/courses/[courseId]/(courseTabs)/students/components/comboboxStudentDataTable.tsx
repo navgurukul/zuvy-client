@@ -68,7 +68,7 @@ export function ComboboxStudent({
         } catch (error: any) {
             toast({
                 title: 'Error',
-                description: error.message,
+                description: error.response.data.message,
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
