@@ -61,7 +61,9 @@ const Page: React.FC<pageProps> = () => {
                 const response = await api.get('tracking/latestUpdatedCourse')
                 if (Array.isArray(response.data.data)) {
                     setCourseStarted(false)
-                    setMessage(response.data.message)
+                    const message = response.data.message.toLowerCase()
+                    if (!message.includes('start'))
+                        setMessage(response.data.message)
                 } else {
                     setCourseStarted(true)
                     setResumeCourse(response.data.data)
@@ -108,7 +110,8 @@ const Page: React.FC<pageProps> = () => {
                                                             {resumeCourse
                                                                 .newChapter
                                                                 ?.title ||
-                                                                resumeCourse.newChapter}
+                                                                resumeCourse.newChapter ||
+                                                                'There is no chapter in the module'}
                                                         </h1>
                                                     </div>
                                                     <div className="flex flex-row gap-4">
@@ -159,7 +162,8 @@ const Page: React.FC<pageProps> = () => {
                                                     >
                                                         {resumeCourse.newChapter
                                                             ?.title ||
-                                                            resumeCourse.newChapter}
+                                                            resumeCourse.newChapter ||
+                                                            'There is no chapter in the module'}
                                                     </h1>
                                                 </div>
                                                 <div className="flex flex-row">

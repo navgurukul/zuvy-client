@@ -62,11 +62,13 @@ function Schedule({ className, ...props }: ScheduleProps) {
                 // If we get res, then course started, hence courseStarted: true;
                 if (Array.isArray(response.data.data)) {
                     setCourseStarted(false)
-                    setSubmissionMessage(response.data.message)
+                    const message = response.data.message.toLowerCase()
+                    if (!message.includes('start'))
+                        setSubmissionMessage(response.data.message)
                 } else {
                     setCourseStarted(true)
                     setResumeCourse(response.data.data)
-                    setNextChapterId(response.data.data.newChapter.id)
+                    setNextChapterId(response.data.data?.newChapter?.id)
                 }
             } catch (error) {
                 console.error('Error getting resume course:', error)
@@ -147,6 +149,9 @@ function Schedule({ className, ...props }: ScheduleProps) {
         getUpcomingClassesHandler,
         getUpcomingSubmissionHandler,
     ])
+
+    console.log('courseStarted', courseStarted)
+    console.log('submissionMessage', submissionMessage)
 
     return (
         <div>
@@ -248,7 +253,8 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                                             {resumeCourse
                                                                 .newChapter
                                                                 ?.title ||
-                                                                resumeCourse.newChapter}
+                                                                resumeCourse.newChapter ||
+                                                                'There is no chapter in the module'}
                                                         </h1>
                                                     </div>
                                                     <div className="flex flex-row gap-4">
@@ -312,7 +318,8 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                                     >
                                                         {resumeCourse.newChapter
                                                             ?.title ||
-                                                            resumeCourse.newChapter}
+                                                            resumeCourse.newChapter ||
+                                                            'There is no chapter in the module'}
                                                     </h1>
                                                 </div>
                                                 <div className="flex flex-row">
