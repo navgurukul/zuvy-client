@@ -121,14 +121,13 @@ const IDE: React.FC<IDEProps> = ({
                 }
             )
 
-            setResult(response.data.data[0].stdOut)
+            // Set the code result data
             setCodeResult(response.data.data)
-            const testCases = response.data.data
-            const allTestCasesPassed = testCases.every(
+
+            // Check if all test cases passed
+            const allTestCasesPassed = response.data.data.every(
                 (testCase: any) => testCase.status === 'Accepted'
             )
-
-            setResult(testCases[0].stdOut)
 
             if (allTestCasesPassed) {
                 toast({
@@ -145,7 +144,11 @@ const IDE: React.FC<IDEProps> = ({
                         'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             }
+
             setCodeError('')
+
+            // Trigger re-render for the output window
+            setResult(response.data.data[0]?.stdOut || 'No output available')
         } catch (error: any) {
             toast({
                 title: 'Failed',
@@ -154,7 +157,10 @@ const IDE: React.FC<IDEProps> = ({
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
-            setCodeError(error.response.data.data[0].stderr)
+            setCodeError(
+                error.response?.data?.data?.[0]?.stderr ||
+                    'Error occurred during submission.'
+            )
         }
     }
 
@@ -391,62 +397,15 @@ const IDE: React.FC<IDEProps> = ({
                                                                         {index +
                                                                             1}
                                                                     </h2>
-                                                                    {testCase.input.map(
-                                                                        (
-                                                                            input: any,
-                                                                            idx: any
-                                                                        ) => (
-                                                                            <p
-                                                                                key={
-                                                                                    idx
-                                                                                }
-                                                                                className="text-gray-300"
-                                                                            >
-                                                                                <span className="font-medium text-gray-400">
-                                                                                    Input{' '}
-                                                                                    {idx +
-                                                                                        1}
-                                                                                    :
-                                                                                </span>{' '}
-                                                                                {
-                                                                                    input.parameterName
-                                                                                }{' '}
-                                                                                (
-                                                                                {
-                                                                                    input.parameterType
-                                                                                }
-                                                                                )
-                                                                                ={' '}
-                                                                                {
-                                                                                    input.parameterValue
-                                                                                }
-                                                                            </p>
-                                                                        )
-                                                                    )}
-                                                                    <p className="mt-2 text-gray-300">
-                                                                        <span className="font-medium text-gray-400">
-                                                                            Expected
-                                                                            Output:
-                                                                        </span>{' '}
-                                                                        {
-                                                                            testCase
-                                                                                .output
-                                                                                .parameterType
-                                                                        }{' '}
-                                                                        ={' '}
-                                                                        {
-                                                                            testCase
-                                                                                .output
-                                                                                .parameterValue
-                                                                        }
-                                                                    </p>
                                                                     <p className="text-gray-300">
                                                                         <span className="font-medium text-gray-400">
                                                                             Your
                                                                             Output:
-                                                                        </span>{' '}
-                                                                        {result}
+                                                                        </span>
+                                                                        {testCase?.stdOut ||
+                                                                            testCase?.stdout}
                                                                     </p>
+
                                                                     <p
                                                                         className={`text-gray-300 ${
                                                                             testCase.status ===
@@ -460,9 +419,32 @@ const IDE: React.FC<IDEProps> = ({
                                                                             testCase.status
                                                                         }
                                                                     </p>
+                                                                    <p
+                                                                        className={`text-gray-300`}
+                                                                    >
+                                                                        Memory:{' '}
+                                                                        {
+                                                                            testCase.memory
+                                                                        }
+                                                                    </p>
+                                                                    <p
+                                                                        className={`text-gray-300`}
+                                                                    >
+                                                                        Time:{' '}
+                                                                        {
+                                                                            testCase.time
+                                                                        }
+                                                                    </p>
                                                                 </>
                                                             ) : (
-                                                                <p className="font-medium text-gray-300">
+                                                                <p
+                                                                    className={`text-gray-300 ${
+                                                                        testCase.status ===
+                                                                        'Accepted'
+                                                                            ? 'text-green-500'
+                                                                            : 'text-red-500'
+                                                                    }`}
+                                                                >
                                                                     Test Case{' '}
                                                                     {index + 1}{' '}
                                                                     status:{' '}

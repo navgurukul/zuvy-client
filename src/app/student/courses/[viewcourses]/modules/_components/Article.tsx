@@ -1,4 +1,4 @@
-import { Editor, EditorContent, useEditor } from '@tiptap/react'
+import { Editor, useEditor } from '@tiptap/react'
 import React from 'react'
 import extensions from '@/app/_components/editor/TiptapExtensions'
 import TiptapEditor from '@/app/_components/editor/TiptapEditor'
@@ -12,16 +12,36 @@ function Article({
     content: any
     completeChapter: () => void
 }) {
-    // if (content.articleContent === null) {
-    //     return <div>Article Content Not Added Yet</div>
-    // }
+    let editorContent;
+
+    if (content?.articleContent && Array.isArray(content.articleContent) && content.articleContent.length > 0) {
+        editorContent = content.articleContent[0];
+    } else {
+        editorContent = {
+            type: "doc",
+            content: [
+                {
+                    type: "paragraph",
+                    attrs: {
+                        textAlign: "left",
+                    },
+                    content: [
+                        {
+                            text: "No article added yet. Please come back later for some interesting article to learn from...",
+                            type: "text",
+                        },
+                    ],
+                },
+            ],
+        };
+    }
 
     const editor = useEditor({
         extensions,
-        content: content.articleContent[0] || `<h1>No Content Added Yet</h1>`,
+        content: editorContent,
         editable: false,
-    })
-    console.log(content.articleContent[0])
+    });
+
     return (
         <>
             <TiptapEditor editor={editor} />
@@ -29,7 +49,7 @@ function Article({
                 <Button onClick={completeChapter}>Mark as Done</Button>
             </div>
         </>
-    )
+    );
 }
 
-export default Article
+export default Article;
