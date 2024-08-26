@@ -186,7 +186,7 @@ const Page = ({ params }: { params: any }) => {
             )
         } else {
             return (
-                <Dialog>
+                <Dialog onOpenChange={(isOpen) => isOpen && form.reset()}>
                     <DialogTrigger asChild>
                         <Button className="lg:max-w-[150px] w-full mt-5">
                             {emptyState ? '+ Create Batch' : 'New Batch'}
