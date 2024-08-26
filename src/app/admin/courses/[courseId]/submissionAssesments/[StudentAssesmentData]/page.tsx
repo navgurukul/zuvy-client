@@ -126,6 +126,14 @@ const Page = ({ params }: any) => {
                                     Not Yet Submitted
                                 </p>
                             </div>
+                            <div className="p-4 rounded-lg shadow-md ">
+                                <h1 className="text-gray-600 font-semibold text-xl">
+                                    {70}%
+                                </h1>
+                                <p className="text-gray-500 ">
+                                    Pass Percentage
+                                </p>
+                            </div>
                         </div>
                     ) : (
                         <div className="flex gap-x-20  ">

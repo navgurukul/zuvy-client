@@ -134,7 +134,11 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
         }
 
         try {
-            await api.put(`Content/editAssessment/${content.id}`, data)
+            await api.put(
+                `Content/editAssessment/${content.id}/${chapterData.chapterId}`,
+                data
+            )
+
             fetchChapterContent(chapterData.chapterId)
             toast({
                 title: 'Assessment Updated Successfully',

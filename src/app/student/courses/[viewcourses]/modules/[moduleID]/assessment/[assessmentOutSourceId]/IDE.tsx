@@ -132,8 +132,9 @@ const IDE: React.FC<IDEProps> = ({
 
             if (allTestCasesPassed) {
                 toast({
-                    title: `Test Cases Passed${action === 'submit' ? ', Solution submitted' : ''
-                        }`,
+                    title: `Test Cases Passed${
+                        action === 'submit' ? ', Solution submitted' : ''
+                    }`,
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
@@ -146,7 +147,6 @@ const IDE: React.FC<IDEProps> = ({
             }
             setCodeError('')
         } catch (error: any) {
-
             toast({
                 title: 'Failed',
                 description:
@@ -359,64 +359,124 @@ const IDE: React.FC<IDEProps> = ({
                                 <div className="flex h-full">
                                     <div className="w-full max-w-5xl p-2 bg-gray-900">
                                         <div className="flex justify-between p-2 bg-gray-800 border-b border-gray-700">
-                                            <p className="text-lg text-gray-300">Output Window</p>
+                                            <p className="text-lg text-gray-300">
+                                                Output Window
+                                            </p>
                                         </div>
                                         <div className="h-full p-4 text-start text-gray-100 overflow-y-auto font-mono bg-gray-900 border border-gray-700 rounded-b-lg">
                                             <code className="block whitespace-pre-wrap">
                                                 {codeError ? (
-                                                    <span className="text-red-500">{codeError}</span>
+                                                    <span className="text-red-500">
+                                                        {codeError}
+                                                    </span>
                                                 ) : (
                                                     result
                                                 )}
                                             </code>
                                             {result &&
-                                                codeResult?.map((testCase: any, index: any) => (
-                                                    <div
-                                                        key={index}
-                                                        className="shadow-sm rounded-lg p-4 my-4 bg-gray-800 border border-gray-700"
-                                                    >
-                                                        {index < 2 ? (
-                                                            <>
-                                                                <h2 className="text-xl font-semibold mb-2 text-gray-300">
-                                                                    Test Case {index + 1}
-                                                                </h2>
-                                                                {testCase.input.map((input: any, idx: any) => (
-                                                                    <p key={idx} className="text-gray-300">
+                                                codeResult?.map(
+                                                    (
+                                                        testCase: any,
+                                                        index: any
+                                                    ) => (
+                                                        <div
+                                                            key={index}
+                                                            className="shadow-sm rounded-lg p-4 my-4 bg-gray-800 border border-gray-700"
+                                                        >
+                                                            {index < 2 ? (
+                                                                <>
+                                                                    <h2 className="text-xl font-semibold mb-2 text-gray-300">
+                                                                        Test
+                                                                        Case{' '}
+                                                                        {index +
+                                                                            1}
+                                                                    </h2>
+                                                                    {testCase.input.map(
+                                                                        (
+                                                                            input: any,
+                                                                            idx: any
+                                                                        ) => (
+                                                                            <p
+                                                                                key={
+                                                                                    idx
+                                                                                }
+                                                                                className="text-gray-300"
+                                                                            >
+                                                                                <span className="font-medium text-gray-400">
+                                                                                    Input{' '}
+                                                                                    {idx +
+                                                                                        1}
+                                                                                    :
+                                                                                </span>{' '}
+                                                                                {
+                                                                                    input.parameterName
+                                                                                }{' '}
+                                                                                (
+                                                                                {
+                                                                                    input.parameterType
+                                                                                }
+                                                                                )
+                                                                                ={' '}
+                                                                                {
+                                                                                    input.parameterValue
+                                                                                }
+                                                                            </p>
+                                                                        )
+                                                                    )}
+                                                                    <p className="mt-2 text-gray-300">
                                                                         <span className="font-medium text-gray-400">
-                                                                            Input {idx + 1}:
+                                                                            Expected
+                                                                            Output:
                                                                         </span>{' '}
-                                                                        {input.parameterName} ({input.parameterType}) ={' '}
-                                                                        {input.parameterValue}
+                                                                        {
+                                                                            testCase
+                                                                                .output
+                                                                                .parameterType
+                                                                        }{' '}
+                                                                        ={' '}
+                                                                        {
+                                                                            testCase
+                                                                                .output
+                                                                                .parameterValue
+                                                                        }
                                                                     </p>
-                                                                ))}
-                                                                <p className="mt-2 text-gray-300">
-                                                                    <span className="font-medium text-gray-400">
-                                                                        Expected Output:
-                                                                    </span>{' '}
-                                                                    {testCase.output.parameterType} ={' '}
-                                                                    {testCase.output.parameterValue}
+                                                                    <p className="text-gray-300">
+                                                                        <span className="font-medium text-gray-400">
+                                                                            Your
+                                                                            Output:
+                                                                        </span>{' '}
+                                                                        {result}
+                                                                    </p>
+                                                                    <p
+                                                                        className={`text-gray-300 ${
+                                                                            testCase.status ===
+                                                                            'Accepted'
+                                                                                ? 'text-green-500'
+                                                                                : 'text-red-500'
+                                                                        }`}
+                                                                    >
+                                                                        Status:{' '}
+                                                                        {
+                                                                            testCase.status
+                                                                        }
+                                                                    </p>
+                                                                </>
+                                                            ) : (
+                                                                <p className="font-medium text-gray-300">
+                                                                    Test Case{' '}
+                                                                    {index + 1}{' '}
+                                                                    status:{' '}
+                                                                    {
+                                                                        testCase.status
+                                                                    }
                                                                 </p>
-                                                                <p className="text-gray-300">
-                                                                    <span className="font-medium text-gray-400">
-                                                                        Your Output:
-                                                                    </span>{' '}
-                                                                    {result}
-                                                                </p>
-                                                                <p className={`text-gray-300 ${testCase.status === 'Accepted' ? 'text-green-500' : 'text-red-500'}`}>
-                                                                    Status: {testCase.status}
-                                                                </p>
-                                                            </>
-                                                        ) : (
-                                                            <p className="font-medium text-gray-300">
-                                                                Test Case {index + 1} status: {testCase.status}
-                                                            </p>
-                                                        )}
-                                                    </div>
-                                                ))}
+                                                            )}
+                                                        </div>
+                                                    )
+                                                )}
                                         </div>
                                     </div>
                                 </div>
-
                             </ResizablePanel>
                         </ResizablePanelGroup>
                     </ResizablePanel>

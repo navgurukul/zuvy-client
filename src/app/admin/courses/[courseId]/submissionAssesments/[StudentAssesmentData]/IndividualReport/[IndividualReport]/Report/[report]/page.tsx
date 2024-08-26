@@ -15,6 +15,7 @@ import IndividualStudentAssesment from '@/app/admin/courses/[courseId]/_componen
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from '@/components/ui/use-toast'
 import { getProctoringDataStore } from '@/store/store'
+import { Check, CheckCircle, User, X, XCircle } from 'lucide-react'
 
 type User = {
     name: string
@@ -217,11 +218,11 @@ const Page = ({ params }: { params: any }) => {
         day: 'numeric',
     }
     const formattedDate = date.toLocaleDateString('en-US', options2)
-    console.log(assesmentData)
+    console.log(codingdata)
 
     return (
         <>
-            {loading ? (
+            {codingdata ? (
                 <BreadcrumbComponent crumbs={crumbs} />
             ) : (
                 <Skeleton className="h-4 w-4/6" />
@@ -229,47 +230,55 @@ const Page = ({ params }: { params: any }) => {
             <MaxWidthWrapper className="p-4">
                 <div className="flex flex-col relative items-start">
                     <div className="flex items-center">
-                        {loading ? (
-                            <Avatar className="w-10 h-10">
-                                <AvatarImage
-                                    src="https://github.com/shadcn.png"
-                                    alt="@shadcn"
-                                />
-                                <AvatarFallback>CN</AvatarFallback>
-                            </Avatar>
-                        ) : (
-                            <Skeleton className="h-6 w-6 rounded-full" />
-                        )}
                         <h1 className="text-start flex ml-6 font-bold text-xl ">
-                            {codingdata ? (
-                                <div>
-                                    <div className="flex gap-x-4 ">
-                                        <span>Individual Report:- </span>
-                                        <span>{username} </span>
-                                    </div>
-                                    <div className="flex gap-x-4 ">
-                                        <span>Status:- </span>
-                                        <span className="flex flex-row">
-                                            {assesmentData?.isPassed ? (
-                                                <h1 className="text-secondary">
-                                                    Passed
-                                                </h1>
-                                            ) : (
-                                                <h1 className="text-red-500">
-                                                    Failed
-                                                </h1>
-                                            )}
-                                        </span>
-                                    </div>
-                                    <div className="flex gap-x-4 ">
-                                        <span>Submitted At :-</span>
-                                        <span>{formattedDate} </span>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="flex items-center space-x-4">
-                                    <div className="space-y-2">
-                                        <Skeleton className="h-4 w-[250px]" />
+                            {codingdata && (
+                                <div className="p-4 rounded-lg bg-white shadow-lg backdrop-blur-lg transition-transform transform  hover:shadow-xl">
+                                    <div className="flex flex-col gap-y-4">
+                                        <div className="flex gap-x-2 items-center">
+                                            <User size={15} />
+                                            <span className="font-semibold text-[15px] text-gray-700 dark:text-gray-300">
+                                                Individual Report:
+                                            </span>
+                                            <span className="font-semibold text-[15px] text-gray-900 dark:text-white">
+                                                {username}
+                                            </span>
+                                        </div>
+                                        <div className="flex gap-x-4 items-center">
+                                            <span className="font-semibold text-[15px] text-gray-700 dark:text-gray-300">
+                                                Status:
+                                            </span>
+                                            <span className="flex flex-row items-center gap-x-2 backdrop-blur-sm px-2 py-1 rounded-md transition-colors duration-300 hover:bg-gray-200 dark:hover:bg-gray-700">
+                                                {assesmentData?.isPassed ? (
+                                                    <>
+                                                        <CheckCircle
+                                                            className="text-green-500"
+                                                            size={16}
+                                                        />
+                                                        <h1 className="text-secondary font-semibold text-[15px]">
+                                                            Passed
+                                                        </h1>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <XCircle
+                                                            className="text-red-500"
+                                                            size={16}
+                                                        />
+                                                        <h1 className="text-red-500 font-semibold text-[15px]">
+                                                            Failed
+                                                        </h1>
+                                                    </>
+                                                )}
+                                            </span>
+                                        </div>
+                                        <div className="flex gap-x-4 items-center">
+                                            <span className="font-semibold text-[15px] text-gray-700 dark:text-gray-300">
+                                                Submitted At:
+                                            </span>
+                                            <span className="font-semibold text-[15px] text-gray-900 dark:text-white">
+                                                {formattedDate}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -332,7 +341,7 @@ const Page = ({ params }: { params: any }) => {
                                         />
                                     ))
                                 ) : (
-                                    <p className="text-left py-20 font-semibold">
+                                    <p className="text-center py-20 font-semibold w-full h-full shadow-lg backdrop-blur-lg transition-transform transform  hover:shadow-xl ">
                                         This student have not submitted any
                                         coding question .
                                     </p>
@@ -343,22 +352,37 @@ const Page = ({ params }: { params: any }) => {
                                     {' '}
                                     Quiz Submission
                                 </h1>
-                                <IndividualStudentAssesment
-                                    data={[]}
-                                    params={params}
-                                    type={'quizSubmission'}
-                                />
+                                {assesmentData?.attemptedMCQQuestions >= 1 ? (
+                                    <IndividualStudentAssesment
+                                        data={[]}
+                                        params={params}
+                                        type={'quizSubmission'}
+                                    />
+                                ) : (
+                                    <p className="text-center py-20 font-semibold w-full h-full shadow-lg backdrop-blur-lg transition-transform transform  hover:shadow-xl ">
+                                        This student have not submitted any Quiz
+                                        question .
+                                    </p>
+                                )}
                             </div>
                             <div className="w-full">
                                 <h1 className="text-left font-semibold ">
                                     {' '}
                                     Open Ended Questions
                                 </h1>
-                                <IndividualStudentAssesment
-                                    data={[]}
-                                    params={params}
-                                    type={'openEndedSubmission'}
-                                />
+                                {assesmentData?.attemptedOpenEndedQuestions >=
+                                1 ? (
+                                    <IndividualStudentAssesment
+                                        data={[]}
+                                        params={params}
+                                        type={'openEndedSubmission'}
+                                    />
+                                ) : (
+                                    <p className="text-center py-20 font-semibold w-full h-full shadow-lg backdrop-blur-lg transition-transform transform  hover:shadow-xl ">
+                                        This student have not submitted any Open
+                                        Ended Question question .
+                                    </p>
+                                )}
                             </div>
                         </>
                     ) : (

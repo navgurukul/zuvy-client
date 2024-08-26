@@ -29,8 +29,6 @@ const AssesmentSubmissionComponent = ({ courseId }: any) => {
         getAssessments()
     }, [getAssessments])
 
-    console.log(assesments)
-
     return (
         <div className="grid grid-cols-1 relative gap-8 mt-4 md:mt-8 md:grid-cols-2">
             {assesments ? (
