@@ -37,7 +37,7 @@ function Page() {
     // state and variables
     const [curriculum, setCurriculum] = useState([])
     const { courseData } = getCourseData()
-    const [typeId, setTypeId] = useState(0)
+    const [typeId, setTypeId] = useState(1)
     const [loading, setLoading] = useState(true)
     const [editMode, setEditMode] = useState(false)
     const [moduleId, setModuleId] = useState(0)
