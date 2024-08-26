@@ -145,26 +145,46 @@ function ClassCard({
                                 Ongoing
                             </Badge>
                         ) : null}
-                        <div className="hidden lg:flex text-end absolute right-1">
-                            <Button
-                                variant={'ghost'}
-                                className="text-lg font-bold"
-                                disabled={
-                                    classType === 'ongoing' ? false : true
-                                }
-                            >
-                                <Link
-                                    target="_blank"
-                                    href={classData.hangoutLink}
-                                    className="gap-3 flex  items-center text-secondary"
+                        {!admin && (
+                            <div className="hidden lg:flex text-end absolute right-1">
+                                <Button
+                                    variant={'ghost'}
+                                    className="text-lg font-bold"
+                                    disabled={
+                                        classType === 'ongoing' ? false : true
+                                    }
                                 >
-                                    <p>Join Class</p>
-                                    <ChevronRight size={15} />
-                                </Link>
-                            </Button>
-                        </div>
+                                    <Link
+                                        target="_blank"
+                                        href={classData.hangoutLink}
+                                        className="gap-3 flex  items-center text-secondary"
+                                    >
+                                        <p>Join Class</p>
+                                        <ChevronRight size={15} />
+                                    </Link>
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 </div>
+                {admin && (
+                    <div className="hidden lg:flex justify-end">
+                        <Button
+                            variant={'ghost'}
+                            className="text-lg font-bold"
+                            disabled={classType === 'ongoing' ? false : true}
+                        >
+                            <Link
+                                target="_blank"
+                                href={classData.hangoutLink}
+                                className="gap-3 flex  items-center text-secondary"
+                            >
+                                <p>Join Class</p>
+                                <ChevronRight size={15} />
+                            </Link>
+                        </Button>
+                    </div>
+                )}
                 <div className="block lg:hidden text-end">
                     <Button
                         variant={'ghost'}
