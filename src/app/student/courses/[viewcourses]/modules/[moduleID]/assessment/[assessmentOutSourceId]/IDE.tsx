@@ -131,7 +131,9 @@ const IDE: React.FC<IDEProps> = ({
 
             if (allTestCasesPassed) {
                 toast({
-                    title: `Test Cases Passed${action === 'submit' ? ', Solution submitted' : ''}`,
+                    title: `Test Cases Passed${
+                        action === 'submit' ? ', Solution submitted' : ''
+                    }`,
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
@@ -147,9 +149,7 @@ const IDE: React.FC<IDEProps> = ({
 
             // Trigger re-render for the output window
             setResult(response.data.data[0]?.stdOut || 'No output available')
-
         } catch (error: any) {
-
             toast({
                 title: 'Failed',
                 description:
@@ -157,7 +157,10 @@ const IDE: React.FC<IDEProps> = ({
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
-            setCodeError(error.response?.data?.data?.[0]?.stderr || 'Error occurred during submission.')
+            setCodeError(
+                error.response?.data?.data?.[0]?.stderr ||
+                    'Error occurred during submission.'
+            )
         }
     }
 
@@ -362,56 +365,100 @@ const IDE: React.FC<IDEProps> = ({
                                 <div className="flex h-full">
                                     <div className="w-full max-w-5xl p-2 bg-gray-900">
                                         <div className="flex justify-between p-2 bg-gray-800 border-b border-gray-700">
-                                            <p className="text-lg text-gray-300">Output Window</p>
+                                            <p className="text-lg text-gray-300">
+                                                Output Window
+                                            </p>
                                         </div>
                                         <div className="h-full p-4 text-start text-gray-100 overflow-y-auto font-mono bg-gray-900 border border-gray-700 rounded-b-lg">
                                             <code className="block whitespace-pre-wrap">
                                                 {codeError ? (
-                                                    <span className="text-red-500">{codeError}</span>
+                                                    <span className="text-red-500">
+                                                        {codeError}
+                                                    </span>
                                                 ) : (
                                                     result
                                                 )}
                                             </code>
                                             {result &&
-                                                codeResult?.map((testCase: any, index: any) => (
-                                                    <div
-                                                        key={index}
-                                                        className="shadow-sm rounded-lg p-4 my-4 bg-gray-800 border border-gray-700"
-                                                    >
-                                                        {index < 2 ? (
-                                                            <>
-                                                                <h2 className="text-xl font-semibold mb-2 text-gray-300">
-                                                                    Test Case {index + 1}
-                                                                </h2>
-                                                                <p className="text-gray-300">
-                                                                    <span className="font-medium text-gray-400">
-                                                                        Your Output:
-                                                                    </span>
-                                                                    {testCase?.stdOut || testCase?.stdout}
-                                                                </p>
+                                                codeResult?.map(
+                                                    (
+                                                        testCase: any,
+                                                        index: any
+                                                    ) => (
+                                                        <div
+                                                            key={index}
+                                                            className="shadow-sm rounded-lg p-4 my-4 bg-gray-800 border border-gray-700"
+                                                        >
+                                                            {index < 2 ? (
+                                                                <>
+                                                                    <h2 className="text-xl font-semibold mb-2 text-gray-300">
+                                                                        Test
+                                                                        Case{' '}
+                                                                        {index +
+                                                                            1}
+                                                                    </h2>
+                                                                    <p className="text-gray-300">
+                                                                        <span className="font-medium text-gray-400">
+                                                                            Your
+                                                                            Output:
+                                                                        </span>
+                                                                        {testCase?.stdOut ||
+                                                                            testCase?.stdout}
+                                                                    </p>
 
-                                                                <p className={`text-gray-300 ${testCase.status === 'Accepted' ? 'text-green-500' : 'text-red-500'}`}>
-                                                                    Status: {testCase.status}
+                                                                    <p
+                                                                        className={`text-gray-300 ${
+                                                                            testCase.status ===
+                                                                            'Accepted'
+                                                                                ? 'text-green-500'
+                                                                                : 'text-red-500'
+                                                                        }`}
+                                                                    >
+                                                                        Status:{' '}
+                                                                        {
+                                                                            testCase.status
+                                                                        }
+                                                                    </p>
+                                                                    <p
+                                                                        className={`text-gray-300`}
+                                                                    >
+                                                                        Memory:{' '}
+                                                                        {
+                                                                            testCase.memory
+                                                                        }
+                                                                    </p>
+                                                                    <p
+                                                                        className={`text-gray-300`}
+                                                                    >
+                                                                        Time:{' '}
+                                                                        {
+                                                                            testCase.time
+                                                                        }
+                                                                    </p>
+                                                                </>
+                                                            ) : (
+                                                                <p
+                                                                    className={`text-gray-300 ${
+                                                                        testCase.status ===
+                                                                        'Accepted'
+                                                                            ? 'text-green-500'
+                                                                            : 'text-red-500'
+                                                                    }`}
+                                                                >
+                                                                    Test Case{' '}
+                                                                    {index + 1}{' '}
+                                                                    status:{' '}
+                                                                    {
+                                                                        testCase.status
+                                                                    }
                                                                 </p>
-                                                                <p className={`text-gray-300`}>
-                                                                    Memory: {testCase.memory}
-                                                                </p>
-                                                                <p className={`text-gray-300`}>
-                                                                    Time: {testCase.time}
-                                                                </p>
-                                                            </>
-                                                        ) : (
-                                                            <p className={`text-gray-300 ${testCase.status === 'Accepted' ? 'text-green-500' : 'text-red-500'}`}>
-                                                                Test Case {index + 1} status: {testCase.status}
-                                                            </p>
-                                                        )}
-                                                    </div>
-                                                ))}
+                                                            )}
+                                                        </div>
+                                                    )
+                                                )}
                                         </div>
                                     </div>
                                 </div>
-
-
                             </ResizablePanel>
                         </ResizablePanelGroup>
                     </ResizablePanel>

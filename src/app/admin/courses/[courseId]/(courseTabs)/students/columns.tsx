@@ -89,7 +89,7 @@ export const columns: ColumnDef<Task>[] = [
             <DataTableColumnHeader column={column} title="Batch Assigned To" />
         ),
         cell: ({ row }) => {
-            const { batchName, userId, bootcampId } = row.original
+            const { batchName, userId, bootcampId , batchId} = row.original
             const { batchData } = getBatchData()
             const newBatchData = batchData?.map((data) => {
                 return {
@@ -97,7 +97,7 @@ export const columns: ColumnDef<Task>[] = [
                     label: data.name,
                 }
             })
-            console.log(batchName)
+            console.log(row.original)
             return (
                 <div className="flex">
                     <ComboboxStudent
@@ -105,6 +105,7 @@ export const columns: ColumnDef<Task>[] = [
                         batchName={batchName}
                         userId={userId}
                         bootcampId={bootcampId}
+                        batchId={batchId}
                     />
                 </div>
             )

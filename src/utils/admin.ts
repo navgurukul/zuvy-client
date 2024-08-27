@@ -331,7 +331,6 @@ export const fetchStudentsHandler = async ({
 }: FetchStudentsParams) => {
     setLoading(true)
 
-    console.log('Hello')
 
     const endpoint = searchTerm
         ? `/bootcamp/students/${courseId}?searchTerm=${searchTerm}`
