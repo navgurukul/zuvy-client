@@ -134,11 +134,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
         }
 
         try {
-            await api.put(
-                `Content/editAssessment/${content.id}/${chapterData.chapterId}`,
-                data
-            )
-
+            await api.put(`Content/editAssessment/${content.id}/${chapterData.chapterId}`, data)
             fetchChapterContent(chapterData.chapterId)
             toast({
                 title: 'Assessment Updated Successfully',
@@ -271,7 +267,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                         )}
                     />
 
-                    <div className="proctoring text-left">
+                    {/* <div className="proctoring text-left">
                         <h2 className=" mt-5 font-bold">
                             Manage Proctoring Boundaries
                         </h2>
@@ -375,7 +371,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                 </FormItem>
                             )}
                         />
-                    </div>
+                    </div> */}
                 </form>
             </Form>
         </main>

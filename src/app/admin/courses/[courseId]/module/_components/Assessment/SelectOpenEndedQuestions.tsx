@@ -1,5 +1,5 @@
 import { cn, difficultyColor, ellipsis } from '@/lib/utils'
-import { PlusCircle, XCircle } from 'lucide-react'
+import { XCircle } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
 
@@ -15,39 +15,42 @@ const SelectOpenEndedQuestions = ({
             <div className="w-full">
                 {selectedQuestions.map((question: any) => (
                     <React.Fragment key={question.id}>
-                        <div
-                            className={`p-5 rounded-sm border border-gray-200 mb-4`}
-                        >
-                            <div className="flex justify-between text-start items-center">
-                                <div>
+                        <div className="p-5 rounded-sm border border-gray-200 mb-4">
+                            <div className="flex justify-between items-start">
+                                <div className="flex-1">
                                     <div className="flex items-center gap-2">
-                                        <h2 className="font-bold text-lg">
+                                        <h2 className="font-bold text-lg truncate">
                                             {ellipsis(question.question, 30)}
                                         </h2>
                                         <span
                                             className={cn(
-                                                `font-semibold text-secondary`,
+                                                'font-semibold text-secondary',
                                                 difficultyColor(
                                                     question.difficulty
                                                 )
                                             )}
                                         >
-                                            {question.difficulty} - OpenEnded
+                                            {question.difficulty}
                                         </span>
                                     </div>
                                     <div className="w-full">
-                                        <p className="text-gray-600 mt-1">
+                                        <p className="text-gray-600 mt-1 text-left">
                                             {ellipsis(question.question, 60)}
                                         </p>
                                     </div>
                                     <Link
-                                        href={''}
-                                        className="font-semibold text-sm mt-2 text-secondary"
+                                        href=""
+                                        className="font-semibold text-sm mt-2 text-secondary text-left block"
                                     >
                                         View Full Description
                                     </Link>
                                 </div>
-                                <div className="flex">
+                                <div className="flex items-center">
+                                    <span
+                                        className="ml-4 bg-[#FEEEC7] text-secondary px-2 py-1 rounded-sm font-semibold"
+                                    >
+                                        OpenEnded
+                                    </span>
                                     <XCircle
                                         onClick={() =>
                                             setSelectedQuestions(
@@ -57,7 +60,7 @@ const SelectOpenEndedQuestions = ({
                                                 )
                                             )
                                         }
-                                        className="text-destructive cursor-pointer"
+                                        className="text-destructive cursor-pointer ml-4"
                                         size={20}
                                     />
                                 </div>

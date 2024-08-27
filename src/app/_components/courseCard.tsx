@@ -41,7 +41,7 @@ function CourseCard({
     typeId: number
 }) {
     const timeAllotedInWeeks = Math.ceil(timeAlloted / 604800)
-    const timeAllotedInDays = Math.round(timeAlloted / 86400)
+    const timeAllotedInDays = Math.ceil(timeAlloted / 86400)
 
     return (
         <Link

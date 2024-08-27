@@ -115,7 +115,7 @@ const IDE: React.FC<IDEProps> = ({
                     sourceCode: b64EncodeUnicode(currentCode),
                 }
             )
-            setResult(response.data.data[0].stdOut)
+            setResult(response.data.data[0].stdOut || response.data.data[0].stdout || 'No Output Available')
             setCodeResult(response.data.data)
             const testCases = response.data.data
             const allTestCasesPassed = testCases.every(
@@ -181,6 +181,11 @@ const IDE: React.FC<IDEProps> = ({
             setCurrentCode(b64DecodeUnicode(templates?.[language]?.template))
         }
     }, [language])
+
+    useEffect(() => {
+        console.log('codeResult:', codeResult);
+    }, [codeResult]);
+
 
     return (
         <div>
@@ -343,25 +348,14 @@ const IDE: React.FC<IDEProps> = ({
                                 </div>
                             </ResizablePanel>
                             <ResizableHandle withHandle />
-                            <ResizablePanel defaultSize={30}>
-                                <div className="flex h-full ">
-                                    <div className="w-full max-w-5xl  p-2  bg-muted  ">
-                                        <div className="flex justify-between p-2">
-                                            <p className="text-lg">
-                                                Output Window
-                                            </p>
-
+                            <ResizablePanel className='' defaultSize={40}>
+                                <div className="flex h-full">
+                                    <div className="w-full max-w-5xl bg-muted p-2 mx-2">
+                                        <div className="flex justify-between p-2 bg-gray-800 border-b border-gray-700">
+                                            <p className="text-lg text-gray-300">Output Window</p>
                                         </div>
                                         <div className="h-full p-4 text-start text-gray-100 overflow-y-auto font-mono bg-gray-900 border border-gray-700 rounded-b-lg">
-                                            <code className="block whitespace-pre-wrap">
-                                                {codeError ? (
-                                                    <span className="text-red-500">{codeError}</span>
-                                                ) : (
-                                                    result
-                                                )}
-                                            </code>
-                                            {result &&
-                                                codeResult?.map((testCase: any, index: any) => (
+                                            {codeResult?.map((testCase: any, index: any) => (
                                                     <div
                                                         key={index}
                                                         className="shadow-sm rounded-lg p-4 my-4 bg-gray-800 border border-gray-700"
@@ -371,45 +365,35 @@ const IDE: React.FC<IDEProps> = ({
                                                                 <h2 className="text-xl font-semibold mb-2 text-gray-300">
                                                                     Test Case {index + 1}
                                                                 </h2>
-                                                                {testCase.input.map((input: any, idx: any) => (
-                                                                    <p key={idx} className="text-gray-300">
-                                                                        <span className="font-medium text-gray-400">
-                                                                            Input {idx + 1}:
-                                                                        </span>{' '}
-                                                                        {input.parameterName} ({input.parameterType}) ={' '}
-                                                                        {input.parameterValue}
-                                                                    </p>
-                                                                ))}
-                                                                <p className="mt-2 text-gray-300">
-                                                                    <span className="font-medium text-gray-400">
-                                                                        Expected Output:
-                                                                    </span>{' '}
-                                                                    {testCase.output.parameterType} ={' '}
-                                                                    {testCase.output.parameterValue}
-                                                                </p>
                                                                 <p className="text-gray-300">
                                                                     <span className="font-medium text-gray-400">
                                                                         Your Output:
-                                                                    </span>{' '}
-                                                                    {result}
+                                                                    </span>
+                                                                    {testCase?.stdOut || testCase?.stdout}
                                                                 </p>
+
                                                                 <p className={`text-gray-300 ${testCase.status === 'Accepted' ? 'text-green-500' : 'text-red-500'}`}>
                                                                     Status: {testCase.status}
                                                                 </p>
+                                                                <p className={`text-gray-300`}>
+                                                                    Memory: {testCase.memory}
+                                                                </p>
+                                                                <p className={`text-gray-300`}>
+                                                                    Time: {testCase.time}
+                                                                </p>
                                                             </>
                                                         ) : (
-                                                            <p className="font-medium text-gray-300">
+                                                            <p className={`text-gray-300 ${testCase.status === 'Accepted' ? 'text-green-500' : 'text-red-500'}`}>
                                                                 Test Case {index + 1} status: {testCase.status}
                                                             </p>
                                                         )}
                                                     </div>
                                                 ))}
                                         </div>
-
-
                                     </div>
                                 </div>
                             </ResizablePanel>
+
                         </ResizablePanelGroup>
                     </ResizablePanel>
                 </ResizablePanelGroup>
