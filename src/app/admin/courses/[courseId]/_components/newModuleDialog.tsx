@@ -45,15 +45,22 @@ interface newModuleDialogProps {
     ) => void
     handleTypeChange: (event: React.ChangeEvent<HTMLInputElement>) => void
     typeId: number
+    isOpen: any
 }
 
 const moduleSchema = z.object({
     moduleType: z.enum(['learning-material', 'project']),
-    name: z.string().min(2, { message: 'Module Name must be at least 2 characters.' }),
-    description: z.string().min(2, { message: 'Module Description must be at least 2 characters.' }),
+    name: z
+        .string()
+        .min(2, { message: 'Module Name must be at least 2 characters.' }),
+    description: z
+        .string()
+        .min(2, {
+            message: 'Module Description must be at least 2 characters.',
+        }),
     months: z.number().min(0, { message: 'Months Should not be empty.' }),
     weeks: z.number().min(0, { message: 'Weeks Should not be empty.' }),
-    days: z.number().min(0, { message: 'Days Should not be empty.' })
+    days: z.number().min(0, { message: 'Days Should not be empty.' }),
 })
 
 const NewModuleDialog: React.FC<newModuleDialogProps> = ({
@@ -64,8 +71,8 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
     handleTimeAllotedChange,
     handleTypeChange,
     typeId,
+    isOpen,
 }) => {
-
     const form = useForm<z.infer<typeof moduleSchema>>({
         resolver: zodResolver(moduleSchema),
         defaultValues: {
@@ -74,13 +81,18 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
             description: moduleData.description,
             months: 0,
             weeks: 0,
-        }
-
+        },
     })
 
     const onSubmit: any = (values: z.infer<typeof moduleSchema>) => {
         createModule()
     }
+
+    useEffect(() => {
+        if (!isOpen) {
+            form.reset() // Reset form state and errors when the dialog is closed
+        }
+    }, [isOpen, form])
 
     useEffect(() => {
         // Check if typeId is not -1, which means it's a new form
@@ -92,19 +104,16 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                 months: 0,
                 weeks: 0,
                 days: 0,
-            });
-
+            })
         } else {
-            form.setValue('moduleType', 'learning-material');
-            form.setValue('name', moduleData.name);
-            form.setValue('description', moduleData.description);
-            form.setValue('months', timeData.months);
-            form.setValue('weeks', timeData.weeks);
-            form.setValue('days', timeData.days);
+            form.setValue('moduleType', 'learning-material')
+            form.setValue('name', moduleData.name)
+            form.setValue('description', moduleData.description)
+            form.setValue('months', timeData.months)
+            form.setValue('weeks', timeData.weeks)
+            form.setValue('days', timeData.days)
         }
-
-    }, [moduleData, timeData, typeId, form]);
-
+    }, [moduleData, timeData, typeId, form])
 
     return (
         <Form {...form}>
@@ -114,13 +123,10 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
             >
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>
-                            New Module
-                        </DialogTitle>
+                        <DialogTitle>New Module</DialogTitle>
                         <div className="main_container flex items-center align-middle text-center">
                             <div className="flex items-center">
                                 <div>
-
                                     <FormField
                                         control={form.control}
                                         name="moduleType"
@@ -133,7 +139,9 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                                         className="size-4"
                                                         value="learning-material"
                                                         checked={typeId === 1}
-                                                        onChange={handleTypeChange}
+                                                        onChange={
+                                                            handleTypeChange
+                                                        }
                                                         name="moduleType"
                                                     />
                                                 </FormControl>
@@ -143,7 +151,10 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                     />
                                 </div>
                                 <div>
-                                    <Label className="m-2 " htmlFor="learning-material">
+                                    <Label
+                                        className="m-2 "
+                                        htmlFor="learning-material"
+                                    >
                                         Learning Material
                                     </Label>
                                 </div>
@@ -151,7 +162,6 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
 
                             <div className="flex items-center ">
                                 <div>
-
                                     <FormField
                                         control={form.control}
                                         name="moduleType"
@@ -164,7 +174,9 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                                         className="size-4"
                                                         value="project"
                                                         checked={typeId === 2}
-                                                        onChange={handleTypeChange}
+                                                        onChange={
+                                                            handleTypeChange
+                                                        }
                                                         name="moduleType"
                                                     />
                                                 </FormControl>
@@ -193,9 +205,13 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                                 <Input
                                                     type="text"
                                                     placeholder={
-                                                        typeId === 2 ? 'Project Name' : 'Module Name'
+                                                        typeId === 2
+                                                            ? 'Project Name'
+                                                            : 'Module Name'
                                                     }
-                                                    onChange={handleModuleChange}
+                                                    onChange={
+                                                        handleModuleChange
+                                                    }
                                                     name="name"
                                                 />
                                             </FormControl>
@@ -227,7 +243,9 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                                             ? 'Project Description'
                                                             : 'Module Description'
                                                     }
-                                                    onChange={(e) => handleModuleChange(e)}
+                                                    onChange={(e) =>
+                                                        handleModuleChange(e)
+                                                    }
                                                     name="description"
                                                 />
                                             </FormControl>
@@ -253,11 +271,14 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                                         id="months"
                                                         placeholder="Months"
                                                         value={
-                                                            timeData?.months > -1
+                                                            timeData?.months >
+                                                            -1
                                                                 ? timeData?.months
                                                                 : undefined
                                                         }
-                                                        onChange={handleTimeAllotedChange}
+                                                        onChange={
+                                                            handleTimeAllotedChange
+                                                        }
                                                         name="months"
                                                     />
                                                 </FormControl>
@@ -278,14 +299,15 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                                         className="no-spinners focus-visible:ring-muted"
                                                         type="number"
                                                         id="weeks"
-
                                                         placeholder="Weeks"
                                                         value={
                                                             timeData?.weeks > -1
                                                                 ? timeData?.weeks
                                                                 : undefined
                                                         }
-                                                        onChange={handleTimeAllotedChange}
+                                                        onChange={
+                                                            handleTimeAllotedChange
+                                                        }
                                                         name="weeks"
                                                     />
                                                 </FormControl>
@@ -306,12 +328,15 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                                         className="no-spinners focus-visible:ring-muted"
                                                         type="number"
                                                         id="days"
-
                                                         placeholder="Days"
                                                         value={
-                                                            timeData?.days > -1 ? timeData?.days : undefined
+                                                            timeData?.days > -1
+                                                                ? timeData?.days
+                                                                : undefined
                                                         }
-                                                        onChange={handleTimeAllotedChange}
+                                                        onChange={
+                                                            handleTimeAllotedChange
+                                                        }
                                                         name="days"
                                                     />
                                                 </FormControl>
@@ -320,7 +345,6 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                         )}
                                     />
                                 </div>
-
                             </div>
                         </div>
                     </DialogHeader>
