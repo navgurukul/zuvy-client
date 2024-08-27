@@ -148,7 +148,8 @@ const IDE: React.FC<IDEProps> = ({
             setCodeError('')
 
             // Trigger re-render for the output window
-            setResult(response.data.data[0]?.stdOut || 'No output available')
+            setResult(response.data.data[0].stdOut || response.data.data[0].stdout || 'No Output Available')
+
         } catch (error: any) {
             toast({
                 title: 'Failed',
@@ -361,50 +362,31 @@ const IDE: React.FC<IDEProps> = ({
                                 </div>
                             </ResizablePanel>
                             <ResizableHandle withHandle />
-                            <ResizablePanel defaultSize={30}>
+                            <ResizablePanel className='' defaultSize={40}>
                                 <div className="flex h-full">
-                                    <div className="w-full max-w-5xl p-2 bg-gray-900">
+                                    <div className="w-full max-w-5xl bg-muted p-2 mx-2">
                                         <div className="flex justify-between p-2 bg-gray-800 border-b border-gray-700">
                                             <p className="text-lg text-gray-300">
                                                 Output Window
                                             </p>
                                         </div>
                                         <div className="h-full p-4 text-start text-gray-100 overflow-y-auto font-mono bg-gray-900 border border-gray-700 rounded-b-lg">
-                                            <code className="block whitespace-pre-wrap">
-                                                {codeError ? (
-                                                    <span className="text-red-500">
-                                                        {codeError}
-                                                    </span>
-                                                ) : (
-                                                    result
-                                                )}
-                                            </code>
-                                            {result &&
-                                                codeResult?.map(
-                                                    (
-                                                        testCase: any,
-                                                        index: any
-                                                    ) => (
-                                                        <div
-                                                            key={index}
-                                                            className="shadow-sm rounded-lg p-4 my-4 bg-gray-800 border border-gray-700"
-                                                        >
-                                                            {index < 2 ? (
-                                                                <>
-                                                                    <h2 className="text-xl font-semibold mb-2 text-gray-300">
-                                                                        Test
-                                                                        Case{' '}
-                                                                        {index +
-                                                                            1}
-                                                                    </h2>
-                                                                    <p className="text-gray-300">
-                                                                        <span className="font-medium text-gray-400">
-                                                                            Your
-                                                                            Output:
-                                                                        </span>
-                                                                        {testCase?.stdOut ||
-                                                                            testCase?.stdout}
-                                                                    </p>
+                                            {codeResult?.map((testCase: any, index: any) => (
+                                                    <div
+                                                        key={index}
+                                                        className="shadow-sm rounded-lg p-4 my-4 bg-gray-800 border border-gray-700"
+                                                    >
+                                                        {index < 2 ? (
+                                                            <>
+                                                                <h2 className="text-xl font-semibold mb-2 text-gray-300">
+                                                                    Test Case {index + 1}
+                                                                </h2>
+                                                                <p className="text-gray-300">
+                                                                    <span className="font-medium text-gray-400">
+                                                                        Your Output:
+                                                                    </span>
+                                                                    {testCase?.stdOut || testCase?.stdout}
+                                                                </p>
 
                                                                     <p
                                                                         className={`text-gray-300 ${

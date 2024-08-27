@@ -1,27 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react'
-
-import Link from 'next/link'
-
 import { Input } from '@/components/ui/input'
-import { cn } from '@/lib/utils'
-
 import { Separator } from '@/components/ui/separator'
-import { ExternalLink } from 'lucide-react'
 import QuizLibrary from './QuizLibrary'
 import { quizData, Options } from './QuizLibrary'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import QuizModal from './QuizModal'
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from '@/components/ui/dialog'
-import NewMcqProblemForm from '@/app/admin/resource/_components/NewMcqProblemForm'
 import { api } from '@/utils/axios.config'
 import { Tag } from '@/app/admin/resource/mcq/page'
 import { toast } from '@/components/ui/use-toast'
@@ -149,71 +133,10 @@ function Quiz(props: any) {
                                 </Button>
                             </div>
                         )}
-                        {/* <Dialog>
-                            <DialogTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    className="text-secondary font-semibold"
-                                >
-                                    Add Question
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>New MCQ</DialogTitle>
-                                </DialogHeader>
-                                <div className="w-full">
-                                    <NewMcqProblemForm
-                                        tags={tags}
-                                        closeModal={closeModal}
-                                        setStoreQuizData={setStoreQuizData}
-                                        getAllQuizQuesiton={getAllQuizQuestion}
-                                    />
-                                </div>
-                            </DialogContent>
-                        </Dialog> */}
+            
                     </div>
                 </ScrollArea>
 
-                {/* <div className="w-full mt-6">
-                    {content &&
-                        (
-                            content as {
-                                id: number
-                                question: string
-                                options: string[]
-                                correctOption: string
-                            }[]
-                        ).map(
-                            (
-                                { id, question, options, correctOption },
-                                index
-                            ) => (
-                                <div key={id} className="text-start mb-5">
-                                    <p>
-                                        Q{index + 1}. {question}
-                                    </p>
-                                    <ul className="text-start">
-                                        {Object.entries(options).map(
-                                            ([key, value]) => (
-                                                <li
-                                                    key={key}
-                                                    className={`rounded-sm my-1 p-2 ${
-                                                        correctOption ===
-                                                        key.toString()
-                                                            ? 'bg-secondary text-white'
-                                                            : ''
-                                                    }`}
-                                                >
-                                                    {value}
-                                                </li>
-                                            )
-                                        )}
-                                    </ul>
-                                </div>
-                            )
-                        )}
-                </div> */}
             </div>
         </>
     )
