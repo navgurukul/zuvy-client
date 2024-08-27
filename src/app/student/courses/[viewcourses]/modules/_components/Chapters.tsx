@@ -108,16 +108,6 @@ function Chapters({ params }: any) {
     }
 
     const renderChapterContent = () => {
-        if (typeId === 2)
-            return (
-                <Projects
-                    moduleId={+moduleID}
-                    projectId={projectId}
-                    bootcampId={+viewcourses}
-                    completeChapter={completeChapter}
-                />
-            )
-
         switch (topicId) {
             case 1:
                 return (
