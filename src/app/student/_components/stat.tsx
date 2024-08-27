@@ -18,6 +18,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
+import Image from 'next/image'
 
 // import { Switch } from "@/components/ui/switch"
 
@@ -104,7 +105,7 @@ export function Stat({ className, ...props }: CardProps) {
     return (
         <>
             {students.length > 0 &&
-                (students.length < 4 ? (
+                (students.length < 3 ? (
                     // <Skeleton className="h-4 w-4/6" />
                     <Card
                         className={cn(
@@ -114,7 +115,7 @@ export function Stat({ className, ...props }: CardProps) {
                     >
                         <CardHeader>
                             <CardTitle className="flex justify-between items-center">
-                                Participents who are enrolled this course should
+                                Participants who are enrolled this course should
                                 be at least more than 2
                             </CardTitle>
                         </CardHeader>
@@ -218,7 +219,14 @@ export function Stat({ className, ...props }: CardProps) {
                                     <Avatar>
                                         <AvatarImage src="https://github.com/shadcn.png" />
                                         <AvatarFallback>
-                                            Souvik Deb
+                                            {
+                                                <Image
+                                                    src="https://avatar.iran.liara.run/public/boy?username=Ash"
+                                                    alt="avatar"
+                                                    width={40}
+                                                    height={40}
+                                                />
+                                            }
                                         </AvatarFallback>
                                     </Avatar>
                                     <p className="text-md font-bold mt-2">
@@ -236,7 +244,14 @@ export function Stat({ className, ...props }: CardProps) {
                                     <Avatar className="w-16 h-16">
                                         <AvatarImage src="https://github.com/shadcn.png" />
                                         <AvatarFallback>
-                                            Souvik Deb
+                                            {
+                                                <Image
+                                                    src="https://avatar.iran.liara.run/public/boy?username=Ash"
+                                                    alt="avatar"
+                                                    width={40}
+                                                    height={40}
+                                                />
+                                            }
                                         </AvatarFallback>
                                     </Avatar>
                                     <p className="text-md font-bold mt-2">
@@ -250,7 +265,14 @@ export function Stat({ className, ...props }: CardProps) {
                                     <Avatar>
                                         <AvatarImage src="https://github.com/shadcn.png" />
                                         <AvatarFallback>
-                                            Souvik Deb
+                                            {
+                                                <Image
+                                                    src="https://avatar.iran.liara.run/public/boy?username=Ash"
+                                                    alt="avatar"
+                                                    width={40}
+                                                    height={40}
+                                                />
+                                            }
                                         </AvatarFallback>
                                     </Avatar>
                                     <p className="text-md font-bold mt-2">
