@@ -10,7 +10,6 @@ const Curricullum = () => {
     const getAllCourses = useCallback(async () => {
         try {
             const response = await api.get(`Content/allModules/117`)
-            console.log('response', response.data)
             setAllCourses(response.data)
         } catch (error) {
             console.error('Error fetching courses:', error)

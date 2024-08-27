@@ -31,12 +31,13 @@ interface ModuleData {
     description: string
     type: string
     timeAlloted: number
+    typeId: number
 }
 function Page() {
     // state and variables
     const [curriculum, setCurriculum] = useState([])
     const { courseData } = getCourseData()
-    const [typeId, setTypeId] = useState(0)
+    const [typeId, setTypeId] = useState(1)
     const [loading, setLoading] = useState(true)
     const [editMode, setEditMode] = useState(false)
     const [moduleId, setModuleId] = useState(0)
@@ -60,7 +61,6 @@ function Page() {
     }
     const handleModuleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
-        console.log(name, value)
         setModuleData((prev) => ({ ...prev, [name]: value }))
     }
     const handleTimeAllotedChange = (
@@ -101,7 +101,6 @@ function Page() {
     }
     useEffect(() => {
         if (isOpen) {
-        
             setModuleData({
                 name: '',
                 description: '',
@@ -113,7 +112,7 @@ function Page() {
             })
         }
     }, [isOpen])
-    
+
     useEffect(() => {
         if (isEditOpen) {
             if (selectedModuleData) {
@@ -121,6 +120,7 @@ function Page() {
                     name: selectedModuleData.name || '',
                     description: selectedModuleData.description || '',
                 })
+                setTypeId(selectedModuleData.typeId)
                 const result = convertSeconds(selectedModuleData.timeAlloted)
                 setTimeData({
                     days: result.days,
@@ -129,7 +129,6 @@ function Page() {
                 })
             }
         } else {
-        
             setModuleData({
                 name: '',
                 description: '',
@@ -141,8 +140,8 @@ function Page() {
             })
         }
     }, [isEditOpen, selectedModuleData])
-    
-//  Edit Module Function:-
+
+    //  Edit Module Function:-
     const editModule = () => {
         const { days, weeks, months } = timeData
         const totalDays = days + (weeks * 7) + (months * 28)
@@ -277,30 +276,28 @@ function Page() {
                 <div className=" w-full flex justify-end pr-4 ">
                     <div>
                     <Dialog  open={isOpen} onOpenChange={setIsOpen}>
-                        <DialogTrigger asChild>
-                            <Button className="text-white bg-secondary  ">
-                                Add Module
-                            </Button>
-                        
-                        </DialogTrigger>
-    
-                        <DialogOverlay />
-                        <NewModuleDialog
-                            moduleData={moduleData}
-                            timeData={timeData}
-                            createModule={createModule}
-                            handleModuleChange={handleModuleChange}
-                            handleTimeAllotedChange={handleTimeAllotedChange}
-                            handleTypeChange={handleTypeChange}
-                            typeId={typeId}
-                        />
-                    </Dialog>
+                            <DialogTrigger asChild>
+                                <Button className="text-white bg-secondary  ">
+                                    Add Module
+                                </Button>
+                            </DialogTrigger>
+
+                            <DialogOverlay />
+                            <NewModuleDialog
+                                moduleData={moduleData}
+                                timeData={timeData}
+                                createModule={createModule}
+                                handleModuleChange={handleModuleChange}
+                                handleTimeAllotedChange={handleTimeAllotedChange}
+                                handleTypeChange={handleTypeChange}
+                                typeId={typeId}
+                            />
+                        </Dialog>
                     </div>
                 </div>
             )}
-           {
-                isEditOpen && (
-                    <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+            {isEditOpen && (
+                <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
                     <EditModuleDialog
                         editMode={editMode}
                         moduleData={moduleData}
@@ -313,8 +310,7 @@ function Page() {
                         typeId={typeId}
                     />
                 </Dialog>
-                )
-           }
+            )}
             {loading ? (
                 <div className="my-5 flex justify-center items-center">
                     <div className="absolute h-screen">
@@ -397,7 +393,7 @@ function Page() {
                             <Dialog>
                                 <DialogTrigger asChild>
                                     <Button className="text-white bg-secondary">
-                                        Add module 
+                                        Add module
                                     </Button>
                                 </DialogTrigger>
                                 <DialogOverlay />
