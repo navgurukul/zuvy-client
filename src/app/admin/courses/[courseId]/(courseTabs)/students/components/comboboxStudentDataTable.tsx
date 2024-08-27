@@ -25,11 +25,13 @@ export function ComboboxStudent({
     batchName,
     userId,
     bootcampId,
+    batchId,
 }: {
     batchData: any
     batchName: any
     userId: any
     bootcampId: any
+    batchId: any
 }) {
     const [open, setOpen] = React.useState(false)
     const [value, setValue] = React.useState('')
@@ -39,7 +41,8 @@ export function ComboboxStudent({
 
     React.useEffect(() => {
         setDisplayBatchName(batchName || 'Unassigned')
-    }, [batchName])
+        setValue(batchId)
+    }, [batchName, batchId])
     const handleSelectBatchChange = async (
         currentValue: any,
         value: any,
@@ -75,6 +78,9 @@ export function ComboboxStudent({
         } finally {
         }
     }
+
+    console.log(value)
+
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
@@ -82,7 +88,7 @@ export function ComboboxStudent({
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className="w-[200px] justify-between"
+                    className="w-[200px] justify-between capitalize"
                 >
                     {displaybatchName}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -96,6 +102,7 @@ export function ComboboxStudent({
                         {batchData.map((batch: any) => (
                             <CommandItem
                                 key={batch.value}
+                                disabled={value == batch.value}
                                 value={`${batch.value}-${batch.label}`}
                                 onSelect={(currentValue) =>
                                     handleSelectBatchChange(
@@ -109,7 +116,7 @@ export function ComboboxStudent({
                                 <Check
                                     className={cn(
                                         'mr-2 h-4 w-4',
-                                        value === batch.value
+                                        value == batch.value
                                             ? 'opacity-100'
                                             : 'opacity-0'
                                     )}

@@ -35,7 +35,7 @@ const AssesmentComponent = (props: Props) => {
                                 <Code className="w-5 lg:w-6 h-5 lg:h-6 text-blue-500 mr-2" />
                                 {props.codingChallenges}
                             </div>
-                            <p className="text-gray-600 dark:text-gray-300 text-sm mt-2">
+                            <p className="text-gray-600 font-semibold text-sm mt-2">
                                 Coding Challenges
                             </p>
                         </div>
@@ -46,7 +46,7 @@ const AssesmentComponent = (props: Props) => {
                                 <CheckCircle className="w-5 lg:w-6 h-5 lg:h-6 text-green-500 mr-2" />
                                 {props.mcq}
                             </div>
-                            <p className="text-gray-600 dark:text-gray-300 text-sm mt-2">
+                            <p className="text-gray-600 font-semibold text-sm mt-2">
                                 MCQs
                             </p>
                         </div>
@@ -57,7 +57,7 @@ const AssesmentComponent = (props: Props) => {
                                 <FileText className="w-5 lg:w-6 h-5 lg:h-6 text-yellow-500 mr-2" />
                                 {props.openEnded}
                             </div>
-                            <p className="text-gray-600 dark:text-gray-300 text-sm mt-2">
+                            <p className="text-gray-600 font-semibold text-sm mt-2">
                                 Open-Ended
                             </p>
                         </div>
@@ -77,7 +77,7 @@ const AssesmentComponent = (props: Props) => {
                             <div className="flex items-center justify-center text-lg lg:text-xl font-semibold text-secondary bg-secondary bg-opacity-30 px-3 lg:px-4 py-2 rounded-md backdrop-blur-md">
                                 {props.qualifiedStudents}
                             </div>
-                            <p className="text-gray-600 dark:text-gray-300 text-sm mt-2">
+                            <p className="text-gray-600 font-semibold text-sm mt-2">
                                 Qualified Students
                             </p>
                         </div>
@@ -95,15 +95,15 @@ const AssesmentComponent = (props: Props) => {
                                 {props.studentsSubmitted}/
                                 {props.totalSubmissions}
                             </div>
-                            <p className="text-gray-600 dark:text-gray-300 text-sm mt-2">
-                                Qualified Students
+                            <p className="text-gray-600 font-semibold text-sm mt-2">
+                                Submitted Students
                             </p>
                         </div>
                         <Link
                             href={`/admin/courses/${props.bootcampId}/submissionAssesments/${props.id}`}
                             className="w-full lg:w-auto"
                         >
-                            <Button className="flex justify-center lg:justify-start items-center w-full lg:w-auto py-2 bg-secondary text-white font-bold rounded-md shadow-md transition-all duration-300">
+                            <Button className="flex justify-center lg:justify-start items-center w-full mt-1 lg:w-auto py-2 bg-secondary text-white font-bold rounded-md shadow-md transition-all duration-300">
                                 <h1 className="w-full text-center">
                                     View Submission
                                 </h1>

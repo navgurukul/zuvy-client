@@ -49,7 +49,7 @@ const IndividualStudentAssesment = ({
         <div
             className={`flex flex-col h-auto lg:h-[220px] p-3 shadow-lg backdrop-blur-lg transition-transform transform  hover:shadow-xl rounded-md overflow-hidden mt-3 ${
                 type === 'quizSubmission' || type === 'openEndedSubmission'
-                    ? 'w-4/5'
+                    ? 'w-3/5'
                     : 'w-full'
             }`}
         >

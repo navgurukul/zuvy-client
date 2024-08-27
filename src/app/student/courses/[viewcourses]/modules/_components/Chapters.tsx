@@ -60,10 +60,10 @@ function Chapters({ params }: any) {
             // )
             // setActiveChapter(nextChapterId || firstPending.id)
             // fetchChapterContent(nextChapterId || firstPending.id)
+            setTypeId(response?.data.moduleDetails[0]?.typeId)
             setProjectId(response?.data.moduleDetails[0]?.projectId)
             setActiveChapter(firstPending?.id)
             fetchChapterContent(firstPending?.id)
-            setTypeId(response?.data.moduleDetails[0]?.typeId)
         } catch (error) {
             console.log(error)
         }
@@ -237,7 +237,12 @@ function Chapters({ params }: any) {
                     </div>
                 </div>
             ) : (
-                <h1 className="mt-5">No Chapters Available Right Now</h1>
+                <Projects
+                    moduleId={+moduleID}
+                    projectId={projectId}
+                    bootcampId={+viewcourses}
+                    completeChapter={completeChapter}
+                />
             )}
         </>
     )

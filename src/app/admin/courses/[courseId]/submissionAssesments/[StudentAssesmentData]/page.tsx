@@ -16,6 +16,7 @@ const Page = ({ params }: any) => {
 
     const [dataTableAssesment, setDataTableAssessments] = useState<any>([])
     const [bootcampData, setBootcampData] = useState<any>()
+    const [passPercentage, setPassPercentage] = useState<number>(0)
 
     const crumbs = [
         {
@@ -55,6 +56,7 @@ const Page = ({ params }: any) => {
             )
             const data = res.data
             setAssessmentData(data.ModuleAssessment)
+            setPassPercentage(data.passPercentage)
 
             const updatedAssessments = data.submitedOutsourseAssessments.map(
                 (assessment: any) => ({
@@ -83,8 +85,6 @@ const Page = ({ params }: any) => {
 
         fetchData()
     }, [getStudentAssesmentDataHandler, getBootcampHandler])
-
-    console.log(dataTableAssesment)
 
     return (
         <>
@@ -128,7 +128,7 @@ const Page = ({ params }: any) => {
                             </div>
                             <div className="p-4 rounded-lg shadow-md ">
                                 <h1 className="text-gray-600 font-semibold text-xl">
-                                    {70}%
+                                    {passPercentage}%
                                 </h1>
                                 <p className="text-gray-500 ">
                                     Pass Percentage

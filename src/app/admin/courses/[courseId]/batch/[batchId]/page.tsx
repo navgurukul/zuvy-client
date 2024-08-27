@@ -237,6 +237,7 @@ const BatchesInfo = ({
 
     const fetchStudentData = useCallback(
         async (offset: number) => {
+            console.log('Hello')
             let endpoint = `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}&limit=${position}&offset=${offset}`
             if (debouncedValue) {
                 endpoint += `&searchTerm=${debouncedValue}`
@@ -557,7 +558,10 @@ const BatchesInfo = ({
                                                         <Button
                                                             className="w-1/2"
                                                             type="submit"
-                                                            disabled={!form.formState.isValid}
+                                                            disabled={
+                                                                !form.formState
+                                                                    .isValid
+                                                            }
                                                         >
                                                             Update batch
                                                         </Button>
@@ -604,6 +608,7 @@ const BatchesInfo = ({
                                     id={+params.courseId || 0}
                                     batch={true}
                                     batchId={params.batchId}
+                                    fetchBatchesData={fetchStudentData}
                                 />
                             </Dialog>
                         </div>

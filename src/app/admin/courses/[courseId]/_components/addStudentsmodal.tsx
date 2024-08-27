@@ -28,11 +28,13 @@ const AddStudentsModal = ({
     message,
     batch,
     batchId,
+    fetchBatchesData,
 }: {
     id: number
     message: boolean
     batch: boolean
     batchId: any
+    fetchBatchesData?: any
 }) => {
     // misc
     interface Student {
@@ -82,6 +84,7 @@ const AddStudentsModal = ({
                     ? `/bootcamp/students/${id}?batch_id=${batchId}`
                     : `/bootcamp/students/${id}`
                 await api.post(endpoint, requestBody).then((response) => {
+                    batch && fetchBatchesData()
                     toast({
                         title: response.data.status,
                         description: response.data.message,
