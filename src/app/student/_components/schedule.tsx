@@ -29,6 +29,7 @@ interface ResumeCourse {
     bootcampId?: number
     newChapter?: any
     moduleId?: number
+    typeId?: number
 }
 
 interface EnrolledCourse {
@@ -152,25 +153,12 @@ function Schedule({ className, ...props }: ScheduleProps) {
 
     return (
         <div>
-            <div className="flex flex-col items-start mt-6">
-                <h1 className="text-xl p-1 text-start font-bold mb-4">
-                    Upcoming Classes
-                </h1>
-
-                {/* Proper alignment of the classes and attendance data */}
-                {/* <div className="flex">
-                    <div className="w-[64%] bg-red-500 flex flex-row-reverse mr-10">
-                        <div>01</div>
-                    </div>
-                    <div className="w-[32%] bg-blue-500 flex">
-                        <div>04</div>
-                        <div>05</div>
-                        <div>06</div>
-                    </div>
-                </div> */}
-
-                <div className="w-full flex flex-col items-center lg:flex-row lg:justify-between gap-8">
-                    {allClasses?.length > 0 ? (
+            {allClasses.length > 0 && (
+                <div className="flex flex-col items-start mt-6">
+                    <h1 className="text-xl p-1 text-start font-bold mb-4">
+                        Upcoming Classes
+                    </h1>
+                    <div className="w-full flex flex-col items-center lg:flex-row lg:justify-between gap-8">
                         <div className="flex flex-col w-full lg:max-w-[860px]">
                             {ongoingClasses.map((classData: any, index) => (
                                 <ClassCard
@@ -193,35 +181,21 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                 />
                             ))}
                         </div>
-                    ) : (
-                        <div className="flex flex-col items-center mt-12 lg:w-[870px]">
-                            <Image
-                                src="/no-class.svg"
-                                alt="No classes"
-                                width={240}
-                                height={240}
-                            />
-                            <p className="text-lg mt-3 text-center">
-                                There are no upcoming classes
-                            </p>
+                    </div>
+                    {allClasses?.length > 2 && (
+                        <div className="w-full flex justify-center mt-3">
+                            <Link href="/student/classes">
+                                <div className="flex items-center border rounded-md border-secondary px-3 py-1 text-secondary">
+                                    <h1 className="text-lg p-1 font-bold">
+                                        See All Upcoming Classes
+                                    </h1>
+                                    <ChevronRight size={20} />
+                                </div>
+                            </Link>
                         </div>
                     )}
                 </div>
-                {allClasses?.length > 2 && (
-                    <div className="w-full flex justify-center mt-3">
-                        <Link href="/student/classes">
-                            <div className="flex items-center border rounded-md border-secondary px-3 py-1 text-secondary">
-                                <h1 className="text-lg p-1 font-bold">
-                                    See All Upcoming Classes
-                                </h1>
-                                <ChevronRight size={20} />
-                            </div>
-                        </Link>
-                    </div>
-                )}
-            </div>
-
-            {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */}
+            )}
 
             {(submissionMessage || courseStarted) && (
                 <div className="flex flex-col flex-start mt-6">
@@ -237,7 +211,20 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                             <div className="flex flex-row justify-between items-center gap-6">
                                                 <div>
                                                     <div className="flex flex-row gap-3">
-                                                        <BookOpenText className="hidden sm:block mt-2" />
+                                                        {resumeCourse.newChapter
+                                                            ?.title &&
+                                                            resumeCourse.typeId ===
+                                                                1 && (
+                                                                <BookOpenText className="mt-2" />
+                                                            )}
+                                                        {resumeCourse.newChapter
+                                                            ?.title &&
+                                                            resumeCourse.typeId ===
+                                                                2 && (
+                                                                <h1 className="text-md mt-2 text-start font-bold">
+                                                                    Project:
+                                                                </h1>
+                                                            )}
                                                         <h1
                                                             className={`${
                                                                 resumeCourse
@@ -303,7 +290,20 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                         <Card className="w-full mb-3 border-none p-5 shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F]">
                                             <div>
                                                 <div className="flex flex-row gap-3">
-                                                    <BookOpenText className="mt-2" />
+                                                    {resumeCourse.newChapter
+                                                        ?.title &&
+                                                        resumeCourse.typeId ===
+                                                            1 && (
+                                                            <BookOpenText className="mt-2" />
+                                                        )}
+                                                    {resumeCourse.newChapter
+                                                        ?.title &&
+                                                        resumeCourse.typeId ===
+                                                            2 && (
+                                                            <h1 className="text-md mt-2 text-start font-bold">
+                                                                Project:
+                                                            </h1>
+                                                        )}
                                                     <h1
                                                         className={`${
                                                             resumeCourse
@@ -365,54 +365,67 @@ function Schedule({ className, ...props }: ScheduleProps) {
                     )}
                 </div>
             )}
-
-            {/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */}
-
-            {/* <Calendar
-        mode="single"
-        selected={date}
-        onSelect={setDate}
-        className="rounded-md border"
-      /> */}
-            <div className="flex flex-col items-start mt-6">
-                {lateAssignments?.length < 1 &&
-                    upcomingAssignments.length < 1 && (
-                        <h1 className="text-xl p-1 text-start font-bold mb-4">
-                            Upcoming Submissions
-                        </h1>
-                    )}
-                <div className="flex flex-col w-full lg:max-w-[860px]">
-                    {lateAssignments?.length > 0 ||
-                    upcomingAssignments?.length > 0 ? (
+            {lateAssignments?.length > 0 ||
+                (upcomingAssignments?.length > 0 && (
+                    <div className="flex flex-col items-start mt-6">
                         <div className="flex flex-col w-full lg:max-w-[860px]">
-                            {lateAssignments?.length > 0 && (
-                                <h1 className="text-xl p-1 text-start font-bold mb-4">
-                                    Late Assignments
-                                </h1>
-                            )}
-                            {lateAssignments.map((data: any, index) => (
-                                <SubmissionCard
-                                    classData={data}
-                                    key={index}
-                                    status={'lateAssignmet'}
-                                    view={'dashboard'}
-                                />
-                            ))}
-                            {upcomingAssignments?.length > 0 && (
-                                <h1 className="text-xl p-1 text-start font-bold mb-4">
-                                    Upcoming Assignments
-                                </h1>
-                            )}
-                            {upcomingAssignments.map((data: any, index) => (
-                                <SubmissionCard
-                                    classData={data}
-                                    key={index}
-                                    status={'upcomingAssignment'}
-                                    view={'dashboard'}
-                                />
-                            ))}
+                            <div className="flex flex-col w-full lg:max-w-[860px]">
+                                {lateAssignments?.length > 0 && (
+                                    <h1 className="text-xl p-1 text-start font-bold mb-4">
+                                        Late Assignments
+                                    </h1>
+                                )}
+                                {lateAssignments.map((data: any, index) => (
+                                    <SubmissionCard
+                                        classData={data}
+                                        key={index}
+                                        status={'lateAssignmet'}
+                                        view={'dashboard'}
+                                    />
+                                ))}
+                                {upcomingAssignments?.length > 0 && (
+                                    <h1 className="text-xl p-1 text-start font-bold mb-4">
+                                        Upcoming Assignments
+                                    </h1>
+                                )}
+                                {upcomingAssignments.map((data: any, index) => (
+                                    <SubmissionCard
+                                        classData={data}
+                                        key={index}
+                                        status={'upcomingAssignment'}
+                                        view={'dashboard'}
+                                    />
+                                ))}
+                            </div>
                         </div>
-                    ) : (
+                    </div>
+                ))}
+            {allClasses.length < 1 && (
+                <div className="flex flex-col items-start mt-6">
+                    <h1 className="text-xl p-1 text-start font-bold mb-4">
+                        Upcoming Classes
+                    </h1>
+                    <div className="w-full flex flex-col items-center lg:flex-row lg:justify-between gap-8">
+                        <div className="flex flex-col items-center mt-12 lg:w-[870px]">
+                            <Image
+                                src="/no-class.svg"
+                                alt="No classes"
+                                width={240}
+                                height={240}
+                            />
+                            <p className="text-lg mt-3 text-center">
+                                There are no upcoming classes
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {lateAssignments?.length < 1 && upcomingAssignments.length < 1 && (
+                <div className="flex flex-col items-start mt-6">
+                    <h1 className="text-xl p-1 text-start font-bold mb-4">
+                        Upcoming Submissions
+                    </h1>
+                    <div className="w-full flex flex-col items-center lg:flex-row lg:justify-between gap-8">
                         <div className="flex flex-col items-center mt-12 lg:w-[870px]">
                             <Image
                                 src="/no-submission.svg"
@@ -425,9 +438,9 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                     'There are no upcoming Submission'}
                             </p>
                         </div>
-                    )}
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     )
 }

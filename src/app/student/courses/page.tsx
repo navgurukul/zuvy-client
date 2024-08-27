@@ -27,6 +27,7 @@ interface ResumeCourse {
     moduleName?: string
     bootcampId?: number
     moduleId?: number
+    typeId?: number
 }
 
 type pageProps = {}
@@ -97,7 +98,18 @@ const Page: React.FC<pageProps> = () => {
                                             <div className="hidden lg:flex flex-row justify-between items-center gap-6">
                                                 <div>
                                                     <div className="flex flex-row gap-3">
-                                                        <BookOpenText className="hidden sm:block mt-2 w-6 h-6" />
+                                                        {resumeCourse.newChapter
+                                                                ?.title &&
+                                                                resumeCourse.typeId === 1 && (
+                                                                    <BookOpenText className="mt-2" />
+                                                                )}
+                                                        {resumeCourse.newChapter
+                                                                ?.title && 
+                                                                resumeCourse.typeId === 2 && (
+                                                                <h1 className="text-md mt-2 text-start font-bold">
+                                                                    Project:
+                                                                </h1>
+                                                            )}
                                                         <h1
                                                             className={`${
                                                                 resumeCourse
@@ -150,7 +162,18 @@ const Page: React.FC<pageProps> = () => {
                                             {/* For Small screen like mobile and small tab */}
                                             <div className="lg:hidden">
                                                 <div className="flex flex-row gap-4">
-                                                    <BookOpenText className="mt-2 w-6 h-6" />
+                                                    {resumeCourse.newChapter
+                                                            ?.title &&
+                                                            resumeCourse.typeId === 1 && (
+                                                                <BookOpenText className="mt-2" />
+                                                            )}
+                                                    {resumeCourse.newChapter
+                                                        ?.title && 
+                                                        resumeCourse.typeId === 2 && (
+                                                        <h1 className="text-md mt-2 text-start font-bold">
+                                                            Project:
+                                                        </h1>
+                                                    )}
                                                     <h1
                                                         className={`${
                                                             resumeCourse
