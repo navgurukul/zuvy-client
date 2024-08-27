@@ -144,20 +144,20 @@ function Page() {
     //  Edit Module Function:-
     const editModule = () => {
         const { days, weeks, months } = timeData
-        const totalDays = days + (weeks * 7) + (months * 28)
+        const totalDays = days + weeks * 7 + months * 28
         const totalSeconds = totalDays * 86400
         const moduleDto = {
             ...moduleData,
             timeAlloted: totalSeconds,
             isLock: false,
         }
-        if(totalSeconds == 0){
+        if (totalSeconds == 0) {
             toast({
                 title: 'Duration cannot be 0',
                 description: 'Please enter a valid duration',
                 className: 'text-start capitalize border border-destructive',
             })
-        }else{
+        } else {
             api.put(
                 `/content/editModuleOfBootcamp/${courseData?.id}?moduleId=${moduleId}`,
                 { moduleDto }
@@ -166,7 +166,8 @@ function Page() {
                     toast({
                         title: 'Success',
                         description: 'Module Edited Successfully',
-                        className: 'text-start capitalize border border-secondary',
+                        className:
+                            'text-start capitalize border border-secondary',
                     })
                     fetchCourseModules()
                     setIsEditOpen(false)
@@ -183,15 +184,15 @@ function Page() {
     }
     const createModule = () => {
         const { days, weeks, months } = timeData
-        const totalDays = days + (weeks * 7) + (months * 28)
+        const totalDays = days + weeks * 7 + months * 28
         const totalSeconds = totalDays * 86400
-        if(totalSeconds == 0){
+        if (totalSeconds == 0) {
             toast({
                 title: 'Duration cannot be 0',
                 description: 'Please enter a valid duration',
                 className: 'text-start capitalize border border-destructive',
             })
-        }else{
+        } else {
             api.post(`/content/modules/${courseData?.id}?typeId=${typeId}`, {
                 ...moduleData,
                 timeAlloted: totalSeconds,
@@ -200,7 +201,8 @@ function Page() {
                     toast({
                         title: 'Success',
                         description: 'Module Created Successfully',
-                        className: 'text-start capitalize border border-secondary',
+                        className:
+                            'text-start capitalize border border-secondary',
                     })
                     fetchCourseModules()
                     setIsOpen(false)
@@ -271,11 +273,11 @@ function Page() {
         handleReorder(newOrderModules)
     }
     return (
-        <div className='w-full '>
+        <div className="w-full ">
             {curriculum.length > 0 && (
                 <div className=" w-full flex justify-end pr-4 ">
                     <div>
-                    <Dialog  open={isOpen} onOpenChange={setIsOpen}>
+                        <Dialog open={isOpen} onOpenChange={setIsOpen}>
                             <DialogTrigger asChild>
                                 <Button className="text-white bg-secondary  ">
                                     Add Module
@@ -288,9 +290,12 @@ function Page() {
                                 timeData={timeData}
                                 createModule={createModule}
                                 handleModuleChange={handleModuleChange}
-                                handleTimeAllotedChange={handleTimeAllotedChange}
+                                handleTimeAllotedChange={
+                                    handleTimeAllotedChange
+                                }
                                 handleTypeChange={handleTypeChange}
                                 typeId={typeId}
+                                isOpen={isOpen}
                             />
                         </Dialog>
                     </div>
@@ -407,6 +412,7 @@ function Page() {
                                     timeData={timeData}
                                     handleTypeChange={handleTypeChange}
                                     typeId={typeId}
+                                    isOpen={isOpen}
                                 />
                             </Dialog>
                         </div>

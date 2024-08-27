@@ -277,6 +277,7 @@ const Page = ({ params }: { params: any }) => {
                                             <Button
                                                 className="w-1/2"
                                                 type="submit"
+                                                disabled={!form.formState.isValid}
                                             >
                                                 Create batch
                                             </Button>

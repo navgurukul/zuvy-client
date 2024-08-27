@@ -40,7 +40,7 @@ function CourseCard({
     quizCount: number
     typeId: number
 }) {
-    const timeAllotedInWeeks = Math.round(timeAlloted / 604800)
+    const timeAllotedInWeeks = Math.ceil(timeAlloted / 604800)
     const timeAllotedInDays = Math.round(timeAlloted / 86400)
 
     return (
