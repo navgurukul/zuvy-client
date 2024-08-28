@@ -181,7 +181,7 @@ const Page = ({ params }: { params: paramsType }) => {
                         </h1>
                         <h1 className="text-left font-semibold flex gap-x-3 m-3">
                             <span>Constraints:-</span>
-                            <span className={`font-semibold text-secondary`}>
+                            <span>
                                 {
                                     codingSubmissionData?.data?.questionDetail
                                         ?.constraints
@@ -189,14 +189,13 @@ const Page = ({ params }: { params: paramsType }) => {
                             </span>
                         </h1>
                     </div>
-                    <div className="flex flex-col lg:flex-row lg:space-x-4">
+                    <div className=" flex flex-col md:flex-row sm:flex-row">
                         <TestCaseResults testCases={testCases} />
-
                         <Editor
                             height="72vh"
                             theme="vs-dark"
                             value={b64DecodeUnicode(decodedString)}
-                            className="p-6 lg:w-1/2"
+                            className="p-6"
                             options={{
                                 readOnly: true,
                                 fontSize: 15,

@@ -341,7 +341,7 @@ const Page = ({ params }: { params: any }) => {
                                         />
                                     ))
                                 ) : (
-                                    <p className="text-center py-20 font-semibold w-full h-full shadow-lg backdrop-blur-lg transition-transform transform  hover:shadow-xl ">
+                                    <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg backdrop-blur-lg transition-transform transform  hover:shadow-xl ">
                                         This student have not submitted any
                                         coding question .
                                     </p>
@@ -359,7 +359,7 @@ const Page = ({ params }: { params: any }) => {
                                         type={'quizSubmission'}
                                     />
                                 ) : (
-                                    <p className="text-center py-20 font-semibold  h-2/3 w-4/5 shadow-lg backdrop-blur-lg transition-transform transform  hover:shadow-xl ">
+                                    <p className="text-center py-20 font-semibold  h-[100px] w-4/5 shadow-lg backdrop-blur-lg transition-transform transform  hover:shadow-xl ">
                                         This student have not submitted any Quiz
                                         question .
                                     </p>
@@ -378,7 +378,7 @@ const Page = ({ params }: { params: any }) => {
                                         type={'openEndedSubmission'}
                                     />
                                 ) : (
-                                    <p className="text-center py-20 font-semibold  h-2/3 w-4/5 shadow-lg backdrop-blur-lg transition-transform transform  hover:shadow-xl ">
+                                    <p className="text-center py-20 font-semibold  h-[100px] w-4/5 shadow-lg backdrop-blur-lg transition-transform transform  hover:shadow-xl ">
                                         This student have not submitted any Open
                                         Ended Question question .
                                     </p>

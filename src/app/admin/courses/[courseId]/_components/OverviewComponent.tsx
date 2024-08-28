@@ -26,7 +26,9 @@ const OverviewComponent = (props: Props) => {
                             <h1 className="text-xl text-start font-semibold text-gray-800  dark:text-white ">
                                 Total Percentage Obtained
                             </h1>
-                            <h1 className="font-bold">{props.score}</h1>
+                            <h1 className="font-bold">
+                                {Math.floor(props.score)}%
+                            </h1>
                         </div>
                         <div className="flex flex-start gap-x-4 p-4">
                             <div>

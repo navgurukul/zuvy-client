@@ -3,7 +3,6 @@ const TestCaseResults = ({ testCases }: any) => {
     return (
         <div className="w-full space-y-4">
             {testCases.map((testCase: any, index: number) => {
-                console.log(testCase.stdout)
                 // const decodedString = b64DecodeUnicode(testCase.stdout)
                 return (
                     <div
