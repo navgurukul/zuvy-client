@@ -146,7 +146,10 @@ const IDE: React.FC<IDEProps> = ({
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
-            setCodeError(error?.message)
+            setCodeError(
+                error.response?.data?.data?.[0]?.stderr ||
+                    'Error occurred during submission.'
+            )
         }
     }
 
@@ -355,6 +358,7 @@ const IDE: React.FC<IDEProps> = ({
                                             <p className="text-lg text-gray-300">Output Window</p>
                                         </div>
                                         <div className="h-full p-4 text-start text-gray-100 overflow-y-auto font-mono bg-gray-900 border border-gray-700 rounded-b-lg">
+                                        <p className='font-mono text-destructive'>{codeError && codeError}</p>
                                             {codeResult?.map((testCase: any, index: any) => (
                                                     <div
                                                         key={index}

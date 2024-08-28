@@ -371,6 +371,7 @@ const IDE: React.FC<IDEProps> = ({
                                             </p>
                                         </div>
                                         <div className="h-full p-4 text-start text-gray-100 overflow-y-auto font-mono bg-gray-900 border border-gray-700 rounded-b-lg">
+                                        <p className='font-mono text-destructive'>{codeError && codeError}</p>
                                             {codeResult?.map((testCase: any, index: any) => (
                                                     <div
                                                         key={index}
