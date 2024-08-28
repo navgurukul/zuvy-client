@@ -39,7 +39,6 @@ export type RequestBodyType = {
         difficulty: string
     }[]
 }
-
 const formSchema = z.object({
     difficulty: z.enum(['Easy', 'Medium', 'Hard'], {
         required_error: 'You need to select a Difficulty type.',
@@ -68,7 +67,7 @@ const NewMcqProblemForm = ({
     setStoreQuizData: any
     getAllQuizQuesiton: any
 }) => {
-    const [selectedOption, setSelectedOption] = useState<string>('')
+    const [selectedOption, setSelectedOption] = useState<number>(1)
     const [options, setOptions] = useState<string[]>(['', ''])
 
     const addOption = () => {
@@ -129,6 +128,7 @@ const NewMcqProblemForm = ({
             })
             return
         }
+
         const optionsObject: { [key: number]: string } = options.reduce(
             (acc, option, index) => {
                 acc[index + 1] = option
@@ -140,7 +140,7 @@ const NewMcqProblemForm = ({
         const formattedData = {
             question: values.questionText,
             options: optionsObject,
-            correctOption: +selectedOption + 1,
+            correctOption: selectedOption,
             mark: 1,
             tagId: values.topics,
             difficulty: values.difficulty,
@@ -149,6 +149,7 @@ const NewMcqProblemForm = ({
         const requestBody = {
             questions: [formattedData],
         }
+
         await handleCreateQuizQuestion(requestBody)
         getAllQuizQuesiton(setStoreQuizData)
         closeModal()
@@ -268,15 +269,19 @@ const NewMcqProblemForm = ({
                         name="options"
                         render={({ field }) => (
                             <FormItem className="space-y-3 ">
-                                <FormLabel className="  mt-5">
-                                    <h1 className="text-left"> Options</h1>
+                                <FormLabel className="mt-5">
+                                    <h1 className="text-left">Options</h1>
                                 </FormLabel>
                                 <RadioGroup
                                     onValueChange={(value) => {
-                                        setSelectedOption(value)
-                                        field.onChange(value)
+                                        const numericValue = Number(value)
+                                        setSelectedOption(numericValue)
+                                        form.setValue(
+                                            'selectedOption',
+                                            numericValue
+                                        )
                                     }}
-                                    defaultValue={selectedOption}
+                                    value={selectedOption.toString()}
                                     className="space-y-1"
                                 >
                                     {options.map((option, index) => (
@@ -304,7 +309,8 @@ const NewMcqProblemForm = ({
                                                         newOptions[index] =
                                                             e.target.value
                                                         setOptions(newOptions)
-                                                        field.onChange(
+                                                        form.setValue(
+                                                            'options',
                                                             newOptions
                                                         )
                                                     }}
