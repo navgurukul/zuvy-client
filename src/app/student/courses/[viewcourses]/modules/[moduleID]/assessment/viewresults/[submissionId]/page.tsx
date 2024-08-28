@@ -17,7 +17,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
     const userID = studentData?.id && studentData?.id
     const router = useRouter()
 
-    // Step 1: Initialize state
+    // State for dynamically setting the questionId
     const [questionId, setQuestionId] = useState<number | null>(null)
     const [timeTaken, setTimeTaken] = useState<string | null>(null)
 
@@ -74,10 +74,10 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
         )
     }
 
-    function viewCodingSubmission(codingOutSourceId: any, assessmentSubmissionId: any) {
+    function viewCodingSubmission(codingOutSourceId: any, questionId: any) {
         if (codingOutSourceId) {
             router.push(
-                `/student/courses/${params.viewcourses}/modules/${params.moduleID}/assessment/codingresults/${codingOutSourceId}/show/${assessmentSubmissionId}/question/${questionId}`
+                `/student/courses/${params.viewcourses}/modules/${params.moduleID}/assessment/codingresults/${codingOutSourceId}/show/${params.submissionId}/question/${questionId}`
             )
         } else {
             toast({
@@ -92,18 +92,6 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
     useEffect(() => {
         getResults()
     }, [params.submissionId])
-
-    // Step 2: Extract ID and save in state
-    useEffect(() => {
-        if (viewResultsData && viewResultsData.PracticeCode) {
-            const lastSubmission = viewResultsData.PracticeCode
-                .filter((submission: any) => submission.action === "submit")
-                .pop()
-            if (lastSubmission) {
-                setQuestionId(lastSubmission.questionId)
-            }
-        }
-    }, [viewResultsData])
 
     if (!viewResultsData) {
         return (
@@ -131,34 +119,33 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                     <div className="headings mx-auto my-5 max-w-2xl">
                         {viewResultsData.PracticeCode.length > 0 ? (<h1 className="text-start text-xl">Coding Challenges</h1>) : <h1 className="text-center text-xl">No Coding Submissions Found</h1>}
                     </div>
-                    {viewResultsData.PracticeCode.map((codingQuestion: any) => {
-                        const lastSubmission = codingQuestion.status === "Accepted" ? codingQuestion : null
-
-                        return (
-                            <div key={codingQuestion.id} className={`container mx-auto rounded-xl shadow-lg overflow-hidden max-w-2xl min-h-52 mt-4 py-5`}>
-                                <div className="flex justify-between">
-                                    <div className="font-bold text-xl my-2">
-                                        {codingQuestion.questionDetail.title}
-                                    </div>
-                                    <div className={cn(
-                                        `font-semibold text-secondary my-2`,
-                                        difficultyColor(codingQuestion.questionDetail.difficulty)
-                                    )}>
-                                        {codingQuestion.questionDetail.difficulty}
-                                    </div>
+                    {viewResultsData.PracticeCode.map((codingQuestion: any) => (
+                        <div key={codingQuestion.id} className={`container mx-auto rounded-xl shadow-lg overflow-hidden max-w-2xl min-h-52 mt-4 py-5`}>
+                            <div className="flex justify-between">
+                                <div className="font-bold text-xl my-2">
+                                    {codingQuestion.questionDetail.title}
                                 </div>
-                                <div className="text-xl mt-2 text-start">
-                                    Description: {codingQuestion.questionDetail.description}
-                                </div>
-                                <div className={`text-xl mt-2 text-start `}>
-                                    Status: <span className={`ml-2 ${lastSubmission?.status === 'Accepted' ? 'text-green-400' : 'text-destructive'}`}>{lastSubmission?.status || 'No Coding Submission Found'}</span>
-                                </div>
-                                <div onClick={() => viewCodingSubmission(lastSubmission?.codingOutsourseId, params.submissionId)} className="cursor-pointer mt-4 flex justify-end text-secondary font-bold">
-                                    View Submission <ChevronRight />
+                                <div className={cn(
+                                    `font-semibold text-secondary my-2`,
+                                    difficultyColor(codingQuestion.questionDetail.difficulty)
+                                )}>
+                                    {codingQuestion.questionDetail.difficulty}
                                 </div>
                             </div>
-                        )
-                    })}
+                            <div className="text-xl mt-2 text-start">
+                                Description: {codingQuestion.questionDetail.description}
+                            </div>
+                            <div className={`text-xl mt-2 text-start `}>
+                                Status: <span className={`ml-2 ${codingQuestion.status === 'Accepted' ? 'text-green-400' : 'text-destructive'}`}>{codingQuestion.status}</span>
+                            </div>
+                            <div 
+                                onClick={() => viewCodingSubmission(codingQuestion.codingOutsourseId, codingQuestion.questionId)} 
+                                className="cursor-pointer mt-4 flex justify-end text-secondary font-bold"
+                            >
+                                View Submission <ChevronRight />
+                            </div>
+                        </div>
+                    ))}
                 </>
             )}
 
