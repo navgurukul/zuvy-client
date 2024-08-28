@@ -47,17 +47,17 @@ const IndividualStudentAssesment = ({
 
     return (
         <div
-            className={`flex flex-col h-auto lg:h-[220px] p-3 shadow-lg backdrop-blur-lg transition-transform transform  hover:shadow-xl rounded-md overflow-hidden mt-3 ${
+            className={`flex flex-col h-[260px] lg:h-[220px] p-3 shadow-lg backdrop-blur-lg transition-transform transform hover:shadow-xl rounded-md overflow-hidden mt-3 ${
                 type === 'quizSubmission' || type === 'openEndedSubmission'
-                    ? 'w-3/5'
+                    ? 'w-4/5'
                     : 'w-full'
             }`}
         >
             <div className="flex flex-col w-full h-full justify-between relative">
-                <div className="absolute top-3 right-3">
+                <div className="absolute lg:top-3 lg:right-3 bottom-3 left-3 lg:left-auto lg:bottom-auto">
                     <Button variant={'ghost'} className="w-full lg:w-auto">
                         <Link
-                            className="text-secondary text-md flex items-center w-full truncate"
+                            className="text-secondary text-md flex items-center w-full truncate mt-10"
                             href={questionInfo.link}
                         >
                             View Solution
@@ -67,7 +67,6 @@ const IndividualStudentAssesment = ({
                 </div>
                 <div className="flex flex-col p-4 gap-y-4 lg:gap-y-7 overflow-hidden">
                     <h1 className="text-[18px] md:text-[20px] capitalize text-start font-semibold text-gray-600 dark:text-white truncate w-full">
-                        Title :-{' '}
                         {type === 'codingSubmission'
                             ? data.questionDetail.title
                             : questionInfo.title}

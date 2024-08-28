@@ -116,7 +116,7 @@ export const columns: ColumnDef<Task>[] = [
             return (
                 <div className="flex items-center">
                     <span className=" mx-6 font-semibold w-full flex ">
-                        {percentage}%
+                        {Math.floor(percentage)}%
                     </span>
                 </div>
             )
