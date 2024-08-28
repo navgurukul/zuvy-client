@@ -323,6 +323,7 @@ export default function NewCodingProblemForm({
                         )}
                     />
 
+                        <h6 className='text-left text-sm font-semibold'> Note: Max 20 test cases supported & a minimum of 2 test cases should be provided</h6>
                     <div className="flex justify-between gap-2">
                         <FormField
                             control={form.control}

@@ -169,7 +169,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                     onChange={(e) => {
                         setChapterTitle(e.target.value)
                     }}
-                    placeholder={chapterTitle}
+                    placeholder={content.ModuleAssessment.title}
                     className="p-0 text-3xl w-2/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize"
                 />
                 {/* <div className="text-secondary flex font-semibold items-center">

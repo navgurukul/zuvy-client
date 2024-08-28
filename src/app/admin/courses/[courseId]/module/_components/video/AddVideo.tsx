@@ -89,15 +89,15 @@ const AddVideo = ({
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            videoTitle: '',
-            description: '',
-            links: '',
+            videoTitle: newContent?.title ?? '',
+            description: newContent?.description ?? '',
+            links: newContent?.links[0] ?? '',
         },
-        // values: {
-        //     videoTitle: newContent?.title ?? '',
-        //     description: newContent?.description ?? '',
-        //     links: newContent?.links[0] ?? '',
-        // },
+        values: {
+            videoTitle: newContent?.title ?? '',
+            description: newContent?.description ?? '',
+            links: newContent?.links[0] ?? '',
+        },
     })
 
     async function onSubmit(values: z.infer<typeof formSchema>) {

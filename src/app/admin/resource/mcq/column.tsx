@@ -114,7 +114,7 @@ export const columns: ColumnDef<quiz>[] = [
                                 />
                             </DialogTrigger>
                             {isEditQuizModalOpen && (
-                                <DialogContent className="sm:max-w-[500px]">
+                                <DialogContent className="sm:max-w-[518px] max-h-[90vh] overflow-y-auto overflow-x-hidden">
                                     <DialogHeader>
                                         <DialogTitle>Edit MCQ</DialogTitle>
                                     </DialogHeader>

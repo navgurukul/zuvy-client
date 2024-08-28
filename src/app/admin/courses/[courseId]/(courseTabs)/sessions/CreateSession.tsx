@@ -115,10 +115,11 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
         defaultValues: {
             sessionTitle: '',
             description: '',
-            startDate: setHours(
-                setMinutes(setSeconds(setMilliseconds(new Date(), 0), 0), 0),
-                0
-            ),
+            startDate: new Date(),
+            // setHours(
+            //     setMinutes(setSeconds(setMilliseconds(new Date(), 0), 0), 0),
+            //     0
+            // ),
             startTime: '',
             endTime: '',
             batch: '',
@@ -356,19 +357,18 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                         <Calendar
                                                             mode="single"
                                                             selected={
-                                                                field.value
+                                                                field.value ||
+                                                                new Date()
                                                             }
-                                                            onSelect={
-                                                                field.onChange
-                                                            }
-                                                            disabled={(
-                                                                date: any
-                                                            ) =>
-                                                                date <=
-                                                                addDays(
-                                                                    new Date(),
-                                                                    -1
-                                                                )
+                                                            onSelect={(date) => {
+                                                                if (date) {
+                                                                    field.onChange(date)
+                                                                } else {
+                                                                    field.onChange(new Date()) // Handle case where selected date is undefined
+                                                                }
+                                                            }}
+                                                            disabled={(date: any) =>
+                                                                date <= addDays(new Date(),-1)
                                                             } // Disable past dates
                                                             initialFocus
                                                         />
