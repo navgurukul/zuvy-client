@@ -96,9 +96,7 @@ const Page = ({ params }: { params: paramsType }) => {
                 )
                 .then((res) => {
                     setCodingSubmissionData(res?.data)
-                    setDecodedString(
-                        b64DecodeUnicode(res?.data?.data.sourceCode)
-                    )
+                    setDecodedString(res?.data?.data.sourceCode)
                     setTestCases(res?.data?.data.TestCasesSubmission)
                 })
         } catch (error) {
@@ -181,41 +179,30 @@ const Page = ({ params }: { params: paramsType }) => {
                                 }
                             </span>
                         </h1>
+                        <h1 className="text-left font-semibold flex gap-x-3 m-3">
+                            <span>Constraints:-</span>
+                            <span className={`font-semibold text-secondary`}>
+                                {
+                                    codingSubmissionData?.data?.questionDetail
+                                        ?.constraints
+                                }
+                            </span>
+                        </h1>
                     </div>
-                    <ResizablePanelGroup
-                        direction="horizontal"
-                        className="w-full h-[90vh] max-w-12xl rounded-lg"
-                    >
-                        <ResizablePanel defaultSize={50}>
-                            <TestCaseResults testCases={testCases} />
-                        </ResizablePanel>
+                    <div className="flex flex-col lg:flex-row lg:space-x-4">
+                        <TestCaseResults testCases={testCases} />
 
-                        <ResizableHandle withHandle />
-
-                        <ResizablePanel defaultSize={50}>
-                            <ResizablePanelGroup direction="vertical">
-                                <ResizablePanel defaultSize={70}>
-                                    <div className="flex h-full w-full">
-                                        <div className="w-full max-w-5xl bg-muted p-2 overflow-auto">
-                                            <form>
-                                                <Editor
-                                                    height="72vh"
-                                                    theme="vs-dark"
-                                                    value={decodedString}
-                                                    className="p-6"
-                                                    options={{
-                                                        readOnly: true,
-                                                        fontSize: 15,
-                                                    }}
-                                                />
-                                            </form>
-                                        </div>
-                                    </div>
-                                </ResizablePanel>
-                                {/* <ResizableHandle withHandle /> */}
-                            </ResizablePanelGroup>
-                        </ResizablePanel>
-                    </ResizablePanelGroup>
+                        <Editor
+                            height="72vh"
+                            theme="vs-dark"
+                            value={b64DecodeUnicode(decodedString)}
+                            className="p-6 lg:w-1/2"
+                            options={{
+                                readOnly: true,
+                                fontSize: 15,
+                            }}
+                        />
+                    </div>
                 </div>
             </MaxWidthWrapper>
         </>

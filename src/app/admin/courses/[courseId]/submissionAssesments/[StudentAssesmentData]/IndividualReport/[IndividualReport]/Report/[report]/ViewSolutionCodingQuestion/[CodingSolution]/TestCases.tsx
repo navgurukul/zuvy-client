@@ -49,22 +49,26 @@ const TestCaseResults = ({ testCases }: any) => {
                                 Students output: {testCase.stdout}
                             </h1>
 
-                            <h3 className="font-semibold text-lg text-gray-600">
-                                Expected Output:
-                            </h3>
-                            <p className="text-gray-800">
-                                <span className="font-medium text-gray-600">
-                                    {
-                                        testCase.testCases.expectedOutput
-                                            .parameterType
-                                    }
-                                </span>
-                                :{' '}
-                                {
-                                    testCase.testCases.expectedOutput
-                                        .parameterValue
-                                }
-                            </p>
+                            <div className="flex justify-center items-center gap-x-2 ">
+                                <h3 className="font-semibold text-lg text-gray-600">
+                                    Expected Output:
+                                </h3>
+                                <p className="text-gray-800">
+                                    <span className="font-semibold text-gray-600">
+                                        {
+                                            testCase.testCases.expectedOutput
+                                                .parameterType
+                                        }
+                                    </span>
+                                    :{' '}
+                                    <span className="font-semibold text-gray-600">
+                                        {
+                                            testCase.testCases.expectedOutput
+                                                .parameterValue
+                                        }
+                                    </span>
+                                </p>
+                            </div>
                         </div>
                     </div>
                 )
