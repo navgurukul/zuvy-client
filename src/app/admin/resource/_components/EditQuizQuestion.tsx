@@ -101,14 +101,14 @@ const EditQuizQuestion = ({
         )
         if (selected) {
             setOptions(Object.values(selected.options))
-            setSelectedOption((selected.correctOption - 1).toString())
+            setSelectedOption(selected.correctOption.toString())
             setDifficulty(selected.difficulty)
             form.reset({
                 difficulty: selected.difficulty,
                 topics: selected.tagId,
                 questionText: selected.question,
                 options: Object.values(selected.options),
-                selectedOption: selected.correctOption - 1,
+                selectedOption: selected.correctOption,
             })
         }
     }, [quizQuestionId, quizQuestion, form])
@@ -171,7 +171,8 @@ const EditQuizQuestion = ({
             id: quizQuestionId,
             question: values.questionText,
             options: optionsObject,
-            correctOption: parseInt(selectedOption) + 1, // Convert to number
+            // correctOption: parseInt(selectedOption) + 1, // Convert to number
+            correctOption: parseInt(selectedOption),
             tagId: values.topics,
             difficulty: values.difficulty,
         }
@@ -327,7 +328,9 @@ const EditQuizQuestion = ({
                                         >
                                             <div className="flex gap-x-3 items-center">
                                                 <RadioGroupItem
-                                                    value={index.toString()}
+                                                    value={(
+                                                        index + 1
+                                                    ).toString()}
                                                 />
                                                 <Input
                                                     placeholder={`Option ${
