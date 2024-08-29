@@ -232,7 +232,7 @@ const Page = ({ params }: { params: any }) => {
                     <div className="flex items-center">
                         <h1 className="text-start flex ml-6 font-bold text-xl ">
                             {codingdata && (
-                                <div className="p-4 rounded-lg bg-white shadow-lg backdrop-blur-lg transition-transform transform  hover:shadow-xl">
+                                <div className="p-4 rounded-lg bg-white shadow-lg transition-transform transform  hover:shadow-xl">
                                     <div className="flex flex-col gap-y-4">
                                         <div className="flex gap-x-2 items-center">
                                             <User size={15} />
@@ -352,16 +352,23 @@ const Page = ({ params }: { params: any }) => {
                                     {' '}
                                     Quiz Submission
                                 </h1>
-                                {assesmentData?.attemptedMCQQuestions >= 1 ? (
+                                {assesmentData?.mcqQuestionCount === 0 &&
+                                assesmentData?.attemptedMCQQuestions === 0 ? (
+                                    <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg backdrop-blur-lg transition-transform transform hover:shadow-xl">
+                                        There are no quiz questions in this
+                                        assessment.
+                                    </p>
+                                ) : assesmentData?.attemptedMCQQuestions >=
+                                  1 ? (
                                     <IndividualStudentAssesment
                                         data={[]}
                                         params={params}
                                         type={'quizSubmission'}
                                     />
                                 ) : (
-                                    <p className="text-center py-20 font-semibold  h-[100px] w-4/5 shadow-lg backdrop-blur-lg transition-transform transform  hover:shadow-xl ">
-                                        This student have not submitted any Quiz
-                                        question .
+                                    <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg backdrop-blur-lg transition-transform transform hover:shadow-xl">
+                                        This student has not submitted any quiz
+                                        question.
                                     </p>
                                 )}
                             </div>
@@ -370,17 +377,24 @@ const Page = ({ params }: { params: any }) => {
                                     {' '}
                                     Open Ended Questions
                                 </h1>
-                                {assesmentData?.attemptedOpenEndedQuestions >=
-                                1 ? (
+                                {assesmentData?.openEndedQuestionCount === 0 &&
+                                assesmentData?.attemptedOpenEndedQuestions ===
+                                    0 ? (
+                                    <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg backdrop-blur-lg transition-transform transform hover:shadow-xl">
+                                        There are no open-ended questions in
+                                        this assessment.
+                                    </p>
+                                ) : assesmentData?.attemptedOpenEndedQuestions >=
+                                  1 ? (
                                     <IndividualStudentAssesment
                                         data={[]}
                                         params={params}
                                         type={'openEndedSubmission'}
                                     />
                                 ) : (
-                                    <p className="text-center py-20 font-semibold  h-[100px] w-4/5 shadow-lg backdrop-blur-lg transition-transform transform  hover:shadow-xl ">
-                                        This student have not submitted any Open
-                                        Ended Question question .
+                                    <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg backdrop-blur-lg transition-transform transform hover:shadow-xl">
+                                        This student has not submitted any
+                                        open-ended questions.
                                     </p>
                                 )}
                             </div>

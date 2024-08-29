@@ -102,7 +102,7 @@ export default function EditCodingQuestionForm({
             inputFormat: 'Number',
             outputFormat: 'Strings',
             testCases:
-                selectCodingQuestion[0]?.testCases.map((testCase: any) => ({
+                selectCodingQuestion[0]?.testCases?.map((testCase: any) => ({
                     input: testCase.input[0],
                     output: testCase.output[0],
                 })) || [],
@@ -177,7 +177,7 @@ export default function EditCodingQuestionForm({
                 topics: selectCodingQuestion[0].tags,
                 inputFormat: 'Number',
                 outputFormat: 'Strings',
-                testCases: selectCodingQuestion[0].testCases.map(
+                testCases: selectCodingQuestion[0]?.testCases?.map(
                     (testCase: any) => ({
                         input: testCase.input[0],
                         output: testCase.output[0],
@@ -185,7 +185,7 @@ export default function EditCodingQuestionForm({
                 ),
             })
             setTestCases(
-                selectCodingQuestion[0].testCases.map(
+                selectCodingQuestion[0]?.testCases?.map(
                     (testCase: any, index: number) => ({
                         id: index + 1,
                         input: testCase.input[0],
@@ -475,7 +475,7 @@ export default function EditCodingQuestionForm({
                             {/* <div className="flex justify-start"> */}
                             <FormLabel>Test Cases</FormLabel>
                             {/* </div> */}
-                            {testCases.map((testCase, index) => (
+                            {testCases?.map((testCase, index) => (
                                 <div
                                     key={index}
                                     className="flex items-center gap-2"

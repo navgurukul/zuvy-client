@@ -52,13 +52,13 @@ const Page = ({ params }: { params: any }) => {
             setProjectData(res.data.data.bootcampModules)
             setTotalStudents(res.data.totalStudents)
         } catch (error) {
-            // console.error('Error fetching assessments:', error)
-            toast({
-                title: 'Error',
-                description: 'Error fetching Projects',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-            })
+            console.error('Error fetching assessments:', error)
+            // toast({
+            //     title: 'Error',
+            //     description: 'Error fetching Projects',
+            //     className:
+            //         'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+            // })
         }
     }, [params.courseId])
 

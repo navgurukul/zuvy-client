@@ -83,6 +83,7 @@ const EditQuizQuestion = ({
     let selectedQuizQuestion = quizQuestion.filter((question: any) => {
         return question.id === quizQuestionId
     })
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -93,6 +94,7 @@ const EditQuizQuestion = ({
             selectedOption: selectedQuizQuestion[0].correctOption || 0,
         },
     })
+
     useEffect(() => {
         const selected = quizQuestion.find(
             (question: any) => question.id === quizQuestionId
@@ -110,6 +112,7 @@ const EditQuizQuestion = ({
             })
         }
     }, [quizQuestionId, quizQuestion, form])
+
     const addOption = () => {
         setOptions([...options, ''])
     }
@@ -158,19 +161,17 @@ const EditQuizQuestion = ({
             })
             return
         }
-        const optionsObject: { [key: number]: string } = options.reduce(
-            (acc, option, index) => {
-                acc[index + 1] = option
-                return acc
-            },
-            {} as { [key: number]: string }
-        )
+
+        const optionsObject = options.reduce((acc, option, index) => {
+            acc[index + 1] = option
+            return acc
+        }, {} as { [key: number]: string })
 
         const formattedData = {
             id: quizQuestionId,
             question: values.questionText,
             options: optionsObject,
-            correctOption: +selectedOption + 1,
+            correctOption: parseInt(selectedOption) + 1, // Convert to number
             tagId: values.topics,
             difficulty: values.difficulty,
         }
@@ -178,7 +179,7 @@ const EditQuizQuestion = ({
         const requestBody = {
             questions: [formattedData],
         }
-        console.log(requestBody)
+
         await handleEditQuizQuestion(requestBody)
         getAllQuizQuesiton(setStoreQuizData)
     }
@@ -314,7 +315,7 @@ const EditQuizQuestion = ({
                                 <RadioGroup
                                     onValueChange={(value) => {
                                         setSelectedOption(value)
-                                        field.onChange(value)
+                                        field.onChange(parseInt(value)) // Ensure this is handled as a number
                                     }}
                                     value={selectedOption}
                                     className="space-y-1"

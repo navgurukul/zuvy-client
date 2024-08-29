@@ -19,24 +19,24 @@ type Props = {
 const OverviewComponent = (props: Props) => {
     return (
         <div className="my-4">
-            <div className="grid grid-cols-1 gap-20   md:grid-cols-2">
-                <div className="lg:flex h-[150px]  shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md ">
-                    <div className="flex flex-col w-full justify-between   ">
-                        <div className="flex items-center p-4 justify-between bg-orange-300 rounded-md">
-                            <h1 className="text-xl text-start font-semibold text-gray-800  dark:text-white ">
-                                Total Percentage Obtained
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+                <div className="lg:flex h-[150px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md ">
+                    <div className="flex flex-col w-full justify-between">
+                        <div className="flex items-center p-4 justify-between rounded-md bg-orange-300">
+                            <h1 className="text-xl text-start font-semibold text-gray-800 dark:text-white">
+                                Total % Obtained
                             </h1>
                             <h1 className="font-bold">
                                 {Math.floor(props.score)}%
                             </h1>
                         </div>
-                        <div className="flex flex-start gap-x-4 p-4">
+                        <div className="flex flex-start gap-x-3 p-3">
                             <div>
                                 <h1 className="text-start font-bold">
                                     {props.totalCodingChallenges}
                                 </h1>
                                 <p className="text-gray-500 text-start">
-                                    Coding Challenges
+                                    Coding Questions
                                 </p>
                             </div>
                             <div>
@@ -54,14 +54,15 @@ const OverviewComponent = (props: Props) => {
                         </div>
                     </div>
                 </div>
-                <div className="lg:flex h-[150px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md ">
-                    <div className="flex flex-col w-full justify-between   ">
-                        <div className="flex items-center justify-between p-4 rounded-md bg-green-300">
-                            <h1 className="text-xl text-start font-semibold text-gray-800  dark:text-white ">
+
+                <div className="lg:flex h-[150px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md">
+                    <div className="flex flex-col w-full justify-between">
+                        <div className="flex items-center justify-between p-4  rounded-md  bg-green-300 ">
+                            <h1 className="text-xl text-start font-semibold text-gray-800 dark:text-white">
                                 Proctoring Report
                             </h1>
                         </div>
-                        <div className="flex flex-start p-4 gap-x-4">
+                        <div className="flex flex-start p-3 gap-x-3">
                             <div>
                                 <h1 className="text-start font-bold">
                                     {props.copyPaste}
@@ -80,9 +81,7 @@ const OverviewComponent = (props: Props) => {
                                 <h1 className="text-start font-bold">
                                     {props.embeddedSearch}
                                 </h1>
-                                <p className="text-gray-500">
-                                    Embedded Google Search
-                                </p>
+                                <p className="text-gray-500">Embedded Search</p>
                             </div>
                         </div>
                     </div>
