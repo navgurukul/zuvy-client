@@ -127,7 +127,6 @@ const EditQuizQuestion = ({
                         'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
             })
-            setIsEditModalOpen(false)
         } catch (error) {
             toast({
                 title: 'Error',
@@ -173,9 +172,9 @@ const EditQuizQuestion = ({
         const requestBody = {
             questions: [formattedData],
         }
-        console.log(requestBody)
         await handleEditQuizQuestion(requestBody)
         getAllQuizQuesiton(setStoreQuizData)
+        setIsEditModalOpen(false)
     }
     return (
         <main className="flex  flex-col p-3 ">

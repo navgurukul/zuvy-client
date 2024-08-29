@@ -103,7 +103,10 @@ export const columns: ColumnDef<quiz>[] = [
             return (
                 <>
                     <div className="flex">
-                        <Dialog>
+                        <Dialog
+                            open={isEditQuizModalOpen}
+                            onOpenChange={setIsEditModalOpen}
+                        >
                             <DialogTrigger asChild>
                                 <Pencil
                                     className="cursor-pointer mr-5"
