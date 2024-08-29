@@ -49,14 +49,9 @@ const formSchema = z.object({
 
     topics: z.number().min(1, 'You need to select a Topic'),
 
-    questionText: z
-        .string()
-        .min(10, {
-            message: 'Question Text must be at least 10 characters.',
-        })
-        .max(160, {
-            message: 'Question Text must not be longer than 30 characters.',
-        }),
+    questionText: z.string().min(1, {
+        message: 'Question Text must be at least 10 characters.',
+    }),
     options: z.array(z.string().max(30)),
     selectedOption: z.number(),
 })
@@ -77,13 +72,12 @@ const EditQuizQuestion = ({
     quizQuestion: any
 }) => {
     const [difficulty, setDifficulty] = useState<string>('Easy')
-    const [selectedOption, setSelectedOption] = useState<string>('')
+    const [selectedOption, setSelectedOption] = useState<any>('')
     const [options, setOptions] = useState<string[]>(['', ''])
 
     let selectedQuizQuestion = quizQuestion.filter((question: any) => {
         return question.id === quizQuestionId
     })
-
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -94,7 +88,6 @@ const EditQuizQuestion = ({
             selectedOption: selectedQuizQuestion[0].correctOption || 0,
         },
     })
-
     useEffect(() => {
         const selected = quizQuestion.find(
             (question: any) => question.id === quizQuestionId
@@ -112,7 +105,6 @@ const EditQuizQuestion = ({
             })
         }
     }, [quizQuestionId, quizQuestion, form])
-
     const addOption = () => {
         setOptions([...options, ''])
     }
@@ -127,7 +119,7 @@ const EditQuizQuestion = ({
 
     const handleEditQuizQuestion = async (requestBody: RequestBodyType) => {
         try {
-            await api.post(`/Content/editquiz`, requestBody).then((res) => {
+            await api.post('/Content/editquiz', requestBody).then((res) => {
                 toast({
                     title: res.data.status || 'Success',
                     description: res.data.message || 'Quiz Question Created',
@@ -161,17 +153,19 @@ const EditQuizQuestion = ({
             })
             return
         }
-
-        const optionsObject = options.reduce((acc, option, index) => {
-            acc[index + 1] = option
-            return acc
-        }, {} as { [key: number]: string })
+        const optionsObject: { [key: number]: any } = options.reduce(
+            (acc, option, index) => {
+                acc[index + 1] = option
+                return acc
+            },
+            {} as { [key: number]: any }
+        )
 
         const formattedData = {
             id: quizQuestionId,
             question: values.questionText,
             options: optionsObject,
-            correctOption: parseInt(selectedOption) + 1, // Convert to number
+            correctOption: parseInt(selectedOption) + 1,
             tagId: values.topics,
             difficulty: values.difficulty,
         }
@@ -179,9 +173,9 @@ const EditQuizQuestion = ({
         const requestBody = {
             questions: [formattedData],
         }
-
-        await handleEditQuizQuestion(requestBody)
-        getAllQuizQuesiton(setStoreQuizData)
+        console.log(requestBody)
+        // await handleEditQuizQuestion(requestBody)
+        // getAllQuizQuesiton(setStoreQuizData)
     }
 
     return (
@@ -306,86 +300,50 @@ const EditQuizQuestion = ({
                             )
                         }}
                     />
-                    <FormField
-                        control={form.control}
-                        name="options"
-                        render={({ field }) => (
-                            <FormItem className="space-y-3">
-                                <FormLabel className="mt-5">Options</FormLabel>
-                                <RadioGroup
-                                    onValueChange={(value) => {
-                                        setSelectedOption(value)
-                                        field.onChange(parseInt(value)) // Ensure this is handled as a number
-                                    }}
-                                    value={selectedOption}
-                                    className="space-y-1"
-                                >
-                                    {options.map((option, index) => (
-                                        <div
-                                            key={index}
-                                            className="flex items-center space-x-3 space-y-0"
-                                        >
-                                            <div className="flex gap-x-3 items-center">
-                                                <RadioGroupItem
-                                                    value={index.toString()}
-                                                />
-                                                <Input
-                                                    placeholder={`Option ${
-                                                        index + 1
-                                                    }`}
-                                                    {...form.register(
-                                                        `options.${index}`
-                                                    )}
-                                                    className="w-[350px]"
-                                                    value={option}
-                                                    onChange={(e) => {
-                                                        const newOptions = [
-                                                            ...options,
-                                                        ]
-                                                        newOptions[index] =
-                                                            e.target.value
-                                                        setOptions(newOptions)
-                                                        field.onChange(
-                                                            newOptions
-                                                        )
-                                                    }}
-                                                />
-                                            </div>
-                                            {options.length > 2 &&
-                                                index >= 2 && (
-                                                    <Button
-                                                        variant={'ghost'}
-                                                        onClick={() =>
-                                                            removeOption(index)
-                                                        }
-                                                        type="button"
-                                                    >
-                                                        <X
-                                                            size={20}
-                                                            className="text-secondary"
-                                                        />
-                                                    </Button>
-                                                )}
-                                        </div>
-                                    ))}
-                                </RadioGroup>
-                                <FormMessage />
-                                <div className="flex justify-start">
+                    <RadioGroup
+                        onValueChange={(value) => {
+                            setSelectedOption(value)
+                            form.setValue('selectedOption', +value)
+                        }}
+                        value={selectedOption}
+                        className="space-y-1"
+                    >
+                        {options.map((option, index) => (
+                            <div
+                                key={index}
+                                className="flex items-center space-x-3 space-y-0"
+                            >
+                                <div className="flex gap-x-3 items-center">
+                                    <RadioGroupItem value={index.toString()} />
+                                    <Input
+                                        placeholder={`Option ${index + 1}`}
+                                        {...form.register(`options.${index}`)}
+                                        className="w-[350px]"
+                                        value={option}
+                                        onChange={(e) => {
+                                            const newOptions = [...options]
+                                            newOptions[index] = e.target.value
+                                            setOptions(newOptions)
+                                            form.setValue('options', newOptions)
+                                        }}
+                                    />
+                                </div>
+                                {options.length > 2 && index >= 2 && (
                                     <Button
-                                        variant={'outline'}
-                                        onClick={addOption}
+                                        variant={'ghost'}
+                                        onClick={() => removeOption(index)}
                                         type="button"
                                     >
-                                        <Plus
+                                        <X
                                             size={20}
                                             className="text-secondary"
-                                        />{' '}
-                                        Add Option
+                                        />
                                     </Button>
-                                </div>
-                            </FormItem>
-                        )}
-                    />
+                                )}
+                            </div>
+                        ))}
+                    </RadioGroup>
+
                     <DialogFooter>
                         <Button type="submit" className="w-1/2 ">
                             Edit MCQ
