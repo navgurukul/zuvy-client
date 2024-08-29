@@ -132,6 +132,11 @@ function Page({}: any) {
     // JSX render:-\
     return (
         <>
+            <div className="flex items-center justify-start w-full pt-4 ">
+                <h1 className="text-2xl font-semibold mb-5">
+                    Class Recordings
+                </h1>
+            </div>
             <div className="flex flex-col gap-3 text-start">
                 <Select
                     onValueChange={(e) => {

@@ -286,7 +286,7 @@ const NewMcqProblemForm = ({
                                         >
                                             <div className="flex gap-x-3 items-center">
                                                 <RadioGroupItem
-                                                    value={index.toString()}
+                                                    value={(index+1).toString()}
                                                 />
                                                 <Input
                                                     placeholder={`Option ${

@@ -94,14 +94,14 @@ const EditQuizQuestion = ({
         )
         if (selected) {
             setOptions(Object.values(selected.options))
-            setSelectedOption((selected.correctOption - 1).toString())
+            setSelectedOption(selected.correctOption.toString())
             setDifficulty(selected.difficulty)
             form.reset({
                 difficulty: selected.difficulty,
                 topics: selected.tagId,
                 questionText: selected.question,
                 options: Object.values(selected.options),
-                selectedOption: selected.correctOption - 1,
+                selectedOption: selected.correctOption,
             })
         }
     }, [quizQuestionId, quizQuestion, form])
