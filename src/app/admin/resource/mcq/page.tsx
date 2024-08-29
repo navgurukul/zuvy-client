@@ -191,15 +191,15 @@ const Mcqs = (props: Props) => {
                         <ScrollArea className=" text-nowrap ">
                             <ScrollBar orientation="horizontal" />
                             <Button
-                                        className={`mx-3 rounded-3xl ${
-                                            selectedTag?.tagName === 'AllTopics'
-                                                ? 'bg-secondary text-white'
-                                                : 'bg-gray-200 text-black'
-                                        }`}
-                                        onClick={handleAllTopicsClick}
-                                    >
-                                        All Topics
-                                    </Button>
+                                className={`mx-3 rounded-3xl ${
+                                    selectedTag?.tagName === 'AllTopics'
+                                        ? 'bg-secondary text-white'
+                                        : 'bg-gray-200 text-black'
+                                }`}
+                                onClick={handleAllTopicsClick}
+                            >
+                                All Topics
+                            </Button>
                             {tags.map((tag: Tag) => (
                                 <Button
                                     className={`mx-3 rounded-3xl ${
