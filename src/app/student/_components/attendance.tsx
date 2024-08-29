@@ -124,16 +124,16 @@ function Attendance() {
                                 <div className="flex items-center gap-2">
                                     <div
                                         className={`w-[10px] h-[10px] rounded-full  ${getAttendanceColorClass(
-                                            attendanceData[0]?.attendance
+                                            attendanceData[0]?.attendedClasses
                                         )}`}
                                     />
-                                    <h1>{attendanceData[0]?.attendance}%</h1>
+                                    <h1>{attendanceData[0]?.attendedClasses}%</h1>
                                 </div>
                                 <div className="flex">
                                     <p className="text-md font-semibold">
                                         {' '}
                                         {
-                                            attendanceData[0]?.attendedClasses
+                                            attendanceData[0]?.attendance
                                         } of {attendanceData[0]?.totalClasses}{' '}
                                         Classes Attended
                                     </p>
