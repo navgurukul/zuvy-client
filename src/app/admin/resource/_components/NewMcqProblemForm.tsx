@@ -145,6 +145,7 @@ const NewMcqProblemForm = ({
             questions: [formattedData],
         }
 
+        console.log(requestBody)
         await handleCreateQuizQuestion(requestBody)
         getAllQuizQuesiton(setStoreQuizData)
         closeModal()
@@ -286,7 +287,7 @@ const NewMcqProblemForm = ({
                                         >
                                             <div className="flex gap-x-3 items-center">
                                                 <RadioGroupItem
-                                                    value={(index+1).toString()}
+                                                    value={index.toString()}
                                                 />
                                                 <Input
                                                     placeholder={`Option ${

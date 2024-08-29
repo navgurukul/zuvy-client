@@ -94,7 +94,7 @@ const EditQuizQuestion = ({
         )
         if (selected) {
             setOptions(Object.values(selected.options))
-            setSelectedOption(selected.correctOption.toString())
+            setSelectedOption((selected.correctOption - 1).toString())
             setDifficulty(selected.difficulty)
             form.reset({
                 difficulty: selected.difficulty,
@@ -174,10 +174,9 @@ const EditQuizQuestion = ({
             questions: [formattedData],
         }
         console.log(requestBody)
-        // await handleEditQuizQuestion(requestBody)
-        // getAllQuizQuesiton(setStoreQuizData)
+        await handleEditQuizQuestion(requestBody)
+        getAllQuizQuesiton(setStoreQuizData)
     }
-
     return (
         <main className="flex  flex-col p-3 ">
             <Form {...form}>
@@ -300,6 +299,89 @@ const EditQuizQuestion = ({
                             )
                         }}
                     />
+
+                    <FormField
+                        control={form.control}
+                        name="selectedOption" // This is important to track the correct option separately
+                        render={({ field }) => (
+                            <FormItem className="space-y-3">
+                                <FormLabel className="mt-5">Options</FormLabel>
+                                <RadioGroup
+                                    onValueChange={(value) => {
+                                        setSelectedOption(value)
+                                        form.setValue('selectedOption', +value)
+                                    }}
+                                    value={selectedOption}
+                                    className="space-y-1"
+                                >
+                                    {options.map((option, index) => (
+                                        <div
+                                            key={index}
+                                            className="flex items-center space-x-3 space-y-0"
+                                        >
+                                            <div className="flex gap-x-3 items-center">
+                                                <RadioGroupItem
+                                                    value={index.toString()}
+                                                />
+                                                <Input
+                                                    placeholder={`Option ${
+                                                        index + 1
+                                                    }`}
+                                                    {...form.register(
+                                                        `options.${index}`
+                                                    )}
+                                                    className="w-[350px]"
+                                                    value={option}
+                                                    onChange={(e) => {
+                                                        const newOptions = [
+                                                            ...options,
+                                                        ]
+                                                        newOptions[index] =
+                                                            e.target.value
+                                                        setOptions(newOptions)
+                                                        form.setValue(
+                                                            'options',
+                                                            newOptions
+                                                        )
+                                                    }}
+                                                />
+                                            </div>
+                                            {options.length > 2 &&
+                                                index >= 2 && (
+                                                    <Button
+                                                        variant={'ghost'}
+                                                        onClick={() =>
+                                                            removeOption(index)
+                                                        }
+                                                        type="button"
+                                                    >
+                                                        <X
+                                                            size={20}
+                                                            className="text-secondary"
+                                                        />
+                                                    </Button>
+                                                )}
+                                        </div>
+                                    ))}
+                                </RadioGroup>
+                                <FormMessage />
+                                <div className="flex justify-start">
+                                    <Button
+                                        variant={'outline'}
+                                        onClick={addOption}
+                                        type="button"
+                                    >
+                                        <Plus
+                                            size={20}
+                                            className="text-secondary"
+                                        />{' '}
+                                        Add Option
+                                    </Button>
+                                </div>
+                            </FormItem>
+                        )}
+                    />
+                    {/* 
                     <RadioGroup
                         onValueChange={(value) => {
                             setSelectedOption(value)
@@ -342,7 +424,7 @@ const EditQuizQuestion = ({
                                 )}
                             </div>
                         ))}
-                    </RadioGroup>
+                    </RadioGroup> */}
 
                     <DialogFooter>
                         <Button type="submit" className="w-1/2 ">
