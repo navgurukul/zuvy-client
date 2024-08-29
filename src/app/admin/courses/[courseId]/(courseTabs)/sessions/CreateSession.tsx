@@ -64,9 +64,7 @@ const formSchema = z
         sessionTitle: z.string().min(2, {
             message: 'Session Title must be at least 2 characters.',
         }),
-        description: z.string().min(2, {
-            message: 'Description must be at least 2 characters.',
-        }),
+        description: z.string().optional(),
         startDate: z.date({
             required_error: 'A start date is required.',
         }),
@@ -171,7 +169,6 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
 
     const {
         sessionTitle,
-        description,
         startDate,
         startTime,
         endTime,
@@ -181,7 +178,6 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
     } = form.watch()
     const isSubmitDisabled = !(
         sessionTitle &&
-        description &&
         startDate &&
         startTime &&
         endTime &&
@@ -309,12 +305,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                     name="description"
                                     render={({ field }) => (
                                         <FormItem className="text-left">
-                                            <FormLabel>
-                                                Description
-                                                <span className="text-red-500">
-                                                    *
-                                                </span>
-                                            </FormLabel>
+                                            <FormLabel>Description</FormLabel>
                                             <FormControl>
                                                 <Input
                                                     placeholder="Description"
@@ -325,13 +316,13 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                         </FormItem>
                                     )}
                                 />
-                                <div className="flex items-center gap-x-4 ">
+                                <div className="flex items-center gap-x-4 gap-y-0 ">
                                     <FormField
                                         control={form.control}
                                         name="startDate"
                                         render={({ field }) => (
                                             <FormItem className="flex flex-col text-left">
-                                                <FormLabel>
+                                                <FormLabel className="p-0 my-2">
                                                     Classes start date
                                                     <span className="text-red-500">
                                                         *
@@ -393,7 +384,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                             name="startTime"
                                             render={({ field }) => (
                                                 <FormItem className="flex flex-col text-left   ">
-                                                    <FormLabel>
+                                                    <FormLabel className="p-0 my-2">
                                                         Start Time
                                                         <span className="text-red-500">
                                                             *
@@ -415,7 +406,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                             name="endTime"
                                             render={({ field }) => (
                                                 <FormItem className="flex flex-col text-left">
-                                                    <FormLabel>
+                                                    <FormLabel className="p-0 my-2">
                                                         End Time
                                                         <span className="text-red-500">
                                                             *
@@ -631,7 +622,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                     name="totalClasses"
                                     render={({ field }) => (
                                         <FormItem className="text-left flex flex-col">
-                                            <FormLabel>
+                                            <FormLabel className="p-0 my-2">
                                                 Total Classes
                                                 <span className="text-red-500">
                                                     *
@@ -659,7 +650,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                     <DialogClose asChild>
                                         {isLoading ? (
                                             <Button disabled>
-                                                <RotateCcw className="mr-2 text-black h-4  animate-spin w-1/3" />
+                                                <Spinner className="mr-2 text-black h-12  animate-spin w-1/3" />
                                                 Creating Session
                                             </Button>
                                         ) : (

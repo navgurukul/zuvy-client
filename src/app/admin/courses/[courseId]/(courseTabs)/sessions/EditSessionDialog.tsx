@@ -24,6 +24,7 @@ import {
 
 import { Input } from '@/components/ui/input'
 import { api } from '@/utils/axios.config'
+import { Spinner } from '@/components/ui/spinner'
 
 interface EditSessionProps {
     meetingId: string
@@ -69,6 +70,8 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
         const minutes = date.getMinutes().toString().padStart(2, '0')
         return `${hours}:${minutes}`
     }
+
+    console.log(props.initialData.description)
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -153,7 +156,7 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-4"
+                    className="space-y-4 "
                 >
                     <FormField
                         control={form.control}
@@ -236,8 +239,6 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
                                 </FormItem>
                             )}
                         />
-                    </div>
-                    <div className="flex items-center gap-x-4">
                         <FormField
                             control={form.control}
                             name="startTime"
@@ -278,7 +279,7 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
                         <div>
                             {loading ? (
                                 <Button disabled>
-                                    <RotateCcw className="mr-2 text-black h-4 w-4 animate-spin" />
+                                    <Spinner className="mr-2 text-black h-12 animate-spin" />
                                     Please wait
                                 </Button>
                             ) : (

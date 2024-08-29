@@ -4,7 +4,7 @@ import { Fragment, useEffect, useState } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { RotateCcw } from 'lucide-react'
+import { Spinner } from '@/components/ui/spinner'
 
 interface DeleteConfirmationModalProps {
     isOpen: boolean
@@ -153,7 +153,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                 </Button>
                                 {loading ? (
                                     <Button variant={'destructive'} disabled>
-                                        <RotateCcw className="mr-2 text-black h-4  animate-spin w-1/3" />
+                                        <Spinner className="mr-2 text-black h-12  animate-spin w-1/3" />
                                         Deleting Session
                                     </Button>
                                 ) : (
