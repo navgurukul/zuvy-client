@@ -44,14 +44,9 @@ const formSchema = z.object({
         required_error: 'You need to select a Difficulty type.',
     }),
     topics: z.number().min(1, 'You need to select a Topic'),
-    questionText: z
-        .string()
-        .min(10, {
-            message: 'Question Text must be at least 10 characters.',
-        })
-        .max(160, {
-            message: 'Question Text must not be longer than 160 characters.',
-        }),
+    questionText: z.string().min(1, {
+        message: 'Question Text must be at least 1 characters.',
+    }),
     options: z.array(z.string().max(30)),
     selectedOption: z.number(),
 })
@@ -140,7 +135,7 @@ const NewMcqProblemForm = ({
         const formattedData = {
             question: values.questionText,
             options: optionsObject,
-            correctOption: selectedOption,
+            correctOption: selectedOption + 1,
             mark: 1,
             tagId: values.topics,
             difficulty: values.difficulty,
@@ -150,6 +145,7 @@ const NewMcqProblemForm = ({
             questions: [formattedData],
         }
 
+        console.log(requestBody)
         await handleCreateQuizQuestion(requestBody)
         getAllQuizQuesiton(setStoreQuizData)
         closeModal()

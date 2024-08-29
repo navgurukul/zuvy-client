@@ -69,11 +69,9 @@ const CodingPlayground = () => {
 
     const getQuestions = async () => {
         try {
-            await api
-                .get(`/Content/allCodingQuestions`)
-                .then((response) => {
-                    setQuestions(response.data)
-                })
+            await api.get(`/Content/allCodingQuestions`).then((response) => {
+                setQuestions(response.data)
+            })
         } catch (error) {
             console.error('Error fetching courses:', error)
         }
@@ -115,9 +113,6 @@ const CodingPlayground = () => {
                     <h1 className="text-2xl font-bold mb-4">
                         Coding Playground
                     </h1>
-                    <p className="mb-4">
-                        Practice problems for AFE + NavGurukul Python Course
-                    </p>
                     <div className="flex mb-2 w-1/4">
                         <Input
                             type="text"

@@ -25,7 +25,11 @@ import { columns } from '@/app/admin/resource/coding/column'
 import NewCodingProblemForm from '@/app/admin/resource/_components/NewCodingProblemForm'
 import { api } from '@/utils/axios.config'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
-import { getCodingQuestionTags, getEditCodingQuestionDialogs, getcodingQuestionState } from '@/store/store'
+import {
+    getCodingQuestionTags,
+    getEditCodingQuestionDialogs,
+    getcodingQuestionState,
+} from '@/store/store'
 import { getAllCodingQuestions } from '@/utils/admin'
 import Image from 'next/image'
 import { Spinner } from '@/components/ui/spinner'
@@ -41,7 +45,7 @@ const CodingProblems = (props: Props) => {
         isCodingEditDialogOpen,
         setIsCodingEditDialogOpen,
         isCodingDialogOpen,
-        setIsCodingDialogOpen
+        setIsCodingDialogOpen,
     } = getEditCodingQuestionDialogs()
     const { tags, setTags } = getCodingQuestionTags()
     const [selectedTag, setSelectedTag] = useState({
@@ -111,7 +115,7 @@ const CodingProblems = (props: Props) => {
                 </div>
             ) : (
                 <div>
-                    {codingQuestions.length > 0 && !isCodingDialogOpen? (
+                    {codingQuestions.length > 0 && !isCodingDialogOpen ? (
                         <MaxWidthWrapper>
                             <h1 className="text-left font-semibold text-2xl">
                                 Resource Library - Coding Problems
@@ -133,10 +137,12 @@ const CodingProblems = (props: Props) => {
                                         />
                                     </div>
                                 </div>
-                              
-                       <Button onClick={()=>setIsCodingDialogOpen(true)}>+ Create Problems</Button>
-                
 
+                                <Button
+                                    onClick={() => setIsCodingDialogOpen(true)}
+                                >
+                                    + Create Problems
+                                </Button>
                             </div>
                             <div className="flex items-center">
                                 <Select
@@ -207,49 +213,62 @@ const CodingProblems = (props: Props) => {
                         </MaxWidthWrapper>
                     ) : (
                         <>
-                          {
-                            !isCodingDialogOpen && codingQuestions.length == 0 ? (<>
-                                                     
-                              <h1 className="text-left font-semibold text-2xl">
-                                Resource Library - Coding Problems
-                            </h1>
-                            <MaxWidthWrapper className="flex flex-col justify-center items-center gap-5">
-                                <div>
-                                    <Image
-                                        src="/resource_library_empty_state.svg"
-                                        alt="Empty State"
-                                        width={500}
-                                        height={500}
-                                    />
-                                </div>
-                                <h2>
-                                    No coding problems have been created yet.
-                                    Start by adding the first one
-                                </h2>
-                                <Button onClick={()=>setIsCodingDialogOpen(true)}>+ Create Problems</Button>
-                   
-                            </MaxWidthWrapper>
-                            </>): (
-                                isCodingDialogOpen && !isCodingEditDialogOpen && (
+                            {!isCodingDialogOpen &&
+                            codingQuestions.length == 0 ? (
+                                <>
+                                    <h1 className="text-left font-semibold text-2xl">
+                                        Resource Library - Coding Problems
+                                    </h1>
                                     <MaxWidthWrapper className="flex flex-col justify-center items-center gap-5">
-                               <div onClick={()=>setIsCodingDialogOpen(false)} className='text-secondary cursor-pointer self-start flex'> <ChevronLeft/> Coding Problems</div>  
-                                                    <NewCodingProblemForm
-                                                        tags={tags}
-                                                        setIsDialogOpen={
-                                                            setIsCodingDialogOpen
-                                                        }
-                                                        getAllCodingQuestions={
-                                                            getAllCodingQuestions
-                                                        }
-                                                        setCodingQuestions={
-                                                            setCodingQuestions
-                                                        }
-                                                    />
-                                                </MaxWidthWrapper>
-                                    
-                                    ) 
-                            )
-                          }
+                                        <div>
+                                            <Image
+                                                src="/resource_library_empty_state.svg"
+                                                alt="Empty State"
+                                                width={500}
+                                                height={500}
+                                            />
+                                        </div>
+                                        <h2>
+                                            No coding problems have been created
+                                            yet. Start by adding the first one
+                                        </h2>
+                                        <Button
+                                            onClick={() =>
+                                                setIsCodingDialogOpen(true)
+                                            }
+                                        >
+                                            + Create Problems
+                                        </Button>
+                                    </MaxWidthWrapper>
+                                </>
+                            ) : (
+                                isCodingDialogOpen &&
+                                !isCodingEditDialogOpen && (
+                                    <MaxWidthWrapper className="flex flex-col justify-center items-center gap-5">
+                                        <div
+                                            onClick={() =>
+                                                setIsCodingDialogOpen(false)
+                                            }
+                                            className="text-secondary cursor-pointer self-start flex"
+                                        >
+                                            {' '}
+                                            <ChevronLeft /> Coding Problems
+                                        </div>
+                                        <NewCodingProblemForm
+                                            tags={tags}
+                                            setIsDialogOpen={
+                                                setIsCodingDialogOpen
+                                            }
+                                            getAllCodingQuestions={
+                                                getAllCodingQuestions
+                                            }
+                                            setCodingQuestions={
+                                                setCodingQuestions
+                                            }
+                                        />
+                                    </MaxWidthWrapper>
+                                )
+                            )}
                         </>
                     )}
                 </div>
