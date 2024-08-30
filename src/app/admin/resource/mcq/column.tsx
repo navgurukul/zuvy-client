@@ -103,7 +103,10 @@ export const columns: ColumnDef<quiz>[] = [
             return (
                 <>
                     <div className="flex">
-                        <Dialog>
+                        <Dialog
+                            open={isEditQuizModalOpen}
+                            onOpenChange={setIsEditModalOpen}
+                        >
                             <DialogTrigger asChild>
                                 <Pencil
                                     className="cursor-pointer mr-5"
@@ -113,27 +116,19 @@ export const columns: ColumnDef<quiz>[] = [
                                     }
                                 />
                             </DialogTrigger>
-                            {isEditQuizModalOpen && (
-                                <DialogContent className="sm:max-w-[518px] max-h-[90vh] overflow-y-auto overflow-x-hidden">
-                                    <DialogHeader>
-                                        <DialogTitle>Edit MCQ</DialogTitle>
-                                    </DialogHeader>
-                                    <div className="w-full">
-                                        <EditQuizQuestion
-                                            tags={tags}
-                                            setIsEditModalOpen={
-                                                setIsEditModalOpen
-                                            }
-                                            getAllQuizQuesiton={
-                                                getAllQuizQuestion
-                                            }
-                                            setStoreQuizData={setStoreQuizData}
-                                            quizQuestionId={quizQuestionId}
-                                            quizQuestion={quizData}
-                                        />
-                                    </div>
-                                </DialogContent>
-                            )}
+                            <DialogContent className="sm:max-w-[518px] max-h-[90vh] overflow-y-auto overflow-x-hidden">
+                                <DialogHeader>
+                                    <DialogTitle>Edit MCQ</DialogTitle>
+                                </DialogHeader>
+                                <EditQuizQuestion
+                                    tags={tags}
+                                    setIsEditModalOpen={setIsEditModalOpen}
+                                    getAllQuizQuesiton={getAllQuizQuestion}
+                                    setStoreQuizData={setStoreQuizData}
+                                    quizQuestionId={quizQuestionId}
+                                    quizQuestion={quizData}
+                                />
+                            </DialogContent>
                         </Dialog>
                         <Trash2
                             onClick={(e) => {
