@@ -65,11 +65,6 @@ const OpenEndedQuestions = (props: Props) => {
         localStorage.setItem('openEndedCurrentTag', JSON.stringify(tag))
     }
 
-    const handleAllTopicsClick = () => {
-        setSelectedTag({ id: -1, tagName: 'AllTopics' })
-    }
-
-    console.log('openEndedQuestions', openEndedQuestions)
     const filteredQuestions = openEndedQuestions?.filter((question: any) => {
         const difficultyMatches =
             selectedDifficulty !== 'any'
@@ -106,8 +101,6 @@ const OpenEndedQuestions = (props: Props) => {
 
         return () => clearTimeout(timer)
     }, [])
-
-    console.log('filteredQuestions', filteredQuestions)
 
     return (
         <>
