@@ -1,11 +1,14 @@
 'use client'
 
+// External imports
+import { useState } from 'react'
 import { ChevronDown, LucideIcon } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
+
+// Internal imports
 import { Logout } from '@/utils/logout'
 import { cn } from '@/lib/utils'
 import { SheetClose } from '@/components/ui/sheet'
-import { useState } from 'react'
 
 interface SidebarItemProps {
     icon?: LucideIcon

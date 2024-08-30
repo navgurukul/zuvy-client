@@ -1,12 +1,14 @@
 'use client'
 
+// External imports
 import { useEffect, useState } from 'react'
-import { ChevronRight, Video } from 'lucide-react'
+import { ChevronRight, Video, BookOpenText } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+
+// Internal imports
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { BookOpenText } from 'lucide-react'
 import { useLazyLoadedStudentData } from '@/store/store'
 import Loader from './_components/Loader'
 import { api } from '@/utils/axios.config'

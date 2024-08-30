@@ -1,10 +1,12 @@
 'use client'
 
+// External imports
 import { useEffect, useState, useCallback } from 'react'
-import { getAttendanceColorClass } from '@/lib/utils'
+
+// Internal imports
+import { getAttendanceColorClass, cn } from '@/lib/utils'
 import { api } from '@/utils/axios.config'
 import { useLazyLoadedStudentData } from '@/store/store'
-import SubmissionCard from '@/app/admin/courses/[courseId]/_components/SubmissionCard'
 import {
     Select,
     SelectContent,
@@ -14,6 +16,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+
 
 interface EnrolledCourse {
     id: number
@@ -123,9 +126,9 @@ function Attendance() {
                             <div className="gap-2 items-center px-3">
                                 <div className="flex items-center gap-2">
                                     <div
-                                        className={`w-[10px] h-[10px] rounded-full  ${getAttendanceColorClass(
+                                        className={cn(`w-[10px] h-[10px] rounded-full  ${getAttendanceColorClass(
                                             attendanceData[0]?.attendedClasses
-                                        )}`}
+                                        )}`)}
                                     />
                                     <h1>{attendanceData[0]?.attendedClasses}%</h1>
                                 </div>

@@ -1,6 +1,11 @@
 'use client'
+
+// External imports
 import React, { useEffect, useState } from 'react'
 import { ChevronLeft, Search } from 'lucide-react'
+import Image from 'next/image'
+
+// Internal imports
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -11,13 +16,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from '@/components/ui/dialog'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Separator } from '@/components/ui/separator'
 import { DataTable } from '@/app/_components/datatable/data-table'
@@ -31,7 +29,6 @@ import {
     getcodingQuestionState,
 } from '@/store/store'
 import { getAllCodingQuestions } from '@/utils/admin'
-import Image from 'next/image'
 import { Spinner } from '@/components/ui/spinner'
 
 type Props = {}
@@ -68,6 +65,11 @@ const CodingProblems = (props: Props) => {
         if (response) {
             setTags(response.data.allTags)
         }
+    }
+
+    const handleCodingDialoge = (flag:boolean) => {
+        setIsCodingDialogOpen(flag)
+
     }
 
     const filteredQuestions = codingQuestions.filter((question: any) => {
@@ -139,7 +141,7 @@ const CodingProblems = (props: Props) => {
                                 </div>
 
                                 <Button
-                                    onClick={() => setIsCodingDialogOpen(true)}
+                                    onClick={() => handleCodingDialoge(true)}
                                 >
                                     + Create Problems
                                 </Button>
@@ -234,7 +236,7 @@ const CodingProblems = (props: Props) => {
                                         </h2>
                                         <Button
                                             onClick={() =>
-                                                setIsCodingDialogOpen(true)
+                                                handleCodingDialoge(true)
                                             }
                                         >
                                             + Create Problems
@@ -247,7 +249,7 @@ const CodingProblems = (props: Props) => {
                                     <MaxWidthWrapper className="flex flex-col justify-center items-center gap-5">
                                         <div
                                             onClick={() =>
-                                                setIsCodingDialogOpen(false)
+                                                handleCodingDialoge(false)
                                             }
                                             className="text-secondary cursor-pointer self-start flex"
                                         >
