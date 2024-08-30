@@ -139,9 +139,9 @@ const Assessment = ({
                 {isAssessmentStarted ? (
                     <Button
                         className="bg-secondary hover:bg-green-700 text-white px-6 py-2 rounded-md shadow-md"
-                        onClick={handleViewResults}
+                        onClick={handleStartAssessment}
                     >
-                        View Results
+                        Start Assessment
                     </Button>
                 ) : (
                     <TooltipProvider>

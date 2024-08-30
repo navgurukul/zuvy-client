@@ -137,6 +137,11 @@ const IDE: React.FC<IDEProps> = ({
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
+                setTimeout(() => {
+                    if (onBack) {
+                        onBack()
+                    }
+                }, 3000)
             } else {
                 toast({
                     title: 'Test Cases Failed',
@@ -189,9 +194,7 @@ const IDE: React.FC<IDEProps> = ({
     useEffect(() => {
         getQuestionDetails()
     }, [language])
-    const handleBack = () => {
-        router.back()
-    }
+  
 
     useEffect(() => {
         if (templates?.[language]?.template) {

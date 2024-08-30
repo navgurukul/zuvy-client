@@ -28,44 +28,35 @@ import { Plus, X } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import {
+    getcodingQuestionState,
     getCodingQuestionTags,
     getEditCodingQuestionDialogs,
 } from '@/store/store'
+import { getAllCodingQuestions } from '@/utils/admin'
 
 const formSchema = z.object({
-    title: z.string(),
-    description: z.string(),
-    problemStatement: z.string(),
-    constraints: z.string(),
+    title: z.string().min(5),
+    problemStatement: z.string().min(10),
+    constraints: z.string().min(5),
     difficulty: z.enum(['Easy', 'Medium', 'Hard'], {
-        required_error: 'You need to select a Difficulty  type.',
+        required_error: 'You need to select a Difficulty type.',
     }),
     topics: z.number().min(1, 'You need to select a Topic'),
-    inputFormat: z.enum(['Strings', 'Number', 'Float'], {
+    inputFormat: z.enum(['str', 'int', 'float', 'arrayOfnum', 'arrayOfStr'], {
         required_error: 'You need to select an Input Format',
     }),
-    outputFormat: z.enum(['Strings', 'Number', 'Float'], {
+    outputFormat: z.enum(['str', 'int', 'float', 'arrayOfnum', 'arrayOfStr'], {
         required_error: 'You need to select an Output Format',
     }),
     testCases: z.array(
         z.object({
-            input: z.string(),
-            output: z.string(),
+            input: z.string().min(1),
+            output: z.string().min(1),
         })
     ),
 })
 
-export default function EditCodingQuestionForm({
-    setIsCodingEditDialogOpen,
-    getAllCodingQuestions,
-    setCodingQuestions,
-    codingQuestions,
-}: {
-    setIsCodingEditDialogOpen: any
-    getAllCodingQuestions: any
-    setCodingQuestions: any
-    codingQuestions: any
-}) {
+export default function EditCodingQuestionForm() {
     const [testCases, setTestCases] = useState([
         { id: 1, input: '', output: '' },
     ])
@@ -73,9 +64,22 @@ export default function EditCodingQuestionForm({
     const { tags } = getCodingQuestionTags()
     const { editCodingQuestionId } = getEditCodingQuestionDialogs()
 
+    const {
+        setEditCodingQuestionId,
+        isCodingEditDialogOpen,
+        setIsCodingEditDialogOpen,
+    } = getEditCodingQuestionDialogs()
+
+    const { codingQuestions, setCodingQuestions } =
+        getcodingQuestionState()
+
     let selectCodingQuestion = codingQuestions.filter((question: any) => {
         return question.id === editCodingQuestionId
     })
+
+    useEffect(()=>{
+        console.log(codingQuestions);
+    },[codingQuestions])
 
     const handleAddTestCase = () => {
         setTestCases((prevTestCases) => [
@@ -94,17 +98,16 @@ export default function EditCodingQuestionForm({
         resolver: zodResolver(formSchema),
         defaultValues: {
             title: selectCodingQuestion[0]?.title || '',
-            description: selectCodingQuestion[0]?.description || '',
             problemStatement: selectCodingQuestion[0]?.description || '',
             constraints: selectCodingQuestion[0]?.constraints || '',
             difficulty: selectCodingQuestion[0]?.difficulty || 'Easy',
-            topics: selectCodingQuestion[0]?.tags || 0,
-            inputFormat: 'Number',
-            outputFormat: 'Strings',
+            topics: selectCodingQuestion[0]?.tagId || 0,
+            inputFormat: 'int',
+            outputFormat: 'int',
             testCases:
                 selectCodingQuestion[0]?.testCases?.map((testCase: any) => ({
-                    input: testCase.input[0],
-                    output: testCase.output[0],
+                    input: testCase.inputs[0],
+                    output: testCase.expectedOutput,
                 })) || [],
         },
     })
@@ -112,7 +115,7 @@ export default function EditCodingQuestionForm({
     async function editCodingQuestion(data: any) {
         try {
             const response = await api.patch(
-                `Content/updateCodingQuestion/${editCodingQuestionId}`,
+                `codingPlatform/update-question/${editCodingQuestionId}`,
                 data
             )
 
@@ -135,32 +138,73 @@ export default function EditCodingQuestionForm({
     }
 
     const handleSubmit = (values: z.infer<typeof formSchema>) => {
-        const auth = JSON.parse(localStorage.getItem('AUTH') || '{}')
-        const authorId = Number(auth.id)
+
+        const processInput = (input: string, format: string) => {
+            switch (format) {
+                case 'arrayOfnum':
+                    return input.split(',').map(Number)
+                case 'arrayOfStr':
+                    return input.split(',')
+                case 'int':
+                    return Number(input)
+                case 'float':
+                    return parseFloat(input)
+                default:
+                    return input
+            }
+        }
+
+        const generateParameterName = (index: number) => {
+            return String.fromCharCode(97 + index)
+        }
 
         const formattedData = {
             title: values.title,
             description: values.problemStatement,
             difficulty: values.difficulty,
-            tags: values.topics,
+            tagId: values.topics,
             constraints: values.constraints,
-            authorId: authorId,
-            examples: values.testCases.map((testCase) => ({
-                inputs: {
-                    input: [testCase.input],
-                    output: [testCase.output],
-                },
-            })),
-            testCases: values.testCases.map((testCase) => ({
-                inputs: {
-                    input: [testCase.input],
-                    output: [testCase.output],
-                },
-            })),
-            expectedOutput: [
-                values.testCases.map((testCase) => testCase.output).join(', '),
-            ],
-            solution: 'solution of the coding question',
+            testCases: values.testCases.map((testCase) => {
+                const processedInput = processInput(
+                    testCase.input,
+                    values.inputFormat
+                )
+                let inputs
+
+                if (Array.isArray(processedInput)) {
+                    inputs = [
+                        {
+                            parameterType: values.inputFormat,
+                            parameterValue: processedInput,
+                            parameterName: 'a',
+                        },
+                    ]
+                } else {
+                    const inputValues = testCase.input
+                        .trim()
+                        .split(' ')
+                        .filter(Boolean)
+                    inputs = inputValues.map((value, index) => ({
+                        parameterType: values.inputFormat,
+                        parameterValue: processInput(value, values.inputFormat),
+                        parameterName: generateParameterName(index),
+                    }))
+                }
+
+                return {
+                    inputs,
+                    expectedOutput: {
+                        parameterType: values.outputFormat,
+                        parameterValue: processInput(
+                            testCase.output,
+                            values.outputFormat
+                        ),
+                    },
+                }
+            }),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            content: {},
         }
         editCodingQuestion(formattedData)
         getAllCodingQuestions(setCodingQuestions)
@@ -170,17 +214,16 @@ export default function EditCodingQuestionForm({
         if (selectCodingQuestion) {
             form.reset({
                 title: selectCodingQuestion[0].title,
-                description: selectCodingQuestion[0].description,
                 problemStatement: selectCodingQuestion[0].description,
                 constraints: selectCodingQuestion[0].constraints,
                 difficulty: selectCodingQuestion[0].difficulty,
                 topics: selectCodingQuestion[0].tags,
-                inputFormat: 'Number',
-                outputFormat: 'Strings',
-                testCases: selectCodingQuestion[0]?.testCases?.map(
+                inputFormat: 'int',
+                outputFormat: 'int',
+                testCases: selectCodingQuestion[0].testCases.map(
                     (testCase: any) => ({
-                        input: testCase.input[0],
-                        output: testCase.output[0],
+                        input: testCase.inputs[0],
+                        output: testCase.expectedOutput,
                     })
                 ),
             })
@@ -188,8 +231,8 @@ export default function EditCodingQuestionForm({
                 selectCodingQuestion[0]?.testCases?.map(
                     (testCase: any, index: number) => ({
                         id: index + 1,
-                        input: testCase.input[0],
-                        output: testCase.output[0],
+                        input: testCase.inputs[0],
+                        output: testCase.expectedOutput,
                     })
                 )
             )
@@ -317,40 +360,7 @@ export default function EditCodingQuestionForm({
                             }}
                         />
                         <div className="flex justify-between gap-2">
-                            {/* <FormField
-                                control={form.control}
-                                name="allowedLanguages"
-                                render={({ field }) => {
-                                    return (
-                                        <FormItem className="text-left w-full">
-                                            <FormLabel>
-                                                Allowed Languages
-                                            </FormLabel>
-                                            <Select
-                                                onValueChange={field.onChange}
-                                            >
-                                                <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Choose Language" />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    <SelectItem value="All Languages">
-                                                        All Languages
-                                                    </SelectItem>
-                                                    <SelectItem value="C++">
-                                                        C++
-                                                    </SelectItem>
-                                                    <SelectItem value="Python">
-                                                        Python
-                                                    </SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )
-                                }}
-                            /> */}
+               
                             <FormField
                                 control={form.control}
                                 name="topics"
@@ -405,72 +415,7 @@ export default function EditCodingQuestionForm({
                                 }}
                             />
                         </div>
-                        <div className="flex justify-between gap-2">
-                            {/* <FormField
-                                control={form.control}
-                                name="inputFormat"
-                                render={({ field }) => {
-                                    return (
-                                        <FormItem className="text-left w-full">
-                                            <FormLabel>Input format</FormLabel>
-                                            <Select
-                                                onValueChange={field.onChange}
-                                            >
-                                                <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Choose Input Format" />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    <SelectItem value="String">
-                                                        String
-                                                    </SelectItem>
-                                                    <SelectItem value="Number">
-                                                        Number
-                                                    </SelectItem>
-                                                    <SelectItem value="Float">
-                                                        Float
-                                                    </SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )
-                                }}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="outputFormat"
-                                render={({ field }) => {
-                                    return (
-                                        <FormItem className="text-left w-full">
-                                            <FormLabel>Output Format</FormLabel>
-                                            <Select
-                                                onValueChange={field.onChange}
-                                            >
-                                                <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Choose Output Format" />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    <SelectItem value="String">
-                                                        String
-                                                    </SelectItem>
-                                                    <SelectItem value="Number">
-                                                        Number
-                                                    </SelectItem>
-                                                    <SelectItem value="Float">
-                                                        Float
-                                                    </SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )
-                                }}
-                            /> */}
-                        </div>
+                       
                         <div className="text-left ">
                             {/* <div className="flex justify-start"> */}
                             <FormLabel>Test Cases</FormLabel>
