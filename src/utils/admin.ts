@@ -217,15 +217,29 @@ export async function filteredCodingQuestions(
     setFilteredQuestions: any,
     selectedDifficulty: string,
     selectedTopic: string,
-    selectedLanguage: string
+    selectedLanguage: string,
+    debouncedSearch: string
 ) {
     try {
-        const response = await api.get('/Content/allCodingQuestions')
+        let url = `/Content/allCodingQuestions`
+
+        const storedTag = localStorage.getItem('currentTag')
+        const tag = storedTag !== null && JSON.parse(storedTag)
+        const tagId = tag && tag.id
+
+        if (debouncedSearch) {
+            url = `/Content/allCodingQuestions?searchTerm=${debouncedSearch}`
+        } else if (tagId && tagId !== -1) {
+            url = `/Content/allCodingQuestions?tagId=${tagId}`
+        }
+
+        // Use the dynamically generated `url` instead of hardcoding it
+        const response = await api.get(url)
         const filtered = response.data.filter(
             (question: any) =>
                 selectedDifficulty === 'Any Difficulty' ||
                 question.difficulty === selectedDifficulty
-            // &&(selectedTopic === 'All Topics' || question.tags.includes(selectedTopic)) &&
+            // && (selectedTopic === 'All Topics' || question.tags.includes(selectedTopic)) &&
             // (selectedLanguage === 'All Languages' || question.language === selectedLanguage)
         )
         setFilteredQuestions(filtered)
@@ -238,16 +252,22 @@ export async function filteredQuizQuestions(
     setFilteredQuestions: any,
     selectedDifficulty: string,
     selectedTopic: string,
-    selectedLanguage: string
+    selectedLanguage: string,
+    debouncedSearch: string
 ) {
     try {
         let url = `/Content/allQuizQuestions`
+
         const storedTag = localStorage.getItem('currentTag')
         const tag = storedTag !== null && JSON.parse(storedTag)
         const tagId = tag && tag.id
-        if (tagId && tagId !== -1) {
+
+        if (debouncedSearch) {
+            url = `/Content/allQuizQuestions?searchTerm=${debouncedSearch}`
+        } else if (tagId && tagId !== -1) {
             url = `/Content/allQuizQuestions?tagId=${tagId}`
         }
+
         const response = await api.get(url)
         const filtered = response.data.filter(
             (question: any) =>
@@ -266,10 +286,24 @@ export async function filteredOpenEndedQuestions(
     setFilteredQuestions: any,
     selectedDifficulty: string,
     selectedTopic: string,
-    selectedLanguage: string
+    selectedLanguage: string,
+    debouncedSearch: string
 ) {
     try {
-        const response = await api.get('/Content/openEndedQuestions')
+        let url = `/Content/openEndedQuestions`
+
+        console.log(debouncedSearch)
+        const storedTag = localStorage.getItem('currentTag')
+        const tag = storedTag !== null && JSON.parse(storedTag)
+        const tagId = tag && tag.id
+
+        if (debouncedSearch) {
+            url = `/Content/openEndedQuestions?searchTerm=${debouncedSearch}`
+        } else if (tagId && tagId !== -1) {
+            url = `/Content/openEndedQuestions?tagId=${tagId}`
+        }
+
+        const response = await api.get(url)
         const filtered = response.data.data.filter(
             (question: any) =>
                 selectedDifficulty === 'Any Difficulty' ||
@@ -330,7 +364,6 @@ export const fetchStudentsHandler = async ({
     setCurrentPage,
 }: FetchStudentsParams) => {
     setLoading(true)
-
 
     const endpoint = searchTerm
         ? `/bootcamp/students/${courseId}?searchTerm=${searchTerm}`

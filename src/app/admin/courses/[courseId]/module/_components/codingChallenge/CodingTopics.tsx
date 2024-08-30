@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Input } from '@/components/ui/input'
 import {
     Select,
@@ -17,6 +17,8 @@ interface CodingTopicsProps {
     setSelectedDifficulty: React.Dispatch<React.SetStateAction<string>>
     selectedLanguage: string
     setSelectedLanguage: React.Dispatch<React.SetStateAction<string>>
+    searchQuestionsInAssessment: string
+    setSearchQuestionsInAssessment: React.Dispatch<React.SetStateAction<string>>
 }
 
 const CodingTopics: React.FC<CodingTopicsProps> = ({
@@ -26,10 +28,17 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
     setSelectedDifficulty,
     selectedLanguage,
     setSelectedLanguage,
+    searchQuestionsInAssessment,
+    setSearchQuestionsInAssessment,
 }) => {
     return (
         <div className="flex flex-col mb-5">
-            <Input placeholder="Search By Name " className="w-full mb-2 " />
+            <Input
+                value={searchQuestionsInAssessment}
+                onChange={(e) => setSearchQuestionsInAssessment(e.target.value)}
+                placeholder="Search The Question By Name"
+                className="w-full mb-2 "
+            />
 
             <div className="dropDownsContainer flex gap-2">
                 <Select onValueChange={(value) => setSelectedTopic(value)}>
