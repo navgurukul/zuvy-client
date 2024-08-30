@@ -31,12 +31,12 @@ const guestRoutes = [
         href: '/student/recordings',
         subtabs: [],
     },
-    {
-        icon: Code,
-        label: 'Coding Playground',
-        href: '/student/playground',
-        subtabs: [],
-    },
+    // {
+    //     icon: Code,
+    //     label: 'Coding Playground',
+    //     href: '/student/playground',
+    //     subtabs: [],
+    // },
     // {
     //   icon: Compass,
     //   label: "Explore",
