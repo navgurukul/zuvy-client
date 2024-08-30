@@ -1,7 +1,11 @@
 'use client'
+
+// External imports
 import React, { useCallback, useEffect, useState } from 'react'
-import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
+
+// Internal imports
+import { Input } from '@/components/ui/input'
 import { columns } from './column'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { api } from '@/utils/axios.config'

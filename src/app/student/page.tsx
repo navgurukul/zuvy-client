@@ -1,12 +1,15 @@
 'use client'
+
+// External imports
 import React, { useEffect, useState } from 'react'
-// import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import Image from 'next/image'
 // import { PartyPopper } from "lucide-react";
 
+
+// Internal imports
+// import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Heading from './_components/heading'
 import Schedule from './_components/schedule'
-import Doubt from './_components/doubt'
-import Image from 'next/image'
 import { Spinner } from '@/components/ui/spinner'
 import { Stat } from './_components/stat'
 import Attendance from './_components/attendance'
