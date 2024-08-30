@@ -45,15 +45,22 @@ const CodingProblems = (props: Props) => {
         setIsCodingDialogOpen,
     } = getEditCodingQuestionDialogs()
     const { tags, setTags } = getCodingQuestionTags()
-    const [selectedTag, setSelectedTag] = useState({
-        tagName: 'AllTopics',
-        id: -1,
+    const [selectedTag, setSelectedTag] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const storedTag = localStorage.getItem('codingCurrentTag')
+            return storedTag !== null
+                ? JSON.parse(storedTag)
+                : { tagName: 'All Topics', id: -1 }
+        }
+        return { tagName: 'All Topics', id: -1 }
     })
     const [selectedDifficulty, setSelectedDifficulty] = useState('any')
     const [loading, setLoading] = useState(true)
 
     const handleTopicClick = (tag: any) => {
         setSelectedTag(tag)
+        const currentTag = JSON.stringify(tag)
+        localStorage.setItem('codingCurrentTag', currentTag)
     }
 
     const handleAllTopicsClick = () => {
@@ -63,13 +70,16 @@ const CodingProblems = (props: Props) => {
     async function getAllTags() {
         const response = await api.get('Content/allTags')
         if (response) {
-            setTags(response.data.allTags)
+            const tagArr = [
+                { tagName: 'All Topics', id: -1 },
+                ...response.data.allTags,
+            ]
+            setTags(tagArr)
         }
     }
 
-    const handleCodingDialoge = (flag:boolean) => {
+    const handleCodingDialoge = (flag: boolean) => {
         setIsCodingDialogOpen(flag)
-
     }
 
     const filteredQuestions = codingQuestions.filter((question: any) => {
@@ -174,38 +184,30 @@ const CodingProblems = (props: Props) => {
                                 </Select>
                                 <Separator
                                     orientation="vertical"
-                                    className="w-1 h-12 ml-4 bg-gray-400 rounded-lg"
+                                    className="w-1 h-12 mx-4 bg-gray-400 rounded-lg"
                                 />
 
-                                <ScrollArea className=" text-nowrap ">
-                                    <ScrollBar orientation="horizontal" />
-                                    <Button
-                                        className={`mx-3 rounded-3xl ${
-                                            selectedTag?.tagName === 'AllTopics'
-                                                ? 'bg-secondary text-white'
-                                                : 'bg-gray-200 text-black'
-                                        }`}
-                                        onClick={handleAllTopicsClick}
-                                    >
-                                        All Topics
-                                    </Button>
-
-                                    {tags.map((tag: any) => (
-                                        <Button
-                                            className={`mx-3 rounded-3xl ${
-                                                selectedTag === tag
-                                                    ? 'bg-secondary text-white'
-                                                    : 'bg-gray-200 text-black'
-                                            }`}
-                                            key={tag?.id}
-                                            onClick={() =>
-                                                handleTopicClick(tag)
-                                            }
-                                        >
-                                            {tag.tagName}
-                                        </Button>
-                                    ))}
-                                </ScrollArea>
+                                <Select
+                                    onValueChange={(value: any) =>
+                                        handleTopicClick(value)
+                                    }
+                                >
+                                    <SelectTrigger className="w-[180px]">
+                                        <SelectValue
+                                            placeholder={selectedTag?.tagName}
+                                        />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {tags.map((tag: any) => (
+                                            <SelectItem
+                                                key={tag.id}
+                                                value={tag}
+                                            >
+                                                {tag.tagName}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
 
                             <DataTable

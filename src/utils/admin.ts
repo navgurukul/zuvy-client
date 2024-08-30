@@ -208,7 +208,11 @@ export const handlerQuizQuestions = (
 export async function getAllTags(setTags: any) {
     const response = await api.get('Content/allTags')
     if (response) {
-        setTags(response.data.allTags)
+        const tagArr = [
+            { tagName: 'All Topics', id: -1 },
+            ...response.data.allTags,
+        ]
+        setTags(tagArr)
     }
 }
 // --------------------------------------------

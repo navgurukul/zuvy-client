@@ -37,9 +37,14 @@ import { Spinner } from '@/components/ui/spinner'
 type Props = {}
 
 const OpenEndedQuestions = (props: Props) => {
-    const [selectedTag, setSelectedTag] = useState({
-        tagName: 'AllTopics',
-        id: -1,
+    const [selectedTag, setSelectedTag] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const storedTag = localStorage.getItem('openEndedCurrentTag')
+            return storedTag !== null
+                ? JSON.parse(storedTag)
+                : { tagName: 'All Topics', id: -1 }
+        }
+        return { tagName: 'All Topics', id: -1 }
     })
     const { tags, setTags } = getCodingQuestionTags()
     const [selectedDifficulty, setSelectedDifficulty] = useState('any')
@@ -51,6 +56,8 @@ const OpenEndedQuestions = (props: Props) => {
 
     const handleTopicClick = (tag: any) => {
         setSelectedTag(tag)
+        const currentTag = JSON.stringify(tag)
+        localStorage.setItem('openEndedCurrentTag', currentTag)
     }
 
     const handleAllTopicsClick = () => {
@@ -182,38 +189,29 @@ const OpenEndedQuestions = (props: Props) => {
                                 </Select>
                                 <Separator
                                     orientation="vertical"
-                                    className="w-1 h-12 ml-4 bg-gray-400 rounded-lg"
+                                    className="w-1 h-12 mx-4 bg-gray-400 rounded-lg"
                                 />
-
-                                <ScrollArea className=" text-nowrap ">
-                                    <ScrollBar orientation="horizontal" />
-                                    <Button
-                                        className={`mx-3 rounded-3xl ${
-                                            selectedTag?.tagName === 'AllTopics'
-                                                ? 'bg-secondary text-white'
-                                                : 'bg-gray-200 text-black'
-                                        }`}
-                                        onClick={handleAllTopicsClick}
-                                    >
-                                        All Topics
-                                    </Button>
-
-                                    {tags.map((tag: any) => (
-                                        <Button
-                                            className={`mx-3 rounded-3xl ${
-                                                selectedTag === tag
-                                                    ? 'bg-secondary text-white'
-                                                    : 'bg-gray-200 text-black'
-                                            }`}
-                                            key={tag?.id}
-                                            onClick={() =>
-                                                handleTopicClick(tag)
-                                            }
-                                        >
-                                            {tag.tagName}
-                                        </Button>
-                                    ))}
-                                </ScrollArea>
+                                <Select
+                                    onValueChange={(value: any) =>
+                                        handleTopicClick(value)
+                                    }
+                                >
+                                    <SelectTrigger className="w-[180px]">
+                                        <SelectValue
+                                            placeholder={selectedTag?.tagName}
+                                        />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {tags.map((tag: any) => (
+                                            <SelectItem
+                                                key={tag.id}
+                                                value={tag}
+                                            >
+                                                {tag.tagName}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
 
                             <DataTable
