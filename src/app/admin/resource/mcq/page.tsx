@@ -46,7 +46,7 @@ const Mcqs = (props: Props) => {
     const [difficulty, setDifficulty] = useState<string>('')
     const { tags, setTags } = getCodingQuestionTags()
     const { quizData, setStoreQuizData } = getAllQuizData()
-    const [selectedTag, setSelectedTag] = useState(() => {
+    const [selectedTag, setSelectedTag] = useState<Tag>(() => {
         if (typeof window !== 'undefined') {
             const storedTag = localStorage.getItem('MCQCurrentTag')
             return storedTag !== null
@@ -57,10 +57,13 @@ const Mcqs = (props: Props) => {
     })
     const [loading, setLoading] = useState(true)
 
-    const handleTopicClick = (tag: Tag) => {
+    const handleTopicClick = (value: string) => {
+        const tag = tags.find((t: Tag) => t.tagName === value) || {
+            tagName: 'All Topics',
+            id: -1,
+        }
         setSelectedTag(tag)
-        const currentTag = JSON.stringify(tag)
-        localStorage.setItem('MCQCurrentTag', currentTag)
+        localStorage.setItem('MCQCurrentTag', JSON.stringify(tag))
     }
     const handleAllTopicsClick = () => {
         setSelectedTag({ id: -1, tagName: 'All Topics' })
@@ -187,20 +190,18 @@ const Mcqs = (props: Props) => {
                             className="w-1 h-12 mx-4 bg-gray-400 rounded-lg"
                         />
                         <Select
-                            // value={selectedTag?.tagName}
-                            onValueChange={(value: any) =>
-                                handleTopicClick(value)
-                            }
+                            value={selectedTag.tagName}
+                            onValueChange={handleTopicClick}
                         >
                             <SelectTrigger className="w-[180px]">
-                                {/* <SelectValue placeholder="Choose Topic" /> */}
-                                <SelectValue
-                                    placeholder={selectedTag?.tagName}
-                                />
+                                <SelectValue placeholder="Choose Topic" />
                             </SelectTrigger>
                             <SelectContent>
-                                {tags.map((tag: any) => (
-                                    <SelectItem key={tag.id} value={tag}>
+                                {tags.map((tag: Tag) => (
+                                    <SelectItem
+                                        key={tag.id}
+                                        value={tag.tagName}
+                                    >
                                         {tag.tagName}
                                     </SelectItem>
                                 ))}

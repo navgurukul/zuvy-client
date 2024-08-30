@@ -1,7 +1,7 @@
 'use client'
 
 // External imports
-import React, { useEffect, useState } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { ChevronLeft, Search } from 'lucide-react'
 import Image from 'next/image'
 
@@ -57,10 +57,13 @@ const CodingProblems = (props: Props) => {
     const [selectedDifficulty, setSelectedDifficulty] = useState('any')
     const [loading, setLoading] = useState(true)
 
-    const handleTopicClick = (tag: any) => {
+    const handleTopicClick = (value: string) => {
+        const tag = tags.find((t: any) => t.tagName === value) || {
+            tagName: 'All Topics',
+            id: -1,
+        }
         setSelectedTag(tag)
-        const currentTag = JSON.stringify(tag)
-        localStorage.setItem('codingCurrentTag', currentTag)
+        localStorage.setItem('codingCurrentTag', JSON.stringify(tag))
     }
 
     const handleAllTopicsClick = () => {
@@ -88,7 +91,7 @@ const CodingProblems = (props: Props) => {
                 ? question.difficulty === selectedDifficulty
                 : true
         const tagMatches =
-            selectedTag?.tagName !== 'AllTopics'
+            selectedTag?.tagName !== 'All Topics'
                 ? question.tags === selectedTag?.id
                 : true
         const searchTermMatches =
@@ -188,20 +191,17 @@ const CodingProblems = (props: Props) => {
                                 />
 
                                 <Select
-                                    onValueChange={(value: any) =>
-                                        handleTopicClick(value)
-                                    }
+                                    value={selectedTag.tagName}
+                                    onValueChange={handleTopicClick}
                                 >
                                     <SelectTrigger className="w-[180px]">
-                                        <SelectValue
-                                            placeholder={selectedTag?.tagName}
-                                        />
+                                        <SelectValue placeholder="Choose Topic" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {tags.map((tag: any) => (
                                             <SelectItem
                                                 key={tag.id}
-                                                value={tag}
+                                                value={tag.tagName}
                                             >
                                                 {tag.tagName}
                                             </SelectItem>

@@ -33,9 +33,13 @@ import { getAllOpenEndedQuestions, getAllTags } from '@/utils/admin'
 import { Spinner } from '@/components/ui/spinner'
 
 type Props = {}
+export type Tag = {
+    id: number
+    tagName: string
+}
 
 const OpenEndedQuestions = (props: Props) => {
-    const [selectedTag, setSelectedTag] = useState(() => {
+    const [selectedTag, setSelectedTag] = useState<Tag>(() => {
         if (typeof window !== 'undefined') {
             const storedTag = localStorage.getItem('openEndedCurrentTag')
             return storedTag !== null
@@ -52,23 +56,27 @@ const OpenEndedQuestions = (props: Props) => {
     const [searchTerm, setSearchTerm] = useState('')
     const [loading, setLoading] = useState(true)
 
-    const handleTopicClick = (tag: any) => {
+    const handleTopicClick = (value: string) => {
+        const tag = tags.find((t: Tag) => t.tagName === value) || {
+            tagName: 'All Topics',
+            id: -1,
+        }
         setSelectedTag(tag)
-        const currentTag = JSON.stringify(tag)
-        localStorage.setItem('openEndedCurrentTag', currentTag)
+        localStorage.setItem('openEndedCurrentTag', JSON.stringify(tag))
     }
 
     const handleAllTopicsClick = () => {
         setSelectedTag({ id: -1, tagName: 'AllTopics' })
     }
 
+    console.log('openEndedQuestions', openEndedQuestions)
     const filteredQuestions = openEndedQuestions?.filter((question: any) => {
         const difficultyMatches =
             selectedDifficulty !== 'any'
                 ? question.difficulty === selectedDifficulty
                 : true
         const tagMatches =
-            selectedTag?.tagName !== 'AllTopics'
+            selectedTag?.tagName !== 'All Topics'
                 ? question.tagId === selectedTag?.id
                 : true
         const searchTermMatches =
@@ -98,6 +106,8 @@ const OpenEndedQuestions = (props: Props) => {
 
         return () => clearTimeout(timer)
     }, [])
+
+    console.log('filteredQuestions', filteredQuestions)
 
     return (
         <>
@@ -190,20 +200,17 @@ const OpenEndedQuestions = (props: Props) => {
                                     className="w-1 h-12 mx-4 bg-gray-400 rounded-lg"
                                 />
                                 <Select
-                                    onValueChange={(value: any) =>
-                                        handleTopicClick(value)
-                                    }
+                                    value={selectedTag.tagName}
+                                    onValueChange={handleTopicClick}
                                 >
                                     <SelectTrigger className="w-[180px]">
-                                        <SelectValue
-                                            placeholder={selectedTag?.tagName}
-                                        />
+                                        <SelectValue placeholder="Choose Topic" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {tags.map((tag: any) => (
+                                        {tags.map((tag: Tag) => (
                                             <SelectItem
                                                 key={tag.id}
-                                                value={tag}
+                                                value={tag.tagName}
                                             >
                                                 {tag.tagName}
                                             </SelectItem>
