@@ -65,9 +65,7 @@ const Mcqs = (props: Props) => {
         setSelectedTag(tag)
         localStorage.setItem('MCQCurrentTag', JSON.stringify(tag))
     }
-    const handleAllTopicsClick = () => {
-        setSelectedTag({ id: -1, tagName: 'All Topics' })
-    }
+
     const openModal = () => setIsOpen(true)
     const closeModal = () => setIsOpen(false)
     const handleSetsearch = (e: React.ChangeEvent<HTMLInputElement>) => {

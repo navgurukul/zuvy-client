@@ -66,10 +66,6 @@ const CodingProblems = (props: Props) => {
         localStorage.setItem('codingCurrentTag', JSON.stringify(tag))
     }
 
-    const handleAllTopicsClick = () => {
-        setSelectedTag({ id: -1, tagName: 'AllTopics' })
-    }
-
     async function getAllTags() {
         const response = await api.get('Content/allTags')
         if (response) {
@@ -92,7 +88,7 @@ const CodingProblems = (props: Props) => {
                 : true
         const tagMatches =
             selectedTag?.tagName !== 'All Topics'
-                ? question.tags === selectedTag?.id
+                ? question.tagId === selectedTag?.id
                 : true
         const searchTermMatches =
             searchTerm !== ''
