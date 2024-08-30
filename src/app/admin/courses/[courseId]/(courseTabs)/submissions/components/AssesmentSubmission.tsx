@@ -1,3 +1,4 @@
+'use client'
 import React, { useCallback, useEffect, useState } from 'react'
 import AssesmentComponent from '../../../_components/AssesmentComponent'
 import { api } from '@/utils/axios.config'
