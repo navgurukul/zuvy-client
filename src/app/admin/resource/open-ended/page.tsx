@@ -1,7 +1,11 @@
 'use client'
-import React, { useEffect, useState } from 'react'
 
+// External imports
+import React, { useEffect, useState } from 'react'
 import { Search } from 'lucide-react'
+import Image from 'next/image'
+
+// Internal imports
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -19,19 +23,13 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
-
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Separator } from '@/components/ui/separator'
 import { DataTable } from '@/app/_components/datatable/data-table'
-
 import { columns } from './column'
 import NewOpenEndedQuestionForm from '@/app/admin/resource/_components/NewOpenEndedQuestionForm'
-import { api } from '@/utils/axios.config'
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { getCodingQuestionTags, getopenEndedQuestionstate } from '@/store/store'
 import { getAllOpenEndedQuestions, getAllTags } from '@/utils/admin'
-import EditOpenEndedQuestionForm from '../_components/EditOpenEndedQuestionForm'
-import Image from 'next/image'
 import { Spinner } from '@/components/ui/spinner'
 
 type Props = {}

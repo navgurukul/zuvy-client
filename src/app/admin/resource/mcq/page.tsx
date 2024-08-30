@@ -1,7 +1,10 @@
 'use client'
-import React, { useState, useEffect, useCallback } from 'react'
 
+// External imports
+import React, { useState, useEffect, useCallback } from 'react'
 import { Search } from 'lucide-react'
+
+// Internal imports
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -15,22 +18,17 @@ import {
 import {
     Dialog,
     DialogContent,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
-
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Separator } from '@/components/ui/separator'
 import { DataTable } from '@/app/_components/datatable/data-table'
-
 import { columns } from './column'
 import NewMcqProblemForm from '../_components/NewMcqProblemForm'
 import { api } from '@/utils/axios.config'
 import { getAllQuizData, getCodingQuestionTags } from '@/store/store'
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
-import { RequestBodyType } from '../_components/NewMcqProblemForm'
 import useDebounce from '@/hooks/useDebounce'
 import { getAllQuizQuestion } from '@/utils/admin'
 import { Spinner } from '@/components/ui/spinner'
