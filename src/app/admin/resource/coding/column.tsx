@@ -135,14 +135,7 @@ export const columns: ColumnDef<CodingQuestion>[] = [
                                 </DialogHeader>
                                 <div className="w-full">
                                     <EditCodingQuestionForm
-                                        setIsCodingEditDialogOpen={
-                                            setIsCodingEditDialogOpen
-                                        }
-                                        getAllCodingQuestions={
-                                            getAllCodingQuestions
-                                        }
-                                        setCodingQuestions={setCodingQuestions}
-                                        codingQuestions={codingQuestions}
+                                       
                                     />
                                 </div>
                             </DialogContent>

@@ -1,6 +1,11 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+
+// External imports
+import React, { useState, useEffect, useCallback } from 'react'
 import { ChevronLeft, Search } from 'lucide-react'
+import Image from 'next/image'
+
+// Internal imports
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -11,13 +16,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from '@/components/ui/dialog'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Separator } from '@/components/ui/separator'
 import { DataTable } from '@/app/_components/datatable/data-table'
@@ -31,7 +29,6 @@ import {
     getcodingQuestionState,
 } from '@/store/store'
 import { getAllCodingQuestions } from '@/utils/admin'
-import Image from 'next/image'
 import { Spinner } from '@/components/ui/spinner'
 
 type Props = {}
@@ -48,26 +45,40 @@ const CodingProblems = (props: Props) => {
         setIsCodingDialogOpen,
     } = getEditCodingQuestionDialogs()
     const { tags, setTags } = getCodingQuestionTags()
-    const [selectedTag, setSelectedTag] = useState({
-        tagName: 'AllTopics',
-        id: -1,
+    const [selectedTag, setSelectedTag] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const storedTag = localStorage.getItem('codingCurrentTag')
+            return storedTag !== null
+                ? JSON.parse(storedTag)
+                : { tagName: 'All Topics', id: -1 }
+        }
+        return { tagName: 'All Topics', id: -1 }
     })
     const [selectedDifficulty, setSelectedDifficulty] = useState('any')
     const [loading, setLoading] = useState(true)
 
-    const handleTopicClick = (tag: any) => {
+    const handleTopicClick = (value: string) => {
+        const tag = tags.find((t: any) => t.tagName === value) || {
+            tagName: 'All Topics',
+            id: -1,
+        }
         setSelectedTag(tag)
-    }
-
-    const handleAllTopicsClick = () => {
-        setSelectedTag({ id: -1, tagName: 'AllTopics' })
+        localStorage.setItem('codingCurrentTag', JSON.stringify(tag))
     }
 
     async function getAllTags() {
         const response = await api.get('Content/allTags')
         if (response) {
-            setTags(response.data.allTags)
+            const tagArr = [
+                { tagName: 'All Topics', id: -1 },
+                ...response.data.allTags,
+            ]
+            setTags(tagArr)
         }
+    }
+
+    const handleCodingDialoge = (flag: boolean) => {
+        setIsCodingDialogOpen(flag)
     }
 
     const filteredQuestions = codingQuestions.filter((question: any) => {
@@ -76,8 +87,8 @@ const CodingProblems = (props: Props) => {
                 ? question.difficulty === selectedDifficulty
                 : true
         const tagMatches =
-            selectedTag?.tagName !== 'AllTopics'
-                ? question.tags === selectedTag?.id
+            selectedTag?.tagName !== 'All Topics'
+                ? question.tagId === selectedTag?.id
                 : true
         const searchTermMatches =
             searchTerm !== ''
@@ -139,7 +150,7 @@ const CodingProblems = (props: Props) => {
                                 </div>
 
                                 <Button
-                                    onClick={() => setIsCodingDialogOpen(true)}
+                                    onClick={() => handleCodingDialoge(true)}
                                 >
                                     + Create Problems
                                 </Button>
@@ -172,38 +183,27 @@ const CodingProblems = (props: Props) => {
                                 </Select>
                                 <Separator
                                     orientation="vertical"
-                                    className="w-1 h-12 ml-4 bg-gray-400 rounded-lg"
+                                    className="w-1 h-12 mx-4 bg-gray-400 rounded-lg"
                                 />
 
-                                <ScrollArea className=" text-nowrap ">
-                                    <ScrollBar orientation="horizontal" />
-                                    <Button
-                                        className={`mx-3 rounded-3xl ${
-                                            selectedTag?.tagName === 'AllTopics'
-                                                ? 'bg-secondary text-white'
-                                                : 'bg-gray-200 text-black'
-                                        }`}
-                                        onClick={handleAllTopicsClick}
-                                    >
-                                        All Topics
-                                    </Button>
-
-                                    {tags.map((tag: any) => (
-                                        <Button
-                                            className={`mx-3 rounded-3xl ${
-                                                selectedTag === tag
-                                                    ? 'bg-secondary text-white'
-                                                    : 'bg-gray-200 text-black'
-                                            }`}
-                                            key={tag?.id}
-                                            onClick={() =>
-                                                handleTopicClick(tag)
-                                            }
-                                        >
-                                            {tag.tagName}
-                                        </Button>
-                                    ))}
-                                </ScrollArea>
+                                <Select
+                                    value={selectedTag.tagName}
+                                    onValueChange={handleTopicClick}
+                                >
+                                    <SelectTrigger className="w-[180px]">
+                                        <SelectValue placeholder="Choose Topic" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {tags.map((tag: any) => (
+                                            <SelectItem
+                                                key={tag.id}
+                                                value={tag.tagName}
+                                            >
+                                                {tag.tagName}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
 
                             <DataTable
@@ -234,7 +234,7 @@ const CodingProblems = (props: Props) => {
                                         </h2>
                                         <Button
                                             onClick={() =>
-                                                setIsCodingDialogOpen(true)
+                                                handleCodingDialoge(true)
                                             }
                                         >
                                             + Create Problems
@@ -247,7 +247,7 @@ const CodingProblems = (props: Props) => {
                                     <MaxWidthWrapper className="flex flex-col justify-center items-center gap-5">
                                         <div
                                             onClick={() =>
-                                                setIsCodingDialogOpen(false)
+                                                handleCodingDialoge(false)
                                             }
                                             className="text-secondary cursor-pointer self-start flex"
                                         >

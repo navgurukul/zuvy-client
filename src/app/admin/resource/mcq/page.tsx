@@ -1,7 +1,10 @@
 'use client'
-import React, { useState, useEffect, useCallback } from 'react'
 
+// External imports
+import React, { useState, useEffect, useCallback } from 'react'
 import { Search } from 'lucide-react'
+
+// Internal imports
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -15,22 +18,17 @@ import {
 import {
     Dialog,
     DialogContent,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
-
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Separator } from '@/components/ui/separator'
 import { DataTable } from '@/app/_components/datatable/data-table'
-
 import { columns } from './column'
 import NewMcqProblemForm from '../_components/NewMcqProblemForm'
 import { api } from '@/utils/axios.config'
 import { getAllQuizData, getCodingQuestionTags } from '@/store/store'
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
-import { RequestBodyType } from '../_components/NewMcqProblemForm'
 import useDebounce from '@/hooks/useDebounce'
 import { getAllQuizQuestion } from '@/utils/admin'
 import { Spinner } from '@/components/ui/spinner'
@@ -48,29 +46,26 @@ const Mcqs = (props: Props) => {
     const [difficulty, setDifficulty] = useState<string>('')
     const { tags, setTags } = getCodingQuestionTags()
     const { quizData, setStoreQuizData } = getAllQuizData()
-    // const [selectedTag, setSelectedTag] = useState(() => {
-    //     if (typeof window !== 'undefined') {
-    //         const storedTag = localStorage.getItem('currentTag')
-    //         return storedTag !== null
-    //             ? JSON.parse(storedTag)
-    //             : { tagName: 'AllTopics', id: -1 }
-    //     }
-    //     return { tagName: 'AllTopics', id: -1 }
-    // })
-    const [selectedTag, setSelectedTag] = useState({
-        tagName: 'AllTopics',
-        id: -1,
+    const [selectedTag, setSelectedTag] = useState<Tag>(() => {
+        if (typeof window !== 'undefined') {
+            const storedTag = localStorage.getItem('MCQCurrentTag')
+            return storedTag !== null
+                ? JSON.parse(storedTag)
+                : { tagName: 'All Topics', id: -1 }
+        }
+        return { tagName: 'All Topics', id: -1 }
     })
     const [loading, setLoading] = useState(true)
 
-    const handleTopicClick = (tag: Tag) => {
+    const handleTopicClick = (value: string) => {
+        const tag = tags.find((t: Tag) => t.tagName === value) || {
+            tagName: 'All Topics',
+            id: -1,
+        }
         setSelectedTag(tag)
-        const currentTag = JSON.stringify(tag)
-        // localStorage.setItem('currentTag', currentTag)
+        localStorage.setItem('MCQCurrentTag', JSON.stringify(tag))
     }
-    const handleAllTopicsClick = () => {
-        setSelectedTag({ id: -1, tagName: 'AllTopics' })
-    }
+
     const openModal = () => setIsOpen(true)
     const closeModal = () => setIsOpen(false)
     const handleSetsearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,7 +75,11 @@ const Mcqs = (props: Props) => {
     async function getAllTags() {
         const response = await api.get('Content/allTags')
         if (response) {
-            setTags([...response.data.allTags])
+            const tagArr = [
+                { tagName: 'All Topics', id: -1 },
+                ...response.data.allTags,
+            ]
+            setTags(tagArr)
         }
     }
 
@@ -186,34 +185,26 @@ const Mcqs = (props: Props) => {
                         </Select>
                         <Separator
                             orientation="vertical"
-                            className="w-1 h-12 ml-4 bg-gray-400 rounded-lg"
+                            className="w-1 h-12 mx-4 bg-gray-400 rounded-lg"
                         />
-                        <ScrollArea className=" text-nowrap ">
-                            <ScrollBar orientation="horizontal" />
-                            <Button
-                                        className={`mx-3 rounded-3xl ${
-                                            selectedTag?.tagName === 'AllTopics'
-                                                ? 'bg-secondary text-white'
-                                                : 'bg-gray-200 text-black'
-                                        }`}
-                                        onClick={handleAllTopicsClick}
+                        <Select
+                            value={selectedTag.tagName}
+                            onValueChange={handleTopicClick}
+                        >
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Choose Topic" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {tags.map((tag: Tag) => (
+                                    <SelectItem
+                                        key={tag.id}
+                                        value={tag.tagName}
                                     >
-                                        All Topics
-                                    </Button>
-                            {tags.map((tag: Tag) => (
-                                <Button
-                                    className={`mx-3 rounded-3xl ${
-                                        selectedTag.id === tag.id
-                                            ? 'bg-secondary text-white'
-                                            : 'bg-gray-200 text-black'
-                                    }`}
-                                    key={tag?.id}
-                                    onClick={() => handleTopicClick(tag)}
-                                >
-                                    {tag.tagName}
-                                </Button>
-                            ))}
-                        </ScrollArea>
+                                        {tag.tagName}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     <DataTable data={quizData} columns={columns} />

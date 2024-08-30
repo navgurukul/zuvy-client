@@ -73,6 +73,8 @@ function Page({
         useState<any>()
     const [chapterId, setChapterId] = useState<any>()
 
+    const [isCodingQuesSubmitted, setIsCodingQuesSubmitted] = useState(false)
+
     const pathname = usePathname()
 
     function isCurrentPageSubmitAssessment() {
@@ -181,34 +183,60 @@ function Page({
         setIntervalId(newIntervalId)
     }
 
-    const handleSolveChallenge = (
+    async function getCodingSubmissionsData(codingOutsourseId: any, assessmentSubmissionId: any, questionId: any) {
+        try {
+            const res = await api.get(
+                `codingPlatform/submissions/questionId=${questionId}?assessmentSubmissionId=${assessmentSubmissionId}&codingOutsourseId=${codingOutsourseId}`
+            )
+            const action = res.data.data.action;
+            setIsCodingQuesSubmitted(action == 'submit');
+            return action;
+    
+        } catch (error) {
+            console.error('Error fetching coding submissions data:', error);
+            return null;
+        }
+    }
+    
+    const handleSolveChallenge = async (
         type: 'quiz' | 'open-ended' | 'coding',
         id?: number,
         codingOutsourseId?: number
     ) => {
-        setSelectedQuesType(type)
-        setIsSolving(true)
+        setSelectedQuesType(type);
+        setIsSolving(true);
+    
         if (type === 'coding' && id) {
-            setSelectedQuestionId(id)
-            setSelectedCodingOutsourseId(codingOutsourseId)
-            requestFullScreen(document.documentElement)
-        }else if(type === 'quiz' && seperateQuizQuestions[0]?.submissionsData.length > 0){
+            const action = await getCodingSubmissionsData(codingOutsourseId, assessmentSubmitId, id);
+    
+            if (action === 'submit') {
+                toast({
+                    title: 'Coding Question Already Submitted',
+                    description: 'You have already submitted this coding question',
+                    className: 'text-left capitalize',
+                });
+            } else {
+                setSelectedQuestionId(id);
+                setSelectedCodingOutsourseId(codingOutsourseId);
+                requestFullScreen(document.documentElement);
+            }
+        } else if (type === 'quiz' && seperateQuizQuestions[0]?.submissionsData.length > 0) {
             toast({
                 title: 'Quiz Already Submitted',
                 description: 'You have already submitted the quiz',
                 className: 'text-left capitalize',
-            })
-
-        } else if( type === 'open-ended' && seperateOpenEndedQuestions[0]?.submissionsData.length > 0){
+            });
+        } else if (type === 'open-ended' && seperateOpenEndedQuestions[0]?.submissionsData.length > 0) {
             toast({
                 title: 'Open Ended Questions Already Submitted',
                 description: 'You have already submitted the open ended questions',
                 className: 'text-left capitalize',
-            })
-        }  else {
-            requestFullScreen(document.documentElement)
+            });
+        } else {
+            requestFullScreen(document.documentElement);
         }
-    }
+    };
+    
 
     const handleBack = () => {
         setIsSolving(false)
@@ -254,17 +282,6 @@ function Page({
         getSeperateQuizQuestions()
         getSeperateOpenEndedQuestions()
     }, [decodedParams.assessmentOutSourceId])
-
-    // const formatTime = (seconds: number) => {
-    //     const h = Math.floor(seconds / 3600)
-    //         .toString()
-    //         .padStart(2, '0')
-    //     const m = Math.floor((seconds % 3600) / 60)
-    //         .toString()
-    //         .padStart(2, '0')
-    //     const s = (seconds % 60).toString().padStart(2, '0')
-    //     return `${h}:${m}:${s}`
-    // }
 
     if (isSolving) {
         if (selectedQuesType === 'quiz' && seperateQuizQuestions[0]?.submissionsData.length == 0) {
@@ -406,8 +423,7 @@ function Page({
                             </p>
                             <p className="description">
                                 All the problems i.e. coding challenges, MCQs
-                                and open-ended questions have to be completed
-                                all at once.
+                                and open-ended questions can be submitted only once.
                             </p>
                         </div>
                     </div>
