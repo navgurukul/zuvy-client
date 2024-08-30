@@ -28,7 +28,7 @@ function Chapters({ params }: any) {
     // misc
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
-    const { viewcourses, moduleID } = useParams()
+    const { viewcourses, moduleID, chapterID } = useParams()
     const urlParams = new URLSearchParams(window.location.search)
     const nextChapterId = Number(urlParams.get('nextChapterId'))
     // state and variables
@@ -36,6 +36,7 @@ function Chapters({ params }: any) {
     const [activeChapter, setActiveChapter] = useState(0)
     const [topicId, setTopicId] = useState<any>(null)
     const [chapterContent, setChapterContent] = useState<any>({})
+    // const [chapterId, setChapterId] = useState<number>(Number(chapterID) || 0)
     const [chapterId, setChapterId] = useState<number>(0)
     const [projectId, setProjectId] = useState<number>(0)
     const [assessmentShortInfo, setAssessmentShortInfo] = useState<any>({})
@@ -217,6 +218,8 @@ function Chapters({ params }: any) {
                                         }
                                         activeChapter={activeChapter}
                                         status={item.status}
+                                        viewcourses={viewcourses}
+                                        moduleID={moduleID}
                                     />
                                 )
                             })}

@@ -1,3 +1,4 @@
+import React, { useCallback, useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 import {
     BookOpenText,
@@ -8,6 +9,8 @@ import {
     Video,
     BookOpenCheck,
 } from 'lucide-react'
+import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
 
 function StudentChapterItem({
     title,
@@ -16,6 +19,8 @@ function StudentChapterItem({
     activeChapter,
     fetchChapterContent,
     status,
+    viewcourses,
+    moduleID,
 }: {
     title: string
     topicId: number
@@ -23,7 +28,10 @@ function StudentChapterItem({
     activeChapter: number
     fetchChapterContent: (chapterId: number) => void
     status: string
+    viewcourses: any
+    moduleID: any
 }) {
+    const router = useRouter()
     // states and variables
     // functions
     const setTopicIcon = () => {
@@ -53,12 +61,33 @@ function StudentChapterItem({
 
     // async
 
-    // useEffect(() => {
-    //     fetchChapterContent(chapterId)
-    // }, [activeChapter])
+    useEffect(() => {
+        // fetchChapterContent(chapterId)
+        if (activeChapter === chapterId) {
+            router.push(
+                `/student/courses/${viewcourses}/modules/${moduleID}/chapters/${chapterId}`
+            )
+        }
+    }, [activeChapter, chapterId])
+
+    console.log('chapterId', chapterId)
+    console.log('activeChapter', activeChapter)
 
     return (
         <div>
+            {/* <Link
+            // key={id}
+            href={`/student/courses/${viewcourses}/modules/${moduleID}/chapters/${activeChapter}`}
+            // className={`bg-gradient-to-bl my-3 p-3 rounded-xl flex flex-col md:flex-row ${
+            //     typeId === 1
+            //         ? !isLock
+            //             ? 'from-blue-50 to-violet-50'
+            //             : 'from-blue-50 to-violet-50 pointer-events-none opacity-50'
+            //         : isLock
+            //         ? 'bg-yellow/30'
+            //         : 'bg-yellow/50'
+            // }`}
+        > */}
             <div
                 className={cn(
                     'flex rounded-md p-3  my-1 cursor-pointer justify-between items-center',
@@ -66,6 +95,9 @@ function StudentChapterItem({
                 )}
                 onClick={() => {
                     fetchChapterContent(chapterId)
+                    // router.push(
+                    //     `/student/courses/${viewcourses}/modules/${moduleID}/chapters/${chapterId}`
+                    // )
                 }}
             >
                 <div className="flex gap-2 text-start capitalize">
@@ -92,6 +124,7 @@ function StudentChapterItem({
                     )}
                 </div>
             </div>
+            {/* </Link> */}
         </div>
     )
 }

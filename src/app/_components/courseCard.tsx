@@ -1,3 +1,4 @@
+import React, { useCallback, useEffect, useState } from 'react'
 import { isPlural } from '@/lib/utils'
 import { CircularProgress } from '@nextui-org/react'
 import {
@@ -11,7 +12,7 @@ import {
     SquareCode,
 } from 'lucide-react'
 import Link from 'next/link'
-import React from 'react'
+import { api } from '@/utils/axios.config'
 
 function CourseCard({
     param,
@@ -40,13 +41,32 @@ function CourseCard({
     quizCount: number
     typeId: number
 }) {
+    const [chapterId, setChapterId] = useState<any>()
     const timeAllotedInWeeks = Math.ceil(timeAlloted / 604800)
     const timeAllotedInDays = Math.ceil(timeAlloted / 86400)
+
+    const getChapterId = useCallback(async () => {
+        try {
+            const response = await api.get(
+                `tracking/getAllChaptersWithStatus/${id}`
+            )
+            setChapterId(response.data.trackingData[0].id)
+        } catch (error) {
+            console.log(error)
+        }
+    }, [])
+    console.log('chapterId', chapterId)
+
+    useEffect(() => {
+        if (id) {
+            getChapterId()
+        }
+    }, [id, getChapterId])
 
     return (
         <Link
             key={id}
-            href={`/student/courses/${param}/modules/${id}`}
+            href={`/student/courses/${param}/modules/${id}/chapters/${chapterId}`}
             className={`bg-gradient-to-bl my-3 p-3 rounded-xl flex flex-col md:flex-row ${
                 typeId === 1
                     ? !isLock
