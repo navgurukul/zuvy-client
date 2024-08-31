@@ -72,7 +72,7 @@ const Page = ({ params }: { params: paramsType }) => {
             isLast: false,
         },
         {
-            crumb: 'individualAssesmentData && individualAssesmentData.user.name',
+            crumb: proctoringData?.user?.name,
             href: `/admin/courses/${params.courseId}/submissionAssesments/${params.StudentAssesmentData}/IndividualReport/${params.IndividualReport}/Report/${params.report}`,
             isLast: false,
         },

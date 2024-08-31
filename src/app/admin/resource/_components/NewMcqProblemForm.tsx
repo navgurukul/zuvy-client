@@ -147,7 +147,6 @@ const NewMcqProblemForm = ({
             questions: [formattedData],
         }
 
-        console.log(requestBody)
         await handleCreateQuizQuestion(requestBody)
         getAllQuizQuesiton(setStoreQuizData)
         closeModal()

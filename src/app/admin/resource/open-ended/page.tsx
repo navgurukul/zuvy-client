@@ -88,11 +88,11 @@ const OpenEndedQuestions = (props: Props) => {
 
     useEffect(() => {
         getAllTags(setTags)
-    }, [])
+    }, [setTags])
 
     useEffect(() => {
         getAllOpenEndedQuestions(setOpenEndedQuestions)
-    }, [searchTerm, selectedTag, selectedDifficulty])
+    }, [searchTerm, selectedTag, selectedDifficulty, setOpenEndedQuestions])
 
     useEffect(() => {
         const timer = setTimeout(() => {

@@ -162,8 +162,9 @@ const Page = ({ params }: { params: any }) => {
             <div className="flex flex-col lg:flex-row justify-between">
                 <div className="relative w-full mr-2">
                     <Input
-                        placeholder="Search for Name, Email bkhnkj"
+                        placeholder="Search for Name, Email "
                         className="lg:w-1/3 w-full my-6 input-with-icon pl-8 "
+                        disabled
                     />
                     <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
                         <Search className="text-gray-400" size={20} />

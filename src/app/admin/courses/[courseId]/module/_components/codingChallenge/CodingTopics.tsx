@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Input } from '@/components/ui/input'
 import {
     Select,
@@ -12,11 +12,16 @@ import {
 
 interface CodingTopicsProps {
     selectedTopic: string
-    setSelectedTopic: React.Dispatch<React.SetStateAction<string>>
+    setSelectedTopic: any
     selectedDifficulty: string
     setSelectedDifficulty: React.Dispatch<React.SetStateAction<string>>
     selectedLanguage: string
-    setSelectedLanguage: React.Dispatch<React.SetStateAction<string>>
+    setSelectedLanguage: any
+    searchQuestionsInAssessment?: string
+    setSearchQuestionsInAssessment?: React.Dispatch<
+        React.SetStateAction<string>
+    >
+    tags?: any
 }
 
 const CodingTopics: React.FC<CodingTopicsProps> = ({
@@ -26,12 +31,24 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
     setSelectedDifficulty,
     selectedLanguage,
     setSelectedLanguage,
+    searchQuestionsInAssessment,
+    setSearchQuestionsInAssessment,
+    tags,
 }) => {
+    const allTopicsId: any = 0
+
     return (
         <div className="flex flex-col mb-5">
-            <Input placeholder="Search By Name " className="w-full mb-2 " />
+            <Input
+                value={searchQuestionsInAssessment}
+                onChange={(e) =>
+                    setSearchQuestionsInAssessment?.(e.target.value)
+                }
+                placeholder="Search The Question By Name"
+                className="w-full mb-2 "
+            />
 
-            <div className="dropDownsContainer flex gap-2">
+            <div className=" flex gap-2">
                 <Select onValueChange={(value) => setSelectedTopic(value)}>
                     <SelectTrigger className="">
                         <SelectValue placeholder={selectedTopic} />
@@ -39,12 +56,16 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
                     <SelectContent>
                         <SelectGroup>
                             <SelectLabel>Topics</SelectLabel>
-                            <SelectItem value="alltopics">
+                            <SelectItem value={allTopicsId}>
                                 All Topics
                             </SelectItem>
-                            <SelectItem value="Frontend">Frontend</SelectItem>
-                            <SelectItem value="Backend">Backend</SelectItem>
-                            <SelectItem value="DSA">DSA</SelectItem>
+                            {tags?.map((item: any) => {
+                                return (
+                                    <SelectItem key={item.id} value={item.id}>
+                                        {item.tagName}
+                                    </SelectItem>
+                                )
+                            })}
                         </SelectGroup>
                     </SelectContent>
                 </Select>
@@ -61,22 +82,6 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
                             <SelectItem value="Easy">Easy</SelectItem>
                             <SelectItem value="Medium">Medium</SelectItem>
                             <SelectItem value="Hard">Hard</SelectItem>
-                        </SelectGroup>
-                    </SelectContent>
-                </Select>
-                <Select onValueChange={(value) => setSelectedLanguage(value)}>
-                    <SelectTrigger className="">
-                        <SelectValue placeholder={selectedLanguage} />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectGroup>
-                            <SelectLabel> Languages</SelectLabel>
-                            <SelectItem value="alllanguages">
-                                All Languages
-                            </SelectItem>
-                            <SelectItem value="Python">Python</SelectItem>
-                            <SelectItem value="Java">Java</SelectItem>
-                            <SelectItem value="React">React</SelectItem>
                         </SelectGroup>
                     </SelectContent>
                 </Select>
