@@ -10,6 +10,8 @@ import CodingTopics from '@/app/admin/courses/[courseId]/module/_components/codi
 import SelectedProblems from '@/app/admin/courses/[courseId]/module/_components/codingChallenge/SelectedProblems'
 import { Input } from '@/components/ui/input'
 import { api } from '@/utils/axios.config'
+import useDebounce from '@/hooks/useDebounce'
+import { getCodingQuestionTags } from '@/store/store'
 
 interface Example {
     input: number[]
@@ -50,6 +52,11 @@ interface CodeProps {
     content: Content
 }
 
+export type Tag = {
+    id: number
+    tagName: string
+}
+
 function CodingChallenge({
     content,
     activeChapterTitle,
@@ -59,10 +66,17 @@ function CodingChallenge({
     activeChapterTitle: string
     moduleId: string
 }) {
+    const [searchTerm, setSearchTerm] = useState('')
+    const debouncedSearch = useDebounce(searchTerm, 1000)
+    const { tags, setTags } = getCodingQuestionTags()
     const [selectedQuestions, setSelectedQuestions] = useState<Question[]>(
         content.codingQuestionDetails
     )
     const [selectedTopic, setSelectedTopic] = useState<string>('All Topics')
+    const [selectedTag, setSelectedTag] = useState<Tag>({
+        tagName: 'All Topics',
+        id: -1,
+    })
     const [selectedDifficulty, setSelectedDifficulty] =
         useState<string>('Any Difficulty')
     const [selectedLanguage, setSelectedLanguage] =
@@ -73,21 +87,60 @@ function CodingChallenge({
     useEffect(() => {
         async function getAllCodingQuestions() {
             try {
-                const response = await api.get('/Content/allCodingQuestions')
+                let url = '/Content/allCodingQuestions'
+
+                const queryParams = []
+
+                if (
+                    selectedDifficulty &&
+                    selectedDifficulty !== 'Any Difficulty'
+                ) {
+                    queryParams.push(
+                        `difficulty=${encodeURIComponent(selectedDifficulty)}`
+                    )
+                }
+                if (selectedTag.id !== -1) {
+                    queryParams.push(`tagId=${selectedTag.id}`)
+                }
+                if (debouncedSearch) {
+                    queryParams.push(
+                        `searchTerm=${encodeURIComponent(debouncedSearch)}`
+                    )
+                }
+                if (queryParams.length > 0) {
+                    url += `?${queryParams.join('&')}`
+                }
+
+                const response = await api.get(url)
 
                 // Filter the questions by difficulty
-                const filtered = response.data.filter((question: Question) =>
-                    selectedDifficulty === 'Any Difficulty'
-                        ? true
-                        : question.difficulty === selectedDifficulty
-                )
-                setFilteredQuestions(filtered)
+                // const filtered = response.data.filter((question: Question) =>
+                //     selectedDifficulty === 'Any Difficulty'
+                //         ? true
+                //         : question.difficulty === selectedDifficulty
+                // )
+                setFilteredQuestions(response.data)
             } catch (error) {
                 console.error('Error:', error)
             }
         }
         getAllCodingQuestions()
-    }, [selectedDifficulty, selectedQuestions])
+    }, [selectedDifficulty, selectedQuestions, debouncedSearch, selectedTag])
+
+    async function getAllTags() {
+        const response = await api.get('Content/allTags')
+        if (response) {
+            const tagArr = [
+                { tagName: 'All Topics', id: -1 },
+                ...response.data.allTags,
+            ]
+            setTags(tagArr)
+        }
+    }
+
+    useEffect(() => {
+        getAllTags()
+    }, [])
 
     useEffect(() => {
         setSelectedQuestions(content.codingQuestionDetails)
@@ -119,12 +172,17 @@ function CodingChallenge({
             <div className="grid grid-cols-2">
                 <div>
                     <CodingTopics
+                        setSearchTerm={setSearchTerm}
+                        searchTerm={searchTerm}
                         selectedTopic={selectedTopic}
                         setSelectedTopic={setSelectedTopic}
+                        selectedTag={selectedTag}
+                        setSelectedTag={setSelectedTag}
                         selectedDifficulty={selectedDifficulty}
                         setSelectedDifficulty={setSelectedDifficulty}
                         selectedLanguage={selectedLanguage}
                         setSelectedLanguage={setSelectedLanguage}
+                        tags={tags}
                     />
                     <ScrollArea className="h-dvh pr-4">
                         {filteredQuestions?.map((question: any) => (

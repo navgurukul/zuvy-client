@@ -35,12 +35,16 @@ interface IDEProps {
     params: { editor: string }
     remainingTime?: any
     assessmentSubmitId?: number
+    onBack?: () => void
+    selectedCodingOutsourseId?: any
 }
 
 const IDE: React.FC<IDEProps> = ({
     params,
     remainingTime,
     assessmentSubmitId,
+    onBack,
+    selectedCodingOutsourseId
 }) => {
     const [questionDetails, setQuestionDetails] = useState<questionDetails>({
         title: '',
