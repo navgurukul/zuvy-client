@@ -18,6 +18,8 @@ import SettingsAssessment from './SettingsAssessment'
 import SelectedQuestions from './SelectedQuestions'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import useDebounce from '@/hooks/useDebounce'
+import { getCodingQuestionTags } from '@/store/store'
+import { api } from '@/utils/axios.config'
 
 type AddAssessmentProps = {
     chapterData: any
@@ -36,7 +38,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         useState<string>('')
     const [selectedDifficulty, setSelectedDifficulty] =
         useState<string>('Any Difficulty')
-    const [selectedTopic, setSelectedTopic] = useState<string>('All Topics')
+    const [selectedTopic, setSelectedTopic] = useState<any>('All Topics')
     const [selectedLanguage, setSelectedLanguage] =
         useState<string>('All Languages')
     const [filteredQuestions, setFilteredQuestions] = useState<any[]>([])
@@ -62,13 +64,20 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     const debouncedSearch = useDebounce(searchQuestionsInAssessment, 300)
 
     const [saveSettings, setSaveSettings] = useState(false)
+    const [tags, setTags] = useState<any>()
 
     const handleSaveSettings = () => {
         setQuestionType('settings')
         setSaveSettings(true)
     }
-
     useEffect(() => {}, [content])
+
+    async function getAllTags() {
+        const response = await api.get('Content/allTags')
+        if (response) {
+            setTags(response.data.allTags)
+        }
+    }
 
     useEffect(() => {
         if (questionType === 'coding') {
@@ -209,6 +218,10 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         fetchChapterContent(chapterData.chapterId)
     }, [])
 
+    useEffect(() => {
+        getAllTags()
+    }, [])
+
     return (
         <div className="container p-4">
             <div className="flex items-center mb-5">
@@ -290,6 +303,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                             setSelectedDifficulty={setSelectedDifficulty}
                             selectedLanguage={selectedLanguage}
                             setSelectedLanguage={setSelectedLanguage}
+                            tags={tags}
                         />
                     </div>
                 </>
