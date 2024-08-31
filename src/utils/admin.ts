@@ -153,14 +153,15 @@ export const handleQuizConfirm = (
     setDeleteModalOpen(false)
 }
 
-export async function getAllQuizQuestion(setQuizQuestion: any) {
+export async function getAllQuizQuestion(
+    setQuizQuestion: any,
+    selectedtagId: number
+) {
     try {
         let url = `/Content/allQuizQuestions`
-        const storedTag = localStorage.getItem('currentTag')
-        const tag = storedTag !== null && JSON.parse(storedTag)
-        const tagId = tag && tag.id
-        if (tagId && tagId !== -1) {
-            url = `/Content/allQuizQuestions?tagId=${tagId}`
+
+        if (selectedtagId && selectedtagId !== -1) {
+            url = `/Content/allQuizQuestions?tagId=${selectedtagId}`
         }
         const response = await api.get(url)
         setQuizQuestion(response.data)

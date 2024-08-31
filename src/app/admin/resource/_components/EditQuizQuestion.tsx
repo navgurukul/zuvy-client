@@ -76,14 +76,16 @@ const EditQuizQuestion = ({
     let selectedQuizQuestion = quizQuestion.filter((question: any) => {
         return question.id === quizQuestionId
     })
+
+    let selectedTagId = selectedQuizQuestion[0]?.tagId
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             difficulty: selectedQuizQuestion[0]?.difficulty || 'Easy',
             topics: selectedQuizQuestion[0]?.tagId || 0,
-            questionText: selectedQuizQuestion[0].question || '',
-            options: selectedQuizQuestion[0].options,
-            selectedOption: selectedQuizQuestion[0].correctOption || 0,
+            questionText: selectedQuizQuestion[0]?.question || '',
+            options: selectedQuizQuestion[0]?.options,
+            selectedOption: selectedQuizQuestion[0]?.correctOption || 0,
         },
     })
     useEffect(() => {
@@ -171,9 +173,12 @@ const EditQuizQuestion = ({
             questions: [formattedData],
         }
         await handleEditQuizQuestion(requestBody)
-        getAllQuizQuesiton(setStoreQuizData)
+        getAllQuizQuesiton(setStoreQuizData, selectedTagId)
         setIsEditModalOpen(false)
     }
+
+    console.log(selectedQuizQuestion)
+
     return (
         <main className="flex  flex-col p-3 ">
             <Form {...form}>
