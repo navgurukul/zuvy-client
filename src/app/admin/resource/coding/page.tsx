@@ -1,11 +1,6 @@
 'use client'
-
-// External imports
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ChevronLeft, Search } from 'lucide-react'
-import Image from 'next/image'
-
-// Internal imports
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -16,6 +11,13 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Separator } from '@/components/ui/separator'
 import { DataTable } from '@/app/_components/datatable/data-table'
@@ -29,11 +31,11 @@ import {
     getcodingQuestionState,
 } from '@/store/store'
 import { getAllCodingQuestions } from '@/utils/admin'
+import Image from 'next/image'
 import { Spinner } from '@/components/ui/spinner'
+import EditCodingQuestionForm from '../_components/EditCodingQuestionForm'
 
-type Props = {}
-
-const CodingProblems = (props: Props) => {
+const CodingProblems = () => {
     const { codingQuestions, setCodingQuestions } = getcodingQuestionState()
 
     const [searchTerm, setSearchTerm] = useState('')
@@ -45,50 +47,37 @@ const CodingProblems = (props: Props) => {
         setIsCodingDialogOpen,
     } = getEditCodingQuestionDialogs()
     const { tags, setTags } = getCodingQuestionTags()
-    const [selectedTag, setSelectedTag] = useState(() => {
-        if (typeof window !== 'undefined') {
-            const storedTag = localStorage.getItem('codingCurrentTag')
-            return storedTag !== null
-                ? JSON.parse(storedTag)
-                : { tagName: 'All Topics', id: -1 }
-        }
-        return { tagName: 'All Topics', id: -1 }
+    const [selectedTag, setSelectedTag] = useState({
+        tagName: 'AllTopics',
+        id: -1,
     })
     const [selectedDifficulty, setSelectedDifficulty] = useState('any')
     const [loading, setLoading] = useState(true)
+    const [openEditDialog, setOpenEditDialog] = useState(false)
 
-    const handleTopicClick = (value: string) => {
-        const tag = tags.find((t: any) => t.tagName === value) || {
-            tagName: 'All Topics',
-            id: -1,
-        }
+    const handleTopicClick = (tag:any) => {
         setSelectedTag(tag)
-        localStorage.setItem('codingCurrentTag', JSON.stringify(tag))
+    }
+
+    const handleAllTopicsClick = () => {
+        setSelectedTag({ id: -1, tagName: 'AllTopics' })
     }
 
     async function getAllTags() {
         const response = await api.get('Content/allTags')
         if (response) {
-            const tagArr = [
-                { tagName: 'All Topics', id: -1 },
-                ...response.data.allTags,
-            ]
-            setTags(tagArr)
+            setTags(response.data.allTags)
         }
     }
 
-    const handleCodingDialoge = (flag: boolean) => {
-        setIsCodingDialogOpen(flag)
-    }
-
-    const filteredQuestions = codingQuestions.filter((question: any) => {
+    const filteredQuestions = codingQuestions.filter((question) => {
         const difficultyMatches =
             selectedDifficulty !== 'any'
                 ? question.difficulty === selectedDifficulty
                 : true
         const tagMatches =
-            selectedTag?.tagName !== 'All Topics'
-                ? question.tagId === selectedTag?.id
+            selectedTag?.tagName !== 'AllTopics'
+                ? question.tags === selectedTag?.id
                 : true
         const searchTermMatches =
             searchTerm !== ''
@@ -97,9 +86,7 @@ const CodingProblems = (props: Props) => {
                       .includes(searchTerm.toLowerCase())
                 : true
 
-        const isQuestionIncluded =
-            difficultyMatches && tagMatches && searchTermMatches
-        return isQuestionIncluded
+        return difficultyMatches && tagMatches && searchTermMatches
     })
 
     useEffect(() => {
@@ -118,12 +105,18 @@ const CodingProblems = (props: Props) => {
         return () => clearTimeout(timer)
     }, [])
 
+    useEffect(()=>{
+        setOpenEditDialog(isCodingEditDialogOpen)
+    },[isCodingEditDialogOpen])
+
     return (
         <>
             {loading ? (
                 <div className="flex justify-center items-center h-screen">
                     <Spinner className="text-secondary" />
                 </div>
+            ) : openEditDialog ? (
+                <EditCodingQuestionForm />
             ) : (
                 <div>
                     {codingQuestions.length > 0 && !isCodingDialogOpen ? (
@@ -150,7 +143,7 @@ const CodingProblems = (props: Props) => {
                                 </div>
 
                                 <Button
-                                    onClick={() => handleCodingDialoge(true)}
+                                    onClick={() => setIsCodingDialogOpen(true)}
                                 >
                                     + Create Problems
                                 </Button>
@@ -183,27 +176,38 @@ const CodingProblems = (props: Props) => {
                                 </Select>
                                 <Separator
                                     orientation="vertical"
-                                    className="w-1 h-12 mx-4 bg-gray-400 rounded-lg"
+                                    className="w-1 h-12 ml-4 bg-gray-400 rounded-lg"
                                 />
 
-                                <Select
-                                    value={selectedTag.tagName}
-                                    onValueChange={handleTopicClick}
-                                >
-                                    <SelectTrigger className="w-[180px]">
-                                        <SelectValue placeholder="Choose Topic" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {tags.map((tag: any) => (
-                                            <SelectItem
-                                                key={tag.id}
-                                                value={tag.tagName}
-                                            >
-                                                {tag.tagName}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <ScrollArea className="text-nowrap">
+                                    <ScrollBar orientation="horizontal" />
+                                    <Button
+                                        className={`mx-3 rounded-3xl ${
+                                            selectedTag?.tagName === 'AllTopics'
+                                                ? 'bg-secondary text-white'
+                                                : 'bg-gray-200 text-black'
+                                        }`}
+                                        onClick={handleAllTopicsClick}
+                                    >
+                                        All Topics
+                                    </Button>
+
+                                    {tags.map((tag) => (
+                                        <Button
+                                            className={`mx-3 rounded-3xl ${
+                                                selectedTag === tag
+                                                    ? 'bg-secondary text-white'
+                                                    : 'bg-gray-200 text-black'
+                                            }`}
+                                            key={tag?.id}
+                                            onClick={() =>
+                                                handleTopicClick(tag)
+                                            }
+                                        >
+                                            {tag.tagName}
+                                        </Button>
+                                    ))}
+                                </ScrollArea>
                             </div>
 
                             <DataTable
@@ -213,8 +217,7 @@ const CodingProblems = (props: Props) => {
                         </MaxWidthWrapper>
                     ) : (
                         <>
-                            {!isCodingDialogOpen &&
-                            codingQuestions.length == 0 ? (
+                            {!isCodingDialogOpen && !isCodingEditDialogOpen && codingQuestions.length === 0 ? (
                                 <>
                                     <h1 className="text-left font-semibold text-2xl">
                                         Resource Library - Coding Problems
@@ -234,7 +237,7 @@ const CodingProblems = (props: Props) => {
                                         </h2>
                                         <Button
                                             onClick={() =>
-                                                handleCodingDialoge(true)
+                                                setIsCodingDialogOpen(true)
                                             }
                                         >
                                             + Create Problems
@@ -242,32 +245,30 @@ const CodingProblems = (props: Props) => {
                                     </MaxWidthWrapper>
                                 </>
                             ) : (
-                                isCodingDialogOpen &&
-                                !isCodingEditDialogOpen && (
-                                    <MaxWidthWrapper className="flex flex-col justify-center items-center gap-5">
-                                        <div
-                                            onClick={() =>
-                                                handleCodingDialoge(false)
-                                            }
-                                            className="text-secondary cursor-pointer self-start flex"
-                                        >
-                                            {' '}
-                                            <ChevronLeft /> Coding Problems
-                                        </div>
-                                        <NewCodingProblemForm
-                                            tags={tags}
-                                            setIsDialogOpen={
-                                                setIsCodingDialogOpen
-                                            }
-                                            getAllCodingQuestions={
-                                                getAllCodingQuestions
-                                            }
-                                            setCodingQuestions={
-                                                setCodingQuestions
-                                            }
-                                        />
-                                    </MaxWidthWrapper>
-                                )
+                                <>
+                                    {isCodingDialogOpen && !isCodingEditDialogOpen && (
+                                        <MaxWidthWrapper className="flex flex-col justify-center items-center gap-5">
+                                            <div
+                                                onClick={() =>
+                                                    setIsCodingDialogOpen(false)
+                                                }
+                                                className="text-secondary cursor-pointer self-start flex"
+                                            >
+                                                {' '}
+                                                <ChevronLeft /> Coding Problems
+                                            </div>
+                                            <NewCodingProblemForm
+                                                tags={tags}
+                                                setIsDialogOpen={setIsCodingDialogOpen}
+                                                getAllCodingQuestions={getAllCodingQuestions}
+                                                setCodingQuestions={setCodingQuestions}
+                                            />
+                                        </MaxWidthWrapper>
+                                    )}
+                                    {isCodingEditDialogOpen && !isCodingDialogOpen && (
+                                        <EditCodingQuestionForm />
+                                    )}
+                                </>
                             )}
                         </>
                     )}
