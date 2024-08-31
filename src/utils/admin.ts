@@ -190,10 +190,10 @@ export const handleEditOpenEndedQuestion = (
 }
 export const handleEditCodingQuestion = (
     codingQuestion: any,
-    setIsCodingDialogOpen: any,
+    setIsCodingEditDialogOpen: any,
     setEditCodingQuestionId: any
 ) => {
-    setIsCodingDialogOpen(true)
+    setIsCodingEditDialogOpen(true)
     setEditCodingQuestionId(codingQuestion.id)
 }
 export const handlerQuizQuestions = (
