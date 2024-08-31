@@ -17,9 +17,11 @@ interface CodingTopicsProps {
     setSelectedDifficulty: React.Dispatch<React.SetStateAction<string>>
     selectedLanguage: string
     setSelectedLanguage: any
-    searchQuestionsInAssessment: string
-    setSearchQuestionsInAssessment: React.Dispatch<React.SetStateAction<string>>
-    tags: any
+    searchQuestionsInAssessment?: string
+    setSearchQuestionsInAssessment?: React.Dispatch<
+        React.SetStateAction<string>
+    >
+    tags?: any
 }
 
 const CodingTopics: React.FC<CodingTopicsProps> = ({
@@ -39,7 +41,9 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
         <div className="flex flex-col mb-5">
             <Input
                 value={searchQuestionsInAssessment}
-                onChange={(e) => setSearchQuestionsInAssessment(e.target.value)}
+                onChange={(e) =>
+                    setSearchQuestionsInAssessment?.(e.target.value)
+                }
                 placeholder="Search The Question By Name"
                 className="w-full mb-2 "
             />
