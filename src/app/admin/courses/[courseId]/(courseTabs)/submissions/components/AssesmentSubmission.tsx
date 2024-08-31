@@ -1,3 +1,4 @@
+'use client'
 import React, { useCallback, useEffect, useState } from 'react'
 import AssesmentComponent from '../../../_components/AssesmentComponent'
 import { api } from '@/utils/axios.config'
@@ -68,22 +69,28 @@ const AssesmentSubmissionComponent = ({ courseId }: any) => {
                             )
                     )
                 ) : (
-                    <div className="w-full absolute h-full">
+                    <div className="w-screen flex flex-col justify-center items-center h-4/5">
+                        <h1 className="text-center font-semibold ">
+                            No Assessment Found
+                        </h1>
                         <Image
-                            src="/public/undraw_Not_found_re_bh2e.png"
-                            alt="Assesment Not Found"
-                            width={100}
-                            height={100}
+                            src="/emptyStates/curriculum.svg"
+                            alt="No Assessment Found"
+                            width={400}
+                            height={400}
                         />
                     </div>
                 )
             ) : (
-                <div className="w-full absolute h-full">
+                <div className="w-full flex justify-center items-center absolute inset-0 h-screen">
+                    <h1 className="text-center font-semibold ">
+                        No Assessment Found
+                    </h1>
                     <Image
-                        src="/public/undraw_Not_found_re_bh2e.png"
-                        alt="Assesment Not Found"
-                        width={100}
-                        height={100}
+                        src="/emptyStates/curriculum.svg"
+                        alt="No Assessment Found"
+                        width={400}
+                        height={400}
                     />
                 </div>
             )}
