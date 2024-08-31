@@ -12,11 +12,11 @@ import {
 
 interface CodingTopicsProps {
     selectedTopic: string
-    setSelectedTopic: React.Dispatch<React.SetStateAction<string>>
+    setSelectedTopic: any
     selectedDifficulty: string
     setSelectedDifficulty: React.Dispatch<React.SetStateAction<string>>
     selectedLanguage: string
-    setSelectedLanguage: React.Dispatch<React.SetStateAction<string>>
+    setSelectedLanguage: any
     searchQuestionsInAssessment: string
     setSearchQuestionsInAssessment: React.Dispatch<React.SetStateAction<string>>
     tags: any
