@@ -164,6 +164,7 @@ const Page = ({ params }: { params: any }) => {
                     <Input
                         placeholder="Search for Name, Email "
                         className="lg:w-1/3 w-full my-6 input-with-icon pl-8 "
+                        disabled
                     />
                     <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
                         <Search className="text-gray-400" size={20} />
