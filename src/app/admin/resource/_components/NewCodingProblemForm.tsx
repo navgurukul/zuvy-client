@@ -25,11 +25,21 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Plus, X } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
+import { cleanUpValues } from '@/utils/admin'
+import { Toast } from '@/components/ui/toast'
+
+// Regular expression to check for special characters
+const noSpecialCharacters = /^[a-zA-Z0-9\s]*$/;
 
 const formSchema = z.object({
-    title: z.string().min(5),
-    problemStatement: z.string().min(10),
-    constraints: z.string().min(5),
+    title: z.string()
+        .min(5, 'Title must be at least 5 characters long.')
+        .max(25, 'Title must be at most 25 characters long.')
+        .refine(value => noSpecialCharacters.test(value), {
+            message: 'Title must not contain special characters.',
+        }),
+    problemStatement: z.string().min(10, 'Problem statement must be at least 10 characters long.'),
+    constraints: z.string().min(5, 'Constraints must be at least 5 characters long.'),
     difficulty: z.enum(['Easy', 'Medium', 'Hard'], {
         required_error: 'You need to select a Difficulty type.',
     }),
@@ -42,11 +52,11 @@ const formSchema = z.object({
     }),
     testCases: z.array(
         z.object({
-            input: z.string().min(1),
-            output: z.string().min(1),
+            input: z.string().min(1, 'Input cannot be empty.'),
+            output: z.string().min(1, 'Output cannot be empty.'),
         })
     ),
-})
+});
 
 export default function NewCodingProblemForm({
     tags,
@@ -61,6 +71,7 @@ export default function NewCodingProblemForm({
 }) {
     const [testCases, setTestCases] = useState([
         { id: 1, input: '', output: '' },
+        { id: 2, input: '', output: '' },
     ])
 
     const handleAddTestCase = () => {
@@ -117,25 +128,68 @@ export default function NewCodingProblemForm({
     }
 
     const handleSubmit = (values: z.infer<typeof formSchema>) => {
+
         const processInput = (input: string, format: string) => {
+            const cleanedInput = cleanUpValues(input);
+    
+            const isValidNumber = (value: string) => !isNaN(Number(value));
+            const isValidFloat = (value: string) => !isNaN(parseFloat(value));
+    
             switch (format) {
-                case 'arrayOfnum':
-                    return input.split(',').map(Number)
-                case 'arrayOfStr':
-                    return input.split(',')
-                case 'int':
-                    return Number(input)
-                case 'float':
-                    return parseFloat(input)
+                case 'arrayOfnum': {
+                    const values = cleanedInput.split(',');
+                    if (!values.every(isValidNumber)) {
+                        toast({
+                            title: 'Invalid number value.',
+                            description: 'Please enter a valid number.',
+                            className:
+                                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                        })
+                        return null;
+                    }
+                    return values.map(Number);
+                }
+                case 'arrayOfStr': {
+                    // No validation needed as anything is allowed
+                    return cleanedInput.split(',');
+                }
+               
+                case 'int': {
+                    const values = cleanedInput.split(' ');
+                    if (!values.every(isValidNumber)) {
+                        toast({
+                            title: 'Invalid number value.',
+                            description: 'Please enter a valid number.',
+                            className:
+                                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                        })
+                        return null;
+                    }
+                    return values.map(Number);
+                }
+                case 'float': {
+                    if (!isValidFloat(cleanedInput)) {
+                        toast({
+                            title: 'Invalid float value.',
+                            description: 'Please enter a valid float value.',
+                            className:
+                                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                        })
+                        return null;
+                    }
+                    return parseFloat(cleanedInput);
+                }
+                case 'str': // Ensure string values are returned as is
+                return input.toString();
                 default:
-                    return input
+                    return cleanedInput;
             }
-        }
-
+        };
+    
         const generateParameterName = (index: number) => {
-            return String.fromCharCode(97 + index)
-        }
-
+            return String.fromCharCode(97 + index); // a, b, c, etc.
+        };
+    
         const formattedData = {
             title: values.title,
             description: values.problemStatement,
@@ -146,9 +200,15 @@ export default function NewCodingProblemForm({
                 const processedInput = processInput(
                     testCase.input,
                     values.inputFormat
-                )
-                let inputs
-
+                );
+    
+                if (processedInput === null) {
+                    // If the input was invalid, return null for this test case
+                    return null;
+                }
+    
+                let inputs;
+    
                 if (Array.isArray(processedInput)) {
                     inputs = [
                         {
@@ -156,37 +216,64 @@ export default function NewCodingProblemForm({
                             parameterValue: processedInput,
                             parameterName: 'a',
                         },
-                    ]
+                    ];
                 } else {
-                    const inputValues = testCase.input
+                    const inputValues = cleanUpValues(testCase.input)
                         .trim()
                         .split(' ')
-                        .filter(Boolean)
+                        .filter(Boolean);
                     inputs = inputValues.map((value, index) => ({
                         parameterType: values.inputFormat,
                         parameterValue: processInput(value, values.inputFormat),
                         parameterName: generateParameterName(index),
-                    }))
+                    }));
                 }
-
+    
+                const expectedOutput = processInput(
+                    testCase.output,
+                    values.outputFormat
+                );
+    
+                if (expectedOutput === null) {
+                    // If the output was invalid, return null for this test case
+                    return null;
+                }
+    
                 return {
                     inputs,
                     expectedOutput: {
                         parameterType: values.outputFormat,
-                        parameterValue: processInput(
-                            testCase.output,
-                            values.outputFormat
-                        ),
+                        parameterValue: expectedOutput,
                     },
-                }
-            }),
+                };
+            }).filter(Boolean), // Remove null test cases
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             content: {},
+        };
+    
+        // Check if any test case input or output is null
+        const hasInvalidTestCase = formattedData.testCases.some((testCase:any) => {
+            return testCase?.inputs.some((input:any) => input.parameterValue === null) ||
+                   testCase?.expectedOutput.parameterValue === null;
+        });
+    
+        if (hasInvalidTestCase || formattedData.testCases.length === 0) {
+            toast({
+                title: 'Please enter valid test cases.',
+                description: 'Submission failed: One or more test cases have invalid inputs or outputs.',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+            })
+            return;
         }
-        createCodingQuestion(formattedData)
-        getAllCodingQuestions(setCodingQuestions)
-    }
+    
+        createCodingQuestion(formattedData);
+        getAllCodingQuestions(setCodingQuestions);
+    };
+    
+    
+    
 
     return (
         <main className="flex flex-col p-3 w-full items-center">
@@ -452,7 +539,7 @@ export default function NewCodingProblemForm({
                                         </FormItem>
                                     )}
                                 />
-                                {index !== 0 && (
+                                {index !== 0 && index !== 1 && (
                                     <X
                                         className="cursor-pointer"
                                         onClick={() =>
