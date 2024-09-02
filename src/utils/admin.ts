@@ -415,5 +415,19 @@ export const fetchStudentsHandler = async ({
         setLoading(false)
     }
 }
+// Utility function to clean up extra commas and spaces
+export function cleanUpValues (value: string) {
+   if (!value) return '';
+
+   value = value.toString().trim();
+
+   // Remove extra commas, spaces, and clean up the value
+   value = value.replace(/,\s*,+/g, ','); // Remove extra commas
+   value = value.replace(/\s{2,}/g, ' '); // Remove extra spaces
+   value = value.replace(/,\s*$/, '');    // Remove trailing commas
+   value = value.replace(/^\s*,/, '');    // Remove leading commas
+
+   return value;
+};
 
 // --------------------------
