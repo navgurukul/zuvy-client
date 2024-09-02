@@ -102,7 +102,6 @@ export default function NewCodingProblemForm({
     })
 
     async function createCodingQuestion(data: any) {
-        console.log(data)
         try {
             const response = await api.post(
                 `codingPlatform/create-question`,
@@ -144,16 +143,14 @@ export default function NewCodingProblemForm({
                             description: 'Please enter a valid number.',
                             className:
                                 'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                        })
+                        });
                         return null;
                     }
                     return values.map(Number);
                 }
                 case 'arrayOfStr': {
-                    // No validation needed as anything is allowed
                     return cleanedInput.split(',');
                 }
-               
                 case 'int': {
                     const values = cleanedInput.split(' ');
                     if (!values.every(isValidNumber)) {
@@ -162,10 +159,10 @@ export default function NewCodingProblemForm({
                             description: 'Please enter a valid number.',
                             className:
                                 'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                        })
+                        });
                         return null;
                     }
-                    return values.map(Number);
+                    return values.length === 1 ? Number(values[0]) : values.map(Number);
                 }
                 case 'float': {
                     if (!isValidFloat(cleanedInput)) {
@@ -174,13 +171,13 @@ export default function NewCodingProblemForm({
                             description: 'Please enter a valid float value.',
                             className:
                                 'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                        })
+                        });
                         return null;
                     }
                     return parseFloat(cleanedInput);
                 }
-                case 'str': // Ensure string values are returned as is
-                return input.toString();
+                case 'str': 
+                    return cleanedInput;
                 default:
                     return cleanedInput;
             }
@@ -203,13 +200,13 @@ export default function NewCodingProblemForm({
                 );
     
                 if (processedInput === null) {
-                    // If the input was invalid, return null for this test case
                     return null;
                 }
     
                 let inputs;
     
-                if (Array.isArray(processedInput)) {
+                if (Array.isArray(processedInput) && 
+                    (values.inputFormat === 'arrayOfnum' || values.inputFormat === 'arrayOfStr')) {
                     inputs = [
                         {
                             parameterType: values.inputFormat,
@@ -222,11 +219,16 @@ export default function NewCodingProblemForm({
                         .trim()
                         .split(' ')
                         .filter(Boolean);
+    
                     inputs = inputValues.map((value, index) => ({
                         parameterType: values.inputFormat,
                         parameterValue: processInput(value, values.inputFormat),
                         parameterName: generateParameterName(index),
                     }));
+    
+                    if (inputs.length === 1) {
+                        inputs = inputs[0];  // If only one input, keep it as a single object
+                    }
                 }
     
                 const expectedOutput = processInput(
@@ -235,7 +237,6 @@ export default function NewCodingProblemForm({
                 );
     
                 if (expectedOutput === null) {
-                    // If the output was invalid, return null for this test case
                     return null;
                 }
     
@@ -246,15 +247,14 @@ export default function NewCodingProblemForm({
                         parameterValue: expectedOutput,
                     },
                 };
-            }).filter(Boolean), // Remove null test cases
+            }).filter(Boolean), 
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             content: {},
         };
     
-        // Check if any test case input or output is null
         const hasInvalidTestCase = formattedData.testCases.some((testCase:any) => {
-            return testCase?.inputs.some((input:any) => input.parameterValue === null) ||
+            return testCase?.inputs?.parameterValue === null ||
                    testCase?.expectedOutput.parameterValue === null;
         });
     
@@ -264,7 +264,7 @@ export default function NewCodingProblemForm({
                 description: 'Submission failed: One or more test cases have invalid inputs or outputs.',
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-            })
+            });
             return;
         }
     
@@ -539,7 +539,7 @@ export default function NewCodingProblemForm({
                                         </FormItem>
                                     )}
                                 />
-                                {index !== 0 && index !== 1 && (
+                                { (
                                     <X
                                         className="cursor-pointer"
                                         onClick={() =>
