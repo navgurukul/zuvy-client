@@ -31,8 +31,9 @@ import {
     getCodingQuestionTags,
     getEditCodingQuestionDialogs,
 } from '@/store/store'
-import { getAllCodingQuestions } from '@/utils/admin'
+import { cleanUpValues, getAllCodingQuestions } from '@/utils/admin'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { create } from 'domain'
 
 const formSchema = z.object({
     title: z.string().min(5),
@@ -50,15 +51,18 @@ const formSchema = z.object({
     }),
     testCases: z.array(
         z.object({
+            id: z.any().optional(), // Optional ID
             input: z.string().min(1),
             output: z.string().min(1),
         })
     ),
 })
 
+
 export default function EditCodingQuestionForm() {
     const [testCases, setTestCases] = useState([
         { id: 1, input: '', output: '' },
+        { id: 2, input: '', output: '' },
     ])
 
     const { tags } = getCodingQuestionTags()
@@ -76,16 +80,13 @@ export default function EditCodingQuestionForm() {
         return question.id === editCodingQuestionId
     })
 
-    useEffect(() => {
-        console.log(codingQuestions)
-    }, [codingQuestions])
-
     const handleAddTestCase = () => {
         setTestCases((prevTestCases) => [
             ...prevTestCases,
-            { id: prevTestCases.length + 1, input: '', output: '' },
-        ])
+            { id: Date.now(), input: '', output: '' }, // Temporary ID
+        ]);
     }
+
 
     const handleRemoveTestCase = (id: number) => {
         setTestCases((prevTestCases) =>
@@ -100,16 +101,18 @@ export default function EditCodingQuestionForm() {
             problemStatement: selectCodingQuestion[0]?.description || '',
             constraints: selectCodingQuestion[0]?.constraints || '',
             difficulty: selectCodingQuestion[0]?.difficulty || 'Easy',
-            topics: selectCodingQuestion[0]?.tagId || 0,
-            inputFormat: 'int',
-            outputFormat: 'int',
+            topics: selectCodingQuestion[0]?.tagId,
+            inputFormat: selectCodingQuestion[0]?.testCases[0]?.inputs[0]?.parameterType,
+            outputFormat: selectCodingQuestion[0]?.testCases[0]?.expectedOutput?.parameterType,
             testCases:
                 selectCodingQuestion[0]?.testCases?.map((testCase: any) => ({
+                    id: testCase.id, // Ensure this is correctly mapped
                     input: JSON.stringify(testCase.inputs.map((input: any) => input.parameterValue)),
                     output: JSON.stringify(testCase.expectedOutput.parameterValue),
                 })) || [],
         },
     })
+    
 
     async function editCodingQuestion(data: any) {
         try {
@@ -137,81 +140,157 @@ export default function EditCodingQuestionForm() {
     }
 
     const handleSubmit = (values: z.infer<typeof formSchema>) => {
-
         const processInput = (input: string | any[], format: string) => {
             if (Array.isArray(input)) {
                 input = input.join(',');
             }
-        
+    
+            input = cleanUpValues(input);
+    
             switch (format) {
-                case 'arrayOfnum':
-                    return input.split(',').map(Number);
+                case 'arrayOfnum': {
+                    const values = input.split(',').map(Number);
+                    if (values.some(isNaN)) {
+                        toast({
+                            title: 'Invalid number value.',
+                            description: 'Please enter valid numbers.',
+                            className:
+                                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                        });
+                        return null;
+                    }
+                    return values;
+                }
                 case 'arrayOfStr':
                     return input.split(',');
-                case 'int':
-                    return Number(input);
-                case 'float':
-                    return parseFloat(input);
+                case 'int': {
+                    const numberValue = Number(input);
+                    if (isNaN(numberValue)) {
+                        toast({
+                            title: 'Invalid integer value.',
+                            description: 'Please enter a valid integer.',
+                            className:
+                                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                        });
+                        return null;
+                    }
+                    return numberValue;
+                }
+                case 'float': {
+                    const floatValue = parseFloat(input);
+                    if (isNaN(floatValue)) {
+                        toast({
+                            title: 'Invalid float value.',
+                            description: 'Please enter a valid float.',
+                            className:
+                                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                        });
+                        return null;
+                    }
+                    return floatValue;
+                }
+                case 'str':
+                    return input.toString();
                 default:
                     return input;
             }
         };
-
+    
         const generateParameterName = (index: number) => {
-            return String.fromCharCode(97 + index)
-        }
-
+            return String.fromCharCode(97 + index); // 'a', 'b', 'c', etc.
+        };
+    
         const formattedData = {
             title: values.title,
             description: values.problemStatement,
             difficulty: values.difficulty,
             tagId: values.topics,
             constraints: values.constraints,
-            testCases: values.testCases.map((testCase) => {
-                const processedInput = processInput(
-                    testCase.input,
-                    values.inputFormat
-                )
-                let inputs
-
-                if (Array.isArray(processedInput)) {
-                    inputs = [
-                        {
+            testCases: values.testCases
+                .map((testCase) => {
+                    const processedInput = processInput(testCase.input, values.inputFormat);
+    
+                    if (processedInput === null) return null;
+    
+                    let inputs;
+                    if (Array.isArray(processedInput)) {
+                        inputs = [
+                            {
+                                parameterType: values.inputFormat,
+                                parameterValue: processedInput,
+                                parameterName: 'a',
+                            },
+                        ];
+                    } else {
+                        const inputValues = testCase.input
+                            .trim()
+                            .split(' ')
+                            .filter(Boolean);
+                        inputs = inputValues.map((value, index) => ({
                             parameterType: values.inputFormat,
-                            parameterValue: processedInput,
-                            parameterName: 'a',
+                            parameterValue: processInput(value, values.inputFormat),
+                            parameterName: generateParameterName(index),
+                        }));
+                    }
+    
+                    const processedOutput = processInput(testCase.output, values.outputFormat);
+    
+                    if (processedOutput === null) return null;
+    
+                    return {
+                        id: testCase.id, // Include ID if it exists
+                        inputs,
+                        expectedOutput: {
+                            parameterType: values.outputFormat,
+                            parameterValue: processedOutput,
                         },
-                    ]
-                } else {
-                    const inputValues = testCase.input
-                        .trim()
-                        .split(' ')
-                        .filter(Boolean)
-                    inputs = inputValues.map((value, index) => ({
-                        parameterType: values.inputFormat,
-                        parameterValue: processInput(value, values.inputFormat),
-                        parameterName: generateParameterName(index),
-                    }))
-                }
-
-                return {
-                    inputs,
-                    expectedOutput: {
-                        parameterType: values.outputFormat,
-                        parameterValue: processInput(
-                            testCase.output,
-                            values.outputFormat
-                        ),
-                    },
-                }
-            }),
-            createdAt: new Date().toISOString(),
+                    };
+                })
+                .filter(Boolean), // Remove null test cases
             updatedAt: new Date().toISOString(),
             content: {},
+        };
+    
+        // Define a threshold for temporary IDs (you may adjust this value)
+        const TEMP_ID_THRESHOLD = Date.now(); // A threshold value to filter out temporary IDs
+    
+        const finalData = {
+            ...formattedData,
+            testCases: formattedData.testCases.map((testCase) => {
+                // Handle temporary IDs and ensure ID handling
+                if (typeof testCase?.id === 'number' && testCase.id > TEMP_ID_THRESHOLD) {
+                    const { id, ...testCaseWithoutId } = testCase;
+                    return testCaseWithoutId;
+                }
+                return testCase;
+            }),
+        };
+    
+        console.log('finalData', finalData);
+        console.log('formattedData', formattedData);
+    
+        // Check if any test case input or output is null
+        const hasInvalidTestCase = formattedData.testCases.some((testCase: any) => {
+            return testCase?.inputs.some((input: any) => input.parameterValue === null) ||
+                testCase?.expectedOutput.parameterValue === null;
+        });
+    
+        if (hasInvalidTestCase || formattedData.testCases.length === 0) {
+            toast({
+                title: 'Please enter valid test cases.',
+                description: 'Submission failed: One or more test cases have invalid inputs or outputs.',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+            });
+            return;
         }
-        editCodingQuestion(formattedData)
-        getAllCodingQuestions(setCodingQuestions)
-    }
+    
+        // Call the edit API with formatted data
+        editCodingQuestion(finalData);
+        getAllCodingQuestions(setCodingQuestions);
+    };
+    
+
 
     useEffect(() => {
         if (selectCodingQuestion) {
@@ -221,43 +300,68 @@ export default function EditCodingQuestionForm() {
                 constraints: selectCodingQuestion[0].constraints,
                 difficulty: selectCodingQuestion[0].difficulty,
                 topics: selectCodingQuestion[0].tagId,
-                inputFormat: 'int',
-                outputFormat: 'int',
-                testCases: selectCodingQuestion[0].testCases.map(
-                    (testCase: any) => ({
-                        input: JSON.stringify(testCase.inputs.map((input: any) => input.parameterValue)),
-                        output: JSON.stringify(testCase.expectedOutput.parameterValue),
-                    })
-                ),
-            })
+                testCases: selectCodingQuestion[0].testCases.map((testCase: any) => ({
+                    id: testCase.id, // Ensure IDs are correctly set here
+                    input: cleanUpValues(
+                        testCase.inputs.map((input: any) => {
+                            let value = input.parameterValue;
+                            let type = input.parameterType;
+                            if (Array.isArray(value)) {
+                                if (type === 'arrayOfnum' || type === 'arrayOfStr') {
+                                    value = value.join(', ');
+                                } else {
+                                    value = value.join(' ');
+                                }
+                            }
+                            return cleanUpValues(value);
+                        }).join(' ')
+                    ),
+                    output: cleanUpValues(
+                        testCase.expectedOutput.parameterValue
+                    ),
+                })),
+            });
             setTestCases(
-                selectCodingQuestion[0]?.testCases?.map(
-                    (testCase: any, index: number) => ({
-                        id: index + 1,
-                        input: JSON.stringify(testCase.inputs.map((input: any) => input.parameterValue)),
-                        output: JSON.stringify(testCase.expectedOutput.parameterValue),
-                    })
-                )
-            )
+                selectCodingQuestion[0]?.testCases?.map((testCase: any, index: number) => ({
+                    id: testCase.id !== undefined ? testCase.id : index + 1, // Ensure IDs are handled correctly
+                    input: cleanUpValues(
+                        testCase.inputs.map((input: any) => {
+                            let value = input.parameterValue;
+                            if (Array.isArray(value)) {
+                                value = value.join(', ');
+                            }
+                            return cleanUpValues(value);
+                        }).join(' ')
+                    ),
+                    output: cleanUpValues(
+                        testCase.expectedOutput.parameterValue
+                    ),
+                }))
+            );
         }
-    }, [selectCodingQuestion[0]])
+    }, [selectCodingQuestion[0]]);
+    
 
-    useEffect(()=>{
+
+
+
+    useEffect(() => {
         console.log(selectCodingQuestion);
-    },[selectCodingQuestion])
+
+    }, [selectCodingQuestion])
 
     return (
         <main className="flex flex-col p-3 w-full items-center ">
-            <div className='flex align-middle self-start text-secondary' onClick={()=>setIsCodingEditDialogOpen(false)}>
-                <p><ChevronLeft/></p> <p>Coding Problems</p>
-                </div>
+            <div className='flex align-middle self-start text-secondary cursor-pointer' onClick={() => setIsCodingEditDialogOpen(false)}>
+                <p><ChevronLeft /></p> <p>Coding Problems</p>
+            </div>
 
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(handleSubmit)}
                     className="w-2/4 flex flex-col gap-4"
                 >
-                  <FormField
+                    <FormField
                         control={form.control}
                         name="title"
                         render={({ field }) => (
@@ -355,6 +459,8 @@ export default function EditCodingQuestionForm() {
                             <FormItem className="text-left w-full">
                                 <FormLabel>Topics</FormLabel>
                                 <Select
+                                    value={tags.find(
+                                        (tag: any) => tag.tagName === selectCodingQuestion[0].tagId)}
                                     onValueChange={(value) => {
                                         const selectedTag = tags.find(
                                             (tag: any) => tag.tagName === value
@@ -366,7 +472,17 @@ export default function EditCodingQuestionForm() {
                                 >
                                     <FormControl>
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Choose Topic" />
+                                            <SelectValue
+                                                placeholder={
+                                                    tags.find(
+                                                        (tag) =>
+                                                            tag.id ===
+                                                            selectCodingQuestion[0]
+                                                                ?.tagId
+                                                    )?.tagName ||
+                                                    'Choose Topic'
+                                                }
+                                            />
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
@@ -385,7 +501,7 @@ export default function EditCodingQuestionForm() {
                         )}
                     />
 
-                        <h6 className='text-left text-sm font-semibold'> Note: Max 20 test cases supported & a minimum of 2 test cases should be provided</h6>
+                    <h6 className='text-left text-sm font-semibold'> Note: Max 20 test cases supported & a minimum of 2 test cases should be provided</h6>
                     <div className="flex justify-between gap-2">
                         <FormField
                             control={form.control}
@@ -483,7 +599,7 @@ export default function EditCodingQuestionForm() {
                                             <p className="text-sm text-gray-500 mt-1">
                                                 {form.watch('inputFormat') ===
                                                     'arrayOfnum' ||
-                                                form.watch('inputFormat') ===
+                                                    form.watch('inputFormat') ===
                                                     'arrayOfStr'
                                                     ? 'Enter values separated by commas (e.g., 1,2,3,4)'
                                                     : 'Enter values separated by spaces (e.g., 2 3 4)'}
@@ -505,7 +621,7 @@ export default function EditCodingQuestionForm() {
                                             <p className="text-sm text-gray-500 mt-1">
                                                 {form.watch('outputFormat') ===
                                                     'arrayOfnum' ||
-                                                form.watch('outputFormat') ===
+                                                    form.watch('outputFormat') ===
                                                     'arrayOfStr'
                                                     ? 'Enter values separated by commas (e.g., 1,2,3,4)'
                                                     : 'Enter values separated by spaces (e.g., 2 3 4)'}
@@ -514,7 +630,7 @@ export default function EditCodingQuestionForm() {
                                         </FormItem>
                                     )}
                                 />
-                        {index !== 0 && (
+                                {index !== 0 && index !== 1 && (
                                     <X
                                         className="cursor-pointer"
                                         onClick={() =>
@@ -523,8 +639,8 @@ export default function EditCodingQuestionForm() {
                                     />
                                 )}
                             </div>
-                        
-                    ))}
+
+                        ))}
                     </div>
 
                     <div className="flex justify-end gap-3">
