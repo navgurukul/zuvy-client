@@ -31,7 +31,7 @@ const AssesmentSubmissionComponent = ({ courseId }: any) => {
     }, [getAssessments])
 
     return (
-        <div className="grid grid-cols-1 relative gap-8 mt-4 md:mt-8 md:grid-cols-2">
+        <div className="grid relative gap-8 mt-4 md:mt-8">
             {assesments ? (
                 Object.keys(assesments).length > 0 ? (
                     Object.keys(assesments).map(
@@ -41,30 +41,36 @@ const AssesmentSubmissionComponent = ({ courseId }: any) => {
                                     <h2 className="text-lg text-start font-bold text-gray-900 dark:text-white">
                                         Module - {key}
                                     </h2>
-                                    {assesments[key].map((assessment: any) => (
-                                        <AssesmentComponent
-                                            key={assessment.id}
-                                            id={assessment.id}
-                                            title={assessment.title}
-                                            codingChallenges={
-                                                assessment.totalCodingQuestions
-                                            }
-                                            mcq={assessment.totalQuizzes}
-                                            openEnded={
-                                                assessment.totalOpenEndedQuestions
-                                            }
-                                            totalSubmissions={
-                                                assesments.totalStudents
-                                            }
-                                            studentsSubmitted={
-                                                assessment.totalSubmitedAssessments
-                                            }
-                                            bootcampId={courseId}
-                                            qualifiedStudents={
-                                                assessment.qualifiedStudents
-                                            }
-                                        />
-                                    ))}
+                                    <div className="grid grid-cols-3">
+                                        {assesments[key].map(
+                                            (assessment: any) => (
+                                                <AssesmentComponent
+                                                    key={assessment.id}
+                                                    id={assessment.id}
+                                                    title={assessment.title}
+                                                    codingChallenges={
+                                                        assessment.totalCodingQuestions
+                                                    }
+                                                    mcq={
+                                                        assessment.totalQuizzes
+                                                    }
+                                                    openEnded={
+                                                        assessment.totalOpenEndedQuestions
+                                                    }
+                                                    totalSubmissions={
+                                                        assesments.totalStudents
+                                                    }
+                                                    studentsSubmitted={
+                                                        assessment.totalSubmitedAssessments
+                                                    }
+                                                    bootcampId={courseId}
+                                                    qualifiedStudents={
+                                                        assessment.qualifiedStudents
+                                                    }
+                                                />
+                                            )
+                                        )}
+                                    </div>
                                 </div>
                             )
                     )
