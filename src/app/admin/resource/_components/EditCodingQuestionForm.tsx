@@ -60,10 +60,7 @@ const formSchema = z.object({
 
 
 export default function EditCodingQuestionForm() {
-    const [testCases, setTestCases] = useState([
-        { id: 1, input: '', output: '' },
-        { id: 2, input: '', output: '' },
-    ])
+    const [testCases, setTestCases] = useState<any>([])
 
     const { tags } = getCodingQuestionTags()
     const { editCodingQuestionId } = getEditCodingQuestionDialogs()
@@ -81,18 +78,20 @@ export default function EditCodingQuestionForm() {
     })
 
     const handleAddTestCase = () => {
-        setTestCases((prevTestCases) => [
+        setTestCases((prevTestCases:any) => [
             ...prevTestCases,
             { id: Date.now(), input: '', output: '' }, // Temporary ID
         ]);
     }
 
-
-    const handleRemoveTestCase = (id: number) => {
-        setTestCases((prevTestCases) =>
-            prevTestCases.filter((testCase) => testCase.id !== id)
-        )
-    }
+    const handleRemoveTestCase = (indexToRemove: number) => {
+        console.log("Index to remove:", indexToRemove);
+              // Ensure a new array is created, and the correct item is removed
+              const updatedTestCases = testCases.filter((_:any, index:any) => index !== indexToRemove);
+                setTestCases(updatedTestCases);
+    };
+    
+    
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -115,6 +114,7 @@ export default function EditCodingQuestionForm() {
     
 
     async function editCodingQuestion(data: any) {
+        console.log(testCases)
         try {
             const response = await api.put(
                 `codingPlatform/update-question/${editCodingQuestionId}`,
@@ -208,9 +208,8 @@ export default function EditCodingQuestionForm() {
             difficulty: values.difficulty,
             tagId: values.topics,
             constraints: values.constraints,
-            testCases: values.testCases
-                .filter((testCase) => !testCase.id || !String(testCase.id).startsWith('temp_')) // Exclude temp IDs
-                .map((testCase) => {
+            testCases: testCases?.filter((testCase:any) => !testCase.id || !String(testCase.id).startsWith('temp_')) // Exclude temp IDs
+                .map((testCase:any) => {
                     const processedInput = processInput(testCase.input, values.inputFormat);
     
                     if (processedInput === null) {
@@ -326,12 +325,17 @@ export default function EditCodingQuestionForm() {
                 }))
             );
         }
-    }, [selectCodingQuestion[0]]);
+    }, []);
     
     useEffect(() => {
         console.log(selectCodingQuestion);
 
     }, [selectCodingQuestion])
+
+    useEffect(() => {
+        console.log("Updated testCases:", testCases);
+    }, [testCases]);
+    
 
     return (
         <main className="flex flex-col p-3 w-full items-center ">
@@ -564,7 +568,7 @@ export default function EditCodingQuestionForm() {
 
                     <div className="text-left">
                         <FormLabel>Test Cases</FormLabel>
-                        {testCases.map((testCase, index) => (
+                        {testCases.map((testCase:any, index:any) => (
                             <div
                                 key={index}
                                 className="flex items-center gap-2 mt-2"
@@ -616,9 +620,7 @@ export default function EditCodingQuestionForm() {
                                 { (
                                     <X
                                         className="cursor-pointer"
-                                        onClick={() =>
-                                            handleRemoveTestCase(testCase.id)
-                                        }
+                                        onClick={() => handleRemoveTestCase(index)}
                                     />
                                 )}
                             </div>
