@@ -12,7 +12,7 @@ import { useLazyLoadedStudentData } from '@/store/store'
 import { api } from '@/utils/axios.config'
 import Editor from '@monaco-editor/react'
 import { ArrowLeft } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname, useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useToast } from '@/components/ui/use-toast'
 import {
@@ -48,6 +48,8 @@ const IDE: React.FC<IDEProps> = ({
     assessmentSubmitId,
     selectedCodingOutsourseId,
 }) => {
+    const pathname = usePathname()
+    const { viewcourses, moduleID, chapterID } = useParams()
     const [questionDetails, setQuestionDetails] = useState<questionDetails>({
         title: '',
         description: '',
@@ -70,6 +72,7 @@ const IDE: React.FC<IDEProps> = ({
 
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
+    const codePanel = pathname?.includes('/codepanel')
 
     const editorLanguages = [
         { lang: 'java', id: 91 },
@@ -145,6 +148,13 @@ const IDE: React.FC<IDEProps> = ({
                         onBack()
                     }
                 }, 3000)
+                if (codePanel) {
+                    const chapterUrl = `/student/courses/${viewcourses}/modules/${moduleID}`
+                    router.push(chapterUrl)
+                    document.exitFullscreen()
+                    console.log('Chal jaa', chapterUrl)
+                    // if(typeof window !== 'undefined') window?.open(chapterUrl)
+                }
             } else {
                 toast({
                     title: 'Test Cases Failed',
@@ -370,7 +380,7 @@ const IDE: React.FC<IDEProps> = ({
                                 </div>
                             </ResizablePanel>
                             <ResizableHandle withHandle />
-                            <ResizablePanel className='' defaultSize={40}>
+                            <ResizablePanel className="" defaultSize={40}>
                                 <div className="flex h-full">
                                     <div className="w-full max-w-5xl bg-muted p-2 mx-2">
                                         <div className="flex justify-between p-2 bg-gray-800 border-b border-gray-700">
@@ -391,13 +401,16 @@ const IDE: React.FC<IDEProps> = ({
                                                         {index < 2 ? (
                                                             <>
                                                                 <h2 className="text-xl font-semibold mb-2 text-gray-300">
-                                                                    Test Case {index + 1}
+                                                                    Test Case{' '}
+                                                                    {index + 1}
                                                                 </h2>
                                                                 <p className="text-gray-300">
                                                                     <span className="font-medium text-gray-400">
-                                                                        Your Output:
+                                                                        Your
+                                                                        Output:
                                                                     </span>
-                                                                    {testCase?.stdOut || testCase?.stdout}
+                                                                    {testCase?.stdOut ||
+                                                                        testCase?.stdout}
                                                                 </p>
 
                                                                 <p

@@ -9,6 +9,8 @@ import {
 import IDE from '@/app/student/playground/[editor]/editor'
 
 function Page({ params }: any) {
+    const { questionID } = params
+    console.log('params', params)
     useEffect(() => {
         requestFullScreen(document.documentElement)
         console.log('Full Screen')
@@ -20,7 +22,7 @@ function Page({ params }: any) {
     return (
         <>
             <IDE
-                params={{ editor: String(2) }}
+                params={{ editor: String(questionID) }}
                 onBack={() => console.log('Here..!')}
                 remainingTime={remainingTime}
                 assessmentSubmitId={assessmentSubmitId}

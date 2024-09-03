@@ -24,6 +24,8 @@ import {
 } from '@/components/ui/select'
 import SubmissionsList from '../_components/submissions-list'
 import { b64DecodeUnicode, b64EncodeUnicode } from '@/utils/base64'
+import { usePathname } from 'next/navigation'
+import { useParams } from 'next/navigation'
 
 interface questionDetails {
     title: string
@@ -44,8 +46,10 @@ const IDE: React.FC<IDEProps> = ({
     remainingTime,
     assessmentSubmitId,
     onBack,
-    selectedCodingOutsourseId
+    selectedCodingOutsourseId,
 }) => {
+    const pathname = usePathname()
+    const { viewcourses, moduleID, chapterID } = useParams()
     const [questionDetails, setQuestionDetails] = useState<questionDetails>({
         title: '',
         description: '',
@@ -69,6 +73,7 @@ const IDE: React.FC<IDEProps> = ({
 
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
+    const codePanel = pathname?.includes('/codepanel')
 
     const editorLanguages = [
         { lang: 'java', id: 91 },
@@ -119,7 +124,11 @@ const IDE: React.FC<IDEProps> = ({
                     sourceCode: b64EncodeUnicode(currentCode),
                 }
             )
-            setResult(response.data.data[0].stdOut || response.data.data[0].stdout || 'No Output Available')
+            setResult(
+                response.data.data[0].stdOut ||
+                    response.data.data[0].stdout ||
+                    'No Output Available'
+            )
             setCodeResult(response.data.data)
             const testCases = response.data.data
             const allTestCasesPassed = testCases.every(
@@ -130,8 +139,9 @@ const IDE: React.FC<IDEProps> = ({
 
             if (allTestCasesPassed) {
                 toast({
-                    title: `Test Cases Passed${action === 'submit' ? ', Solution submitted' : ''
-                        }`,
+                    title: `Test Cases Passed${
+                        action === 'submit' ? ', Solution submitted' : ''
+                    }`,
                     className: 'text-start capitalize border border-secondary',
                 })
             } else {
@@ -140,6 +150,15 @@ const IDE: React.FC<IDEProps> = ({
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
+            }
+            if (codePanel) {
+                const chapterUrl = `/student/courses/${viewcourses}/modules/${moduleID}`
+                router.push(chapterUrl)
+                document.exitFullscreen()
+                // console.log('Chal jaa', chapterUrl)
+                // if (typeof window !== 'undefined') {
+                //     window?.open(chapterUrl, '_blank')
+                // }
             }
             setCodeError('')
         } catch (error: any) {
@@ -190,9 +209,8 @@ const IDE: React.FC<IDEProps> = ({
     }, [language])
 
     useEffect(() => {
-        console.log('codeResult:', codeResult);
-    }, [codeResult]);
-
+        console.log('codeResult:', codeResult)
+    }, [codeResult])
 
     return (
         <div>
@@ -355,15 +373,20 @@ const IDE: React.FC<IDEProps> = ({
                                 </div>
                             </ResizablePanel>
                             <ResizableHandle withHandle />
-                            <ResizablePanel className='' defaultSize={40}>
+                            <ResizablePanel className="" defaultSize={40}>
                                 <div className="flex h-full">
                                     <div className="w-full max-w-5xl bg-muted p-2 mx-2">
                                         <div className="flex justify-between p-2 bg-gray-800 border-b border-gray-700">
-                                            <p className="text-lg text-gray-300">Output Window</p>
+                                            <p className="text-lg text-gray-300">
+                                                Output Window
+                                            </p>
                                         </div>
                                         <div className="h-full p-4 text-start text-gray-100 overflow-y-auto font-mono bg-gray-900 border border-gray-700 rounded-b-lg">
-                                        <p className='font-mono text-destructive'>{codeError && codeError}</p>
-                                            {codeResult?.map((testCase: any, index: any) => (
+                                            <p className="font-mono text-destructive">
+                                                {codeError && codeError}
+                                            </p>
+                                            {codeResult?.map(
+                                                (testCase: any, index: any) => (
                                                     <div
                                                         key={index}
                                                         className="shadow-sm rounded-lg p-4 my-4 bg-gray-800 border border-gray-700"
@@ -371,37 +394,72 @@ const IDE: React.FC<IDEProps> = ({
                                                         {index < 2 ? (
                                                             <>
                                                                 <h2 className="text-xl font-semibold mb-2 text-gray-300">
-                                                                    Test Case {index + 1}
+                                                                    Test Case{' '}
+                                                                    {index + 1}
                                                                 </h2>
                                                                 <p className="text-gray-300">
                                                                     <span className="font-medium text-gray-400">
-                                                                        Your Output:
+                                                                        Your
+                                                                        Output:
                                                                     </span>
-                                                                    {testCase?.stdOut || testCase?.stdout}
+                                                                    {testCase?.stdOut ||
+                                                                        testCase?.stdout}
                                                                 </p>
 
-                                                                <p className={`text-gray-300 ${testCase.status === 'Accepted' ? 'text-green-500' : 'text-red-500'}`}>
-                                                                    Status: {testCase.status}
+                                                                <p
+                                                                    className={`text-gray-300 ${
+                                                                        testCase.status ===
+                                                                        'Accepted'
+                                                                            ? 'text-green-500'
+                                                                            : 'text-red-500'
+                                                                    }`}
+                                                                >
+                                                                    Status:{' '}
+                                                                    {
+                                                                        testCase.status
+                                                                    }
                                                                 </p>
-                                                                <p className={`text-gray-300`}>
-                                                                    Memory: {testCase.memory}
+                                                                <p
+                                                                    className={`text-gray-300`}
+                                                                >
+                                                                    Memory:{' '}
+                                                                    {
+                                                                        testCase.memory
+                                                                    }
                                                                 </p>
-                                                                <p className={`text-gray-300`}>
-                                                                    Time: {testCase.time}
+                                                                <p
+                                                                    className={`text-gray-300`}
+                                                                >
+                                                                    Time:{' '}
+                                                                    {
+                                                                        testCase.time
+                                                                    }
                                                                 </p>
                                                             </>
                                                         ) : (
-                                                            <p className={`text-gray-300 ${testCase.status === 'Accepted' ? 'text-green-500' : 'text-red-500'}`}>
-                                                                Test Case {index + 1} status: {testCase.status}
+                                                            <p
+                                                                className={`text-gray-300 ${
+                                                                    testCase.status ===
+                                                                    'Accepted'
+                                                                        ? 'text-green-500'
+                                                                        : 'text-red-500'
+                                                                }`}
+                                                            >
+                                                                Test Case{' '}
+                                                                {index + 1}{' '}
+                                                                status:{' '}
+                                                                {
+                                                                    testCase.status
+                                                                }
                                                             </p>
                                                         )}
                                                     </div>
-                                                ))}
+                                                )
+                                            )}
                                         </div>
                                     </div>
                                 </div>
                             </ResizablePanel>
-
                         </ResizablePanelGroup>
                     </ResizablePanel>
                 </ResizablePanelGroup>

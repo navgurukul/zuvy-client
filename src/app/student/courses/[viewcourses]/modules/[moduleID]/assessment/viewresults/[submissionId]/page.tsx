@@ -176,7 +176,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                                 }
                                 className="cursor-pointer mt-4 flex justify-end text-secondary font-bold"
                             >
-                                View Submission <ChevronRight />
+                                View Submission C <ChevronRight />
                             </div>
                         </div>
                     ))}
@@ -206,7 +206,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                             onClick={viewQuizSubmission}
                             className="cursor-pointer mt-4 flex justify-end text-secondary font-bold"
                         >
-                            View Submission <ChevronRight />
+                            View Submission B <ChevronRight />
                         </div>
                     </div>
                 </>
@@ -239,7 +239,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                             onClick={viewOpenEndedSubmission}
                             className="cursor-pointer mt-4 flex justify-end text-secondary font-bold"
                         >
-                            View Submission <ChevronRight />
+                            View Submission A <ChevronRight />
                         </div>
                     </div>
                 </>
