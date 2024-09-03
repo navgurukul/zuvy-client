@@ -105,6 +105,9 @@ const IDE: React.FC<IDEProps> = ({
         action: string
     ) => {
         e.preventDefault()
+        console.log('action', action)
+        console.log('params.editor', params.editor)
+
         try {
             const response = await api.post(
                 `/codingPlatform/practicecode/questionId=${params.editor}?action=${action}&submissionId=${assessmentSubmitId}&codingOutsourseId=${selectedCodingOutsourseId}`,
@@ -153,8 +156,11 @@ const IDE: React.FC<IDEProps> = ({
             setCodeError('')
 
             // Trigger re-render for the output window
-            setResult(response.data.data[0].stdOut || response.data.data[0].stdout || 'No Output Available')
-
+            setResult(
+                response.data.data[0].stdOut ||
+                    response.data.data[0].stdout ||
+                    'No Output Available'
+            )
         } catch (error: any) {
             toast({
                 title: 'Failed',
@@ -194,7 +200,6 @@ const IDE: React.FC<IDEProps> = ({
     useEffect(() => {
         getQuestionDetails()
     }, [language])
-  
 
     useEffect(() => {
         if (templates?.[language]?.template) {
@@ -374,8 +379,11 @@ const IDE: React.FC<IDEProps> = ({
                                             </p>
                                         </div>
                                         <div className="h-full p-4 text-start text-gray-100 overflow-y-auto font-mono bg-gray-900 border border-gray-700 rounded-b-lg">
-                                        <p className='font-mono text-destructive'>{codeError && codeError}</p>
-                                            {codeResult?.map((testCase: any, index: any) => (
+                                            <p className="font-mono text-destructive">
+                                                {codeError && codeError}
+                                            </p>
+                                            {codeResult?.map(
+                                                (testCase: any, index: any) => (
                                                     <div
                                                         key={index}
                                                         className="shadow-sm rounded-lg p-4 my-4 bg-gray-800 border border-gray-700"
@@ -392,37 +400,6 @@ const IDE: React.FC<IDEProps> = ({
                                                                     {testCase?.stdOut || testCase?.stdout}
                                                                 </p>
 
-                                                                    <p
-                                                                        className={`text-gray-300 ${
-                                                                            testCase.status ===
-                                                                            'Accepted'
-                                                                                ? 'text-green-500'
-                                                                                : 'text-red-500'
-                                                                        }`}
-                                                                    >
-                                                                        Status:{' '}
-                                                                        {
-                                                                            testCase.status
-                                                                        }
-                                                                    </p>
-                                                                    <p
-                                                                        className={`text-gray-300`}
-                                                                    >
-                                                                        Memory:{' '}
-                                                                        {
-                                                                            testCase.memory
-                                                                        }
-                                                                    </p>
-                                                                    <p
-                                                                        className={`text-gray-300`}
-                                                                    >
-                                                                        Time:{' '}
-                                                                        {
-                                                                            testCase.time
-                                                                        }
-                                                                    </p>
-                                                                </>
-                                                            ) : (
                                                                 <p
                                                                     className={`text-gray-300 ${
                                                                         testCase.status ===
@@ -431,17 +408,48 @@ const IDE: React.FC<IDEProps> = ({
                                                                             : 'text-red-500'
                                                                     }`}
                                                                 >
-                                                                    Test Case{' '}
-                                                                    {index + 1}{' '}
-                                                                    status:{' '}
+                                                                    Status:{' '}
                                                                     {
                                                                         testCase.status
                                                                     }
                                                                 </p>
-                                                            )}
-                                                        </div>
-                                                    )
-                                                )}
+                                                                <p
+                                                                    className={`text-gray-300`}
+                                                                >
+                                                                    Memory:{' '}
+                                                                    {
+                                                                        testCase.memory
+                                                                    }
+                                                                </p>
+                                                                <p
+                                                                    className={`text-gray-300`}
+                                                                >
+                                                                    Time:{' '}
+                                                                    {
+                                                                        testCase.time
+                                                                    }
+                                                                </p>
+                                                            </>
+                                                        ) : (
+                                                            <p
+                                                                className={`text-gray-300 ${
+                                                                    testCase.status ===
+                                                                    'Accepted'
+                                                                        ? 'text-green-500'
+                                                                        : 'text-red-500'
+                                                                }`}
+                                                            >
+                                                                Test Case{' '}
+                                                                {index + 1}{' '}
+                                                                status:{' '}
+                                                                {
+                                                                    testCase.status
+                                                                }
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                )
+                                            )}
                                         </div>
                                     </div>
                                 </div>

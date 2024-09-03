@@ -20,7 +20,7 @@ function CodingChallenge({
     completeChapter: () => void
 }) {
     // const { openNewTab } = UseFullScreenTab();
-    const { viewcourses, moduleID, chapterID } = useParams()
+    const { viewcourses, moduleID } = useParams()
     const [codingQuestions, setCodingQuestions] = useState<any[]>([])
     const [selectedQuesType, setSelectedQuesType] = useState<
         'quiz' | 'open-ended' | 'coding'
@@ -36,10 +36,6 @@ function CodingChallenge({
     const [isSolving, setIsSolving] = useState(false)
     const [isCodingQuesSubmitted, setIsCodingQuesSubmitted] = useState(false)
     const [assessmentSubmitId, setAssessmentSubmitId] = useState<any>()
-
-    console.log('viewcourses', viewcourses)
-    console.log('moduleID', moduleID)
-    console.log('chapterID', chapterID)
 
     async function getCodingSubmissionsData(
         codingOutsourseId: any,
@@ -132,7 +128,7 @@ function CodingChallenge({
             } else {
                 let newWindow: any
                 const assessmentUrl =
-                    '/student/courses/122/modules/405/chapter/1'
+                    `/student/courses/${viewcourses}/modules/${moduleID}/chapter/${content.id}`
                 if (typeof window !== 'undefined') {
                     newWindow = window?.open(assessmentUrl, '_blank')
                 }

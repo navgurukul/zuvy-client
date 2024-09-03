@@ -52,7 +52,7 @@ const QuestionCard = ({
                 >
                     {description}
                 </h2>
-                <h2>Topic: {tag?.tagName}</h2>
+                {tag && <h2>Topic: {tag?.tagName}</h2>}
             </div>
             <div></div>
             <div className="text-secondary justify-end flex items-center">
