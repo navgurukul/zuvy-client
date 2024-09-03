@@ -181,6 +181,23 @@ const Assessment = ({
                         </p>
                     )}
                 </div>
+
+                {!isAssessmentStarted && (
+                    <div className="mt-6 w-full max-w-2xl mx-auto">
+                        {isDisabled && (
+                            <h2> No Questions Available. Assessment will appear soon!</h2>
+                        )}
+                        <h2 className="text-xl font-semibold my-5 text-gray-800">Assessment Rules</h2>
+                        <div className="flex flex-col gap-2 text-sm">
+                            <ol className="list-decimal list-outside pl-4 text-start">
+                                <li className='font-bold'>If you change the tab more than 4 times during assessment, your assessment may get submitted automatically.</li>
+                                <li className='font-bold'>If you exit full screen mode more than 4 times during assessment, your assessment may get submitted automatically.</li>
+                                <li className='font-bold'>Do not close the browser during the assessment as you will not be able to resume the assessment once you close the tab or browser.</li>
+                                <li className='font-bold'>MCQs & Open-ended Questions can be submitted only once.</li>
+                            </ol>
+                        </div>
+                    </div>
+                )}
             </div>
 
             <div className="mt-8 flex justify-center">

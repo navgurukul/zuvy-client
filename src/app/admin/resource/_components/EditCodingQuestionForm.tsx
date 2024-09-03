@@ -60,10 +60,7 @@ const formSchema = z.object({
 
 
 export default function EditCodingQuestionForm() {
-    const [testCases, setTestCases] = useState([
-        { id: 1, input: '', output: '' },
-        { id: 2, input: '', output: '' },
-    ])
+    const [testCases, setTestCases] = useState<any>([])
 
     const { tags } = getCodingQuestionTags()
     const { editCodingQuestionId } = getEditCodingQuestionDialogs()
@@ -81,18 +78,20 @@ export default function EditCodingQuestionForm() {
     })
 
     const handleAddTestCase = () => {
-        setTestCases((prevTestCases) => [
+        setTestCases((prevTestCases:any) => [
             ...prevTestCases,
             { id: Date.now(), input: '', output: '' }, // Temporary ID
         ]);
     }
 
-
-    const handleRemoveTestCase = (id: number) => {
-        setTestCases((prevTestCases) =>
-            prevTestCases.filter((testCase) => testCase.id !== id)
-        )
-    }
+    const handleRemoveTestCase = (indexToRemove: number) => {
+        console.log("Index to remove:", indexToRemove);
+              // Ensure a new array is created, and the correct item is removed
+              const updatedTestCases = testCases.filter((_:any, index:any) => index !== indexToRemove);
+                setTestCases(updatedTestCases);
+    };
+    
+    
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -115,6 +114,7 @@ export default function EditCodingQuestionForm() {
     
 
     async function editCodingQuestion(data: any) {
+        console.log(testCases)
         try {
             const response = await api.put(
                 `codingPlatform/update-question/${editCodingQuestionId}`,
@@ -139,65 +139,67 @@ export default function EditCodingQuestionForm() {
         }
     }
 
-    const handleSubmit = (values: z.infer<typeof formSchema>) => {
-        const processInput = (input: string | any[], format: string) => {
-            if (Array.isArray(input)) {
-                input = input.join(',');
-            }
+    const handleEditSubmit = (values: z.infer<typeof formSchema>) => {
+
+        const processInput = (input: string, format: string) => {
+            const cleanedInput = cleanUpValues(input);
     
-            input = cleanUpValues(input);
+            const isValidNumber = (value: string) => !isNaN(Number(value));
+            const isValidFloat = (value: string) => !isNaN(parseFloat(value));
     
             switch (format) {
                 case 'arrayOfnum': {
-                    const values = input.split(',').map(Number);
-                    if (values.some(isNaN)) {
+                    const values = cleanedInput.split(',');
+                    if (!values.every(isValidNumber)) {
                         toast({
                             title: 'Invalid number value.',
-                            description: 'Please enter valid numbers.',
+                            description: 'Please enter a valid number.',
                             className:
                                 'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                         });
                         return null;
                     }
-                    return values;
+                    return values.map(Number);
                 }
-                case 'arrayOfStr':
-                    return input.split(',');
+                case 'arrayOfStr': {
+                    return cleanedInput.split(',');
+                }
                 case 'int': {
-                    const numberValue = Number(input);
-                    if (isNaN(numberValue)) {
+                    const values = cleanedInput.split(' ');
+                    if (!values.every(isValidNumber)) {
                         toast({
-                            title: 'Invalid integer value.',
-                            description: 'Please enter a valid integer.',
+                            title: 'Invalid number value.',
+                            description: 'Please enter a valid number.',
                             className:
                                 'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                         });
                         return null;
                     }
-                    return numberValue;
+                    const number = Number(values.join(''));
+                    return number;
                 }
                 case 'float': {
-                    const floatValue = parseFloat(input);
-                    if (isNaN(floatValue)) {
+                    if (!isValidFloat(cleanedInput)) {
                         toast({
                             title: 'Invalid float value.',
-                            description: 'Please enter a valid float.',
+                            description: 'Please enter a valid float value.',
                             className:
                                 'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                         });
                         return null;
                     }
-                    return floatValue;
+                    
+                    return parseFloat(cleanedInput);
                 }
-                case 'str':
-                    return input.toString();
+                case 'str': 
+                    return cleanedInput;
                 default:
-                    return input;
+                    return cleanedInput;
             }
         };
     
         const generateParameterName = (index: number) => {
-            return String.fromCharCode(97 + index); // 'a', 'b', 'c', etc.
+            return String.fromCharCode(97 + index); // a, b, c, etc.
         };
     
         const formattedData = {
@@ -206,14 +208,18 @@ export default function EditCodingQuestionForm() {
             difficulty: values.difficulty,
             tagId: values.topics,
             constraints: values.constraints,
-            testCases: values.testCases
-                .map((testCase) => {
+            testCases: testCases?.filter((testCase:any) => !testCase.id || !String(testCase.id).startsWith('temp_')) // Exclude temp IDs
+                .map((testCase:any) => {
                     const processedInput = processInput(testCase.input, values.inputFormat);
     
-                    if (processedInput === null) return null;
+                    if (processedInput === null) {
+                        return null;
+                    }
     
                     let inputs;
-                    if (Array.isArray(processedInput)) {
+    
+                    if (Array.isArray(processedInput) &&
+                        (values.inputFormat === 'arrayOfnum' || values.inputFormat === 'arrayOfStr')) {
                         inputs = [
                             {
                                 parameterType: values.inputFormat,
@@ -222,7 +228,7 @@ export default function EditCodingQuestionForm() {
                             },
                         ];
                     } else {
-                        const inputValues = testCase.input
+                        const inputValues = cleanUpValues(testCase.input)
                             .trim()
                             .split(' ')
                             .filter(Boolean);
@@ -233,46 +239,28 @@ export default function EditCodingQuestionForm() {
                         }));
                     }
     
-                    const processedOutput = processInput(testCase.output, values.outputFormat);
+                    const expectedOutput = processInput(testCase.output, values.outputFormat);
     
-                    if (processedOutput === null) return null;
+                    if (expectedOutput === null) {
+                        return null;
+                    }
     
                     return {
-                        id: testCase.id, // Include ID if it exists
+                        id: testCase.id, // Include existing ID if present
                         inputs,
                         expectedOutput: {
                             parameterType: values.outputFormat,
-                            parameterValue: processedOutput,
+                            parameterValue: expectedOutput,
                         },
                     };
-                })
-                .filter(Boolean), // Remove null test cases
+                }).filter(Boolean), // Remove null test cases
             updatedAt: new Date().toISOString(),
             content: {},
         };
     
-        // Define a threshold for temporary IDs (you may adjust this value)
-        const TEMP_ID_THRESHOLD = Date.now(); // A threshold value to filter out temporary IDs
-    
-        const finalData = {
-            ...formattedData,
-            testCases: formattedData.testCases.map((testCase) => {
-                // Handle temporary IDs and ensure ID handling
-                if (typeof testCase?.id === 'number' && testCase.id > TEMP_ID_THRESHOLD) {
-                    const { id, ...testCaseWithoutId } = testCase;
-                    return testCaseWithoutId;
-                }
-                return testCase;
-            }),
-        };
-    
-        console.log('finalData', finalData);
-        console.log('formattedData', formattedData);
-    
-        // Check if any test case input or output is null
-        const hasInvalidTestCase = formattedData.testCases.some((testCase: any) => {
-            return testCase?.inputs.some((input: any) => input.parameterValue === null) ||
-                testCase?.expectedOutput.parameterValue === null;
+        const hasInvalidTestCase = formattedData.testCases.some((testCase:any) => {
+            return testCase?.inputs.some((input:any) => input.parameterValue === null) ||
+                   testCase?.expectedOutput.parameterValue === null;
         });
     
         if (hasInvalidTestCase || formattedData.testCases.length === 0) {
@@ -285,12 +273,10 @@ export default function EditCodingQuestionForm() {
             return;
         }
     
-        // Call the edit API with formatted data
-        editCodingQuestion(finalData);
+              editCodingQuestion(formattedData); // Call the edit API
         getAllCodingQuestions(setCodingQuestions);
     };
     
-
 
     useEffect(() => {
         if (selectCodingQuestion) {
@@ -339,16 +325,17 @@ export default function EditCodingQuestionForm() {
                 }))
             );
         }
-    }, [selectCodingQuestion[0]]);
+    }, []);
     
-
-
-
-
     useEffect(() => {
         console.log(selectCodingQuestion);
 
     }, [selectCodingQuestion])
+
+    useEffect(() => {
+        console.log("Updated testCases:", testCases);
+    }, [testCases]);
+    
 
     return (
         <main className="flex flex-col p-3 w-full items-center ">
@@ -358,7 +345,7 @@ export default function EditCodingQuestionForm() {
 
             <Form {...form}>
                 <form
-                    onSubmit={form.handleSubmit(handleSubmit)}
+                    onSubmit={form.handleSubmit(handleEditSubmit)}
                     className="w-2/4 flex flex-col gap-4"
                 >
                     <FormField
@@ -581,7 +568,7 @@ export default function EditCodingQuestionForm() {
 
                     <div className="text-left">
                         <FormLabel>Test Cases</FormLabel>
-                        {testCases.map((testCase, index) => (
+                        {testCases.map((testCase:any, index:any) => (
                             <div
                                 key={index}
                                 className="flex items-center gap-2 mt-2"
@@ -630,12 +617,10 @@ export default function EditCodingQuestionForm() {
                                         </FormItem>
                                     )}
                                 />
-                                {index !== 0 && index !== 1 && (
+                                { (
                                     <X
                                         className="cursor-pointer"
-                                        onClick={() =>
-                                            handleRemoveTestCase(testCase.id)
-                                        }
+                                        onClick={() => handleRemoveTestCase(index)}
                                     />
                                 )}
                             </div>
