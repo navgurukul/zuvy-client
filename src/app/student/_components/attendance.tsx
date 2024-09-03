@@ -34,7 +34,7 @@ function Attendance() {
     const getAttendanceHandler = useCallback(async () => {
         await api.get(`/student/Dashboard/attendance`).then((res) => {
             const attendance = res.data.filter(
-                (course: any) => selectedCourse?.id === course.bootcampId
+                (course: any) => selectedCourse?.id === course?.bootcampId
             )
             setAttendanceData(attendance)
         })
