@@ -323,12 +323,13 @@ function CodingChallenge({
     }
 
     useEffect(() => {
+        // Call this when chapter gets change
         getResults()
     }, [codingQuestionId])
 
     function viewCodingSubmission(questionId: any) {
         router.push(
-            `/student/courses/${viewcourses}/modules/${moduleID}/assessment/codingresults/question/${questionId}`
+            `/student/courses/${viewcourses}/modules/${moduleID}/codingresult/question/${questionId}`
         )
         // } else {
         //     toast({
@@ -386,8 +387,7 @@ function CodingChallenge({
                         <div
                             onClick={() =>
                                 viewCodingSubmission(
-                                    codingQuestionResult?.questionDetail
-                                        .questionId
+                                    codingQuestionResult?.questionDetail.id
                                 )
                             }
                             className="cursor-pointer mt-4 flex justify-end text-secondary font-bold"
@@ -416,9 +416,11 @@ function CodingChallenge({
                     </>
                 )}
             </div>
-            <Button onClick={submitAssessment} disabled={disableSubmit}>
-                Submit Coding Problem
-            </Button>
+            {!isSuccess && (
+                <Button onClick={submitAssessment} disabled={disableSubmit}>
+                    Submit Coding Problem
+                </Button>
+            )}
         </div>
     )
 }
