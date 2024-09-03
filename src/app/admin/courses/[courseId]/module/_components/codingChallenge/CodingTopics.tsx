@@ -15,7 +15,7 @@ interface CodingTopicsProps {
     setSearchTerm: (newSearchTerm: string) => void
     searchTerm: string
     selectedTopic: string
-    setSelectedTopic: React.Dispatch<React.SetStateAction<string>>
+    setSelectedTopic: any
     selectedDifficulty: string
     setSelectedDifficulty: React.Dispatch<React.SetStateAction<string>>
     selectedLanguage: string

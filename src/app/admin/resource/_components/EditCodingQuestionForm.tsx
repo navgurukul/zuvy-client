@@ -23,8 +23,7 @@ import {
     Select,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Plus, X } from 'lucide-react'
+import { ChevronLeft, Plus, X } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import {
@@ -32,7 +31,9 @@ import {
     getCodingQuestionTags,
     getEditCodingQuestionDialogs,
 } from '@/store/store'
-import { getAllCodingQuestions } from '@/utils/admin'
+import { cleanUpValues, getAllCodingQuestions } from '@/utils/admin'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { create } from 'domain'
 
 const formSchema = z.object({
     title: z.string().min(5),
@@ -50,16 +51,16 @@ const formSchema = z.object({
     }),
     testCases: z.array(
         z.object({
+            id: z.any().optional(), // Optional ID
             input: z.string().min(1),
             output: z.string().min(1),
         })
     ),
 })
 
+
 export default function EditCodingQuestionForm() {
-    const [testCases, setTestCases] = useState([
-        { id: 1, input: '', output: '' },
-    ])
+    const [testCases, setTestCases] = useState<any>([])
 
     const { tags } = getCodingQuestionTags()
     const { editCodingQuestionId } = getEditCodingQuestionDialogs()
@@ -70,29 +71,27 @@ export default function EditCodingQuestionForm() {
         setIsCodingEditDialogOpen,
     } = getEditCodingQuestionDialogs()
 
-    const { codingQuestions, setCodingQuestions } =
-        getcodingQuestionState()
+    const { codingQuestions, setCodingQuestions } = getcodingQuestionState()
 
     let selectCodingQuestion = codingQuestions.filter((question: any) => {
         return question.id === editCodingQuestionId
     })
 
-    useEffect(()=>{
-        console.log(codingQuestions);
-    },[codingQuestions])
-
     const handleAddTestCase = () => {
-        setTestCases((prevTestCases) => [
+        setTestCases((prevTestCases:any) => [
             ...prevTestCases,
-            { id: prevTestCases.length + 1, input: '', output: '' },
-        ])
+            { id: Date.now(), input: '', output: '' }, // Temporary ID
+        ]);
     }
 
-    const handleRemoveTestCase = (id: number) => {
-        setTestCases((prevTestCases) =>
-            prevTestCases.filter((testCase) => testCase.id !== id)
-        )
-    }
+    const handleRemoveTestCase = (indexToRemove: number) => {
+        console.log("Index to remove:", indexToRemove);
+              // Ensure a new array is created, and the correct item is removed
+              const updatedTestCases = testCases.filter((_:any, index:any) => index !== indexToRemove);
+                setTestCases(updatedTestCases);
+    };
+    
+    
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -101,20 +100,23 @@ export default function EditCodingQuestionForm() {
             problemStatement: selectCodingQuestion[0]?.description || '',
             constraints: selectCodingQuestion[0]?.constraints || '',
             difficulty: selectCodingQuestion[0]?.difficulty || 'Easy',
-            topics: selectCodingQuestion[0]?.tagId || 0,
-            inputFormat: 'int',
-            outputFormat: 'int',
+            topics: selectCodingQuestion[0]?.tagId,
+            inputFormat: selectCodingQuestion[0]?.testCases[0]?.inputs[0]?.parameterType,
+            outputFormat: selectCodingQuestion[0]?.testCases[0]?.expectedOutput?.parameterType,
             testCases:
                 selectCodingQuestion[0]?.testCases?.map((testCase: any) => ({
-                    input: testCase.inputs[0],
-                    output: testCase.expectedOutput,
+                    id: testCase.id, // Ensure this is correctly mapped
+                    input: JSON.stringify(testCase.inputs.map((input: any) => input.parameterValue)),
+                    output: JSON.stringify(testCase.expectedOutput.parameterValue),
                 })) || [],
         },
     })
+    
 
     async function editCodingQuestion(data: any) {
+        console.log(testCases)
         try {
-            const response = await api.patch(
+            const response = await api.put(
                 `codingPlatform/update-question/${editCodingQuestionId}`,
                 data
             )
@@ -137,78 +139,144 @@ export default function EditCodingQuestionForm() {
         }
     }
 
-    const handleSubmit = (values: z.infer<typeof formSchema>) => {
+    const handleEditSubmit = (values: z.infer<typeof formSchema>) => {
 
         const processInput = (input: string, format: string) => {
+            const cleanedInput = cleanUpValues(input);
+    
+            const isValidNumber = (value: string) => !isNaN(Number(value));
+            const isValidFloat = (value: string) => !isNaN(parseFloat(value));
+    
             switch (format) {
-                case 'arrayOfnum':
-                    return input.split(',').map(Number)
-                case 'arrayOfStr':
-                    return input.split(',')
-                case 'int':
-                    return Number(input)
-                case 'float':
-                    return parseFloat(input)
+                case 'arrayOfnum': {
+                    const values = cleanedInput.split(',');
+                    if (!values.every(isValidNumber)) {
+                        toast({
+                            title: 'Invalid number value.',
+                            description: 'Please enter a valid number.',
+                            className:
+                                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                        });
+                        return null;
+                    }
+                    return values.map(Number);
+                }
+                case 'arrayOfStr': {
+                    return cleanedInput.split(',');
+                }
+                case 'int': {
+                    const values = cleanedInput.split(' ');
+                    if (!values.every(isValidNumber)) {
+                        toast({
+                            title: 'Invalid number value.',
+                            description: 'Please enter a valid number.',
+                            className:
+                                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                        });
+                        return null;
+                    }
+                    const number = Number(values.join(''));
+                    return number;
+                }
+                case 'float': {
+                    if (!isValidFloat(cleanedInput)) {
+                        toast({
+                            title: 'Invalid float value.',
+                            description: 'Please enter a valid float value.',
+                            className:
+                                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                        });
+                        return null;
+                    }
+                    
+                    return parseFloat(cleanedInput);
+                }
+                case 'str': 
+                    return cleanedInput;
                 default:
-                    return input
+                    return cleanedInput;
             }
-        }
-
+        };
+    
         const generateParameterName = (index: number) => {
-            return String.fromCharCode(97 + index)
-        }
-
+            return String.fromCharCode(97 + index); // a, b, c, etc.
+        };
+    
         const formattedData = {
             title: values.title,
             description: values.problemStatement,
             difficulty: values.difficulty,
             tagId: values.topics,
             constraints: values.constraints,
-            testCases: values.testCases.map((testCase) => {
-                const processedInput = processInput(
-                    testCase.input,
-                    values.inputFormat
-                )
-                let inputs
-
-                if (Array.isArray(processedInput)) {
-                    inputs = [
-                        {
+            testCases: testCases?.filter((testCase:any) => !testCase.id || !String(testCase.id).startsWith('temp_')) // Exclude temp IDs
+                .map((testCase:any) => {
+                    const processedInput = processInput(testCase.input, values.inputFormat);
+    
+                    if (processedInput === null) {
+                        return null;
+                    }
+    
+                    let inputs;
+    
+                    if (Array.isArray(processedInput) &&
+                        (values.inputFormat === 'arrayOfnum' || values.inputFormat === 'arrayOfStr')) {
+                        inputs = [
+                            {
+                                parameterType: values.inputFormat,
+                                parameterValue: processedInput,
+                                parameterName: 'a',
+                            },
+                        ];
+                    } else {
+                        const inputValues = cleanUpValues(testCase.input)
+                            .trim()
+                            .split(' ')
+                            .filter(Boolean);
+                        inputs = inputValues.map((value, index) => ({
                             parameterType: values.inputFormat,
-                            parameterValue: processedInput,
-                            parameterName: 'a',
+                            parameterValue: processInput(value, values.inputFormat),
+                            parameterName: generateParameterName(index),
+                        }));
+                    }
+    
+                    const expectedOutput = processInput(testCase.output, values.outputFormat);
+    
+                    if (expectedOutput === null) {
+                        return null;
+                    }
+    
+                    return {
+                        id: testCase.id, // Include existing ID if present
+                        inputs,
+                        expectedOutput: {
+                            parameterType: values.outputFormat,
+                            parameterValue: expectedOutput,
                         },
-                    ]
-                } else {
-                    const inputValues = testCase.input
-                        .trim()
-                        .split(' ')
-                        .filter(Boolean)
-                    inputs = inputValues.map((value, index) => ({
-                        parameterType: values.inputFormat,
-                        parameterValue: processInput(value, values.inputFormat),
-                        parameterName: generateParameterName(index),
-                    }))
-                }
-
-                return {
-                    inputs,
-                    expectedOutput: {
-                        parameterType: values.outputFormat,
-                        parameterValue: processInput(
-                            testCase.output,
-                            values.outputFormat
-                        ),
-                    },
-                }
-            }),
-            createdAt: new Date().toISOString(),
+                    };
+                }).filter(Boolean), // Remove null test cases
             updatedAt: new Date().toISOString(),
             content: {},
+        };
+    
+        const hasInvalidTestCase = formattedData.testCases.some((testCase:any) => {
+            return testCase?.inputs.some((input:any) => input.parameterValue === null) ||
+                   testCase?.expectedOutput.parameterValue === null;
+        });
+    
+        if (hasInvalidTestCase || formattedData.testCases.length === 0) {
+            toast({
+                title: 'Please enter valid test cases.',
+                description: 'Submission failed: One or more test cases have invalid inputs or outputs.',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+            });
+            return;
         }
-        editCodingQuestion(formattedData)
-        getAllCodingQuestions(setCodingQuestions)
-    }
+    
+              editCodingQuestion(formattedData); // Call the edit API
+        getAllCodingQuestions(setCodingQuestions);
+    };
+    
 
     useEffect(() => {
         if (selectCodingQuestion) {
@@ -217,275 +285,363 @@ export default function EditCodingQuestionForm() {
                 problemStatement: selectCodingQuestion[0].description,
                 constraints: selectCodingQuestion[0].constraints,
                 difficulty: selectCodingQuestion[0].difficulty,
-                topics: selectCodingQuestion[0].tags,
-                inputFormat: 'int',
-                outputFormat: 'int',
-                testCases: selectCodingQuestion[0].testCases.map(
-                    (testCase: any) => ({
-                        input: testCase.inputs[0],
-                        output: testCase.expectedOutput,
-                    })
-                ),
-            })
+                topics: selectCodingQuestion[0].tagId,
+                testCases: selectCodingQuestion[0].testCases.map((testCase: any) => ({
+                    id: testCase.id, // Ensure IDs are correctly set here
+                    input: cleanUpValues(
+                        testCase.inputs.map((input: any) => {
+                            let value = input.parameterValue;
+                            let type = input.parameterType;
+                            if (Array.isArray(value)) {
+                                if (type === 'arrayOfnum' || type === 'arrayOfStr') {
+                                    value = value.join(', ');
+                                } else {
+                                    value = value.join(' ');
+                                }
+                            }
+                            return cleanUpValues(value);
+                        }).join(' ')
+                    ),
+                    output: cleanUpValues(
+                        testCase.expectedOutput.parameterValue
+                    ),
+                })),
+            });
             setTestCases(
-                selectCodingQuestion[0]?.testCases?.map(
-                    (testCase: any, index: number) => ({
-                        id: index + 1,
-                        input: testCase.inputs[0],
-                        output: testCase.expectedOutput,
-                    })
-                )
-            )
+                selectCodingQuestion[0]?.testCases?.map((testCase: any, index: number) => ({
+                    id: testCase.id !== undefined ? testCase.id : index + 1, // Ensure IDs are handled correctly
+                    input: cleanUpValues(
+                        testCase.inputs.map((input: any) => {
+                            let value = input.parameterValue;
+                            if (Array.isArray(value)) {
+                                value = value.join(', ');
+                            }
+                            return cleanUpValues(value);
+                        }).join(' ')
+                    ),
+                    output: cleanUpValues(
+                        testCase.expectedOutput.parameterValue
+                    ),
+                }))
+            );
         }
-    }, [selectCodingQuestion[0]])
+    }, []);
+    
+    useEffect(() => {
+        console.log(selectCodingQuestion);
+
+    }, [selectCodingQuestion])
+
+    useEffect(() => {
+        console.log("Updated testCases:", testCases);
+    }, [testCases]);
+    
 
     return (
-        <ScrollArea className="h-[calc(100vh-200px)] w-full rounded-md  ">
-            <main className="flex  flex-col p-3 ">
-                <Form {...form}>
-                    <form
-                        onSubmit={form.handleSubmit(handleSubmit)}
-                        className=" max-w-md w-full flex flex-col gap-4"
-                    >
-                        <FormField
-                            control={form.control}
-                            name="title"
-                            render={({ field }) => {
-                                return (
-                                    <FormItem className="text-left">
-                                        <FormLabel>Title</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                placeholder="Title"
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )
-                            }}
-                        />
+        <main className="flex flex-col p-3 w-full items-center ">
+            <div className='flex align-middle self-start text-secondary cursor-pointer' onClick={() => setIsCodingEditDialogOpen(false)}>
+                <p><ChevronLeft /></p> <p>Coding Problems</p>
+            </div>
 
-                        <FormField
-                            control={form.control}
-                            name="problemStatement"
-                            render={({ field }) => {
-                                return (
-                                    <FormItem className="text-left">
-                                        <FormLabel>Problem Statement</FormLabel>
-                                        <FormControl>
-                                            <Textarea
-                                                placeholder="Write the Detailed Description Here"
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )
-                            }}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="constraints"
-                            render={({ field }) => {
-                                return (
-                                    <FormItem className="text-left">
-                                        <FormLabel>Constraints </FormLabel>
-                                        <FormControl>
-                                            <Textarea
-                                                placeholder="Write the Detailed Description Here"
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )
-                            }}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="difficulty"
-                            render={({ field }) => {
-                                return (
-                                    <FormField
-                                        control={form.control}
-                                        name="difficulty"
-                                        render={({ field }) => (
-                                            <FormItem className="space-y-3">
-                                                <FormControl>
-                                                    <RadioGroup
-                                                        onValueChange={
-                                                            field.onChange
-                                                        }
-                                                        defaultValue={
-                                                            selectCodingQuestion[0]
-                                                                .difficulty
-                                                        }
-                                                        className="flex  space-y-1"
-                                                    >
-                                                        <FormLabel className="mt-5">
-                                                            Difficulty
-                                                        </FormLabel>
-                                                        <FormItem className="flex  items-center space-x-3 space-y-0">
-                                                            <FormControl>
-                                                                <RadioGroupItem value="Easy" />
-                                                            </FormControl>
-                                                            <FormLabel className="font-normal">
-                                                                Easy
-                                                            </FormLabel>
-                                                        </FormItem>
-                                                        <FormItem className="flex items-center space-x-3 space-y-0">
-                                                            <FormControl>
-                                                                <RadioGroupItem value="Medium" />
-                                                            </FormControl>
-                                                            <FormLabel className="font-normal">
-                                                                Medium
-                                                            </FormLabel>
-                                                        </FormItem>
-                                                        <FormItem className="flex items-center space-x-3 space-y-0">
-                                                            <FormControl>
-                                                                <RadioGroupItem value="Hard" />
-                                                            </FormControl>
-                                                            <FormLabel className="font-normal">
-                                                                Hard
-                                                            </FormLabel>
-                                                        </FormItem>
-                                                    </RadioGroup>
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
+            <Form {...form}>
+                <form
+                    onSubmit={form.handleSubmit(handleEditSubmit)}
+                    className="w-2/4 flex flex-col gap-4"
+                >
+                    <FormField
+                        control={form.control}
+                        name="title"
+                        render={({ field }) => (
+                            <FormItem className="text-left">
+                                <FormLabel>Title</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Title" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="problemStatement"
+                        render={({ field }) => (
+                            <FormItem className="text-left">
+                                <FormLabel>Problem Statement</FormLabel>
+                                <FormControl>
+                                    <Textarea
+                                        placeholder="Write the Detailed Description Here"
+                                        {...field}
                                     />
-                                )
-                            }}
-                        />
-                        <div className="flex justify-between gap-2">
-               
-                            <FormField
-                                control={form.control}
-                                name="topics"
-                                render={({ field }) => {
-                                    return (
-                                        <FormItem className="text-left w-full">
-                                            <FormLabel>Topics</FormLabel>
-                                            <Select
-                                                onValueChange={(value) => {
-                                                    const selectedTag =
-                                                        tags.find(
-                                                            (tag: any) =>
-                                                                tag.tagName ===
-                                                                value
-                                                        )
-                                                    if (selectedTag) {
-                                                        field.onChange(
-                                                            selectedTag.id
-                                                        )
-                                                    }
-                                                }}
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="constraints"
+                        render={({ field }) => (
+                            <FormItem className="text-left">
+                                <FormLabel>Constraints</FormLabel>
+                                <FormControl>
+                                    <Textarea
+                                        placeholder="Write the Constraints Here"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="difficulty"
+                        render={({ field }) => (
+                            <FormItem className="space-y-3">
+                                <FormLabel>Difficulty</FormLabel>
+                                <FormControl>
+                                    <RadioGroup
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value}
+                                        className="flex space-y-1"
+                                    >
+                                        <FormItem className="flex items-center space-x-3 space-y-0">
+                                            <FormControl>
+                                                <RadioGroupItem value="Easy" />
+                                            </FormControl>
+                                            <FormLabel className="font-normal">
+                                                Easy
+                                            </FormLabel>
+                                        </FormItem>
+                                        <FormItem className="flex items-center space-x-3 space-y-0">
+                                            <FormControl>
+                                                <RadioGroupItem value="Medium" />
+                                            </FormControl>
+                                            <FormLabel className="font-normal">
+                                                Medium
+                                            </FormLabel>
+                                        </FormItem>
+                                        <FormItem className="flex items-center space-x-3 space-y-0">
+                                            <FormControl>
+                                                <RadioGroupItem value="Hard" />
+                                            </FormControl>
+                                            <FormLabel className="font-normal">
+                                                Hard
+                                            </FormLabel>
+                                        </FormItem>
+                                    </RadioGroup>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="topics"
+                        render={({ field }) => (
+                            <FormItem className="text-left w-full">
+                                <FormLabel>Topics</FormLabel>
+                                <Select
+                                    value={tags.find(
+                                        (tag: any) => tag.tagName === selectCodingQuestion[0].tagId)}
+                                    onValueChange={(value) => {
+                                        const selectedTag = tags.find(
+                                            (tag: any) => tag.tagName === value
+                                        )
+                                        if (selectedTag) {
+                                            field.onChange(selectedTag.id)
+                                        }
+                                    }}
+                                >
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue
+                                                placeholder={
+                                                    tags.find(
+                                                        (tag) =>
+                                                            tag.id ===
+                                                            selectCodingQuestion[0]
+                                                                ?.tagId
+                                                    )?.tagName ||
+                                                    'Choose Topic'
+                                                }
+                                            />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {tags.map((tag: any) => (
+                                            <SelectItem
+                                                key={tag.id}
+                                                value={tag.tagName}
                                             >
-                                                <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue
-                                                            placeholder={
-                                                                tags.find(
-                                                                    (tag) =>
-                                                                        tag.id ===
-                                                                        selectCodingQuestion[0]
-                                                                            ?.tags
-                                                                )?.tagName ||
-                                                                'Choose Topic'
-                                                            }
-                                                        />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    {tags.map((tag: any) => (
-                                                        <SelectItem
-                                                            key={tag.id}
-                                                            value={tag.tagName}
-                                                        >
-                                                            {tag.tagName}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
+                                                {tag.tagName}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <h6 className='text-left text-sm font-semibold'> Note: Max 20 test cases supported & a minimum of 2 test cases should be provided</h6>
+                    <div className="flex justify-between gap-2">
+                        <FormField
+                            control={form.control}
+                            name="inputFormat"
+                            render={({ field }) => (
+                                <FormItem className="text-left w-full">
+                                    <FormLabel>Input format</FormLabel>
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        defaultValue={String(field.value)}
+                                    >
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Choose Input Format" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="str">
+                                                String
+                                            </SelectItem>
+                                            <SelectItem value="int">
+                                                Number
+                                            </SelectItem>
+                                            <SelectItem value="float">
+                                                Float
+                                            </SelectItem>
+                                            <SelectItem value="arrayOfnum">
+                                                Array Of Numbers
+                                            </SelectItem>
+                                            <SelectItem value="arrayOfStr">
+                                                Array Of Strings
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="outputFormat"
+                            render={({ field }) => (
+                                <FormItem className="text-left w-full">
+                                    <FormLabel>Output Format</FormLabel>
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        defaultValue={String(field.value)}
+                                    >
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Choose Output Format" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="str">
+                                                String
+                                            </SelectItem>
+                                            <SelectItem value="int">
+                                                Number
+                                            </SelectItem>
+                                            <SelectItem value="float">
+                                                Float
+                                            </SelectItem>
+                                            <SelectItem value="arrayOfnum">
+                                                Array Of Numbers
+                                            </SelectItem>
+                                            <SelectItem value="arrayOfStr">
+                                                Array Of Strings
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+
+                    <div className="text-left">
+                        <FormLabel>Test Cases</FormLabel>
+                        {testCases.map((testCase:any, index:any) => (
+                            <div
+                                key={index}
+                                className="flex items-center gap-2 mt-2"
+                            >
+                                <FormField
+                                    control={form.control}
+                                    name={`testCases.${index}.input`}
+                                    render={({ field }) => (
+                                        <FormItem className="text-left">
+                                            <Input
+                                                placeholder="Input"
+                                                value={field.value || ''}
+                                                onChange={field.onChange}
+                                            />
+                                            <p className="text-sm text-gray-500 mt-1">
+                                                {form.watch('inputFormat') ===
+                                                    'arrayOfnum' ||
+                                                    form.watch('inputFormat') ===
+                                                    'arrayOfStr'
+                                                    ? 'Enter values separated by commas (e.g., 1,2,3,4)'
+                                                    : 'Enter values separated by spaces (e.g., 2 3 4)'}
+                                            </p>
                                             <FormMessage />
                                         </FormItem>
-                                    )
-                                }}
-                            />
-                        </div>
-                       
-                        <div className="text-left ">
-                            {/* <div className="flex justify-start"> */}
-                            <FormLabel>Test Cases</FormLabel>
-                            {/* </div> */}
-                            {testCases?.map((testCase, index) => (
-                                <div
-                                    key={index}
-                                    className="flex items-center gap-2"
-                                >
-                                    <FormField
-                                        control={form.control}
-                                        name={`testCases.${index}.input`}
-                                        render={({ field }) => (
-                                            <FormItem className="text-left">
-                                                <Input
-                                                    placeholder="Input"
-                                                    value={field.value || ''}
-                                                    onChange={field.onChange}
-                                                />
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name={`testCases.${index}.output`}
-                                        render={({ field }) => (
-                                            <FormItem className="text-left">
-                                                <Input
-                                                    placeholder="Output"
-                                                    value={field.value || ''}
-                                                    onChange={field.onChange}
-                                                />
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    {index !== 0 && (
-                                        <X
-                                            className="cursor-pointer"
-                                            onClick={() =>
-                                                handleRemoveTestCase(
-                                                    testCase.id
-                                                )
-                                            }
-                                        />
                                     )}
-                                </div>
-                            ))}
-                            <Button
-                                variant={'outline'}
-                                type="button"
-                                className="mt-2"
-                                onClick={handleAddTestCase}
-                            >
-                                <Plus size={20} />
-                                <p className="text-secondary font-bold">
-                                    Add Test Cases
-                                </p>
-                            </Button>
-                        </div>
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name={`testCases.${index}.output`}
+                                    render={({ field }) => (
+                                        <FormItem className="text-left">
+                                            <Input
+                                                placeholder="Output"
+                                                value={field.value || ''}
+                                                onChange={field.onChange}
+                                            />
+                                            <p className="text-sm text-gray-500 mt-1">
+                                                {form.watch('outputFormat') ===
+                                                    'arrayOfnum' ||
+                                                    form.watch('outputFormat') ===
+                                                    'arrayOfStr'
+                                                    ? 'Enter values separated by commas (e.g., 1,2,3,4)'
+                                                    : 'Enter values separated by spaces (e.g., 2 3 4)'}
+                                            </p>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                { (
+                                    <X
+                                        className="cursor-pointer"
+                                        onClick={() => handleRemoveTestCase(index)}
+                                    />
+                                )}
+                            </div>
 
-                        <div className="flex justify-end">
-                            <Button type="submit" className="w-1/2 ">
-                                Edit Coding Question
-                            </Button>
-                        </div>
-                    </form>
-                </Form>
-            </main>
-        </ScrollArea>
+                        ))}
+                    </div>
+
+                    <div className="flex justify-end gap-3">
+                        <Button
+                            variant={'outline'}
+                            type="button"
+                            onClick={handleAddTestCase}
+                        >
+                            <Plus size={15} />
+                            Add Test Case
+                        </Button>
+                        <Button type="submit">Save</Button>
+                    </div>
+                </form>
+            </Form>
+        </main>
     )
+
 }
