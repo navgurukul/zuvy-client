@@ -24,8 +24,8 @@ const AssesmentComponent = (props: Props) => {
     )
 
     return (
-        <div className="flex flex-col lg:flex-row h-auto lg:h-[280px] sm:h-[360px] w-full lg:w-4/5 shadow-lg my-5 rounded-lg p-4 lg:p-6 bg-white dark:bg-gray-800 transition-transform transform hover:shadow-xl">
-            <div className="flex flex-col w-full justify-between py-2 lg:mx-4 min-h-[250px] sm:min-h-[200px]">
+        <div className="lg:flex-row h-auto lg:h-[280px] sm:h-[360px] w-full  shadow-lg my-5 rounded-lg p-4 lg:p-6 bg-white dark:bg-gray-800 transition-transform transform hover:shadow-xl">
+            <div className=" w-full justify-between py-2 lg:mx-4 min-h-[250px] sm:min-h-[200px]">
                 <h1 className="text-sm lg:text-base text-start font-medium text-gray-900 dark:text-white">
                     {props.title}
                 </h1>
