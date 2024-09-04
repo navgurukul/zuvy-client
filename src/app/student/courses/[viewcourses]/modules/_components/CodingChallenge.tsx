@@ -44,6 +44,7 @@ function CodingChallenge({
     const [assessmentSubmitId, setAssessmentSubmitId] = useState<any>()
     const [disableSubmit, setDisableSubmit] = useState(false)
     const [isSuccess, setIsScuccess] = useState(false)
+    const [chapterStatus, setChapterStatus] = useState('Pending')
     const [codingQuestionResult, setCodingQuestionResult] = useState<any>()
 
     const {
@@ -81,7 +82,8 @@ function CodingChallenge({
                 `/tracking/getQuizAndAssignmentWithStatus?chapterId=${content.id}`
                 // `/tracking/getAllFormsWithStatus/${props.moduleId}?chapterId=${props.chapterId}`
             )
-            console.log('res', res.data.data.codingProblem)
+            console.log('res', res.data.data.status)
+            // setChapterStatus(res.data.data.status)
             setCodingQuestions(res.data.data.codingProblem)
             setCodingQuestionId(res.data.data.codingProblem[0].id)
             // if (res.data && res.data.questions) {
@@ -287,7 +289,7 @@ function CodingChallenge({
             console.log('ressss', res)
             setCodingQuestionResult(res.data.data)
             setIsScuccess(res.data.isSuccess)
-
+            // completeChapter()
             // Parse the timestamps into Date objects
             // const startedAt = new Date(res?.data?.startedAt)
             // const submitedAt = new Date(res?.data?.submitedAt)
@@ -317,7 +319,9 @@ function CodingChallenge({
             // setTimeTaken(output)
             // setViewResultsData(res.data)
             // setAssessmentOutsourseId(res.data.assessmentOutsourseId)
-        } catch (e: any) {
+        } catch (error: any) {
+            console.log('e', error.response.data.isSuccess)
+            setIsScuccess(error.response.data.isSuccess)
             // setShowErrorMessage(e?.response?.data?.message)
         }
     }
@@ -325,7 +329,7 @@ function CodingChallenge({
     useEffect(() => {
         // Call this when chapter gets change
         getResults()
-    }, [codingQuestionId])
+    }, [codingQuestionId, content.id])
 
     function viewCodingSubmission(questionId: any) {
         router.push(
@@ -347,7 +351,7 @@ function CodingChallenge({
                 {isSuccess ? (
                     <div
                         key={codingQuestionResult?.questionDetail.id}
-                        className={`container mx-auto rounded-xl shadow-lg overflow-hidden max-w-2xl min-h-52 mt-4 py-5`}
+                        className={`container mx-auto rounded-xl shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F] overflow-hidden max-w-2xl min-h-52 mt-4 py-5`}
                     >
                         <div className="flex justify-between">
                             <div className="font-bold text-xl my-2">
@@ -416,11 +420,11 @@ function CodingChallenge({
                     </>
                 )}
             </div>
-            {!isSuccess && (
+            {/* {!isSuccess && chapterStatus !== 'Completed' && (
                 <Button onClick={submitAssessment} disabled={disableSubmit}>
                     Submit Coding Problem
                 </Button>
-            )}
+            )} */}
         </div>
     )
 }

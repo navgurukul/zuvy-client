@@ -41,7 +41,7 @@ const QuestionCard = ({
     }, [])
 
     return (
-        <div className="my-5 p-6 bg-white rounded-xl shadow-md">
+        <div className="my-5 p-6 bg-white rounded-xl shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F]">
             <div className="flex justify-between">
                 <h2 className="capitalize">{title}</h2>
                 <h2
