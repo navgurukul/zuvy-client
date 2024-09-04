@@ -27,6 +27,7 @@ import {
 import DeleteConfirmationModal from './deleteModal'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
 import { usePathname } from 'next/navigation'
+import { Popover } from '@/components/ui/popover'
 
 function ClassCard({
     classData,
@@ -46,7 +47,9 @@ function ClassCard({
     const [loading, setLoading] = useState(false)
 
     const handleOpenDialog = () => setIsDialogOpen(true)
-    const handleCloseDialog = () => setIsDialogOpen(false)
+    const handleCloseDialog = () => {
+        setIsDialogOpen(false)
+    }
     const pathname = usePathname()
     const dashboard = pathname === '/student'
     const admin = pathname.includes('/admin')
@@ -253,6 +256,7 @@ function ClassCard({
                         getClasses={getClasses}
                         open={isDialogOpen}
                         onClose={handleCloseDialog}
+                        setIsDialogOpen={setIsDialogOpen}
                     />
                 </DialogContent>
             </Dialog>

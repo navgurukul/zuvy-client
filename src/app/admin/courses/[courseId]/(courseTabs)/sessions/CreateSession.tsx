@@ -328,8 +328,8 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                         *
                                                     </span>{' '}
                                                 </FormLabel>
-                                                <Popover>
-                                                    <PopoverTrigger asChild>
+                                                <Dialog>
+                                                    <DialogTrigger asChild>
                                                         <FormControl>
                                                             <Button
                                                                 variant={
@@ -349,11 +349,8 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                                 <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                                             </Button>
                                                         </FormControl>
-                                                    </PopoverTrigger>
-                                                    <PopoverContent
-                                                        className="w-auto p-0"
-                                                        align="start"
-                                                    >
+                                                    </DialogTrigger>
+                                                    <DialogContent className="w-auto p-4">
                                                         <Calendar
                                                             mode="single"
                                                             selected={
@@ -384,8 +381,8 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                             } // Disable past dates
                                                             initialFocus
                                                         />
-                                                    </PopoverContent>
-                                                </Popover>
+                                                    </DialogContent>
+                                                </Dialog>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
@@ -449,8 +446,8 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                         *
                                                     </span>
                                                 </FormLabel>
-                                                <Popover>
-                                                    <PopoverTrigger asChild>
+                                                <Dialog>
+                                                    <DialogTrigger asChild>
                                                         <FormControl>
                                                             <Button
                                                                 variant="outline"
@@ -476,8 +473,8 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                                             </Button>
                                                         </FormControl>
-                                                    </PopoverTrigger>
-                                                    <PopoverContent className="w-[300px] p-0">
+                                                    </DialogTrigger>
+                                                    <DialogContent className="w-[300px] p-0">
                                                         <Command>
                                                             <CommandInput placeholder="Search batch..." />
                                                             <CommandEmpty>
@@ -522,8 +519,8 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                                 )}
                                                             </CommandGroup>
                                                         </Command>
-                                                    </PopoverContent>
-                                                </Popover>
+                                                    </DialogContent>
+                                                </Dialog>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
@@ -539,8 +536,8 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                         *
                                                     </span>
                                                 </FormLabel>
-                                                <Popover>
-                                                    <PopoverTrigger asChild>
+                                                <Dialog>
+                                                    <DialogTrigger asChild>
                                                         <FormControl>
                                                             <Button
                                                                 variant="outline"
@@ -565,8 +562,8 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                                             </Button>
                                                         </FormControl>
-                                                    </PopoverTrigger>
-                                                    <PopoverContent className="w-[300px] p-0">
+                                                    </DialogTrigger>
+                                                    <DialogContent className="w-[300px] p-0">
                                                         <Command>
                                                             <CommandInput placeholder="Search days..." />
                                                             <CommandEmpty>
@@ -627,8 +624,8 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                                 )}
                                                             </CommandGroup>
                                                         </Command>
-                                                    </PopoverContent>
-                                                </Popover>
+                                                    </DialogContent>
+                                                </Dialog>
                                                 <FormMessage />
                                             </FormItem>
                                         )}

@@ -37,6 +37,7 @@ interface EditSessionProps {
     getClasses: () => void
     open: boolean // Controlled state
     onClose: () => void // Function to handle dialog close
+    setIsDialogOpen: any
 }
 
 const formSchema = z
@@ -70,8 +71,6 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
         const minutes = date.getMinutes().toString().padStart(2, '0')
         return `${hours}:${minutes}`
     }
-
-    console.log(props.initialData.description)
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -135,7 +134,8 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
                         'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
                 props.getClasses() // Refresh the class list
-                props.onClose() // Close the dialog
+                props.onClose()
+                // Close the dialog
             } else {
                 console.error(
                     'API Error:',
@@ -151,12 +151,14 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
     }
 
     return (
-        <>
-            <div className="text-lg font-semibold">Edit Session</div>
+        <div className="p-1">
+            <div className="text-lg text-left font-semibold mb-4">
+                Edit Session
+            </div>
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-4 "
+                    className="space-y-6"
                 >
                     <FormField
                         control={form.control}
@@ -168,6 +170,7 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
                                     <Input
                                         placeholder="Session Title"
                                         {...field}
+                                        className="w-full"
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -184,25 +187,26 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
                                     <Input
                                         placeholder="Description"
                                         {...field}
+                                        className="w-full"
                                     />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
-                    <div className="flex items-center gap-x-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         <FormField
                             control={form.control}
                             name="startDate"
                             render={({ field }) => (
-                                <FormItem className="flex flex-col text-left">
+                                <FormItem className="text-left">
                                     <FormLabel>Start Date</FormLabel>
                                     <Popover>
                                         <PopoverTrigger asChild>
                                             <FormControl>
                                                 <Button
                                                     variant={'outline'}
-                                                    className={`w-[230px] text-left font-normal ${
+                                                    className={`w-full text-left font-normal ${
                                                         !field.value &&
                                                         'text-muted-foreground'
                                                     }`}
@@ -243,31 +247,32 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
                             control={form.control}
                             name="startTime"
                             render={({ field }) => (
-                                <FormItem className="text-left flex flex-col">
+                                <FormItem className="text-left">
                                     <FormLabel>Start Time</FormLabel>
                                     <FormControl>
                                         <Input
-                                            placeholder="startTime"
+                                            placeholder="Start Time"
                                             {...field}
                                             type="time"
+                                            className="w-full"
                                         />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
-
                         <FormField
                             control={form.control}
                             name="endTime"
                             render={({ field }) => (
-                                <FormItem className="text-left flex flex-col">
+                                <FormItem className="text-left">
                                     <FormLabel>End Time</FormLabel>
                                     <FormControl>
                                         <Input
-                                            placeholder="endTime"
+                                            placeholder="End Time"
                                             {...field}
                                             type="time"
+                                            className="w-full"
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -275,27 +280,26 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
                             )}
                         />
                     </div>
-                    <div className="flex justify-end">
-                        <div>
-                            {loading ? (
-                                <Button disabled>
-                                    <Spinner className="mr-2 text-black h-12 animate-spin" />
-                                    Please wait
-                                </Button>
-                            ) : (
-                                <Button
-                                    disabled={isSubmitDisabled}
-                                    variant={'secondary'}
-                                    type="submit"
-                                >
-                                    Save Changes
-                                </Button>
-                            )}
-                        </div>
+                    <div className="flex justify-end mt-4">
+                        {loading ? (
+                            <Button disabled>
+                                <Spinner className="mr-2 text-black h-5 animate-spin" />
+                                Please wait
+                            </Button>
+                        ) : (
+                            <Button
+                                disabled={isSubmitDisabled}
+                                variant={'secondary'}
+                                type="submit"
+                                className="w-full sm:w-auto"
+                            >
+                                Save Changes
+                            </Button>
+                        )}
                     </div>
                 </form>
             </Form>
-        </>
+        </div>
     )
 }
 
