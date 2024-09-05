@@ -222,7 +222,7 @@ export async function filteredCodingQuestions(
     setFilteredQuestions: any,
     selectedDifficulty: string,
     selectedTopic: any,
-    // selectedLanguage: string,
+    selectedLanguage: string,
     debouncedSearch: string
 ) {
     try {
@@ -233,7 +233,7 @@ export async function filteredCodingQuestions(
         if (selectedTopic?.id !== -1) {
             queryParams.push(`tagId=${selectedTopic.id}`)
         }
-        if (selectedDifficulty && selectedDifficulty !== 'None') {
+        if (selectedDifficulty && (selectedDifficulty !== 'None' && selectedDifficulty !== 'Any Difficulty')) {
             queryParams.push(`difficulty=${selectedDifficulty}`)
         }
         if (debouncedSearch) {
@@ -245,6 +245,7 @@ export async function filteredCodingQuestions(
         }
 
         const response = await api.get(url)
+        console.log('response', response)
 
         setFilteredQuestions(response.data)
     } catch (error) {
@@ -300,7 +301,7 @@ export async function filteredOpenEndedQuestions(
     setFilteredQuestions: any,
     selectedDifficulty: string,
     selectedTopic: any,
-    // selectedLanguage: string,
+    selectedLanguage: string,
     debouncedSearch: string
 ) {
     try {
@@ -311,7 +312,7 @@ export async function filteredOpenEndedQuestions(
         if (selectedTopic?.id !== -1) {
             queryParams.push(`tagId=${selectedTopic.id}`)
         }
-        if (selectedDifficulty && selectedDifficulty !== 'None') {
+        if (selectedDifficulty && (selectedDifficulty !== 'None' && selectedDifficulty !== 'Any Difficulty')) {
             queryParams.push(`difficulty=${selectedDifficulty}`)
         }
         if (debouncedSearch) {
