@@ -25,6 +25,13 @@ import {
 import { Input } from '@/components/ui/input'
 import { api } from '@/utils/axios.config'
 import { Spinner } from '@/components/ui/spinner'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogContent,
+} from '@/components/ui/alert-dialog'
+import { AlertDialogTrigger } from '@radix-ui/react-alert-dialog'
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
 
 interface EditSessionProps {
     meetingId: string
@@ -45,9 +52,7 @@ const formSchema = z
         sessionTitle: z.string().min(2, {
             message: 'Session Title must be at least 2 characters.',
         }),
-        description: z.string().min(2, {
-            message: 'Description must be at least 2 characters.',
-        }),
+
         startDate: z.date({
             required_error: 'Start Date is required',
         }),
@@ -76,7 +81,6 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
         resolver: zodResolver(formSchema),
         defaultValues: {
             sessionTitle: props.initialData.sessionTitle,
-            description: props.initialData.description,
             startDate: new Date(props.initialData.startTime),
             startTime: formatTime(props.initialData.startTime),
             endTime: formatTime(props.initialData.endTime),
@@ -84,12 +88,10 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
         mode: 'onChange',
     })
 
-    const { sessionTitle, description, startDate, startTime, endTime } =
-        form.watch()
+    const { sessionTitle, startDate, startTime, endTime } = form.watch()
 
     const isSubmitDisabled = !(
         sessionTitle &&
-        description &&
         startDate &&
         startTime &&
         endTime
@@ -112,7 +114,6 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
 
         const transformedData = {
             title: values.sessionTitle,
-            description: values.description,
             startDateTime: startDateTime,
             endDateTime: endDateTime,
         }
@@ -177,23 +178,7 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
                             </FormItem>
                         )}
                     />
-                    <FormField
-                        control={form.control}
-                        name="description"
-                        render={({ field }) => (
-                            <FormItem className="text-left">
-                                <FormLabel>Description</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        placeholder="Description"
-                                        {...field}
-                                        className="w-full"
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         <FormField
                             control={form.control}
@@ -201,8 +186,8 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
                             render={({ field }) => (
                                 <FormItem className="text-left">
                                     <FormLabel>Start Date</FormLabel>
-                                    <Popover>
-                                        <PopoverTrigger asChild>
+                                    <Dialog>
+                                        <DialogTrigger asChild>
                                             <FormControl>
                                                 <Button
                                                     variant={'outline'}
@@ -222,23 +207,20 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
                                                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                                 </Button>
                                             </FormControl>
-                                        </PopoverTrigger>
-                                        <PopoverContent
-                                            className="w-auto p-0"
-                                            align="start"
-                                        >
+                                        </DialogTrigger>
+                                        <DialogContent className="w-auto p-2">
                                             <Calendar
                                                 mode="single"
                                                 selected={field.value}
                                                 onSelect={field.onChange}
                                                 disabled={(date) =>
                                                     date <=
-                                                    addDays(new Date(), 0)
+                                                    addDays(new Date(), -1)
                                                 }
                                                 initialFocus
                                             />
-                                        </PopoverContent>
-                                    </Popover>
+                                        </DialogContent>
+                                    </Dialog>
                                     <FormMessage />
                                 </FormItem>
                             )}

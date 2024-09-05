@@ -14,6 +14,7 @@ type Props = {
     copyPaste: string
     tabchanges: number
     embeddedSearch: number
+    submissionType: string
 }
 
 const OverviewComponent = (props: Props) => {
@@ -31,26 +32,40 @@ const OverviewComponent = (props: Props) => {
                             </h1>
                         </div>
                         <div className="flex flex-start gap-x-3 p-3">
-                            <div>
-                                <h1 className="text-start font-bold">
-                                    {props.totalCodingChallenges}
-                                </h1>
-                                <p className="text-gray-500 text-start">
-                                    Coding Questions
-                                </p>
-                            </div>
-                            <div>
-                                <h1 className="text-start font-bold">
-                                    {props.totalCorrectedMcqs}
-                                </h1>
-                                <p className="text-gray-500 text-start">MCQs</p>
-                            </div>
-                            <div>
-                                <h1 className="text-start font-bold">
-                                    {props.totalOpenEnded}
-                                </h1>
-                                <p className="text-gray-500">Open-Ended</p>
-                            </div>
+                            <>
+                                {props.totalCodingChallenges > 0 && (
+                                    <div>
+                                        <h1 className="text-start font-bold">
+                                            {props.totalCodingChallenges}
+                                        </h1>
+                                        <p className="text-gray-500 text-start">
+                                            Coding Questions
+                                        </p>
+                                    </div>
+                                )}
+
+                                {props.totalCorrectedMcqs > 0 && (
+                                    <div>
+                                        <h1 className="text-start font-bold">
+                                            {props.totalCorrectedMcqs}
+                                        </h1>
+                                        <p className="text-gray-500 text-start">
+                                            MCQs
+                                        </p>
+                                    </div>
+                                )}
+
+                                {props.totalOpenEnded > 0 && (
+                                    <div>
+                                        <h1 className="text-start font-bold">
+                                            {props.totalOpenEnded}
+                                        </h1>
+                                        <p className="text-gray-500 text-start">
+                                            Open-Ended
+                                        </p>
+                                    </div>
+                                )}
+                            </>
                         </div>
                     </div>
                 </div>
@@ -82,6 +97,12 @@ const OverviewComponent = (props: Props) => {
                                     {props.embeddedSearch}
                                 </h1>
                                 <p className="text-gray-500">Embedded Search</p>
+                            </div>
+                            <div>
+                                <h1 className="text-start font-bold capitalize">
+                                    {props.submissionType}
+                                </h1>
+                                <p className="text-gray-500">Submission Type</p>
                             </div>
                         </div>
                     </div>

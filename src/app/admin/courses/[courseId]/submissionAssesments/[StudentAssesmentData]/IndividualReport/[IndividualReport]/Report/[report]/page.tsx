@@ -218,7 +218,6 @@ const Page = ({ params }: { params: any }) => {
         day: 'numeric',
     }
     const formattedDate = date.toLocaleDateString('en-US', options2)
-    console.log(codingdata)
 
     return (
         <>
@@ -306,6 +305,7 @@ const Page = ({ params }: { params: any }) => {
                         copyPaste={assesmentData?.copyPaste}
                         tabchanges={assesmentData?.tabChange}
                         embeddedSearch={assesmentData?.embeddedGoogleSearch}
+                        submissionType={assesmentData?.typeOfsubmission}
                     />
                 ) : (
                     <div className="flex gap-x-20  ">
@@ -320,114 +320,99 @@ const Page = ({ params }: { params: any }) => {
                     </div>
                 )}
 
-                <div className="grid grid-cols-1   gap-20 mt-4 md:mt-8 md:grid-cols-2">
+                <div className="grid grid-cols-1 gap-20 mt-4 md:mt-8 md:grid-cols-2">
                     {codingdata ? (
                         <>
-                            <div className="w-full">
-                                <h1 className="text-left font-semibold ">
-                                    {' '}
-                                    Coding Submission
-                                </h1>
-                                {codingdata.length > 0 ? (
-                                    codingdata.map((data, index) => (
+                            {/* Coding Submission */}
+                            {codingdata.length > 0 && (
+                                <div className="w-full">
+                                    <h1 className="text-left font-semibold">
+                                        Coding Submission
+                                    </h1>
+                                    {codingdata.length > 0 ? (
+                                        codingdata.map((data) => (
+                                            <IndividualStudentAssesment
+                                                key={data.id}
+                                                data={data}
+                                                params={params}
+                                                type="codingSubmission"
+                                                codingOutsourseId={
+                                                    data.codingOutsourseId
+                                                }
+                                            />
+                                        ))
+                                    ) : (
+                                        <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg backdrop-blur-lg transition-transform transform hover:shadow-xl">
+                                            This student has not submitted any
+                                            coding question.
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Quiz Submission */}
+                            {assesmentData?.mcqQuestionCount > 0 && (
+                                <div className="w-full">
+                                    <h1 className="text-left font-semibold">
+                                        Quiz Submission
+                                    </h1>
+                                    {assesmentData?.mcqQuestionCount === 0 &&
+                                    assesmentData?.attemptedMCQQuestions ===
+                                        0 ? (
+                                        <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg backdrop-blur-lg transition-transform transform hover:shadow-xl">
+                                            There are no quiz questions in this
+                                            assessment.
+                                        </p>
+                                    ) : assesmentData?.attemptedMCQQuestions >=
+                                      1 ? (
                                         <IndividualStudentAssesment
-                                            key={data.id}
-                                            data={data}
+                                            data={[]}
                                             params={params}
-                                            type={'codingSubmission'}
-                                            codingOutsourseId={
-                                                data.codingOutsourseId
-                                            }
+                                            type="quizSubmission"
                                         />
-                                    ))
-                                ) : (
-                                    <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg backdrop-blur-lg transition-transform transform  hover:shadow-xl ">
-                                        This student have not submitted any
-                                        coding question .
-                                    </p>
-                                )}
-                            </div>
-                            <div className="w-full">
-                                <h1 className="text-left font-semibold ">
-                                    {' '}
-                                    Quiz Submission
-                                </h1>
-                                {assesmentData?.mcqQuestionCount === 0 &&
-                                assesmentData?.attemptedMCQQuestions === 0 ? (
-                                    <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg backdrop-blur-lg transition-transform transform hover:shadow-xl">
-                                        There are no quiz questions in this
-                                        assessment.
-                                    </p>
-                                ) : assesmentData?.attemptedMCQQuestions >=
-                                  1 ? (
-                                    <IndividualStudentAssesment
-                                        data={[]}
-                                        params={params}
-                                        type={'quizSubmission'}
-                                    />
-                                ) : (
-                                    <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg backdrop-blur-lg transition-transform transform hover:shadow-xl">
-                                        This student has not submitted any quiz
-                                        question.
-                                    </p>
-                                )}
-                            </div>
-                            <div className="w-full">
-                                <h1 className="text-left font-semibold ">
-                                    {' '}
-                                    Open Ended Questions
-                                </h1>
-                                {assesmentData?.openEndedQuestionCount === 0 &&
-                                assesmentData?.attemptedOpenEndedQuestions ===
-                                    0 ? (
-                                    <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg backdrop-blur-lg transition-transform transform hover:shadow-xl">
-                                        There are no open-ended questions in
-                                        this assessment.
-                                    </p>
-                                ) : assesmentData?.attemptedOpenEndedQuestions >=
-                                  1 ? (
-                                    <IndividualStudentAssesment
-                                        data={[]}
-                                        params={params}
-                                        type={'openEndedSubmission'}
-                                    />
-                                ) : (
-                                    <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg backdrop-blur-lg transition-transform transform hover:shadow-xl">
-                                        This student has not submitted any
-                                        open-ended questions.
-                                    </p>
-                                )}
-                            </div>
+                                    ) : (
+                                        <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg backdrop-blur-lg transition-transform transform hover:shadow-xl">
+                                            This student has not submitted any
+                                            quiz question.
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Open Ended Submission */}
+                            {assesmentData?.openEndedQuestionCount > 0 && (
+                                <div className="w-full">
+                                    <h1 className="text-left font-semibold">
+                                        Open Ended Questions
+                                    </h1>
+                                    {assesmentData?.openEndedQuestionCount ===
+                                        0 &&
+                                    assesmentData?.attemptedOpenEndedQuestions ===
+                                        0 ? (
+                                        <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg backdrop-blur-lg transition-transform transform hover:shadow-xl">
+                                            There are no open-ended questions in
+                                            this assessment.
+                                        </p>
+                                    ) : assesmentData?.attemptedOpenEndedQuestions >=
+                                      1 ? (
+                                        <IndividualStudentAssesment
+                                            data={[]}
+                                            params={params}
+                                            type="openEndedSubmission"
+                                        />
+                                    ) : (
+                                        <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg backdrop-blur-lg transition-transform transform hover:shadow-xl">
+                                            This student has not submitted any
+                                            open-ended questions.
+                                        </p>
+                                    )}
+                                </div>
+                            )}
                         </>
                     ) : (
-                        <div className="absolute w-full flex justify-start items-center">
-                            <div className="grid grid-cols-1   gap-20 mt-4 md:mt-8 md:grid-cols-2 ">
-                                <div>
-                                    <Skeleton className="h-[125px] w-[700px] rounded-xl" />
-                                    <div className="space-y-2 ">
-                                        <Skeleton className="h-4 w-[700px]" />
-                                    </div>
-                                </div>
-                                <div>
-                                    <Skeleton className="h-[125px] w-[700px] rounded-xl" />
-                                    <div className="space-y-2 ">
-                                        <Skeleton className="h-4 w-[700px]" />
-                                    </div>
-                                </div>
-                                <div>
-                                    <Skeleton className="h-[125px] w-[700px] rounded-xl" />
-                                    <div className="space-y-2 ">
-                                        <Skeleton className="h-4 w-[700px]" />
-                                    </div>
-                                </div>
-                                <div>
-                                    <Skeleton className="h-[125px] w-[700px] rounded-xl" />
-                                    <div className="space-y-2 ">
-                                        <Skeleton className="h-4 w-[700px]" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <p className="text-center font-semibold">
+                            Loading data...
+                        </p>
                     )}
                 </div>
             </MaxWidthWrapper>
