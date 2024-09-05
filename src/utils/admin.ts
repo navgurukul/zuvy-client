@@ -222,7 +222,7 @@ export async function filteredCodingQuestions(
     setFilteredQuestions: any,
     selectedDifficulty: string,
     selectedTopic: any,
-    selectedLanguage: string,
+    // selectedLanguage: string,
     debouncedSearch: string
 ) {
     try {
@@ -230,14 +230,14 @@ export async function filteredCodingQuestions(
 
         const queryParams = []
 
+        if (selectedTopic?.id !== -1) {
+            queryParams.push(`tagId=${selectedTopic.id}`)
+        }
+        if (selectedDifficulty && selectedDifficulty !== 'None') {
+            queryParams.push(`difficulty=${selectedDifficulty}`)
+        }
         if (debouncedSearch) {
             queryParams.push(`searchTerm=${debouncedSearch}`)
-        }
-        if (selectedTopic !== 'All Topics' && selectedTopic != 0) {
-            queryParams.push(`tagId=${+selectedTopic}`)
-        }
-        if (selectedDifficulty !== 'Any Difficulty') {
-            queryParams.push(`difficulty=${selectedDifficulty}`)
         }
 
         if (queryParams.length > 0) {
@@ -246,16 +246,7 @@ export async function filteredCodingQuestions(
 
         const response = await api.get(url)
 
-        const filtered = response.data.filter(
-            (question: any) =>
-                selectedDifficulty === 'Any Difficulty' ||
-                question.difficulty === selectedDifficulty
-            // Uncomment and modify the following lines if needed:
-            // && (selectedTopic === 'All Topics' || question.tags.includes(selectedTopic))
-            // && (selectedLanguage === 'All Languages' || question.language === selectedLanguage)
-        )
-
-        setFilteredQuestions(filtered)
+        setFilteredQuestions(response.data)
     } catch (error) {
         console.error('Error:', error)
     }
@@ -309,7 +300,7 @@ export async function filteredOpenEndedQuestions(
     setFilteredQuestions: any,
     selectedDifficulty: string,
     selectedTopic: any,
-    selectedLanguage: string,
+    // selectedLanguage: string,
     debouncedSearch: string
 ) {
     try {
@@ -317,14 +308,14 @@ export async function filteredOpenEndedQuestions(
 
         const queryParams = []
 
+        if (selectedTopic?.id !== -1) {
+            queryParams.push(`tagId=${selectedTopic.id}`)
+        }
+        if (selectedDifficulty && selectedDifficulty !== 'None') {
+            queryParams.push(`difficulty=${selectedDifficulty}`)
+        }
         if (debouncedSearch) {
             queryParams.push(`searchTerm=${debouncedSearch}`)
-        }
-        if (selectedTopic !== 'All Topics' && selectedTopic != 0) {
-            queryParams.push(`tagId=${+selectedTopic}`)
-        }
-        if (selectedDifficulty !== 'Any Difficulty') {
-            queryParams.push(`difficulty=${selectedDifficulty}`)
         }
         // Add more conditions here as needed, e.g., selectedLanguage, etc.
 
@@ -333,14 +324,7 @@ export async function filteredOpenEndedQuestions(
         }
 
         const response = await api.get(url)
-        const filtered = response.data.data.filter(
-            (question: any) =>
-                selectedDifficulty === 'Any Difficulty' ||
-                question.difficulty === selectedDifficulty
-            // && (selectedTopic === 'All Topics' || question.tags.includes(selectedTopic)) &&
-            // (selectedLanguage === 'All Languages' || question.language === selectedLanguage)
-        )
-        setFilteredQuestions(filtered)
+        setFilteredQuestions(response.data.data)
     } catch (error) {
         console.error('Error:', error)
     }
@@ -416,18 +400,18 @@ export const fetchStudentsHandler = async ({
     }
 }
 // Utility function to clean up extra commas and spaces
-export function cleanUpValues (value: string) {
-   if (!value) return '';
+export function cleanUpValues(value: string) {
+    if (!value) return ''
 
-   value = value.toString().trim();
+    value = value.toString().trim()
 
-   // Remove extra commas, spaces, and clean up the value
-   value = value.replace(/,\s*,+/g, ','); // Remove extra commas
-   value = value.replace(/\s{2,}/g, ' '); // Remove extra spaces
-   value = value.replace(/,\s*$/, '');    // Remove trailing commas
-   value = value.replace(/^\s*,/, '');    // Remove leading commas
+    // Remove extra commas, spaces, and clean up the value
+    value = value.replace(/,\s*,+/g, ',') // Remove extra commas
+    value = value.replace(/\s{2,}/g, ' ') // Remove extra spaces
+    value = value.replace(/,\s*$/, '') // Remove trailing commas
+    value = value.replace(/^\s*,/, '') // Remove leading commas
 
-   return value;
-};
+    return value
+}
 
 // --------------------------

@@ -29,8 +29,13 @@ import { DataTable } from '@/app/_components/datatable/data-table'
 import { columns } from './column'
 import NewOpenEndedQuestionForm from '@/app/admin/resource/_components/NewOpenEndedQuestionForm'
 import { getCodingQuestionTags, getopenEndedQuestionstate } from '@/store/store'
-import { getAllOpenEndedQuestions, getAllTags } from '@/utils/admin'
+import {
+    getAllOpenEndedQuestions,
+    getAllTags,
+    filteredOpenEndedQuestions,
+} from '@/utils/admin'
 import { Spinner } from '@/components/ui/spinner'
+import useDebounce from '@/hooks/useDebounce'
 
 type Props = {}
 export type Tag = {
@@ -49,11 +54,13 @@ const OpenEndedQuestions = (props: Props) => {
         return { tagName: 'All Topics', id: -1 }
     })
     const { tags, setTags } = getCodingQuestionTags()
-    const [selectedDifficulty, setSelectedDifficulty] = useState('any')
+    const [selectedDifficulty, setSelectedDifficulty] = useState('None')
+    const [allOpenEndedQuestions, setAllOpenEndedQuestions] = useState([])
     const { openEndedQuestions, setOpenEndedQuestions } =
         getopenEndedQuestionstate()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
+    const debouncedSearch = useDebounce(searchTerm, 500)
     const [loading, setLoading] = useState(true)
 
     const handleTopicClick = (value: string) => {
@@ -65,34 +72,25 @@ const OpenEndedQuestions = (props: Props) => {
         localStorage.setItem('openEndedCurrentTag', JSON.stringify(tag))
     }
 
-    const filteredQuestions = openEndedQuestions?.filter((question: any) => {
-        const difficultyMatches =
-            selectedDifficulty !== 'any'
-                ? question.difficulty === selectedDifficulty
-                : true
-        const tagMatches =
-            selectedTag?.tagName !== 'All Topics'
-                ? question.tagId === selectedTag?.id
-                : true
-        const searchTermMatches =
-            searchTerm !== ''
-                ? question.question
-                      .toLowerCase()
-                      .includes(searchTerm.toLowerCase())
-                : true
-
-        const isQuestionIncluded =
-            difficultyMatches && tagMatches && searchTermMatches
-        return isQuestionIncluded
-    })
-
     useEffect(() => {
         getAllTags(setTags)
     }, [setTags])
 
     useEffect(() => {
-        getAllOpenEndedQuestions(setOpenEndedQuestions)
-    }, [searchTerm, selectedTag, selectedDifficulty, setOpenEndedQuestions])
+        getAllOpenEndedQuestions(setAllOpenEndedQuestions)
+        filteredOpenEndedQuestions(
+            setOpenEndedQuestions,
+            selectedDifficulty,
+            selectedTag,
+            debouncedSearch
+        )
+    }, [
+        searchTerm,
+        selectedTag,
+        selectedDifficulty,
+        setOpenEndedQuestions,
+        debouncedSearch,
+    ])
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -110,7 +108,7 @@ const OpenEndedQuestions = (props: Props) => {
                 </div>
             ) : (
                 <div>
-                    {openEndedQuestions.length > 0 ? (
+                    {allOpenEndedQuestions?.length > 0 ? (
                         <MaxWidthWrapper>
                             <h1 className="text-left font-semibold text-2xl">
                                 Resource Library - Open-Ended-Questions
@@ -173,7 +171,7 @@ const OpenEndedQuestions = (props: Props) => {
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectGroup>
-                                            <SelectItem value="any">
+                                            <SelectItem value="None">
                                                 Any Difficulty
                                             </SelectItem>
                                             <SelectItem value="Easy">
@@ -213,7 +211,7 @@ const OpenEndedQuestions = (props: Props) => {
                             </div>
 
                             <DataTable
-                                data={filteredQuestions}
+                                data={openEndedQuestions}
                                 columns={columns}
                             />
                         </MaxWidthWrapper>
