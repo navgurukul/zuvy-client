@@ -170,11 +170,11 @@ const Mcqs = (props: Props) => {
                             }
                         >
                             <SelectTrigger className="w-[180px]">
-                                <SelectValue placeholder="DIfficulty" />
+                                <SelectValue placeholder="Difficulty" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectGroup>
-                                    <SelectItem value="None">Any</SelectItem>
+                                    <SelectItem value="None">Any Difficulty</SelectItem>
                                     <SelectItem value="Easy">Easy</SelectItem>
                                     <SelectItem value="Medium">
                                         Medium
