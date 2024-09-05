@@ -13,8 +13,14 @@ import { Button } from '@/components/ui/button'
 import { getAssessmentStore } from '@/store/store'
 import { cn, difficultyColor } from '@/lib/utils'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import CodingQuestionCard from './CodingQuestionCard'
 
 // import { UseFullScreenTab } from './useFullScreenTab'
+
+export type Tag = {
+    id: number
+    tagName: string
+}
 
 function CodingChallenge({
     content,
@@ -46,6 +52,8 @@ function CodingChallenge({
     const [isSuccess, setIsScuccess] = useState(false)
     const [chapterStatus, setChapterStatus] = useState('Pending')
     const [codingQuestionResult, setCodingQuestionResult] = useState<any>()
+    const [tagId, setTagId] = useState()
+    const [tag, setTag] = useState<Tag>()
 
     const {
         tabChangeInstance,
@@ -289,6 +297,15 @@ function CodingChallenge({
             console.log('ressss', res)
             setCodingQuestionResult(res.data.data)
             setIsScuccess(res.data.isSuccess)
+            setTagId(res.data.data.questionDetail.tagId)
+
+            // const response = await api.get('Content/allTags')
+            // if (response) {
+            //     const tag = response?.data?.allTags?.find(
+            //         (item: any) => item.id == tagId
+            //     )
+            //     setTag(tag)
+            // }
             // completeChapter()
             // Parse the timestamps into Date objects
             // const startedAt = new Date(res?.data?.startedAt)
@@ -331,6 +348,25 @@ function CodingChallenge({
         getResults()
     }, [codingQuestionId, content.id])
 
+    async function getAllTags() {
+        const response = await api.get('Content/allTags')
+        if (response) {
+            const tag = response?.data?.allTags?.find(
+                (item: any) => item.id == tagId
+            )
+            setTag(tag)
+        }
+    }
+
+    useEffect(() => {
+        getAllTags()
+    }, [tagId])
+
+    console.log(
+        'codingQuestionResult',
+        codingQuestionResult?.questionDetail.tagId
+    )
+
     function viewCodingSubmission(questionId: any) {
         router.push(
             `/student/courses/${viewcourses}/modules/${moduleID}/codingresult/question/${questionId}`
@@ -347,67 +383,36 @@ function CodingChallenge({
     return (
         <div className="flex justify-center">
             <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
+                <h2 className="text-2xl font-bold mb-3">{content.title}</h2>
                 <h2 className="font-bold">Coding Challenges</h2>
                 {isSuccess ? (
-                    <div
+                    <CodingQuestionCard
                         key={codingQuestionResult?.questionDetail.id}
-                        className={`container mx-auto rounded-xl shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F] overflow-hidden max-w-2xl min-h-52 mt-4 py-5`}
-                    >
-                        <div className="flex justify-between">
-                            <div className="font-bold text-xl my-2">
-                                {codingQuestionResult?.questionDetail.title}
-                            </div>
-                            <div
-                                className={cn(
-                                    `font-semibold text-secondary my-2`,
-                                    difficultyColor(
-                                        codingQuestionResult?.questionDetail
-                                            .difficulty
-                                    )
-                                )}
-                            >
-                                {
-                                    codingQuestionResult?.questionDetail
-                                        .difficulty
-                                }
-                            </div>
-                        </div>
-                        <div className="text-xl mt-2 text-start">
-                            Description:{' '}
-                            {codingQuestionResult?.questionDetail.description}
-                        </div>
-                        <div className={`text-xl mt-2 text-start `}>
-                            Status:{' '}
-                            <span
-                                className={`ml-2 ${
-                                    codingQuestionResult?.status === 'Accepted'
-                                        ? 'text-green-400'
-                                        : 'text-destructive'
-                                }`}
-                            >
-                                {codingQuestionResult?.status}
-                            </span>
-                        </div>
-                        <div
-                            onClick={() =>
-                                viewCodingSubmission(
-                                    codingQuestionResult?.questionDetail.id
-                                )
-                            }
-                            className="cursor-pointer mt-4 flex justify-end text-secondary font-bold"
-                        >
-                            View Solution <ChevronRight />
-                        </div>
-                    </div>
+                        id={codingQuestionResult?.questionDetail.id}
+                        title={codingQuestionResult?.questionDetail.title}
+                        difficulty={
+                            codingQuestionResult?.questionDetail.difficulty
+                        }
+                        tagName={tag?.tagName}
+                        description={
+                            codingQuestionResult?.questionDetail.description
+                        }
+                        status={codingQuestionResult?.status}
+                        onSolveChallenge={viewCodingSubmission}
+                        isSuccess={isSuccess}
+                    />
                 ) : (
                     <>
                         {codingQuestions?.map((question: any) => (
-                            <QuestionCard
+                            <CodingQuestionCard
                                 key={question.id}
                                 id={question.id}
                                 title={question.title}
-                                description={question.difficulty}
-                                tagId={question.tagId}
+                                difficulty={question.difficulty}
+                                tagName={tag?.tagName}
+                                description={question.description}
+                                status={'Pending'}
+                                isSuccess={isSuccess}
                                 onSolveChallenge={() =>
                                     handleSolveChallenge(
                                         'coding',
