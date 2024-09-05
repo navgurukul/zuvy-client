@@ -72,7 +72,6 @@ const IDE: React.FC<IDEProps> = ({
 
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
-    const codePanel = pathname?.includes('/codepanel')
 
     const editorLanguages = [
         { lang: 'java', id: 91 },
@@ -148,13 +147,6 @@ const IDE: React.FC<IDEProps> = ({
                         onBack()
                     }
                 }, 3000)
-                if (codePanel) {
-                    const chapterUrl = `/student/courses/${viewcourses}/modules/${moduleID}`
-                    router.push(chapterUrl)
-                    document.exitFullscreen()
-                    console.log('Chal jaa', chapterUrl)
-                    // if(typeof window !== 'undefined') window?.open(chapterUrl)
-                }
             } else {
                 toast({
                     title: 'Test Cases Failed',

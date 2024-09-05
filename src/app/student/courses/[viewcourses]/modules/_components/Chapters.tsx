@@ -129,6 +129,7 @@ function Chapters({ params }: any) {
                     <CodingChallenge
                         content={chapterContent}
                         completeChapter={completeChapter}
+                        fetchChapters={fetchChapters}
                     />
                 )
             case 4:

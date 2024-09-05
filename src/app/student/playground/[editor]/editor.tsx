@@ -66,6 +66,7 @@ const IDE: React.FC<IDEProps> = ({
     const [testCases, setTestCases] = useState<any>([])
     const [templates, setTemplates] = useState<any>([])
     const [examples, setExamples] = useState<any>([])
+    const [isSubmitted, setIsSubmitted] = useState(false)
     const router = useRouter()
     const { toast } = useToast()
 
@@ -109,6 +110,9 @@ const IDE: React.FC<IDEProps> = ({
         action: string
     ) => {
         e.preventDefault()
+        console.log('params.editor', params.editor)
+        console.log('typeof params.editor', typeof params.editor)
+
         try {
             const response = await api.post(
                 `codingPlatform/practicecode/questionId=${params.editor}?action=${action}`,
@@ -124,6 +128,7 @@ const IDE: React.FC<IDEProps> = ({
                     sourceCode: b64EncodeUnicode(currentCode),
                 }
             )
+            setIsSubmitted(true)
             setResult(
                 response.data.data[0].stdOut ||
                     response.data.data[0].stdout ||
@@ -150,15 +155,6 @@ const IDE: React.FC<IDEProps> = ({
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
-            }
-            if (codePanel) {
-                const chapterUrl = `/student/courses/${viewcourses}/modules/${moduleID}`
-                router.push(chapterUrl)
-                document.exitFullscreen()
-                // console.log('Chal jaa', chapterUrl)
-                // if (typeof window !== 'undefined') {
-                //     window?.open(chapterUrl, '_blank')
-                // }
             }
             setCodeError('')
         } catch (error: any) {
@@ -199,6 +195,9 @@ const IDE: React.FC<IDEProps> = ({
     }, [language])
 
     const handleBack = () => {
+        if (codePanel) {
+            document.exitFullscreen()
+        }
         router.back()
     }
 
@@ -226,6 +225,7 @@ const IDE: React.FC<IDEProps> = ({
                         onClick={(e) => handleSubmit(e, 'run')}
                         size="sm"
                         className="mr-2"
+                        disabled={codePanel && isSubmitted}
                     >
                         <Play size={20} />
                         <span className="ml-2 text-lg font-bold">Run</span>
@@ -233,6 +233,7 @@ const IDE: React.FC<IDEProps> = ({
                     <Button
                         onClick={(e) => handleSubmit(e, 'submit')}
                         size="sm"
+                        disabled={codePanel && isSubmitted}
                     >
                         <Upload size={20} />
                         <span className="ml-2 text-lg font-bold">Submit</span>
