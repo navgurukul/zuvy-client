@@ -62,6 +62,7 @@ const OpenEndedQuestions = (props: Props) => {
     const [searchTerm, setSearchTerm] = useState('')
     const debouncedSearch = useDebounce(searchTerm, 500)
     const [loading, setLoading] = useState(true)
+    const selectedLanguage = ''
 
     const handleTopicClick = (value: string) => {
         const tag = tags.find((t: Tag) => t.tagName === value) || {
@@ -82,6 +83,7 @@ const OpenEndedQuestions = (props: Props) => {
             setOpenEndedQuestions,
             selectedDifficulty,
             selectedTag,
+            selectedLanguage,
             debouncedSearch
         )
     }, [

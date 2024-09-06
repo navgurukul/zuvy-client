@@ -43,7 +43,6 @@ const IndividualStudentAssesment = ({
         }
     }
     const questionInfo = renderQuestion()
-    console.log(data)
 
     return (
         <div

@@ -66,6 +66,7 @@ const CodingProblems = () => {
     const [selectedDifficulty, setSelectedDifficulty] = useState('None')
     const [loading, setLoading] = useState(true)
     const [openEditDialog, setOpenEditDialog] = useState(false)
+    const selectedLanguage = ''
 
     const handleTopicClick = (value: string) => {
         const tag = tags.find((t: Tag) => t.tagName === value) || {
@@ -97,6 +98,7 @@ const CodingProblems = () => {
             setCodingQuestions,
             selectedDifficulty,
             selectedTag,
+            selectedLanguage,
             debouncedSearch
         )
     }, [searchTerm, selectedTag.id, selectedDifficulty, debouncedSearch])
