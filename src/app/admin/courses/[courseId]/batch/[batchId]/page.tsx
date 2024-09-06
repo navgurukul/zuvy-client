@@ -210,7 +210,7 @@ const BatchesInfo = ({
                             const response = await api.get(
                                 `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}`
                             )
-                            setStudentData(response.data.modifiedStudentInfo);
+                            setStudentData(response.data.modifiedStudentInfo)
 
                             //   }
                         } catch (error) {}
@@ -225,7 +225,6 @@ const BatchesInfo = ({
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
-            
         }
     }
     useEffect(() => {
@@ -239,7 +238,6 @@ const BatchesInfo = ({
 
     const fetchStudentData = useCallback(
         async (offset: number) => {
-            console.log('Hello')
             let endpoint = `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}&limit=${position}&offset=${offset}`
             if (debouncedValue) {
                 endpoint += `&searchTerm=${debouncedValue}`
@@ -461,16 +459,18 @@ const BatchesInfo = ({
                                         </clipPath>
                                     </defs>
                                 </svg>
-                              <div className="text-xl font-semibold space-y-1">
-                                        <div className="flex items-center">
-                                            <span className="ml-1">{instructorsInfo?.instructorName}</span>
-                                        </div>
-                                        <div className="flex items-center">
-                                            <span className="ml-1">{instructorsInfo?.instructorEmail}</span>
-                                        </div>
-                            </div>
-
-
+                                <div className="text-xl font-semibold space-y-1">
+                                    <div className="flex items-center">
+                                        <span className="ml-1">
+                                            {instructorsInfo?.instructorName}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <span className="ml-1">
+                                            {instructorsInfo?.instructorEmail}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <Input

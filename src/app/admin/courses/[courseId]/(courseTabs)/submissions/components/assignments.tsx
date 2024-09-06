@@ -38,8 +38,6 @@ const Assignments = ({ courseId }: Props) => {
         fetchAssignmentDataHandler()
     }, [courseId])
 
-    console.log(assignmentData)
-
     return (
         <>
             {loading ? (

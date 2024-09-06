@@ -9,66 +9,79 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import useDebounce from '@/hooks/useDebounce'
 
 interface CodingTopicsProps {
+    setSearchTerm: (newSearchTerm: string) => void
+    searchTerm: string
     selectedTopic: string
     setSelectedTopic: any
     selectedDifficulty: string
     setSelectedDifficulty: React.Dispatch<React.SetStateAction<string>>
     selectedLanguage: string
-    setSelectedLanguage: any
-    searchQuestionsInAssessment?: string
-    setSearchQuestionsInAssessment?: React.Dispatch<
-        React.SetStateAction<string>
-    >
-    tags?: any
+    setSelectedLanguage: React.Dispatch<React.SetStateAction<string>>
+    tags: any
+    selectedTag: any
+    setSelectedTag: React.Dispatch<React.SetStateAction<Tag>>
+}
+
+export type Tag = {
+    id: number
+    tagName: string
 }
 
 const CodingTopics: React.FC<CodingTopicsProps> = ({
+    setSearchTerm,
+    searchTerm,
     selectedTopic,
     setSelectedTopic,
     selectedDifficulty,
     setSelectedDifficulty,
     selectedLanguage,
     setSelectedLanguage,
-    searchQuestionsInAssessment,
-    setSearchQuestionsInAssessment,
     tags,
+    selectedTag,
+    setSelectedTag,
 }) => {
-    const allTopicsId: any = 0
 
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(event.target.value)
+    }
+
+    const handleTopicClick = (value: string) => {
+        const tag = tags.find((t: Tag) => t.tagName === value) || {
+            tagName: 'All Topics',
+            id: -1,
+        }
+        setSelectedTag(tag)
+    }
+    
     return (
         <div className="flex flex-col mb-5">
             <Input
-                value={searchQuestionsInAssessment}
-                onChange={(e) =>
-                    setSearchQuestionsInAssessment?.(e.target.value)
-                }
-                placeholder="Search The Question By Name"
+                placeholder="Search By Name "
+                value={searchTerm}
+                onChange={handleSearchChange}
                 className="w-full mb-2 "
             />
 
-            <div className=" flex gap-2">
-                <Select onValueChange={(value) => setSelectedTopic(value)}>
-                    <SelectTrigger className="">
-                        <SelectValue placeholder={selectedTopic} />
+            <div className="dropDownsContainer flex gap-2">
+                <Select
+                    value={selectedTag?.tagName}
+                    onValueChange={handleTopicClick}
+                >
+                    <SelectTrigger>
+                        <SelectValue placeholder="Choose Topic" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectGroup>
-                            <SelectLabel>Topics</SelectLabel>
-                            <SelectItem value={allTopicsId}>
-                                All Topics
+                        {tags?.map((tag: Tag) => (
+                            <SelectItem key={tag.id} value={tag.tagName}>
+                                {tag.tagName}
                             </SelectItem>
-                            {tags?.map((item: any) => {
-                                return (
-                                    <SelectItem key={item.id} value={item.id}>
-                                        {item.tagName}
-                                    </SelectItem>
-                                )
-                            })}
-                        </SelectGroup>
+                        ))}
                     </SelectContent>
                 </Select>
+               
                 <Select onValueChange={(value) => setSelectedDifficulty(value)}>
                     <SelectTrigger className="">
                         <SelectValue placeholder={selectedDifficulty} />
@@ -85,6 +98,22 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
                         </SelectGroup>
                     </SelectContent>
                 </Select>
+                {/* <Select onValueChange={(value) => setSelectedLanguage(value)}>
+                    <SelectTrigger className="">
+                        <SelectValue placeholder={selectedLanguage} />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                            <SelectLabel> Languages</SelectLabel>
+                            <SelectItem value="alllanguages">
+                                All Languages
+                            </SelectItem>
+                            <SelectItem value="Python">Python</SelectItem>
+                            <SelectItem value="Java">Java</SelectItem>
+                            <SelectItem value="React">React</SelectItem>
+                        </SelectGroup>
+                    </SelectContent>
+                </Select> */}
             </div>
         </div>
     )

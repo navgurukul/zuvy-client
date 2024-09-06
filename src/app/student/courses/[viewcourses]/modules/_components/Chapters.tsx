@@ -125,7 +125,13 @@ function Chapters({ params }: any) {
                     />
                 )
             case 3:
-                return <CodingChallenge />
+                return (
+                    <CodingChallenge
+                        content={chapterContent}
+                        completeChapter={completeChapter}
+                        fetchChapters={fetchChapters}
+                    />
+                )
             case 4:
                 return (
                     <Quiz
