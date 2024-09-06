@@ -183,7 +183,6 @@ const Projects = ({
     const ProjectStatus = getSubmissionStatus(submittedDate, deadlineDate)
 
     // You have submitted on :- 20 Aug 2024 (Late submitted)
-    console.log(formattedSubmittedDate)
 
     return (
         <div className="flex flex-col gap-y-3 w-full">

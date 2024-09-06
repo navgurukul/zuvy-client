@@ -126,7 +126,6 @@ function Page({ params }: any) {
 
                 if (delay > 0) {
                     const timeout = setTimeout(() => {
-                        console.log('Class started at', item.time)
                         getHandleAllClasses(offset)
                     }, delay)
                     timeouts.push(timeout)

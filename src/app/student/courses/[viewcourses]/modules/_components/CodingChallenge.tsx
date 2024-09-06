@@ -1,9 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
-import {
-    requestFullScreen,
-} from '@/utils/students'
+import { requestFullScreen } from '@/utils/students'
 import { useParams, useRouter } from 'next/navigation'
 import CodingQuestionCard from './CodingQuestionCard'
 
@@ -40,7 +38,7 @@ function CodingChallenge({
             const res = await api.get(
                 `/tracking/getQuizAndAssignmentWithStatus?chapterId=${content.id}`
             )
-            console.log('res', res.data.data.status)
+
             setCodingQuestions(res.data.data.codingProblem)
             setCodingQuestionId(res.data.data.codingProblem[0].id)
         } catch (error) {

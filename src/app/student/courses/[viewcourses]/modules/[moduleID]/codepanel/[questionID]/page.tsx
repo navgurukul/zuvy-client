@@ -10,10 +10,9 @@ import IDE from '@/app/student/playground/[editor]/editor'
 
 function Page({ params }: any) {
     const { questionID } = params
-    console.log('params', params)
+
     useEffect(() => {
         requestFullScreen(document.documentElement)
-        console.log('Full Screen')
     }, [])
     const remainingTime = null
     const assessmentSubmitId = 1

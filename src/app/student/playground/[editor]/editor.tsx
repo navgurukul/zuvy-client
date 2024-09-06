@@ -110,8 +110,6 @@ const IDE: React.FC<IDEProps> = ({
         action: string
     ) => {
         e.preventDefault()
-        console.log('params.editor', params.editor)
-        console.log('typeof params.editor', typeof params.editor)
 
         try {
             const response = await api.post(
@@ -206,10 +204,6 @@ const IDE: React.FC<IDEProps> = ({
             setCurrentCode(b64DecodeUnicode(templates?.[language]?.template))
         }
     }, [language])
-
-    useEffect(() => {
-        console.log('codeResult:', codeResult)
-    }, [codeResult])
 
     return (
         <div>

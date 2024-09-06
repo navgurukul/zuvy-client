@@ -218,7 +218,6 @@ const Page = ({ params }: { params: any }) => {
         day: 'numeric',
     }
     const formattedDate = date.toLocaleDateString('en-US', options2)
-    console.log(codingdata)
 
     return (
         <>

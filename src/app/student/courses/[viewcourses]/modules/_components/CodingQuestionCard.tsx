@@ -23,7 +23,6 @@ function CodingQuestionCard({
     isSuccess,
     onSolveChallenge,
 }: QuestionCardProps) {
-    console.log('status', status)
     return (
         <div
             key={id}
