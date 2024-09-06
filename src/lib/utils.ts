@@ -31,6 +31,19 @@ export function difficultyColor(difficulty: string): string {
     }
 }
 
+export function statusColor(status: string): string {
+    switch (status?.toLowerCase()) {
+        case 'accepted':
+            return 'text-secondary'
+        case 'pending':
+            return 'text-yellow-dark'
+        case 'wrong answer':
+            return 'text-destructive'
+        default:
+            return 'text-gray-500'
+    }
+}
+
 export const getAttendanceColorClass = (attendance: any) => {
     if (attendance === 100) {
         return 'bg-green-500 text-white'

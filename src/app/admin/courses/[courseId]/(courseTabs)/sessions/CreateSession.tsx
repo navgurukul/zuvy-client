@@ -239,7 +239,6 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                 toggleForm()
             })
         } catch (error) {
-            console.error('An error occurred:', error)
             toast({
                 title: 'Network error',
                 description:

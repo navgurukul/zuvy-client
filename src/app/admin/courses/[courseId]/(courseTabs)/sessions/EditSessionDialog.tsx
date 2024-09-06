@@ -117,14 +117,12 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
             startDateTime: startDateTime,
             endDateTime: endDateTime,
         }
-        console.log('Submitting data:', transformedData)
 
         try {
             const response = await api.patch(
                 `/classes/update/${props.meetingId}`,
                 transformedData
             )
-            console.log('API response:', response.data)
 
             if (response.status === 200) {
                 toast({

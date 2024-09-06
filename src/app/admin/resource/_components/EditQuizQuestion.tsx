@@ -177,8 +177,6 @@ const EditQuizQuestion = ({
         setIsEditModalOpen(false)
     }
 
-    console.log(selectedQuizQuestion)
-
     return (
         <main className="flex  flex-col p-3 ">
             <Form {...form}>
@@ -383,7 +381,7 @@ const EditQuizQuestion = ({
                             </FormItem>
                         )}
                     />
-                    {/* 
+                    {/*
                     <RadioGroup
                         onValueChange={(value) => {
                             setSelectedOption(value)

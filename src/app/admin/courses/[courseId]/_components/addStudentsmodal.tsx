@@ -111,7 +111,6 @@ const AddStudentsModal = ({
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
-                console.error('Error', error.message)
             }
         }
     }
@@ -123,8 +122,8 @@ const AddStudentsModal = ({
                     {message
                         ? 'New Batch'
                         : selectedOption === '2'
-                        ? 'Add Student'
-                        : 'Add Students'}
+                          ? 'Add Student'
+                          : 'Add Students'}
                 </DialogTitle>
                 <span>
                     {message

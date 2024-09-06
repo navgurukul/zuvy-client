@@ -28,6 +28,11 @@ type AddAssessmentProps = {
     moduleId: any
 }
 
+export type Tag = {
+    id: number
+    tagName: string
+}
+
 const AddAssessment: React.FC<AddAssessmentProps> = ({
     chapterData,
     content,
@@ -39,6 +44,10 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     const [selectedDifficulty, setSelectedDifficulty] =
         useState<string>('Any Difficulty')
     const [selectedTopic, setSelectedTopic] = useState<any>('All Topics')
+    const [selectedTag, setSelectedTag] = useState<Tag>({
+        tagName: 'All Topics',
+        id: -1,
+    })
     const [selectedLanguage, setSelectedLanguage] =
         useState<string>('All Languages')
     const [filteredQuestions, setFilteredQuestions] = useState<any[]>([])
@@ -75,7 +84,11 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     async function getAllTags() {
         const response = await api.get('Content/allTags')
         if (response) {
-            setTags(response.data.allTags)
+            const tagArr = [
+                { tagName: 'All Topics', id: -1 },
+                ...response.data.allTags,
+            ]
+            setTags(tagArr)
         }
     }
 
@@ -84,7 +97,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
             filteredCodingQuestions(
                 setFilteredQuestions,
                 selectedDifficulty,
-                selectedTopic,
+                selectedTag,
                 selectedLanguage,
                 debouncedSearch
             )
@@ -100,7 +113,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
             filteredOpenEndedQuestions(
                 setFilteredQuestions,
                 selectedDifficulty,
-                selectedTopic,
+                selectedTag,
                 selectedLanguage,
                 debouncedSearch
             )
@@ -109,6 +122,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         questionType,
         selectedDifficulty,
         selectedTopic,
+        selectedTag,
         selectedLanguage,
         debouncedSearch,
     ])
@@ -119,7 +133,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         filteredCodingQuestions(
             setFilteredQuestions,
             selectedDifficulty,
-            selectedTopic,
+            selectedTag,
             selectedLanguage,
             debouncedSearch
         )
@@ -145,7 +159,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         filteredOpenEndedQuestions(
             setFilteredQuestions,
             selectedDifficulty,
-            selectedTopic,
+            selectedTag,
             selectedLanguage,
             debouncedSearch
         )
@@ -291,14 +305,16 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                 <>
                     <div className="mb-5 grid grid-cols-2">
                         <CodingTopics
-                            searchQuestionsInAssessment={
+                            searchTerm={
                                 searchQuestionsInAssessment
                             }
-                            setSearchQuestionsInAssessment={
+                            setSearchTerm={
                                 setSearchQuestionsInAssessment
                             }
                             selectedTopic={selectedTopic}
                             setSelectedTopic={setSelectedTopic}
+                            selectedTag={selectedTag}
+                            setSelectedTag={setSelectedTag}
                             selectedDifficulty={selectedDifficulty}
                             setSelectedDifficulty={setSelectedDifficulty}
                             selectedLanguage={selectedLanguage}
