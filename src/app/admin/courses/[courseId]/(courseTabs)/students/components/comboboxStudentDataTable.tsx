@@ -38,6 +38,7 @@ export function ComboboxStudent({
     const [displaybatchName, setDisplayBatchName] = React.useState(
         batchName || 'Unassigned'
     )
+    const [batchisFull, setBatchisFull] = React.useState(false)
 
     React.useEffect(() => {
         setDisplayBatchName(batchName || 'Unassigned')
@@ -69,6 +70,8 @@ export function ComboboxStudent({
                     setDisplayBatchName(label)
                 })
         } catch (error: any) {
+            if (error.response.data.message === 'Batch is full')
+                setBatchisFull(true)
             toast({
                 title: 'Error',
                 description: error.response.data.message,
@@ -100,7 +103,7 @@ export function ComboboxStudent({
                         {batchData.map((batch: any) => (
                             <CommandItem
                                 key={batch.value}
-                                disabled={value == batch.value}
+                                disabled={value == batch.value && !batchisFull}
                                 value={`${batch.value}-${batch.label}`}
                                 onSelect={(currentValue) =>
                                     handleSelectBatchChange(
@@ -114,7 +117,7 @@ export function ComboboxStudent({
                                 <Check
                                     className={cn(
                                         'mr-2 h-4 w-4',
-                                        value == batch.value
+                                        value == batch.value && !batchisFull
                                             ? 'opacity-100'
                                             : 'opacity-0'
                                     )}

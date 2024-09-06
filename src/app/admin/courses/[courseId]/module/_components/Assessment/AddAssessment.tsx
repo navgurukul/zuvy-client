@@ -70,7 +70,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     const [selectedOpenEndedQuesIds, setSelectedOpenEndedQuesIds] = useState<
         number[]
     >([])
-    const debouncedSearch = useDebounce(searchQuestionsInAssessment, 300)
+    const debouncedSearch = useDebounce(searchQuestionsInAssessment, 500)
 
     const [saveSettings, setSaveSettings] = useState(false)
     const [tags, setTags] = useState<any>()

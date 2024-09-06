@@ -21,6 +21,7 @@ const Page = ({ params }: { params: any }) => {
     const [projectData, setProjectData] = useState<any>([])
     const [formData, setFormData] = useState<any>([])
     const [loading, setLoading] = useState(true)
+    const [searchAssessment, setsearchAssessment] = useState<string>('')
 
     const handleTabChange = (tab: string) => {
         setActiveTab(tab)
@@ -162,9 +163,14 @@ const Page = ({ params }: { params: any }) => {
             <div className="flex flex-col lg:flex-row justify-between">
                 <div className="relative w-full mr-2">
                     <Input
-                        placeholder="Search for Name, Email "
-                        className="lg:w-1/3 w-full my-6 input-with-icon pl-8 "
-                        disabled
+                        placeholder={`${
+                            activeTab === 'assessments'
+                                ? 'Search for Assessment By Name'
+                                : 'Search '
+                        }`}
+                        className="lg:w-1/3 w-full my-6 input-with-icon pl-8"
+                        value={searchAssessment}
+                        onChange={(e) => setsearchAssessment(e.target.value)}
                     />
                     <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
                         <Search className="text-gray-400" size={20} />
@@ -214,7 +220,10 @@ const Page = ({ params }: { params: any }) => {
                         }
                     })()}
                 {activeTab === 'assessments' && (
-                    <AssesmentSubmissionComponent courseId={params.courseId} />
+                    <AssesmentSubmissionComponent
+                        searchTerm={searchAssessment}
+                        courseId={params.courseId}
+                    />
                 )}
                 {activeTab === 'projects' &&
                     (projectData.length > 0 ? (
