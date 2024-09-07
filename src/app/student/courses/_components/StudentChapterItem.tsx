@@ -17,6 +17,7 @@ function StudentChapterItem({
     topicId,
     chapterId,
     activeChapter,
+    setActiveChapter,
     fetchChapterContent,
     status,
     viewcourses,
@@ -26,6 +27,7 @@ function StudentChapterItem({
     topicId: number
     chapterId: number
     activeChapter: number
+    setActiveChapter: any
     fetchChapterContent: (chapterId: number) => void
     status: string
     viewcourses: any
@@ -67,8 +69,10 @@ function StudentChapterItem({
             router.push(
                 `/student/courses/${viewcourses}/modules/${moduleID}/chapters/${chapterId}`
             )
+
+            setActiveChapter(chapterId)
         }
-    }, [activeChapter, chapterId])
+    }, [chapterId])
 
     console.log('chapterId', chapterId)
     console.log('activeChapter', activeChapter)
@@ -77,7 +81,7 @@ function StudentChapterItem({
         <div>
             {/* <Link
             // key={id}
-            href={`/student/courses/${viewcourses}/modules/${moduleID}/chapters/${activeChapter}`}
+            href={`/student/courses/${viewcourses}/modules/${moduleID}/chapters/${chapterId}`}
             // className={`bg-gradient-to-bl my-3 p-3 rounded-xl flex flex-col md:flex-row ${
             //     typeId === 1
             //         ? !isLock

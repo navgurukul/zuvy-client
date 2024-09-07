@@ -217,6 +217,7 @@ function Chapters({ params }: any) {
                                             fetchChapterContent
                                         }
                                         activeChapter={activeChapter}
+                                        setActiveChapter={setActiveChapter}
                                         status={item.status}
                                         viewcourses={viewcourses}
                                         moduleID={moduleID}
