@@ -407,7 +407,7 @@ export const fetchStudentsHandler = async ({
         setLoading(false)
     }
 }
-// Utility function to clean up extra commas and spaces
+
 export function cleanUpValues(value: string) {
     if (!value) return ''
 
@@ -421,5 +421,3 @@ export function cleanUpValues(value: string) {
 
     return value
 }
-
-// --------------------------

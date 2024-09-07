@@ -3,10 +3,12 @@
 import React, { useEffect, useState } from 'react'
 import {
     handleFullScreenChange,
+    handleKeyDown,
+    handleRightClick,
     handleVisibilityChange,
     requestFullScreen,
 } from '@/utils/students'
-import { Clock, Timer } from 'lucide-react'
+import { Clock, Fullscreen, Timer } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import QuizQuestions from './QuizQuestions'
 import OpenEndedQuestions from './OpenEndedQuestions'
@@ -147,6 +149,18 @@ function Page({
             }
         }
     }, [tabChangeInstance, fullScreenExitInstance])
+
+    useEffect(() => {
+        // Add event listeners for right-click and key presses
+        document.addEventListener('contextmenu', handleRightClick)
+        document.addEventListener('keydown', handleKeyDown)
+        return () => {
+            document.removeEventListener('contextmenu', handleRightClick)
+            document.removeEventListener('keydown', handleKeyDown)
+        }
+    }, [tabChangeInstance, fullScreenExitInstance])
+
+
 
     useEffect(() => {
         if (remainingTime === 0 && intervalId) {
@@ -486,9 +500,8 @@ function Page({
                                 <QuestionCard
                                     id={1}
                                     title="Quiz"
-                                    description={`${
-                                        assessmentData.Quizzes || 0
-                                    } questions`}
+                                    description={`${assessmentData.Quizzes || 0
+                                        } questions`}
                                     onSolveChallenge={() =>
                                         handleSolveChallenge('quiz')
                                     }
@@ -505,9 +518,8 @@ function Page({
                                 <QuestionCard
                                     id={1}
                                     title="Open-Ended Questions"
-                                    description={`${
-                                        assessmentData.OpenEndedQuestions || 0
-                                    } questions`}
+                                    description={`${assessmentData.OpenEndedQuestions || 0
+                                        } questions`}
                                     onSolveChallenge={() =>
                                         handleSolveChallenge('open-ended')
                                     }
