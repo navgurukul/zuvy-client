@@ -49,7 +49,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
     const [upcomingClasses, setUpcomingClasses] = useState([])
     const [ongoingClasses, setOngoingClasses] = useState([])
     const [upcomingAssignments, setUpcomingAssignments] = useState([])
-    const [lateAssignments, setLateAssignments] = useState([])
+    const [lateAssignments, setLateAssignments] = useState<any[]>([])
     const [attendanceData, setAttendanceData] = useState<any[]>([])
     const [enrolledCourse, setEnrolledCourse] = useState([])
     const [submissionMessage, setSubmissionMessage] = useState()
@@ -108,8 +108,10 @@ function Schedule({ className, ...props }: ScheduleProps) {
     }, [selectedCourse?.id])
     const getUpcomingSubmissionHandler = useCallback(async () => {
         await api.get(`/tracking/allupcomingSubmission`).then((res) => {
-            setUpcomingAssignments(res?.data?.data?.upcomingAssignments)
-            setLateAssignments(res?.data?.data?.lateAssignments)
+            if (res?.data?.data) {
+                setUpcomingAssignments(res?.data?.data?.upcomingAssignments)
+                setLateAssignments(res?.data?.data?.lateAssignments)
+            }
         })
     }, [])
 
