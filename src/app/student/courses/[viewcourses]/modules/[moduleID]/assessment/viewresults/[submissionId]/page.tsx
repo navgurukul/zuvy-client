@@ -117,7 +117,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                 Back
             </div>
             <div className="headings mx-auto my-5 max-w-2xl">
-                <div>{timeTaken}HELLOOO</div>
+                <div>{timeTaken}</div>
             </div>
 
             {/* Render Coding Challenges if they exist */}

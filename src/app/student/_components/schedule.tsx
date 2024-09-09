@@ -100,7 +100,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
     }, [])
     const getAttendanceHandler = useCallback(async () => {
         await api.get(`/student/Dashboard/attendance`).then((res) => {
-            const attendance = res.data.filter(
+            const attendance = res?.data?.filter(
                 (course: any) => selectedCourse?.id === course?.bootcampId
             )
             setAttendanceData(attendance)
@@ -108,8 +108,8 @@ function Schedule({ className, ...props }: ScheduleProps) {
     }, [selectedCourse?.id])
     const getUpcomingSubmissionHandler = useCallback(async () => {
         await api.get(`/tracking/allupcomingSubmission`).then((res) => {
-            setUpcomingAssignments(res.data.data.upcomingAssignments)
-            setLateAssignments(res.data.data.lateAssignments)
+            setUpcomingAssignments(res?.data?.data?.upcomingAssignments)
+            setLateAssignments(res?.data?.data?.lateAssignments)
         })
     }, [])
 

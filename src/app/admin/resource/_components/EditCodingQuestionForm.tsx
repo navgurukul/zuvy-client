@@ -1,3 +1,4 @@
+
 'use client'
 import { useEffect, useState } from 'react'
 
@@ -83,13 +84,16 @@ export default function EditCodingQuestionForm() {
         ])
     }
 
-    const handleRemoveTestCase = (indexToRemove: number) => {
-        // Ensure a new array is created, and the correct item is removed
-        const updatedTestCases = testCases.filter(
-            (_: any, index: any) => index !== indexToRemove
-        )
-        setTestCases(updatedTestCases)
-    }
+    const handleRemoveTestCase = (id: number) => {
+    const updatedTestCases = testCases.filter((testCase: any) => testCase.id !== id);
+    setTestCases(updatedTestCases);
+
+    // Sync the form state with updated test cases
+    form.reset({
+        ...form.getValues(),
+        testCases: updatedTestCases
+    });
+};
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -120,6 +124,7 @@ export default function EditCodingQuestionForm() {
     })
 
     async function editCodingQuestion(data: any) {
+
         try {
             const response = await api.put(
                 `codingPlatform/update-question/${editCodingQuestionId}`,
@@ -144,7 +149,69 @@ export default function EditCodingQuestionForm() {
         }
     }
 
+    useEffect(() => {
+        if (selectCodingQuestion) {
+            form.reset({
+                title: selectCodingQuestion[0].title,
+                problemStatement: selectCodingQuestion[0].description,
+                constraints: selectCodingQuestion[0].constraints,
+                difficulty: selectCodingQuestion[0].difficulty,
+                topics: selectCodingQuestion[0].tagId,
+                testCases: selectCodingQuestion[0].testCases.map(
+                    (testCase: any) => ({
+                        id: testCase.id, // Ensure IDs are correctly set here
+                        input: cleanUpValues(
+                            testCase.inputs
+                                .map((input: any) => {
+                                    let value = input.parameterValue
+                                    let type = input.parameterType
+                                    if (Array.isArray(value)) {
+                                        if (
+                                            type === 'arrayOfnum' ||
+                                            type === 'arrayOfStr'
+                                        ) {
+                                            value = value.join(', ')
+                                        } else {
+                                            value = value.join(' ')
+                                        }
+                                    }
+                                    return cleanUpValues(value)
+                                })
+                                .join(' ')
+                        ),
+                        output: cleanUpValues(
+                            testCase.expectedOutput.parameterValue
+                        ),
+                    })
+                ),
+            })
+            setTestCases(
+                selectCodingQuestion[0]?.testCases?.map(
+                    (testCase: any) => ({
+                        id: testCase.id,
+                        input: testCase.inputs
+                            .map((input: any) => {
+                                let value = input.parameterValue;
+                                if (Array.isArray(value)) {
+                                    value = value.join(', ');
+                                }
+                                // Keep `0` and non-empty values intact, while cleaning other values
+                                return value !== null && value !== undefined ? cleanUpValues(value.toString()) : value;
+                            })
+                            .join(' '),
+                        output: testCase.expectedOutput.parameterValue !== null && testCase.expectedOutput.parameterValue !== undefined
+                            ? cleanUpValues(testCase.expectedOutput.parameterValue.toString())
+                            : testCase.expectedOutput.parameterValue,
+                    })
+                )
+            );
+
+
+        }
+    }, [])
+
     const handleEditSubmit = (values: z.infer<typeof formSchema>) => {
+        console.log('values', values.testCases);
         const processInput = (input: string, format: string) => {
             const cleanedInput = cleanUpValues(input)
 
@@ -212,7 +279,7 @@ export default function EditCodingQuestionForm() {
             difficulty: values.difficulty,
             tagId: values.topics,
             constraints: values.constraints,
-            testCases: testCases
+            testCases: values.testCases
                 ?.filter(
                     (testCase: any) =>
                         !testCase.id || !String(testCase.id).startsWith('temp_')
@@ -304,65 +371,7 @@ export default function EditCodingQuestionForm() {
         getAllCodingQuestions(setCodingQuestions)
     }
 
-    useEffect(() => {
-        if (selectCodingQuestion) {
-            form.reset({
-                title: selectCodingQuestion[0].title,
-                problemStatement: selectCodingQuestion[0].description,
-                constraints: selectCodingQuestion[0].constraints,
-                difficulty: selectCodingQuestion[0].difficulty,
-                topics: selectCodingQuestion[0].tagId,
-                testCases: selectCodingQuestion[0].testCases.map(
-                    (testCase: any) => ({
-                        id: testCase.id, // Ensure IDs are correctly set here
-                        input: cleanUpValues(
-                            testCase.inputs
-                                .map((input: any) => {
-                                    let value = input.parameterValue
-                                    let type = input.parameterType
-                                    if (Array.isArray(value)) {
-                                        if (
-                                            type === 'arrayOfnum' ||
-                                            type === 'arrayOfStr'
-                                        ) {
-                                            value = value.join(', ')
-                                        } else {
-                                            value = value.join(' ')
-                                        }
-                                    }
-                                    return cleanUpValues(value)
-                                })
-                                .join(' ')
-                        ),
-                        output: cleanUpValues(
-                            testCase.expectedOutput.parameterValue
-                        ),
-                    })
-                ),
-            })
-            setTestCases(
-                selectCodingQuestion[0]?.testCases?.map(
-                    (testCase: any, index: number) => ({
-                        id: testCase.id !== undefined ? testCase.id : index + 1, // Ensure IDs are handled correctly
-                        input: cleanUpValues(
-                            testCase.inputs
-                                .map((input: any) => {
-                                    let value = input.parameterValue
-                                    if (Array.isArray(value)) {
-                                        value = value.join(', ')
-                                    }
-                                    return cleanUpValues(value)
-                                })
-                                .join(' ')
-                        ),
-                        output: cleanUpValues(
-                            testCase.expectedOutput.parameterValue
-                        ),
-                    })
-                )
-            )
-        }
-    }, [])
+   
 
     return (
         <main className="flex flex-col p-3 w-full items-center ">
@@ -604,12 +613,11 @@ export default function EditCodingQuestionForm() {
                             )}
                         />
                     </div>
-
                     <div className="text-left">
                         <FormLabel>Test Cases</FormLabel>
-                        {testCases.map((testCase: any, index: any) => (
+                        {testCases.map((testCase: any, index: number) => (
                             <div
-                                key={index}
+                                key={testCase.id} // Use `testCase.id` as the key for unique identification
                                 className="flex items-center gap-2 mt-2"
                             >
                                 <FormField
@@ -619,14 +627,11 @@ export default function EditCodingQuestionForm() {
                                         <FormItem className="text-left">
                                             <Input
                                                 placeholder="Input"
-                                                value={field.value || ''}
+                                                value={field.value} // Ensure 0 is shown
                                                 onChange={field.onChange}
                                             />
                                             <p className="text-sm text-gray-500 mt-1">
-                                                {form.watch('inputFormat') ===
-                                                    'arrayOfnum' ||
-                                                form.watch('inputFormat') ===
-                                                    'arrayOfStr'
+                                                {form.watch('inputFormat') === 'arrayOfnum' || form.watch('inputFormat') === 'arrayOfStr'
                                                     ? 'Enter values separated by commas (e.g., 1,2,3,4)'
                                                     : 'Enter values separated by spaces (e.g., 2 3 4)'}
                                             </p>
@@ -634,6 +639,7 @@ export default function EditCodingQuestionForm() {
                                         </FormItem>
                                     )}
                                 />
+
                                 <FormField
                                     control={form.control}
                                     name={`testCases.${index}.output`}
@@ -641,14 +647,11 @@ export default function EditCodingQuestionForm() {
                                         <FormItem className="text-left">
                                             <Input
                                                 placeholder="Output"
-                                                value={field.value || ''}
+                                                value={field.value} // Ensure 0 is shown
                                                 onChange={field.onChange}
                                             />
                                             <p className="text-sm text-gray-500 mt-1">
-                                                {form.watch('outputFormat') ===
-                                                    'arrayOfnum' ||
-                                                form.watch('outputFormat') ===
-                                                    'arrayOfStr'
+                                                {form.watch('outputFormat') === 'arrayOfnum' || form.watch('outputFormat') === 'arrayOfStr'
                                                     ? 'Enter values separated by commas (e.g., 1,2,3,4)'
                                                     : 'Enter values separated by spaces (e.g., 2 3 4)'}
                                             </p>
@@ -656,12 +659,13 @@ export default function EditCodingQuestionForm() {
                                         </FormItem>
                                     )}
                                 />
+
                                 {
                                     <X
                                         className="cursor-pointer"
                                         onClick={() =>
-                                            handleRemoveTestCase(index)
-                                        }
+                                            handleRemoveTestCase(testCase.id)
+                                        } // Pass `testCase.id` to remove the correct test case
                                     />
                                 }
                             </div>
@@ -684,3 +688,4 @@ export default function EditCodingQuestionForm() {
         </main>
     )
 }
+
