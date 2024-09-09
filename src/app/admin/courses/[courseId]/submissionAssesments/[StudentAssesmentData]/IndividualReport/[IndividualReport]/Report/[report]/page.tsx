@@ -226,55 +226,36 @@ const Page = ({ params }: { params: any }) => {
             ) : (
                 <Skeleton className="h-4 w-4/6" />
             )}
-            <MaxWidthWrapper className="p-4">
+            <MaxWidthWrapper className="p-10 ">
                 <div className="flex flex-col relative items-start">
                     <div className="flex items-center">
-                        <h1 className="text-start flex ml-6 font-bold text-xl ">
+                        <h1 className="text-start flex  font-bold text-xl ">
                             {codingdata && (
-                                <div className="p-4 rounded-lg bg-white shadow-lg transition-transform transform  hover:shadow-xl">
+                                <div className=" rounded-lg bg-white  transition-transform transform  ">
                                     <div className="flex flex-col gap-y-4">
                                         <div className="flex gap-x-2 items-center">
-                                            <User size={15} />
-                                            <span className="font-semibold text-[15px] text-gray-700 dark:text-gray-300">
+                                            <Avatar>
+                                                <AvatarImage
+                                                    src="https://github.com/shadcn.png"
+                                                    alt="@shadcn"
+                                                />
+                                                <AvatarFallback>
+                                                    CN
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <span className="font-semibold text-[20px] text-gray-900 dark:text-white">
+                                                {username} -
+                                            </span>
+                                            <span className="font-semibold text-[20px] text-gray-700 dark:text-gray-300">
                                                 Individual Report:
                                             </span>
-                                            <span className="font-semibold text-[15px] text-gray-900 dark:text-white">
-                                                {username}
-                                            </span>
                                         </div>
-                                        <div className="flex gap-x-4 items-center">
-                                            <span className="font-semibold text-[15px] text-gray-700 dark:text-gray-300">
-                                                Status:
+
+                                        <div className="flex gap-x-1 items-center">
+                                            <span className="font-normal text-[15px] text-gray-700 dark:text-gray-300">
+                                                Submitted On
                                             </span>
-                                            <span className="flex flex-row items-center gap-x-2 backdrop-blur-sm px-2 py-1 rounded-md transition-colors duration-300 hover:bg-gray-200 dark:hover:bg-gray-700">
-                                                {assesmentData?.isPassed ? (
-                                                    <>
-                                                        <CheckCircle
-                                                            className="text-green-500"
-                                                            size={16}
-                                                        />
-                                                        <h1 className="text-secondary font-semibold text-[15px]">
-                                                            Passed
-                                                        </h1>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <XCircle
-                                                            className="text-red-500"
-                                                            size={16}
-                                                        />
-                                                        <h1 className="text-red-500 font-semibold text-[15px]">
-                                                            Failed
-                                                        </h1>
-                                                    </>
-                                                )}
-                                            </span>
-                                        </div>
-                                        <div className="flex gap-x-4 items-center">
-                                            <span className="font-semibold text-[15px] text-gray-700 dark:text-gray-300">
-                                                Submitted At:
-                                            </span>
-                                            <span className="font-semibold text-[15px] text-gray-900 dark:text-white">
+                                            <span className="font-normal text-[15px] text-gray-900 dark:text-white">
                                                 {formattedDate}
                                             </span>
                                         </div>
@@ -306,6 +287,14 @@ const Page = ({ params }: { params: any }) => {
                         tabchanges={assesmentData?.tabChange}
                         embeddedSearch={assesmentData?.embeddedGoogleSearch}
                         submissionType={assesmentData?.typeOfsubmission}
+                        totalCodingScore={assesmentData?.requiredCodingScore}
+                        codingScore={assesmentData?.codingScore}
+                        mcqScore={assesmentData?.mcqScore}
+                        totalMcqScore={assesmentData?.requiredMCQScore}
+                        openEndedScore={assesmentData?.openEndedScore}
+                        totalOpenEndedScore={
+                            assesmentData?.requiredOpenEndedScore
+                        }
                     />
                 ) : (
                     <div className="flex gap-x-20  ">
@@ -327,7 +316,7 @@ const Page = ({ params }: { params: any }) => {
                             {codingdata.length > 0 && (
                                 <div className="w-full">
                                     <h1 className="text-left font-semibold">
-                                        Coding Submission
+                                        Coding Challenges
                                     </h1>
                                     {codingdata.length > 0 ? (
                                         codingdata.map((data) => (
@@ -339,10 +328,22 @@ const Page = ({ params }: { params: any }) => {
                                                 codingOutsourseId={
                                                     data.codingOutsourseId
                                                 }
+                                                copyPaste={
+                                                    assesmentData?.copyPaste
+                                                }
+                                                tabchanges={
+                                                    assesmentData?.tabChange
+                                                }
+                                                totalCodingScore={
+                                                    assesmentData?.requiredCodingScore
+                                                }
+                                                codingScore={
+                                                    assesmentData?.codingScore
+                                                }
                                             />
                                         ))
                                     ) : (
-                                        <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg backdrop-blur-lg transition-transform transform hover:shadow-xl">
+                                        <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg  transition-transform transform hover:shadow-xl">
                                             This student has not submitted any
                                             coding question.
                                         </p>
@@ -354,12 +355,12 @@ const Page = ({ params }: { params: any }) => {
                             {assesmentData?.mcqQuestionCount > 0 && (
                                 <div className="w-full">
                                     <h1 className="text-left font-semibold">
-                                        Quiz Submission
+                                        MCQs
                                     </h1>
                                     {assesmentData?.mcqQuestionCount === 0 &&
                                     assesmentData?.attemptedMCQQuestions ===
                                         0 ? (
-                                        <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg backdrop-blur-lg transition-transform transform hover:shadow-xl">
+                                        <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg  transition-transform transform hover:shadow-xl">
                                             There are no quiz questions in this
                                             assessment.
                                         </p>
@@ -369,9 +370,17 @@ const Page = ({ params }: { params: any }) => {
                                             data={[]}
                                             params={params}
                                             type="quizSubmission"
+                                            copyPaste={assesmentData?.copyPaste}
+                                            tabchanges={
+                                                assesmentData?.tabChange
+                                            }
+                                            mcqScore={assesmentData?.mcqScore}
+                                            totalMcqScore={
+                                                assesmentData?.requiredMCQScore
+                                            }
                                         />
                                     ) : (
-                                        <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg backdrop-blur-lg transition-transform transform hover:shadow-xl">
+                                        <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg  transition-transform transform hover:shadow-xl">
                                             This student has not submitted any
                                             quiz question.
                                         </p>
@@ -383,13 +392,13 @@ const Page = ({ params }: { params: any }) => {
                             {assesmentData?.openEndedQuestionCount > 0 && (
                                 <div className="w-full">
                                     <h1 className="text-left font-semibold">
-                                        Open Ended Questions
+                                        Open-Ended
                                     </h1>
                                     {assesmentData?.openEndedQuestionCount ===
                                         0 &&
                                     assesmentData?.attemptedOpenEndedQuestions ===
                                         0 ? (
-                                        <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg backdrop-blur-lg transition-transform transform hover:shadow-xl">
+                                        <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg  transition-transform transform hover:shadow-xl">
                                             There are no open-ended questions in
                                             this assessment.
                                         </p>
@@ -399,9 +408,19 @@ const Page = ({ params }: { params: any }) => {
                                             data={[]}
                                             params={params}
                                             type="openEndedSubmission"
+                                            copyPaste={assesmentData?.copyPaste}
+                                            tabchanges={
+                                                assesmentData?.tabChange
+                                            }
+                                            openEndedScore={
+                                                assesmentData?.openEndedScore
+                                            }
+                                            totalOpenEndedScore={
+                                                assesmentData.requiredOpenEndedScore
+                                            }
                                         />
                                     ) : (
-                                        <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg backdrop-blur-lg transition-transform transform hover:shadow-xl">
+                                        <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg  transition-transform transform hover:shadow-xl">
                                             This student has not submitted any
                                             open-ended questions.
                                         </p>

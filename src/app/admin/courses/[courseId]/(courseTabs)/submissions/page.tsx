@@ -13,6 +13,7 @@ import { Spinner } from '@/components/ui/spinner'
 import FormComponent from '../../_components/FormComponent'
 import Assignments from './components/assignments'
 import AssesmentSubmissionComponent from './components/AssesmentSubmission'
+import PraticeProblemsComponent from './components/PraticeProblemsComponent'
 
 const Page = ({ params }: { params: any }) => {
     const [activeTab, setActiveTab] = useState('practice')
@@ -25,7 +26,16 @@ const Page = ({ params }: { params: any }) => {
 
     const handleTabChange = (tab: string) => {
         setActiveTab(tab)
+        localStorage.setItem('tab', tab) 
     }
+
+    useEffect(() => {
+        const lastUpdatedTab = localStorage.getItem('tab')
+        if (lastUpdatedTab) {
+            setActiveTab(lastUpdatedTab) 
+        }
+    }, [])
+
 
     const getSubmissions = useCallback(async () => {
         try {
@@ -190,35 +200,9 @@ const Page = ({ params }: { params: any }) => {
                 )}
             </div>
             <div className="w-full">
-                {activeTab === 'practice' &&
-                    (() => {
-                        const allEmpty = submissions.every(
-                            ({ moduleChapterData }) =>
-                                moduleChapterData.length === 0
-                        )
-
-                        if (allEmpty) {
-                            return (
-                                <div className="text-left font-semibold my-5">
-                                    No practice problems found.
-                                </div>
-                            )
-                        } else {
-                            return submissions.map(
-                                ({ id, name, moduleChapterData }) =>
-                                    moduleChapterData.length > 0 ? (
-                                        <PracticeProblems
-                                            key={id}
-                                            courseId={params.courseId}
-                                            name={name}
-                                            totalStudents={totalStudents}
-                                            submission={moduleChapterData}
-                                            moduleId={id}
-                                        />
-                                    ) : null
-                            )
-                        }
-                    })()}
+                {activeTab === 'practice' && (
+                    <PraticeProblemsComponent courseId={params.courseId} />
+                )}
                 {activeTab === 'assessments' && (
                     <AssesmentSubmissionComponent
                         searchTerm={searchAssessment}

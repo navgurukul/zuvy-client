@@ -267,12 +267,12 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
             {props.checkopenSessionForm && (
                 <>
                     <DialogOverlay />
-                    <DialogContent className="w-full p-3">
+                    <DialogContent className="w-full p-2 mr-1 ">
                         <DialogHeader className="text-lg font-semibold">
                             New Session
                         </DialogHeader>
 
-                        <div className="w-[490px]">
+                        <div className="w-[490px] p-2">
                             <Form {...form}>
                                 <form
                                     onSubmit={form.handleSubmit(onSubmit)}
@@ -301,7 +301,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                         )}
                                     />
 
-                                    <div className="flex items-center gap-x-2 gap-y-0 ">
+                                    <div className="flex items-center gap-x-3 gap-y-0 ">
                                         <FormField
                                             control={form.control}
                                             name="startDate"
@@ -328,7 +328,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                                     {field.value
                                                                         ? format(
                                                                               field.value,
-                                                                              'EEEE, MMMM d, yyyy'
+                                                                              'EE MMM dd yyyy'
                                                                           )
                                                                         : 'Pick a date'}
                                                                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
@@ -372,12 +372,12 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                 </FormItem>
                                             )}
                                         />
-                                        <div className="flex justify-start w-1/2 gap-x-2">
+                                        <div className="flex justify-start w-[300px] gap-x-2">
                                             <FormField
                                                 control={form.control}
                                                 name="startTime"
                                                 render={({ field }) => (
-                                                    <FormItem className="flex flex-col text-left   ">
+                                                    <FormItem className="flex flex-col text-left  w-[112px] ">
                                                         <FormLabel className="p-0 my-2">
                                                             Start Time
                                                             <span className="text-red-500">
@@ -399,7 +399,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                 control={form.control}
                                                 name="endTime"
                                                 render={({ field }) => (
-                                                    <FormItem className="flex flex-col text-left">
+                                                    <FormItem className="flex flex-col text-left w-[112px]">
                                                         <FormLabel className="p-0 my-2 ">
                                                             End Time
                                                             <span className="text-red-500">
@@ -543,11 +543,30 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                                 >
                                                                     {field.value
                                                                         .length >
-                                                                    0
-                                                                        ? field.value.join(
-                                                                              ' '
-                                                                          )
-                                                                        : 'Select days...'}
+                                                                    0 ? (
+                                                                        <>
+                                                                            {field.value
+                                                                                .slice(
+                                                                                    0,
+                                                                                    2
+                                                                                )
+                                                                                .join(
+                                                                                    ', '
+                                                                                )}
+                                                                            {field
+                                                                                .value
+                                                                                .length >
+                                                                                2 &&
+                                                                                ` + ${
+                                                                                    field
+                                                                                        .value
+                                                                                        .length -
+                                                                                    2
+                                                                                } more`}
+                                                                        </>
+                                                                    ) : (
+                                                                        'Select days...'
+                                                                    )}
                                                                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                                                 </Button>
                                                             </FormControl>

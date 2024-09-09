@@ -177,7 +177,7 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
                         )}
                     />
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1">
                         <FormField
                             control={form.control}
                             name="startDate"
@@ -197,7 +197,7 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
                                                     {field.value ? (
                                                         format(
                                                             field.value,
-                                                            'PPP'
+                                                            'EE MMM dd yyyy'
                                                         )
                                                     ) : (
                                                         <span>Pick a date</span>
