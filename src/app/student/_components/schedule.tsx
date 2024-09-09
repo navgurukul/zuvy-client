@@ -108,7 +108,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
     }, [selectedCourse?.id])
     const getUpcomingSubmissionHandler = useCallback(async () => {
         await api.get(`/tracking/allupcomingSubmission`).then((res) => {
-            if (res?.data?.data) {
+                        if (res?.data?.data) {
                 setUpcomingAssignments(res?.data?.data?.upcomingAssignments)
                 setLateAssignments(res?.data?.data?.lateAssignments)
             }
@@ -367,41 +367,41 @@ function Schedule({ className, ...props }: ScheduleProps) {
                     )}
                 </div>
             )}
-            {lateAssignments?.length > 0 ||
-                (upcomingAssignments?.length > 0 && (
-                    <div className="flex flex-col items-start mt-6">
+            {(lateAssignments?.length > 0 ||
+                upcomingAssignments?.length > 0) && (
+                <div className="flex flex-col items-start mt-6">
+                    <div className="flex flex-col w-full lg:max-w-[860px]">
                         <div className="flex flex-col w-full lg:max-w-[860px]">
-                            <div className="flex flex-col w-full lg:max-w-[860px]">
-                                {lateAssignments?.length > 0 && (
-                                    <h1 className="text-xl p-1 text-start font-bold mb-4">
-                                        Late Assignments
-                                    </h1>
-                                )}
-                                {lateAssignments.map((data: any, index) => (
-                                    <SubmissionCard
-                                        classData={data}
-                                        key={index}
-                                        status={'lateAssignmet'}
-                                        view={'dashboard'}
-                                    />
-                                ))}
-                                {upcomingAssignments?.length > 0 && (
-                                    <h1 className="text-xl p-1 text-start font-bold mb-4">
-                                        Upcoming Assignments
-                                    </h1>
-                                )}
-                                {upcomingAssignments.map((data: any, index) => (
-                                    <SubmissionCard
-                                        classData={data}
-                                        key={index}
-                                        status={'upcomingAssignment'}
-                                        view={'dashboard'}
-                                    />
-                                ))}
-                            </div>
+                            {lateAssignments?.length > 0 && (
+                                <h1 className="text-xl p-1 text-start font-bold mb-4">
+                                    Late Assignments
+                                </h1>
+                            )}
+                            {lateAssignments.map((data: any, index) => (
+                                <SubmissionCard
+                                    classData={data}
+                                    key={index}
+                                    status={'lateAssignmet'}
+                                    view={'dashboard'}
+                                />
+                            ))}
+                            {upcomingAssignments?.length > 0 && (
+                                <h1 className="text-xl p-1 text-start font-bold mb-4">
+                                    Upcoming Assignments
+                                </h1>
+                            )}
+                            {upcomingAssignments.map((data: any, index) => (
+                                <SubmissionCard
+                                    classData={data}
+                                    key={index}
+                                    status={'upcomingAssignment'}
+                                    view={'dashboard'}
+                                />
+                            ))}
                         </div>
                     </div>
-                ))}
+                </div>
+            )}
             {allClasses.length < 1 && (
                 <div className="flex flex-col items-start mt-6">
                     <h1 className="text-xl p-1 text-start font-bold mb-4">
