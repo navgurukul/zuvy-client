@@ -51,9 +51,9 @@ const Mcqs = (props: Props) => {
             const storedTag = localStorage.getItem('MCQCurrentTag')
             return storedTag !== null
                 ? JSON.parse(storedTag)
-                : { tagName: 'All Topics', id: -1 }
+                : { id: -1, tagName: 'All Topics' }
         }
-        return { tagName: 'All Topics', id: -1 }
+        return { id: -1, tagName: 'All Topics' }
     })
     const [loading, setLoading] = useState(true)
 
@@ -76,7 +76,7 @@ const Mcqs = (props: Props) => {
         const response = await api.get('Content/allTags')
         if (response) {
             const tagArr = [
-                { tagName: 'All Topics', id: -1 },
+                { id: -1, tagName: 'All Topics' },
                 ...response.data.allTags,
             ]
             setTags(tagArr)
@@ -87,6 +87,7 @@ const Mcqs = (props: Props) => {
         try {
             let url = `/Content/allQuizQuestions`
 
+            console.log(url)
             const queryParams = []
 
             if (difficulty && difficulty !== 'None') {
@@ -174,7 +175,9 @@ const Mcqs = (props: Props) => {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectGroup>
-                                    <SelectItem value="None">Any Difficulty</SelectItem>
+                                    <SelectItem value="None">
+                                        Any Difficulty
+                                    </SelectItem>
                                     <SelectItem value="Easy">Easy</SelectItem>
                                     <SelectItem value="Medium">
                                         Medium

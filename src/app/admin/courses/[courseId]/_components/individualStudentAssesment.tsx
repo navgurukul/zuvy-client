@@ -15,6 +15,14 @@ const IndividualStudentAssesment = ({
     type,
     params,
     codingOutsourseId,
+    copyPaste,
+    tabchanges,
+    codingScore,
+    totalCodingScore,
+    mcqScore,
+    totalMcqScore,
+    openEndedScore,
+    totalOpenEndedScore,
 }: any) => {
     const { courseId, StudentAssesmentData, IndividualReport, report } = params
     const color = getAssesmentBackgroundColorClass(25, 5)
@@ -43,72 +51,86 @@ const IndividualStudentAssesment = ({
         }
     }
     const questionInfo = renderQuestion()
+    const scoreHandler = () => {
+        let score, totalScore
+
+        if (type === 'codingSubmission') {
+            score = codingScore
+            totalScore = totalCodingScore
+        } else if (type === 'quizSubmission') {
+            score = mcqScore
+            totalScore = totalMcqScore
+        } else {
+            score = openEndedScore
+            totalScore = totalOpenEndedScore
+        }
+
+        const percentage = (score / totalScore) * 100
+
+        let bgColorClass
+        if (percentage < 50) {
+            bgColorClass = 'bg-red-500'
+        } else if (percentage >= 50 && percentage < 70) {
+            bgColorClass = 'bg-yellow-300'
+        } else if (percentage >= 70 && percentage <= 80) {
+            bgColorClass = 'bg-green-200'
+        } else {
+            bgColorClass = 'bg-green-300'
+        }
+
+        return {
+            score: score + '/' + totalScore,
+            className: bgColorClass,
+        }
+    }
 
     return (
         <div
-            className={`flex flex-col h-[260px] lg:h-[220px] p-3 shadow-lg backdrop-blur-lg transition-transform transform hover:shadow-xl rounded-md overflow-hidden mt-3 ${
-                type === 'quizSubmission' || type === 'openEndedSubmission'
-                    ? 'w-4/5'
-                    : 'w-full'
-            }`}
+            className={`flex flex-col h-[260px] lg:h-[220px] p-3 shadow-lg  transition-transform transform hover:shadow-xl rounded-md overflow-hidden mt-3 w-5/6 relative`}
         >
-            <div className="flex flex-col w-full h-full justify-between relative">
-                <div className="absolute lg:top-3 lg:right-3 bottom-3 left-3 lg:left-auto lg:bottom-auto">
+            <div className="flex flex-col w-full h-full justify-between">
+                <div className="flex flex-col p-4 gap-y-4 lg:gap-y-7 overflow-hidden">
+                    <h1 className="  capitalize text-start font-semibold text-gray-600 dark:text-white truncate w-full">
+                        {type === 'codingSubmission'
+                            ? data.questionDetail.title
+                            : questionInfo.title}
+                    </h1>
+
+                    <div className="flex flex-col gap-y-2 md:flex-row md:gap-x-12 ">
+                        {/* <h1>Time Taken: 10mins</h1> */}
+                        {type !== 'quizSubmission' && (
+                            <h1>
+                                Copy Paste:{' '}
+                                {copyPaste == 0 ? 'None' : copyPaste}
+                            </h1>
+                        )}
+                        <h1>
+                            Tab Change: {tabchanges == 0 ? 'None' : tabchanges}
+                        </h1>
+                    </div>
+                    <div className="flex items-center gap-x-2">
+                        <div
+                            className={`h-2 w-2 ${
+                                scoreHandler().className
+                            } rounded-full`}
+                        />
+                        <h1 className="text-start">
+                            Score: {scoreHandler().score}
+                        </h1>
+                    </div>
+                </div>
+
+                {/* Button positioned at the bottom-right */}
+                <div className="absolute bottom-3 right-3">
                     <Button variant={'ghost'} className="w-full lg:w-auto">
                         <Link
-                            className="text-secondary text-md flex items-center w-full truncate mt-10"
+                            className="text-secondary font-semibold text-md flex items-center w-full truncate"
                             href={questionInfo.link}
                         >
                             View Solution
                             <ChevronRight size={20} className="ml-1" />
                         </Link>
                     </Button>
-                </div>
-                <div className="flex flex-col p-4 gap-y-4 lg:gap-y-7 overflow-hidden">
-                    <h1 className="text-[18px] md:text-[20px] capitalize text-start font-semibold text-gray-600 dark:text-white truncate w-full">
-                        {type === 'codingSubmission'
-                            ? data.questionDetail.title
-                            : questionInfo.title}
-                    </h1>
-                    <div className="flex flex-col gap-3 md:gap-4 lg:gap-5 overflow-hidden">
-                        {type === 'codingSubmission' && (
-                            <div className="flex flex-col gap-3 md:gap-4 lg:gap-5 w-full">
-                                <div className="flex font-semibold gap-2 flex-wrap overflow-hidden">
-                                    <h1>Description:</h1>
-                                    <h1 className="truncate">
-                                        {data.questionDetail.description}
-                                    </h1>
-                                </div>
-                                <div className="flex font-semibold gap-2 flex-wrap overflow-hidden">
-                                    <h1>Difficulty:</h1>
-                                    <h1
-                                        className={cn(
-                                            `font-semibold text-secondary`,
-                                            difficultyColor(
-                                                data.questionDetail.difficulty
-                                            )
-                                        )}
-                                    >
-                                        {data.questionDetail.difficulty}
-                                    </h1>
-                                </div>
-                                <div className="flex font-semibold gap-2 flex-wrap overflow-hidden">
-                                    <h1>Submission Status:</h1>
-                                    <h1
-                                        className={cn(
-                                            `font-semibold ${
-                                                data.status === 'Accepted'
-                                                    ? 'text-secondary'
-                                                    : 'text-destructive'
-                                            }`
-                                        )}
-                                    >
-                                        {data.status}
-                                    </h1>
-                                </div>
-                            </div>
-                        )}
-                    </div>
                 </div>
             </div>
         </div>

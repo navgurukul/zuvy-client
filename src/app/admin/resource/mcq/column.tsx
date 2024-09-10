@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/dialog'
 import NewMcqProblemForm from '../_components/NewMcqProblemForm'
 import EditQuizQuestion from '../_components/EditQuizQuestion'
+import { useReducer, useState } from 'react'
 
 export const columns: ColumnDef<quiz>[] = [
     {
@@ -81,85 +82,81 @@ export const columns: ColumnDef<quiz>[] = [
         cell: ({ row }) => {
             const quizQuestion = row.original
 
-            const {
-                isEditQuizModalOpen,
-                setIsEditModalOpen,
-                quizQuestionId,
-                setIsQuizQuestionId,
-            } = getEditQuizQuestion()
+            const openDialog = () => {
+                const dialog = document.getElementById(
+                    'editQuizDialog'
+                ) as HTMLDialogElement
+                if (dialog) {
+                    dialog.showModal()
+                }
+            }
+            const closeDialog = () => {
+                const dialog = document.getElementById(
+                    'editQuizDialog'
+                ) as HTMLDialogElement
+                if (dialog) {
+                    dialog.close()
+                }
+            }
+
             const {
                 isDeleteModalOpen,
                 setDeleteModalOpen,
                 deleteQuizQuestionId,
                 setDeleteQuizQuestionId,
             } = getDeleteQuizQuestion()
-            const { quizData, setStoreQuizData } = getAllQuizData()
-            const { tags } = getCodingQuestionTags()
-            const handlerQuizQuestions = (quizQuestion: any) => {
-                setIsEditModalOpen(true)
-                setIsQuizQuestionId(quizQuestion.id)
-            }
+            const { setStoreQuizData } = getAllQuizData()
 
             return (
-                <>
-                    <div className="flex">
-                        <Dialog
-                            open={isEditQuizModalOpen}
-                            onOpenChange={setIsEditModalOpen}
-                        >
-                            <DialogTrigger asChild>
-                                <Pencil
-                                    className="cursor-pointer mr-5"
-                                    size={20}
-                                    onClick={() =>
-                                        handlerQuizQuestions(quizQuestion)
-                                    }
-                                />
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-[518px] max-h-[90vh] overflow-y-auto overflow-x-hidden">
-                                <DialogHeader>
-                                    <DialogTitle>Edit MCQ</DialogTitle>
-                                </DialogHeader>
-                                <EditQuizQuestion
-                                    tags={tags}
-                                    setIsEditModalOpen={setIsEditModalOpen}
-                                    getAllQuizQuesiton={getAllQuizQuestion}
-                                    setStoreQuizData={setStoreQuizData}
-                                    quizQuestionId={quizQuestionId}
-                                    quizQuestion={quizData}
-                                />
-                            </DialogContent>
-                        </Dialog>
-                        <Trash2
-                            onClick={(e) => {
-                                e.stopPropagation()
-                                handleDeleteQuizModal(
-                                    setDeleteModalOpen,
-                                    setDeleteQuizQuestionId,
-                                    quizQuestion
-                                )
-                            }}
-                            className="text-destructive cursor-pointer"
-                            size={20}
-                        />
-                        <DeleteConfirmationModal
-                            isOpen={isDeleteModalOpen}
-                            onClose={() => setDeleteModalOpen(false)}
-                            onConfirm={() => {
-                                handleQuizConfirm(
-                                    handleQuizDelete,
-                                    setDeleteModalOpen,
-                                    deleteQuizQuestionId,
-                                    getAllQuizQuestion,
-                                    setStoreQuizData
-                                )
-                            }}
-                            modalText={DELETE_QUIZ_QUESTION_CONFIRMATION}
-                            buttonText="Delete Quiz Question"
-                            input={false}
-                        />
-                    </div>
-                </>
+                <div className="flex">
+                    <Dialog id="editQuizDialog">
+                        <DialogTrigger asChild>
+                            <Pencil
+                                className="cursor-pointer mr-5"
+                                size={20}
+                                onClick={openDialog}
+                            />
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[518px] max-h-[90vh] overflow-y-auto overflow-x-hidden">
+                            <DialogHeader>
+                                <DialogTitle>Edit MCQ</DialogTitle>
+                            </DialogHeader>
+                            <EditQuizQuestion
+                                setIsEditModalOpen={closeDialog}
+                                setStoreQuizData={setStoreQuizData}
+                                quizId={quizQuestion.id}
+                            />
+                        </DialogContent>
+                    </Dialog>
+                    <Trash2
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            handleDeleteQuizModal(
+                                setDeleteModalOpen,
+                                setDeleteQuizQuestionId,
+                                quizQuestion
+                            )
+                        }}
+                        className="text-destructive cursor-pointer"
+                        size={20}
+                    />
+                    <DeleteConfirmationModal
+                        isOpen={isDeleteModalOpen}
+                        onClose={() => setDeleteModalOpen(false)}
+                        onConfirm={() => {
+                            handleQuizConfirm(
+                                handleQuizDelete,
+                                setDeleteModalOpen,
+                                deleteQuizQuestionId,
+                                getAllQuizQuestion,
+                                setStoreQuizData
+                            )
+                        }}
+                        modalText={DELETE_QUIZ_QUESTION_CONFIRMATION}
+                        buttonText="Delete Quiz Question"
+                        input={false}
+                    />
+                </div>
             )
         },
     },

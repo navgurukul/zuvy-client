@@ -96,9 +96,16 @@ export const columns: ColumnDef<Task>[] = [
         cell: ({ row }) => {
             const status = row.original.status
             return (
-                <div className="flex space-x-2">
+                <div className="flex items-center space-x-2">
+                    <div
+                        className={`w-2 h-2 rounded-full ${
+                            status === 'Accepted'
+                                ? 'bg-green-300'
+                                : 'bg-red-500'
+                        }`}
+                    />
                     <span className="max-w-[500px] truncate font-medium">
-                        {status ? 'Accepeted' : 'Not Accepted'}
+                        {status}
                     </span>
                 </div>
             )

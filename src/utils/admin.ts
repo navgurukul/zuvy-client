@@ -1,5 +1,6 @@
 import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
+import { useEffect, useRef } from 'react'
 
 export function handleDelete(
     deleteCodingQuestionId: any,
@@ -158,10 +159,13 @@ export async function getAllQuizQuestion(
     selectedtagId: number
 ) {
     try {
+        const mcqtagId: any = localStorage.getItem('MCQCurrentTag')
+        const MCQCurrentTagId = JSON.parse(mcqtagId)
+
         let url = `/Content/allQuizQuestions`
 
-        if (selectedtagId && selectedtagId !== -1) {
-            url = `/Content/allQuizQuestions?tagId=${selectedtagId}`
+        if (MCQCurrentTagId.id !== -1) {
+            url = `/Content/allQuizQuestions?tagId=${MCQCurrentTagId.id}`
         }
         const response = await api.get(url)
         setQuizQuestion(response.data)
@@ -420,4 +424,18 @@ export function cleanUpValues(value: string) {
     value = value.replace(/^\s*,/, '') // Remove leading commas
 
     return value
+}
+
+// --------------------------
+
+export function useFirstRenderValue<T>(value: T): T | undefined {
+    const ref = useRef<T | undefined>(undefined)
+
+    useEffect(() => {
+        if (ref.current === undefined) {
+            ref.current = value
+        }
+    }, [value])
+
+    return ref.current
 }
