@@ -164,8 +164,8 @@ export async function getAllQuizQuestion(
 
         let url = `/Content/allQuizQuestions`
 
-        if (MCQCurrentTagId.id !== -1) {
-            url = `/Content/allQuizQuestions?tagId=${MCQCurrentTagId.id}`
+        if (MCQCurrentTagId?.id !== -1) {
+            url = `/Content/allQuizQuestions?tagId=${MCQCurrentTagId?.id}`
         }
         const response = await api.get(url)
         setQuizQuestion(response.data)
@@ -422,7 +422,7 @@ export function cleanUpValues(value: string) {
     value = value.replace(/\s{2,}/g, ' ') // Remove extra spaces
     value = value.replace(/,\s*$/, '') // Remove trailing commas
     value = value.replace(/^\s*,/, '') // Remove leading commas
-
+    
     return value
 }
 

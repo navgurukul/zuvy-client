@@ -498,7 +498,7 @@ export default function NewCodingProblemForm({
                                     control={form.control}
                                     name={`testCases.${index}.input`}
                                     render={({ field }) => (
-                                        <FormItem className="text-left">
+                                        <FormItem className="text-left w-full">
                                             <Input
                                                 placeholder="Input"
                                                 value={field.value || ''}
@@ -509,7 +509,7 @@ export default function NewCodingProblemForm({
                                                     'arrayOfnum' ||
                                                     form.watch('inputFormat') ===
                                                     'arrayOfStr'
-                                                    ? 'Enter values separated by commas (e.g., 1,2,3,4)'
+                                                    ? 'Max 1 array accepted (e.g., 1,2,3,4)'
                                                     : 'Enter values separated by spaces (e.g., 2 3 4)'}
                                             </p>
                                             <FormMessage />
@@ -520,7 +520,7 @@ export default function NewCodingProblemForm({
                                     control={form.control}
                                     name={`testCases.${index}.output`}
                                     render={({ field }) => (
-                                        <FormItem className="text-left">
+                                        <FormItem className="text-left w-full">
                                             <Input
                                                 placeholder="Output"
                                                 value={field.value || ''}
@@ -531,8 +531,8 @@ export default function NewCodingProblemForm({
                                                     'arrayOfnum' ||
                                                     form.watch('outputFormat') ===
                                                     'arrayOfStr'
-                                                    ? 'Enter values separated by commas (e.g., 1,2,3,4)'
-                                                    : 'Enter values separated by spaces (e.g., 2 3 4)'}
+                                                    ? 'Max 1 array accepted (e.g., 1,2,3,4)'
+                                                    : 'Only one value accepted (e.g., 55)'}
                                             </p>
                                             <FormMessage />
                                         </FormItem>

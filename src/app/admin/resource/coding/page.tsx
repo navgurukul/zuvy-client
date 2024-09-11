@@ -101,7 +101,7 @@ const CodingProblems = () => {
             selectedLanguage,
             debouncedSearch
         )
-    }, [searchTerm, selectedTag.id, selectedDifficulty, debouncedSearch])
+    }, [searchTerm, selectedTag.id, selectedDifficulty, debouncedSearch, isCodingDialogOpen, openEditDialog])
 
     useEffect(() => {
         const timer = setTimeout(() => {
