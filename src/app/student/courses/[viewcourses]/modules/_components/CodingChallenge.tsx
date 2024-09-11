@@ -1,8 +1,11 @@
+// External imports
 import React, { useState, useCallback, useEffect } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+
+// Internal imports
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { requestFullScreen } from '@/utils/students'
-import { useParams, useRouter } from 'next/navigation'
 import CodingQuestionCard from './CodingQuestionCard'
 
 export type Tag = {
@@ -41,6 +44,7 @@ function CodingChallenge({
 
             setCodingQuestions(res.data.data.codingProblem)
             setCodingQuestionId(res.data.data.codingProblem[0].id)
+            setTagId(res.data.data.codingProblem[0].tagId)
         } catch (error) {
             toast({
                 title: 'Error',
@@ -84,7 +88,6 @@ function CodingChallenge({
             )
             setCodingQuestionResult(res.data.data)
             setIsScuccess(res.data.isSuccess)
-            setTagId(res.data.data.questionDetail.tagId)
         } catch (error: any) {
             setIsScuccess(error.response.data.isSuccess)
         }

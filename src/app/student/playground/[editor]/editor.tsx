@@ -126,7 +126,12 @@ const IDE: React.FC<IDEProps> = ({
                     sourceCode: b64EncodeUnicode(currentCode),
                 }
             )
-            setIsSubmitted(true)
+            if (action === 'submit') {
+                setIsSubmitted(true)
+                await api.post(
+                    `tracking/updateChapterStatus/${viewcourses}/${moduleID}?chapterId=${chapterID}`
+                )
+            }
             setResult(
                 response.data.data[0].stdOut ||
                     response.data.data[0].stdout ||
