@@ -24,9 +24,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
-import NewMcqProblemForm from '../_components/NewMcqProblemForm'
 import EditQuizQuestion from '../_components/EditQuizQuestion'
-import { useReducer, useState } from 'react'
 
 export const columns: ColumnDef<quiz>[] = [
     {
@@ -83,19 +81,9 @@ export const columns: ColumnDef<quiz>[] = [
             const quizQuestion = row.original
 
             const openDialog = () => {
-                const dialog = document.getElementById(
-                    'editQuizDialog'
-                ) as HTMLDialogElement
+                const dialog = document.getElementById('editQuizDialog')
                 if (dialog) {
-                    dialog.showModal()
-                }
-            }
-            const closeDialog = () => {
-                const dialog = document.getElementById(
-                    'editQuizDialog'
-                ) as HTMLDialogElement
-                if (dialog) {
-                    dialog.close()
+                    dialog.setAttribute('data-state', 'open') // Simulate opening the dialog
                 }
             }
 
@@ -109,25 +97,31 @@ export const columns: ColumnDef<quiz>[] = [
 
             return (
                 <div className="flex">
-                    <Dialog id="editQuizDialog">
-                        <DialogTrigger asChild>
-                            <Pencil
-                                className="cursor-pointer mr-5"
-                                size={20}
-                                onClick={openDialog}
-                            />
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-[518px] max-h-[90vh] overflow-y-auto overflow-x-hidden">
-                            <DialogHeader>
-                                <DialogTitle>Edit MCQ</DialogTitle>
-                            </DialogHeader>
-                            <EditQuizQuestion
-                                setIsEditModalOpen={closeDialog}
-                                setStoreQuizData={setStoreQuizData}
-                                quizId={quizQuestion.id}
-                            />
-                        </DialogContent>
-                    </Dialog>
+                    <div id="editQuizDialog" data-state="closed">
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Pencil
+                                    className="cursor-pointer mr-5"
+                                    size={20}
+                                    onClick={openDialog}
+                                />
+                            </DialogTrigger>
+
+                            <DialogContent
+                                className="sm:max-w-[518px] max-h-[90vh] overflow-y-auto overflow-x-hidden"
+                                data-state="closed"
+                            >
+                                <DialogHeader>
+                                    <DialogTitle>Edit MCQ</DialogTitle>
+                                </DialogHeader>
+                                <EditQuizQuestion
+                                    setStoreQuizData={setStoreQuizData}
+                                    quizId={quizQuestion.id}
+                                />
+                            </DialogContent>
+                        </Dialog>
+                    </div>
+
                     <Trash2
                         onClick={(e) => {
                             e.stopPropagation()
