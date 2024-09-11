@@ -164,8 +164,8 @@ export async function getAllQuizQuestion(
 
         let url = `/Content/allQuizQuestions`
 
-        if (MCQCurrentTagId.id !== -1) {
-            url = `/Content/allQuizQuestions?tagId=${MCQCurrentTagId.id}`
+        if (MCQCurrentTagId?.id !== -1) {
+            url = `/Content/allQuizQuestions?tagId=${MCQCurrentTagId?.id}`
         }
         const response = await api.get(url)
         setQuizQuestion(response.data)

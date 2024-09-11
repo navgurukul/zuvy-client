@@ -43,7 +43,7 @@ const Mcqs = (props: Props) => {
     const [isOpen, setIsOpen] = useState(false)
     const [search, setSearch] = useState('')
     const debouncedSearch = useDebounce(search, 500)
-    const [difficulty, setDifficulty] = useState<string>('')
+    const [difficulty, setDifficulty] = useState<string>('None')
     const { tags, setTags } = getCodingQuestionTags()
     const { quizData, setStoreQuizData } = getAllQuizData()
     const [selectedTag, setSelectedTag] = useState<Tag>(() => {
