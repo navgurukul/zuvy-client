@@ -113,7 +113,7 @@ export default function EditCodingQuestionForm() {
                     id: testCase.id, // Ensure this is correctly mapped
                     input: JSON.stringify(
                         testCase.inputs.map(
-                            (input: any) => input.parameterValue
+                            (input: any) => String(input.parameterValue)
                         )
                     ),
                     output: JSON.stringify(
@@ -175,12 +175,12 @@ export default function EditCodingQuestionForm() {
                                             value = value.join(' ')
                                         }
                                     }
-                                    return cleanUpValues(value)
+                                    return cleanUpValues(String(value))
                                 })
                                 .join(' ')
                         ),
                         output: cleanUpValues(
-                            testCase.expectedOutput.parameterValue
+                            String(testCase.expectedOutput.parameterValue)
                         ),
                     })
                 ),
@@ -211,7 +211,6 @@ export default function EditCodingQuestionForm() {
     }, [])
 
     const handleEditSubmit = (values: z.infer<typeof formSchema>) => {
-        console.log('values', values.testCases);
         const processInput = (input: string, format: string) => {
             const cleanedInput = cleanUpValues(input)
 
@@ -624,15 +623,15 @@ export default function EditCodingQuestionForm() {
                                     control={form.control}
                                     name={`testCases.${index}.input`}
                                     render={({ field }) => (
-                                        <FormItem className="text-left">
+                                        <FormItem className="text-left w-full">
                                             <Input
                                                 placeholder="Input"
                                                 value={field.value} // Ensure 0 is shown
                                                 onChange={field.onChange}
                                             />
-                                            <p className="text-sm text-gray-500 mt-1">
+                                            <p className="text-sm text-gray-500 mt-1 ">
                                                 {form.watch('inputFormat') === 'arrayOfnum' || form.watch('inputFormat') === 'arrayOfStr'
-                                                    ? 'Enter values separated by commas (e.g., 1,2,3,4)'
+                                                    ? 'Max 1 array accepted (e.g., 1,2,3,4)'
                                                     : 'Enter values separated by spaces (e.g., 2 3 4)'}
                                             </p>
                                             <FormMessage />
@@ -644,16 +643,16 @@ export default function EditCodingQuestionForm() {
                                     control={form.control}
                                     name={`testCases.${index}.output`}
                                     render={({ field }) => (
-                                        <FormItem className="text-left">
+                                        <FormItem className="text-left w-full">
                                             <Input
                                                 placeholder="Output"
                                                 value={field.value} // Ensure 0 is shown
                                                 onChange={field.onChange}
                                             />
-                                            <p className="text-sm text-gray-500 mt-1">
+                                            <p className="text-sm text-gray-500 mt-1 ">
                                                 {form.watch('outputFormat') === 'arrayOfnum' || form.watch('outputFormat') === 'arrayOfStr'
-                                                    ? 'Enter values separated by commas (e.g., 1,2,3,4)'
-                                                    : 'Enter values separated by spaces (e.g., 2 3 4)'}
+                                                    ? 'Max 1 array accepted (e.g., 1,2,3,4)'
+                                                    : 'Only one value accepted (e.g., 55)'}
                                             </p>
                                             <FormMessage />
                                         </FormItem>
