@@ -75,16 +75,17 @@ export default function NewCodingProblemForm({
     ])
 
     const handleAddTestCase = () => {
-        setTestCases((prevTestCases) => [
+        setTestCases((prevTestCases: any) => [
             ...prevTestCases,
-            { id: prevTestCases.length + 1, input: '', output: '' },
+            { id: Date.now(), input: '', output: '' }, // Temporary ID
         ])
     }
 
     const handleRemoveTestCase = (id: number) => {
-        setTestCases((prevTestCases) =>
-            prevTestCases.filter((testCase) => testCase.id !== id)
+        setTestCases((prevTestCases: any) =>
+            prevTestCases.filter((testCase: any) => testCase.id !== id)
         )
+
     }
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -125,6 +126,7 @@ export default function NewCodingProblemForm({
             })
         }
     }
+
 
     const handleSubmit = (values: z.infer<typeof formSchema>) => {
 
@@ -226,9 +228,6 @@ export default function NewCodingProblemForm({
                         parameterName: generateParameterName(index),
                     }));
     
-                    if (inputs.length === 1) {
-                        inputs = inputs[0];  // If only one input, keep it as a single object
-                    }
                 }
     
                 const expectedOutput = processInput(
@@ -490,9 +489,9 @@ export default function NewCodingProblemForm({
 
                     <div className="text-left">
                         <FormLabel>Test Cases</FormLabel>
-                        {testCases.map((testCase, index) => (
+                        {testCases.map((testCase: any, index: number) => (
                             <div
-                                key={index}
+                                key={testCase.id} // Use `testCase.id` as the key for unique identification
                                 className="flex items-center gap-2 mt-2"
                             >
                                 <FormField
@@ -508,7 +507,7 @@ export default function NewCodingProblemForm({
                                             <p className="text-sm text-gray-500 mt-1">
                                                 {form.watch('inputFormat') ===
                                                     'arrayOfnum' ||
-                                                form.watch('inputFormat') ===
+                                                    form.watch('inputFormat') ===
                                                     'arrayOfStr'
                                                     ? 'Enter values separated by commas (e.g., 1,2,3,4)'
                                                     : 'Enter values separated by spaces (e.g., 2 3 4)'}
@@ -530,7 +529,7 @@ export default function NewCodingProblemForm({
                                             <p className="text-sm text-gray-500 mt-1">
                                                 {form.watch('outputFormat') ===
                                                     'arrayOfnum' ||
-                                                form.watch('outputFormat') ===
+                                                    form.watch('outputFormat') ===
                                                     'arrayOfStr'
                                                     ? 'Enter values separated by commas (e.g., 1,2,3,4)'
                                                     : 'Enter values separated by spaces (e.g., 2 3 4)'}
@@ -539,14 +538,14 @@ export default function NewCodingProblemForm({
                                         </FormItem>
                                     )}
                                 />
-                                { (
+                                {
                                     <X
                                         className="cursor-pointer"
                                         onClick={() =>
                                             handleRemoveTestCase(testCase.id)
-                                        }
+                                        } // Pass `testCase.id` to remove the correct test case
                                     />
-                                )}
+                                }
                             </div>
                         ))}
                         <Button

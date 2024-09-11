@@ -1,5 +1,5 @@
 // External imports
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import * as z from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -29,6 +29,10 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { Tag } from '../mcq/page'
 import { DialogFooter } from '@/components/ui/dialog'
+import { getAllQuizQuestion, useFirstRenderValue } from '@/utils/admin'
+import { getCodingQuestionTags } from '@/store/store'
+import { error } from 'console'
+import { Spinner } from '@/components/ui/spinner'
 
 type Props = {}
 export type RequestBodyType = {
@@ -55,56 +59,72 @@ const formSchema = z.object({
 })
 
 const EditQuizQuestion = ({
-    tags,
-    setIsEditModalOpen,
     setStoreQuizData,
-    getAllQuizQuesiton,
-    quizQuestionId,
-    quizQuestion,
+    quizId,
 }: {
-    tags: Tag[]
-    setIsEditModalOpen: any
     setStoreQuizData: any
-    getAllQuizQuesiton: any
-    quizQuestionId: number
-    quizQuestion: any
+    quizId: number
 }) => {
     const [difficulty, setDifficulty] = useState<string>('Easy')
     const [selectedOption, setSelectedOption] = useState<any>('')
     const [options, setOptions] = useState<string[]>(['', ''])
+    const [quizQuestionById, setQuizQuestionById] = useState<any>()
+    const [loadingState, setLoadingState] = useState<string>('')
+    const { tags } = getCodingQuestionTags()
 
-    let selectedQuizQuestion = quizQuestion.filter((question: any) => {
-        return question.id === quizQuestionId
-    })
+    const fetchQuizQuestion = useCallback(async () => {
+        setLoadingState('formIsLoading')
+        try {
+            await api
+                .get(
+                    `/Content/GetQuizQuestionById/${quizId}
+`
+                )
+                .then((res) => {
+                    setQuizQuestionById(res.data.data[0])
+                })
+        } catch (error: any) {
+            console.log(error.message)
+        } finally {
+            setLoadingState('formIsLoaded')
+        }
+    }, [quizId])
 
-    let selectedTagId = selectedQuizQuestion[0]?.tagId
+    useEffect(() => {
+        fetchQuizQuestion()
+    }, [fetchQuizQuestion, quizId])
+
+    let selectedQuizQuestion = quizQuestionById
+    let selectedTagId = selectedQuizQuestion?.tagId
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            difficulty: selectedQuizQuestion[0]?.difficulty || 'Easy',
-            topics: selectedQuizQuestion[0]?.tagId || 0,
-            questionText: selectedQuizQuestion[0]?.question || '',
-            options: selectedQuizQuestion[0]?.options,
-            selectedOption: selectedQuizQuestion[0]?.correctOption || 0,
+            difficulty: selectedQuizQuestion?.difficulty || 'Easy',
+            topics: selectedQuizQuestion?.tagId || 0,
+            questionText: selectedQuizQuestion?.question || '',
+            options: selectedQuizQuestion?.options,
+            selectedOption: selectedQuizQuestion?.correctOption || 0,
         },
     })
+
     useEffect(() => {
-        const selected = quizQuestion.find(
-            (question: any) => question.id === quizQuestionId
-        )
-        if (selected) {
-            setOptions(Object.values(selected.options))
-            setSelectedOption((selected.correctOption - 1).toString())
-            setDifficulty(selected.difficulty)
+        const selectedQuizQuestion = quizQuestionById
+        if (selectedQuizQuestion) {
+            setOptions(Object.values(selectedQuizQuestion.options))
+            setSelectedOption(
+                (selectedQuizQuestion.correctOption - 1).toString()
+            )
+            setDifficulty(selectedQuizQuestion.difficulty)
+
             form.reset({
-                difficulty: selected.difficulty,
-                topics: selected.tagId,
-                questionText: selected.question,
-                options: Object.values(selected.options),
-                selectedOption: selected.correctOption,
+                difficulty: selectedQuizQuestion.difficulty,
+                topics: selectedQuizQuestion.tagId,
+                questionText: selectedQuizQuestion.question,
+                options: Object.values(selectedQuizQuestion.options),
+                selectedOption: selectedQuizQuestion.correctOption,
             })
         }
-    }, [quizQuestionId, quizQuestion, form])
+    }, [quizQuestionById, form])
     const addOption = () => {
         setOptions([...options, ''])
     }
@@ -161,7 +181,7 @@ const EditQuizQuestion = ({
         )
 
         const formattedData = {
-            id: quizQuestionId,
+            id: quizId,
             question: values.questionText,
             options: optionsObject,
             correctOption: parseInt(selectedOption) + 1,
@@ -173,267 +193,244 @@ const EditQuizQuestion = ({
             questions: [formattedData],
         }
         await handleEditQuizQuestion(requestBody)
-        getAllQuizQuesiton(setStoreQuizData, selectedTagId)
-        setIsEditModalOpen(false)
+        getAllQuizQuestion(setStoreQuizData, selectedTagId)
     }
-
     return (
-        <main className="flex  flex-col p-3 ">
-            <Form {...form}>
-                <form
-                    onSubmit={form.handleSubmit(handleSubmit)}
-                    className=" max-w-md w-full flex flex-col gap-4"
-                >
-                    <FormField
-                        control={form.control}
-                        name="difficulty"
-                        render={({ field }) => (
-                            <FormItem className="space-y-3">
-                                <FormControl>
-                                    <RadioGroup
-                                        onValueChange={(value) => {
-                                            setDifficulty(value)
-                                            field.onChange(value)
-                                        }}
-                                        value={difficulty}
-                                        className="flex space-y-1"
-                                    >
-                                        <FormLabel className="mt-5">
-                                            Difficulty
-                                        </FormLabel>
-                                        <FormItem className="flex  items-center space-x-3 space-y-0">
-                                            <FormControl>
-                                                <RadioGroupItem value="Easy" />
-                                            </FormControl>
-                                            <FormLabel className="font-normal">
-                                                Easy
-                                            </FormLabel>
-                                        </FormItem>
-                                        <FormItem className="flex items-center space-x-3 space-y-0">
-                                            <FormControl>
-                                                <RadioGroupItem value="Medium" />
-                                            </FormControl>
-                                            <FormLabel className="font-normal">
-                                                Medium
-                                            </FormLabel>
-                                        </FormItem>
-                                        <FormItem className="flex items-center space-x-3 space-y-0">
-                                            <FormControl>
-                                                <RadioGroupItem value="Hard" />
-                                            </FormControl>
-                                            <FormLabel className="font-normal">
-                                                Hard
-                                            </FormLabel>
-                                        </FormItem>
-                                    </RadioGroup>
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="topics"
-                        render={({ field }) => {
-                            return (
-                                <FormItem className="text-left w-full">
-                                    <FormLabel>Topics</FormLabel>
-                                    <Select
-                                        onValueChange={(value) => {
-                                            const selectedTag = tags.find(
-                                                (tag: any) =>
-                                                    tag.tagName === value
-                                            )
-                                            if (selectedTag) {
-                                                field.onChange(selectedTag.id)
-                                            }
-                                        }}
-                                    >
+        <>
+            {loadingState === 'formIsLoading' ? (
+                <Spinner className="text-secondary" />
+            ) : loadingState === 'formIsLoaded' ? (
+                <main className="flex  flex-col p-3 ">
+                    <Form {...form}>
+                        <form
+                            onSubmit={form.handleSubmit(handleSubmit)}
+                            className=" max-w-md w-full flex flex-col gap-4"
+                        >
+                            <FormField
+                                control={form.control}
+                                name="difficulty"
+                                render={({ field }) => (
+                                    <FormItem className="space-y-3">
                                         <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue
-                                                    placeholder={
-                                                        tags.find(
-                                                            (tag) =>
-                                                                tag.id ===
-                                                                selectedQuizQuestion[0]
-                                                                    ?.tagId
-                                                        )?.tagName ||
-                                                        'Choose Topic'
-                                                    }
-                                                />
-                                            </SelectTrigger>
+                                            <RadioGroup
+                                                onValueChange={(value) => {
+                                                    setDifficulty(value)
+                                                    field.onChange(value)
+                                                }}
+                                                value={difficulty}
+                                                className="flex space-y-1"
+                                            >
+                                                <FormLabel className="mt-5">
+                                                    Difficulty
+                                                </FormLabel>
+                                                <FormItem className="flex  items-center space-x-3 space-y-0">
+                                                    <FormControl>
+                                                        <RadioGroupItem value="Easy" />
+                                                    </FormControl>
+                                                    <FormLabel className="font-normal">
+                                                        Easy
+                                                    </FormLabel>
+                                                </FormItem>
+                                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                                    <FormControl>
+                                                        <RadioGroupItem value="Medium" />
+                                                    </FormControl>
+                                                    <FormLabel className="font-normal">
+                                                        Medium
+                                                    </FormLabel>
+                                                </FormItem>
+                                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                                    <FormControl>
+                                                        <RadioGroupItem value="Hard" />
+                                                    </FormControl>
+                                                    <FormLabel className="font-normal">
+                                                        Hard
+                                                    </FormLabel>
+                                                </FormItem>
+                                            </RadioGroup>
                                         </FormControl>
-                                        <SelectContent>
-                                            {tags.map((tag: any) => (
-                                                <SelectItem
-                                                    key={tag.id}
-                                                    value={tag.tagName}
-                                                >
-                                                    {tag.tagName}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )
-                        }}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="questionText"
-                        render={({ field }) => {
-                            return (
-                                <FormItem className="text-left">
-                                    <FormLabel>Question Text</FormLabel>
-                                    <FormControl>
-                                        <Textarea
-                                            placeholder="Write your Question here"
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )
-                        }}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="selectedOption" // This is important to track the correct option separately
-                        render={({ field }) => (
-                            <FormItem className="space-y-3">
-                                <FormLabel className="mt-5">Options</FormLabel>
-                                <RadioGroup
-                                    onValueChange={(value) => {
-                                        setSelectedOption(value)
-                                        form.setValue('selectedOption', +value)
-                                    }}
-                                    value={selectedOption}
-                                    className="space-y-1"
-                                >
-                                    {options.map((option, index) => (
-                                        <div
-                                            key={index}
-                                            className="flex items-center space-x-3 space-y-0"
-                                        >
-                                            <div className="flex gap-x-3 items-center">
-                                                <RadioGroupItem
-                                                    value={index.toString()}
-                                                />
-                                                <Input
-                                                    placeholder={`Option ${
-                                                        index + 1
-                                                    }`}
-                                                    {...form.register(
-                                                        `options.${index}`
-                                                    )}
-                                                    className="w-[350px]"
-                                                    value={option}
-                                                    onChange={(e) => {
-                                                        const newOptions = [
-                                                            ...options,
-                                                        ]
-                                                        newOptions[index] =
-                                                            e.target.value
-                                                        setOptions(newOptions)
-                                                        form.setValue(
-                                                            'options',
-                                                            newOptions
-                                                        )
-                                                    }}
-                                                />
-                                            </div>
-                                            {options.length > 2 &&
-                                                index >= 2 && (
-                                                    <Button
-                                                        variant={'ghost'}
-                                                        onClick={() =>
-                                                            removeOption(index)
-                                                        }
-                                                        type="button"
-                                                    >
-                                                        <X
-                                                            size={20}
-                                                            className="text-secondary"
-                                                        />
-                                                    </Button>
-                                                )}
-                                        </div>
-                                    ))}
-                                </RadioGroup>
-                                <FormMessage />
-                                <div className="flex justify-start">
-                                    <Button
-                                        variant={'outline'}
-                                        onClick={addOption}
-                                        type="button"
-                                    >
-                                        <Plus
-                                            size={20}
-                                            className="text-secondary"
-                                        />{' '}
-                                        Add Option
-                                    </Button>
-                                </div>
-                            </FormItem>
-                        )}
-                    />
-                    {/*
-                    <RadioGroup
-                        onValueChange={(value) => {
-                            setSelectedOption(value)
-                            form.setValue('selectedOption', +value)
-                        }}
-                        value={selectedOption}
-                        className="space-y-1"
-                    >
-                        {options.map((option, index) => (
-                            <div
-                                key={index}
-                                className="flex items-center space-x-3 space-y-0"
-                            >
-                                <div className="flex gap-x-3 items-center">
-                                    <RadioGroupItem value={index.toString()} />
-                                    <Input
-                                        placeholder={`Option ${index + 1}`}
-                                        {...form.register(`options.${index}`)}
-                                        className="w-[350px]"
-                                        value={option}
-                                        onChange={(e) => {
-                                            const newOptions = [...options]
-                                            newOptions[index] = e.target.value
-                                            setOptions(newOptions)
-                                            form.setValue('options', newOptions)
-                                        }}
-                                    />
-                                </div>
-                                {options.length > 2 && index >= 2 && (
-                                    <Button
-                                        variant={'ghost'}
-                                        onClick={() => removeOption(index)}
-                                        type="button"
-                                    >
-                                        <X
-                                            size={20}
-                                            className="text-secondary"
-                                        />
-                                    </Button>
+                                        <FormMessage />
+                                    </FormItem>
                                 )}
-                            </div>
-                        ))}
-                    </RadioGroup> */}
+                            />
 
-                    <DialogFooter>
-                        <Button type="submit" className="w-1/2 ">
-                            Edit MCQ
-                        </Button>
-                    </DialogFooter>
-                </form>
-            </Form>
-        </main>
+                            <FormField
+                                control={form.control}
+                                name="topics"
+                                render={({ field }) => {
+                                    return (
+                                        <FormItem className="text-left w-full">
+                                            <FormLabel>Topics</FormLabel>
+                                            <Select
+                                                onValueChange={(value) => {
+                                                    const selectedTag =
+                                                        tags.find(
+                                                            (tag: any) =>
+                                                                tag.tagName ===
+                                                                value
+                                                        )
+                                                    if (selectedTag) {
+                                                        field.onChange(
+                                                            selectedTag.id
+                                                        )
+                                                    }
+                                                }}
+                                            >
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue
+                                                            placeholder={
+                                                                tags.find(
+                                                                    (tag) =>
+                                                                        tag.id ===
+                                                                        selectedQuizQuestion?.tagId
+                                                                )?.tagName ||
+                                                                'Choose Topic'
+                                                            }
+                                                        />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    {tags.map((tag: any) => (
+                                                        <SelectItem
+                                                            key={tag.id}
+                                                            value={tag.tagName}
+                                                        >
+                                                            {tag.tagName}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )
+                                }}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="questionText"
+                                render={({ field }) => {
+                                    return (
+                                        <FormItem className="text-left">
+                                            <FormLabel>Question Text</FormLabel>
+                                            <FormControl>
+                                                <Textarea
+                                                    placeholder="Write your Question here"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )
+                                }}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="selectedOption" // This is important to track the correct option separately
+                                render={({ field }) => (
+                                    <FormItem className="space-y-3">
+                                        <FormLabel className="mt-5">
+                                            Options
+                                        </FormLabel>
+                                        <RadioGroup
+                                            onValueChange={(value) => {
+                                                setSelectedOption(value)
+                                                form.setValue(
+                                                    'selectedOption',
+                                                    +value
+                                                )
+                                            }}
+                                            value={selectedOption}
+                                            className="space-y-1"
+                                        >
+                                            {options.map((option, index) => (
+                                                <div
+                                                    key={index}
+                                                    className="flex items-center space-x-3 space-y-0"
+                                                >
+                                                    <div className="flex gap-x-3 items-center">
+                                                        <RadioGroupItem
+                                                            value={index.toString()}
+                                                        />
+                                                        <Input
+                                                            placeholder={`Option ${
+                                                                index + 1
+                                                            }`}
+                                                            {...form.register(
+                                                                `options.${index}`
+                                                            )}
+                                                            className="w-[350px]"
+                                                            value={option}
+                                                            onChange={(e) => {
+                                                                const newOptions =
+                                                                    [...options]
+                                                                newOptions[
+                                                                    index
+                                                                ] =
+                                                                    e.target.value
+                                                                setOptions(
+                                                                    newOptions
+                                                                )
+                                                                form.setValue(
+                                                                    'options',
+                                                                    newOptions
+                                                                )
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    {options.length > 2 &&
+                                                        index >= 2 && (
+                                                            <Button
+                                                                variant={
+                                                                    'ghost'
+                                                                }
+                                                                onClick={() =>
+                                                                    removeOption(
+                                                                        index
+                                                                    )
+                                                                }
+                                                                type="button"
+                                                            >
+                                                                <X
+                                                                    size={20}
+                                                                    className="text-secondary"
+                                                                />
+                                                            </Button>
+                                                        )}
+                                                </div>
+                                            ))}
+                                        </RadioGroup>
+                                        <FormMessage />
+                                        <div className="flex justify-start">
+                                            <Button
+                                                variant={'outline'}
+                                                onClick={addOption}
+                                                type="button"
+                                            >
+                                                <Plus
+                                                    size={20}
+                                                    className="text-secondary"
+                                                />{' '}
+                                                Add Option
+                                            </Button>
+                                        </div>
+                                    </FormItem>
+                                )}
+                            />
+
+                            <DialogFooter>
+                                <Button type="submit" className="w-1/2 ">
+                                    Edit MCQ
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </Form>
+                </main>
+            ) : (
+                ''
+            )}
+        </>
     )
 }
 

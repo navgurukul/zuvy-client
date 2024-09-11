@@ -1,9 +1,9 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { AlertOctagon, Clock, Timer } from 'lucide-react'
+import { AlertOctagon, Timer } from 'lucide-react'
 import {
     Tooltip,
     TooltipContent,
@@ -15,14 +15,42 @@ const Assessment = ({
     assessmentShortInfo,
     assessmentOutSourceId,
     submissionId,
+    chapterContent
 }: {
     assessmentShortInfo: any
     assessmentOutSourceId: any
     submissionId: any
+    chapterContent: any
 }) => {
     const router = useRouter()
     const testDuration = assessmentShortInfo.timeLimit
     const { viewcourses, moduleID } = useParams()
+
+    const [assessmentEndTime, setAssessmentEndTime] = useState<number | null>(null)
+    const [isTimeOver, setIsTimeOver] = useState(false)
+
+    useEffect(() => {
+        // Calculate end time based on start time and duration
+        const startedAt = assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.startedAt
+        if (startedAt) {
+            const startTime = new Date(startedAt).getTime()
+            const endTime = startTime + testDuration * 1000
+
+            
+            // Check if the time is over
+            const interval = setInterval(() => {
+                const currentTime = Date.now()
+                if (currentTime > endTime) {
+                    setIsTimeOver(true)
+                }else{
+                    setIsTimeOver(false)
+                }
+            }, 1000)
+
+            return () => clearInterval(interval)
+        }
+        ;
+    }, [assessmentShortInfo, testDuration])
 
     const handleStartAssessment = () => {
         try {
@@ -183,9 +211,18 @@ const Assessment = ({
                 </div>
             </div>
 
-            <div className="mt-8 flex justify-center">
+            <div className="mt-8 flex flex-col items-center justify-center">
                 {isAssessmentStarted ? (
-                    <Button onClick={handleViewResults}>View Results</Button>
+                    <>
+                        <Button onClick={handleViewResults} disabled={chapterContent.status === 'Pending'}>
+                            View Results
+                        </Button>
+                        {isTimeOver && chapterContent.status === 'Pending' && (
+                            <p className="text-red-500 mt-4">
+                                You have not submitted the assessment properly.
+                            </p>
+                        )}
+                    </>
                 ) : (
                     <TooltipProvider>
                         <Tooltip>

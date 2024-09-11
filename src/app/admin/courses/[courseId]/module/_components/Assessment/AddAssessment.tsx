@@ -245,7 +245,8 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                         setChapterTitle(e.target.value)
                     }}
                     placeholder={content.ModuleAssessment.title}
-                    className="p-0 text-3xl w-2/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize"
+                    className="p-0 text-2xl w-2/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize "
+                    autoFocus
                 />
                 {/* <div className="text-secondary flex font-semibold items-center">
                     <h6 className="mr-2 text-sm">Preview</h6>

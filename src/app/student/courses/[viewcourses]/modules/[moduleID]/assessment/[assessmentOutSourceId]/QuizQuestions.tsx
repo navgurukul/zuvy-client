@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -33,7 +33,18 @@ const QuizQuestions = ({
     getSeperateQuizQuestions: () => void
 }) => {
     const router = useRouter()
+    const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined) // Correct type
     // Define the Zod schema for form validation
+
+    useEffect(() => {
+        return () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current)
+            }
+        }
+    }, [])
+
+
     const formSchema = z.object({
         answers: z.array(
             z.string().nonempty({ message: 'This question is required.' })
@@ -79,7 +90,8 @@ const QuizQuestions = ({
 
             getSeperateQuizQuestions()
 
-            setTimeout(() => {
+               // Set the timeout and store the timeout ID
+               timeoutRef.current = setTimeout(() => {
                 onBack()
             }, 3000)
         } catch (error: any) {

@@ -159,6 +159,7 @@ function Chapters({ params }: any) {
                         assessmentShortInfo={assessmentShortInfo}
                         assessmentOutSourceId={assessmentOutSourceId}
                         submissionId={submissionId}
+                        chapterContent={chapterContent}
                     />
                 )
             case 7:
