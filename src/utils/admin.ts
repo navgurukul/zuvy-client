@@ -424,7 +424,7 @@ export function cleanUpValues(value: string) {
     value = value.replace(/\s{2,}/g, ' ') // Remove extra spaces
     value = value.replace(/,\s*$/, '') // Remove trailing commas
     value = value.replace(/^\s*,/, '') // Remove leading commas
-
+    
     return value
 }
 
