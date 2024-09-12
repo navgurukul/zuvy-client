@@ -164,9 +164,11 @@ export async function getAllQuizQuestion(
 
         let url = `/Content/allQuizQuestions`
 
-        if (MCQCurrentTagId?.id !== -1) {
+        // Check if the tagId exists and is not undefined
+        if (MCQCurrentTagId?.id !== undefined && MCQCurrentTagId?.id !== -1) {
             url = `/Content/allQuizQuestions?tagId=${MCQCurrentTagId?.id}`
         }
+
         const response = await api.get(url)
         setQuizQuestion(response.data)
     } catch (error) {

@@ -1,5 +1,5 @@
 // External imports
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import * as z from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -71,13 +71,16 @@ const EditQuizQuestion = ({
     const [quizQuestionById, setQuizQuestionById] = useState<any>()
     const [loadingState, setLoadingState] = useState<string>('')
     const { tags } = getCodingQuestionTags()
+    const initialQuizId = useRef(quizId)
+
+    console.log(quizId)
 
     const fetchQuizQuestion = useCallback(async () => {
         setLoadingState('formIsLoading')
         try {
             await api
                 .get(
-                    `/Content/GetQuizQuestionById/${quizId}
+                    `/Content/GetQuizQuestionById/${initialQuizId.current}
 `
                 )
                 .then((res) => {
