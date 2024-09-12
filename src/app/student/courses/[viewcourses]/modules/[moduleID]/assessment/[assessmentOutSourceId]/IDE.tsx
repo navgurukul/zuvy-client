@@ -138,11 +138,11 @@ const IDE: React.FC<IDEProps> = ({
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
-                setTimeout(() => {
-                    if (onBack) {
-                        onBack()
-                    }
-                }, 3000)
+                
+                if (onBack) {
+                    onBack()
+                }
+
             } else if (allTestCasesPassed && action === 'run') {
                 toast({
                     title: `Test Cases Passed`,
@@ -162,8 +162,8 @@ const IDE: React.FC<IDEProps> = ({
             // Trigger re-render for the output window
             setResult(
                 response.data.data[0].stdOut ||
-                    response.data.data[0].stdout ||
-                    'No Output Available'
+                response.data.data[0].stdout ||
+                'No Output Available'
             )
         } catch (error: any) {
             toast({
@@ -175,7 +175,7 @@ const IDE: React.FC<IDEProps> = ({
             })
             setCodeError(
                 error.response?.data?.data?.[0]?.stderr ||
-                    'Error occurred during submission.'
+                'Error occurred during submission.'
             )
         }
     }
@@ -408,12 +408,11 @@ const IDE: React.FC<IDEProps> = ({
                                                                 </p>
 
                                                                 <p
-                                                                    className={`text-gray-300 ${
-                                                                        testCase.status ===
-                                                                        'Accepted'
+                                                                    className={`text-gray-300 ${testCase.status ===
+                                                                            'Accepted'
                                                                             ? 'text-green-500'
                                                                             : 'text-red-500'
-                                                                    }`}
+                                                                        }`}
                                                                 >
                                                                     Status:{' '}
                                                                     {
@@ -439,12 +438,11 @@ const IDE: React.FC<IDEProps> = ({
                                                             </>
                                                         ) : (
                                                             <p
-                                                                className={`text-gray-300 ${
-                                                                    testCase.status ===
-                                                                    'Accepted'
+                                                                className={`text-gray-300 ${testCase.status ===
+                                                                        'Accepted'
                                                                         ? 'text-green-500'
                                                                         : 'text-red-500'
-                                                                }`}
+                                                                    }`}
                                                             >
                                                                 Test Case{' '}
                                                                 {index + 1}{' '}
