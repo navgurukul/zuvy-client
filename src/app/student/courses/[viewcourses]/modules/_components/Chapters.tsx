@@ -29,11 +29,13 @@ function Chapters({ params }: any) {
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
     const { viewcourses, moduleID, chapterID } = useParams()
+    const chapter_id = Array.isArray(chapterID) ? Number(chapterID[0]) : Number(chapterID);
     const urlParams = new URLSearchParams(window.location.search)
     const nextChapterId = Number(urlParams.get('nextChapterId'))
     // state and variables
+    console.log('chapterID useParams', chapterID)
     const [chapters, setChapters] = useState<any>([])
-    const [activeChapter, setActiveChapter] = useState(0)
+    const [activeChapter, setActiveChapter] = useState(chapter_id)
     const [topicId, setTopicId] = useState<any>(null)
     const [chapterContent, setChapterContent] = useState<any>({})
     // const [chapterId, setChapterId] = useState<number>(Number(chapterID) || 0)
@@ -61,10 +63,17 @@ function Chapters({ params }: any) {
             // )
             // setActiveChapter(nextChapterId || firstPending.id)
             // fetchChapterContent(nextChapterId || firstPending.id)
+            console.log('response', response)
+            console.log('firstPending', firstPending)
             setTypeId(response?.data.moduleDetails[0]?.typeId)
             setProjectId(response?.data.moduleDetails[0]?.projectId)
-            setActiveChapter(firstPending?.id)
-            fetchChapterContent(firstPending?.id)
+            console.log('firstPending?.id', firstPending?.id)
+            // setActiveChapter(firstPending?.id)
+            // fetchChapterContent(firstPending?.id)
+            // if (activeChapter === 0) {
+            //     setActiveChapter(response.data.trackingData[0]?.id)
+            fetchChapterContent(chapter_id)
+            // }
         } catch (error) {
             console.log(error)
         }
@@ -86,7 +95,15 @@ function Chapters({ params }: any) {
                 // setActiveChapter(nextChapterId || chapterId)
                 // setChapterId(nextChapterId || response.data.trackingData.id)
 
+                console.log(
+                    'chapterId in getChapterDetailsWithStatus',
+                    chapterId
+                )
                 setActiveChapter(chapterId)
+                console.log(
+                    'response data getChapterDetailsWithStatus',
+                    response.data.trackingData
+                )
                 setChapterId(response.data.trackingData.id)
                 setTopicId(response.data.trackingData.topicId)
                 setChapterContent(response.data.trackingData)
@@ -180,9 +197,12 @@ function Chapters({ params }: any) {
         }
     }, [userID, fetchChapters])
 
+    console.log('chapters', chapters)
+
     useEffect(() => {
         if (chapters.length > 0) {
-            fetchChapterContent(chapters[0]?.id)
+            // fetchChapterContent(chapters[0]?.id)
+            fetchChapterContent(chapter_id)
         }
     }, [chapters])
 
@@ -199,6 +219,8 @@ function Chapters({ params }: any) {
             )
         }
     }, [topicId, chapterId])
+
+    console.log('activeChapter', activeChapter)
 
     return (
         <>

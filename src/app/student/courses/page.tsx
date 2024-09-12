@@ -99,13 +99,15 @@ const Page: React.FC<pageProps> = () => {
                                                 <div>
                                                     <div className="flex flex-row gap-3">
                                                         {resumeCourse.newChapter
-                                                                ?.title &&
-                                                                resumeCourse.typeId === 1 && (
-                                                                    <BookOpenText className="mt-2" />
-                                                                )}
+                                                            ?.title &&
+                                                            resumeCourse.typeId ===
+                                                                1 && (
+                                                                <BookOpenText className="mt-2" />
+                                                            )}
                                                         {resumeCourse.newChapter
-                                                                ?.title && 
-                                                                resumeCourse.typeId === 2 && (
+                                                            ?.title &&
+                                                            resumeCourse.typeId ===
+                                                                2 && (
                                                                 <h1 className="text-md mt-2 text-start font-bold">
                                                                     Project:
                                                                 </h1>
@@ -147,7 +149,7 @@ const Page: React.FC<pageProps> = () => {
                                                     >
                                                         <Link
                                                             className="gap-3 flex items-center text-secondary"
-                                                            href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`}
+                                                            href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}/chapters/${resumeCourse.newChapter?.id}`}
                                                         >
                                                             <p>
                                                                 Resume Learning
@@ -163,17 +165,19 @@ const Page: React.FC<pageProps> = () => {
                                             <div className="lg:hidden">
                                                 <div className="flex flex-row gap-4">
                                                     {resumeCourse.newChapter
-                                                            ?.title &&
-                                                            resumeCourse.typeId === 1 && (
-                                                                <BookOpenText className="mt-2" />
-                                                            )}
+                                                        ?.title &&
+                                                        resumeCourse.typeId ===
+                                                            1 && (
+                                                            <BookOpenText className="mt-2" />
+                                                        )}
                                                     {resumeCourse.newChapter
-                                                        ?.title && 
-                                                        resumeCourse.typeId === 2 && (
-                                                        <h1 className="text-md mt-2 text-start font-bold">
-                                                            Project:
-                                                        </h1>
-                                                    )}
+                                                        ?.title &&
+                                                        resumeCourse.typeId ===
+                                                            2 && (
+                                                            <h1 className="text-md mt-2 text-start font-bold">
+                                                                Project:
+                                                            </h1>
+                                                        )}
                                                     <h1
                                                         className={`${
                                                             resumeCourse
@@ -207,7 +211,7 @@ const Page: React.FC<pageProps> = () => {
                                                     >
                                                         <Link
                                                             className="gap-3 flex items-center text-secondary"
-                                                            href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`}
+                                                            href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}/chapters/${resumeCourse.newChapter?.id}`}
                                                         >
                                                             <p>
                                                                 Resume Learning

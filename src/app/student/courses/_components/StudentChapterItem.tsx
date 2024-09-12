@@ -63,23 +63,23 @@ function StudentChapterItem({
 
     // async
 
-    useEffect(() => {
-        // fetchChapterContent(chapterId)
-        if (activeChapter === chapterId) {
-            router.push(
-                `/student/courses/${viewcourses}/modules/${moduleID}/chapters/${chapterId}`
-            )
+    // useEffect(() => {
+    //     // fetchChapterContent(chapterId)
+    //     if (activeChapter === chapterId) {
+    //         router.push(
+    //             `/student/courses/${viewcourses}/modules/${moduleID}/chapters/${chapterId}`
+    //         )
 
-            setActiveChapter(chapterId)
-        }
-    }, [chapterId])
+    //         setActiveChapter(chapterId)
+    //     }
+    // }, [chapterId])
 
     console.log('chapterId', chapterId)
-    console.log('activeChapter', activeChapter)
+    // console.log('activeChapter', activeChapter)
 
     return (
         <div>
-            {/* <Link
+            <Link
             // key={id}
             href={`/student/courses/${viewcourses}/modules/${moduleID}/chapters/${chapterId}`}
             // className={`bg-gradient-to-bl my-3 p-3 rounded-xl flex flex-col md:flex-row ${
@@ -91,13 +91,14 @@ function StudentChapterItem({
             //         ? 'bg-yellow/30'
             //         : 'bg-yellow/50'
             // }`}
-        > */}
+        >
             <div
                 className={cn(
                     'flex rounded-md p-3  my-1 cursor-pointer justify-between items-center',
                     setActiveChapterItem()
                 )}
                 onClick={() => {
+                    console.log('chapterId sending to fetchChapterContent', chapterId)
                     fetchChapterContent(chapterId)
                     // router.push(
                     //     `/student/courses/${viewcourses}/modules/${moduleID}/chapters/${chapterId}`
@@ -128,7 +129,7 @@ function StudentChapterItem({
                     )}
                 </div>
             </div>
-            {/* </Link> */}
+            </Link>
         </div>
     )
 }

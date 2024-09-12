@@ -262,13 +262,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                                     >
                                                         <Link
                                                             className="gap-3 flex items-center text-secondary"
-                                                            // href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`}
-                                                            href={{
-                                                                pathname: `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`,
-                                                                query: {
-                                                                    nextChapterId,
-                                                                },
-                                                            }}
+                                                            href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}/chapters/${resumeCourse.newChapter?.id}`}
                                                         >
                                                             <p>
                                                                 Resume Learning
@@ -338,13 +332,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                                 >
                                                     <Link
                                                         className="gap-3 flex items-center text-secondary"
-                                                        // href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`}
-                                                        href={{
-                                                            pathname: `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`,
-                                                            query: {
-                                                                nextChapterId,
-                                                            },
-                                                        }}
+                                                        href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}/chapters/${resumeCourse.newChapter?.id}`}
                                                     >
                                                         <p>Resume Learning</p>
                                                         <ChevronRight
