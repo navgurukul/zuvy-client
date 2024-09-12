@@ -408,6 +408,8 @@ function Page({
         setIsFullScreen(true)
     }
 
+
+
     return (
         <React.Fragment>
             {!isFullScreen ? (
