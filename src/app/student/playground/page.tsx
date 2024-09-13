@@ -1,13 +1,17 @@
 'use client'
 
+// External imports
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-
-import { useLazyLoadedStudentData } from '@/store/store'
-import { api } from '@/utils/axios.config'
 import Image from 'next/image'
+
+// Internal imports
+import { useLazyLoadedStudentData, getCodingQuestionTags } from '@/store/store'
+import { api } from '@/utils/axios.config'
+import { getAllTags } from '@/utils/admin'
 import { difficultyColor } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import {
     Select,
     SelectContent,
@@ -15,7 +19,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import {
     Table,
     TableBody,
@@ -24,10 +27,9 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
-import { Button } from '@/components/ui/button'
-import { getCodingQuestionTags } from '@/store/store'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
-import { getAllOpenEndedQuestions, getAllTags } from '@/utils/admin'
+import { toast } from '@/components/ui/use-toast'
+
 interface Question {
     title: string
     status: string
@@ -69,13 +71,17 @@ const CodingPlayground = () => {
 
     const getQuestions = async () => {
         try {
-            await api
-                .get(`/Content/allCodingQuestions`)
-                .then((response) => {
-                    setQuestions(response.data)
-                })
+            await api.get(`/Content/allCodingQuestions`).then((response) => {
+                setQuestions(response.data)
+            })
         } catch (error) {
-            console.error('Error fetching courses:', error)
+            toast({
+                title: 'Error:',
+                description: 'An error occurred while fetching coding questions',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+            })
+            // console.error('Error fetching courses:', error)
         }
     }
 
@@ -115,9 +121,6 @@ const CodingPlayground = () => {
                     <h1 className="text-2xl font-bold mb-4">
                         Coding Playground
                     </h1>
-                    <p className="mb-4">
-                        Practice problems for AFE + NavGurukul Python Course
-                    </p>
                     <div className="flex mb-2 w-1/4">
                         <Input
                             type="text"

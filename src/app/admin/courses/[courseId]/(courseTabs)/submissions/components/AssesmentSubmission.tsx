@@ -1,20 +1,25 @@
+'use client'
 import React, { useCallback, useEffect, useState } from 'react'
 import AssesmentComponent from '../../../_components/AssesmentComponent'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import Image from 'next/image'
+import useDebounce from '@/hooks/useDebounce'
 // import assesmentNotfound from @/public
 
 type Props = {}
 
-const AssesmentSubmissionComponent = ({ courseId }: any) => {
+const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
     const [assesments, setAssesments] = useState<any>()
+    const debouncedSearch = useDebounce(searchTerm, 300)
 
     const getAssessments = useCallback(async () => {
         try {
-            const res = await api.get(
-                `/admin/bootcampAssessment/bootcamp_id${courseId}`
-            )
+            const url = debouncedSearch
+                ? `/admin/bootcampAssessment/bootcamp_id${courseId}?searchAssessment=${debouncedSearch}`
+                : `/admin/bootcampAssessment/bootcamp_id${courseId}`
+
+            const res = await api.get(url)
             setAssesments(res.data)
         } catch (error) {
             toast({
@@ -23,14 +28,14 @@ const AssesmentSubmissionComponent = ({ courseId }: any) => {
                 className: 'text-start capitalize border border-destructive',
             })
         }
-    }, [courseId])
+    }, [courseId, debouncedSearch])
 
     useEffect(() => {
         getAssessments()
     }, [getAssessments])
 
     return (
-        <div className="grid grid-cols-1 relative gap-8 mt-4 md:mt-8 md:grid-cols-2">
+        <div className="grid relative gap-8 mt-4 md:mt-8">
             {assesments ? (
                 Object.keys(assesments).length > 0 ? (
                     Object.keys(assesments).map(
@@ -40,50 +45,62 @@ const AssesmentSubmissionComponent = ({ courseId }: any) => {
                                     <h2 className="text-lg text-start font-bold text-gray-900 dark:text-white">
                                         Module - {key}
                                     </h2>
-                                    {assesments[key].map((assessment: any) => (
-                                        <AssesmentComponent
-                                            key={assessment.id}
-                                            id={assessment.id}
-                                            title={assessment.title}
-                                            codingChallenges={
-                                                assessment.totalCodingQuestions
-                                            }
-                                            mcq={assessment.totalQuizzes}
-                                            openEnded={
-                                                assessment.totalOpenEndedQuestions
-                                            }
-                                            totalSubmissions={
-                                                assesments.totalStudents
-                                            }
-                                            studentsSubmitted={
-                                                assessment.totalSubmitedAssessments
-                                            }
-                                            bootcampId={courseId}
-                                            qualifiedStudents={
-                                                assessment.qualifiedStudents
-                                            }
-                                        />
-                                    ))}
+                                    <div className="grid md:grid-cols-3 gap-3">
+                                        {assesments[key].map(
+                                            (assessment: any) => (
+                                                <AssesmentComponent
+                                                    key={assessment.id}
+                                                    id={assessment.id}
+                                                    title={assessment.title}
+                                                    codingChallenges={
+                                                        assessment.totalCodingQuestions
+                                                    }
+                                                    mcq={
+                                                        assessment.totalQuizzes
+                                                    }
+                                                    openEnded={
+                                                        assessment.totalOpenEndedQuestions
+                                                    }
+                                                    totalSubmissions={
+                                                        assesments.totalStudents
+                                                    }
+                                                    studentsSubmitted={
+                                                        assessment.totalSubmitedAssessments
+                                                    }
+                                                    bootcampId={courseId}
+                                                    qualifiedStudents={
+                                                        assessment.qualifiedStudents
+                                                    }
+                                                />
+                                            )
+                                        )}
+                                    </div>
                                 </div>
                             )
                     )
                 ) : (
-                    <div className="w-full absolute h-full">
+                    <div className="w-screen flex flex-col justify-center items-center h-4/5">
+                        <h1 className="text-center font-semibold ">
+                            No Assessment Found
+                        </h1>
                         <Image
-                            src="/public/undraw_Not_found_re_bh2e.png"
-                            alt="Assesment Not Found"
-                            width={100}
-                            height={100}
+                            src="/emptyStates/curriculum.svg"
+                            alt="No Assessment Found"
+                            width={400}
+                            height={400}
                         />
                     </div>
                 )
             ) : (
-                <div className="w-full absolute h-full">
+                <div className="w-full flex justify-center items-center absolute inset-0 h-screen">
+                    <h1 className="text-center font-semibold ">
+                        No Assessment Found
+                    </h1>
                     <Image
-                        src="/public/undraw_Not_found_re_bh2e.png"
-                        alt="Assesment Not Found"
-                        width={100}
-                        height={100}
+                        src="/emptyStates/curriculum.svg"
+                        alt="No Assessment Found"
+                        width={400}
+                        height={400}
                     />
                 </div>
             )}

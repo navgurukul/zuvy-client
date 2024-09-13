@@ -22,15 +22,6 @@ import {
     handleEditCodingQuestion,
 } from '@/utils/admin'
 
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from '@/components/ui/dialog'
-import EditCodingQuestionForm from '@/app/admin/resource/_components/EditCodingQuestionForm'
-
 export const columns: ColumnDef<CodingQuestion>[] = [
     {
         accessorKey: 'problemName',
@@ -110,11 +101,6 @@ export const columns: ColumnDef<CodingQuestion>[] = [
             return (
                 <>
                     <div className="flex">
-                        <Dialog
-                            onOpenChange={setIsCodingEditDialogOpen}
-                            open={isCodingEditDialogOpen}
-                        >
-                            <DialogTrigger>
                                 <Pencil
                                     className="cursor-pointer mr-5"
                                     size={20}
@@ -126,27 +112,7 @@ export const columns: ColumnDef<CodingQuestion>[] = [
                                         )
                                     }}
                                 />
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-[500px]">
-                                <DialogHeader>
-                                    <DialogTitle>
-                                        Edit Coding Question
-                                    </DialogTitle>
-                                </DialogHeader>
-                                <div className="w-full">
-                                    <EditCodingQuestionForm
-                                        setIsCodingEditDialogOpen={
-                                            setIsCodingEditDialogOpen
-                                        }
-                                        getAllCodingQuestions={
-                                            getAllCodingQuestions
-                                        }
-                                        setCodingQuestions={setCodingQuestions}
-                                        codingQuestions={codingQuestions}
-                                    />
-                                </div>
-                            </DialogContent>
-                        </Dialog>
+                    
                         <Trash2
                             onClick={(e) => {
                                 e.stopPropagation()

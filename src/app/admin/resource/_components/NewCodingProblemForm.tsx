@@ -25,11 +25,21 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Plus, X } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
+import { cleanUpValues } from '@/utils/admin'
+import { Toast } from '@/components/ui/toast'
+
+// Regular expression to check for special characters
+const noSpecialCharacters = /^[a-zA-Z0-9\s]*$/;
 
 const formSchema = z.object({
-    title: z.string().min(5),
-    problemStatement: z.string().min(10),
-    constraints: z.string().min(5),
+    title: z.string()
+        .min(5, 'Title must be at least 5 characters long.')
+        .max(25, 'Title must be at most 25 characters long.')
+        .refine(value => noSpecialCharacters.test(value), {
+            message: 'Title must not contain special characters.',
+        }),
+    problemStatement: z.string().min(10, 'Problem statement must be at least 10 characters long.'),
+    constraints: z.string().min(5, 'Constraints must be at least 5 characters long.'),
     difficulty: z.enum(['Easy', 'Medium', 'Hard'], {
         required_error: 'You need to select a Difficulty type.',
     }),
@@ -42,11 +52,11 @@ const formSchema = z.object({
     }),
     testCases: z.array(
         z.object({
-            input: z.string().min(1),
-            output: z.string().min(1),
+            input: z.string().min(1, 'Input cannot be empty.'),
+            output: z.string().min(1, 'Output cannot be empty.'),
         })
     ),
-})
+});
 
 export default function NewCodingProblemForm({
     tags,
@@ -61,19 +71,21 @@ export default function NewCodingProblemForm({
 }) {
     const [testCases, setTestCases] = useState([
         { id: 1, input: '', output: '' },
+        { id: 2, input: '', output: '' },
     ])
 
     const handleAddTestCase = () => {
-        setTestCases((prevTestCases) => [
+        setTestCases((prevTestCases: any) => [
             ...prevTestCases,
-            { id: prevTestCases.length + 1, input: '', output: '' },
+            { id: Date.now(), input: '', output: '' }, // Temporary ID
         ])
     }
 
     const handleRemoveTestCase = (id: number) => {
-        setTestCases((prevTestCases) =>
-            prevTestCases.filter((testCase) => testCase.id !== id)
+        setTestCases((prevTestCases: any) =>
+            prevTestCases.filter((testCase: any) => testCase.id !== id)
         )
+
     }
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -91,7 +103,6 @@ export default function NewCodingProblemForm({
     })
 
     async function createCodingQuestion(data: any) {
-        console.log(data)
         try {
             const response = await api.post(
                 `codingPlatform/create-question`,
@@ -116,26 +127,68 @@ export default function NewCodingProblemForm({
         }
     }
 
+
     const handleSubmit = (values: z.infer<typeof formSchema>) => {
+
         const processInput = (input: string, format: string) => {
+            const cleanedInput = cleanUpValues(input);
+    
+            const isValidNumber = (value: string) => !isNaN(Number(value));
+            const isValidFloat = (value: string) => !isNaN(parseFloat(value));
+    
             switch (format) {
-                case 'arrayOfnum':
-                    return input.split(',').map(Number)
-                case 'arrayOfStr':
-                    return input.split(',')
-                case 'int':
-                    return Number(input)
-                case 'float':
-                    return parseFloat(input)
+                case 'arrayOfnum': {
+                    const values = cleanedInput.split(',');
+                    if (!values.every(isValidNumber)) {
+                        toast({
+                            title: 'Invalid number value.',
+                            description: 'Please enter a valid number.',
+                            className:
+                                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                        });
+                        return null;
+                    }
+                    return values.map(Number);
+                }
+                case 'arrayOfStr': {
+                    return cleanedInput.split(',');
+                }
+                case 'int': {
+                    const values = cleanedInput.split(' ');
+                    if (!values.every(isValidNumber)) {
+                        toast({
+                            title: 'Invalid number value.',
+                            description: 'Please enter a valid number.',
+                            className:
+                                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                        });
+                        return null;
+                    }
+                    return values.length === 1 ? Number(values[0]) : values.map(Number);
+                }
+                case 'float': {
+                    if (!isValidFloat(cleanedInput)) {
+                        toast({
+                            title: 'Invalid float value.',
+                            description: 'Please enter a valid float value.',
+                            className:
+                                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                        });
+                        return null;
+                    }
+                    return parseFloat(cleanedInput);
+                }
+                case 'str': 
+                    return cleanedInput;
                 default:
-                    return input
+                    return cleanedInput;
             }
-        }
-
+        };
+    
         const generateParameterName = (index: number) => {
-            return String.fromCharCode(97 + index)
-        }
-
+            return String.fromCharCode(97 + index); // a, b, c, etc.
+        };
+    
         const formattedData = {
             title: values.title,
             description: values.problemStatement,
@@ -146,47 +199,80 @@ export default function NewCodingProblemForm({
                 const processedInput = processInput(
                     testCase.input,
                     values.inputFormat
-                )
-                let inputs
-
-                if (Array.isArray(processedInput)) {
+                );
+    
+                if (processedInput === null) {
+                    return null;
+                }
+    
+                let inputs;
+    
+                if (Array.isArray(processedInput) && 
+                    (values.inputFormat === 'arrayOfnum' || values.inputFormat === 'arrayOfStr')) {
                     inputs = [
                         {
                             parameterType: values.inputFormat,
                             parameterValue: processedInput,
                             parameterName: 'a',
                         },
-                    ]
+                    ];
                 } else {
-                    const inputValues = testCase.input
+                    const inputValues = cleanUpValues(testCase.input)
                         .trim()
                         .split(' ')
-                        .filter(Boolean)
+                        .filter(Boolean);
+    
                     inputs = inputValues.map((value, index) => ({
                         parameterType: values.inputFormat,
                         parameterValue: processInput(value, values.inputFormat),
                         parameterName: generateParameterName(index),
-                    }))
+                    }));
+    
                 }
-
+    
+                const expectedOutput = processInput(
+                    testCase.output,
+                    values.outputFormat
+                );
+    
+                if (expectedOutput === null) {
+                    return null;
+                }
+    
                 return {
                     inputs,
                     expectedOutput: {
                         parameterType: values.outputFormat,
-                        parameterValue: processInput(
-                            testCase.output,
-                            values.outputFormat
-                        ),
+                        parameterValue: expectedOutput,
                     },
-                }
-            }),
+                };
+            }).filter(Boolean), 
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             content: {},
+        };
+    
+        const hasInvalidTestCase = formattedData.testCases.some((testCase:any) => {
+            return testCase?.inputs?.parameterValue === null ||
+                   testCase?.expectedOutput.parameterValue === null;
+        });
+    
+        if (hasInvalidTestCase || formattedData.testCases.length === 0) {
+            toast({
+                title: 'Please enter valid test cases.',
+                description: 'Submission failed: One or more test cases have invalid inputs or outputs.',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+            });
+            return;
         }
-        createCodingQuestion(formattedData)
-        getAllCodingQuestions(setCodingQuestions)
-    }
+    
+        createCodingQuestion(formattedData);
+        getAllCodingQuestions(setCodingQuestions);
+    };
+    
+    
+    
 
     return (
         <main className="flex flex-col p-3 w-full items-center">
@@ -403,16 +489,16 @@ export default function NewCodingProblemForm({
 
                     <div className="text-left">
                         <FormLabel>Test Cases</FormLabel>
-                        {testCases.map((testCase, index) => (
+                        {testCases.map((testCase: any, index: number) => (
                             <div
-                                key={index}
+                                key={testCase.id} // Use `testCase.id` as the key for unique identification
                                 className="flex items-center gap-2 mt-2"
                             >
                                 <FormField
                                     control={form.control}
                                     name={`testCases.${index}.input`}
                                     render={({ field }) => (
-                                        <FormItem className="text-left">
+                                        <FormItem className="text-left w-full">
                                             <Input
                                                 placeholder="Input"
                                                 value={field.value || ''}
@@ -421,9 +507,9 @@ export default function NewCodingProblemForm({
                                             <p className="text-sm text-gray-500 mt-1">
                                                 {form.watch('inputFormat') ===
                                                     'arrayOfnum' ||
-                                                form.watch('inputFormat') ===
+                                                    form.watch('inputFormat') ===
                                                     'arrayOfStr'
-                                                    ? 'Enter values separated by commas (e.g., 1,2,3,4)'
+                                                    ? 'Max 1 array accepted (e.g., 1,2,3,4)'
                                                     : 'Enter values separated by spaces (e.g., 2 3 4)'}
                                             </p>
                                             <FormMessage />
@@ -434,7 +520,7 @@ export default function NewCodingProblemForm({
                                     control={form.control}
                                     name={`testCases.${index}.output`}
                                     render={({ field }) => (
-                                        <FormItem className="text-left">
+                                        <FormItem className="text-left w-full">
                                             <Input
                                                 placeholder="Output"
                                                 value={field.value || ''}
@@ -443,23 +529,23 @@ export default function NewCodingProblemForm({
                                             <p className="text-sm text-gray-500 mt-1">
                                                 {form.watch('outputFormat') ===
                                                     'arrayOfnum' ||
-                                                form.watch('outputFormat') ===
+                                                    form.watch('outputFormat') ===
                                                     'arrayOfStr'
-                                                    ? 'Enter values separated by commas (e.g., 1,2,3,4)'
-                                                    : 'Enter values separated by spaces (e.g., 2 3 4)'}
+                                                    ? 'Max 1 array accepted (e.g., 1,2,3,4)'
+                                                    : 'Only one value accepted (e.g., 55)'}
                                             </p>
                                             <FormMessage />
                                         </FormItem>
                                     )}
                                 />
-                                {index !== 0 && (
+                                {
                                     <X
                                         className="cursor-pointer"
                                         onClick={() =>
                                             handleRemoveTestCase(testCase.id)
-                                        }
+                                        } // Pass `testCase.id` to remove the correct test case
                                     />
-                                )}
+                                }
                             </div>
                         ))}
                         <Button

@@ -1,18 +1,27 @@
 'use client'
+
+// External imports
 import React, { useCallback, useEffect, useState } from 'react'
-import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
+
+// Internal imports
+import { Input } from '@/components/ui/input'
 import { columns } from './column'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { api } from '@/utils/axios.config'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Skeleton } from '@/components/ui/skeleton'
+import useDebounce from '@/hooks/useDebounce'
 
 type Props = {}
 
 const Page = ({ params }: any) => {
     const [assesmentData, setAssessmentData] = useState<any>()
+    const [searchStudentAssessment, setSearchStudentAssessment] =
+        useState<any>('')
+
+    const debouncedSearch = useDebounce(searchStudentAssessment, 400)
 
     const [dataTableAssesment, setDataTableAssessments] = useState<any>([])
     const [bootcampData, setBootcampData] = useState<any>()
@@ -51,10 +60,13 @@ const Page = ({ params }: any) => {
 
     const getStudentAssesmentDataHandler = useCallback(async () => {
         try {
-            const res = await api.get(
-                `/admin/assessment/students/assessment_id${params.StudentAssesmentData}`
-            )
+            const endpoint = debouncedSearch
+                ? `/admin/assessment/students/assessment_id114?searchStudent=${debouncedSearch}`
+                : `/admin/assessment/students/assessment_id${params.StudentAssesmentData}`
+
+            const res = await api.get(endpoint)
             const data = res.data
+
             setAssessmentData(data.ModuleAssessment)
             setPassPercentage(data.passPercentage)
 
@@ -69,7 +81,7 @@ const Page = ({ params }: any) => {
         } catch (error) {
             console.error('API Error:', error)
         }
-    }, [params.StudentAssesmentData])
+    }, [params.StudentAssesmentData, debouncedSearch])
 
     useEffect(() => {
         const fetchData = async () => {
@@ -147,8 +159,12 @@ const Page = ({ params }: any) => {
                     )}
                     <div className="relative">
                         <Input
-                            placeholder="Search for Name, Email"
-                            className="w-1/3 my-6 input-with-icon pl-8" // Add left padding for the icon
+                            placeholder="Search for Student"
+                            className="w-1/3 my-6 input-with-icon pl-8"
+                            value={searchStudentAssessment}
+                            onChange={(e) =>
+                                setSearchStudentAssessment(e.target.value)
+                            }
                         />
                         <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
                             <Search className="text-gray-400" size={20} />

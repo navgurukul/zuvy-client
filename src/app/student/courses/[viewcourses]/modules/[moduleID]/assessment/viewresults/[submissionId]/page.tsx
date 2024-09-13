@@ -42,7 +42,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
             const timeTaken = {
                 seconds: Math.floor(timeTakenSeconds % 60),
                 minutes: Math.floor((timeTakenSeconds / 60) % 60),
-                hours: Math.floor((timeTakenSeconds / 3600) % 24)
+                hours: Math.floor((timeTakenSeconds / 3600) % 24),
             }
 
             // Create the output string based on the hours
@@ -96,7 +96,10 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
     if (!viewResultsData) {
         return (
             <div>
-                <div onClick={() => router.back()} className='cursor-pointer flex justify-start'>
+                <div
+                    onClick={() => router.back()}
+                    className="cursor-pointer flex justify-start"
+                >
                     <ChevronLeft width={24} /> Back
                 </div>
                 {showErrorMessage}
@@ -106,8 +109,12 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
 
     return (
         <React.Fragment>
-            <div onClick={() => router.back()} className='cursor-pointer flex justify-start'>
-                <ChevronLeft width={24} />Back
+            <div
+                onClick={() => router.back()}
+                className="cursor-pointer flex justify-start"
+            >
+                <ChevronLeft width={24} />
+                Back
             </div>
             <div className="headings mx-auto my-5 max-w-2xl">
                 <div>{timeTaken}</div>
@@ -117,29 +124,56 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
             {viewResultsData?.codingQuestionCount > 0 && (
                 <>
                     <div className="headings mx-auto my-5 max-w-2xl">
-                        {viewResultsData.PracticeCode.length > 0 ? (<h1 className="text-start text-xl">Coding Challenges</h1>) : <h1 className="text-center text-xl">No Coding Submissions Found</h1>}
+                        {viewResultsData.PracticeCode.length > 0 ? (
+                            <h1 className="text-start text-xl">
+                                Coding Challenges
+                            </h1>
+                        ) : (
+                            <h1 className="text-center text-xl">
+                                No Coding Submissions Found
+                            </h1>
+                        )}
                     </div>
                     {viewResultsData.PracticeCode.map((codingQuestion: any) => (
-                        <div key={codingQuestion.id} className={`container mx-auto rounded-xl shadow-lg overflow-hidden max-w-2xl min-h-52 mt-4 py-5`}>
+                        <div
+                            key={codingQuestion.id}
+                            className={`container mx-auto rounded-xl shadow-lg overflow-hidden max-w-2xl min-h-52 mt-4 py-5`}
+                        >
                             <div className="flex justify-between">
                                 <div className="font-bold text-xl my-2">
                                     {codingQuestion.questionDetail.title}
                                 </div>
-                                <div className={cn(
-                                    `font-semibold text-secondary my-2`,
-                                    difficultyColor(codingQuestion.questionDetail.difficulty)
-                                )}>
+                                <div
+                                    className={cn(
+                                        `font-semibold text-secondary my-2`,
+                                        difficultyColor(
+                                            codingQuestion.questionDetail
+                                                .difficulty
+                                        )
+                                    )}
+                                >
                                     {codingQuestion.questionDetail.difficulty}
                                 </div>
                             </div>
                             <div className="text-xl mt-2 text-start">
-                                Description: {codingQuestion.questionDetail.description}
+                                Description:{' '}
+                                {codingQuestion.questionDetail.description}
                             </div>
                             <div className={`text-xl mt-2 text-start `}>
-                                Status: <span className={`ml-2 ${codingQuestion.status === 'Accepted' ? 'text-green-400' : 'text-destructive'}`}>{codingQuestion.status}</span>
+                                Status:{' '}
+                                <span
+                                    className={`ml-2 ${codingQuestion.status === 'Accepted' ? 'text-green-400' : 'text-destructive'}`}
+                                >
+                                    {codingQuestion.status}
+                                </span>
                             </div>
-                            <div 
-                                onClick={() => viewCodingSubmission(codingQuestion.codingOutsourseId, codingQuestion.questionId)} 
+                            <div
+                                onClick={() =>
+                                    viewCodingSubmission(
+                                        codingQuestion.codingOutsourseId,
+                                        codingQuestion.questionId
+                                    )
+                                }
                                 className="cursor-pointer mt-4 flex justify-end text-secondary font-bold"
                             >
                                 View Submission <ChevronRight />
@@ -157,13 +191,16 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                     </div>
                     <div className="container mx-auto bg-white rounded-xl shadow-lg overflow-hidden max-w-2xl h-36">
                         <div className="flex justify-between">
-                            <div className="font-bold text-xl mb-2">Quiz Questions</div>
+                            <div className="font-bold text-xl mb-2">
+                                Quiz Questions
+                            </div>
                             <div className="p-2 text-base rounded-full bg-[#FFC374]">
                                 {viewResultsData.mcqQuestionCount} questions
                             </div>
                         </div>
                         <div className="text-xl mt-2 text-start">
-                            Attempted {viewResultsData?.attemptedMCQQuestions}/{viewResultsData?.mcqQuestionCount}
+                            Attempted {viewResultsData?.attemptedMCQQuestions}/
+                            {viewResultsData?.mcqQuestionCount}
                         </div>
                         <div
                             onClick={viewQuizSubmission}
@@ -179,7 +216,9 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
             {viewResultsData?.openEndedQuestionCount > 0 && (
                 <>
                     <div className="headings mx-auto my-10 max-w-2xl">
-                        <h1 className="text-start text-xl">Open-Ended Questions</h1>
+                        <h1 className="text-start text-xl">
+                            Open-Ended Questions
+                        </h1>
                     </div>
                     <div className="container mx-auto bg-white rounded-xl shadow-lg overflow-hidden max-w-2xl h-36">
                         <div className="flex justify-between">
@@ -187,11 +226,14 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                                 Open-Ended Questions
                             </div>
                             <div className="p-2 text-base rounded-full bg-[#FFC374]">
-                                {viewResultsData.openEndedQuestionCount} questions
+                                {viewResultsData.openEndedQuestionCount}{' '}
+                                questions
                             </div>
                         </div>
                         <div className="text-xl mt-2 text-start">
-                            Attempted {viewResultsData?.attemptedOpenEndedQuestions}/{viewResultsData?.openEndedQuestionCount}
+                            Attempted{' '}
+                            {viewResultsData?.attemptedOpenEndedQuestions}/
+                            {viewResultsData?.openEndedQuestionCount}
                         </div>
                         <div
                             onClick={viewOpenEndedSubmission}

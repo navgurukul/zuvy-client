@@ -1,7 +1,11 @@
 'use client'
-import React, { useEffect, useState } from 'react'
 
+// External imports
+import React, { useEffect, useState } from 'react'
 import { Search } from 'lucide-react'
+import Image from 'next/image'
+
+// Internal imports
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -19,72 +23,76 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
-
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Separator } from '@/components/ui/separator'
 import { DataTable } from '@/app/_components/datatable/data-table'
-
 import { columns } from './column'
 import NewOpenEndedQuestionForm from '@/app/admin/resource/_components/NewOpenEndedQuestionForm'
-import { api } from '@/utils/axios.config'
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { getCodingQuestionTags, getopenEndedQuestionstate } from '@/store/store'
-import { getAllOpenEndedQuestions, getAllTags } from '@/utils/admin'
-import EditOpenEndedQuestionForm from '../_components/EditOpenEndedQuestionForm'
-import Image from 'next/image'
+import {
+    getAllOpenEndedQuestions,
+    getAllTags,
+    filteredOpenEndedQuestions,
+} from '@/utils/admin'
 import { Spinner } from '@/components/ui/spinner'
+import useDebounce from '@/hooks/useDebounce'
 
 type Props = {}
+export type Tag = {
+    id: number
+    tagName: string
+}
 
 const OpenEndedQuestions = (props: Props) => {
-    const [selectedTag, setSelectedTag] = useState({
-        tagName: 'AllTopics',
-        id: -1,
+    const [selectedTag, setSelectedTag] = useState<Tag>(() => {
+        if (typeof window !== 'undefined') {
+            const storedTag = localStorage.getItem('openEndedCurrentTag')
+            return storedTag !== null
+                ? JSON.parse(storedTag)
+                : { tagName: 'All Topics', id: -1 }
+        }
+        return { tagName: 'All Topics', id: -1 }
     })
     const { tags, setTags } = getCodingQuestionTags()
-    const [selectedDifficulty, setSelectedDifficulty] = useState('any')
+    const [selectedDifficulty, setSelectedDifficulty] = useState('None')
+    const [allOpenEndedQuestions, setAllOpenEndedQuestions] = useState([])
     const { openEndedQuestions, setOpenEndedQuestions } =
         getopenEndedQuestionstate()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
+    const debouncedSearch = useDebounce(searchTerm, 500)
     const [loading, setLoading] = useState(true)
+    const selectedLanguage = ''
 
-    const handleTopicClick = (tag: any) => {
+    const handleTopicClick = (value: string) => {
+        const tag = tags.find((t: Tag) => t.tagName === value) || {
+            tagName: 'All Topics',
+            id: -1,
+        }
         setSelectedTag(tag)
+        localStorage.setItem('openEndedCurrentTag', JSON.stringify(tag))
     }
-
-    const handleAllTopicsClick = () => {
-        setSelectedTag({ id: -1, tagName: 'AllTopics' })
-    }
-
-    const filteredQuestions = openEndedQuestions?.filter((question: any) => {
-        const difficultyMatches =
-            selectedDifficulty !== 'any'
-                ? question.difficulty === selectedDifficulty
-                : true
-        const tagMatches =
-            selectedTag?.tagName !== 'AllTopics'
-                ? question.tagId === selectedTag?.id
-                : true
-        const searchTermMatches =
-            searchTerm !== ''
-                ? question.question
-                      .toLowerCase()
-                      .includes(searchTerm.toLowerCase())
-                : true
-
-        const isQuestionIncluded =
-            difficultyMatches && tagMatches && searchTermMatches
-        return isQuestionIncluded
-    })
 
     useEffect(() => {
         getAllTags(setTags)
-    }, [])
+    }, [setTags])
 
     useEffect(() => {
-        getAllOpenEndedQuestions(setOpenEndedQuestions)
-    }, [searchTerm, selectedTag, selectedDifficulty])
+        getAllOpenEndedQuestions(setAllOpenEndedQuestions)
+        filteredOpenEndedQuestions(
+            setOpenEndedQuestions,
+            selectedDifficulty,
+            selectedTag,
+            selectedLanguage,
+            debouncedSearch
+        )
+    }, [
+        searchTerm,
+        selectedTag,
+        selectedDifficulty,
+        setOpenEndedQuestions,
+        debouncedSearch,
+    ])
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -102,7 +110,7 @@ const OpenEndedQuestions = (props: Props) => {
                 </div>
             ) : (
                 <div>
-                    {openEndedQuestions.length > 0 ? (
+                    {allOpenEndedQuestions?.length > 0 ? (
                         <MaxWidthWrapper>
                             <h1 className="text-left font-semibold text-2xl">
                                 Resource Library - Open-Ended-Questions
@@ -165,7 +173,7 @@ const OpenEndedQuestions = (props: Props) => {
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectGroup>
-                                            <SelectItem value="any">
+                                            <SelectItem value="None">
                                                 Any Difficulty
                                             </SelectItem>
                                             <SelectItem value="Easy">
@@ -182,42 +190,30 @@ const OpenEndedQuestions = (props: Props) => {
                                 </Select>
                                 <Separator
                                     orientation="vertical"
-                                    className="w-1 h-12 ml-4 bg-gray-400 rounded-lg"
+                                    className="w-1 h-12 mx-4 bg-gray-400 rounded-lg"
                                 />
-
-                                <ScrollArea className=" text-nowrap ">
-                                    <ScrollBar orientation="horizontal" />
-                                    <Button
-                                        className={`mx-3 rounded-3xl ${
-                                            selectedTag?.tagName === 'AllTopics'
-                                                ? 'bg-secondary text-white'
-                                                : 'bg-gray-200 text-black'
-                                        }`}
-                                        onClick={handleAllTopicsClick}
-                                    >
-                                        All Topics
-                                    </Button>
-
-                                    {tags.map((tag: any) => (
-                                        <Button
-                                            className={`mx-3 rounded-3xl ${
-                                                selectedTag === tag
-                                                    ? 'bg-secondary text-white'
-                                                    : 'bg-gray-200 text-black'
-                                            }`}
-                                            key={tag?.id}
-                                            onClick={() =>
-                                                handleTopicClick(tag)
-                                            }
-                                        >
-                                            {tag.tagName}
-                                        </Button>
-                                    ))}
-                                </ScrollArea>
+                                <Select
+                                    value={selectedTag.tagName}
+                                    onValueChange={handleTopicClick}
+                                >
+                                    <SelectTrigger className="w-[180px]">
+                                        <SelectValue placeholder="Choose Topic" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {tags.map((tag: Tag) => (
+                                            <SelectItem
+                                                key={tag.id}
+                                                value={tag.tagName}
+                                            >
+                                                {tag.tagName}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
 
                             <DataTable
-                                data={filteredQuestions}
+                                data={openEndedQuestions}
                                 columns={columns}
                             />
                         </MaxWidthWrapper>

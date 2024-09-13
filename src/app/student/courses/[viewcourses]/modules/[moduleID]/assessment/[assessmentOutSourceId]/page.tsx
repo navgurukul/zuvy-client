@@ -3,10 +3,12 @@
 import React, { useEffect, useState } from 'react'
 import {
     handleFullScreenChange,
+    handleKeyDown,
+    handleRightClick,
     handleVisibilityChange,
     requestFullScreen,
 } from '@/utils/students'
-import { Clock, Timer } from 'lucide-react'
+import { Clock, Fullscreen, Timer } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import QuizQuestions from './QuizQuestions'
 import OpenEndedQuestions from './OpenEndedQuestions'
@@ -49,15 +51,14 @@ function Page({
         fullScreenExitInstance,
         setCopyPasteAttempt,
         copyPasteAttempt,
-
     } = getAssessmentStore()
 
     const [selectedQuesType, setSelectedQuesType] = useState<
         'quiz' | 'open-ended' | 'coding'
     >('quiz')
-    
+
     const [isSolving, setIsSolving] = useState(false)
-    
+
     const [selectedQuestionId, setSelectedQuestionId] = useState<number | null>(
         null
     )
@@ -73,6 +74,8 @@ function Page({
         useState<any>()
     const [chapterId, setChapterId] = useState<any>()
 
+    const [isCodingQuesSubmitted, setIsCodingQuesSubmitted] = useState(false)
+
     const pathname = usePathname()
 
     function isCurrentPageSubmitAssessment() {
@@ -86,7 +89,6 @@ function Page({
         api.post(
             `tracking/updateChapterStatus/${params.viewcourses}/${params.moduleID}?chapterId=${chapterId}`
         )
-
     }
 
     useEffect(() => {
@@ -149,6 +151,18 @@ function Page({
     }, [tabChangeInstance, fullScreenExitInstance])
 
     useEffect(() => {
+        // Add event listeners for right-click and key presses
+        document.addEventListener('contextmenu', handleRightClick)
+        document.addEventListener('keydown', handleKeyDown)
+        return () => {
+            document.removeEventListener('contextmenu', handleRightClick)
+            document.removeEventListener('keydown', handleKeyDown)
+        }
+    }, [tabChangeInstance, fullScreenExitInstance])
+
+
+
+    useEffect(() => {
         if (remainingTime === 0 && intervalId) {
             clearInterval(intervalId)
             submitAssessment()
@@ -164,15 +178,15 @@ function Page({
             )
             setRemainingTime(newRemainingTime)
 
-                // Show toast when remaining time is 5 minutes
-                if (newRemainingTime === 300) {
-                    toast({
-                        title: 'WARNING',
-                        description: 'Hurry up less than 5 minutes remaining now!',
-                        className: 'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-red-600 text-white',
-                    })
-                }
-
+            // Show toast when remaining time is 5 minutes
+            if (newRemainingTime === 300) {
+                toast({
+                    title: 'WARNING',
+                    description: 'Hurry up less than 5 minutes remaining now!',
+                    className:
+                        'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-red-600 text-white',
+                })
+            }
 
             if (newRemainingTime === 0 && newIntervalId) {
                 clearInterval(newIntervalId)
@@ -181,31 +195,71 @@ function Page({
         setIntervalId(newIntervalId)
     }
 
-    const handleSolveChallenge = (
+    async function getCodingSubmissionsData(
+        codingOutsourseId: any,
+        assessmentSubmissionId: any,
+        questionId: any
+    ) {
+        try {
+            const res = await api.get(
+                `codingPlatform/submissions/questionId=${questionId}?assessmentSubmissionId=${assessmentSubmissionId}&codingOutsourseId=${codingOutsourseId}`
+            )
+            const action = res.data.data.action
+            setIsCodingQuesSubmitted(action == 'submit')
+            return action
+        } catch (error) {
+            console.error('Error fetching coding submissions data:', error)
+            return null
+        }
+    }
+
+    const handleSolveChallenge = async (
         type: 'quiz' | 'open-ended' | 'coding',
         id?: number,
         codingOutsourseId?: number
     ) => {
         setSelectedQuesType(type)
         setIsSolving(true)
+
         if (type === 'coding' && id) {
-            setSelectedQuestionId(id)
-            setSelectedCodingOutsourseId(codingOutsourseId)
-            requestFullScreen(document.documentElement)
-        }else if(type === 'quiz' && seperateQuizQuestions[0]?.submissionsData.length > 0){
+            const action = await getCodingSubmissionsData(
+                codingOutsourseId,
+                assessmentSubmitId,
+                id
+            )
+
+            if (action === 'submit') {
+                toast({
+                    title: 'Coding Question Already Submitted',
+                    description:
+                        'You have already submitted this coding question',
+                    className: 'text-left capitalize',
+                })
+            } else {
+                setSelectedQuestionId(id)
+                setSelectedCodingOutsourseId(codingOutsourseId)
+                requestFullScreen(document.documentElement)
+            }
+        } else if (
+            type === 'quiz' &&
+            seperateQuizQuestions[0]?.submissionsData.length > 0
+        ) {
             toast({
                 title: 'Quiz Already Submitted',
                 description: 'You have already submitted the quiz',
                 className: 'text-left capitalize',
             })
-
-        } else if( type === 'open-ended' && seperateOpenEndedQuestions[0]?.submissionsData.length > 0){
+        } else if (
+            type === 'open-ended' &&
+            seperateOpenEndedQuestions[0]?.submissionsData.length > 0
+        ) {
             toast({
                 title: 'Open Ended Questions Already Submitted',
-                description: 'You have already submitted the open ended questions',
+                description:
+                    'You have already submitted the open ended questions',
                 className: 'text-left capitalize',
             })
-        }  else {
+        } else {
             requestFullScreen(document.documentElement)
         }
     }
@@ -255,19 +309,11 @@ function Page({
         getSeperateOpenEndedQuestions()
     }, [decodedParams.assessmentOutSourceId])
 
-    // const formatTime = (seconds: number) => {
-    //     const h = Math.floor(seconds / 3600)
-    //         .toString()
-    //         .padStart(2, '0')
-    //     const m = Math.floor((seconds % 3600) / 60)
-    //         .toString()
-    //         .padStart(2, '0')
-    //     const s = (seconds % 60).toString().padStart(2, '0')
-    //     return `${h}:${m}:${s}`
-    // }
-
     if (isSolving) {
-        if (selectedQuesType === 'quiz' && seperateQuizQuestions[0]?.submissionsData.length == 0) {
+        if (
+            selectedQuesType === 'quiz' &&
+            seperateQuizQuestions[0]?.submissionsData.length == 0
+        ) {
             return (
                 <QuizQuestions
                     onBack={handleBack}
@@ -277,17 +323,22 @@ function Page({
                     getSeperateQuizQuestions={getSeperateQuizQuestions}
                 />
             )
-        } else if (selectedQuesType === 'open-ended' && seperateOpenEndedQuestions[0]?.submissionsData.length == 0) {
+        } else if (
+            selectedQuesType === 'open-ended' &&
+            seperateOpenEndedQuestions[0]?.submissionsData.length == 0
+        ) {
             return (
                 <OpenEndedQuestions
                     onBack={handleBack}
                     remainingTime={remainingTime}
                     questions={seperateOpenEndedQuestions}
                     assessmentSubmitId={assessmentSubmitId}
-                    getSeperateOpenEndedQuestions={getSeperateOpenEndedQuestions}
+                    getSeperateOpenEndedQuestions={
+                        getSeperateOpenEndedQuestions
+                    }
                 />
             )
-        }else if (
+        } else if (
             selectedQuesType === 'coding' &&
             selectedQuestionId !== null
         ) {
@@ -312,7 +363,7 @@ function Page({
                     tabChange: tabChangeInstance,
                     copyPaste: copyPasteAttempt,
                     embeddedGoogleSearch: 0,
-                    "typeOfsubmission": "studentSubmit"
+                    typeOfsubmission: 'studentSubmit',
                 }
             )
             toast({
@@ -332,13 +383,15 @@ function Page({
             )
 
             const newFullScreenExitInstance = 0
-                localStorage.setItem('fullScreenExitInstance', newFullScreenExitInstance.toString());
-                setFullScreenExitInstance(newFullScreenExitInstance)
+            localStorage.setItem(
+                'fullScreenExitInstance',
+                newFullScreenExitInstance.toString()
+            )
+            setFullScreenExitInstance(newFullScreenExitInstance)
 
             setTimeout(() => {
                 window.close()
             }, 4000)
-
         } catch (e) {
             console.error(e)
         }
@@ -355,28 +408,37 @@ function Page({
         setIsFullScreen(true)
     }
 
+
+
     return (
         <React.Fragment>
             {!isFullScreen ? (
                 <>
-                <div className="flex items-center justify-center gap-2">
-                <div className='font-bold text-xl'><TimerDisplay remainingTime={remainingTime} /></div>
-            </div>
-            <Separator />
-            <h1>Enter Full Screen to see the Questions. 
-                Warning: If you exit fullscreen, your test will get submitted automatically</h1>
-                <div className="flex justify-center mt-10">
-                    <Button onClick={handleFullScreenRequest}>
-                        Enter Full Screen
-                    </Button>
-                </div>
+                    <div className="flex items-center justify-center gap-2">
+                        <div className="font-bold text-xl">
+                            <TimerDisplay remainingTime={remainingTime} />
+                        </div>
+                    </div>
+                    <Separator className="my-6" />
+                    <h1>
+                        Enter Full Screen to see the Questions. Warning: If you
+                        exit fullscreen, your test will get submitted
+                        automatically
+                    </h1>
+                    <div className="flex justify-center mt-10">
+                        <Button onClick={handleFullScreenRequest}>
+                            Enter Full Screen
+                        </Button>
+                    </div>
                 </>
             ) : (
                 <>
                     <div className="flex items-center justify-center gap-2">
-                    <div className='font-bold text-xl'><TimerDisplay remainingTime={remainingTime} /></div>
+                        <div className="font-bold text-xl">
+                            <TimerDisplay remainingTime={remainingTime} />
+                        </div>
                     </div>
-                    <Separator />
+                    <Separator className="my-6" />
                     <div
                         className="flex justify-center"
                         onPaste={(e) => handleCopyPasteAttempt(e)}
@@ -406,8 +468,8 @@ function Page({
                             </p>
                             <p className="description">
                                 All the problems i.e. coding challenges, MCQs
-                                and open-ended questions have to be completed
-                                all at once.
+                                and open-ended questions can be submitted only
+                                once.
                             </p>
                         </div>
                     </div>
@@ -433,43 +495,40 @@ function Page({
                             )}
                         </div>
                     </div>
-                   {
-                    assessmentData.Quizzes > 0 && (
+                    {assessmentData.Quizzes > 0 && (
                         <div className="flex justify-center">
-                        <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
-                            <h2 className="font-bold">MCQs</h2>
-                            <QuestionCard
-                                id={1}
-                                title="Quiz"
-                                description={`${
-                                    assessmentData.Quizzes || 0
-                                } questions`}
-                                onSolveChallenge={() =>
-                                    handleSolveChallenge('quiz')
-                                }
-                            />
+                            <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
+                                <h2 className="font-bold">MCQs</h2>
+                                <QuestionCard
+                                    id={1}
+                                    title="Quiz"
+                                    description={`${assessmentData.Quizzes || 0
+                                        } questions`}
+                                    onSolveChallenge={() =>
+                                        handleSolveChallenge('quiz')
+                                    }
+                                />
+                            </div>
                         </div>
-                    </div>
-                    )
-                   }
-                   {assessmentData.OpenEndedQuestions > 0 && (
-                     <div className="flex justify-center">
-                     <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
-                         <h2 className="font-bold">Open-Ended Questions</h2>
-                         <QuestionCard
-                             id={1}
-                             title="Open-Ended Questions"
-                             description={`${
-                                 assessmentData.OpenEndedQuestions ||
-                                 0
-                             } questions`}
-                             onSolveChallenge={() =>
-                                 handleSolveChallenge('open-ended')
-                             }
-                         />
-                     </div>
-                 </div>
-                   )}
+                    )}
+                    {assessmentData.OpenEndedQuestions > 0 && (
+                        <div className="flex justify-center">
+                            <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
+                                <h2 className="font-bold">
+                                    Open-Ended Questions
+                                </h2>
+                                <QuestionCard
+                                    id={1}
+                                    title="Open-Ended Questions"
+                                    description={`${assessmentData.OpenEndedQuestions || 0
+                                        } questions`}
+                                    onSolveChallenge={() =>
+                                        handleSolveChallenge('open-ended')
+                                    }
+                                />
+                            </div>
+                        </div>
+                    )}
                     <Button onClick={submitAssessment} disabled={disableSubmit}>
                         Submit Assessment
                     </Button>

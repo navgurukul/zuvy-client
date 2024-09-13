@@ -209,6 +209,33 @@ export function handleFullScreenChange(
     }
 }
 
+// Disable right click & Function keys & console access:
+
+        // Disable right-click context menu
+      export const handleRightClick = (event: MouseEvent) => {
+            event.preventDefault()
+        }
+
+  // Disable key combinations for opening DevTools, function keys, and prevent exiting fullscreen
+ export const handleKeyDown = (event: KeyboardEvent) => {
+    // Prevent common DevTools shortcuts
+    if (
+        (event.ctrlKey && event.shiftKey && event.code === 'KeyI') || // Ctrl+Shift+I
+        (event.ctrlKey && event.shiftKey && event.code === 'KeyJ') || // Ctrl+Shift+J
+        (event.ctrlKey && event.code === 'KeyU') || // Ctrl+U (view source)
+        (event.ctrlKey && event.code === 'KeyS') || // Ctrl+S (save page)
+        event.code === 'F12' || // F12 (DevTools)
+        event.code === 'Escape' // Escape (exit fullscreen)
+    ) {
+        event.preventDefault()
+    }
+
+    // Disable all function keys (F1 to F12)
+    if (event.code.startsWith('F') && event.code.length === 3) {
+        event.preventDefault()
+    }
+}
+
 export async function getAssessmentShortInfo(
     assessmentId: any,
     moduleID: any,

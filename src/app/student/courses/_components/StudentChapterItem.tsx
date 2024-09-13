@@ -34,6 +34,9 @@ function StudentChapterItem({
     moduleID: any
 }) {
     const router = useRouter()
+    const pathname = usePathname()
+    const path = pathname.split('/')[1]
+
     // states and variables
     // functions
     const setTopicIcon = () => {
@@ -74,12 +77,9 @@ function StudentChapterItem({
     //     }
     // }, [chapterId])
 
-    console.log('chapterId', chapterId)
-    // console.log('activeChapter', activeChapter)
-
     return (
         <div>
-            <Link
+            {/* <Link
             // key={id}
             href={`/student/courses/${viewcourses}/modules/${moduleID}/chapters/${chapterId}`}
             // className={`bg-gradient-to-bl my-3 p-3 rounded-xl flex flex-col md:flex-row ${
@@ -91,7 +91,7 @@ function StudentChapterItem({
             //         ? 'bg-yellow/30'
             //         : 'bg-yellow/50'
             // }`}
-        >
+        > */}
             <div
                 className={cn(
                     'flex rounded-md p-3  my-1 cursor-pointer justify-between items-center',
@@ -100,9 +100,9 @@ function StudentChapterItem({
                 onClick={() => {
                     console.log('chapterId sending to fetchChapterContent', chapterId)
                     fetchChapterContent(chapterId)
-                    // router.push(
-                    //     `/student/courses/${viewcourses}/modules/${moduleID}/chapters/${chapterId}`
-                    // )
+                    router.push(
+                        `/${path}/courses/${viewcourses}/modules/${moduleID}/chapters/${chapterId}`
+                    )
                 }}
             >
                 <div className="flex gap-2 text-start capitalize">
@@ -129,7 +129,7 @@ function StudentChapterItem({
                     )}
                 </div>
             </div>
-            </Link>
+            {/* </Link> */}
         </div>
     )
 }

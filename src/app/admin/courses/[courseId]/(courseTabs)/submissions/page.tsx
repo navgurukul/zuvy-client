@@ -13,6 +13,7 @@ import { Spinner } from '@/components/ui/spinner'
 import FormComponent from '../../_components/FormComponent'
 import Assignments from './components/assignments'
 import AssesmentSubmissionComponent from './components/AssesmentSubmission'
+import PraticeProblemsComponent from './components/PraticeProblemsComponent'
 
 const Page = ({ params }: { params: any }) => {
     const [activeTab, setActiveTab] = useState('practice')
@@ -21,10 +22,20 @@ const Page = ({ params }: { params: any }) => {
     const [projectData, setProjectData] = useState<any>([])
     const [formData, setFormData] = useState<any>([])
     const [loading, setLoading] = useState(true)
+    const [searchAssessment, setsearchAssessment] = useState<string>('')
 
     const handleTabChange = (tab: string) => {
         setActiveTab(tab)
+        localStorage.setItem('tab', tab) 
     }
+
+    useEffect(() => {
+        const lastUpdatedTab = localStorage.getItem('tab')
+        if (lastUpdatedTab) {
+            setActiveTab(lastUpdatedTab) 
+        }
+    }, [])
+
 
     const getSubmissions = useCallback(async () => {
         try {
@@ -52,13 +63,13 @@ const Page = ({ params }: { params: any }) => {
             setProjectData(res.data.data.bootcampModules)
             setTotalStudents(res.data.totalStudents)
         } catch (error) {
-            // console.error('Error fetching assessments:', error)
-            toast({
-                title: 'Error',
-                description: 'Error fetching Projects',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-            })
+            console.error('Error fetching assessments:', error)
+            // toast({
+            //     title: 'Error',
+            //     description: 'Error fetching Projects',
+            //     className:
+            //         'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+            // })
         }
     }, [params.courseId])
 
@@ -162,8 +173,14 @@ const Page = ({ params }: { params: any }) => {
             <div className="flex flex-col lg:flex-row justify-between">
                 <div className="relative w-full mr-2">
                     <Input
-                        placeholder="Search for Name, Email bkhnkj"
-                        className="lg:w-1/3 w-full my-6 input-with-icon pl-8 "
+                        placeholder={`${
+                            activeTab === 'assessments'
+                                ? 'Search for Assessment By Name'
+                                : 'Search '
+                        }`}
+                        className="lg:w-1/3 w-full my-6 input-with-icon pl-8"
+                        value={searchAssessment}
+                        onChange={(e) => setsearchAssessment(e.target.value)}
                     />
                     <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
                         <Search className="text-gray-400" size={20} />
@@ -183,37 +200,14 @@ const Page = ({ params }: { params: any }) => {
                 )}
             </div>
             <div className="w-full">
-                {activeTab === 'practice' &&
-                    (() => {
-                        const allEmpty = submissions.every(
-                            ({ moduleChapterData }) =>
-                                moduleChapterData.length === 0
-                        )
-
-                        if (allEmpty) {
-                            return (
-                                <div className="text-left font-semibold my-5">
-                                    No practice problems found.
-                                </div>
-                            )
-                        } else {
-                            return submissions.map(
-                                ({ id, name, moduleChapterData }) =>
-                                    moduleChapterData.length > 0 ? (
-                                        <PracticeProblems
-                                            key={id}
-                                            courseId={params.courseId}
-                                            name={name}
-                                            totalStudents={totalStudents}
-                                            submission={moduleChapterData}
-                                            moduleId={id}
-                                        />
-                                    ) : null
-                            )
-                        }
-                    })()}
+                {activeTab === 'practice' && (
+                    <PraticeProblemsComponent courseId={params.courseId} />
+                )}
                 {activeTab === 'assessments' && (
-                    <AssesmentSubmissionComponent courseId={params.courseId} />
+                    <AssesmentSubmissionComponent
+                        searchTerm={searchAssessment}
+                        courseId={params.courseId}
+                    />
                 )}
                 {activeTab === 'projects' &&
                     (projectData.length > 0 ? (

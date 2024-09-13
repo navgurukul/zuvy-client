@@ -11,14 +11,10 @@ const Page = ({ params }: { params: any }) => {
     const [codingSubmissionsData, setCodingSubmissionsData] =
         useState<any>(null)
 
-    async function getCodingSubmissionsData(
-        codingOutsourseId: any,
-        assessmentSubmissionId: any,
-        questionId: any
-    ) {
+    async function getCodingSubmissionsData(questionId: any) {
         try {
             const res = await api.get(
-                `codingPlatform/submissions/questionId=${questionId}?assessmentSubmissionId=${assessmentSubmissionId}&codingOutsourseId=${codingOutsourseId}`
+                `codingPlatform/submissions/questionId=${questionId}`
             )
             setCodingSubmissionsData(res.data)
         } catch (error) {
@@ -30,11 +26,7 @@ const Page = ({ params }: { params: any }) => {
         if (!userID) {
             userID = studentData?.id
         }
-        getCodingSubmissionsData(
-            params.codingOutsourseId,
-            params.assessmentSubmissionId,
-            params.questionId
-        )
+        getCodingSubmissionsData(params.questionID)
     }, [userID])
 
     return (

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Input } from '@/components/ui/input'
 import {
     Select,
@@ -9,45 +9,79 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import useDebounce from '@/hooks/useDebounce'
 
 interface CodingTopicsProps {
+    setSearchTerm: (newSearchTerm: string) => void
+    searchTerm: string
     selectedTopic: string
-    setSelectedTopic: React.Dispatch<React.SetStateAction<string>>
+    setSelectedTopic: any
     selectedDifficulty: string
     setSelectedDifficulty: React.Dispatch<React.SetStateAction<string>>
     selectedLanguage: string
     setSelectedLanguage: React.Dispatch<React.SetStateAction<string>>
+    tags: any
+    selectedTag: any
+    setSelectedTag: React.Dispatch<React.SetStateAction<Tag>>
+}
+
+export type Tag = {
+    id: number
+    tagName: string
 }
 
 const CodingTopics: React.FC<CodingTopicsProps> = ({
+    setSearchTerm,
+    searchTerm,
     selectedTopic,
     setSelectedTopic,
     selectedDifficulty,
     setSelectedDifficulty,
     selectedLanguage,
     setSelectedLanguage,
+    tags,
+    selectedTag,
+    setSelectedTag,
 }) => {
+
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(event.target.value)
+    }
+
+    const handleTopicClick = (value: string) => {
+        const tag = tags.find((t: Tag) => t.tagName === value) || {
+            tagName: 'All Topics',
+            id: -1,
+        }
+        setSelectedTag(tag)
+    }
+    
     return (
         <div className="flex flex-col mb-5">
-            <Input placeholder="Search By Name " className="w-full mb-2 " />
+            <Input
+                placeholder="Search By Name "
+                value={searchTerm}
+                onChange={handleSearchChange}
+                className="w-full mb-2 "
+            />
 
             <div className="dropDownsContainer flex gap-2">
-                <Select onValueChange={(value) => setSelectedTopic(value)}>
-                    <SelectTrigger className="">
-                        <SelectValue placeholder={selectedTopic} />
+                <Select
+                    value={selectedTag?.tagName}
+                    onValueChange={handleTopicClick}
+                >
+                    <SelectTrigger>
+                        <SelectValue placeholder="Choose Topic" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectGroup>
-                            <SelectLabel>Topics</SelectLabel>
-                            <SelectItem value="alltopics">
-                                All Topics
+                        {tags?.map((tag: Tag) => (
+                            <SelectItem key={tag.id} value={tag.tagName}>
+                                {tag.tagName}
                             </SelectItem>
-                            <SelectItem value="Frontend">Frontend</SelectItem>
-                            <SelectItem value="Backend">Backend</SelectItem>
-                            <SelectItem value="DSA">DSA</SelectItem>
-                        </SelectGroup>
+                        ))}
                     </SelectContent>
                 </Select>
+               
                 <Select onValueChange={(value) => setSelectedDifficulty(value)}>
                     <SelectTrigger className="">
                         <SelectValue placeholder={selectedDifficulty} />
@@ -64,7 +98,7 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
                         </SelectGroup>
                     </SelectContent>
                 </Select>
-                <Select onValueChange={(value) => setSelectedLanguage(value)}>
+                {/* <Select onValueChange={(value) => setSelectedLanguage(value)}>
                     <SelectTrigger className="">
                         <SelectValue placeholder={selectedLanguage} />
                     </SelectTrigger>
@@ -79,7 +113,7 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
                             <SelectItem value="React">React</SelectItem>
                         </SelectGroup>
                     </SelectContent>
-                </Select>
+                </Select> */}
             </div>
         </div>
     )

@@ -32,10 +32,7 @@ const formSchema = z.object({
     questionDescription: z.string().min(5, {
         message: 'Description must be at least 5 characters long',
     }),
-    marks: z
-        .string()
-        .refine((val) => !isNaN(Number(val)), { message: 'Must be a number' })
-        .transform((val) => Number(val)),
+
     topics: z.number().min(1, { message: 'You must select a topic' }),
     difficulty: z.string(),
 })
@@ -91,7 +88,6 @@ function NewOpenEndedQuestionForm({
         const formattedData = {
             question: values.questionDescription,
             tagId: values.topics,
-            marks: values.marks,
             difficulty: values.difficulty,
         }
         createOpenEndedQuestion(formattedData)
@@ -189,29 +185,7 @@ function NewOpenEndedQuestionForm({
                             )
                         }}
                     />
-                    <FormField
-                        control={form.control}
-                        name="marks"
-                        render={({ field }) => {
-                            return (
-                                <FormItem className="text-left">
-                                    <FormLabel>
-                                        Set the Marks for the Question
-                                    </FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            className="no-spinners"
-                                            type="number"
-                                            min="0"
-                                            placeholder="Enter the Marks for the Question"
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )
-                        }}
-                    />
+
                     <FormField
                         control={form.control}
                         name="questionDescription"
@@ -232,7 +206,6 @@ function NewOpenEndedQuestionForm({
                             )
                         }}
                     />
-
                     <div className="flex justify-end">
                         <Button type="submit" className="w-1/2 ">
                             Create Open-Ended Question

@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button'
 type Props = {}
 
 const Projects = (params: any) => {
-    console.log(params.courseId)
     const arr = [1, 2, 3, 4, 5, 6]
     return (
         <div className="container mx-auto px-4">

@@ -1,5 +1,6 @@
 import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
+import { useEffect, useRef } from 'react'
 
 export function handleDelete(
     deleteCodingQuestionId: any,
@@ -153,14 +154,18 @@ export const handleQuizConfirm = (
     setDeleteModalOpen(false)
 }
 
-export async function getAllQuizQuestion(setQuizQuestion: any) {
+export async function getAllQuizQuestion(
+    setQuizQuestion: any,
+    selectedtagId: number
+) {
     try {
+        const mcqtagId: any = localStorage.getItem('MCQCurrentTag')
+        const MCQCurrentTagId = JSON.parse(mcqtagId)
+
         let url = `/Content/allQuizQuestions`
-        const storedTag = localStorage.getItem('currentTag')
-        const tag = storedTag !== null && JSON.parse(storedTag)
-        const tagId = tag && tag.id
-        if (tagId && tagId !== -1) {
-            url = `/Content/allQuizQuestions?tagId=${tagId}`
+
+        if (MCQCurrentTagId?.id !== -1) {
+            url = `/Content/allQuizQuestions?tagId=${MCQCurrentTagId?.id}`
         }
         const response = await api.get(url)
         setQuizQuestion(response.data)
@@ -190,10 +195,10 @@ export const handleEditOpenEndedQuestion = (
 }
 export const handleEditCodingQuestion = (
     codingQuestion: any,
-    setIsCodingDialogOpen: any,
+    setIsCodingEditDialogOpen: any,
     setEditCodingQuestionId: any
 ) => {
-    setIsCodingDialogOpen(true)
+    setIsCodingEditDialogOpen(true)
     setEditCodingQuestionId(codingQuestion.id)
 }
 export const handlerQuizQuestions = (
@@ -208,7 +213,11 @@ export const handlerQuizQuestions = (
 export async function getAllTags(setTags: any) {
     const response = await api.get('Content/allTags')
     if (response) {
-        setTags(response.data.allTags)
+        const tagArr = [
+            { tagName: 'All Topics', id: -1 },
+            ...response.data.allTags,
+        ]
+        setTags(tagArr)
     }
 }
 // --------------------------------------------
@@ -216,19 +225,36 @@ export async function getAllTags(setTags: any) {
 export async function filteredCodingQuestions(
     setFilteredQuestions: any,
     selectedDifficulty: string,
-    selectedTopic: string,
-    selectedLanguage: string
+    selectedTopic: any,
+    selectedLanguage: string,
+    debouncedSearch: string
 ) {
     try {
-        const response = await api.get('/Content/allCodingQuestions')
-        const filtered = response.data.filter(
-            (question: any) =>
-                selectedDifficulty === 'Any Difficulty' ||
-                question.difficulty === selectedDifficulty
-            // &&(selectedTopic === 'All Topics' || question.tags.includes(selectedTopic)) &&
-            // (selectedLanguage === 'All Languages' || question.language === selectedLanguage)
-        )
-        setFilteredQuestions(filtered)
+        let url = `/Content/allCodingQuestions`
+
+        const queryParams = []
+
+        if (selectedTopic?.id !== -1) {
+            queryParams.push(`tagId=${selectedTopic.id}`)
+        }
+        if (
+            selectedDifficulty &&
+            selectedDifficulty !== 'None' &&
+            selectedDifficulty !== 'Any Difficulty'
+        ) {
+            queryParams.push(`difficulty=${selectedDifficulty}`)
+        }
+        if (debouncedSearch) {
+            queryParams.push(`searchTerm=${debouncedSearch}`)
+        }
+
+        if (queryParams.length > 0) {
+            url += '?' + queryParams.join('&')
+        }
+
+        const response = await api.get(url)
+
+        setFilteredQuestions(response.data)
     } catch (error) {
         console.error('Error:', error)
     }
@@ -237,25 +263,41 @@ export async function filteredCodingQuestions(
 export async function filteredQuizQuestions(
     setFilteredQuestions: any,
     selectedDifficulty: string,
-    selectedTopic: string,
-    selectedLanguage: string
+    selectedTopic: any,
+    selectedLanguage: string,
+    debouncedSearch: string
 ) {
     try {
         let url = `/Content/allQuizQuestions`
-        const storedTag = localStorage.getItem('currentTag')
-        const tag = storedTag !== null && JSON.parse(storedTag)
-        const tagId = tag && tag.id
-        if (tagId && tagId !== -1) {
-            url = `/Content/allQuizQuestions?tagId=${tagId}`
+
+        const queryParams = []
+
+        if (debouncedSearch) {
+            queryParams.push(`searchTerm=${debouncedSearch}`)
         }
+        if (selectedTopic !== 'All Topics' && selectedTopic != 0) {
+            queryParams.push(`tagId=${+selectedTopic}`)
+        }
+        if (selectedDifficulty !== 'Any Difficulty') {
+            queryParams.push(`difficulty=${selectedDifficulty}`)
+        }
+        // Add more conditions here as needed, e.g., selectedLanguage, etc.
+
+        if (queryParams.length > 0) {
+            url += '?' + queryParams.join('&')
+        }
+
         const response = await api.get(url)
+
         const filtered = response.data.filter(
             (question: any) =>
                 selectedDifficulty === 'Any Difficulty' ||
                 question.difficulty === selectedDifficulty
-            // &&(selectedTopic === 'All Topics' || question.tags.includes(selectedTopic)) &&
-            // (selectedLanguage === 'All Languages' || question.language === selectedLanguage)
+            // Uncomment and modify the following lines if needed:
+            // && (selectedTopic === 'All Topics' || question.tags.includes(selectedTopic))
+            // && (selectedLanguage === 'All Languages' || question.language === selectedLanguage)
         )
+
         setFilteredQuestions(filtered)
     } catch (error) {
         console.error('Error:', error)
@@ -265,19 +307,36 @@ export async function filteredQuizQuestions(
 export async function filteredOpenEndedQuestions(
     setFilteredQuestions: any,
     selectedDifficulty: string,
-    selectedTopic: string,
-    selectedLanguage: string
+    selectedTopic: any,
+    selectedLanguage: string,
+    debouncedSearch: string
 ) {
     try {
-        const response = await api.get('/Content/openEndedQuestions')
-        const filtered = response.data.data.filter(
-            (question: any) =>
-                selectedDifficulty === 'Any Difficulty' ||
-                question.difficulty === selectedDifficulty
-            // && (selectedTopic === 'All Topics' || question.tags.includes(selectedTopic)) &&
-            // (selectedLanguage === 'All Languages' || question.language === selectedLanguage)
-        )
-        setFilteredQuestions(filtered)
+        let url = `/Content/openEndedQuestions`
+
+        const queryParams = []
+
+        if (selectedTopic?.id !== -1) {
+            queryParams.push(`tagId=${selectedTopic.id}`)
+        }
+        if (
+            selectedDifficulty &&
+            selectedDifficulty !== 'None' &&
+            selectedDifficulty !== 'Any Difficulty'
+        ) {
+            queryParams.push(`difficulty=${selectedDifficulty}`)
+        }
+        if (debouncedSearch) {
+            queryParams.push(`searchTerm=${debouncedSearch}`)
+        }
+        // Add more conditions here as needed, e.g., selectedLanguage, etc.
+
+        if (queryParams.length > 0) {
+            url += '?' + queryParams.join('&')
+        }
+
+        const response = await api.get(url)
+        setFilteredQuestions(response.data.data)
     } catch (error) {
         console.error('Error:', error)
     }
@@ -331,7 +390,6 @@ export const fetchStudentsHandler = async ({
 }: FetchStudentsParams) => {
     setLoading(true)
 
-
     const endpoint = searchTerm
         ? `/bootcamp/students/${courseId}?searchTerm=${searchTerm}`
         : `/bootcamp/students/${courseId}?limit=${limit}&offset=${offset}`
@@ -354,4 +412,30 @@ export const fetchStudentsHandler = async ({
     }
 }
 
+export function cleanUpValues(value: string) {
+    if (!value) return ''
+
+    value = value.toString().trim()
+
+    // Remove extra commas, spaces, and clean up the value
+    value = value.replace(/,\s*,+/g, ',') // Remove extra commas
+    value = value.replace(/\s{2,}/g, ' ') // Remove extra spaces
+    value = value.replace(/,\s*$/, '') // Remove trailing commas
+    value = value.replace(/^\s*,/, '') // Remove leading commas
+    
+    return value
+}
+
 // --------------------------
+
+export function useFirstRenderValue<T>(value: T): T | undefined {
+    const ref = useRef<T | undefined>(undefined)
+
+    useEffect(() => {
+        if (ref.current === undefined) {
+            ref.current = value
+        }
+    }, [value])
+
+    return ref.current
+}

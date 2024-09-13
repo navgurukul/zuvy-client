@@ -106,7 +106,6 @@ export const columns: ColumnDef<Task>[] = [
         id: 'actions',
         cell: ({ row }) => {
             // const label = labels.find((label) => label.value === row.original.label);
-            console.log(row.original)
 
             return (
                 <div className="flex space-x-2">

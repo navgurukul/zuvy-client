@@ -29,12 +29,12 @@ import { useEffect } from 'react'
 const formSchema = z.object({
     hour: z
         .number()
-        .min(1, 'Hour must be between 1 and 5')
-        .max(5, 'Hour must be between 1 and 5'),
+        .min(0, 'Hour must be between 0 and 5')
+        .max(5, 'Hour must be between 0 and 5'),
     minute: z
         .number()
-        .min(0, 'Minute must be between 0 and 59')
-        .max(59, 'Minute must be between 0 and 59'),
+        .min(15, 'Minute must be between 15 and 59')
+        .max(59, 'Minute must be between 15 and 59'),
     passPercentage: z.string().nonempty('Percentage is required'),
     copyPaste: z.boolean(),
     embeddedGoogleSearch: z.boolean(),
@@ -90,7 +90,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     useEffect(() => {
         form.reset({
             hour: content.timeLimit ? Math.floor(content.timeLimit / 3600) : 2,
-            minute: (content.timeLimit / 60) % 60,
+            minute: (content.timeLimit / 60) % 60 >= 15 ? (content.timeLimit / 60) % 60 : 15,
             passPercentage:
                 content.passPercentage != null
                     ? content.passPercentage.toString()
@@ -147,8 +147,8 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
         }
     }
 
-    const hours = Array.from({ length: 5 }, (_, i) => i + 1)
-    const minutes = Array.from({ length: 60 }, (_, i) => i)
+    const hours = Array.from({ length: 6 }, (_, i) => i);
+    const minutes = Array.from({ length: 45 }, (_, i) => i + 15)
 
     return (
         <main className="flex flex-col p-3">

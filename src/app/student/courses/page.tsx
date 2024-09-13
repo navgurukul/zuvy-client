@@ -1,16 +1,19 @@
 'use client'
 
+// External imports
 import { useEffect, useState } from 'react'
-import { ChevronRight, Video } from 'lucide-react'
+import { ChevronRight, Video, BookOpenText } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+
+// Internal imports
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { BookOpenText } from 'lucide-react'
 import { useLazyLoadedStudentData } from '@/store/store'
 import Loader from './_components/Loader'
 import { api } from '@/utils/axios.config'
 import OptimizedImageWithFallback from '@/components/ImageWithFallback'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface EnrolledCourse {
     name: string
@@ -40,6 +43,7 @@ const Page: React.FC<pageProps> = () => {
     const [enrolledCourse, setEnrolledCourse] = useState<EnrolledCourse[]>([])
     const [resumeCourse, setResumeCourse] = useState<ResumeCourse>({})
     const [courseStarted, setCourseStarted] = useState<boolean>(false)
+    const [flag, setFlag] = useState<boolean>(true)
     const [message, setMessage] = useState()
     const userID = studentData?.id && studentData?.id
 
@@ -49,6 +53,7 @@ const Page: React.FC<pageProps> = () => {
             try {
                 const response = await api.get(`/student`)
                 setEnrolledCourse(response.data)
+                setFlag(false)
             } catch (error) {
                 console.error('Error getting enrolled courses:', error)
             }
@@ -100,14 +105,12 @@ const Page: React.FC<pageProps> = () => {
                                                     <div className="flex flex-row gap-3">
                                                         {resumeCourse.newChapter
                                                             ?.title &&
-                                                            resumeCourse.typeId ===
-                                                                1 && (
+                                                                resumeCourse.typeId === 1 && (
                                                                 <BookOpenText className="mt-2" />
                                                             )}
                                                         {resumeCourse.newChapter
                                                             ?.title &&
-                                                            resumeCourse.typeId ===
-                                                                2 && (
+                                                                resumeCourse.typeId === 2 && (
                                                                 <h1 className="text-md mt-2 text-start font-bold">
                                                                     Project:
                                                                 </h1>
@@ -166,14 +169,12 @@ const Page: React.FC<pageProps> = () => {
                                                 <div className="flex flex-row gap-4">
                                                     {resumeCourse.newChapter
                                                         ?.title &&
-                                                        resumeCourse.typeId ===
-                                                            1 && (
+                                                            resumeCourse.typeId === 1 && (
                                                             <BookOpenText className="mt-2" />
                                                         )}
                                                     {resumeCourse.newChapter
                                                         ?.title &&
-                                                        resumeCourse.typeId ===
-                                                            2 && (
+                                                        resumeCourse.typeId === 2 && (
                                                             <h1 className="text-md mt-2 text-start font-bold">
                                                                 Project:
                                                             </h1>
@@ -237,54 +238,65 @@ const Page: React.FC<pageProps> = () => {
                 )}
 
                 <div className=" flex flex-col items-center justify-center mt-6">
-                    <div className="x-5 flex items-center justify-start w-full">
-                        <h1 className="p-1 mx-4 text-xl font-semibold ">
-                            Enrolled Courses
-                        </h1>
-                    </div>
                     <div className="container  mx-auto p-1">
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4">
-                            {enrolledCourse.length > 0 ? (
-                                enrolledCourse.map(
-                                    ({
-                                        name,
-                                        coverImage,
-                                        id,
-                                        progress,
-                                        batchId,
-                                    }: {
-                                        name: string
-                                        coverImage: string
-                                        id: number
-                                        progress: number
-                                        batchId: number
-                                    }) => (
-                                        <Link
-                                            key={id}
-                                            href={`courses/${id}/batch/${batchId}`}
-                                            className="text-gray-900 text-base"
-                                        >
-                                            <div className="bg-muted flex justify-center h-[200px] relative overflow-hidden rounded-sm">
-                                                <OptimizedImageWithFallback
-                                                    src={coverImage}
-                                                    alt="Placeholder Image"
-                                                    // className="rounded-md object-cover"
-                                                    // width={300}
-                                                    // height={48}
-                                                    fallBackSrc={
-                                                        '/logo_white.png'
-                                                    }
-                                                />
-                                            </div>
+                            {flag ? (
+                                <div className="animate-pulse flex gap-8">
+                                    {[...Array(3)].map((_, index) => (
+                                        <div key={index} className="mb-4">
+                                            <Skeleton className="h-[200px] w-[300px] rounded-sm" />
                                             <div className="px-1 py-4">
-                                                {name}
+                                                <Skeleton className="h-6 w-3/4 mb-2 rounded" />
                                             </div>
-                                            <Loader progress={progress} />
-                                        </Link>
-                                    )
-                                )
+                                            <Skeleton className="h-3 w-full rounded-full mt-2" />
+                                        </div>
+                                    ))}
+                                </div>
                             ) : (
-                                <p>No courses available.</p>
+                                <>
+                                    {enrolledCourse.length > 0 ? (
+                                        enrolledCourse.map(
+                                            ({
+                                                name,
+                                                coverImage,
+                                                id,
+                                                progress,
+                                                batchId,
+                                            }: {
+                                                name: string
+                                                coverImage: string
+                                                id: number
+                                                progress: number
+                                                batchId: number
+                                            }) => (
+                                                <Link
+                                                    key={id}
+                                                    href={`courses/${id}/batch/${batchId}`}
+                                                    className="text-gray-900 text-base"
+                                                >
+                                                    <div className="bg-muted flex justify-center h-[200px] relative overflow-hidden rounded-sm">
+                                                        <OptimizedImageWithFallback
+                                                            src={coverImage}
+                                                            alt="Placeholder Image"
+                                                            // className="rounded-md object-cover"
+                                                            // width={300}
+                                                            // height={48}
+                                                            fallBackSrc={
+                                                                '/logo_white.png'
+                                                            }
+                                                        />
+                                                    </div>
+                                                    <div className="px-1 py-4">
+                                                        {name}
+                                                    </div>
+                                                    <Loader progress={progress} />
+                                                </Link>
+                                            )
+                                        )
+                                    ) : (
+                                        <p>No courses available.</p>
+                                    )}
+                                </>
                             )}
                         </div>
                     </div>

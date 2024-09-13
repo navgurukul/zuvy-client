@@ -27,6 +27,12 @@ import {
 import DeleteConfirmationModal from './deleteModal'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
 import { usePathname } from 'next/navigation'
+import { Popover } from '@/components/ui/popover'
+import { AlertDialog, AlertDialogTrigger } from '@radix-ui/react-alert-dialog'
+import {
+    AlertDialogAction,
+    AlertDialogContent,
+} from '@/components/ui/alert-dialog'
 
 function ClassCard({
     classData,
@@ -46,7 +52,9 @@ function ClassCard({
     const [loading, setLoading] = useState(false)
 
     const handleOpenDialog = () => setIsDialogOpen(true)
-    const handleCloseDialog = () => setIsDialogOpen(false)
+    const handleCloseDialog = () => {
+        setIsDialogOpen(false)
+    }
     const pathname = usePathname()
     const dashboard = pathname === '/student'
     const admin = pathname.includes('/admin')
@@ -201,61 +209,68 @@ function ClassCard({
                         </Link>
                     </Button>
                 </div>
-                <div className="absolute top-4 right-4">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            {activeTab === 'ongoing'
-                                ? null
-                                : admin && (
-                                      <MoreVertical
-                                          size={20}
-                                          className="text-secondary cursor-pointer "
-                                      />
-                                  )}
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-full">
-                            <DropdownMenuGroup>
-                                <DropdownMenuItem
-                                    onClick={handleOpenDialog}
-                                    className="cursor-pointer flex flex-row justify-between "
-                                >
-                                    <span>Edit</span>
-                                    <Edit
-                                        size={18}
-                                        className="text-secondary"
+                {!studentSide &&
+                    classType !== 'ongoing' &&
+                    classType !== 'Upcoming' && (
+                        <div className="absolute top-4  flex gap-2 right-4">
+                            <AlertDialog
+                                open={isDialogOpen}
+                                onOpenChange={setIsDialogOpen}
+                            >
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <AlertDialogTrigger asChild>
+                                                <Edit
+                                                    size={18}
+                                                    className="text-secondary"
+                                                />
+                                            </AlertDialogTrigger>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>Edit Session</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+
+                                <AlertDialogContent>
+                                    <AlertDialogAction className="w-2 h-2 bg-white text-black ">
+                                        X
+                                    </AlertDialogAction>
+                                    <EditSessionDialog
+                                        meetingId={classData.meetingId}
+                                        initialData={{
+                                            sessionTitle: classData.title,
+                                            description: classData.description,
+                                            startTime: classData.startTime,
+                                            endTime: classData.endTime,
+                                        }}
+                                        getClasses={getClasses}
+                                        open={isDialogOpen}
+                                        onClose={handleCloseDialog}
+                                        setIsDialogOpen={setIsDialogOpen}
                                     />
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                    onClick={() => setDeleteModalOpen(true)}
-                                    className="cursor-pointer flex flex-row justify-between "
-                                >
-                                    <span>Delete</span>
-                                    <Trash2Icon
-                                        size={18}
-                                        className="text-destructive"
-                                    />
-                                </DropdownMenuItem>
-                            </DropdownMenuGroup>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Trash2Icon
+                                            size={18}
+                                            className="text-destructive"
+                                            onClick={() =>
+                                                setDeleteModalOpen(true)
+                                            }
+                                        />
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Delete Session</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        </div>
+                    )}
             </Card>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent>
-                    <EditSessionDialog
-                        meetingId={classData.meetingId}
-                        initialData={{
-                            sessionTitle: classData.title,
-                            description: classData.description,
-                            startTime: classData.startTime,
-                            endTime: classData.endTime,
-                        }}
-                        getClasses={getClasses}
-                        open={isDialogOpen}
-                        onClose={handleCloseDialog}
-                    />
-                </DialogContent>
-            </Dialog>
 
             <DeleteConfirmationModal
                 isOpen={isDeleteModalOpen}
