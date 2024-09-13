@@ -12,13 +12,14 @@ function Video({
     return (
         <div>
             <p className="text-start mb-2 text-xl font-semibold">
-                {content.description}
+                {content?.description}
             </p>
             {content.links?.map((link: string) => (
                 <YouTubePlayer
                     url={link}
                     key={link}
                     completeChapter={completeChapter}
+                    status={content?.status}
                 />
             ))}
         </div>
