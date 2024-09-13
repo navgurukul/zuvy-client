@@ -15,7 +15,6 @@ const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
     status,
 }) => {
     const isCompleted = status === 'Completed'
-    console.log(isCompleted)
     return (
         <div
             style={{
