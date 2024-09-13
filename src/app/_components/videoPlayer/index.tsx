@@ -4,9 +4,13 @@ import ReactPlayer from 'react-player/youtube'
 
 interface YouTubePlayerProps {
     url: string
+    completeChapter: any
 }
 
-const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ url }) => {
+const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
+    url,
+    completeChapter,
+}) => {
     return (
         <div
             style={{
@@ -18,7 +22,8 @@ const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ url }) => {
         >
             <ReactPlayer
                 url={url}
-                controls
+                controls={false}
+                onEnded={() => completeChapter()}
                 width="100%"
                 height="100%"
                 style={{ position: 'absolute', top: 0, left: 0 }}

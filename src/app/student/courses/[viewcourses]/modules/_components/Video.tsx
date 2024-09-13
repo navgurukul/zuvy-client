@@ -1,6 +1,6 @@
 import YouTubePlayer from '@/app/_components/videoPlayer'
 import { Button } from '@/components/ui/button'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 function Video({
     content,
@@ -15,11 +15,12 @@ function Video({
                 {content.description}
             </p>
             {content.links?.map((link: string) => (
-                <YouTubePlayer url={link} key={link} />
+                <YouTubePlayer
+                    url={link}
+                    key={link}
+                    completeChapter={completeChapter}
+                />
             ))}
-            <div className="mt-2 text-end">
-                <Button onClick={completeChapter}>Mark as Done</Button>
-            </div>
         </div>
     )
 }

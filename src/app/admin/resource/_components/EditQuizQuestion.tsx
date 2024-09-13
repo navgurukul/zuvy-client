@@ -30,7 +30,11 @@ import { toast } from '@/components/ui/use-toast'
 import { Tag } from '../mcq/page'
 import { DialogFooter } from '@/components/ui/dialog'
 import { getAllQuizQuestion, useFirstRenderValue } from '@/utils/admin'
-import { getCodingQuestionTags } from '@/store/store'
+import {
+    getCodingQuestionTags,
+    getmcqdifficulty,
+    getMcqSearch,
+} from '@/store/store'
 import { error } from 'console'
 import { Spinner } from '@/components/ui/spinner'
 
@@ -71,9 +75,9 @@ const EditQuizQuestion = ({
     const [quizQuestionById, setQuizQuestionById] = useState<any>()
     const [loadingState, setLoadingState] = useState<string>('')
     const { tags } = getCodingQuestionTags()
+    const { mcqDifficulty } = getmcqdifficulty()
+    const { mcqSearch, setmcqSearch } = getMcqSearch()
     const initialQuizId = useRef(quizId)
-
-    console.log(quizId)
 
     const fetchQuizQuestion = useCallback(async () => {
         setLoadingState('formIsLoading')
@@ -196,8 +200,9 @@ const EditQuizQuestion = ({
             questions: [formattedData],
         }
         await handleEditQuizQuestion(requestBody)
-        getAllQuizQuestion(setStoreQuizData, selectedTagId)
+        getAllQuizQuestion(setStoreQuizData, mcqDifficulty, mcqSearch)
     }
+
     return (
         <>
             {loadingState === 'formIsLoading' ? (
@@ -396,8 +401,8 @@ const EditQuizQuestion = ({
                                                                 type="button"
                                                             >
                                                                 <X
-                                                                    size={20}
-                                                                    className="text-secondary"
+                                                                    size={15}
+                                                                    className="text-destructive"
                                                                 />
                                                             </Button>
                                                         )}
