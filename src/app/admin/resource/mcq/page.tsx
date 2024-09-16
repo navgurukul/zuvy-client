@@ -28,7 +28,12 @@ import { DataTable } from '@/app/_components/datatable/data-table'
 import { columns } from './column'
 import NewMcqProblemForm from '../_components/NewMcqProblemForm'
 import { api } from '@/utils/axios.config'
-import { getAllQuizData, getCodingQuestionTags } from '@/store/store'
+import {
+    getAllQuizData,
+    getCodingQuestionTags,
+    getmcqdifficulty,
+    getMcqSearch,
+} from '@/store/store'
 import useDebounce from '@/hooks/useDebounce'
 import { getAllQuizQuestion } from '@/utils/admin'
 import { Spinner } from '@/components/ui/spinner'
@@ -43,9 +48,14 @@ const Mcqs = (props: Props) => {
     const [isOpen, setIsOpen] = useState(false)
     const [search, setSearch] = useState('')
     const debouncedSearch = useDebounce(search, 500)
-    const [difficulty, setDifficulty] = useState<string>('None')
+    // const [difficulty, setDifficulty] = useState<string>('None')
     const { tags, setTags } = getCodingQuestionTags()
     const { quizData, setStoreQuizData } = getAllQuizData()
+    const { mcqDifficulty: difficulty, setMcqDifficulty: setDifficulty } =
+        getmcqdifficulty()
+
+    const { setmcqSearch } = getMcqSearch()
+
     const [selectedTag, setSelectedTag] = useState<Tag>(() => {
         if (typeof window !== 'undefined') {
             const storedTag = localStorage.getItem('MCQCurrentTag')
@@ -86,8 +96,8 @@ const Mcqs = (props: Props) => {
     const getAllQuizQuestion = useCallback(async () => {
         try {
             let url = `/Content/allQuizQuestions`
+            setmcqSearch(debouncedSearch)
 
-            console.log(url)
             const queryParams = []
 
             if (difficulty && difficulty !== 'None') {
@@ -112,7 +122,13 @@ const Mcqs = (props: Props) => {
         } catch (error) {
             console.error('Error fetching quiz questions:', error)
         }
-    }, [difficulty, debouncedSearch, setStoreQuizData, selectedTag.id])
+    }, [
+        difficulty,
+        debouncedSearch,
+        setStoreQuizData,
+        selectedTag.id,
+        setmcqSearch,
+    ])
 
     useEffect(() => {
         getAllTags()

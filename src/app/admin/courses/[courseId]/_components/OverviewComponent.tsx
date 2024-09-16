@@ -28,7 +28,7 @@ const OverviewComponent = (props: any) => {
                                 Total Score
                             </h1>
                             <h1 className=" font-semibold">
-                                {Math.floor(props.score)}/100
+                                {Math.floor(props.score)}%
                             </h1>
                         </div>
                         <div className="flex flex-col md:flex-row gap-3 p-3 md:p-4">

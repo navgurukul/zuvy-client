@@ -323,7 +323,7 @@ const NewMcqProblemForm = ({
                                                         type="button"
                                                     >
                                                         <X
-                                                            size={20}
+                                                            size={15}
                                                             className="text-destructive"
                                                         />
                                                     </Button>

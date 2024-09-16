@@ -25,6 +25,7 @@ const IndividualStudentAssesment = ({
     totalOpenEndedScore,
 }: any) => {
     const { courseId, StudentAssesmentData, IndividualReport, report } = params
+    console.log(data)
     const color = getAssesmentBackgroundColorClass(25, 5)
     const renderQuestion = () => {
         switch (type) {
@@ -111,11 +112,19 @@ const IndividualStudentAssesment = ({
                     <div className="flex items-center gap-x-2">
                         <div
                             className={`h-2 w-2 ${
-                                scoreHandler().className
+                                type !== 'codingSubmission'
+                                    ? scoreHandler().className
+                                    : data.status == 'Accepted'
+                                    ? `bg-green-300`
+                                    : `bg-red-500`
                             } rounded-full`}
                         />
                         <h1 className="text-start">
-                            Score: {scoreHandler().score}
+                            {type !== 'codingSubmission' ? (
+                                <span>Score: {scoreHandler().score}</span>
+                            ) : (
+                                <span>Status: {data.status}</span>
+                            )}
                         </h1>
                     </div>
                 </div>

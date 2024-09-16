@@ -1,6 +1,9 @@
+import { difficultyColor } from '@/lib/utils'
 import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
 import { useEffect, useRef } from 'react'
+import useDebounce from '@/hooks/useDebounce'
+import { getMcqSearch } from '@/store/store'
 
 export function handleDelete(
     deleteCodingQuestionId: any,
@@ -156,17 +159,30 @@ export const handleQuizConfirm = (
 
 export async function getAllQuizQuestion(
     setQuizQuestion: any,
-    selectedtagId: number
+    difficulty?: string,
+    mcqSearch?: string
 ) {
     try {
         const mcqtagId: any = localStorage.getItem('MCQCurrentTag')
         const MCQCurrentTagId = JSON.parse(mcqtagId)
-
         let url = `/Content/allQuizQuestions`
+        const queryParams: string[] = []
 
-        if (MCQCurrentTagId?.id !== -1) {
-            url = `/Content/allQuizQuestions?tagId=${MCQCurrentTagId?.id}`
+        if (mcqSearch && mcqSearch !== 'None') {
+            queryParams.push(`searchTerm=${mcqSearch}`)
         }
+        if (MCQCurrentTagId?.id !== undefined && MCQCurrentTagId?.id !== -1) {
+            queryParams.push(`tagId=${MCQCurrentTagId.id}`)
+        }
+
+        if (difficulty && difficulty !== 'None') {
+            queryParams.push(`difficulty=${difficulty}`)
+        }
+
+        if (queryParams.length > 0) {
+            url += `?${queryParams.join('&')}`
+        }
+
         const response = await api.get(url)
         setQuizQuestion(response.data)
     } catch (error) {
@@ -422,7 +438,7 @@ export function cleanUpValues(value: string) {
     value = value.replace(/\s{2,}/g, ' ') // Remove extra spaces
     value = value.replace(/,\s*$/, '') // Remove trailing commas
     value = value.replace(/^\s*,/, '') // Remove leading commas
-    
+
     return value
 }
 
