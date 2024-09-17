@@ -20,6 +20,8 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useStudentData } from './components/useStudentData'
+import useAttendanceData from './components/studentAttendanceAnalytics'
+import AttandanceRefreshComp from './components/AttandanceRefreshComp'
 export type StudentData = {
     email: string
     name: string
@@ -44,31 +46,39 @@ const Page = ({ params }: { params: any }) => {
         onLimitChange,
         handleSetSearch,
     } = useStudentData(params.courseId)
+    const { attendanceData } = useAttendanceData(params.courseId)
 
     return (
         <div>
             <div>
-                <div className="flex flex-col lg:flex-row justify-between">
+                <div className="flex flex-col md:flex-row justify-between items-center gap-y-4">
                     <Input
                         type="search"
-                        placeholder="search"
-                        className="lg:w-1/4 w-full"
+                        placeholder="Search"
+                        className="w-full md:w-1/2 lg:w-1/4"
                         onChange={handleSetSearch}
                     />
-                    <Dialog>
-                        <DialogTrigger asChild>
-                            <Button className="gap-x-2 mt-5">
-                                <Plus /> Add Students
-                            </Button>
-                        </DialogTrigger>
-                        <DialogOverlay />
-                        <AddStudentsModal
-                            message={false}
-                            id={params.courseId || 0}
-                            batch={false}
-                            batchId={0}
-                        />
-                    </Dialog>
+                    <div className="flex flex-col md:flex-row items-center gap-x-2 gap-y-4">
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button className="gap-x-2">
+                                    <Plus /> Add Students
+                                </Button>
+                            </DialogTrigger>
+                            <DialogOverlay />
+                            <AddStudentsModal
+                                message={false}
+                                id={params.courseId || 0}
+                                batch={false}
+                                batchId={0}
+                            />
+                        </Dialog>
+                        {attendanceData?.length > 0 && (
+                            <AttandanceRefreshComp
+                                attendanceData={attendanceData}
+                            />
+                        )}
+                    </div>
                 </div>
 
                 <div>

@@ -58,7 +58,7 @@ const formSchema = z.object({
     questionText: z.string().min(1, {
         message: 'Question Text must be at least 10 characters.',
     }),
-    options: z.array(z.string().max(30)),
+    options: z.array(z.string()),
     selectedOption: z.number(),
 })
 
