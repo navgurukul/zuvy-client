@@ -12,9 +12,11 @@ import {
     BookOpenCheck,
 } from 'lucide-react'
 import DeleteConfirmationModal from '../../_components/deleteModal'
-import { useState } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { DELETE_CHAPTER_CONFIRMATION } from '@/utils/constant'
 import { toast } from '@/components/ui/use-toast'
+import { usePathname, useRouter } from 'next/navigation'
+// import {getChapterDetailsById} from '@/utils/admin'
 
 function ChapterItem({
     title,
@@ -25,6 +27,8 @@ function ChapterItem({
     fetchChapterContent,
     fetchChapters,
     moduleId,
+    courseId,
+    setChapterContent,
 }: {
     title: string
     topicId: number
@@ -34,8 +38,11 @@ function ChapterItem({
     fetchChapterContent: (chapterId: number) => void
     fetchChapters: () => void
     moduleId: string
+    courseId: string
+    setChapterContent: any
 }) {
     // states and variables
+    const router = useRouter()
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
 
     // functions
@@ -103,8 +110,19 @@ function ChapterItem({
                     'flex rounded-md p-3  my-1 cursor-pointer justify-between items-center',
                     setActiveChapterItem()
                 )}
+                // onClick={() => {
+                //     fetchChapterContent(chapterId)
+                // }}
                 onClick={() => {
+                    console.log(
+                        'chapterId sending to fetchChapterContent',
+                        chapterId
+                    )
                     fetchChapterContent(chapterId)
+                    // getChapterDetailsById(chapterId, setChapterContent)
+                    router.push(
+                        `/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterId}`
+                    )
                 }}
             >
                 <div className="flex gap-2 capitalize">

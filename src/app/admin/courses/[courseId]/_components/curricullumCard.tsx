@@ -8,7 +8,7 @@ import {
     PencilLine,
     Trash2,
 } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
 import { api } from '@/utils/axios.config'
 import { useRouter } from 'next/navigation'
@@ -57,8 +57,26 @@ const CurricullumCard = ({
     const timeAllotedInWeeks = Math.ceil(timeAlloted / 604800)
 
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
+    const [chapterId, setChapterId] = useState<any>()
 
     // functions
+
+    const getChapterId = useCallback(async () => {
+        try {
+            const response = await api.get(
+                `tracking/getAllChaptersWithStatus/${moduleId}`
+            )
+            setChapterId(response.data.trackingData[0].id)
+        } catch (error) {
+            console.log(error)
+        }
+    }, [])
+
+    useEffect(() => {
+        if (moduleId) {
+            getChapterId()
+        }
+    }, [moduleId, getChapterId])
 
     const handleDeleteModal = () => {
         setDeleteModalOpen(true)
@@ -88,7 +106,7 @@ const CurricullumCard = ({
     }
 
     const handleModuleRoute = () => {
-        router.push(`/admin/courses/${courseId}/module/${moduleId}`)
+        router.push(`/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterId}`)
     }
 
     return (
