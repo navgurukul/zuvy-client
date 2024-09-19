@@ -8,6 +8,7 @@ import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { OFFSET, POSITION } from '@/utils/constant'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import { useLazyLoadedStudentData } from '@/store/store'
+import Image from 'next/image'
 
 const InstructorPage = () => {
     const { studentData } = useLazyLoadedStudentData()
@@ -80,17 +81,36 @@ const InstructorPage = () => {
                     })}
                 </div>
             </div>
-            <DataTablePagination
-                totalStudents={totalSessions}
-                position={position}
-                setPosition={setPosition}
-                pages={pages}
-                lastPage={lastPage}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                fetchStudentData={fetchSessions}
-                setOffset={setOffset}
-            />
+            {(ongoingSessions.length < 1 || upcomingSessions.length < 1) && (
+                <div className="flex flex-col items-start mt-6">
+                    <div className="w-full flex flex-col items-center lg:flex-row lg:justify-between gap-8">
+                        <div className="flex flex-col items-center mt-12 w-full">
+                            <Image
+                                src="/no-class.svg"
+                                alt="No classes"
+                                width={240}
+                                height={240}
+                            />
+                            <p className="text-lg mt-3 text-center">
+                                There are no upcoming classes in this Batch
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {(ongoingSessions.length > 0 || upcomingSessions.length > 0) && (
+                <DataTablePagination
+                    totalStudents={totalSessions}
+                    position={position}
+                    setPosition={setPosition}
+                    pages={pages}
+                    lastPage={lastPage}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    fetchStudentData={fetchSessions}
+                    setOffset={setOffset}
+                />
+            )}
         </MaxWidthWrapper>
     )
 }
