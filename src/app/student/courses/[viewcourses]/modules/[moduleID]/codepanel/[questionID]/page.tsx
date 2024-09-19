@@ -11,9 +11,6 @@ import IDE from '@/app/student/playground/[editor]/editor'
 function Page({ params }: any) {
     const { questionID } = params
 
-    useEffect(() => {
-        requestFullScreen(document.documentElement)
-    }, [])
     const remainingTime = null
     const assessmentSubmitId = 1
     const selectedCodingOutsourseId = ''

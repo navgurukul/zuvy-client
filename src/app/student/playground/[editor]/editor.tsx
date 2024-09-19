@@ -126,11 +126,12 @@ const IDE: React.FC<IDEProps> = ({
                     sourceCode: b64EncodeUnicode(currentCode),
                 }
             )
+
             if (action === 'submit') {
                 setIsSubmitted(true)
-                await api.post(
-                    `tracking/updateChapterStatus/${viewcourses}/${moduleID}?chapterId=${chapterID}`
-                )
+                // await api.post(
+                //     `tracking/updateChapterStatus/${viewcourses}/${moduleID}?chapterId=${chapterID}`
+                // )
             }
             setResult(
                 response.data.data[0].stdOut ||
@@ -200,6 +201,7 @@ const IDE: React.FC<IDEProps> = ({
     const handleBack = () => {
         if (codePanel) {
             document.exitFullscreen()
+            // handleFullScreenChange
         }
         router.back()
     }
