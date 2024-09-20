@@ -17,6 +17,7 @@ import {
 
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
+import { useRouter } from 'next/navigation'
 
 function ChapterModal({
     params,
@@ -27,6 +28,7 @@ function ChapterModal({
     fetchChapters: () => void
     newChapterOrder: number
 }) {
+    const router = useRouter()
     const createChapter = async (topicId: number) => {
         await api
             .post(`Content/chapter`, {
@@ -36,6 +38,10 @@ function ChapterModal({
                 // order: newChapterOrder,
             })
             .then((res) => {
+                const data = res?.data?.module[0]
+                router.push(
+                    `/admin/courses/${params?.courseId}/module/${data.moduleId}/chapters/${data.id}`
+                )
                 toast({
                     title: res?.data?.module[0]?.title,
                     description: res?.data?.message,

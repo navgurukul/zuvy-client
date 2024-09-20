@@ -15,7 +15,7 @@ import DeleteConfirmationModal from '../../_components/deleteModal'
 import React, { useState, useEffect, useCallback } from 'react'
 import { DELETE_CHAPTER_CONFIRMATION } from '@/utils/constant'
 import { toast } from '@/components/ui/use-toast'
-import { usePathname, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 
 function ChapterItem({
     title,

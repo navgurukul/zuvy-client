@@ -433,9 +433,6 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
         }
     }, [chapterData, fetchChapterContent])
 
-    console.log('chapterData', chapterData)
-    console.log('chapterContent', chapterContent)
-
     async function handleReorder(newOrderChapters: any) {
         newOrderChapters = newOrderChapters.map((item: any, index: any) => ({
             ...item,
