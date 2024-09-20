@@ -189,7 +189,7 @@ function CodingChallenge({
                             <div
                                 key={question.id}
                                 className={`p-5 rounded-sm ${
-                                    selectedQuestions.some(
+                                    selectedQuestions?.some(
                                         (selectedQuestion) =>
                                             selectedQuestion?.id === question.id
                                     )
@@ -230,7 +230,7 @@ function CodingChallenge({
                                         </Link>
                                     </div>
                                     <div>
-                                        {selectedQuestions.some(
+                                        {selectedQuestions?.some(
                                             (selectedQuestion) =>
                                                 selectedQuestion?.id ===
                                                 question.id

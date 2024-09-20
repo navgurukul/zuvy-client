@@ -189,6 +189,77 @@ export const getAllQuizData = create<storequizData>((set) => ({
 
 // ------------------------------
 
+type chapterContent = {
+    chapterContent: any
+    setChapterContent: (newValue: any) => void
+}
+
+export const getChapterContentState = create<chapterContent>((set) => ({
+    chapterContent: null,
+    setChapterContent: (newValue: any) => {
+        set({ chapterContent: newValue })
+    },
+}))
+
+type Chapter = {
+    chapterId: number
+    chapterTitle: string
+    topicId: number
+    topicName: string
+    order: number
+}
+
+type chapterData = {
+    chapterData: Chapter[]
+    setChapterData: (newValue: Chapter[]) => void
+}
+
+export const getChapterDataState = create<chapterData>((set) => ({
+    chapterData: [],
+    setChapterData: (newValue: Chapter[]) => {
+        set({ chapterData: newValue })
+    },
+}))
+
+type currentChapter = {
+    currentChapter: Chapter[]
+    setCurrentChapter: (newValue: Chapter[]) => void
+}
+
+export const getCurrentChapterState = create<currentChapter>((set) => ({
+    currentChapter: [],
+    setCurrentChapter: (newValue: Chapter[]) => {
+        set({ currentChapter: newValue })
+    },
+}))
+
+type topicId = {
+    topicId: number
+    setTopicId: (newValue: number) => void
+}
+
+export const getTopicId = create<topicId>((set) => ({
+    topicId: 1,
+    setTopicId: (newValue: number) => {
+        set({ topicId: newValue })
+    },
+}))
+
+type moduleName = {
+    moduleName: string
+    setModuleName: (newValue: string) => void
+}
+
+export const getCurrentModuleName = create<moduleName>((set) => ({
+    moduleName: '',
+    setModuleName: (newValue: string) => {
+        set({ moduleName: newValue })
+    },
+}))
+
+// ------------------------------
+
+
 type codingQuestions = {
     codingQuestions: any[]
     setCodingQuestions: (newValue: any[]) => void

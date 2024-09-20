@@ -52,7 +52,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         useState<string>('All Languages')
     const [filteredQuestions, setFilteredQuestions] = useState<any[]>([])
     const [chapterTitle, setChapterTitle] = useState<string>(
-        content.ModuleAssessment.title
+        content.ModuleAssessment?.title
     )
     const [questionType, setQuestionType] = useState<string>('coding')
     const [selectedCodingQuestions, setSelectedCodingQuestions] = useState<
@@ -169,7 +169,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     }
 
     useEffect(() => {
-        setChapterTitle(content.ModuleAssessment.title)
+        setChapterTitle(content.ModuleAssessment?.title)
 
         // Ensure unique coding questions
         const uniqueCodingQuestions = Array.from(
@@ -244,7 +244,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                     onChange={(e) => {
                         setChapterTitle(e.target.value)
                     }}
-                    placeholder={content.ModuleAssessment.title}
+                    placeholder={content.ModuleAssessment?.title}
                     className="p-0 text-2xl w-2/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize "
                     autoFocus
                 />

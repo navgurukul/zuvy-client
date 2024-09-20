@@ -49,6 +49,14 @@ import {
 } from '@/components/ui/popover'
 import { CalendarIcon } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
+import {
+    getChapterContentState,
+    getChapterDataState,
+    getCurrentChapterState,
+    getTopicId,
+    getCurrentModuleName,
+} from '@/store/store'
+import { Spinner } from '@/components/ui/spinner'
 
 // Interfaces:-
 type Chapter = {
@@ -103,12 +111,13 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
     const chapter_id = Array.isArray(chapterID)
         ? Number(chapterID[0])
         : Number(chapterID)
-    const [chapterData, setChapterData] = useState<Chapter[]>([])
-    const [currentChapter, setCurrentChapter] = useState<Chapter[]>([])
-    const [moduleName, setModuleName] = useState('')
+    const { chapterData, setChapterData } = getChapterDataState()
+    const { currentChapter, setCurrentChapter } = getCurrentChapterState()
+    const moduleName = getCurrentModuleName((state) => state.moduleName)
+    const setModuleName = getCurrentModuleName((state) => state.setModuleName)
     const [activeChapter, setActiveChapter] = useState(chapter_id)
-    const [chapterContent, setChapterContent] = useState<any>([])
-    const [topicId, setTopicId] = useState(1)
+    const { chapterContent, setChapterContent } = getChapterContentState()
+    const { topicId, setTopicId } = getTopicId()
     const [chapterId, setChapterId] = useState<number>(0)
     const [key, setKey] = useState(0)
     const [activeChapterTitle, setActiveChapterTitle] = useState('')
@@ -120,6 +129,7 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
     const [projectData, setProjectData] = useState<ProjectData>()
     const [moduleData, setModuleData] = useState<Module[]>([])
     const [title, setTitle] = useState('')
+    const [loading, setLoading] = useState(true)
 
     const crumbs = [
         {
@@ -233,7 +243,10 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
             const response = await api.get(
                 `/Content/allChaptersOfModule/${moduleId}`
             )
-
+            const currentChapter = response.data.chapterWithTopic.find(
+                (item: any) => item.chapterId === chapter_id
+            )
+            setCurrentChapter(currentChapter)
             setChapterData(response.data.chapterWithTopic)
             setModuleName(response.data.moduleName)
             setModuleData(response.data.chapterWithTopic)
@@ -261,11 +274,10 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                     setActiveChapterTitle(currentModule?.chapterTitle)
                     setCurrentChapter(currentModule)
                 }
-
                 if (currentModule?.topicName === 'Quiz') {
                     setChapterContent(
                         response.data
-                            .quizQuestionDetails as QuizQuestionDetails[]
+                        // .quizQuestionDetails as QuizQuestionDetails[]
                     )
                 } else if (currentModule?.topicName === 'Coding Question') {
                     setChapterContent(response.data)
@@ -276,6 +288,9 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                 }
 
                 setTopicId(currentModule?.topicId)
+                setTimeout(() => {
+                    setLoading(false) // Set loading to false after the delay
+                }, 2000)
 
                 // setTopicId(response.data.topicId)
 
@@ -289,60 +304,88 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
     )
 
     const renderChapterContent = () => {
-        switch (topicId) {
-            case 1:
-                return (
-                    <AddVideo
-                        key={chapterId}
-                        moduleId={params.moduleId}
-                        content={chapterContent}
-                        fetchChapterContent={fetchChapterContent}
-                    />
-                )
-            case 2:
-                return <AddArticle key={chapterId} content={chapterContent} />
-            case 3:
-                return (
-                    <CodingChallenge
-                        key={chapterId}
-                        moduleId={params.moduleId}
-                        content={chapterContent}
-                        activeChapterTitle={activeChapterTitle}
-                    />
-                )
-            case 4:
-                return (
-                    <Quiz
-                        key={chapterId}
-                        chapterId={chapterId}
-                        moduleId={params.moduleId}
-                        content={chapterContent}
-                    />
-                )
-            case 5:
-                return <Assignment key={chapterId} content={chapterContent} />
-            case 6:
-                return (
-                    <AddAssessment
-                        key={chapterId}
-                        chapterData={currentChapter}
-                        content={chapterContent}
-                        fetchChapterContent={fetchChapterContent}
-                        moduleId={params.moduleId}
-                    />
-                )
-            case 7:
-                return (
-                    <AddForm
-                        key={chapterId}
-                        chapterData={currentChapter}
-                        content={chapterContent}
-                        fetchChapterContent={fetchChapterContent}
-                        moduleId={params.moduleId}
-                    />
-                )
-            default:
-                return <h1>Create New Chapter</h1>
+        if (
+            topicId &&
+            chapterContent &&
+            (chapterContent?.id === chapter_id ||
+                chapterContent?.chapterId === chapter_id)
+        ) {
+            switch (topicId) {
+                case 1:
+                    return (
+                        <AddVideo
+                            key={chapterId}
+                            moduleId={params.moduleId}
+                            content={chapterContent}
+                            fetchChapterContent={fetchChapterContent}
+                        />
+                    )
+                case 2:
+                    return (
+                        <AddArticle key={chapterId} content={chapterContent} />
+                    )
+
+                case 3:
+                    return (
+                        <CodingChallenge
+                            key={chapterId}
+                            moduleId={params.moduleId}
+                            content={chapterContent}
+                            activeChapterTitle={activeChapterTitle}
+                        />
+                    )
+                case 4:
+                    return (
+                        <Quiz
+                            key={chapterId}
+                            chapterId={chapterId}
+                            moduleId={params.moduleId}
+                            content={chapterContent.quizQuestionDetails}
+                        />
+                    )
+                case 5:
+                    return (
+                        <Assignment key={chapterId} content={chapterContent} />
+                    )
+                case 6:
+                    return (
+                        <AddAssessment
+                            key={chapterId}
+                            chapterData={currentChapter}
+                            content={chapterContent}
+                            fetchChapterContent={fetchChapterContent}
+                            moduleId={params.moduleId}
+                        />
+                    )
+                case 7:
+                    return (
+                        <AddForm
+                            key={chapterId}
+                            chapterData={currentChapter}
+                            content={chapterContent}
+                            fetchChapterContent={fetchChapterContent}
+                            moduleId={params.moduleId}
+                        />
+                    )
+                default:
+                    return <h1>Create New Chapter</h1>
+            }
+        } else {
+            return (
+                <>
+                    {loading ? (
+                        <div className="my-5 flex justify-center items-center">
+                            <div className="absolute h-screen">
+                                <div className="relative top-[70%]">
+                                    <Spinner className="text-secondary" />
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <h1>Create New Chapter</h1>
+                    )}
+                </>
+            )
         }
     }
 
@@ -374,7 +417,14 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
     useEffect(() => {
         if (chapterData.length > 0) {
             // const firstChapterId = chapterData[0].chapterId
-            fetchChapterContent(chapter_id)
+            const currentChapter = chapterData.find(
+                (item) => item.chapterId === chapter_id
+            )
+            if (currentChapter && currentChapter.topicId) {
+                setTopicId(currentChapter.topicId)
+                setActiveChapterTitle(currentChapter.chapterTitle)
+                fetchChapterContent(chapter_id)
+            }
         } else {
             setActiveChapter(0)
             setChapterContent([])

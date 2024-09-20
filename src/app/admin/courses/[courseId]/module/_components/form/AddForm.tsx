@@ -67,7 +67,7 @@ const AddForm: React.FC<AddFormProps> = ({
             title: content?.title ?? '',
             description: content?.description ?? '',
             questions:
-                content.formQuestionDetails.length > 0
+                content.formQuestionDetails?.length > 0
                     ? content.formQuestionDetails.map((q: any) => ({
                           id: q.id.toString(),
                           question: q.question,
@@ -91,7 +91,7 @@ const AddForm: React.FC<AddFormProps> = ({
             title: content?.title ?? '',
             description: content?.description ?? '',
             questions:
-                content.formQuestionDetails.length > 0
+                content.formQuestionDetails?.length > 0
                     ? content.formQuestionDetails.map((q: any) => ({
                           id: q.id.toString(),
                           question: q.question,

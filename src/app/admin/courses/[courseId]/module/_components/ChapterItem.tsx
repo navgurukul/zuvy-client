@@ -16,7 +16,6 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { DELETE_CHAPTER_CONFIRMATION } from '@/utils/constant'
 import { toast } from '@/components/ui/use-toast'
 import { usePathname, useRouter } from 'next/navigation'
-// import {getChapterDetailsById} from '@/utils/admin'
 
 function ChapterItem({
     title,
@@ -114,12 +113,6 @@ function ChapterItem({
                 //     fetchChapterContent(chapterId)
                 // }}
                 onClick={() => {
-                    console.log(
-                        'chapterId sending to fetchChapterContent',
-                        chapterId
-                    )
-                    fetchChapterContent(chapterId)
-                    // getChapterDetailsById(chapterId, setChapterContent)
                     router.push(
                         `/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterId}`
                     )
