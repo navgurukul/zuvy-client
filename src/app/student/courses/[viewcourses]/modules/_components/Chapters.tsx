@@ -3,7 +3,7 @@
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useLazyLoadedStudentData } from '@/store/store'
 import { api } from '@/utils/axios.config'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState, useRef } from 'react'
 import StudentChapterItem from '../../../_components/StudentChapterItem'
 import Video from './Video'
 import Article from './Article'
@@ -19,6 +19,7 @@ import {
     getStudentChapterContentState,
     getStudentChaptersState,
     getTopicId,
+    getScrollPosition
 } from '@/store/store'
 import { Spinner } from '@/components/ui/spinner'
 
@@ -46,7 +47,8 @@ function Chapters({ params }: any) {
     const [activeChapter, setActiveChapter] = useState(chapter_id)
     // const [topicId, setTopicId] = useState<any>(null)
     const { topicId, setTopicId } = getTopicId()
-    const { chapterContent, setChapterContent } = getStudentChapterContentState()
+    const { chapterContent, setChapterContent } =
+        getStudentChapterContentState()
     // const [chapterContent, setChapterContent] = useState<any>({})
     // const [chapterId, setChapterId] = useState<number>(Number(chapterID) || 0)
     const [chapterId, setChapterId] = useState<number>(0)
@@ -56,6 +58,10 @@ function Chapters({ params }: any) {
     const [submissionId, setSubmissionId] = useState<any>()
     const [typeId, setTypeId] = useState<any>(null)
     const [loading, setLoading] = useState(true)
+    const scrollAreaRef = useRef<HTMLDivElement>(null)
+    const { scrollPosition, setScrollPosition } =
+    getScrollPosition()
+    // const [scrollPosition, setScrollPosition] = useState(10)
 
     // func [viewcourses]   [courseId]
     const fetchChapters = useCallback(async () => {
@@ -120,7 +126,7 @@ function Chapters({ params }: any) {
                 setChapterContent(response.data.trackingData)
                 setTimeout(() => {
                     setLoading(false) // Set loading to false after the delay
-                }, 10000)
+                }, 2000)
             } catch (error) {
                 console.error('Error fetching chapter content:', error)
             }
@@ -139,14 +145,54 @@ function Chapters({ params }: any) {
         }
     }
 
-    console.log('activeChapter', activeChapter)
-    console.log('chapters', chapters)
-    console.log('topicId', topicId)
-    console.log('chapterContent ^^^', chapterContent)
+    console.log('Before change scrollPosition', scrollPosition)
+
+    const handleScroll = useCallback((event: Event) => {
+        const target = event.target as HTMLDivElement
+        const newScrollPosition = target.scrollTop
+        console.log('Scroll event triggered. New position:', newScrollPosition)
+        setScrollPosition(newScrollPosition)
+    }, [])
+
+    useEffect(() => {
+        console.log('Setting up scroll event listener')
+        const scrollArea = scrollAreaRef.current
+        if (scrollArea) {
+            const scrollableElement = scrollArea.querySelector('[data-radix-scroll-area-viewport]')
+            const targetElement = scrollableElement || scrollArea
+            
+            targetElement.addEventListener('scroll', handleScroll, { passive: true })
+            console.log('Scroll event listener added to:', targetElement)
+            
+            return () => {
+                targetElement.removeEventListener('scroll', handleScroll)
+                console.log('Scroll event listener removed')
+            }
+        }
+    }, [handleScroll])
+
+    useEffect(() => {
+        if (scrollAreaRef.current) {
+            const scrollableElement = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]')
+            const targetElement = scrollableElement || scrollAreaRef.current
+    
+            console.log('Attempting to set scrollTop to:', scrollPosition)
+            targetElement.scrollTop = scrollPosition
+            console.log('scrollTop after setting:', targetElement.scrollTop)
+        }
+    }, [chapterContent, scrollPosition])
+
+    console.log('scrollAreaRef', scrollAreaRef)
+    console.log('scrollPosition', scrollPosition)
+
+    // console.log('activeChapter', activeChapter)
+    // console.log('chapters', chapters)
+    // console.log('topicId', topicId)
+    // console.log('chapterContent ^^^', chapterContent)
 
     const renderChapterContent = () => {
-        console.log('chapterContent', chapterContent)
-        console.log('loading', loading)
+        // console.log('chapterContent', chapterContent)
+        // console.log('loading', loading)
         if (
             topicId &&
             chapterContent &&
@@ -277,7 +323,7 @@ function Chapters({ params }: any) {
             {chapters.length > 0 ? (
                 <div className="grid  grid-cols-4 mt-5">
                     <div className=" col-span-1">
-                        <ScrollArea className="h-dvh pr-4">
+                        <ScrollArea className="h-dvh pr-4" ref={scrollAreaRef}>
                             {chapters?.map((item: any, index: any) => {
                                 return (
                                     <StudentChapterItem

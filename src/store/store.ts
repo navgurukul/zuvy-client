@@ -225,6 +225,18 @@ export const getModuleName = create<studentModuleName>((set) => ({
     },
 }))
 
+type scrollPosition = {
+    scrollPosition: number
+    setScrollPosition: (newValue: number) => void
+}
+
+export const getScrollPosition = create<scrollPosition>((set) => ({
+    scrollPosition: 0,
+    setScrollPosition: (newValue: number) => {
+        set({ scrollPosition: newValue })
+    },
+}))
+
 // ------------------------------
 
 // ----------------Chapter state for Admin side--------------

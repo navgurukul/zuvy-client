@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, useRef } from 'react'
 import ChapterItem from '@/app/admin/courses/[courseId]/module/_components/ChapterItem'
 import Quiz from '@/app/admin/courses/[courseId]/module/_components/quiz/Quiz'
 import Assignment from '@/app/admin/courses/[courseId]/module/_components/assignment/Assignment'
@@ -55,6 +55,7 @@ import {
     getCurrentChapterState,
     getTopicId,
     getCurrentModuleName,
+    getScrollPosition
 } from '@/store/store'
 import { Spinner } from '@/components/ui/spinner'
 
@@ -130,6 +131,9 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
     const [moduleData, setModuleData] = useState<Module[]>([])
     const [title, setTitle] = useState('')
     const [loading, setLoading] = useState(true)
+    const scrollAreaRef = useRef<HTMLDivElement>(null)
+    const { scrollPosition, setScrollPosition } =
+    getScrollPosition()
 
     const crumbs = [
         {
@@ -302,6 +306,57 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
         },
         [moduleData, params.courseId, params.moduleId]
     )
+
+    const handleScroll = useCallback((event: Event) => {
+        const target = event.target as HTMLDivElement
+        const newScrollPosition = target.scrollTop
+        console.log('Scroll event triggered. New position:', newScrollPosition)
+        setScrollPosition(newScrollPosition)
+    }, [])
+
+    useEffect(() => {
+        console.log('Setting up scroll event listener')
+        const scrollArea = scrollAreaRef.current
+        if (scrollArea) {
+            const scrollableElement = scrollArea.querySelector('[data-radix-scroll-area-viewport]')
+            const targetElement = scrollableElement || scrollArea
+            
+            targetElement.addEventListener('scroll', handleScroll, { passive: true })
+            console.log('Scroll event listener added to:', targetElement)
+            
+            return () => {
+                targetElement.removeEventListener('scroll', handleScroll)
+                console.log('Scroll event listener removed')
+            }
+        }
+    }, [handleScroll])
+
+    useEffect(() => {
+        if (scrollAreaRef.current) {
+            const scrollableElement = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]')
+            const targetElement = scrollableElement || scrollAreaRef.current
+    
+            console.log('Attempting to set scrollTop to:', scrollPosition)
+            targetElement.scrollTop = scrollPosition
+            console.log('scrollTop after setting:', targetElement.scrollTop)
+        }
+    }, [chapterContent, scrollPosition])
+
+    const scrollToBottom = useCallback(() => {
+        if (scrollAreaRef.current) {
+            const scrollableElement = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]')
+            if (scrollableElement) {
+                scrollableElement.scrollTop = scrollableElement.scrollHeight
+            }
+        }
+    }, [])
+
+    useEffect(() => {
+        if (chapterData.length > 0) {
+            scrollToBottom()
+        }
+    }, [chapterData, scrollToBottom])
+
 
     const renderChapterContent = () => {
         if (
@@ -494,7 +549,7 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                                 />
                             </Dialog>
                         </div>
-                        <ScrollArea className="h-dvh pr-4">
+                        <ScrollArea className="h-dvh pr-4" ref={scrollAreaRef}>
                             <Reorder.Group
                                 values={chapterData}
                                 onReorder={async (newOrderChapters: any) => {
