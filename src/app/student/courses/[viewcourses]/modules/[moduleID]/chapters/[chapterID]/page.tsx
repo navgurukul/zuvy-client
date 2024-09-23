@@ -7,7 +7,9 @@ import React, { useCallback, useEffect, useState } from 'react'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import { useParams } from 'next/navigation'
 import Chapters from '../../../_components/Chapters'
-// import Chapters from '../_components/Chapters'
+import {
+    getModuleName,
+} from '@/store/store'
 
 function Page({ params }: any) {
     // misc
@@ -15,7 +17,7 @@ function Page({ params }: any) {
     const userID = studentData?.id && studentData?.id
     const { viewcourses, moduleID } = useParams()
     const { paramBatchId } = getParamBatchId()
-    const [moduleName, setModuleName] = useState('')
+    const { moduleName, setModuleName } = getModuleName()
 
     const crumbs = [
         {
@@ -35,7 +37,7 @@ function Page({ params }: any) {
     ]
 
     // // func
-    const getModuleName = useCallback(async () => {
+    const getModule = useCallback(async () => {
         try {
             const response = await api.get(
                 `tracking/getAllChaptersWithStatus/${moduleID}`
@@ -49,9 +51,9 @@ function Page({ params }: any) {
     // async
     useEffect(() => {
         if (userID) {
-            getModuleName()
+            getModule()
         }
-    }, [userID, getModuleName])
+    }, [userID, getModule])
 
     return (
         <>

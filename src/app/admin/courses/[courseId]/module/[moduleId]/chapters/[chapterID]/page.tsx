@@ -290,7 +290,7 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                 setTopicId(currentModule?.topicId)
                 setTimeout(() => {
                     setLoading(false) // Set loading to false after the delay
-                }, 2000)
+                }, 500)
 
                 // setTopicId(response.data.topicId)
 

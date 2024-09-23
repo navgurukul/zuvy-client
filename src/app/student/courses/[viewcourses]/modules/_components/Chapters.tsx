@@ -15,6 +15,12 @@ import Assessment from './Assessment'
 import FeedbackForm from './FeedbackForm'
 import { getAssessmentShortInfo } from '@/utils/students'
 import Projects from './Projects'
+import {
+    getStudentChapterContentState,
+    getStudentChaptersState,
+    getTopicId,
+} from '@/store/store'
+import { Spinner } from '@/components/ui/spinner'
 
 interface Chapter {
     id: number
@@ -29,15 +35,19 @@ function Chapters({ params }: any) {
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
     const { viewcourses, moduleID, chapterID } = useParams()
-    const chapter_id = Array.isArray(chapterID) ? Number(chapterID[0]) : Number(chapterID);
-    const urlParams = new URLSearchParams(window.location.search)
-    const nextChapterId = Number(urlParams.get('nextChapterId'))
+    const chapter_id = Array.isArray(chapterID)
+        ? Number(chapterID[0])
+        : Number(chapterID)
+    // const urlParams = new URLSearchParams(window.location.search)
+    // const nextChapterId = Number(urlParams.get('nextChapterId'))
     // state and variables
-    console.log('chapterID useParams', chapterID)
-    const [chapters, setChapters] = useState<any>([])
+    // const [chapters, setChapters] = useState<any>([])
+    const { chapters, setChapters } = getStudentChaptersState()
     const [activeChapter, setActiveChapter] = useState(chapter_id)
-    const [topicId, setTopicId] = useState<any>(null)
-    const [chapterContent, setChapterContent] = useState<any>({})
+    // const [topicId, setTopicId] = useState<any>(null)
+    const { topicId, setTopicId } = getTopicId()
+    const { chapterContent, setChapterContent } = getStudentChapterContentState()
+    // const [chapterContent, setChapterContent] = useState<any>({})
     // const [chapterId, setChapterId] = useState<number>(Number(chapterID) || 0)
     const [chapterId, setChapterId] = useState<number>(0)
     const [projectId, setProjectId] = useState<number>(0)
@@ -45,6 +55,7 @@ function Chapters({ params }: any) {
     const [assessmentOutSourceId, setAssessmentOutSourceId] = useState<any>()
     const [submissionId, setSubmissionId] = useState<any>()
     const [typeId, setTypeId] = useState<any>(null)
+    const [loading, setLoading] = useState(true)
 
     // func [viewcourses]   [courseId]
     const fetchChapters = useCallback(async () => {
@@ -63,11 +74,11 @@ function Chapters({ params }: any) {
             // )
             // setActiveChapter(nextChapterId || firstPending.id)
             // fetchChapterContent(nextChapterId || firstPending.id)
-            console.log('response', response)
-            console.log('firstPending', firstPending)
+            // console.log('response', response)
+            // console.log('firstPending', firstPending)
             setTypeId(response?.data.moduleDetails[0]?.typeId)
             setProjectId(response?.data.moduleDetails[0]?.projectId)
-            console.log('firstPending?.id', firstPending?.id)
+            // console.log('firstPending?.id', firstPending?.id)
             // setActiveChapter(firstPending?.id)
             // fetchChapterContent(firstPending?.id)
             // if (activeChapter === 0) {
@@ -95,18 +106,21 @@ function Chapters({ params }: any) {
                 // setActiveChapter(nextChapterId || chapterId)
                 // setChapterId(nextChapterId || response.data.trackingData.id)
 
-                console.log(
-                    'chapterId in getChapterDetailsWithStatus',
-                    chapterId
-                )
+                // console.log(
+                //     'chapterId in getChapterDetailsWithStatus',
+                //     chapterId
+                // )
                 setActiveChapter(chapterId)
-                console.log(
-                    'response data getChapterDetailsWithStatus',
-                    response.data.trackingData
-                )
+                // console.log(
+                //     'response data getChapterDetailsWithStatus',
+                //     response.data.trackingData
+                // )
                 setChapterId(response.data.trackingData.id)
                 setTopicId(response.data.trackingData.topicId)
                 setChapterContent(response.data.trackingData)
+                setTimeout(() => {
+                    setLoading(false) // Set loading to false after the delay
+                }, 10000)
             } catch (error) {
                 console.error('Error fetching chapter content:', error)
             }
@@ -125,75 +139,106 @@ function Chapters({ params }: any) {
         }
     }
 
+    console.log('activeChapter', activeChapter)
+    console.log('chapters', chapters)
+    console.log('topicId', topicId)
+    console.log('chapterContent ^^^', chapterContent)
+
     const renderChapterContent = () => {
-        switch (topicId) {
-            case 1:
-                return (
-                    <Video
-                        content={chapterContent}
-                        completeChapter={completeChapter}
-                    />
-                )
-            case 2:
-                return (
-                    <Article
-                        content={chapterContent}
-                        completeChapter={completeChapter}
-                        key={chapterContent.id}
-                    />
-                )
-            case 3:
-                return (
-                    <CodingChallenge
-                        content={chapterContent}
-                        completeChapter={completeChapter}
-                        fetchChapters={fetchChapters}
-                    />
-                )
-            case 4:
-                return (
-                    <Quiz
-                        content={chapterContent}
-                        moduleId={moduleID.toString()}
-                        // moduleId={moduleIdString}
-                        chapterId={chapterId}
-                        bootcampId={+viewcourses}
-                        fetchChapters={completeChapter}
-                    />
-                )
-            case 5:
-                return (
-                    <Assignment
-                        content={chapterContent}
-                        moduleId={+moduleID}
-                        projectId={projectId}
-                        bootcampId={+viewcourses}
-                        completeChapter={completeChapter}
-                    />
-                )
-            case 6:
-                return (
-                    <Assessment
-                        assessmentShortInfo={assessmentShortInfo}
-                        assessmentOutSourceId={assessmentOutSourceId}
-                        submissionId={submissionId}
-                        chapterContent={chapterContent}
-                    />
-                )
-            case 7:
-                return (
-                    <FeedbackForm
-                        content={chapterContent}
-                        moduleId={moduleID.toString()}
-                        // moduleId={moduleIdString}
-                        chapterId={chapterId}
-                        bootcampId={+viewcourses}
-                        completeChapter={completeChapter}
-                        // bootcampId={viewcourses}
-                    />
-                )
-            default:
-                return <h1>No Chapters Available Right Now</h1>
+        console.log('chapterContent', chapterContent)
+        console.log('loading', loading)
+        if (
+            topicId &&
+            chapterContent &&
+            (chapterContent?.id === chapter_id ||
+                chapterContent?.chapterId === chapter_id)
+        ) {
+            switch (topicId) {
+                case 1:
+                    return (
+                        <Video
+                            content={chapterContent}
+                            completeChapter={completeChapter}
+                        />
+                    )
+                case 2:
+                    return (
+                        <Article
+                            content={chapterContent}
+                            completeChapter={completeChapter}
+                            key={chapterContent.id}
+                        />
+                    )
+                case 3:
+                    return (
+                        <CodingChallenge
+                            content={chapterContent}
+                            completeChapter={completeChapter}
+                            fetchChapters={fetchChapters}
+                        />
+                    )
+                case 4:
+                    return (
+                        <Quiz
+                            content={chapterContent}
+                            moduleId={moduleID.toString()}
+                            // moduleId={moduleIdString}
+                            chapterId={chapterId}
+                            bootcampId={+viewcourses}
+                            fetchChapters={completeChapter}
+                        />
+                    )
+                case 5:
+                    return (
+                        <Assignment
+                            content={chapterContent}
+                            moduleId={+moduleID}
+                            projectId={projectId}
+                            bootcampId={+viewcourses}
+                            completeChapter={completeChapter}
+                        />
+                    )
+                case 6:
+                    return (
+                        <Assessment
+                            assessmentShortInfo={assessmentShortInfo}
+                            assessmentOutSourceId={assessmentOutSourceId}
+                            submissionId={submissionId}
+                            chapterContent={chapterContent}
+                        />
+                    )
+                case 7:
+                    return (
+                        <FeedbackForm
+                            content={chapterContent}
+                            moduleId={moduleID.toString()}
+                            // moduleId={moduleIdString}
+                            chapterId={chapterId}
+                            bootcampId={+viewcourses}
+                            completeChapter={completeChapter}
+                            // bootcampId={viewcourses}
+                        />
+                    )
+                default:
+                    return <h1>No Chapters Available Right Now</h1>
+            }
+        } else {
+            return (
+                <>
+                    {/* <h1>Hello students...!!</h1> */}
+                    {loading ? (
+                        <div className="my-5 flex justify-center items-center">
+                            <div className="absolute h-screen">
+                                <div className="relative top-[70%]">
+                                    <Spinner className="text-secondary" />
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <h1>Create New Chapter</h1>
+                    )}
+                </>
+            )
         }
     }
 
@@ -204,7 +249,7 @@ function Chapters({ params }: any) {
         }
     }, [userID, fetchChapters])
 
-    console.log('chapters', chapters)
+    // console.log('chapters', chapters)
 
     useEffect(() => {
         if (chapters.length > 0) {
@@ -226,8 +271,6 @@ function Chapters({ params }: any) {
             )
         }
     }, [topicId, chapterId])
-
-    console.log('activeChapter', activeChapter)
 
     return (
         <>

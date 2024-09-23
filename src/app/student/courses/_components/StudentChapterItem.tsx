@@ -99,7 +99,7 @@ function StudentChapterItem({
                 )}
                 onClick={() => {
                     console.log('chapterId sending to fetchChapterContent', chapterId)
-                    fetchChapterContent(chapterId)
+                    // fetchChapterContent(chapterId)
                     router.push(
                         `/${path}/courses/${viewcourses}/modules/${moduleID}/chapters/${chapterId}`
                     )

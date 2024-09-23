@@ -187,7 +187,47 @@ export const getAllQuizData = create<storequizData>((set) => ({
     },
 }))
 
+// ----------------Chapter state for Student side--------------
+
+type studentChapterContent = {
+    chapterContent: any
+    setChapterContent: (newValue: any) => void
+}
+
+export const getStudentChapterContentState = create<studentChapterContent>((set) => ({
+    chapterContent: {},
+    setChapterContent: (newValue: any) => {
+        set({ chapterContent: newValue })
+    },
+}))
+
+type chapters = {
+    chapters: any[]
+    setChapters: (newValue: any[]) => void
+}
+
+export const getStudentChaptersState = create<chapters>((set) => ({
+    chapters: [],
+    setChapters: (newValue: any[]) => {
+        set({ chapters: newValue })
+    },
+}))
+
+type studentModuleName = {
+    moduleName: string
+    setModuleName: (newValue: string) => void
+}
+
+export const getModuleName = create<studentModuleName>((set) => ({
+    moduleName: '',
+    setModuleName: (newValue: string) => {
+        set({ moduleName: newValue })
+    },
+}))
+
 // ------------------------------
+
+// ----------------Chapter state for Admin side--------------
 
 type chapterContent = {
     chapterContent: any
