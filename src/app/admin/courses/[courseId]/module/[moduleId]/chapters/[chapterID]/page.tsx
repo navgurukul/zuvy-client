@@ -351,11 +351,11 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
         }
     }, [])
 
-    useEffect(() => {
-        if (chapterData.length > 0) {
-            scrollToBottom()
-        }
-    }, [chapterData, scrollToBottom])
+    // useEffect(() => {
+    //     if (chapterData.length > 0) {
+    //         scrollToBottom()
+    //     }
+    // }, [chapterData.length, scrollToBottom])
 
 
     const renderChapterContent = () => {
@@ -528,7 +528,7 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
         <>
             <BreadcrumbComponent crumbs={crumbs} />
             {!projectId ? (
-                <div className="grid  grid-cols-4 mt-5">
+                <div className="grid grid-cols-4 mt-5">
                     <div className=" col-span-1">
                         <div className="mb-5 flex">
                             <Dialog>
@@ -546,11 +546,14 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                                     params={params}
                                     fetchChapters={fetchChapters}
                                     newChapterOrder={chapterData.length}
+                                    scrollToBottom={scrollToBottom}
                                 />
                             </Dialog>
                         </div>
-                        <ScrollArea className="h-dvh pr-4" ref={scrollAreaRef}>
-                            <Reorder.Group
+                        {/* <ScrollArea className="h-dvh pr-4" ref={scrollAreaRef}> */}
+                        <ScrollArea className="h-[600px] pr-4" ref={scrollAreaRef}>
+                        {/* <ScrollArea className="min-h-[500px] max-h-[600px] overflow-y-auto pr-4" ref={scrollAreaRef}> */}
+                        <Reorder.Group
                                 values={chapterData}
                                 onReorder={async (newOrderChapters: any) => {
                                     handleReorder(newOrderChapters)

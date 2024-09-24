@@ -184,7 +184,8 @@ function CodingChallenge({
                         setSelectedLanguage={setSelectedLanguage}
                         tags={tags}
                     />
-                    <ScrollArea className="h-dvh pr-4">
+                    {/* <ScrollArea className="h-dvh pr-4"> */}
+                    <ScrollArea className="h-[500px] pr-4">
                         {filteredQuestions?.map((question: any) => (
                             <div
                                 key={question.id}
