@@ -322,10 +322,12 @@ const EditQuizQuestion = ({
                                         <FormItem className="text-left">
                                             <FormLabel>Question Text</FormLabel>
                                             <FormControl>
-                                                <Textarea
-                                                    placeholder="Write your Question here"
-                                                    {...field}
-                                                />
+                                                <pre>
+                                                    <Textarea
+                                                        placeholder="Write your Question here"
+                                                        {...field}
+                                                    />
+                                                </pre>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>

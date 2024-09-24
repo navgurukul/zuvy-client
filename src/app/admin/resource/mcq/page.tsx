@@ -2,11 +2,13 @@
 
 // External imports
 import React, { useState, useEffect, useCallback } from 'react'
-import { Search } from 'lucide-react'
+import { ChevronLeft, Search } from 'lucide-react'
 
 // Internal imports
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import {
     Select,
     SelectContent,
@@ -15,13 +17,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from '@/components/ui/dialog'
+
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Separator } from '@/components/ui/separator'
 import { DataTable } from '@/app/_components/datatable/data-table'
@@ -35,8 +31,8 @@ import {
     getMcqSearch,
 } from '@/store/store'
 import useDebounce from '@/hooks/useDebounce'
-import { getAllQuizQuestion } from '@/utils/admin'
-import { Spinner } from '@/components/ui/spinner'
+import BulkUploadMcq from '../_components/BulkUploadMcq'
+import NewMcqProblemFormNew from '../_components/DummyForm'
 
 type Props = {}
 export type Tag = {
@@ -49,10 +45,13 @@ const Mcqs = (props: Props) => {
     const [search, setSearch] = useState('')
     const debouncedSearch = useDebounce(search, 500)
     // const [difficulty, setDifficulty] = useState<string>('None')
+    const [isMcqModalOpen, setIsMcqModalOpen] = useState<boolean>(false)
     const { tags, setTags } = getCodingQuestionTags()
     const { quizData, setStoreQuizData } = getAllQuizData()
     const { mcqDifficulty: difficulty, setMcqDifficulty: setDifficulty } =
         getmcqdifficulty()
+
+    const [mcqType, setMcqType] = useState<string>('')
 
     const { setmcqSearch } = getMcqSearch()
 
@@ -140,11 +139,68 @@ const Mcqs = (props: Props) => {
 
     return (
         <>
-            {loading ? (
-                <div className="flex justify-center items-center h-screen">
-                    <Spinner className="text-secondary" />
+            {isMcqModalOpen && (
+                <div className="flex flex-col items-start ">
+                    <div
+                        className="flex cursor-pointer p-5 text-secondary"
+                        onClick={() =>
+                            setIsMcqModalOpen((prevState) => !prevState)
+                        }
+                    >
+                        <ChevronLeft />
+                        <h1>MCQ Problems</h1>
+                    </div>
+                    <h1 className="text-xl mb-4 text-center w-full items-start justify-start">
+                        New MCQ
+                    </h1>
+                    <div className="flex flex-col items-center justify-center w-screen">
+                        <RadioGroup
+                            className="flex flex-col items-center w-1/2"
+                            defaultValue="oneatatime"
+                            onValueChange={(value) => setMcqType(value)}
+                        >
+                            <div className="flex w-1/3 items-start justify-start gap-3">
+                                <div className="flex  space-x-2">
+                                    <RadioGroupItem
+                                        value="bulk"
+                                        id="r1"
+                                        className="text-secondary"
+                                    />
+                                    <Label htmlFor="r1">Bulk</Label>
+                                </div>
+                                <div className="flex  space-x-2">
+                                    <RadioGroupItem
+                                        value="oneatatime"
+                                        id="r2"
+                                        className="text-secondary"
+                                    />
+                                    <Label htmlFor="r2">One At A Time</Label>
+                                </div>
+                            </div>
+                        </RadioGroup>
+
+                        {mcqType === 'bulk' ? (
+                            <BulkUploadMcq />
+                        ) : (
+                            <div className="flex items-center justify-center w-screen ">
+                                {/* <NewMcqProblemForm
+                                    tags={tags}
+                                    closeModal={closeModal}
+                                    setStoreQuizData={setStoreQuizData}
+                                    getAllQuizQuesiton={getAllQuizQuestion}
+                                /> */}
+                                <NewMcqProblemFormNew
+                                    tags={tags}
+                                    closeModal={closeModal}
+                                    setStoreQuizData={setStoreQuizData}
+                                    getAllQuizQuesiton={getAllQuizQuestion}
+                                />
+                            </div>
+                        )}
+                    </div>
                 </div>
-            ) : (
+            )}
+            {!isMcqModalOpen && (
                 <MaxWidthWrapper>
                     <h1 className="text-left font-semibold text-2xl">
                         Resource Library - MCQs
@@ -161,24 +217,13 @@ const Mcqs = (props: Props) => {
                                 <Search className="text-gray-400" size={20} />
                             </div>
                         </div>
-                        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                            <DialogTrigger asChild>
-                                <Button>+ Create MCQ</Button>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-[500px]">
-                                <DialogHeader>
-                                    <DialogTitle>New MCQ</DialogTitle>
-                                </DialogHeader>
-                                <div className="w-full">
-                                    <NewMcqProblemForm
-                                        tags={tags}
-                                        closeModal={closeModal}
-                                        setStoreQuizData={setStoreQuizData}
-                                        getAllQuizQuesiton={getAllQuizQuestion}
-                                    />
-                                </div>
-                            </DialogContent>
-                        </Dialog>
+                        <Button
+                            onClick={() =>
+                                setIsMcqModalOpen((prevState) => !prevState)
+                            }
+                        >
+                            + Create MCQ
+                        </Button>
                     </div>
                     <div className="flex items-center">
                         <Select

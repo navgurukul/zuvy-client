@@ -12,6 +12,7 @@ type Props = {
     className: string
     setStudentData?: any
     acceptedFiles?: any
+    mcqSide?: boolean
 }
 
 const Dropzone = ({
@@ -19,6 +20,7 @@ const Dropzone = ({
     studentData,
     setStudentData,
     acceptedFiles = 'text/csv',
+    mcqSide,
 }: Props) => {
     // misc
 
@@ -83,7 +85,7 @@ const Dropzone = ({
                         <p>Drop the files here ...</p>
                     </div>
                 ) : (
-                    <div className="p-2 gap-y-4 flex flex-col justify-center items-center w-full h-full ">
+                    <div className="p-2 gap-y-4 flex flex-col justify-center items-center w-full h-full text-secondary ">
                         <Upload className="mb-[20px]" />
                         <p className=" mx-3 font-semibold">
                             Upload Or Drag File
@@ -122,15 +124,27 @@ const Dropzone = ({
             ) : (
                 acceptedFiles === 'text/csv' && (
                     <div className="flex pt-2 justify-between items-center">
-                        <p className="text-gray-400 text-xs">
-                            Format for student data:
-                            <Link
-                                href="https://www.dropbox.com/scl/fi/jmd558u9uvl6ehtwlfdgj/csvformatted-file.csv?rlkey=zb5jzu52m5i5jcyli02kyfien&dl=1"
-                                className="mx-2 text-xs font-semibold text-[#2F433A]"
-                            >
-                                Sample_Student_Data.csv
-                            </Link>
-                        </p>
+                        {!mcqSide ? (
+                            <p className="text-gray-400 text-xs">
+                                Format for student data:
+                                <Link
+                                    href="https://www.dropbox.com/scl/fi/jmd558u9uvl6ehtwlfdgj/csvformatted-file.csv?rlkey=zb5jzu52m5i5jcyli02kyfien&dl=1"
+                                    className="mx-2 text-xs font-semibold text-[#2F433A]"
+                                >
+                                    Sample_Student_Data.csv
+                                </Link>
+                            </p>
+                        ) : (
+                            <p className="text-gray-400 w-[450px] text-start text-xs">
+                                Format for MCQ data:
+                                <Link
+                                    href="https://www.dropbox.com/scl/fi/jmd558u9uvl6ehtwlfdgj/csvformatted-file.csv?rlkey=zb5jzu52m5i5jcyli02kyfien&dl=1"
+                                    className="mx-2 text-xs font-semibold text-[#2F433A]"
+                                >
+                                    Sample_MCQ_Data.csv
+                                </Link>
+                            </p>
+                        )}
                     </div>
                 )
             )}

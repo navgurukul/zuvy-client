@@ -5,7 +5,7 @@ import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-co
 
 import { getAllQuizData, getCodingQuestionTags, quiz } from '@/store/store'
 import { Edit, Eye, Pencil, Trash2 } from 'lucide-react'
-import { difficultyColor } from '@/lib/utils'
+import { difficultyColor, difficultyColorNew } from '@/lib/utils'
 
 import DeleteConfirmationModal from '../../courses/[courseId]/_components/deleteModal'
 import { getDeleteQuizQuestion, getEditQuizQuestion } from '@/store/store'
@@ -36,9 +36,21 @@ export const columns: ColumnDef<quiz>[] = [
                 title="Question Name"
             />
         ),
+
         cell: ({ row }) => {
             const question = row.original?.question
-            return <p className="text-left text-md font-[14px] ">{question}</p>
+            return (
+                <pre
+                    className="text-left text-md p-2 w-[900px] font-[16px] hover:bg-slate-200 rounded-lg transition ease-in-out delay-150 overflow-hidden text-ellipsis"
+                    style={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: 'vertical',
+                    }}
+                >
+                    {question}
+                </pre>
+            )
         },
         enableSorting: false,
         enableHiding: false,
@@ -55,26 +67,39 @@ export const columns: ColumnDef<quiz>[] = [
         cell: ({ row }) => {
             const difficulty = row.original.difficulty
             return (
-                <p
-                    className={` text-left ml-3 text-[15px] font-semibold  ${difficultyColor(
-                        difficulty
-                    )}`}
-                >
-                    {difficulty}
-                </p>
+                <div className="flex items-center gap-3">
+                    <div
+                        className={` h-2 w-2 rounded-full font-semibold  ${difficultyColorNew(
+                            difficulty
+                        )}`}
+                    />
+                    <h1>{difficulty}</h1>
+                </div>
             )
         },
         enableSorting: false,
         enableHiding: false,
     },
+    {
+        id: 'actions1',
+        cell: ({ row }) => {
+            const quizQuestion = row.original
+
+            return (
+                <>
+                    <Eye className="cursor-pointer" />
+                </>
+            )
+        },
+    },
 
     {
-        id: 'actions',
+        id: 'actions2',
         header: ({ column }) => (
             <DataTableColumnHeader
                 className="text-[17px]"
                 column={column}
-                title="Actions"
+                title=""
             />
         ),
         cell: ({ row }) => {
@@ -83,16 +108,10 @@ export const columns: ColumnDef<quiz>[] = [
             const openDialog = () => {
                 const dialog = document.getElementById('editQuizDialog')
                 if (dialog) {
-                    dialog.setAttribute('data-state', 'open') // Simulate opening the dialog
+                    dialog.setAttribute('data-state', 'open')
                 }
             }
 
-            const {
-                isDeleteModalOpen,
-                setDeleteModalOpen,
-                deleteQuizQuestionId,
-                setDeleteQuizQuestionId,
-            } = getDeleteQuizQuestion()
             const { setStoreQuizData } = getAllQuizData()
 
             return (
@@ -121,7 +140,25 @@ export const columns: ColumnDef<quiz>[] = [
                             </DialogContent>
                         </Dialog>
                     </div>
+                </div>
+            )
+        },
+    },
+    {
+        id: 'actions3',
 
+        cell: ({ row }) => {
+            const quizQuestion = row.original
+            const {
+                isDeleteModalOpen,
+                setDeleteModalOpen,
+                deleteQuizQuestionId,
+                setDeleteQuizQuestionId,
+            } = getDeleteQuizQuestion()
+            const { setStoreQuizData } = getAllQuizData()
+
+            return (
+                <div className="ml-[-30px]">
                     <Trash2
                         onClick={(e) => {
                             e.stopPropagation()

@@ -46,11 +46,17 @@ const formSchema = z.object({
         required_error: 'You need to select a Difficulty type.',
     }),
     topics: z.number().min(1, 'You need to select a Topic'),
-    questionText: z.string().min(1, {
-        message: 'Question Text must be at least 1 characters.',
-    }),
-    options: z.array(z.string()),
-    selectedOption: z.number(),
+    variants: z.array(
+        z.object({
+            questionText: z.string().min(1, {
+                message: 'Question Text must be at least 1 character.',
+            }),
+            options: z
+                .array(z.string())
+                .min(2, 'You must provide at least two options.'),
+            selectedOption: z.number().optional(),
+        })
+    ),
 })
 
 const NewMcqProblemForm = ({
@@ -66,21 +72,36 @@ const NewMcqProblemForm = ({
 }) => {
     const [selectedOption, setSelectedOption] = useState<number>(1)
     const [options, setOptions] = useState<string[]>(['', ''])
-    const [variants, setVariants] = useState<number[]>([1])
-    const [selectedVariant, setSelectedVariant] = useState<number>(0)
+    // const [variants, setVariants] = useState<number[]>([1])
+    // const [selectedVariant, setSelectedVariant] = useState<number>(0)
     const [hoveredVariantIndex, setHoveredVariantIndex] = useState<
         number | null
     >(null)
+    const [variants, setVariants] = useState<
+        {
+            questionText: string
+            options: string[]
+            selectedOption: number | null // Allow null
+        }[]
+    >([{ questionText: '', options: [''], selectedOption: null }])
+
+    const [selectedVariant, setSelectedVariant] = useState<number>(0)
 
     const addOption = () => {
         setOptions([...options, ''])
     }
 
     const removeOption = (index: number) => {
-        if (options.length > 2) {
-            const newOptions = options.filter((_, i) => i !== index)
-            setOptions(newOptions)
-            form.setValue('options', newOptions)
+        if (variants[selectedVariant].options.length > 2) {
+            const newOptions = variants[selectedVariant].options.filter(
+                (_, i) => i !== index
+            )
+            setVariants((prev) => {
+                const updated = [...prev]
+                updated[selectedVariant].options = newOptions
+                return updated
+            })
+            form.setValue(`variants.${selectedVariant}.options`, newOptions)
         }
     }
 
@@ -110,49 +131,18 @@ const NewMcqProblemForm = ({
         defaultValues: {
             difficulty: 'Easy',
             topics: 0,
-            questionText: '',
-            options: options,
-            selectedOption: 1,
+            variants: [
+                {
+                    questionText: '',
+                    options: ['', ''],
+                    selectedOption: 0,
+                },
+            ],
         },
     })
 
     const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-        const emptyOptions = values.options.some(
-            (option) => option.trim() === ''
-        )
-
-        if (emptyOptions) {
-            toast({
-                title: 'Error',
-                description: 'Options cannot be empty',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-            })
-            return
-        }
-
-        const optionsObject: { [key: number]: string } = options.reduce(
-            (acc, option, index) => {
-                acc[index + 1] = option
-                return acc
-            },
-            {} as { [key: number]: string }
-        )
-
-        const formattedData = {
-            question: values.questionText,
-            options: optionsObject,
-            correctOption: selectedOption + 1,
-            mark: 1,
-            tagId: values.topics,
-            difficulty: values.difficulty,
-        }
-
-        const requestBody = {
-            questions: [formattedData],
-        }
-
-        console.log(requestBody)
+        console.log(values)
 
         // await handleCreateQuizQuestion(requestBody)
         // getAllQuizQuesiton(setStoreQuizData)
@@ -162,9 +152,10 @@ const NewMcqProblemForm = ({
     const addVariantHandler = () => {
         setVariants((prevVariants) => [
             ...prevVariants,
-            prevVariants.length + 1,
+            { questionText: '', options: ['', ''], selectedOption: null }, // Initialize selectedOption as null
         ])
     }
+
     const removeVariant = (indexToRemove: number) => {
         setVariants((prevVariants) =>
             prevVariants.filter((_, index) => index !== indexToRemove)
@@ -267,12 +258,6 @@ const NewMcqProblemForm = ({
                         {variants.map((variant, index) => (
                             <div
                                 key={index}
-                                onMouseEnter={() =>
-                                    setHoveredVariantIndex(index)
-                                }
-                                onMouseLeave={() =>
-                                    setHoveredVariantIndex(null)
-                                }
                                 className="relative flex items-center gap-x-5"
                             >
                                 <Button
@@ -284,48 +269,50 @@ const NewMcqProblemForm = ({
                                     variant={'ghost'}
                                     onClick={() => setSelectedVariant(index)}
                                 >
-                                    Variant {variant}
+                                    Variant {index + 1}
                                     {hoveredVariantIndex === index &&
-                                        index !== 0 && ( // Prevent X icon for Variant 1 (index 0)
+                                        index !== 0 && (
                                             <X
                                                 onClick={(e) => {
                                                     e.stopPropagation() // Prevent button click when clicking X
                                                     removeVariant(index)
                                                 }}
                                                 size={20}
-                                                className="text-destructive "
+                                                className="text-destructive"
                                             />
                                         )}
                                 </Button>
                             </div>
                         ))}
-
-                        <Button onClick={addVariantHandler} variant={'ghost'}>
+                        <Button
+                            onClick={addVariantHandler}
+                            type="button"
+                            variant={'ghost'}
+                        >
                             + Add Variant
                         </Button>
                     </div>
 
                     <FormField
                         control={form.control}
-                        name="questionText"
-                        render={({ field }) => {
-                            return (
-                                <FormItem className="text-left">
-                                    <FormLabel>Question Text</FormLabel>
-                                    <FormControl>
-                                        <Textarea
-                                            placeholder="Write your Question here"
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )
-                        }}
+                        name={`variants.${selectedVariant}.questionText`}
+                        render={({ field }) => (
+                            <FormItem className="text-left">
+                                <FormLabel>Question Text</FormLabel>
+                                <FormControl>
+                                    <Textarea
+                                        placeholder="Write your Question here"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
                     />
+
                     <FormField
                         control={form.control}
-                        name="options"
+                        name={`variants.${selectedVariant}.options`}
                         render={({ field }) => (
                             <FormItem className="space-y-3 ">
                                 <FormLabel className="mt-5">
@@ -334,70 +321,115 @@ const NewMcqProblemForm = ({
                                 <RadioGroup
                                     onValueChange={(value) => {
                                         const numericValue = Number(value)
-                                        setSelectedOption(numericValue)
+                                        setVariants((prev) => {
+                                            const updated = [...prev]
+                                            updated[
+                                                selectedVariant
+                                            ].selectedOption = numericValue
+                                            return updated
+                                        })
                                         form.setValue(
-                                            'selectedOption',
+                                            `variants.${selectedVariant}.selectedOption`,
                                             numericValue
                                         )
                                     }}
-                                    value={selectedOption.toString()}
+                                    value={
+                                        variants[selectedVariant]
+                                            .selectedOption !== null
+                                            ? variants[
+                                                  selectedVariant
+                                              ].selectedOption.toString()
+                                            : ''
+                                    }
                                     className="space-y-1"
                                 >
-                                    {options.map((option, index) => (
-                                        <div
-                                            key={index}
-                                            className="flex items-center space-x-3 space-y-0"
-                                        >
-                                            <div className="flex gap-x-3 items-center">
-                                                <RadioGroupItem
-                                                    value={index.toString()}
-                                                />
-                                                <Input
-                                                    placeholder={`Option ${
-                                                        index + 1
-                                                    }`}
-                                                    {...form.register(
-                                                        `options.${index}`
+                                    {variants[selectedVariant].options.map(
+                                        (option, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex items-center space-x-3 space-y-0"
+                                            >
+                                                <div className="flex gap-x-3 items-center">
+                                                    <RadioGroupItem
+                                                        value={index.toString()}
+                                                    />
+                                                    <Input
+                                                        placeholder={`Option ${
+                                                            index + 1
+                                                        }`}
+                                                        {...form.register(
+                                                            `variants.${selectedVariant}.options.${index}`
+                                                        )}
+                                                        className="w-[350px]"
+                                                        value={option}
+                                                        onChange={(e) => {
+                                                            const newOptions = [
+                                                                ...variants[
+                                                                    selectedVariant
+                                                                ].options,
+                                                            ]
+                                                            newOptions[index] =
+                                                                e.target.value
+                                                            setVariants(
+                                                                (prev) => {
+                                                                    const updated =
+                                                                        [
+                                                                            ...prev,
+                                                                        ]
+                                                                    updated[
+                                                                        selectedVariant
+                                                                    ].options =
+                                                                        newOptions
+                                                                    return updated
+                                                                }
+                                                            )
+                                                            form.setValue(
+                                                                `variants.${selectedVariant}.options`,
+                                                                newOptions
+                                                            )
+                                                        }}
+                                                    />
+                                                </div>
+                                                {variants[selectedVariant]
+                                                    .options.length > 2 &&
+                                                    index >= 2 && (
+                                                        <Button
+                                                            variant={'ghost'}
+                                                            onClick={() =>
+                                                                removeOption(
+                                                                    index
+                                                                )
+                                                            }
+                                                            type="button"
+                                                        >
+                                                            <X
+                                                                size={15}
+                                                                className="text-destructive"
+                                                            />
+                                                        </Button>
                                                     )}
-                                                    className="w-[350px]"
-                                                    value={option}
-                                                    onChange={(e) => {
-                                                        const newOptions = [
-                                                            ...options,
-                                                        ]
-                                                        newOptions[index] =
-                                                            e.target.value
-                                                        setOptions(newOptions)
-                                                        form.setValue(
-                                                            'options',
-                                                            newOptions
-                                                        )
-                                                    }}
-                                                />
                                             </div>
-                                            {options.length > 2 &&
-                                                index >= 2 && (
-                                                    <Button
-                                                        variant={'ghost'}
-                                                        onClick={() =>
-                                                            removeOption(index)
-                                                        }
-                                                        type="button"
-                                                    >
-                                                        <X
-                                                            size={15}
-                                                            className="text-destructive"
-                                                        />
-                                                    </Button>
-                                                )}
-                                        </div>
-                                    ))}
+                                        )
+                                    )}
                                 </RadioGroup>
                                 <FormMessage />
                                 <div className="flex justify-start">
                                     <Button
                                         variant={'outline'}
-                                        onClick={addOption}
+                                        onClick={() => {
+                                            const newOptions = [
+                                                ...variants[selectedVariant]
+                                                    .options,
+                                                '',
+                                            ]
+                                            setVariants((prev) => {
+                                                const updated = [...prev]
+                                                updated[
+                                                    selectedVariant
+                                                ].options = newOptions
+                                                return updated
+                                            })
+                                        }}
                                         type="button"
                                     >
                                         <Plus
