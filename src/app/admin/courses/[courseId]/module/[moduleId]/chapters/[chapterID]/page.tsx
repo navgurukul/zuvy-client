@@ -55,7 +55,7 @@ import {
     getCurrentChapterState,
     getTopicId,
     getCurrentModuleName,
-    getScrollPosition
+    getScrollPosition,
 } from '@/store/store'
 import { Spinner } from '@/components/ui/spinner'
 
@@ -132,8 +132,7 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
     const [title, setTitle] = useState('')
     const [loading, setLoading] = useState(true)
     const scrollAreaRef = useRef<HTMLDivElement>(null)
-    const { scrollPosition, setScrollPosition } =
-    getScrollPosition()
+    const { scrollPosition, setScrollPosition } = getScrollPosition()
 
     const crumbs = [
         {
@@ -318,12 +317,16 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
         console.log('Setting up scroll event listener')
         const scrollArea = scrollAreaRef.current
         if (scrollArea) {
-            const scrollableElement = scrollArea.querySelector('[data-radix-scroll-area-viewport]')
+            const scrollableElement = scrollArea.querySelector(
+                '[data-radix-scroll-area-viewport]'
+            )
             const targetElement = scrollableElement || scrollArea
-            
-            targetElement.addEventListener('scroll', handleScroll, { passive: true })
+
+            targetElement.addEventListener('scroll', handleScroll, {
+                passive: true,
+            })
             console.log('Scroll event listener added to:', targetElement)
-            
+
             return () => {
                 targetElement.removeEventListener('scroll', handleScroll)
                 console.log('Scroll event listener removed')
@@ -333,9 +336,11 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
 
     useEffect(() => {
         if (scrollAreaRef.current) {
-            const scrollableElement = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]')
+            const scrollableElement = scrollAreaRef.current.querySelector(
+                '[data-radix-scroll-area-viewport]'
+            )
             const targetElement = scrollableElement || scrollAreaRef.current
-    
+
             console.log('Attempting to set scrollTop to:', scrollPosition)
             targetElement.scrollTop = scrollPosition
             console.log('scrollTop after setting:', targetElement.scrollTop)
@@ -344,7 +349,9 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
 
     const scrollToBottom = useCallback(() => {
         if (scrollAreaRef.current) {
-            const scrollableElement = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]')
+            const scrollableElement = scrollAreaRef.current.querySelector(
+                '[data-radix-scroll-area-viewport]'
+            )
             if (scrollableElement) {
                 scrollableElement.scrollTop = scrollableElement.scrollHeight
             }
@@ -356,7 +363,6 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
     //         scrollToBottom()
     //     }
     // }, [chapterData.length, scrollToBottom])
-
 
     const renderChapterContent = () => {
         if (
@@ -551,9 +557,12 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                             </Dialog>
                         </div>
                         {/* <ScrollArea className="h-dvh pr-4" ref={scrollAreaRef}> */}
-                        <ScrollArea className="h-[600px] pr-4" ref={scrollAreaRef}>
-                        {/* <ScrollArea className="min-h-[500px] max-h-[600px] overflow-y-auto pr-4" ref={scrollAreaRef}> */}
-                        <Reorder.Group
+                        <ScrollArea
+                            className="h-[500px] lg:h-[670px] pr-4"
+                            ref={scrollAreaRef}
+                        >
+                            {/* <ScrollArea className="min-h-[500px] max-h-[600px] overflow-y-auto pr-4" ref={scrollAreaRef}> */}
+                            <Reorder.Group
                                 values={chapterData}
                                 onReorder={async (newOrderChapters: any) => {
                                     handleReorder(newOrderChapters)
@@ -605,7 +614,13 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                             </Reorder.Group>
                         </ScrollArea>
                     </div>
-                    <div className="col-span-3 mx-4">
+                    <div
+                        className="col-span-3 mx-4 h-[690px] overflow-y-auto"
+                        style={{
+                            scrollbarWidth: 'none', // Firefox
+                            msOverflowStyle: 'none', // IE and Edge
+                        }}
+                    >
                         {renderChapterContent()}
                     </div>
                 </div>
