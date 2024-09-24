@@ -23,12 +23,12 @@ function ChapterModal({
     params,
     fetchChapters,
     newChapterOrder,
-    scrollToBottom,
+    setIsNewChapterCreated
 }: {
     params: { moduleId: string; courseId: string }
     fetchChapters: () => void
     newChapterOrder: number
-    scrollToBottom: () => void
+    setIsNewChapterCreated: any
 }) {
     const router = useRouter()
     const createChapter = async (topicId: number) => {
@@ -60,9 +60,7 @@ function ChapterModal({
                 })
             })
         fetchChapters()
-        setTimeout(() => {
-            scrollToBottom()
-        }, 500)
+        setIsNewChapterCreated(true)
     }
 
     // const createAssessment = async () => {

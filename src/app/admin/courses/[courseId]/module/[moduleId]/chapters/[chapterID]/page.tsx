@@ -133,7 +133,7 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
     const [loading, setLoading] = useState(true)
     const scrollAreaRef = useRef<HTMLDivElement>(null)
     const { scrollPosition, setScrollPosition } = getScrollPosition()
-
+    const [isNewChapterCreated, setIsNewChapterCreated] = useState(false);
     const crumbs = [
         {
             crumb: 'Courses',
@@ -311,6 +311,7 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
         const newScrollPosition = target.scrollTop
         console.log('Scroll event triggered. New position:', newScrollPosition)
         setScrollPosition(newScrollPosition)
+        localStorage.setItem('scrollPosition', newScrollPosition.toString());
     }, [])
 
     useEffect(() => {
@@ -357,7 +358,28 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
             }
         }
     }, [])
-
+    useEffect(() => {
+        const savedScrollPosition = localStorage.getItem('scrollPosition');
+        if (savedScrollPosition && scrollAreaRef.current) {
+            const scrollableElement = scrollAreaRef.current.querySelector(
+                '[data-radix-scroll-area-viewport]'
+            );
+            const targetElement = scrollableElement || scrollAreaRef.current;
+    
+            targetElement.scrollTop = parseInt(savedScrollPosition, 10);
+        }
+    }, [chapterContent]);
+    useEffect(() => {
+        if (isNewChapterCreated) {
+            // Scroll to the bottom when a new chapter is created
+            setTimeout(() => {
+                scrollToBottom();
+            }, 300); // Adjust the delay if needed
+    
+            // Reset the new chapter flag
+            setIsNewChapterCreated(false);
+        }
+    }, [chapterData, isNewChapterCreated]);
     // useEffect(() => {
     //     if (chapterData.length > 0) {
     //         scrollToBottom()
@@ -552,7 +574,8 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                                     params={params}
                                     fetchChapters={fetchChapters}
                                     newChapterOrder={chapterData.length}
-                                    scrollToBottom={scrollToBottom}
+                                    setIsNewChapterCreated={setIsNewChapterCreated}
+
                                 />
                             </Dialog>
                         </div>

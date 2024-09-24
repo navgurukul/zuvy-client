@@ -12,10 +12,11 @@ import {
     BookOpenCheck,
 } from 'lucide-react'
 import DeleteConfirmationModal from '../../_components/deleteModal'
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { DELETE_CHAPTER_CONFIRMATION } from '@/utils/constant'
 import { toast } from '@/components/ui/use-toast'
 import { useRouter } from 'next/navigation'
+import { getScrollPosition } from '@/store/store'
 
 function ChapterItem({
     title,
@@ -27,7 +28,7 @@ function ChapterItem({
     fetchChapters,
     moduleId,
     courseId,
-    setChapterContent,
+    setChapterContent
 }: {
     title: string
     topicId: number
@@ -43,7 +44,7 @@ function ChapterItem({
     // states and variables
     const router = useRouter()
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
-
+    const scrollAreaRef = useRef<HTMLDivElement>(null)
     // functions
     const setTopicIcon = () => {
         switch (topicId) {
@@ -113,6 +114,7 @@ function ChapterItem({
                 //     fetchChapterContent(chapterId)
                 // }}
                 onClick={() => {
+
                     router.push(
                         `/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterId}`
                     )
