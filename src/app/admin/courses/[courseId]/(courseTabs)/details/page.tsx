@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -26,21 +26,21 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover'
 import { Calendar } from '@/components/ui/calendar'
+import Cropper from 'react-cropper'
+import 'cropperjs/dist/cropper.css'
 import OptimizedImageWithFallback from '@/components/ImageWithFallback'
 import { cn } from '@/lib/utils'
 import { LANGUAGES } from '@/utils/constant'
 import { getCourseData, getStoreStudentData } from '@/store/store'
 import { api, apiMeraki } from '@/utils/axios.config'
-// import { fetchStudentData } from '@/utils/students'
 
 const FormSchema = z.object({
     name: z.string(),
     bootcampTopic: z.string(),
     duration: z.string().optional(),
     language: z.string(),
-    // capEnrollment: z.coerce.number().int().positive().optional(),
     startTime: z.date().optional(),
-    coverImage: z.string(),
+    coverImage: z.string().optional(),
 })
 
 interface CourseData {
@@ -51,12 +51,18 @@ interface CourseData {
     duration: string
     language: string
     startTime: string
-    unassigned_students: number // Change the type to number
+    unassigned_students: number
 }
 
 function Page({ params }: { params: any }) {
+    const [image, setImage] = useState<string | null>(null);
+    const [cropper, setCropper] = useState<Cropper | null>(null);
+    const [isCropping, setIsCropping] = useState(false);
+    const [croppedImage, setCroppedImage] = useState<string | null>(null);
+
     const { courseData, setCourseData } = getCourseData()
     const { setStoreStudentData } = getStoreStudentData()
+
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
@@ -69,74 +75,70 @@ function Page({ params }: { params: any }) {
                 ? new Date(courseData.startTime)
                 : undefined,
         },
-        values: {
-            name: courseData?.name ?? '',
-            bootcampTopic: courseData?.bootcampTopic ?? '',
-            coverImage: courseData?.coverImage ?? '',
-            duration: courseData?.duration ?? '',
-            language: courseData?.language ?? '',
-            // capEnrollment: courseData?.capEnrollment,
-            startTime: courseData?.startTime
-                ? new Date(courseData.startTime)
-                : undefined,
-        },
     })
-    // useEffect(() => {
-    //     fetchStudentData(params.courseId, setStoreStudentData)
-    // }, [params.courseId, setStoreStudentData])
 
     async function onSubmit(data: z.infer<typeof FormSchema>) {
         try {
-            await api
-                .patch(
-                    `/bootcamp/${courseData?.id}`,
-                    {
-                        ...data,
+            let coverImage = data.coverImage || '';
+            if (croppedImage) {
+                const response = await fetch(croppedImage);
+                const blob = await response.blob();
+                const file = new File([blob], 'cropped-image.png', { type: 'image/png' });
+
+                const formData = new FormData();
+                formData.append('image', file);
+
+                const res = await apiMeraki.post('/courseEditor/ImageUploadS3', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
                     },
-                    {
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                    }
-                )
-                .then((res) => {
-                    const {
-                        id,
-                        name,
-                        bootcampTopic,
-                        coverImage,
-                        startTime,
-                        duration,
-                        language,
-                        // capEnrollment,
-                        unassigned_students,
-                    } = res.data.updatedBootcamp[0]
-                    setCourseData({
-                        id,
-                        name,
-                        bootcampTopic,
-                        coverImage,
-                        startTime,
-                        duration,
-                        language,
-                        // capEnrollment,
-                        unassigned_students,
-                    })
-                    toast({
-                        title: res.data.status,
-                        description: res.data.message,
-                        className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
-                    })
-                })
+                });
+                coverImage = res.data.file.url;
+            }
+
+            await api.patch(
+                `/bootcamp/${courseData?.id}`,
+                {
+                    ...data,
+                    coverImage,
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                }
+            ).then((res) => {
+                const {
+                    id,
+                    name,
+                    bootcampTopic,
+                    coverImage,
+                    startTime,
+                    duration,
+                    language,
+                    unassigned_students,
+                } = res.data.updatedBootcamp[0];
+                setCourseData({
+                    id,
+                    name,
+                    bootcampTopic,
+                    coverImage,
+                    startTime,
+                    duration,
+                    language,
+                    unassigned_students,
+                });
+                toast({
+                    title: res.data.status,
+                    description: res.data.message,
+                });
+            });
         } catch (error) {
             toast({
                 title: 'Failed',
                 variant: 'destructive',
-                // description: error.message,
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-            })
+                className: 'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+            });
         }
     }
 
@@ -151,52 +153,55 @@ function Page({ params }: { params: any }) {
     ) => {
         const file = event.target.files?.[0]
         if (file) {
-            const formData = new FormData()
-            formData.append('image', file)
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImage(reader.result as string);
+                setIsCropping(true);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
 
-            try {
-                await apiMeraki
-                    .post(`/courseEditor/ImageUploadS3`, formData, {
-                        headers: {
-                            'Content-Type': 'multipart/form-data',
-                        },
-                    })
-                    .then((res) => {
-                        const imageUrl = res.data.file.url
-                        const updatedCourseData: CourseData = {
-                            ...getCourseData.getState().courseData!,
-                            coverImage: imageUrl,
-                        }
-                        setCourseData(updatedCourseData)
-                    })
-            } catch (error) {
-                toast({
-                    title: 'Error',
-                    description:
-                        'There was an error while uploading the image. Please try again.',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                })
-            }
+    const handleCrop = () => {
+        if (cropper) {
+            const croppedCanvas = cropper.getCroppedCanvas({
+                width: 800,  // Adjust width as needed
+                height: 400, // Adjust height as needed
+            });
+            setCroppedImage(croppedCanvas.toDataURL());
+            setIsCropping(false);
+            toast({
+                description: 'Image cropped successfully. You can now upload it.',
+            });
         }
     }
 
     return (
         <div className="max-w-[400px] m-auto">
             <Form {...form}>
-                <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-4"
-                >
-                    <div className="bg-muted flex justify-center rounded-sm my-3 overflow-hidden">
-                        <OptimizedImageWithFallback
-                            src={courseData?.coverImage || ''}
-                            alt={courseData?.name || ''}
-                            fallBackSrc={'/logo_white.png'}
-                            // className=""
-                        />
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <div className="image-container bg-muted flex justify-center items-center rounded-sm my-3 overflow-hidden" style={{ height: '200px', width: '400px' }}>
+                        {!isCropping && croppedImage ? (
+                            <img
+                                src={croppedImage}
+                                alt="Cropped Preview"
+                                // className="object-cover  h-full"
+                            />
+                        ) : image ? (
+                            <Cropper
+                                src={image}
+                                style={{ height: 200, width: '100%' }}
+                                aspectRatio={16 / 9}
+                                onInitialized={(instance) => setCropper(instance)}
+                            />
+                        ) : (
+                            <OptimizedImageWithFallback
+                                src={courseData?.coverImage || '/logo_white.png'}
+                                alt={courseData?.name || 'Cover Image'}
+                                fallBackSrc={'/logo_white.png'}
+                            />
+                        )}
                     </div>
-                    <div>
                         <Input
                             id="picture"
                             type="file"
@@ -209,9 +214,15 @@ function Page({ params }: { params: any }) {
                             type="button"
                             onClick={handleButtonClick}
                         >
-                            Upload course Image
+                            Upload Course Image
                         </Button>
-                    </div>
+                        {image && (
+                            <Button onClick={handleCrop} variant={'outline'} type="button">
+                                Crop Image
+                            </Button>
+                        )}
+                   
+
                     <FormField
                         control={form.control}
                         name="name"
@@ -222,7 +233,6 @@ function Page({ params }: { params: any }) {
                                     <Input
                                         placeholder="Enter Bootcamp Name"
                                         {...field}
-                                        value={field.value}
                                         className="capitalize"
                                     />
                                 </FormControl>
@@ -230,6 +240,7 @@ function Page({ params }: { params: any }) {
                             </FormItem>
                         )}
                     />
+
                     <FormField
                         control={form.control}
                         name="bootcampTopic"
@@ -240,18 +251,18 @@ function Page({ params }: { params: any }) {
                                     <Input
                                         placeholder="Enter Bootcamp Topic"
                                         {...field}
-                                        value={field.value}
                                     />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
+
                     <FormField
                         control={form.control}
                         name="startTime"
                         render={({ field }) => (
-                            <FormItem className="flex flex-col text-start">
+                            <FormItem className="text-start">
                                 <FormLabel>Date of Commencement</FormLabel>
                                 <Popover>
                                     <PopoverTrigger asChild>
@@ -259,36 +270,27 @@ function Page({ params }: { params: any }) {
                                             <Button
                                                 variant={'outline'}
                                                 className={cn(
-                                                    'pl-3 text-left font-normal',
-                                                    !field.value &&
-                                                        'text-muted-foreground'
+                                                    'pl-3 text-left font-normal w-full',
+                                                    !field.value && 'text-muted-foreground'
                                                 )}
                                             >
-                                                {field.value ? (
-                                                    format(field.value, 'PPP')
-                                                ) : (
-                                                    <span>Pick a date</span>
-                                                )}
-                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                {field.value
+                                                    ? format(field.value, 'PPP')
+                                                    : 'Pick a date'}
+                                                <CalendarIcon className="h-4 w-4 text-muted-foreground ml-auto" />
                                             </Button>
                                         </FormControl>
                                     </PopoverTrigger>
-                                    <PopoverContent
-                                        className="w-auto p-0"
-                                        align="start"
-                                    >
+                                    <PopoverContent>
                                         <Calendar
                                             mode="single"
                                             selected={field.value}
-                                            onSelect={field.onChange}
-                                            disabled={(date) =>
-                                                date <
-                                                new Date(
-                                                    Date.now() -
-                                                        24 * 60 * 60 * 1000
-                                                )
-                                            }
-                                            initialFocus
+                                            onSelect={(date) => {
+                                                if (date) {
+                                                    field.onChange(date)
+                                                }
+                                            }}
+                                            disabled={(date) => date < new Date()}
                                         />
                                     </PopoverContent>
                                 </Popover>
@@ -296,6 +298,7 @@ function Page({ params }: { params: any }) {
                             </FormItem>
                         )}
                     />
+
                     <FormField
                         control={form.control}
                         name="duration"
@@ -304,58 +307,34 @@ function Page({ params }: { params: any }) {
                                 <FormLabel>Duration</FormLabel>
                                 <FormControl>
                                     <Input
-                                        type="text"
                                         placeholder="Enter Bootcamp Duration"
                                         {...field}
-                                        value={field.value}
                                     />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
-                    {/* <FormField
-        control={form.control}
-        name="capEnrollment"
-        render={({ field }) => (
-          <FormItem className="text-start">
-            <FormLabel>Cap Enrollment at</FormLabel>
-            <FormControl>
-              <Input
-                type="number"
-                placeholder="Enter Bootcamp Enrollment Cap"
-                {...field}
-                value={field.value}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      /> */}
-                    <FormField
+
+<FormField
                         control={form.control}
                         name="language"
                         render={({ field }) => (
-                            <FormItem className="space-y-3 text-start">
+                            <FormItem className="text-start">
                                 <FormLabel>Language</FormLabel>
                                 <FormControl>
                                     <RadioGroup
                                         onValueChange={field.onChange}
-                                        className="flex"
-                                        value={field.value}
+                                        defaultValue={field.value}
+                                        className="flex gap-4"
                                     >
-                                        {LANGUAGES.map((lang) => (
-                                            <FormItem
-                                                key={lang}
-                                                className="flex items-center space-x-3 space-y-0"
-                                            >
+                                        {LANGUAGES.map((language, index) => (
+                                            <FormItem key={index} className="flex flex-row items-center space-x-3 space-y-0">
                                                 <FormControl>
-                                                    <RadioGroupItem
-                                                        value={lang}
-                                                    />
+                                                    <RadioGroupItem value={language} />
                                                 </FormControl>
                                                 <FormLabel className="font-normal">
-                                                    {lang}
+                                                    {language}
                                                 </FormLabel>
                                             </FormItem>
                                         ))}
@@ -365,6 +344,7 @@ function Page({ params }: { params: any }) {
                             </FormItem>
                         )}
                     />
+
 
                     <Button type="submit">Submit</Button>
                 </form>
