@@ -59,8 +59,10 @@ function ChapterModal({
                         'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             })
+       
         fetchChapters()
         setIsNewChapterCreated(true)
+        
     }
 
     // const createAssessment = async () => {

@@ -55,7 +55,7 @@ import {
     getCurrentChapterState,
     getTopicId,
     getCurrentModuleName,
-    getScrollPosition,
+    getScrollPosition
 } from '@/store/store'
 import { Spinner } from '@/components/ui/spinner'
 
@@ -132,8 +132,11 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
     const [title, setTitle] = useState('')
     const [loading, setLoading] = useState(true)
     const scrollAreaRef = useRef<HTMLDivElement>(null)
+    const activeChapterRef = useRef<HTMLDivElement | null>(null); 
     const { scrollPosition, setScrollPosition } = getScrollPosition()
     const [isNewChapterCreated, setIsNewChapterCreated] = useState(false);
+    const [isChapterClicked, setIsChapterClicked] = useState(false);
+    const isChapterClickedRef = useRef(false);
     const crumbs = [
         {
             crumb: 'Courses',
@@ -305,80 +308,108 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
         },
         [moduleData, params.courseId, params.moduleId]
     )
-
-    const handleScroll = useCallback((event: Event) => {
-        const target = event.target as HTMLDivElement
-        const newScrollPosition = target.scrollTop
-        console.log('Scroll event triggered. New position:', newScrollPosition)
-        setScrollPosition(newScrollPosition)
-        localStorage.setItem('scrollPosition', newScrollPosition.toString());
-    }, [])
-
     useEffect(() => {
-        console.log('Setting up scroll event listener')
-        const scrollArea = scrollAreaRef.current
-        if (scrollArea) {
-            const scrollableElement = scrollArea.querySelector(
-                '[data-radix-scroll-area-viewport]'
-            )
-            const targetElement = scrollableElement || scrollArea
-
-            targetElement.addEventListener('scroll', handleScroll, {
-                passive: true,
-            })
-            console.log('Scroll event listener added to:', targetElement)
-
-            return () => {
-                targetElement.removeEventListener('scroll', handleScroll)
-                console.log('Scroll event listener removed')
-            }
+        console.log(isChapterClickedRef.current)
+        if (!isChapterClickedRef.current && activeChapterRef.current && scrollAreaRef.current) {
+            console.log("went inside",isChapterClickedRef.current)
+            // Only scroll if it's not triggered by a chapter click
+            activeChapterRef.current.scrollIntoView({
+                behavior: 'smooth',
+               // block: 'center'
+            });
         }
-    }, [handleScroll])
+    }, [activeChapter]); // Adding 'isChapterClicked' to dependencies
 
+    // Reset the isChapterClicked state after some delay
     useEffect(() => {
-        if (scrollAreaRef.current) {
-            const scrollableElement = scrollAreaRef.current.querySelector(
-                '[data-radix-scroll-area-viewport]'
-            )
-            const targetElement = scrollableElement || scrollAreaRef.current
-
-            console.log('Attempting to set scrollTop to:', scrollPosition)
-            targetElement.scrollTop = scrollPosition
-            console.log('scrollTop after setting:', targetElement.scrollTop)
+        if (isChapterClicked) {
+            const timer = setTimeout(() => {
+                isChapterClickedRef.current = false;
+            }, 300);
+            return () => clearTimeout(timer); // Clean up the timer
         }
-    }, [chapterContent, scrollPosition])
+    }, [activeChapter]);
+    // const handleScroll = useCallback((event: Event) => {
+       
+    //     const target = event.target as HTMLDivElement
+    //     const newScrollPosition = target.scrollTop
+    //     console.log('Scroll event triggered. New position:', newScrollPosition)
+    //     setScrollPosition(newScrollPosition)
+    //     //localStorage.setItem('scrollPosition', newScrollPosition.toString());
+    // }, [])
+    // const saveScrollPositionToLocalStorage = () => {
+    //     localStorage.setItem('scrollPosition', scrollPosition.toString());
+    // };
+    // useEffect(() => {
+    //     console.log('Setting up scroll event listener')
+    //     const scrollArea = scrollAreaRef.current
+    //     if (scrollArea) {
+    //         const scrollableElement = scrollArea.querySelector(
+    //             '[data-radix-scroll-area-viewport]'
+    //         )
+    //         const targetElement = scrollableElement || scrollArea
 
-    const scrollToBottom = useCallback(() => {
-        if (scrollAreaRef.current) {
-            const scrollableElement = scrollAreaRef.current.querySelector(
-                '[data-radix-scroll-area-viewport]'
-            )
-            if (scrollableElement) {
-                scrollableElement.scrollTop = scrollableElement.scrollHeight
-            }
-        }
-    }, [])
-    useEffect(() => {
-        const savedScrollPosition = localStorage.getItem('scrollPosition');
-        if (savedScrollPosition && scrollAreaRef.current) {
-            const scrollableElement = scrollAreaRef.current.querySelector(
-                '[data-radix-scroll-area-viewport]'
-            );
-            const targetElement = scrollableElement || scrollAreaRef.current;
+    //         targetElement.addEventListener('scroll', handleScroll, {
+    //             passive: true,
+    //         })
+    //         console.log('Scroll event listener added to:', targetElement)
+
+    //         return () => {
+    //             targetElement.removeEventListener('scroll', handleScroll)
+    //             console.log('Scroll event listener removed')
+    //         }
+    //     }
+    // }, [handleScroll])
+
     
-            targetElement.scrollTop = parseInt(savedScrollPosition, 10);
-        }
-    }, [chapterContent]);
-    useEffect(() => {
-        if (isNewChapterCreated) {
-            // Scroll to the bottom when a new chapter is created
-            setTimeout(() => {
-                scrollToBottom();
-            }, 300); // Adjust the delay if needed
+
+    // useEffect(() => {
+    //     if (scrollAreaRef.current) {
+    //         const scrollableElement = scrollAreaRef.current.querySelector(
+    //             '[data-radix-scroll-area-viewport]'
+    //         )
+    //         const targetElement = scrollableElement || scrollAreaRef.current
+
+    //         console.log('Attempting to set scrollTop to:', scrollPosition)
+    //         targetElement.scrollTop = scrollPosition
+    //         console.log('scrollTop after setting:', targetElement.scrollTop)
+    //     }
+    // }, [chapterContent, scrollPosition])
+
+    // const scrollToBottom = useCallback(() => {
+    //     if (scrollAreaRef.current) {
+    //         const scrollableElement = scrollAreaRef.current.querySelector(
+    //             '[data-radix-scroll-area-viewport]'
+    //         )
+    //         if (scrollableElement) {
+    //             // setTimeout(() => {
+    //                 // Scroll to the bottom of the container
+    //                 scrollableElement.scrollTop = scrollableElement.scrollHeight;
+    //                 console.log('Scrolled to bottom:', scrollableElement.scrollTop);
     
-            // Reset the new chapter flag
-            setIsNewChapterCreated(false);
-        }
+    //                 // Save the scroll position to localStorage
+    //                 localStorage.setItem('scrollPosition', scrollableElement.scrollTop.toString());
+    //             // }, 100);
+    //         }
+    //     }
+    // }, [])
+    // useEffect(() => {
+    //     const savedScrollPosition = localStorage.getItem('scrollPosition');
+    //     if (savedScrollPosition && scrollAreaRef.current) {
+    //         const scrollableElement = scrollAreaRef.current.querySelector(
+    //             '[data-radix-scroll-area-viewport]'
+    //         );
+    //         const targetElement = scrollableElement || scrollAreaRef.current;
+    
+    //         targetElement.scrollTop = parseInt(savedScrollPosition, 10);
+    //     }
+    // }, [chapterContent]);
+    useEffect(() => {
+        if (isNewChapterCreated && scrollAreaRef.current) {
+            const scrollableElement = scrollAreaRef.current;
+            scrollableElement.scrollTop = scrollableElement.scrollHeight; // Scroll to the bottom
+            setIsNewChapterCreated(false); // Reset the new chapter flag
+          }
     }, [chapterData, isNewChapterCreated]);
     // useEffect(() => {
     //     if (chapterData.length > 0) {
@@ -583,6 +614,7 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                         <ScrollArea
                             className="h-[500px] lg:h-[670px] pr-4"
                             ref={scrollAreaRef}
+                            type={'scroll'}
                         >
                             {/* <ScrollArea className="min-h-[500px] max-h-[600px] overflow-y-auto pr-4" ref={scrollAreaRef}> */}
                             <Reorder.Group
@@ -599,6 +631,9 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                                                     value={item}
                                                     key={item.chapterId}
                                                 >
+                                                    <div
+                          ref={item.chapterId === activeChapter ? activeChapterRef : null} // Set ref to active chapter
+                        >
                                                     <ChapterItem
                                                         key={item.chapterId}
                                                         chapterId={
@@ -629,7 +664,10 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                                                         setChapterContent={
                                                             setChapterContent
                                                         }
+                                                        setActiveChapter={setActiveChapter}
+                                                        isChapterClickedRef={isChapterClickedRef}
                                                     />
+                                                    </div>
                                                 </Reorder.Item>
                                             )
                                         }

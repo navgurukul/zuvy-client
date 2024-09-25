@@ -28,7 +28,10 @@ function ChapterItem({
     fetchChapters,
     moduleId,
     courseId,
-    setChapterContent
+    setChapterContent,
+    setActiveChapter,
+    isChapterClickedRef
+    //saveScrollPositionToLocalStorage
 }: {
     title: string
     topicId: number
@@ -40,6 +43,9 @@ function ChapterItem({
     moduleId: string
     courseId: string
     setChapterContent: any
+    setActiveChapter:any
+    isChapterClickedRef: any
+   // saveScrollPositionToLocalStorage:any
 }) {
     // states and variables
     const router = useRouter()
@@ -70,7 +76,11 @@ function ChapterItem({
             ? 'bg-secondary/50 text-primary'
             : 'text-black hover:bg-secondary/20'
     }
-
+    const handleClick = () => {
+        isChapterClickedRef.current = true; 
+        setActiveChapter(chapterId); // Set the active chapter in the parent component
+        router.push(`/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterId}`);
+      };
     const handleDeleteChapter = async () => {
         try {
             await api
@@ -114,10 +124,7 @@ function ChapterItem({
                 //     fetchChapterContent(chapterId)
                 // }}
                 onClick={() => {
-
-                    router.push(
-                        `/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterId}`
-                    )
+                    handleClick()
                 }}
             >
                 <div className="flex gap-2 capitalize">
