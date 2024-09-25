@@ -311,8 +311,8 @@ function Page() {
                         editModule={editModule}
                         handleModuleChange={handleModuleChange}
                         handleTimeAllotedChange={handleTimeAllotedChange}
-                        handleTypeChange={handleTypeChange}
-                        typeId={typeId}
+                       
+                        
                     />
                 </Dialog>
             )}
