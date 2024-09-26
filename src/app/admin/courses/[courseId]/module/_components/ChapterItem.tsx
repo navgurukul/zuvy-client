@@ -1,3 +1,155 @@
+// import { cn } from '@/lib/utils'
+// import { api } from '@/utils/axios.config'
+// import {
+//     BookOpenText,
+//     SquareCode,
+//     FileQuestion,
+//     PencilLine,
+//     StickyNote,
+//     Trash2,
+//     Video,
+//     GripVertical,
+//     BookOpenCheck,
+// } from 'lucide-react'
+// import DeleteConfirmationModal from '../../_components/deleteModal'
+// import React, { useState, useEffect, useCallback, useRef } from 'react'
+// import { DELETE_CHAPTER_CONFIRMATION } from '@/utils/constant'
+// import { toast } from '@/components/ui/use-toast'
+// import { useRouter } from 'next/navigation'
+// import { getScrollPosition } from '@/store/store'
+// import Link from 'next/link'
+
+
+// function ChapterItem({
+//     title,
+//     topicId,
+//     topicName,
+//     chapterId,
+//     activeChapter,
+//     fetchChapterContent,
+//     fetchChapters,
+//     moduleId,
+//     courseId,
+//     // setChapterContent
+// }: {
+//     title: string
+//     topicId: number
+//     topicName: string
+//     chapterId: number
+//     activeChapter: number
+//     fetchChapterContent: (chapterId: number) => void
+//     fetchChapters: () => void
+//     moduleId: any
+//     // courseId: string
+//     courseId: any
+//     // setChapterContent: any
+// }) {
+//     // states and variables
+//     const router = useRouter()
+//     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
+//     const scrollAreaRef = useRef<HTMLDivElement>(null)
+//     // functions
+//     const setTopicIcon = () => {
+//         switch (topicId) {
+//             case 1:
+//                 return <Video />
+//             case 2:
+//                 return <BookOpenText />
+//             case 3:
+//                 return <SquareCode />
+//             case 4:
+//                 return <FileQuestion />
+//             case 5:
+//                 return <PencilLine />
+//             case 6:
+//                 return <BookOpenCheck />
+//             default:
+//                 return <StickyNote />
+//         }
+//     }
+
+//     const setActiveChapterItem = () => {
+//         return activeChapter === chapterId
+//             ? 'bg-secondary/50 text-primary'
+//             : 'text-black hover:bg-secondary/20'
+//     }
+
+//     const handleDeleteChapter = async () => {
+//         try {
+//             await api
+//                 .delete(
+//                     `/content/deleteChapter/${moduleId}?chapterId=${chapterId}`
+//                 )
+//                 .then((res) => {
+//                     toast({
+//                         title: res.data.title,
+//                         description: res.data.message,
+//                         className:
+//                             'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+//                     })
+//                     fetchChapters()
+//                 })
+//                 .catch((error) => {
+//                     toast({
+//                         title: error.data.title,
+//                         description: error.data.message,
+//                         className:
+//                             'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+//                     })
+//                 })
+//         } catch (error) {
+//             console.error('Error handling delete chapter:', error)
+//         }
+//     }
+
+//     const handleDeleteModal = () => {
+//         setDeleteModalOpen(true)
+//     }
+
+//     return (
+//         <div>
+//             <Link href={`/admin/courses/${courseId}/module/${moduleId}/chapters/content/${chapterId}/chapterContent`}>
+//             <div
+//                 className={cn(
+//                     'flex rounded-md p-3  my-1 cursor-pointer justify-between items-center',
+//                     setActiveChapterItem()
+//                 )}
+//             >
+//                 <div className="flex gap-2 capitalize">
+//                     <p>{setTopicIcon()}</p>
+//                     <p>{title}</p>
+//                 </div>
+//                 <div className="flex">
+//                     <Trash2
+//                         onClick={(e) => {
+//                             e.stopPropagation()
+//                             handleDeleteModal()
+//                         }}
+//                         className="hover:text-destructive cursor-pointer"
+//                         size={15}
+//                     />
+//                     <GripVertical size={15} />
+//                 </div>
+//             </div>
+//             </Link>
+//             <DeleteConfirmationModal
+//                 isOpen={isDeleteModalOpen}
+//                 onClose={() => setDeleteModalOpen(false)}
+//                 onConfirm={() => {
+//                     handleDeleteChapter()
+//                     setDeleteModalOpen(false)
+//                 }}
+//                 modalText={DELETE_CHAPTER_CONFIRMATION}
+//                 buttonText="Delete Chapter"
+//                 input={false}
+//             />
+//         </div>
+//     )
+// }
+
+// export default ChapterItem
+
+
 import { cn } from '@/lib/utils'
 import { api } from '@/utils/axios.config'
 import {
@@ -12,11 +164,9 @@ import {
     BookOpenCheck,
 } from 'lucide-react'
 import DeleteConfirmationModal from '../../_components/deleteModal'
-import React, { useState, useEffect, useCallback, useRef } from 'react'
+import { useState } from 'react'
 import { DELETE_CHAPTER_CONFIRMATION } from '@/utils/constant'
 import { toast } from '@/components/ui/use-toast'
-import { useRouter } from 'next/navigation'
-import { getScrollPosition } from '@/store/store'
 
 function ChapterItem({
     title,
@@ -27,8 +177,6 @@ function ChapterItem({
     fetchChapterContent,
     fetchChapters,
     moduleId,
-    courseId,
-    setChapterContent
 }: {
     title: string
     topicId: number
@@ -38,13 +186,10 @@ function ChapterItem({
     fetchChapterContent: (chapterId: number) => void
     fetchChapters: () => void
     moduleId: string
-    courseId: string
-    setChapterContent: any
 }) {
     // states and variables
-    const router = useRouter()
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
-    const scrollAreaRef = useRef<HTMLDivElement>(null)
+
     // functions
     const setTopicIcon = () => {
         switch (topicId) {
@@ -110,14 +255,9 @@ function ChapterItem({
                     'flex rounded-md p-3  my-1 cursor-pointer justify-between items-center',
                     setActiveChapterItem()
                 )}
-                // onClick={() => {
-                //     fetchChapterContent(chapterId)
-                // }}
                 onClick={() => {
-
-                    router.push(
-                        `/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterId}`
-                    )
+                    console.log('Click!')
+                    fetchChapterContent(chapterId)
                 }}
             >
                 <div className="flex gap-2 capitalize">

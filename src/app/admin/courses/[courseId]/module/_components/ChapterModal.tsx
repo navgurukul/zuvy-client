@@ -20,29 +20,33 @@ import { toast } from '@/components/ui/use-toast'
 import { useRouter } from 'next/navigation'
 
 function ChapterModal({
-    params,
+    // params,
     fetchChapters,
     newChapterOrder,
-    setIsNewChapterCreated
+    moduleId,
+    courseId
+    // setIsNewChapterCreated
 }: {
-    params: { moduleId: string; courseId: string }
+    // params: { moduleId: string; courseId: string }
     fetchChapters: () => void
     newChapterOrder: number
-    setIsNewChapterCreated: any
+    courseId: any
+    moduleId: any
+    // setIsNewChapterCreated: any
 }) {
     const router = useRouter()
     const createChapter = async (topicId: number) => {
         await api
             .post(`Content/chapter`, {
-                moduleId: Number(params?.moduleId),
-                bootcampId: Number(params?.courseId),
+                moduleId: Number(moduleId),
+                bootcampId: Number(courseId),
                 topicId: topicId,
                 // order: newChapterOrder,
             })
             .then((res) => {
                 const data = res?.data?.module[0]
                 router.push(
-                    `/admin/courses/${params?.courseId}/module/${data.moduleId}/chapters/${data.id}`
+                    `/admin/courses/${courseId}/module/${data.moduleId}/chapters/${data.id}/chapterContent`
                 )
                 toast({
                     title: res?.data?.module[0]?.title,
@@ -60,7 +64,7 @@ function ChapterModal({
                 })
             })
         fetchChapters()
-        setIsNewChapterCreated(true)
+        // setIsNewChapterCreated(true)
     }
 
     // const createAssessment = async () => {

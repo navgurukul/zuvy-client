@@ -106,7 +106,7 @@ const CurricullumCard = ({
     }
 
     const handleModuleRoute = () => {
-        router.push(`/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterId}`)
+        router.push(`/admin/courses/${courseId}/module/${moduleId}/chapters/content/${chapterId}/chapterContent`)
     }
 
     return (
