@@ -13,7 +13,6 @@ import { Reorder } from 'framer-motion'
 import { toast } from '@/components/ui/use-toast'
 import { Spinner } from '@/components/ui/spinner'
 import EditModuleDialog from '../../_components/EditModuleDialog'
-import { convertSeconds } from '@/utils/admin'
 interface CurriculumItem {
     id: number
     name: string
@@ -82,7 +81,24 @@ function Page() {
         setIsEditOpen(true)
     }
     // Convert seconds to months, weeks and days:-
-    
+    const convertSeconds = (seconds: number) => {
+        const SECONDS_IN_A_MINUTE = 60
+        const SECONDS_IN_AN_HOUR = 60 * SECONDS_IN_A_MINUTE
+        const SECONDS_IN_A_DAY = 24 * SECONDS_IN_AN_HOUR
+        const SECONDS_IN_A_WEEK = 7 * SECONDS_IN_A_DAY
+        const SECONDS_IN_A_MONTH = 28 * SECONDS_IN_A_DAY
+        const months = Math.floor(seconds / SECONDS_IN_A_MONTH)
+        seconds %= SECONDS_IN_A_MONTH
+        const weeks = Math.floor(seconds / SECONDS_IN_A_WEEK)
+        seconds %= SECONDS_IN_A_WEEK
+        const days = Math.floor(seconds / SECONDS_IN_A_DAY)
+        seconds %= SECONDS_IN_A_DAY
+        return {
+            months: months,
+            weeks: weeks,
+            days: days,
+        }
+    }
     useEffect(() => {
         if (isOpen) {
             setModuleData({
@@ -96,7 +112,6 @@ function Page() {
             })
         }
     }, [isOpen])
-
     useEffect(() => {
         if (isEditOpen) {
             if (selectedModuleData) {
@@ -123,8 +138,32 @@ function Page() {
                 days: -1,
             })
         }
-    }, [isEditOpen, selectedModuleData])
-
+    }, [selectedModuleData])
+     
+    useEffect(() => {
+        if (isEditOpen && moduleId) {
+            // Fetch the module data when the dialog is opened
+                const res =api.get(`/content/allModules/${courseData?.id}`).then((res) => {
+                const data = res.data.find((module: any) => module.id === moduleId);
+                setSelectedModuleData(data) // Set the selected module's data
+    
+                // Update the form fields when module data is fetched
+                setModuleData({
+                    name: data?.name || '',
+                    description: data?.description || '',
+                })
+                setTypeId(data?.typeId || 1)
+                
+                // Convert seconds to time data and set it in state
+                const result = convertSeconds(data?.timeAlloted)
+                setTimeData({
+                    days: result.days,
+                    weeks: result.weeks,
+                    months: result.months,
+                })
+            })
+        }
+    }, [isEditOpen, moduleId]) 
     //  Edit Module Function:-
     const editModule = () => {
         const { days, weeks, months } = timeData
@@ -267,7 +306,6 @@ function Page() {
                                     Add Module
                                 </Button>
                             </DialogTrigger>
-
                             <DialogOverlay />
                             <NewModuleDialog
                                 moduleData={moduleData}
@@ -295,9 +333,7 @@ function Page() {
                         editModule={editModule}
                         handleModuleChange={handleModuleChange}
                         handleTimeAllotedChange={handleTimeAllotedChange}
-                     
-                       
-                        
+                        typeId={typeId}
                     />
                 </Dialog>
             )}

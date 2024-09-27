@@ -1,7 +1,5 @@
 'use client'
-
 import React, { useEffect } from 'react'
-
 import {
     Form,
     FormControl,
@@ -11,7 +9,6 @@ import {
     FormLabel,
     FormMessage,
 } from '@/components/ui/form'
-
 import { Button } from '@/components/ui/button'
 import {
     DialogClose,
@@ -20,11 +17,9 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog'
-
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 
@@ -45,6 +40,7 @@ interface editModuleDialogProps {
     handleTimeAllotedChange: (
         event: React.ChangeEvent<HTMLInputElement>
     ) => void
+    typeId: number
 }
 
 const moduleSchema = z.object({
@@ -63,6 +59,7 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
     editModule,
     createModule,
     handleTimeAllotedChange,
+    typeId,
 }) => {
     const form = useForm<z.infer<typeof moduleSchema>>({
         resolver: zodResolver(moduleSchema),
@@ -80,11 +77,13 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
     }
 
     useEffect(() => {
-        form.setValue('name', moduleData.name)
-        form.setValue('description', moduleData.description)
-        form.setValue('months', timeData.months)
-        form.setValue('weeks', timeData.weeks)
-        form.setValue('days', timeData.days)
+        form.reset({
+            name: moduleData.name,
+            description: moduleData.description,
+            months: timeData.months,
+            weeks: timeData.weeks,
+            days: timeData.days
+        })
     }, [moduleData, timeData, form])
 
     return (
@@ -98,7 +97,6 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                         <DialogTitle>
                             Edit Module
                         </DialogTitle>
-
                         <div className="py-4">
                             <div>
                                 <FormField
@@ -125,9 +123,10 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                         </div>
                         <div className="py-4">
                             <Label htmlFor="desc">
-                                Module Description
+                                {typeId === 2
+                                    ? 'Project Description'
+                                    : 'Module Description'}
                             </Label>
-
                             <div>
                                 <FormField
                                     control={form.control}
@@ -153,7 +152,7 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                             </div>
                         </div>
                         <div className="py-4">
-                            <Label>Time Alotted:</Label>
+                            <Label>Time Allotted:</Label>
                             <div className="flex gap-2">
                                 <div>
                                     <FormField
@@ -179,7 +178,6 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                                         )}
                                     />
                                 </div>
-
                                 <div>
                                     <FormField
                                         control={form.control}
@@ -204,7 +202,6 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                                         )}
                                     />
                                 </div>
-
                                 <div>
                                     <FormField
                                         control={form.control}
