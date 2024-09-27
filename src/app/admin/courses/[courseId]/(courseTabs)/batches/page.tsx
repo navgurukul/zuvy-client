@@ -295,7 +295,7 @@ const Page = ({ params }: { params: any }) => {
         return (
             <div>
                 <div className="relative flex flex-col lg:flex-row items-center justify-between mb-6">
-                    {batchData?.length ?? 0 > 0 ? (
+                    {batchData? (
                         <Input
                             type="search"
                             placeholder="Search"

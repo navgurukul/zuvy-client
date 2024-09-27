@@ -112,7 +112,6 @@ function Page() {
             })
         }
     }, [isOpen])
-
     useEffect(() => {
         if (isEditOpen) {
             if (selectedModuleData) {
@@ -139,8 +138,32 @@ function Page() {
                 days: -1,
             })
         }
-    }, [isEditOpen, selectedModuleData])
-
+    }, [selectedModuleData])
+     
+    useEffect(() => {
+        if (isEditOpen && moduleId) {
+            // Fetch the module data when the dialog is opened
+                const res =api.get(`/content/allModules/${courseData?.id}`).then((res) => {
+                const data = res.data.find((module: any) => module.id === moduleId);
+                setSelectedModuleData(data) // Set the selected module's data
+    
+                // Update the form fields when module data is fetched
+                setModuleData({
+                    name: data?.name || '',
+                    description: data?.description || '',
+                })
+                setTypeId(data?.typeId || 1)
+                
+                // Convert seconds to time data and set it in state
+                const result = convertSeconds(data?.timeAlloted)
+                setTimeData({
+                    days: result.days,
+                    weeks: result.weeks,
+                    months: result.months,
+                })
+            })
+        }
+    }, [isEditOpen, moduleId]) 
     //  Edit Module Function:-
     const editModule = () => {
         const { days, weeks, months } = timeData
@@ -283,7 +306,6 @@ function Page() {
                                     Add Module
                                 </Button>
                             </DialogTrigger>
-
                             <DialogOverlay />
                             <NewModuleDialog
                                 moduleData={moduleData}
@@ -311,7 +333,6 @@ function Page() {
                         editModule={editModule}
                         handleModuleChange={handleModuleChange}
                         handleTimeAllotedChange={handleTimeAllotedChange}
-                        handleTypeChange={handleTypeChange}
                         typeId={typeId}
                     />
                 </Dialog>
