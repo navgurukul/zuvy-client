@@ -19,7 +19,6 @@
 // import { getScrollPosition } from '@/store/store'
 // import Link from 'next/link'
 
-
 // function ChapterItem({
 //     title,
 //     topicId,
@@ -149,7 +148,6 @@
 
 // export default ChapterItem
 
-
 import { cn } from '@/lib/utils'
 import { api } from '@/utils/axios.config'
 import {
@@ -167,6 +165,8 @@ import DeleteConfirmationModal from '../../_components/deleteModal'
 import { useState } from 'react'
 import { DELETE_CHAPTER_CONFIRMATION } from '@/utils/constant'
 import { toast } from '@/components/ui/use-toast'
+import Link from 'next/link'
+import { useParams, useRouter } from 'next/navigation'
 
 function ChapterItem({
     title,
@@ -174,8 +174,10 @@ function ChapterItem({
     topicName,
     chapterId,
     activeChapter,
-    fetchChapterContent,
-    fetchChapters,
+    setActiveChapter,
+    // fetchChapterContent,
+    // handleChapterClick,
+    // fetchChapters,
     moduleId,
 }: {
     title: string
@@ -183,11 +185,15 @@ function ChapterItem({
     topicName: string
     chapterId: number
     activeChapter: number
-    fetchChapterContent: (chapterId: number) => void
-    fetchChapters: () => void
+    setActiveChapter: any
+    // fetchChapterContent: (chapterId: number, topicId: number) => void
+    // fetchChapters: () => void
+    // handleChapterClick: () => void
     moduleId: string
 }) {
     // states and variables
+    const { courseId } = useParams()
+    const router = useRouter()
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
 
     // functions
@@ -216,6 +222,9 @@ function ChapterItem({
             : 'text-black hover:bg-secondary/20'
     }
 
+    console.log('activeChapter', activeChapter)
+    console.log('chapterId', chapterId)
+
     const handleDeleteChapter = async () => {
         try {
             await api
@@ -229,7 +238,7 @@ function ChapterItem({
                         className:
                             'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
-                    fetchChapters()
+                    // fetchChapters()
                 })
                 .catch((error) => {
                     toast({
@@ -250,32 +259,39 @@ function ChapterItem({
 
     return (
         <div>
-            <div
-                className={cn(
-                    'flex rounded-md p-3  my-1 cursor-pointer justify-between items-center',
-                    setActiveChapterItem()
-                )}
-                onClick={() => {
-                    console.log('Click!')
-                    fetchChapterContent(chapterId)
-                }}
+            <Link
+                // href={`/admin/courses/${courseId}/module/${moduleId}/chapters/content/${chapterId}/chapterContent`}
+                href={`/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterId}`}
             >
-                <div className="flex gap-2 capitalize">
-                    <p>{setTopicIcon()} </p>
-                    <p>{title}</p>
+                <div
+                    className={cn(
+                        'flex rounded-md p-3  my-1 cursor-pointer justify-between items-center',
+                        setActiveChapterItem()
+                    )}
+                    onClick={() => {
+                        console.log('Click!')
+                        // fetchChapterContent(chapterId, topicId)
+                        // handleChapterClick()
+                        setActiveChapter(chapterId)
+                    }}
+                >
+                    <div className="flex gap-2 capitalize">
+                        <p>{setTopicIcon()} </p>
+                        <p>{title}</p>
+                    </div>
+                    <div className="flex">
+                        <Trash2
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                handleDeleteModal()
+                            }}
+                            className="hover:text-destructive cursor-pointer"
+                            size={15}
+                        />
+                        <GripVertical size={15} />
+                    </div>
                 </div>
-                <div className="flex">
-                    <Trash2
-                        onClick={(e) => {
-                            e.stopPropagation()
-                            handleDeleteModal()
-                        }}
-                        className="hover:text-destructive cursor-pointer"
-                        size={15}
-                    />
-                    <GripVertical size={15} />
-                </div>
-            </div>
+            </Link>
             <DeleteConfirmationModal
                 isOpen={isDeleteModalOpen}
                 onClose={() => setDeleteModalOpen(false)}

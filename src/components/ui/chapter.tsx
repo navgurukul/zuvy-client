@@ -9,7 +9,7 @@ import ChapterItem from '@/app/admin/courses/[courseId]/module/_components/Chapt
 import { toast } from '@/components/ui/use-toast'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import ChapterModal from '@/app/admin/courses/[courseId]/module/_components/ChapterModal' 
+import ChapterModal from '@/app/admin/courses/[courseId]/module/_components/ChapterModal'
 import AddVideo from '@/app/admin/courses/[courseId]/module/_components/video/AddVideo'
 import AddArticle from '@/app/admin/courses/[courseId]/module/_components/Article/AddArticle'
 import CodingChallenge from '@/app/admin/courses/[courseId]/module/_components/codingChallenge/CodingChallenge'
@@ -20,7 +20,6 @@ import AddForm from '@/app/admin/courses/[courseId]/module/_components/form/AddF
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 
 // import { getChapterDataState } from '@/store/store'
-
 
 interface Module {
     chapterId: number
@@ -57,15 +56,11 @@ interface QuizQuestionDetails {
 
 function Chapter() {
     const { courseId, moduleId, chapterID } = useParams()
-    // console.log('moduleId', moduleId)
-    // console.log('typeof moduleId', typeof moduleId)
-
     const chapter_id = Array.isArray(chapterID)
         ? Number(chapterID[0])
         : Number(chapterID)
     const moduleID = Array.isArray(moduleId) ? moduleId[0] : moduleId
     // const { chapterData, setChapterData } = getChapterDataState()
-    const [chapterData, setChapterData] = useState([])
     // const [chapterData, setChapterData] = useState([
     //     {
     //         chapterId: 276,
@@ -173,48 +168,42 @@ function Chapter() {
     //         order: 15,
     //     },
     //     {
-    //         chapterId: 586,
-    //         chapterTitle: 'Chapter 10',
-    //         topicId: 5,
-    //         topicName: 'Assignment',
-    //         order: 10,
-    //     },
-    //     {
-    //         chapterId: 587,
-    //         chapterTitle: 'Chapter 11',
-    //         topicId: 4,
-    //         topicName: 'Quiz',
-    //         order: 11,
-    //     },
-    //     {
-    //         chapterId: 588,
-    //         chapterTitle: 'Chapter 12',
-    //         topicId: 1,
-    //         topicName: 'Video',
-    //         order: 12,
-    //     },
-    //     {
-    //         chapterId: 589,
-    //         chapterTitle: 'Chapter 13',
+    //         chapterId: 592,
+    //         chapterTitle: 'Chapter 16',
     //         topicId: 7,
     //         topicName: 'Form',
-    //         order: 13,
+    //         order: 16,
     //     },
     //     {
-    //         chapterId: 590,
-    //         chapterTitle: 'Chapter 14',
+    //         chapterId: 593,
+    //         chapterTitle: 'Chapter 17',
+    //         topicId: 7,
+    //         topicName: 'Form',
+    //         order: 17,
+    //     },
+    //     {
+    //         chapterId: 594,
+    //         chapterTitle: 'Chapter 18',
+    //         topicId: 4,
+    //         topicName: 'Quiz',
+    //         order: 18,
+    //     },
+    //     {
+    //         chapterId: 595,
+    //         chapterTitle: 'Chapter 19',
+    //         topicId: 2,
+    //         topicName: 'Article',
+    //         order: 19,
+    //     },
+    //     {
+    //         chapterId: 596,
+    //         chapterTitle: 'Chapter 20',
     //         topicId: 5,
     //         topicName: 'Assignment',
-    //         order: 14,
-    //     },
-    //     {
-    //         chapterId: 591,
-    //         chapterTitle: 'Chapter 15',
-    //         topicId: 1,
-    //         topicName: 'Video',
-    //         order: 15,
+    //         order: 20,
     //     },
     // ])
+    const [chapterData, setChapterData] = useState([])
     const [chapterContent, setChapterContent] = useState<any>([])
     const [chapterId, setChapterId] = useState<number>(0)
     const [activeChapterTitle, setActiveChapterTitle] = useState('')
@@ -225,11 +214,7 @@ function Chapter() {
     const [topicId, setTopicId] = useState(1)
     const [key, setKey] = useState(0)
     const [open, setOpen] = useState(false)
-
-    // console.log('courseId', courseId)
-    // console.log('moduleId', moduleId)
-    // console.log('chapter_id', chapter_id)
-    // console.log('chapterData', chapterData)
+    const scrollAreaRef = useRef<HTMLDivElement | null>(null)
 
     const crumbs = [
         {
@@ -254,7 +239,7 @@ function Chapter() {
             const response = await api.get(
                 `/Content/allChaptersOfModule/${moduleId}`
             )
-            // console.log('response', response)
+            console.log('response', response)
             const currentChapter = response.data.chapterWithTopic.find(
                 (item: any) => item.chapterId === chapter_id
             )
@@ -269,50 +254,50 @@ function Chapter() {
         }
     }, [moduleId, chapter_id])
 
-    const fetchChapterContent = useCallback(
-        async (chapterId: number) => {
-            let topicId = moduleData.find(
-                (myModule: any) => myModule.chapterId === chapterId
-            )?.topicId
-            try {
-                const response = await api.get(
-                    `Content/chapterDetailsById/${chapterId}?bootcampId=${courseId}&moduleId=${moduleId}&topicId=${topicId}`
-                )
-                setChapterId(chapterId)
-                const currentModule: any = moduleData.find(
-                    (myModule: any) => myModule.chapterId === chapterId
-                )
+    // const fetchChapterContent = useCallback(
+    //     async (chapterId: number, topicId: number) => {
+    //         // let topicId = moduleData.find(
+    //         //     (myModule: any) => myModule.chapterId === chapterId
+    //         // )?.topicId
+    //         try {
+    //             const response = await api.get(
+    //                 `Content/chapterDetailsById/${chapterId}?bootcampId=${courseId}&moduleId=${moduleId}&topicId=${topicId}`
+    //             )
+    //             setChapterId(chapterId)
+    //             const currentModule: any = moduleData.find(
+    //                 (myModule: any) => myModule.chapterId === chapterId
+    //             )
 
-                if (currentModule) {
-                    setActiveChapterTitle(currentModule?.chapterTitle)
-                    setCurrentChapter(currentModule)
-                }
+    //             if (currentModule) {
+    //                 setActiveChapterTitle(currentModule?.chapterTitle)
+    //                 setCurrentChapter(currentModule)
+    //             }
 
-                if (currentModule?.topicName === 'Quiz') {
-                    setChapterContent(
-                        response.data
-                            .quizQuestionDetails as QuizQuestionDetails[]
-                    )
-                } else if (currentModule?.topicName === 'Coding Question') {
-                    setChapterContent(response.data)
-                } else if (currentModule?.topicName === 'Form') {
-                    setChapterContent(response.data)
-                } else {
-                    setChapterContent(response.data)
-                }
+    //             if (currentModule?.topicName === 'Quiz') {
+    //                 setChapterContent(
+    //                     response.data
+    //                         .quizQuestionDetails as QuizQuestionDetails[]
+    //                 )
+    //             } else if (currentModule?.topicName === 'Coding Question') {
+    //                 setChapterContent(response.data)
+    //             } else if (currentModule?.topicName === 'Form') {
+    //                 setChapterContent(response.data)
+    //             } else {
+    //                 setChapterContent(response.data)
+    //             }
 
-                setTopicId(currentModule?.topicId)
+    //             setTopicId(currentModule?.topicId)
+    //             // setTopicId(topicId)
+    //             // setTopicId(response.data.topicId)
 
-                // setTopicId(response.data.topicId)
-
-                setActiveChapter(chapterId)
-                setKey((prevKey:any) => prevKey + 1)
-            } catch (error) {
-                console.error('Error fetching chapter content:', error)
-            }
-        },
-        [moduleData, courseId, moduleId]
-    )
+    //             setActiveChapter(chapterId)
+    //             setKey((prevKey: any) => prevKey + 1)
+    //         } catch (error) {
+    //             console.error('Error fetching chapter content:', error)
+    //         }
+    //     },
+    //     [moduleData, courseId, moduleId]
+    // )
 
     useEffect(() => {
         // fetchCourseModules()
@@ -321,19 +306,17 @@ function Chapter() {
         }
     }, [courseId, moduleId, fetchChapters])
 
-    useEffect(() => {
-        if (chapterData.length > 0) {
-            // const firstChapterId = chapterData[0].chapterId
-            fetchChapterContent(chapter_id)
-        } else {
-            setActiveChapter(0)
-            setChapterContent([])
-            setActiveChapterTitle('')
-            setTopicId(0)
-        }
-    }, [chapterData, fetchChapterContent])
-
-    // console.log('chapterData', chapterData)
+    // useEffect(() => {
+    //     if (chapterData.length > 0) {
+    //         // const firstChapterId = chapterData[0].chapterId
+    //         fetchChapterContent(chapter_id, topicId)
+    //     } else {
+    //         setActiveChapter(0)
+    //         setChapterContent([])
+    //         setActiveChapterTitle('')
+    //         setTopicId(0)
+    //     }
+    // }, [chapterData, fetchChapterContent])
 
     async function handleReorder(newOrderChapters: any) {
         newOrderChapters = newOrderChapters.map((item: any, index: any) => ({
@@ -371,189 +354,158 @@ function Chapter() {
         }
     }
 
+    const scrollToBottom = () => {
+        const lastChapterElement = document.getElementById('last-chapter')
+        if (lastChapterElement) {
+            lastChapterElement.scrollIntoView({ behavior: 'smooth' })
+        }
+    }
+
     const handleAddChapter = () => {
         setOpen(true)
     }
 
-    const renderChapterContent = () => {
-        switch (topicId) {
-            case 1:
-                return (
-                    <AddVideo
-                        key={chapterId}
-                        moduleId={moduleID}
-                        content={chapterContent}
-                        fetchChapterContent={fetchChapterContent}
-                    />
-                )
-            case 2:
-                return <AddArticle key={chapterId} content={chapterContent} />
-            case 3:
-                return (
-                    <CodingChallenge
-                        key={chapterId}
-                        moduleId={moduleID}
-                        content={chapterContent}
-                        activeChapterTitle={activeChapterTitle}
-                    />
-                )
-            case 4:
-                return (
-                    <Quiz
-                        key={chapterId}
-                        chapterId={chapterId}
-                        moduleId={moduleID}
-                        content={chapterContent}
-                    />
-                )
-            case 5:
-                return <Assignment key={chapterId} content={chapterContent} />
-            case 6:
-                return (
-                    <AddAssessment
-                        key={chapterId}
-                        chapterData={currentChapter}
-                        content={chapterContent}
-                        fetchChapterContent={fetchChapterContent}
-                        moduleId={moduleID}
-                    />
-                )
-            case 7:
-                return (
-                    <AddForm
-                        key={chapterId}
-                        chapterData={currentChapter}
-                        content={chapterContent}
-                        fetchChapterContent={fetchChapterContent}
-                        moduleId={moduleID}
-                    />
-                )
-            default:
-                return <h1>Create New Chapter</h1>
-
+    const handleChapterClick = (chapterId: any) => {
+        // Append the hash to the URL when clicking on a chapter
+        if (typeof window !== 'undefined') {
+            window.location.hash = `#chapter-${chapterId}`
         }
     }
 
+    // const renderChapterContent = () => {
+    //     console.log('topicId', topicId)
+    //     switch (topicId) {
+    //         case 1:
+    //             return (
+    //                 <AddVideo
+    //                     key={chapterId}
+    //                     moduleId={moduleID}
+    //                     content={chapterContent}
+    //                     fetchChapterContent={fetchChapterContent}
+    //                 />
+    //             )
+    //         case 2:
+    //             return <AddArticle key={chapterId} content={chapterContent} />
+    //         case 3:
+    //             return (
+    //                 <CodingChallenge
+    //                     key={chapterId}
+    //                     moduleId={moduleID}
+    //                     content={chapterContent}
+    //                     activeChapterTitle={activeChapterTitle}
+    //                 />
+    //             )
+    //         case 4:
+    //             return (
+    //                 <Quiz
+    //                     key={chapterId}
+    //                     chapterId={chapterId}
+    //                     moduleId={moduleID}
+    //                     content={chapterContent}
+    //                 />
+    //             )
+    //         case 5:
+    //             return <Assignment key={chapterId} content={chapterContent} />
+    //         case 6:
+    //             return (
+    //                 <AddAssessment
+    //                     key={chapterId}
+    //                     chapterData={currentChapter}
+    //                     content={chapterContent}
+    //                     fetchChapterContent={fetchChapterContent}
+    //                     topicId={topicId}
+    //                     moduleId={moduleID}
+    //                 />
+    //             )
+    //         case 7:
+    //             return (
+    //                 <AddForm
+    //                     key={chapterId}
+    //                     chapterData={currentChapter}
+    //                     content={chapterContent}
+    //                     // fetchChapterContent={fetchChapterContent}
+    //                     moduleId={moduleID}
+    //                 />
+    //             )
+    //         default:
+    //             return <h1>Create New Chapter</h1>
+    //     }
+    // }
+
     return (
         <>
-            {/* <div className=" col-span-1">
-                <div className="mb-5 flex">
-                    <Dialog>
-                        <DialogTrigger asChild>
-                            <Button
-                                variant="secondary"
-                                className="py-2 px-2 h-full w-full mr-4"
-                                onClick={handleAddChapter}
-                            >
-                                Add Chapter
-                            </Button>
-                        </DialogTrigger>
-                        <DialogOverlay />
-                        <ChapterModal
-                            // params={params}
-                            courseId={courseId}
-                            moduleId={moduleId}
-                            fetchChapters={fetchChapters}
-                            newChapterOrder={chapterData.length}
-                            // setIsNewChapterCreated={setIsNewChapterCreated}
-                        />
-                    </Dialog>
-                </div>
-                    <ScrollArea
-                className="h-[500px] lg:h-[670px] pr-4"
-                // ref={scrollAreaRef}
-            >
-                    <Reorder.Group
-                        values={chapterData}
-                        onReorder={async (newOrderChapters: any) => {
-                            handleReorder(newOrderChapters)
-                        }}
-                    >
-                        {chapterData &&
-                            chapterData?.map((item: any, index: any) => {
-                                return (
-                                    <Reorder.Item
-                                        value={item}
-                                        key={item.chapterId}
-                                    >
-                                        <ChapterItem
-                                            key={item.chapterId}
-                                            chapterId={item.chapterId}
-                                            title={item.chapterTitle}
-                                            topicId={item.topicId}
-                                            topicName={item.topicName}
-                                            // fetchChapterContent={
-                                            //     fetchChapterContent
-                                            // }
-                                            fetchChapters={fetchChapters}
-                                            activeChapter={activeChapter}
-                                            moduleId={moduleId}
-                                            courseId={courseId}
-                                            // setChapterContent={
-                                            //     setChapterContent
-                                            // }
-                                        />
-                                    </Reorder.Item>
-                                )
-                            })}
-                    </Reorder.Group>
-                </ScrollArea>
-            </div> */}
             <BreadcrumbComponent crumbs={crumbs} />
             {/* <div className="grid grid-cols-4 mt-5">
                 <div className="col-span-1"> */}
-                    <div className="mb-5 flex">
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button
-                                    variant="secondary"
-                                    className="py-2 px-2 h-full w-full mr-4"
-                                    onClick={handleAddChapter}
-                                >
-                                    Add Chapter
-                                </Button>
-                            </DialogTrigger>
-                            <DialogOverlay />
-                            {/* <ChapterModal
-                                    params={params}
-                                    fetchChapters={fetchChapters}
-                                    newChapterOrder={chapterData.length}
-                                /> */}
-                        </Dialog>
-                    </div>
-                    <ScrollArea className="h-dvh pr-4">
-                        <Reorder.Group
-                            values={chapterData}
-                            onReorder={async (newOrderChapters: any) => {
-                                handleReorder(newOrderChapters)
-                            }}
+            <div className="mb-5 flex">
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <Button
+                            variant="secondary"
+                            className="py-2 px-2 h-full w-full mr-4"
+                            onClick={handleAddChapter}
                         >
-                            {chapterData &&
-                                chapterData?.map((item: any, index: any) => {
-                                    return (
-                                        <Reorder.Item
-                                            value={item}
-                                            key={item.chapterId}
-                                        >
-                                            <ChapterItem
-                                                key={item.chapterId}
-                                                chapterId={item.chapterId}
-                                                title={item.chapterTitle}
-                                                topicId={item.topicId}
-                                                topicName={item.topicName}
-                                                fetchChapterContent={
-                                                    fetchChapterContent
-                                                }
-                                                fetchChapters={fetchChapters}
-                                                activeChapter={activeChapter}
-                                                moduleId={moduleID}
-                                            />
-                                        </Reorder.Item>
-                                    )
-                                })}
-                        </Reorder.Group>
-                    </ScrollArea>
-                {/* </div>
+                            Add Chapter
+                        </Button>
+                    </DialogTrigger>
+                    <DialogOverlay />
+                    <ChapterModal
+                        // params={params}
+                        courseId={courseId}
+                        moduleId={moduleId}
+                        fetchChapters={fetchChapters}
+                        newChapterOrder={chapterData.length}
+                        scrollToBottom={scrollToBottom}
+                    />
+                </Dialog>
+            </div>
+            {/* <ScrollArea className="h-dvh pr-4" type="hover"> */}
+            <ScrollArea className="h-[500px] lg:h-[670px] pr-4" type="hover">
+                <Reorder.Group
+                    values={chapterData}
+                    onReorder={async (newOrderChapters: any) => {
+                        handleReorder(newOrderChapters)
+                    }}
+                >
+                    {chapterData &&
+                        chapterData?.map((item: any, index: any) => {
+                            const isLastItem = index === chapterData.length - 1
+                            return (
+                                <Reorder.Item
+                                    value={item}
+                                    key={item.chapterId}
+                                    id={
+                                        isLastItem
+                                            ? 'last-chapter'
+                                            : `chapter-${item.chapterId}`
+                                    }
+                                    // onClick={() =>
+                                    //     handleChapterClick(item.chapterId)
+                                    // }
+                                >
+                                    <ChapterItem
+                                        key={item.chapterId}
+                                        chapterId={item.chapterId}
+                                        title={item.chapterTitle}
+                                        topicId={item.topicId}
+                                        topicName={item.topicName}
+                                        // fetchChapterContent={
+                                        //     fetchChapterContent
+                                        // }
+                                        // fetchChapters={fetchChapters}
+                                        setActiveChapter={setActiveChapter}
+                                        activeChapter={activeChapter}
+                                        moduleId={moduleID}
+                                        // handleChapterClick={() =>
+                                        //     handleChapterClick(item.chapterId)
+                                        // }
+                                    />
+                                </Reorder.Item>
+                            )
+                        })}
+                </Reorder.Group>
+            </ScrollArea>
+            {/* </div>
                 <div className="col-span-3 mx-4">{renderChapterContent()}</div>
             </div> */}
         </>

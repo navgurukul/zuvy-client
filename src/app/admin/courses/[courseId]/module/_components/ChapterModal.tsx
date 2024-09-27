@@ -24,14 +24,16 @@ function ChapterModal({
     fetchChapters,
     newChapterOrder,
     moduleId,
-    courseId
-    // setIsNewChapterCreated
-}: {
+    courseId,
+    scrollToBottom,
+}: // setIsNewChapterCreated
+{
     // params: { moduleId: string; courseId: string }
     fetchChapters: () => void
     newChapterOrder: number
     courseId: any
     moduleId: any
+    scrollToBottom: () => void
     // setIsNewChapterCreated: any
 }) {
     const router = useRouter()
@@ -46,7 +48,7 @@ function ChapterModal({
             .then((res) => {
                 const data = res?.data?.module[0]
                 router.push(
-                    `/admin/courses/${courseId}/module/${data.moduleId}/chapters/${data.id}/chapterContent`
+                    `/admin/courses/${courseId}/module/${data.moduleId}/chapters/${data.id}`
                 )
                 toast({
                     title: res?.data?.module[0]?.title,
@@ -64,6 +66,10 @@ function ChapterModal({
                 })
             })
         fetchChapters()
+        setTimeout(() => {
+            scrollToBottom()
+        }, 500)
+
         // setIsNewChapterCreated(true)
     }
 

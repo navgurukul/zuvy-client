@@ -69,7 +69,7 @@ const AddVideo = ({
         contentDetails: ContentDetail[]
     }
     moduleId: string
-    fetchChapterContent: (chapterId: number) => Promise<void>
+    fetchChapterContent: (chapterId: number, topicId: number) => Promise<void>
 }) => {
     const [showVideo, setShowVideo] = useState(true)
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -119,7 +119,7 @@ const AddVideo = ({
                         className:
                             'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
-                    fetchChapterContent(content.id)
+                    fetchChapterContent(content.id, content.topicId)
                 })
         } catch (error) {
             toast({

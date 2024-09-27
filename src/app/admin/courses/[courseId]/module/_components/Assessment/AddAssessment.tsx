@@ -24,8 +24,9 @@ import { api } from '@/utils/axios.config'
 type AddAssessmentProps = {
     chapterData: any
     content: any
-    fetchChapterContent: (chapterId: number) => void
+    fetchChapterContent: (chapterId: number, topicId:number) => void
     moduleId: any
+    topicId: number
 }
 
 export type Tag = {
@@ -38,6 +39,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     content,
     fetchChapterContent,
     moduleId,
+    topicId
 }) => {
     const [searchQuestionsInAssessment, setSearchQuestionsInAssessment] =
         useState<string>('')
@@ -229,7 +231,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     }, [selectedOpenEndedQuestions])
 
     useEffect(() => {
-        fetchChapterContent(chapterData.chapterId)
+        fetchChapterContent(chapterData.chapterId, topicId)
     }, [])
 
     useEffect(() => {
@@ -370,6 +372,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                 }
                                 content={content}
                                 fetchChapterContent={fetchChapterContent}
+                                topicId={topicId}
                                 chapterData={chapterData}
                                 chapterTitle={chapterTitle}
                                 saveSettings={saveSettings}
