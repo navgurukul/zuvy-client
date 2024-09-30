@@ -21,6 +21,7 @@ import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import {
     getChapterContentState,
     getChapterDataState,
+    getModuleData,
     getCurrentChapterState,
     getTopicId,
     getCurrentModuleName,
@@ -69,6 +70,7 @@ function Chapter() {
         : Number(chapterID)
     const moduleID = Array.isArray(moduleId) ? moduleId[0] : moduleId
     const { chapterData, setChapterData } = getChapterDataState()
+    const { chapterContent, setChapterContent } = getChapterContentState()
     // const [chapterData, setChapterData] = useState([
     //     {
     //         chapterId: 276,
@@ -212,11 +214,12 @@ function Chapter() {
     //     },
     // ])
     // const [chapterData, setChapterData] = useState([])
-    const [chapterContent, setChapterContent] = useState<any>([])
+    // const [chapterContent, setChapterContent] = useState<any>([])
     const [chapterId, setChapterId] = useState<number>(0)
     const [activeChapterTitle, setActiveChapterTitle] = useState('')
-    const [currentChapter, setCurrentChapter] = useState<Chapter[]>([])
-    const [moduleData, setModuleData] = useState<Module[]>([])
+    // const [currentChapter, setCurrentChapter] = useState<Chapter[]>([])
+    // const [moduleData, setModuleData] = useState<Module[]>([])
+    const { moduleData, setModuleData } = getModuleData()
     // const [moduleName, setModuleName] = useState('')
     const [activeChapter, setActiveChapter] = useState(chapter_id)
     // const [topicId, setTopicId] = useState(1)
@@ -230,7 +233,7 @@ function Chapter() {
     const [isNewChapterCreated, setIsNewChapterCreated] = useState(false)
     const [isChapterClicked, setIsChapterClicked] = useState(false)
     const isChapterClickedRef = useRef(false)
-    const [initialLoad, setInitialLoad] = useState(true)
+    // const [initialLoad, setInitialLoad] = useState(true)
 
     const crumbs = [
         {
@@ -271,50 +274,50 @@ function Chapter() {
         }
     }, [moduleId, chapter_id])
 
-    const fetchChapterContent = useCallback(
-        async (chapterId: number, topicId: number) => {
-            // let topicId = moduleData.find(
-            //     (myModule: any) => myModule.chapterId === chapterId
-            // )?.topicId
-            try {
-                const response = await api.get(
-                    `Content/chapterDetailsById/${chapterId}?bootcampId=${courseId}&moduleId=${moduleId}&topicId=${topicId}`
-                )
-                setChapterId(chapterId)
-                const currentModule: any = moduleData.find(
-                    (myModule: any) => myModule.chapterId === chapterId
-                )
+    // const fetchChapterContent = useCallback(
+    //     async (chapterId: number, topicId: number) => {
+    //         // let topicId = moduleData.find(
+    //         //     (myModule: any) => myModule.chapterId === chapterId
+    //         // )?.topicId
+    //         try {
+    //             const response = await api.get(
+    //                 `Content/chapterDetailsById/${chapterId}?bootcampId=${courseId}&moduleId=${moduleId}&topicId=${topicId}`
+    //             )
+    //             setChapterId(chapterId)
+    //             // const currentModule: any = moduleData.find(
+    //             //     (myModule: any) => myModule.chapterId === chapterId
+    //             // )
 
-                if (currentModule) {
-                    setActiveChapterTitle(currentModule?.chapterTitle)
-                    setCurrentChapter(currentModule)
-                }
+    //             // if (currentModule) {
+    //             //     setActiveChapterTitle(currentModule?.chapterTitle)
+    //             //     // setCurrentChapter(currentModule)
+    //             // }
 
-                if (currentModule?.topicName === 'Quiz') {
-                    setChapterContent(
-                        response.data
-                            .quizQuestionDetails as QuizQuestionDetails[]
-                    )
-                } else if (currentModule?.topicName === 'Coding Question') {
-                    setChapterContent(response.data)
-                } else if (currentModule?.topicName === 'Form') {
-                    setChapterContent(response.data)
-                } else {
-                    setChapterContent(response.data)
-                }
+    //             // if (currentModule?.topicName === 'Quiz') {
+    //             //     setChapterContent(
+    //             //         response.data
+    //             //             .quizQuestionDetails as QuizQuestionDetails[]
+    //             //     )
+    //             // } else if (currentModule?.topicName === 'Coding Question') {
+    //             //     setChapterContent(response.data)
+    //             // } else if (currentModule?.topicName === 'Form') {
+    //             //     setChapterContent(response.data)
+    //             // } else {
+    //             //     setChapterContent(response.data)
+    //             // }
 
-                setTopicId(currentModule?.topicId)
-                // setTopicId(topicId)
-                // setTopicId(response.data.topicId)
+    //             // setTopicId(currentModule?.topicId)
+    //             // setTopicId(topicId)
+    //             // setTopicId(response.data.topicId)
 
-                setActiveChapter(chapterId)
-                setKey((prevKey: any) => prevKey + 1)
-            } catch (error) {
-                console.error('Error fetching chapter content:', error)
-            }
-        },
-        [moduleData, courseId, moduleId]
-    )
+    //             setActiveChapter(chapterId)
+    //             setKey((prevKey: any) => prevKey + 1)
+    //         } catch (error) {
+    //             console.error('Error fetching chapter content:', error)
+    //         }
+    //     },
+    //     [moduleData, courseId, moduleId]
+    // )
 
     useEffect(() => {
         // fetchCourseModules()
@@ -326,14 +329,16 @@ function Chapter() {
     useEffect(() => {
         if (chapterData.length > 0) {
             // const firstChapterId = chapterData[0].chapterId
-            fetchChapterContent(chapter_id, topicId)
+            // fetchChapterContent(chapter_id, topicId)
+            setActiveChapter(chapter_id)
+            setChapterId(chapter_id)
         } else {
             setActiveChapter(0)
             setChapterContent([])
             setActiveChapterTitle('')
             setTopicId(0)
         }
-    }, [chapterData, fetchChapterContent])
+    }, [chapterData])
 
     async function handleReorder(newOrderChapters: any) {
         newOrderChapters = newOrderChapters.map((item: any, index: any) => ({
@@ -387,39 +392,40 @@ function Chapter() {
         console.log('activeChapterRef.current', activeChapterRef.current)
         console.log('scrollAreaRef.current', scrollAreaRef.current)
         if (
-            !isChapterClickedRef.current &&
-            activeChapterRef.current &&
-            scrollAreaRef.current
+            // !isChapterClickedRef.current &&
+            activeChapterRef.current
+            // &&
+            // scrollAreaRef.current
         ) {
-            console.log('went inside', isChapterClickedRef.current)
+            // console.log('went inside', isChapterClickedRef.current)
             // Only scroll if it's not triggered by a chapter click
             activeChapterRef.current.scrollIntoView({
-                behavior: 'smooth',
+                // behavior: 'smooth',
                 // block: 'center'
                 // behavior: 'auto',
-                // block: 'center',
+                block: 'center',
             })
         }
-        setInitialLoad(false)
-    }, [activeChapter, initialLoad]) // Adding 'isChapterClicked' to dependencies
+        // setInitialLoad(false)
+    }, [activeChapter]) // Adding 'isChapterClicked' to dependencies
 
     // Reset the isChapterClicked state after some delay
-    useEffect(() => {
-        if (isChapterClicked) {
-            const timer = setTimeout(() => {
-                isChapterClickedRef.current = false
-            }, 300)
-            return () => clearTimeout(timer) // Clean up the timer
-        }
-    }, [activeChapter])
+    // useEffect(() => {
+    //     if (isChapterClicked) {
+    //         const timer = setTimeout(() => {
+    //             isChapterClickedRef.current = false
+    //         }, 300)
+    //         return () => clearTimeout(timer) // Clean up the timer
+    //     }
+    // }, [activeChapter])
 
-    useEffect(() => {
-        if (isNewChapterCreated && scrollAreaRef.current) {
-            const scrollableElement = scrollAreaRef.current
-            scrollableElement.scrollTop = scrollableElement.scrollHeight // Scroll to the bottom
-            setIsNewChapterCreated(false) // Reset the new chapter flag
-        }
-    }, [chapterData, isNewChapterCreated])
+    // useEffect(() => {
+    //     if (isNewChapterCreated && scrollAreaRef.current) {
+    //         const scrollableElement = scrollAreaRef.current
+    //         scrollableElement.scrollTop = scrollableElement.scrollHeight // Scroll to the bottom
+    //         setIsNewChapterCreated(false) // Reset the new chapter flag
+    //     }
+    // }, [chapterData, isNewChapterCreated])
 
     // const handleChapterClick = (chapterId: any) => {
     //     // Append the hash to the URL when clicking on a chapter
@@ -519,7 +525,7 @@ function Chapter() {
             <ScrollArea
                 className="h-[500px] lg:h-[670px] pr-4"
                 type="hover"
-                ref={scrollAreaRef}
+                // ref={scrollAreaRef}
             >
                 <Reorder.Group
                     values={chapterData}
@@ -543,32 +549,33 @@ function Chapter() {
                                     //     handleChapterClick(item.chapterId)
                                     // }
                                 >
-                                    <div
+                                    {/* <div
                                         ref={
                                             item.chapterId === activeChapter
                                                 ? activeChapterRef
                                                 : null
                                         } // Set ref to active chapter
-                                    >
-                                        <ChapterItem
-                                            key={item.chapterId}
-                                            chapterId={item.chapterId}
-                                            title={item.chapterTitle}
-                                            topicId={item.topicId}
-                                            topicName={item.topicName}
-                                            // fetchChapterContent={
-                                            //     fetchChapterContent
-                                            // }
-                                            // fetchChapters={fetchChapters}
-                                            setActiveChapter={setActiveChapter}
-                                            activeChapter={activeChapter}
-                                            moduleId={moduleID}
-                                            isChapterClickedRef={
-                                                isChapterClickedRef
-                                            }
-                                            // handleChapterClick={handleChapterClick}
-                                        />
-                                    </div>
+                                    > */}
+                                    <ChapterItem
+                                        key={item.chapterId}
+                                        chapterId={item.chapterId}
+                                        title={item.chapterTitle}
+                                        topicId={item.topicId}
+                                        topicName={item.topicName}
+                                        // fetchChapterContent={
+                                        //     fetchChapterContent
+                                        // }
+                                        // fetchChapters={fetchChapters}
+                                        setActiveChapter={setActiveChapter}
+                                        activeChapter={activeChapter}
+                                        moduleId={moduleID}
+                                        isChapterClickedRef={
+                                            isChapterClickedRef
+                                        }
+                                        activeChapterRef={activeChapterRef}
+                                        // handleChapterClick={handleChapterClick}
+                                    />
+                                    {/* </div> */}
                                 </Reorder.Item>
                             )
                         })}

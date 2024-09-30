@@ -194,12 +194,14 @@ type studentChapterContent = {
     setChapterContent: (newValue: any) => void
 }
 
-export const getStudentChapterContentState = create<studentChapterContent>((set) => ({
-    chapterContent: {},
-    setChapterContent: (newValue: any) => {
-        set({ chapterContent: newValue })
-    },
-}))
+export const getStudentChapterContentState = create<studentChapterContent>(
+    (set) => ({
+        chapterContent: {},
+        setChapterContent: (newValue: any) => {
+            set({ chapterContent: newValue })
+        },
+    })
+)
 
 type chapters = {
     chapters: any[]
@@ -222,18 +224,6 @@ export const getModuleName = create<studentModuleName>((set) => ({
     moduleName: '',
     setModuleName: (newValue: string) => {
         set({ moduleName: newValue })
-    },
-}))
-
-type scrollPosition = {
-    scrollPosition: number
-    setScrollPosition: (newValue: number) => void
-}
-
-export const getScrollPosition = create<scrollPosition>((set) => ({
-    scrollPosition: 0,
-    setScrollPosition: (newValue: number) => {
-        set({ scrollPosition: newValue })
     },
 }))
 
@@ -309,8 +299,39 @@ export const getCurrentModuleName = create<moduleName>((set) => ({
     },
 }))
 
-// ------------------------------
+interface Module {
+    chapterId: number
+    topicName: string
+    chapterTitle: string
+    topicId: number
+    // include other properties as needed
+}
 
+type studentModuleData = {
+    moduleData: Module[]
+    setModuleData: (newValue: Module[]) => void
+}
+
+export const getModuleData = create<studentModuleData>((set) => ({
+    moduleData: [],
+    setModuleData: (newValue: Module[]) => {
+        set({ moduleData: newValue })
+    },
+}))
+
+type scrollPosition = {
+    scrollPosition: number
+    setScrollPosition: (newValue: number) => void
+}
+
+export const getScrollPosition = create<scrollPosition>((set) => ({
+    scrollPosition: 0,
+    setScrollPosition: (newValue: number) => {
+        set({ scrollPosition: newValue })
+    },
+}))
+
+// ------------------------------
 
 type codingQuestions = {
     codingQuestions: any[]

@@ -967,18 +967,22 @@ import AddForm from '@/app/admin/courses/[courseId]/module/_components/form/AddF
 import {
     getChapterContentState,
     getChapterDataState,
+    getModuleData,
     getCurrentChapterState,
     getTopicId,
     getCurrentModuleName,
     getScrollPosition,
 } from '@/store/store'
-interface Module {
-    chapterId: number
-    topicName: string
-    chapterTitle: string
-    topicId: number
-    // include other properties as needed
-}
+import { Spinner } from '@/components/ui/spinner'
+
+
+// interface Module {
+//     chapterId: number
+//     topicName: string
+//     chapterTitle: string
+//     topicId: number
+//     // include other properties as needed
+// }
 
 type Chapter = {
     chapterId: number
@@ -1015,7 +1019,7 @@ export default function Page({
     const chapter_id = Array.isArray(chapterID)
         ? Number(chapterID[0])
         : Number(chapterID)
-    const [moduleData, setModuleData] = useState<Module[]>([])
+    // const [moduleData, setModuleData] = useState<Module[]>([])
     // const [moduleData, setModuleData] = useState([
     //     {
     //         chapterId: 276,
@@ -1640,32 +1644,35 @@ export default function Page({
     // ])
     // const [chapterContent, setChapterContent] = useState<any>([])
     const { chapterContent, setChapterContent } = getChapterContentState()
+    const { moduleData, setModuleData } = getModuleData()
     const [chapterId, setChapterId] = useState<number>(0)
     const [activeChapterTitle, setActiveChapterTitle] = useState('')
-    const [currentChapter, setCurrentChapter] = useState<Chapter[]>([])
+    // const [currentChapter, setCurrentChapter] = useState<Chapter[]>([])
+    const { currentChapter, setCurrentChapter } = getCurrentChapterState()
     const [activeChapter, setActiveChapter] = useState(chapter_id)
     const [topicId, setTopicId] = useState(1)
     const [key, setKey] = useState(0)
+    const [loading, setLoading] = useState(true)
 
-    const fetchChapters = useCallback(async () => {
-        try {
-            const response = await api.get(
-                `/Content/allChaptersOfModule/${moduleId}`
-            )
-            // console.log('response of allChaptersOfModule', response)
-            const currentChapter = response.data.chapterWithTopic.find(
-                (item: any) => item.chapterId === chapter_id
-            )
-            // console.log('currentChapter', currentChapter)
-            // setCurrentChapter(currentChapter)
-            setChapterData(response.data.chapterWithTopic)
-            // setModuleName(response.data.moduleName)
-            setModuleData(response.data.chapterWithTopic)
-        } catch (error) {
-            console.error('Error fetching chapters:', error)
-            // Handle error as needed
-        }
-    }, [moduleId, chapter_id])
+    // const fetchChapters = useCallback(async () => {
+    //     try {
+    //         const response = await api.get(
+    //             `/Content/allChaptersOfModule/${moduleId}`
+    //         )
+    //         // console.log('response of allChaptersOfModule', response)
+    //         const currentChapter = response.data.chapterWithTopic.find(
+    //             (item: any) => item.chapterId === chapter_id
+    //         )
+    //         // console.log('currentChapter', currentChapter)
+    //         setCurrentChapter(currentChapter)
+    //         setChapterData(response.data.chapterWithTopic)
+    //         // setModuleName(response.data.moduleName)
+    //         setModuleData(response.data.chapterWithTopic)
+    //     } catch (error) {
+    //         console.error('Error fetching chapters:', error)
+    //         // Handle error as needed
+    //     }
+    // }, [moduleId, chapter_id])
 
     const fetchChapterContent = useCallback(
         async (chapterId: number, topicId: number) => {
@@ -1700,6 +1707,10 @@ export default function Page({
                     setChapterContent(response.data)
                 }
 
+                setTimeout(() => {
+                    setLoading(false) // Set loading to false after the delay
+                }, 100)
+
                 setTopicId(currentModule?.topicId)
 
                 // setTopicId(response.data.topicId)
@@ -1713,12 +1724,12 @@ export default function Page({
         [moduleData, courseId, moduleId]
     )
 
-    useEffect(() => {
-        // fetchCourseModules()
-        if (moduleId) {
-            fetchChapters()
-        }
-    }, [courseId, moduleId, fetchChapters])
+    // useEffect(() => {
+    //     // fetchCourseModules()
+    //     if (moduleId) {
+    //         fetchChapters()
+    //     }
+    // }, [courseId, moduleId, fetchChapters])
 
     useEffect(() => {
         if (chapterData.length > 0) {
@@ -1734,6 +1745,12 @@ export default function Page({
 
     const renderChapterContent = () => {
         // console.log('topicId', topicId)
+        // if (
+        //     topicId &&
+        //     chapterContent &&
+        //     (chapterContent?.id === chapter_id ||
+        //         chapterContent?.chapterId === chapter_id)
+        // ) {
         switch (topicId) {
             case 1:
                 return (
@@ -1790,6 +1807,23 @@ export default function Page({
             default:
                 return <h1>Create New Chapter</h1>
         }
+    // } else {
+    //     return (
+    //         <>
+    //             {loading ? (
+    //                 <div className="my-5 flex justify-center items-center">
+    //                     <div className="absolute h-screen">
+    //                         <div className="relative top-[70%]">
+    //                             <Spinner className="text-secondary" />
+    //                         </div>
+    //                     </div>
+    //                 </div>
+    //             ) : (
+    //                 <h1>Create New Chapter</h1>
+    //             )}
+    //         </>
+    //     )
+    // }
     }
 
     return <div>{renderChapterContent()}</div>

@@ -179,6 +179,7 @@ function ChapterItem({
     // handleChapterClick,
     // fetchChapters,
     moduleId,
+    activeChapterRef,
     isChapterClickedRef,
 }: {
     title: string
@@ -191,6 +192,7 @@ function ChapterItem({
     // fetchChapters: () => void
     // handleChapterClick: (chapterId: number) => void;
     moduleId: string
+    activeChapterRef: any
     isChapterClickedRef: any
 }) {
     // states and variables
@@ -225,7 +227,7 @@ function ChapterItem({
     }
 
     const handleClick = () => {
-        isChapterClickedRef.current = true
+        // isChapterClickedRef.current = true
         setActiveChapter(chapterId) // Set the active chapter in the parent component
         // handleChapterClick(chapterId)
     }
@@ -263,7 +265,7 @@ function ChapterItem({
     }
 
     return (
-        <div>
+        <div ref={chapterId === activeChapter ? activeChapterRef : null}>
             <Link
                 // href={`/admin/courses/${courseId}/module/${moduleId}/chapters/content/${chapterId}/chapterContent`}
                 href={`/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterId}`}
