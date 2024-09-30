@@ -964,7 +964,14 @@ import Quiz from '@/app/admin/courses/[courseId]/module/_components/quiz/Quiz'
 import Assignment from '@/app/admin/courses/[courseId]/module/_components/assignment/Assignment'
 import AddAssessment from '@/app/admin/courses/[courseId]/module/_components/Assessment/AddAssessment'
 import AddForm from '@/app/admin/courses/[courseId]/module/_components/form/AddForm'
-
+import {
+    getChapterContentState,
+    getChapterDataState,
+    getCurrentChapterState,
+    getTopicId,
+    getCurrentModuleName,
+    getScrollPosition,
+} from '@/store/store'
 interface Module {
     chapterId: number
     topicName: string
@@ -1319,7 +1326,8 @@ export default function Page({
     //         order: 44,
     //     },
     // ])
-    const [chapterData, setChapterData] = useState([])
+    // const [chapterData, setChapterData] = useState([])
+    const { chapterData, setChapterData } = getChapterDataState()
     // const [chapterData, setChapterData] = useState([
     //     {
     //         chapterId: 276,
@@ -1630,7 +1638,8 @@ export default function Page({
     //         order: 44,
     //     },
     // ])
-    const [chapterContent, setChapterContent] = useState<any>([])
+    // const [chapterContent, setChapterContent] = useState<any>([])
+    const { chapterContent, setChapterContent } = getChapterContentState()
     const [chapterId, setChapterId] = useState<number>(0)
     const [activeChapterTitle, setActiveChapterTitle] = useState('')
     const [currentChapter, setCurrentChapter] = useState<Chapter[]>([])
@@ -1643,7 +1652,7 @@ export default function Page({
             const response = await api.get(
                 `/Content/allChaptersOfModule/${moduleId}`
             )
-            console.log('response of allChaptersOfModule', response)
+            // console.log('response of allChaptersOfModule', response)
             const currentChapter = response.data.chapterWithTopic.find(
                 (item: any) => item.chapterId === chapter_id
             )
@@ -1667,7 +1676,7 @@ export default function Page({
                 const response = await api.get(
                     `Content/chapterDetailsById/${chapterId}?bootcampId=${courseId}&moduleId=${moduleId}&topicId=${topicId}`
                 )
-                console.log('response of chapterDetailsById', response)
+                // console.log('response of chapterDetailsById', response)
                 setChapterId(chapterId)
                 const currentModule: any = moduleData.find(
                     (myModule: any) => myModule.chapterId === chapterId
@@ -1724,7 +1733,7 @@ export default function Page({
     }, [chapterData, fetchChapterContent])
 
     const renderChapterContent = () => {
-        console.log('topicId', topicId)
+        // console.log('topicId', topicId)
         switch (topicId) {
             case 1:
                 return (

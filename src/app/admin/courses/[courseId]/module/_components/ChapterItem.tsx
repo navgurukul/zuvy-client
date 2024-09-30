@@ -179,6 +179,7 @@ function ChapterItem({
     // handleChapterClick,
     // fetchChapters,
     moduleId,
+    isChapterClickedRef,
 }: {
     title: string
     topicId: number
@@ -188,8 +189,9 @@ function ChapterItem({
     setActiveChapter: any
     // fetchChapterContent: (chapterId: number, topicId: number) => void
     // fetchChapters: () => void
-    // handleChapterClick: () => void
+    // handleChapterClick: (chapterId: number) => void;
     moduleId: string
+    isChapterClickedRef: any
 }) {
     // states and variables
     const { courseId } = useParams()
@@ -222,8 +224,11 @@ function ChapterItem({
             : 'text-black hover:bg-secondary/20'
     }
 
-    console.log('activeChapter', activeChapter)
-    console.log('chapterId', chapterId)
+    const handleClick = () => {
+        isChapterClickedRef.current = true
+        setActiveChapter(chapterId) // Set the active chapter in the parent component
+        // handleChapterClick(chapterId)
+    }
 
     const handleDeleteChapter = async () => {
         try {
@@ -272,7 +277,8 @@ function ChapterItem({
                         console.log('Click!')
                         // fetchChapterContent(chapterId, topicId)
                         // handleChapterClick()
-                        setActiveChapter(chapterId)
+                        // setActiveChapter(chapterId)
+                        handleClick()
                     }}
                 >
                     <div className="flex gap-2 capitalize">
