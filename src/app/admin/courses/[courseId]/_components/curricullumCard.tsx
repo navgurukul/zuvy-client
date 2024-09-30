@@ -106,15 +106,15 @@ const CurricullumCard = ({
     }
 
     const handleModuleRoute = () => {
-        // if (typeId === 1) {
+        if (typeId === 1) {
             router.push(
                 `/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterId}`
             )
-        // } else if (typeId === 2) {
-        //     router.push(
-        //         `/admin/courses/${courseId}/module/${moduleId}/project/${projectId}`
-        //     )
-        // }
+        } else if (typeId === 2) {
+            router.push(
+                `/admin/courses/${courseId}/module/${moduleId}/project/${projectId}`
+            )
+        }
     }
 
     return (

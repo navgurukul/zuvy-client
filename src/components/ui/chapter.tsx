@@ -10,33 +10,14 @@ import { toast } from '@/components/ui/use-toast'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import ChapterModal from '@/app/admin/courses/[courseId]/module/_components/ChapterModal'
-import AddVideo from '@/app/admin/courses/[courseId]/module/_components/video/AddVideo'
-import AddArticle from '@/app/admin/courses/[courseId]/module/_components/Article/AddArticle'
-import CodingChallenge from '@/app/admin/courses/[courseId]/module/_components/codingChallenge/CodingChallenge'
-import Quiz from '@/app/admin/courses/[courseId]/module/_components/quiz/Quiz'
-import Assignment from '@/app/admin/courses/[courseId]/module/_components/assignment/Assignment'
-import AddAssessment from '@/app/admin/courses/[courseId]/module/_components/Assessment/AddAssessment'
-import AddForm from '@/app/admin/courses/[courseId]/module/_components/form/AddForm'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import {
     getChapterContentState,
     getChapterDataState,
     getModuleData,
-    getCurrentChapterState,
     getTopicId,
     getCurrentModuleName,
-    getScrollPosition,
 } from '@/store/store'
-
-// import { getChapterDataState } from '@/store/store'
-
-interface Module {
-    chapterId: number
-    topicName: string
-    chapterTitle: string
-    topicId: number
-    // include other properties as needed
-}
 
 type Chapter = {
     chapterId: number
@@ -213,16 +194,10 @@ function Chapter() {
     //         order: 20,
     //     },
     // ])
-    // const [chapterData, setChapterData] = useState([])
-    // const [chapterContent, setChapterContent] = useState<any>([])
     const [chapterId, setChapterId] = useState<number>(0)
     const [activeChapterTitle, setActiveChapterTitle] = useState('')
-    // const [currentChapter, setCurrentChapter] = useState<Chapter[]>([])
-    // const [moduleData, setModuleData] = useState<Module[]>([])
     const { moduleData, setModuleData } = getModuleData()
-    // const [moduleName, setModuleName] = useState('')
     const [activeChapter, setActiveChapter] = useState(chapter_id)
-    // const [topicId, setTopicId] = useState(1)
     const { topicId, setTopicId } = getTopicId()
     const moduleName = getCurrentModuleName((state) => state.moduleName)
     const setModuleName = getCurrentModuleName((state) => state.setModuleName)
@@ -233,7 +208,6 @@ function Chapter() {
     const [isNewChapterCreated, setIsNewChapterCreated] = useState(false)
     const [isChapterClicked, setIsChapterClicked] = useState(false)
     const isChapterClickedRef = useRef(false)
-    // const [initialLoad, setInitialLoad] = useState(true)
 
     const crumbs = [
         {
@@ -259,12 +233,9 @@ function Chapter() {
             const response = await api.get(
                 `/Content/allChaptersOfModule/${moduleId}`
             )
-            // console.log('response', response)
             const currentChapter = response.data.chapterWithTopic.find(
                 (item: any) => item.chapterId === chapter_id
             )
-            // console.log('currentChapter', currentChapter)
-            // setCurrentChapter(currentChapter)
             setChapterData(response.data.chapterWithTopic)
             setModuleName(response.data.moduleName)
             setModuleData(response.data.chapterWithTopic)
@@ -274,53 +245,7 @@ function Chapter() {
         }
     }, [moduleId, chapter_id])
 
-    // const fetchChapterContent = useCallback(
-    //     async (chapterId: number, topicId: number) => {
-    //         // let topicId = moduleData.find(
-    //         //     (myModule: any) => myModule.chapterId === chapterId
-    //         // )?.topicId
-    //         try {
-    //             const response = await api.get(
-    //                 `Content/chapterDetailsById/${chapterId}?bootcampId=${courseId}&moduleId=${moduleId}&topicId=${topicId}`
-    //             )
-    //             setChapterId(chapterId)
-    //             // const currentModule: any = moduleData.find(
-    //             //     (myModule: any) => myModule.chapterId === chapterId
-    //             // )
-
-    //             // if (currentModule) {
-    //             //     setActiveChapterTitle(currentModule?.chapterTitle)
-    //             //     // setCurrentChapter(currentModule)
-    //             // }
-
-    //             // if (currentModule?.topicName === 'Quiz') {
-    //             //     setChapterContent(
-    //             //         response.data
-    //             //             .quizQuestionDetails as QuizQuestionDetails[]
-    //             //     )
-    //             // } else if (currentModule?.topicName === 'Coding Question') {
-    //             //     setChapterContent(response.data)
-    //             // } else if (currentModule?.topicName === 'Form') {
-    //             //     setChapterContent(response.data)
-    //             // } else {
-    //             //     setChapterContent(response.data)
-    //             // }
-
-    //             // setTopicId(currentModule?.topicId)
-    //             // setTopicId(topicId)
-    //             // setTopicId(response.data.topicId)
-
-    //             setActiveChapter(chapterId)
-    //             setKey((prevKey: any) => prevKey + 1)
-    //         } catch (error) {
-    //             console.error('Error fetching chapter content:', error)
-    //         }
-    //     },
-    //     [moduleData, courseId, moduleId]
-    // )
-
     useEffect(() => {
-        // fetchCourseModules()
         if (moduleId) {
             fetchChapters()
         }
@@ -328,8 +253,6 @@ function Chapter() {
 
     useEffect(() => {
         if (chapterData.length > 0) {
-            // const firstChapterId = chapterData[0].chapterId
-            // fetchChapterContent(chapter_id, topicId)
             setActiveChapter(chapter_id)
             setChapterId(chapter_id)
         } else {
@@ -427,78 +350,9 @@ function Chapter() {
     //     }
     // }, [chapterData, isNewChapterCreated])
 
-    // const handleChapterClick = (chapterId: any) => {
-    //     // Append the hash to the URL when clicking on a chapter
-    //     if (typeof window !== 'undefined') {
-    //         window.location.hash = `#chapter-${chapterId}`
-    //     }
-    // }
-
-    // const renderChapterContent = () => {
-    //     console.log('topicId', topicId)
-    //     switch (topicId) {
-    //         case 1:
-    //             return (
-    //                 <AddVideo
-    //                     key={chapterId}
-    //                     moduleId={moduleID}
-    //                     content={chapterContent}
-    //                     fetchChapterContent={fetchChapterContent}
-    //                 />
-    //             )
-    //         case 2:
-    //             return <AddArticle key={chapterId} content={chapterContent} />
-    //         case 3:
-    //             return (
-    //                 <CodingChallenge
-    //                     key={chapterId}
-    //                     moduleId={moduleID}
-    //                     content={chapterContent}
-    //                     activeChapterTitle={activeChapterTitle}
-    //                 />
-    //             )
-    //         case 4:
-    //             return (
-    //                 <Quiz
-    //                     key={chapterId}
-    //                     chapterId={chapterId}
-    //                     moduleId={moduleID}
-    //                     content={chapterContent}
-    //                 />
-    //             )
-    //         case 5:
-    //             return <Assignment key={chapterId} content={chapterContent} />
-    //         case 6:
-    //             return (
-    //                 <AddAssessment
-    //                     key={chapterId}
-    //                     chapterData={currentChapter}
-    //                     content={chapterContent}
-    //                     fetchChapterContent={fetchChapterContent}
-    //                     topicId={topicId}
-    //                     moduleId={moduleID}
-    //                 />
-    //             )
-    //         case 7:
-    //             return (
-    //                 <AddForm
-    //                     key={chapterId}
-    //                     chapterData={currentChapter}
-    //                     content={chapterContent}
-    //                     // fetchChapterContent={fetchChapterContent}
-    //                     moduleId={moduleID}
-    //                 />
-    //             )
-    //         default:
-    //             return <h1>Create New Chapter</h1>
-    //     }
-    // }
-
     return (
         <>
             <BreadcrumbComponent crumbs={crumbs} />
-            {/* <div className="grid grid-cols-4 mt-5">
-                <div className="col-span-1"> */}
             <div className="mb-5 flex">
                 <Dialog>
                     <DialogTrigger asChild>
@@ -562,10 +416,7 @@ function Chapter() {
                                         title={item.chapterTitle}
                                         topicId={item.topicId}
                                         topicName={item.topicName}
-                                        // fetchChapterContent={
-                                        //     fetchChapterContent
-                                        // }
-                                        // fetchChapters={fetchChapters}
+                                        fetchChapters={fetchChapters}
                                         setActiveChapter={setActiveChapter}
                                         activeChapter={activeChapter}
                                         moduleId={moduleID}
@@ -573,7 +424,6 @@ function Chapter() {
                                             isChapterClickedRef
                                         }
                                         activeChapterRef={activeChapterRef}
-                                        // handleChapterClick={handleChapterClick}
                                     />
                                     {/* </div> */}
                                 </Reorder.Item>
@@ -581,9 +431,6 @@ function Chapter() {
                         })}
                 </Reorder.Group>
             </ScrollArea>
-            {/* </div>
-                <div className="col-span-3 mx-4">{renderChapterContent()}</div>
-            </div> */}
         </>
     )
 }
