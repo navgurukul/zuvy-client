@@ -1,18 +1,11 @@
 'use client'
 import React, { useCallback, useEffect, useState } from 'react'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
-import {
-    ResizablePanelGroup,
-    ResizablePanel,
-    ResizableHandle,
-} from '@/components/ui/resizable'
 
 import Editor from '@monaco-editor/react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { getProctoringDataStore } from '@/store/store'
 import { paramsType } from '../../ViewSolutionOpenEnded/page'
 import { toast } from '@/components/ui/use-toast'
-import dynamic from 'next/dynamic'
 
 import { api } from '@/utils/axios.config'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'

@@ -61,7 +61,7 @@ const Page = ({ params }: any) => {
     const getStudentAssesmentDataHandler = useCallback(async () => {
         try {
             const endpoint = debouncedSearch
-                ? `/admin/assessment/students/assessment_id114?searchStudent=${debouncedSearch}`
+                ? `/admin/assessment/students/assessment_id${params.StudentAssesmentData}?searchStudent=${debouncedSearch}`
                 : `/admin/assessment/students/assessment_id${params.StudentAssesmentData}`
 
             const res = await api.get(endpoint)
@@ -100,18 +100,14 @@ const Page = ({ params }: any) => {
 
     return (
         <>
-            {assesmentData ? (
-                <BreadcrumbComponent crumbs={crumbs} />
-            ) : (
-                <Skeleton className="h-4 w-4/6" />
-            )}
+            <BreadcrumbComponent crumbs={crumbs} />
             <MaxWidthWrapper className="p-4 ">
                 <div className="flex flex-col gap-y-4">
                     <h1 className="text-start text-xl font-bold capitalize text-primary">
                         {assesmentData?.title}
                     </h1>
 
-                    {assesmentData ? (
+                    {
                         <div className="text-start flex gap-x-3">
                             <div className="p-4 rounded-lg shadow-md ">
                                 <h1 className="text-gray-600 font-semibold text-xl">
@@ -147,16 +143,7 @@ const Page = ({ params }: any) => {
                                 </p>
                             </div>
                         </div>
-                    ) : (
-                        <div className="flex gap-x-20  ">
-                            <div className="gap-y-4">
-                                <Skeleton className="h-4 my-3 w-[300px]" />
-                                <div className="space-y-2 ">
-                                    <Skeleton className="h-[125px] w-[600px] rounded-xl" />
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                    }
                     <div className="relative">
                         <Input
                             placeholder="Search for Student"

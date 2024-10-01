@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
@@ -34,83 +34,98 @@ interface Module {
     moduleChapterData: ModuleChapterData[]
 }
 const PraticeProblems = ({ params }: any) => {
-    const [submissionData, setSubmissionData] = useState<any[]>([])
     const [matchingData, setMatchingData] = useState<any>(null)
     const [totalStudents, setTotalStudents] = useState<number>(0)
     const [studentDetails, setStudentDetails] = useState<any[]>([])
     const [bootcampData, setBootcampData] = useState<any>({})
 
-    const crumbs = [
-        {
-            crumb: 'My Courses',
-            href: `/admin/courses`,
-            isLast: false,
-        },
-        {
-            crumb: bootcampData?.name,
-            href: `/admin/courses/${params.courseId}/submissions`,
-            isLast: false,
-        },
-        {
-            crumb: 'Submission - Practice Problems',
-            href: '',
-            isLast: false,
-        },
-        {
-            crumb: matchingData?.moduleChapterData[0]?.codingQuestionDetails
-                ?.title,
-            href: '',
-            isLast: false,
-        },
-    ]
+    const crumbs = useMemo(
+        () => [
+            {
+                crumb: 'My Courses',
+                href: `/admin/courses`,
+                isLast: false,
+            },
+            {
+                crumb: bootcampData?.name,
+                href: `/admin/courses/${params.courseId}/submissions`,
+                isLast: false,
+            },
+            {
+                crumb: 'Submission - Practice Problems',
+                href: '',
+                isLast: false,
+            },
+            {
+                crumb: matchingData?.moduleChapterData[0]?.codingQuestionDetails
+                    ?.title,
+                href: '',
+                isLast: true,
+            },
+        ],
+        [bootcampData, matchingData, params]
+    )
 
-    const getSubmissionDataHandler = useCallback(async () => {
-        try {
-            const res = await api.get(
-                `/submission/submissionsOfPractiseProblems/${params.courseId}`
-            )
-            setSubmissionData(res.data.trackingData)
-            setTotalStudents(res.data.totalStudents)
-        } catch (error) {}
-    }, [params.courseId])
-
-    const getBootcampHandler = useCallback(async () => {
-        try {
-            const res = await api.get(`/bootcamp/${params.courseId}`)
-            setBootcampData(res.data.bootcamp)
-        } catch (error) {}
-    }, [params.courseId])
-
-    const getStudentDetails = useCallback(async () => {
-        try {
-            const res = await api.get(
-                `/submission/practiseProblemStatus/${matchingData?.id}?chapterId=${matchingData?.moduleChapterData[0].id}&questionId=${matchingData?.moduleChapterData[0].codingQuestionDetails.id}`
-            )
-
-            setStudentDetails(res.data.data)
-        } catch (error) {}
-    }, [matchingData?.id, matchingData?.moduleChapterData])
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        localStorage.setItem(
+            'crumbData',
+            JSON.stringify([
+                bootcampData?.name,
+                matchingData?.moduleChapterData[0]?.codingQuestionDetails
+                    ?.title,
+            ])
+        )
+    }
 
     useEffect(() => {
-        getSubmissionDataHandler()
-        getBootcampHandler()
-    }, [getSubmissionDataHandler, getBootcampHandler])
-    useEffect(() => {
-        if (matchingData) {
-            getStudentDetails()
+        const fetchData = async () => {
+            try {
+                const [submissionRes, bootcampRes] = await Promise.all([
+                    api.get(
+                        `/submission/submissionsOfPractiseProblems/${params.courseId}`
+                    ),
+                    api.get(`/bootcamp/${params.courseId}`),
+                ])
+
+                const submissions = submissionRes.data.trackingData
+                setTotalStudents(submissionRes.data.totalStudents)
+                setBootcampData(bootcampRes.data.bootcamp)
+
+                if (submissions.length > 0 && params.StudentProblemData) {
+                    const matchingModule = submissions.find(
+                        (module: any) =>
+                            module.id === +params.StudentProblemData
+                    )
+                    setMatchingData(matchingModule || null)
+
+                    if (matchingModule) {
+                        const studentRes = await api.get(
+                            `/submission/practiseProblemStatus/${matchingModule.id}?chapterId=${matchingModule.moduleChapterData[0].id}&questionId=${matchingModule.moduleChapterData[0].codingQuestionDetails.id}`
+                        )
+                        const updatedStudentDetails = studentRes.data.data.map(
+                            (studentDetail: any) => ({
+                                ...studentDetail,
+                                bootcampId: params.courseId,
+                                questionId:
+                                    matchingModule.moduleChapterData[0]
+                                        .codingQuestionDetails.id,
+                                moduleId: params.StudentProblemData,
+                            })
+                        )
+
+                        setStudentDetails(updatedStudentDetails)
+                    }
+                } else {
+                    setMatchingData(null)
+                    setStudentDetails([])
+                }
+            } catch (error) {
+                console.error('Error fetching data', error)
+            }
         }
-    }, [getStudentDetails, matchingData])
 
-    useEffect(() => {
-        if (submissionData.length > 0 && params.StudentProblemData) {
-            const matchingModule = submissionData.find(
-                (module) => module.id === +params.StudentProblemData
-            )
-            setMatchingData(matchingModule || null)
-        } else {
-            setMatchingData(null)
-        }
-    }, [submissionData, params.StudentProblemData])
+        fetchData()
+    }, [params.courseId, params.StudentProblemData])
 
     return (
         <>
