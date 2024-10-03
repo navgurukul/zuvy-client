@@ -1,4 +1,3 @@
-
 'use client'
 
 import { getParamBatchId, useLazyLoadedStudentData } from '@/store/store'
@@ -7,9 +6,8 @@ import React, { useCallback, useEffect, useState } from 'react'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import { useParams } from 'next/navigation'
 import Chapters from '../../../_components/Chapters'
-import {
-    getModuleName,
-} from '@/store/store'
+import { getModuleName } from '@/store/store'
+import ChapterContent from '../../../_components/ChapterContent'
 
 function Page({ params }: any) {
     // misc
@@ -57,8 +55,9 @@ function Page({ params }: any) {
 
     return (
         <>
-            <BreadcrumbComponent crumbs={crumbs} />
-            <Chapters params={params} />
+            {/* <BreadcrumbComponent crumbs={crumbs} /> */}
+            {/* <Chapters params={params} /> */}
+            <ChapterContent />
         </>
     )
 }

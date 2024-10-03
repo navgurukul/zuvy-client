@@ -6,6 +6,7 @@ import { api } from '@/utils/axios.config'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import { useParams } from 'next/navigation'
 import Chapters from '@/app/student/courses/[viewcourses]/modules/_components/Chapters'
+import ChapterContent from '@/app/student/courses/[viewcourses]/modules/_components/ChapterContent'
 
 const Page = ({ params }: any) => {
     const { studentData } = useLazyLoadedStudentData()
@@ -51,8 +52,9 @@ const Page = ({ params }: any) => {
 
     return (
         <>
-            <BreadcrumbComponent crumbs={crumbs} />
-            <Chapters params={params} />
+            {/* <BreadcrumbComponent crumbs={crumbs} /> */}
+            {/* <Chapters params={params} /> */}
+            <ChapterContent />
         </>
     )
 }

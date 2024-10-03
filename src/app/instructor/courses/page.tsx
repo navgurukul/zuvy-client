@@ -8,7 +8,8 @@ import Link from 'next/link'
 type Props = {}
 
 interface EnrolledCourse {
-    bootcampDetail: any
+    id: number
+    name: string
 }
 
 const Page = (props: Props) => {
@@ -26,6 +27,8 @@ const Page = (props: Props) => {
         getEnrolledCourses()
     }, [])
 
+    console.log('enrolledCourse', enrolledCourse)
+
     return (
         <div className=" flex flex-col items-center justify-center mt-6">
             <div className="x-5 flex items-center justify-start w-full">
@@ -36,28 +39,23 @@ const Page = (props: Props) => {
             <div className="container  mx-auto p-1">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4">
                     {enrolledCourse.length > 0 ? (
-                        enrolledCourse.map(
-                            ({ bootcampDetail }: { bootcampDetail: any }) => (
-                                <Link
-                                    key={bootcampDetail.id}
-                                    // href={`courses/${id}/batch/${batchId}`} /batch/${302}
-                                    href={`courses/${bootcampDetail.id}`}
-                                    className="text-gray-900 text-base"
-                                >
-                                    <div className="bg-muted flex justify-center h-[200px] relative overflow-hidden rounded-sm">
-                                        <OptimizedImageWithFallback
-                                            // src={coverImage}
-                                            src={'/logo_white.png'}
-                                            alt="Placeholder Image"
-                                            fallBackSrc={'/logo_white.png'}
-                                        />
-                                    </div>
-                                    <div className="px-1 py-4">
-                                        {bootcampDetail.name}
-                                    </div>
-                                </Link>
-                            )
-                        )
+                        enrolledCourse.map((course) => (
+                            <Link
+                                key={course.id}
+                                href={`courses/${course.id}`}
+                                className="text-gray-900 text-base"
+                            >
+                                <div className="bg-muted flex justify-center h-[200px] relative overflow-hidden rounded-sm">
+                                    <OptimizedImageWithFallback
+                                        // src={coverImage}
+                                        src={'/logo_white.png'}
+                                        alt="Placeholder Image"
+                                        fallBackSrc={'/logo_white.png'}
+                                    />
+                                </div>
+                                <div className="px-1 py-4">{course.name}</div>
+                            </Link>
+                        ))
                     ) : (
                         <p>No courses available.</p>
                     )}

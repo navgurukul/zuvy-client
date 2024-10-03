@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input'
 import FormSection from './FormSection'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import {
     Form,
     FormControl,
@@ -272,77 +273,86 @@ const AddForm: React.FC<AddFormProps> = ({
     }
 
     return (
-        <div className="flex flex-col gap-y-8 mx-auto px-5 items-center justify-center w-1/2">
-            <Form {...form}>
-                <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="w-full items-left justify-left flex flex-col space-y-8"
-                >
-                    <FormField
-                        control={form.control}
-                        name="title"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormControl>
-                                    <Input
-                                        {...field}
-                                        placeholder="Untitled Form"
-                                        className="p-0 text-3xl w-full text-left font-semibold outline-none border-none focus:ring-0"
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="description"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel className="flex text-left text-md font-semibold mb-1">
-                                    Description
-                                </FormLabel>
-                                <FormControl>
-                                    <Input
-                                        {...field}
-                                        className="w-[450px] px-3 py-2 border rounded-md"
-                                        placeholder="Placeholder"
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    {questions.map((item, index) => (
-                        <FormSection
-                            key={item.id || `form-section-${index}`}
-                            item={item}
-                            index={index}
-                            form={form}
-                            deleteQuestion={deleteQuestion}
-                            formData={questions}
+        <ScrollArea
+            className="h-[500px] lg:h-[670px] pr-4"
+            type="hover"
+            style={{
+                scrollbarWidth: 'none', // Firefox
+                msOverflowStyle: 'none', // IE and Edge
+            }}
+        >
+            <div className="flex flex-col gap-y-8 mx-auto px-5 items-center justify-center w-1/2">
+                <Form {...form}>
+                    <form
+                        onSubmit={form.handleSubmit(onSubmit)}
+                        className="w-full items-left justify-left flex flex-col space-y-8"
+                    >
+                        <FormField
+                            control={form.control}
+                            name="title"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormControl>
+                                        <Input
+                                            {...field}
+                                            placeholder="Untitled Form"
+                                            className="p-0 text-3xl w-full text-left font-semibold outline-none border-none focus:ring-0"
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
                         />
-                    ))}
+                        <FormField
+                            control={form.control}
+                            name="description"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="flex text-left text-md font-semibold mb-1">
+                                        Description
+                                    </FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            {...field}
+                                            className="w-[450px] px-3 py-2 border rounded-md"
+                                            placeholder="Placeholder"
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
 
-                    <div className="flex justify-start">
-                        <Button
-                            variant={'secondary'}
-                            type="button"
-                            onClick={addQuestion}
-                            className="gap-x-2 border-none hover:text-secondary hover:bg-popover"
-                        >
-                            <Plus /> Add Question
-                        </Button>
-                    </div>
-                    <div className="flex justify-start">
-                        <Button type="submit" className="w-1/3">
-                            Save
-                        </Button>
-                    </div>
-                </form>
-            </Form>
-        </div>
+                        {questions.map((item, index) => (
+                            <FormSection
+                                key={item.id || `form-section-${index}`}
+                                item={item}
+                                index={index}
+                                form={form}
+                                deleteQuestion={deleteQuestion}
+                                formData={questions}
+                            />
+                        ))}
+
+                        <div className="flex justify-start">
+                            <Button
+                                variant={'secondary'}
+                                type="button"
+                                onClick={addQuestion}
+                                className="gap-x-2 border-none hover:text-secondary hover:bg-popover"
+                            >
+                                <Plus /> Add Question
+                            </Button>
+                        </div>
+                        <div className="flex justify-start">
+                            <Button type="submit" className="w-1/3">
+                                Save
+                            </Button>
+                        </div>
+                    </form>
+                </Form>
+            </div>
+        </ScrollArea>
     )
 }
 
