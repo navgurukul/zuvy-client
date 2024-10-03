@@ -61,12 +61,20 @@ function Page({ params }: any) {
     }
     const handleTabChange = (tab: string) => {
         setActiveTab(tab)
+        localStorage.setItem('sessionTab', tab)
     }
     const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value)
     }
 
     const tabs = ['completed', 'upcoming', 'ongoing']
+
+    useEffect(() => {
+        const lastUpdatedTab = localStorage.getItem('sessionTab')
+        if (lastUpdatedTab) {
+            setActiveTab(lastUpdatedTab)
+        }
+    }, [])
 
     const getHandleAllClasses = useCallback(
         async (offset: number) => {

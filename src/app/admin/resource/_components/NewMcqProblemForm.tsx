@@ -49,7 +49,7 @@ const formSchema = z.object({
     questionText: z.string().min(1, {
         message: 'Question Text must be at least 1 characters.',
     }),
-    options: z.array(z.string().max(30)),
+    options: z.array(z.string()),
     selectedOption: z.number(),
 })
 
@@ -323,7 +323,7 @@ const NewMcqProblemForm = ({
                                                         type="button"
                                                     >
                                                         <X
-                                                            size={20}
+                                                            size={15}
                                                             className="text-destructive"
                                                         />
                                                     </Button>

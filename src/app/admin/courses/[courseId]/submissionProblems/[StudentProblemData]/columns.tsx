@@ -5,6 +5,8 @@ import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 
 import { Task } from '@/utils/data/schema'
+import Link from 'next/link'
+import { FileText } from 'lucide-react'
 
 export const columns: ColumnDef<Task>[] = [
     {
@@ -107,6 +109,24 @@ export const columns: ColumnDef<Task>[] = [
                     <span className="max-w-[500px] truncate font-medium">
                         {status}
                     </span>
+                </div>
+            )
+        },
+    },
+    {
+        id: 'actions',
+        cell: ({ row }) => {
+            const { bootcampId, id, questionId, moduleId } = row.original
+
+            return (
+                <div className="flex space-x-2">
+                    <Link
+                        href={`/admin/courses/${bootcampId}/submissionProblems/individualCodingSubbmission/${id}?questionId=${questionId}&moduleId=${moduleId}`}
+                        className="max-w-[500px] text-secondary font-medium flex items-center"
+                    >
+                        <FileText size={16} />
+                        <p className="text-[15px]">Coding Submission</p>
+                    </Link>
                 </div>
             )
         },
