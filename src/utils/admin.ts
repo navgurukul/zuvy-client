@@ -270,6 +270,8 @@ export async function filteredCodingQuestions(
 
         const response = await api.get(url)
 
+        console.log("gh",response.data)
+
         setFilteredQuestions(response.data)
     } catch (error) {
         console.error('Error:', error)
@@ -283,6 +285,7 @@ export async function filteredQuizQuestions(
     selectedLanguage: string,
     debouncedSearch: string
 ) {
+    console.log()
     try {
         let url = `/Content/allQuizQuestions`
 
@@ -291,9 +294,11 @@ export async function filteredQuizQuestions(
         if (debouncedSearch) {
             queryParams.push(`searchTerm=${debouncedSearch}`)
         }
-        if (selectedTopic !== 'All Topics' && selectedTopic != 0) {
-            queryParams.push(`tagId=${+selectedTopic}`)
+        if (selectedTopic?.id !== -1) {
+            queryParams.push(`tagId=${selectedTopic.id}`)
         }
+       
+         
         if (selectedDifficulty !== 'Any Difficulty') {
             queryParams.push(`difficulty=${selectedDifficulty}`)
         }
@@ -304,6 +309,7 @@ export async function filteredQuizQuestions(
         }
 
         const response = await api.get(url)
+        console.log("nikit",response.data)
 
         const filtered = response.data.filter(
             (question: any) =>
@@ -311,10 +317,12 @@ export async function filteredQuizQuestions(
                 question.difficulty === selectedDifficulty
             // Uncomment and modify the following lines if needed:
             // && (selectedTopic === 'All Topics' || question.tags.includes(selectedTopic))
-            // && (selectedLanguage === 'All Languages' || question.language === selectedLanguage)
+            && (selectedLanguage === 'All Languages' || question.language === selectedLanguage)
         )
-
-        setFilteredQuestions(filtered)
+        console.log("fgg",selectedTopic)
+        console.log("rrr",selectedLanguage)
+        // console.log(filtered)
+        setFilteredQuestions(response.data)
     } catch (error) {
         console.error('Error:', error)
     }

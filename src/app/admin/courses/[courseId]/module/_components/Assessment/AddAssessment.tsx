@@ -101,14 +101,16 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                 selectedLanguage,
                 debouncedSearch
             )
+            console.log("rt",selectedLanguage)
         } else if (questionType === 'mcq') {
             filteredQuizQuestions(
                 setFilteredQuestions,
                 selectedDifficulty,
-                selectedTopic,
+                selectedTag,
                 selectedLanguage,
                 debouncedSearch
             )
+            console.log("mhh",selectedTopic)
         } else {
             filteredOpenEndedQuestions(
                 setFilteredQuestions,
@@ -117,6 +119,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                 selectedLanguage,
                 debouncedSearch
             )
+            
         }
     }, [
         questionType,
@@ -350,7 +353,10 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                         ) : questionType === 'mcq' ? (
                             <QuizQuestions
                                 questions={filteredQuestions}
-                                setSelectedQuestions={setSelectedQuizQuestions}
+                                setSelectedQuestions={
+                                    setSelectedQuizQuestions
+
+                                }
                                 selectedQuestions={selectedQuizQuestions}
                             />
                         ) : questionType == 'open-ended' ? (
