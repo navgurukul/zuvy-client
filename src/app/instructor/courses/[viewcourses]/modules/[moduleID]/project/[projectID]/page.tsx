@@ -1,8 +1,8 @@
 'use client'
 
 import React from 'react'
+import Projects from '@/app/student/courses/[viewcourses]/modules/_components/Projects'
 import { useParams } from 'next/navigation'
-import Projects from '../../../_components/Projects'
 
 export default function Project() {
     const { viewcourses, moduleID, projectID } = useParams()

@@ -21,7 +21,6 @@ const CurricullumCard = ({ course }: Props) => {
     const { viewcourses } = useParams()
     const [chapterId, setChapterId] = useState<any>()
 
-
     const timeAllotedInWeeks = Math.ceil(course.timeAlloted / 604800)
 
     const getChapterId = useCallback(async () => {
@@ -42,12 +41,18 @@ const CurricullumCard = ({ course }: Props) => {
     }, [course.id, getChapterId])
 
     const handleModuleRoute = () => {
-        router.push(`/instructor/courses/${viewcourses}/modules/${course.id}/chapters/${chapterId}`)
+        if (course.typeId === 1) {
+            router.push(
+                `/instructor/courses/${viewcourses}/modules/${course.id}/chapters/${chapterId}`
+            )
+        } else if (course.typeId === 2) {
+            router.push(
+                `/instructor/courses/${viewcourses}/modules/${course.id}/project/${course.projectId}`
+            )
+        }
     }
 
     return (
-        // <Link href={''}>
-        // </Link>
         <div className="w-full flex items-center justify-between gap-y-2 cursor-pointer">
             <div className="w-full p-2" onClick={handleModuleRoute}>
                 <div className="flex mb-2 w-full justify-between">
