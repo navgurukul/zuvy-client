@@ -13,6 +13,7 @@ const InstructorPage = () => {
     const { studentData } = useLazyLoadedStudentData()
     const [ongoingSessions, setOngoingSessions] = useState<any[]>([])
     const [upcomingSessions, setUpcomingSessions] = useState<any[]>([])
+    const [allSessions, setAllSessions] = useState<any[]>([])
     const [position, setPosition] = useState(POSITION)
     const [pages, setPages] = useState<number>()
     const [offset, setOffset] = useState<number>(OFFSET)
@@ -26,9 +27,12 @@ const InstructorPage = () => {
         (username?.[0]?.slice(1)?.toLowerCase() || '')
 
     const fetchSessions = (data: any) => {
+        setAllSessions([...data.ongoing, ...data.upcoming])
         setOngoingSessions(data.ongoing)
         setUpcomingSessions(data.upcoming)
     }
+
+    console.log('allSessions', allSessions)
 
     return (
         <MaxWidthWrapper className="">
@@ -80,17 +84,19 @@ const InstructorPage = () => {
                     })}
                 </div>
             </div>
-            <DataTablePagination
-                totalStudents={totalSessions}
-                position={position}
-                setPosition={setPosition}
-                pages={pages}
-                lastPage={lastPage}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                fetchStudentData={fetchSessions}
-                setOffset={setOffset}
-            />
+            {allSessions.length > 0 && (
+                <DataTablePagination
+                    totalStudents={totalSessions}
+                    position={position}
+                    setPosition={setPosition}
+                    pages={pages}
+                    lastPage={lastPage}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    fetchStudentData={fetchSessions}
+                    setOffset={setOffset}
+                />
+            )}
         </MaxWidthWrapper>
     )
 }

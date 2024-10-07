@@ -108,7 +108,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
     }, [selectedCourse?.id])
     const getUpcomingSubmissionHandler = useCallback(async () => {
         await api.get(`/tracking/allupcomingSubmission`).then((res) => {
-                        if (res?.data?.data) {
+            if (res?.data?.data) {
                 setUpcomingAssignments(res?.data?.data?.upcomingAssignments)
                 setLateAssignments(res?.data?.data?.lateAssignments)
             }
@@ -264,7 +264,11 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                                     >
                                                         <Link
                                                             className="gap-3 flex items-center text-secondary"
-                                                            href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}/chapters/${resumeCourse.newChapter?.id}`}
+                                                            href={
+                                                                resumeCourse.typeId === 1
+                                                                    ? `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}/chapters/${resumeCourse.newChapter?.id}`
+                                                                    : `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}/project/${resumeCourse.newChapter?.id}`
+                                                            }
                                                         >
                                                             <p>
                                                                 Resume Learning
@@ -334,8 +338,11 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                                 >
                                                     <Link
                                                         className="gap-3 flex items-center text-secondary"
-                                                        href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}/chapters/${resumeCourse.newChapter?.id}`}
-                                                    >
+                                                        href={
+                                                            resumeCourse.typeId === 1
+                                                                ? `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}/chapters/${resumeCourse.newChapter?.id}`
+                                                                : `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}/project/${resumeCourse.newChapter?.id}`
+                                                        }                                                    >
                                                         <p>Resume Learning</p>
                                                         <ChevronRight
                                                             size={15}
