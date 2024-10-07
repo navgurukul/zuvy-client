@@ -118,7 +118,7 @@ const Page = ({ params }: any) => {
                     </div>
                     <div className="relative">
                         <Input
-                            placeholder="Search for Name, Email"
+                            placeholder="Search for Name, Email asdasdasd"
                             className="w-1/3 my-6 input-with-icon pl-8" // Add left padding for the icon
                         />
                         <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">

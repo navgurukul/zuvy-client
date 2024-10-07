@@ -11,14 +11,6 @@ type Props = {
 }
 
 const SubmissionComponent = (props: Props) => {
-    const [color, setColor] = useState('#ff0000')
-
-    const handleClick = () => {
-        const randomColor =
-            '#' + Math.floor(Math.random() * 16777215).toString(16)
-        setColor(randomColor)
-    }
-
     const submissionPercentage =
         props.studentsSubmitted / props.totalSubmissions
 

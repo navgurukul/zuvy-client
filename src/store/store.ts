@@ -647,3 +647,27 @@ export const getStoreStudentBatchData = create<storeBatchData>((set) => ({
         set({ studentsBatchData: newValue })
     },
 }))
+
+type mcqdifficulty = {
+    mcqDifficulty: string
+    setMcqDifficulty: (newValue: string) => void
+}
+
+export const getmcqdifficulty = create<mcqdifficulty>((set) => ({
+    mcqDifficulty: 'None',
+    setMcqDifficulty: (newValue: string) => {
+        set({ mcqDifficulty: newValue })
+    },
+}))
+
+type mcqSearch = {
+    mcqSearch: string
+    setmcqSearch: (newValue: string) => void
+}
+
+export const getMcqSearch = create<mcqSearch>((set) => ({
+    mcqSearch: 'None',
+    setmcqSearch: (newValue: string) => {
+        set({ mcqSearch: newValue })
+    },
+}))

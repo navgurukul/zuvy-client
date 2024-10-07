@@ -1,7 +1,5 @@
 'use client'
-
 import React, { useEffect } from 'react'
-
 import {
     Form,
     FormControl,
@@ -11,7 +9,6 @@ import {
     FormLabel,
     FormMessage,
 } from '@/components/ui/form'
-
 import { Button } from '@/components/ui/button'
 import {
     DialogClose,
@@ -20,14 +17,11 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog'
-
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 
 interface editModuleDialogProps {
     moduleData: {
@@ -46,12 +40,10 @@ interface editModuleDialogProps {
     handleTimeAllotedChange: (
         event: React.ChangeEvent<HTMLInputElement>
     ) => void
-    handleTypeChange: (event: React.ChangeEvent<HTMLInputElement>) => void
     typeId: number
 }
 
 const moduleSchema = z.object({
-    moduleType: z.enum(['learning-material', 'project']),
     name: z.string().min(2, { message: 'Module Name must be at least 2 characters.' }),
     description: z.string().min(2, { message: 'Module Description must be at least 2 characters.' }),
     months: z.number().min(0, { message: 'Months Should not be empty.' }),
@@ -67,20 +59,17 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
     editModule,
     createModule,
     handleTimeAllotedChange,
-    handleTypeChange,
     typeId,
 }) => {
     const form = useForm<z.infer<typeof moduleSchema>>({
         resolver: zodResolver(moduleSchema),
         defaultValues: {
-            moduleType: 'learning-material',
             name: moduleData.name,
             description: moduleData.description,
             months: timeData.months,
             weeks: timeData.weeks,
             days: timeData.days
         }
-
     })
 
     const onSubmit: any = (values: z.infer<typeof moduleSchema>) => {
@@ -88,13 +77,14 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
     }
 
     useEffect(() => {
-        form.setValue('moduleType', typeId === 2 ? 'project' : 'learning-material')  // Ensure moduleType reflects typeId
-        form.setValue('name', moduleData.name)
-        form.setValue('description', moduleData.description)
-        form.setValue('months', timeData.months)
-        form.setValue('weeks', timeData.weeks)
-        form.setValue('days', timeData.days)
-    }, [moduleData, timeData, typeId, form])
+        form.reset({
+            name: moduleData.name,
+            description: moduleData.description,
+            months: timeData.months,
+            weeks: timeData.weeks,
+            days: timeData.days
+        })
+    }, [moduleData, timeData, form])
 
     return (
         <Form {...form}>
@@ -107,71 +97,6 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                         <DialogTitle>
                             Edit Module
                         </DialogTitle>
-                        <div className="main_container flex items-center align-middle text-center">
-                            <div className="flex items-center">
-                                <div>
-                                    <FormField
-                                        control={form.control}
-                                        name="moduleType"
-                                        render={({ field }) => (
-                                            <FormItem className="text-left">
-                                                <FormControl>
-                                                    <Input
-                                                        type="radio"
-                                                        id="learning-material"
-                                                        className="size-4"
-                                                        value="learning-material"
-                                                        checked={typeId === 1}
-                                                        onChange={handleTypeChange}
-                                                        name="moduleType"
-                                                        disabled
-                                                    />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
-                                <div>
-                                    <Label className="m-2 " htmlFor="learning-material">
-                                        Learning Material
-                                    </Label>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center ">
-                                <div>
-                                    <FormField
-                                        control={form.control}
-                                        name="moduleType"
-                                        render={({ field }) => (
-                                            <FormItem className="text-left">
-                                                <FormControl>
-                                                    <Input
-                                                        type="radio"
-                                                        id="project"
-                                                        className="size-4"
-                                                        value="project"
-                                                        checked={typeId === 2}
-                                                        onChange={handleTypeChange}
-                                                        name="moduleType"
-                                                        disabled
-                                                    />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
-
-                                <div>
-                                    <Label className="mx-2 " htmlFor="project">
-                                        Project
-                                    </Label>
-                                </div>
-                            </div>
-                        </div>
-
                         <div className="py-4">
                             <div>
                                 <FormField
@@ -202,7 +127,6 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                                     ? 'Project Description'
                                     : 'Module Description'}
                             </Label>
-
                             <div>
                                 <FormField
                                     control={form.control}
@@ -228,7 +152,7 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                             </div>
                         </div>
                         <div className="py-4">
-                            <Label>Time Alotted:</Label>
+                            <Label>Time Allotted:</Label>
                             <div className="flex gap-2">
                                 <div>
                                     <FormField
@@ -241,10 +165,10 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                                                         className="no-spinners focus-visible:ring-muted"
                                                         type="number"
                                                         id="months"
-                                                        value={field.value}  // Use field value
+                                                        value={field.value}
                                                         onChange={(e) => {
-                                                            field.onChange(e) // Sync field state
-                                                            handleTimeAllotedChange(e) // External change handler
+                                                            field.onChange(e)
+                                                            handleTimeAllotedChange(e)
                                                         }}
                                                         name="months"
                                                     />
@@ -254,7 +178,6 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                                         )}
                                     />
                                 </div>
-
                                 <div>
                                     <FormField
                                         control={form.control}
@@ -266,10 +189,10 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                                                         className="no-spinners focus-visible:ring-muted"
                                                         type="number"
                                                         id="weeks"
-                                                        value={field.value}  // Use field value
+                                                        value={field.value}
                                                         onChange={(e) => {
-                                                            field.onChange(e) // Sync field state
-                                                            handleTimeAllotedChange(e) // External change handler
+                                                            field.onChange(e)
+                                                            handleTimeAllotedChange(e)
                                                         }}
                                                         name="weeks"
                                                     />
@@ -279,7 +202,6 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                                         )}
                                     />
                                 </div>
-
                                 <div>
                                     <FormField
                                         control={form.control}
@@ -291,10 +213,10 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                                                         className="no-spinners focus-visible:ring-muted"
                                                         type="number"
                                                         id="days"
-                                                        value={field.value}  // Use field value
+                                                        value={field.value}
                                                         onChange={(e) => {
-                                                            field.onChange(e) // Sync field state
-                                                            handleTimeAllotedChange(e) // External change handler
+                                                            field.onChange(e)
+                                                            handleTimeAllotedChange(e)
                                                         }}
                                                         name="days"
                                                     />

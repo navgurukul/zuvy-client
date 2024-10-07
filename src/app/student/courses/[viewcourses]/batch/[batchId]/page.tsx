@@ -213,7 +213,7 @@ function Page({
                                                     classData={classData}
                                                     classType={classData.status}
                                                     key={index}
-                                                    activeTab={'ongoing'}
+                                                    activeTab={'Upcoming'}
                                                     studentSide={false}
                                                     getClasses={() =>
                                                         console.log('')

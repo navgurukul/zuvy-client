@@ -211,7 +211,7 @@ function ClassCard({
                 </div>
                 {!studentSide &&
                     classType !== 'ongoing' &&
-                    classType !== 'Upcoming' && (
+                    classType !== 'upcoming' && (
                         <div className="absolute top-4  flex gap-2 right-4">
                             <AlertDialog
                                 open={isDialogOpen}
