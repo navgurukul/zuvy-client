@@ -14,6 +14,7 @@ import {
 import Link from 'next/link'
 import { api } from '@/utils/axios.config'
 import { useRouter, useParams } from 'next/navigation'
+import { encryptId } from '@/app/utils'
 
 function CourseCard({
     param,
@@ -45,17 +46,23 @@ function CourseCard({
     projectId: number
 }) {
     const router = useRouter()
-    const { viewcourses, moduleID } = useParams()
+    const { viewcourses } = useParams()
     const [chapterId, setChapterId] = useState<any>()
     const timeAllotedInWeeks = Math.ceil(timeAlloted / 604800)
     const timeAllotedInDays = Math.ceil(timeAlloted / 86400)
+    const encryptedModuleID = encryptId(id)
+    const encryptedProjectId = projectId ? encryptId(projectId) : projectId
 
     const getChapterId = useCallback(async () => {
         try {
             const response = await api.get(
                 `tracking/getAllChaptersWithStatus/${id}`
             )
-            setChapterId(response.data.trackingData[0].id)
+            const encryptedChapterID = encryptId(
+                response.data.trackingData[0].id
+            )
+            setChapterId(encryptedChapterID)
+            // setChapterId(response.data.trackingData[0].id)
         } catch (error) {
             console.log(error)
         }
@@ -70,11 +77,11 @@ function CourseCard({
     const handleModuleRoute = () => {
         if (typeId === 1) {
             router.push(
-                `/student/courses/${viewcourses}/modules/${id}/chapters/${chapterId}`
+                `/student/courses/${viewcourses}/modules/${encryptedModuleID}/chapters/${chapterId}`
             )
         } else if (typeId === 2) {
             router.push(
-                `/student/courses/${viewcourses}/modules/${id}/project/${projectId}`
+                `/student/courses/${viewcourses}/modules/${encryptedModuleID}/project/${encryptedProjectId}`
             )
         }
     }

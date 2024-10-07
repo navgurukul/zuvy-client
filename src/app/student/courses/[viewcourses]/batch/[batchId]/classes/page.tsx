@@ -7,6 +7,7 @@ import BreadcrumbCmponent from '@/app/_components/breadcrumbCmponent'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import { OFFSET, CLASS_CARD_POSITION } from '@/utils/constant'
 import useDebounce from '@/hooks/useDebounce'
+import { decryptId } from '@/app/utils'
 
 interface Bootcamp {
     id: number
@@ -34,6 +35,14 @@ function Page({
 }: {
     params: { viewcourses: string; batchId: string }
 }) {
+    const course_id = Array.isArray(params.viewcourses)
+        ? params.viewcourses[0]
+        : params.viewcourses
+    const decryptedCourseId = decryptId(course_id)
+    const batch_id = Array.isArray(params.viewcourses)
+        ? params.batchId[0]
+        : params.batchId
+    const decryptedBatchId = decryptId(batch_id)
     const [upcomingClasses, setUpcomingClasses] = useState([])
     const [ongoingClasses, setOngoingClasses] = useState([])
     const [search, setSearch] = useState('')
@@ -65,7 +74,7 @@ function Page({
     const fetchRecordings = useCallback(
         async (offset: number) => {
             try {
-                let baseUrl = `/student/Dashboard/classes/?batch_id=${params.batchId}&limit=${position}&offset=${offset}`
+                let baseUrl = `/student/Dashboard/classes/?batch_id=${decryptedBatchId}&limit=${position}&offset=${offset}`
 
                 if (debouncedSearch) {
                     baseUrl += `&searchTerm=${encodeURIComponent(
@@ -83,24 +92,25 @@ function Page({
                 console.error('Error getting completed classes:', error)
             }
         },
-        [userID, params.batchId, debouncedSearch, position]
+        [userID, decryptedBatchId, debouncedSearch, position]
     )
 
     useEffect(() => {
         if (userID) {
             fetchRecordings(offset)
         }
-    }, [userID, params.batchId, fetchRecordings, offset])
+    }, [userID, decryptedBatchId, fetchRecordings, offset])
 
+    console.log('decryptedCourseId in classes', decryptedCourseId)
     useEffect(() => {
-        api.get(`/bootcamp/${params.viewcourses}`)
+        api.get(`/bootcamp/${decryptedCourseId}`)
             .then((response) => {
                 setBootcampData(response.data)
             })
             .catch((error) => {
                 console.log('Error fetching bootcamp data:', error)
             })
-    }, [params.viewcourses])
+    }, [decryptedCourseId])
 
     return (
         <>

@@ -437,13 +437,13 @@ export const getEditQuizQuestion = create<editQuizQuestion>((set) => ({
 
 // ------------------------------
 type saveParam = {
-    paramBatchId: number
-    setIsParamBatchId: (newValue: number) => void
+    paramBatchId: number | string
+    setIsParamBatchId: (newValue: number | string) => void
 }
 
 export const getParamBatchId = create<saveParam>((set) => ({
     paramBatchId: 0,
-    setIsParamBatchId: (newvalue: number) => {
+    setIsParamBatchId: (newvalue: number | string) => {
         set({ paramBatchId: newvalue })
     },
 }))

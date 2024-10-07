@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { useRouter, useParams } from 'next/navigation'
 import { isPlural } from '@/lib/utils'
 import { api } from '@/utils/axios.config'
-
+import { encryptId } from '@/app/utils'
 import {
     BookOpenText,
     Clock1,
@@ -19,8 +19,11 @@ type Props = {
 const CurricullumCard = ({ course }: Props) => {
     const router = useRouter()
     const { viewcourses } = useParams()
+    const encryptedModuleID = encryptId(course.id)
+    const encryptedProjectId = course.projectId
+        ? encryptId(course.projectId)
+        : course.projectId
     const [chapterId, setChapterId] = useState<any>()
-
 
     const timeAllotedInWeeks = Math.ceil(course.timeAlloted / 604800)
 
@@ -29,7 +32,11 @@ const CurricullumCard = ({ course }: Props) => {
             const response = await api.get(
                 `tracking/getAllChaptersWithStatus/${course.id}`
             )
-            setChapterId(response.data.trackingData[0].id)
+            const encryptedChapterID = encryptId(
+                response.data.trackingData[0].id
+            )
+            setChapterId(encryptedChapterID)
+            // setChapterId(response.data.trackingData[0].id)
         } catch (error) {
             console.log(error)
         }
@@ -41,8 +48,21 @@ const CurricullumCard = ({ course }: Props) => {
         }
     }, [course.id, getChapterId])
 
+    console.log('course', course)
+
     const handleModuleRoute = () => {
-        router.push(`/instructor/courses/${viewcourses}/modules/${course.id}/chapters/${chapterId}`)
+        // router.push(
+        //     `/instructor/courses/${viewcourses}/modules/${encryptedModuleID}/chapters/${chapterId}`
+        // )
+        if (course.typeId === 1) {
+            router.push(
+                `/instructor/courses/${viewcourses}/modules/${encryptedModuleID}/chapters/${chapterId}`
+            )
+        } else if (course.typeId === 2) {
+            router.push(
+                `/instructor/courses/${viewcourses}/modules/${encryptedModuleID}/project/${encryptedProjectId}`
+            )
+        }
     }
 
     return (

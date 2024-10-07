@@ -56,6 +56,7 @@
         "clsx": "^2.1.0",
         "cmdk": "^0.2.1",
         "cookies-next": "^4.1.0",
+        "crypto-js": "^4.2.0",
         "date-fns": "^3.1.0",
         "dotenv": "^16.4.0",
         "draft-js": "^0.11.7",
@@ -89,6 +90,7 @@
     },
     "devDependencies": {
         "@tailwindcss/typography": "^0.5.13",
+        "@types/crypto-js": "^4.2.2",
         "@types/node": "^20",
         "@types/papaparse": "^5.3.14",
         "@types/react": "^18",

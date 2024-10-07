@@ -14,6 +14,7 @@ import Loader from './_components/Loader'
 import { api } from '@/utils/axios.config'
 import OptimizedImageWithFallback from '@/components/ImageWithFallback'
 import { Skeleton } from '@/components/ui/skeleton'
+import { encryptId } from '@/app/utils'
 
 interface EnrolledCourse {
     name: string
@@ -105,12 +106,14 @@ const Page: React.FC<pageProps> = () => {
                                                     <div className="flex flex-row gap-3">
                                                         {resumeCourse.newChapter
                                                             ?.title &&
-                                                                resumeCourse.typeId === 1 && (
+                                                            resumeCourse.typeId ===
+                                                                1 && (
                                                                 <BookOpenText className="mt-2" />
                                                             )}
                                                         {resumeCourse.newChapter
                                                             ?.title &&
-                                                                resumeCourse.typeId === 2 && (
+                                                            resumeCourse.typeId ===
+                                                                2 && (
                                                                 <h1 className="text-md mt-2 text-start font-bold">
                                                                     Project:
                                                                 </h1>
@@ -169,12 +172,14 @@ const Page: React.FC<pageProps> = () => {
                                                 <div className="flex flex-row gap-4">
                                                     {resumeCourse.newChapter
                                                         ?.title &&
-                                                            resumeCourse.typeId === 1 && (
+                                                        resumeCourse.typeId ===
+                                                            1 && (
                                                             <BookOpenText className="mt-2" />
                                                         )}
                                                     {resumeCourse.newChapter
                                                         ?.title &&
-                                                        resumeCourse.typeId === 2 && (
+                                                        resumeCourse.typeId ===
+                                                            2 && (
                                                             <h1 className="text-md mt-2 text-start font-bold">
                                                                 Project:
                                                             </h1>
@@ -268,30 +273,38 @@ const Page: React.FC<pageProps> = () => {
                                                 id: number
                                                 progress: number
                                                 batchId: number
-                                            }) => (
-                                                <Link
-                                                    key={id}
-                                                    href={`courses/${id}/batch/${batchId}`}
-                                                    className="text-gray-900 text-base"
-                                                >
-                                                    <div className="bg-muted flex justify-center h-[200px] relative overflow-hidden rounded-sm">
-                                                        <OptimizedImageWithFallback
-                                                            src={coverImage}
-                                                            alt="Placeholder Image"
-                                                            // className="rounded-md object-cover"
-                                                            // width={300}
-                                                            // height={48}
-                                                            fallBackSrc={
-                                                                '/logo_white.png'
-                                                            }
+                                            }) => {
+                                                const encryptedCourseId =
+                                                    encryptId(id)
+                                                const encryptedBatchId =
+                                                    encryptId(batchId)
+                                                return (
+                                                    <Link
+                                                        key={id}
+                                                        href={`courses/${encryptedCourseId}/batch/${encryptedBatchId}`}
+                                                        className="text-gray-900 text-base"
+                                                    >
+                                                        <div className="bg-muted flex justify-center h-[200px] relative overflow-hidden rounded-sm">
+                                                            <OptimizedImageWithFallback
+                                                                src={coverImage}
+                                                                alt="Placeholder Image"
+                                                                // className="rounded-md object-cover"
+                                                                // width={300}
+                                                                // height={48}
+                                                                fallBackSrc={
+                                                                    '/logo_white.png'
+                                                                }
+                                                            />
+                                                        </div>
+                                                        <div className="px-1 py-4">
+                                                            {name}
+                                                        </div>
+                                                        <Loader
+                                                            progress={progress}
                                                         />
-                                                    </div>
-                                                    <div className="px-1 py-4">
-                                                        {name}
-                                                    </div>
-                                                    <Loader progress={progress} />
-                                                </Link>
-                                            )
+                                                    </Link>
+                                                )
+                                            }
                                         )
                                     ) : (
                                         <p>No courses available.</p>

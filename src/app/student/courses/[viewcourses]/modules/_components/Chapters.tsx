@@ -379,6 +379,7 @@ import {
     getStudentChaptersState,
     getTopicId,
 } from '@/store/store'
+import { decryptId } from '@/app/utils'
 
 interface Chapter {
     id: number
@@ -393,11 +394,15 @@ function Chapters({ params }: any) {
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
     const { viewcourses, moduleID, chapterID } = useParams()
-    const chapter_id = Array.isArray(chapterID)
-        ? Number(chapterID[0])
-        : Number(chapterID)
+    const course_id = Array.isArray(viewcourses) ? viewcourses[0] : viewcourses
+    const decryptedCourseID = decryptId(course_id)
+    const module_id = Array.isArray(moduleID) ? moduleID[0] : moduleID
+    const decryptedModuleId = decryptId(module_id)
+    const chapter_id = Array.isArray(chapterID) ? chapterID[0] : chapterID
+    const decryptedChapterId = decryptId(chapter_id)
     const { chapters, setChapters } = getStudentChaptersState()
-    const [activeChapter, setActiveChapter] = useState(chapter_id)
+    const [activeChapter, setActiveChapter] = useState(decryptedChapterId)
+    // const [activeChapter, setActiveChapter] = useState(Number(chapter_id))
     const { topicId, setTopicId } = getTopicId()
     const { chapterContent, setChapterContent } =
         getStudentChapterContentState()
@@ -410,11 +415,12 @@ function Chapters({ params }: any) {
     const scrollAreaRef = useRef<HTMLDivElement>(null)
     const activeChapterRef = useRef<HTMLDivElement | null>(null)
 
+    console.log('decryptedModuleId', decryptedModuleId)
     // func [viewcourses]   [courseId]
     const fetchChapters = useCallback(async () => {
         try {
             const response = await api.get(
-                `tracking/getAllChaptersWithStatus/${moduleID}`
+                `tracking/getAllChaptersWithStatus/${decryptedModuleId}`
             )
             setChapters(response.data.trackingData)
             // setTypeId(response?.data.moduleDetails[0]?.typeId)
@@ -445,8 +451,8 @@ function Chapters({ params }: any) {
 
     useEffect(() => {
         if (chapters.length > 0) {
-            setChapterId(chapter_id)
-            setActiveChapter(chapter_id)
+            setChapterId(decryptedChapterId)
+            setActiveChapter(decryptedChapterId)
         }
     }, [chapters, chapter_id])
 
@@ -454,8 +460,8 @@ function Chapters({ params }: any) {
         if (topicId === 6) {
             getAssessmentShortInfo(
                 chapterContent?.assessmentId,
-                moduleID,
-                viewcourses,
+                decryptedModuleId,
+                decryptedCourseID,
                 chapterId,
                 setAssessmentShortInfo,
                 setAssessmentOutSourceId,
@@ -472,8 +478,6 @@ function Chapters({ params }: any) {
                 ref={scrollAreaRef}
             >
                 {chapters?.map((item: any, index: any) => {
-                    const isLastItem = index === chapters.length - 1
-
                     return (
                         <StudentChapterItem
                             key={item.id}
@@ -486,6 +490,7 @@ function Chapters({ params }: any) {
                             viewcourses={viewcourses}
                             moduleID={moduleID}
                             activeChapterRef={activeChapterRef}
+                            // chapter_id={chapter_id}
                         />
                     )
                 })}

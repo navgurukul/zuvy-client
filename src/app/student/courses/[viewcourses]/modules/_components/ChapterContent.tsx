@@ -17,6 +17,7 @@ import {
     getTopicId,
     getScrollPosition,
 } from '@/store/store'
+import { decryptId } from '@/app/utils'
 
 interface Chapter {
     id: number
@@ -31,11 +32,14 @@ function ChapterContent() {
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
     const { viewcourses, moduleID, chapterID } = useParams()
-    const chapter_id = Array.isArray(chapterID)
-        ? Number(chapterID[0])
-        : Number(chapterID)
+    const course_id = Array.isArray(viewcourses) ? viewcourses[0] : viewcourses
+    const decryptedCourseID = decryptId(course_id)
+    const module_id = Array.isArray(moduleID) ? moduleID[0] : moduleID
+    const decryptedModuleId = decryptId(module_id)
+    const chapter_id = Array.isArray(chapterID) ? chapterID[0] : chapterID
+    const decryptedChapterId = decryptId(chapter_id)
     const { chapters, setChapters } = getStudentChaptersState()
-    const [activeChapter, setActiveChapter] = useState(chapter_id)
+    const [activeChapter, setActiveChapter] = useState(decryptedChapterId)
     const { topicId, setTopicId } = getTopicId()
     const { chapterContent, setChapterContent } =
         getStudentChapterContentState()
@@ -88,7 +92,7 @@ function ChapterContent() {
     useEffect(() => {
         if (chapters.length > 0) {
             // fetchChapterContent(chapters[0]?.id)
-            fetchChapterContent(chapter_id)
+            fetchChapterContent(decryptedChapterId)
         }
     }, [chapters])
 
@@ -96,20 +100,20 @@ function ChapterContent() {
         if (topicId === 6) {
             getAssessmentShortInfo(
                 chapterContent?.assessmentId,
-                moduleID,
-                viewcourses,
-                chapterId,
+                decryptedModuleId,
+                decryptedCourseID,
+                decryptedChapterId,
                 setAssessmentShortInfo,
                 setAssessmentOutSourceId,
                 setSubmissionId
             )
         }
-    }, [topicId, chapterId])
+    }, [topicId, decryptedChapterId])
 
     const fetchChapters = useCallback(async () => {
         try {
             const response = await api.get(
-                `tracking/getAllChaptersWithStatus/${moduleID}`
+                `tracking/getAllChaptersWithStatus/${decryptedModuleId}`
             )
             setChapters(response.data.trackingData)
             const firstPending = response.data.trackingData.find(
@@ -131,7 +135,7 @@ function ChapterContent() {
             // fetchChapterContent(firstPending?.id)
             // if (activeChapter === 0) {
             //     setActiveChapter(response.data.trackingData[0]?.id)
-            fetchChapterContent(chapter_id)
+            fetchChapterContent(decryptedChapterId)
             // }
         } catch (error) {
             console.log(error)
@@ -141,7 +145,7 @@ function ChapterContent() {
     const completeChapter = async () => {
         try {
             await api.post(
-                `tracking/updateChapterStatus/${viewcourses}/${moduleID}?chapterId=${activeChapter}`
+                `tracking/updateChapterStatus/${decryptedCourseID}/${decryptedModuleId}?chapterId=${activeChapter}`
             )
             await fetchChapters()
         } catch (error) {
@@ -150,13 +154,11 @@ function ChapterContent() {
     }
 
     const renderChapterContent = () => {
-        // console.log('chapterContent', chapterContent)
-        // console.log('loading', loading)
         if (
             topicId &&
             chapterContent &&
-            (chapterContent?.id === chapter_id ||
-                chapterContent?.chapterId === chapter_id)
+            (chapterContent?.id === decryptedChapterId ||
+                chapterContent?.chapterId === decryptedChapterId)
         ) {
             switch (topicId) {
                 case 1:
@@ -186,10 +188,10 @@ function ChapterContent() {
                     return (
                         <Quiz
                             content={chapterContent}
-                            moduleId={moduleID.toString()}
+                            moduleId={decryptedModuleId.toString()}
                             // moduleId={moduleIdString}
                             chapterId={chapterId}
-                            bootcampId={+viewcourses}
+                            bootcampId={decryptedCourseID}
                             fetchChapters={completeChapter}
                         />
                     )
@@ -197,9 +199,9 @@ function ChapterContent() {
                     return (
                         <Assignment
                             content={chapterContent}
-                            moduleId={+moduleID}
+                            moduleId={decryptedModuleId}
                             projectId={projectId}
-                            bootcampId={+viewcourses}
+                            bootcampId={decryptedCourseID}
                             completeChapter={completeChapter}
                         />
                     )
@@ -216,10 +218,10 @@ function ChapterContent() {
                     return (
                         <FeedbackForm
                             content={chapterContent}
-                            moduleId={moduleID.toString()}
+                            moduleId={decryptedModuleId.toString()}
                             // moduleId={moduleIdString}
                             chapterId={chapterId}
-                            bootcampId={+viewcourses}
+                            bootcampId={decryptedCourseID}
                             completeChapter={completeChapter}
                             // bootcampId={viewcourses}
                         />

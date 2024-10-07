@@ -20,6 +20,8 @@ import ClassCard from '@/app/admin/courses/[courseId]/_components/classCard'
 import CourseCard from '@/app/_components/courseCard'
 import BreadcrumbCmponent from '@/app/_components/breadcrumbCmponent'
 import SubmissionCard from '@/app/admin/courses/[courseId]/_components/SubmissionCard'
+import { decryptId } from '@/app/utils'
+
 interface CourseProgress {
     status: string
     progress: number
@@ -43,10 +45,12 @@ const initialInstructorDetailsState: InstructorDetailsState = []
 function Page({
     params,
 }: {
-    params: { viewcourses: string; batchId: number; moduleID: string }
+    params: { viewcourses: string; batchId: string; moduleID: string }
 }) {
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
+    const decryptedCourseID = decryptId(params.viewcourses)
+    const decryptedBatchId = decryptId(params.batchId)
     const [modulesProgress, setModulesProgress] = useState([])
     const [courseProgress, setCourseProgress] = useState<CourseProgress | null>(
         null
@@ -59,9 +63,9 @@ function Page({
     const [upcomingAssignments, setUpcomingAssignments] = useState([])
     const [lateAssignments, setLateAssignments] = useState([])
     const [isCourseStarted, setIsCourseStarted] = useState(false)
-
     const [attendenceData, setAttendenceData] = useState<any[]>([])
     // const [completedClasses, setCompletedClasses] = useState([])
+
     const crumbs = [
         { crumb: 'My Courses', href: '/student/courses', isLast: false },
         {
@@ -74,7 +78,7 @@ function Page({
     // setIsParamBatchId(params.batchId)
     const getUpcomingClassesHandler = useCallback(async () => {
         const response = await api.get(
-            `/student/Dashboard/classes/?batch_id=${params.batchId}`
+            `/student/Dashboard/classes/?batch_id=${decryptedBatchId}`
         )
         if (Array.isArray(response.data.data)) {
             setIsCourseStarted(false)
@@ -87,14 +91,14 @@ function Page({
             setAllClasses(classes)
             await api
                 .get(
-                    `/student/Dashboard/classes/?batch_id=${params.batchId}&limit=2&offset=0`
+                    `/student/Dashboard/classes/?batch_id=${decryptedBatchId}&limit=2&offset=0`
                 )
                 .then((res) => {
                     setUpcomingClasses(res.data.data.filterClasses.upcoming)
                     setOngoingClasses(res.data.data.filterClasses.ongoing)
                 })
         }
-    }, [params.batchId])
+    }, [decryptedBatchId])
     const getAttendanceHandler = useCallback(async () => {
         await api.get(`/student/Dashboard/attendance`).then((res) => {
             setAttendenceData(res.data)
@@ -103,13 +107,13 @@ function Page({
     const getUpcomingSubmissionHandler = useCallback(async () => {
         await api
             .get(
-                `/tracking/allupcomingSubmission?bootcampId=${params.viewcourses}`
+                `/tracking/allupcomingSubmission?bootcampId=${decryptedCourseID}`
             )
             .then((res) => {
                 setUpcomingAssignments(res.data?.data?.upcomingAssignments)
                 setLateAssignments(res.data?.data?.lateAssignments)
             })
-    }, [params.viewcourses])
+    }, [decryptedCourseID])
     useEffect(() => {
         const fetchData = async () => {
             await Promise.all([
@@ -118,13 +122,13 @@ function Page({
                 getUpcomingSubmissionHandler(),
             ])
         }
-        setIsParamBatchId(params.batchId)
+        setIsParamBatchId(decryptedBatchId)
 
         fetchData()
     }, [
         getUpcomingSubmissionHandler,
         getUpcomingClassesHandler,
-        params.batchId,
+        decryptedBatchId,
         getAttendanceHandler,
         setIsParamBatchId,
     ])
@@ -133,7 +137,7 @@ function Page({
         const getModulesProgress = async () => {
             try {
                 const response = await api.get(
-                    `/tracking/allModulesForStudents/${params.viewcourses}`
+                    `/tracking/allModulesForStudents/${decryptedCourseID}`
                 )
                 response.data.map((module: any) => {
                     setModulesProgress(response.data)
@@ -143,13 +147,13 @@ function Page({
             }
         }
         if (userID) getModulesProgress()
-    }, [userID, params.viewcourses])
+    }, [userID, decryptedCourseID])
 
     useEffect(() => {
         const getCourseProgress = async () => {
             try {
                 const response = await api.get(
-                    `/tracking/bootcampProgress/${params.viewcourses}`
+                    `/tracking/bootcampProgress/${decryptedCourseID}`
                 )
                 setCourseProgress(response.data.data)
                 setInstructorDetails(response.data.instructorDetails)
@@ -158,7 +162,7 @@ function Page({
             }
         }
         if (userID) getCourseProgress()
-    }, [userID, params.viewcourses])
+    }, [userID, decryptedCourseID])
 
     console.log('modulesProgress', modulesProgress)
 

@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { encryptId } from '@/app/utils'
 
 function StudentChapterItem({
     title,
@@ -22,7 +23,8 @@ function StudentChapterItem({
     viewcourses,
     moduleID,
     activeChapterRef,
-}: {
+}: // chapter_id,
+{
     title: string
     topicId: number
     chapterId: number
@@ -32,11 +34,15 @@ function StudentChapterItem({
     viewcourses: any
     moduleID: any
     activeChapterRef: any
+    // chapter_id: string
 }) {
     const router = useRouter()
     const pathname = usePathname()
     const path = pathname.split('/')[1]
     const instructor = pathname?.includes('/instructor')
+
+    console.log('viewcourses in select item', viewcourses)
+    console.log('moduleID in select item', moduleID)
 
     // states and variables
     // functions
@@ -69,14 +75,17 @@ function StudentChapterItem({
         setActiveChapter(chapterId) // Set the active chapter in the parent component
     }
 
+    console.log('activeChapter', activeChapter)
+    console.log('chapterId', chapterId)
+    const encryptedChapterID = encryptId(chapterId)
     return (
         <div ref={chapterId === activeChapter ? activeChapterRef : null}>
             <Link
                 // key={id}
                 href={
                     instructor
-                        ? `/instructor/courses/${viewcourses}/modules/${moduleID}/chapters/${chapterId}`
-                        : `/student/courses/${viewcourses}/modules/${moduleID}/chapters/${chapterId}`
+                        ? `/instructor/courses/${viewcourses}/modules/${moduleID}/chapters/${encryptedChapterID}`
+                        : `/student/courses/${viewcourses}/modules/${moduleID}/chapters/${encryptedChapterID}`
                 }
             >
                 <div

@@ -1,8 +1,12 @@
+// export default function Project() {
+//     return <h1>Punnu Please add Project from chapters</h1>
+// }
+
 'use client'
 
 import React, { useCallback, useEffect, useState, useRef } from 'react'
 import { useParams } from 'next/navigation'
-import Projects from '../../../_components/Projects'
+// import Projects from '../../../_components/Projects'
 import { api } from '@/utils/axios.config'
 import {
     getStudentChaptersState,
@@ -10,6 +14,7 @@ import {
     getScrollPosition,
 } from '@/store/store'
 import { decryptId } from '@/app/utils'
+import Projects from '@/app/student/courses/[viewcourses]/modules/_components/Projects'
 
 export default function Project() {
     const { viewcourses, moduleID, projectID } = useParams()

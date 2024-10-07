@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { api } from '@/utils/axios.config'
 import OptimizedImageWithFallback from '@/components/ImageWithFallback'
 import Link from 'next/link'
+import { encryptId } from '@/app/utils'
 
 type Props = {}
 
@@ -39,23 +40,28 @@ const Page = (props: Props) => {
             <div className="container  mx-auto p-1">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4">
                     {enrolledCourse.length > 0 ? (
-                        enrolledCourse.map((course) => (
-                            <Link
-                                key={course.id}
-                                href={`courses/${course.id}`}
-                                className="text-gray-900 text-base"
-                            >
-                                <div className="bg-muted flex justify-center h-[200px] relative overflow-hidden rounded-sm">
-                                    <OptimizedImageWithFallback
-                                        // src={coverImage}
-                                        src={'/logo_white.png'}
-                                        alt="Placeholder Image"
-                                        fallBackSrc={'/logo_white.png'}
-                                    />
-                                </div>
-                                <div className="px-1 py-4">{course.name}</div>
-                            </Link>
-                        ))
+                        enrolledCourse.map((course) => {
+                            const encryptedCourseId = encryptId(course.id)
+                            return (
+                                <Link
+                                    key={course.id}
+                                    href={`courses/${encryptedCourseId}`}
+                                    className="text-gray-900 text-base"
+                                >
+                                    <div className="bg-muted flex justify-center h-[200px] relative overflow-hidden rounded-sm">
+                                        <OptimizedImageWithFallback
+                                            // src={coverImage}
+                                            src={'/logo_white.png'}
+                                            alt="Placeholder Image"
+                                            fallBackSrc={'/logo_white.png'}
+                                        />
+                                    </div>
+                                    <div className="px-1 py-4">
+                                        {course.name}
+                                    </div>
+                                </Link>
+                            )
+                        })
                     ) : (
                         <p>No courses available.</p>
                     )}

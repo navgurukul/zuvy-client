@@ -5,9 +5,12 @@ import { api } from '@/utils/axios.config'
 import CurricullumCard from '../../_components/curricullumCard'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import { useParams } from 'next/navigation'
+import { decryptId } from '@/app/utils'
 
 const Curricullum = () => {
     const { viewcourses } = useParams()
+    const course_id = Array.isArray(viewcourses) ? viewcourses[0] : viewcourses
+    const decryptedCourseID = decryptId(course_id)
     const [allCourses, setAllCourses] = useState<any[]>([])
 
     const crumbs = [
@@ -25,7 +28,9 @@ const Curricullum = () => {
 
     const getAllCourses = useCallback(async () => {
         try {
-            const response = await api.get(`Content/allModules/${viewcourses}`)
+            const response = await api.get(
+                `Content/allModules/${decryptedCourseID}`
+            )
             setAllCourses(response.data)
         } catch (error) {
             console.error('Error fetching courses:', error)
