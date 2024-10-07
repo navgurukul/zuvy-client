@@ -27,8 +27,6 @@ const Page = (props: Props) => {
         getEnrolledCourses()
     }, [])
 
-    console.log('enrolledCourse', enrolledCourse)
-
     return (
         <div className=" flex flex-col items-center justify-center mt-6">
             <div className="x-5 flex items-center justify-start w-full">

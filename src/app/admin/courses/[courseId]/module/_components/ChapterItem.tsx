@@ -73,7 +73,6 @@ function ChapterItem({
     }
 
     const handleClick = () => {
-        // isChapterClickedRef.current = true
         setActiveChapter(chapterId) // Set the active chapter in the parent component
     }
 

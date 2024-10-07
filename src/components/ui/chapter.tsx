@@ -52,148 +52,6 @@ function Chapter() {
     const moduleID = Array.isArray(moduleId) ? moduleId[0] : moduleId
     const { chapterData, setChapterData } = getChapterDataState()
     const { chapterContent, setChapterContent } = getChapterContentState()
-    // const [chapterData, setChapterData] = useState([
-    //     {
-    //         chapterId: 276,
-    //         chapterTitle: 'Assessment for module number 115',
-    //         topicId: 6,
-    //         topicName: 'Assessment',
-    //         order: 1,
-    //     },
-    //     {
-    //         chapterId: 578,
-    //         chapterTitle: 'Chapter 2',
-    //         topicId: 1,
-    //         topicName: 'Video',
-    //         order: 2,
-    //     },
-    //     {
-    //         chapterId: 579,
-    //         chapterTitle: 'Chapter 3',
-    //         topicId: 1,
-    //         topicName: 'Video',
-    //         order: 3,
-    //     },
-    //     {
-    //         chapterId: 580,
-    //         chapterTitle: 'Chapter 4',
-    //         topicId: 1,
-    //         topicName: 'Video',
-    //         order: 4,
-    //     },
-    //     {
-    //         chapterId: 581,
-    //         chapterTitle: 'Chapter 5',
-    //         topicId: 2,
-    //         topicName: 'Article',
-    //         order: 5,
-    //     },
-    //     {
-    //         chapterId: 582,
-    //         chapterTitle: 'Chapter 6',
-    //         topicId: 3,
-    //         topicName: 'Coding Question',
-    //         order: 6,
-    //     },
-    //     {
-    //         chapterId: 583,
-    //         chapterTitle: 'Chapter 7',
-    //         topicId: 5,
-    //         topicName: 'Assignment',
-    //         order: 7,
-    //     },
-    //     {
-    //         chapterId: 584,
-    //         chapterTitle: 'Chapter 8',
-    //         topicId: 6,
-    //         topicName: 'Assessment',
-    //         order: 8,
-    //     },
-    //     {
-    //         chapterId: 585,
-    //         chapterTitle: 'Chapter 9',
-    //         topicId: 7,
-    //         topicName: 'Form',
-    //         order: 9,
-    //     },
-    //     {
-    //         chapterId: 586,
-    //         chapterTitle: 'Chapter 10',
-    //         topicId: 5,
-    //         topicName: 'Assignment',
-    //         order: 10,
-    //     },
-    //     {
-    //         chapterId: 587,
-    //         chapterTitle: 'Chapter 11',
-    //         topicId: 4,
-    //         topicName: 'Quiz',
-    //         order: 11,
-    //     },
-    //     {
-    //         chapterId: 588,
-    //         chapterTitle: 'Chapter 12',
-    //         topicId: 1,
-    //         topicName: 'Video',
-    //         order: 12,
-    //     },
-    //     {
-    //         chapterId: 589,
-    //         chapterTitle: 'Chapter 13',
-    //         topicId: 7,
-    //         topicName: 'Form',
-    //         order: 13,
-    //     },
-    //     {
-    //         chapterId: 590,
-    //         chapterTitle: 'Chapter 14',
-    //         topicId: 5,
-    //         topicName: 'Assignment',
-    //         order: 14,
-    //     },
-    //     {
-    //         chapterId: 591,
-    //         chapterTitle: 'Chapter 15',
-    //         topicId: 1,
-    //         topicName: 'Video',
-    //         order: 15,
-    //     },
-    //     {
-    //         chapterId: 592,
-    //         chapterTitle: 'Chapter 16',
-    //         topicId: 7,
-    //         topicName: 'Form',
-    //         order: 16,
-    //     },
-    //     {
-    //         chapterId: 593,
-    //         chapterTitle: 'Chapter 17',
-    //         topicId: 7,
-    //         topicName: 'Form',
-    //         order: 17,
-    //     },
-    //     {
-    //         chapterId: 594,
-    //         chapterTitle: 'Chapter 18',
-    //         topicId: 4,
-    //         topicName: 'Quiz',
-    //         order: 18,
-    //     },
-    //     {
-    //         chapterId: 595,
-    //         chapterTitle: 'Chapter 19',
-    //         topicId: 2,
-    //         topicName: 'Article',
-    //         order: 19,
-    //     },
-    //     {
-    //         chapterId: 596,
-    //         chapterTitle: 'Chapter 20',
-    //         topicId: 5,
-    //         topicName: 'Assignment',
-    //         order: 20,
-    //     },
-    // ])
     const [chapterId, setChapterId] = useState<number>(0)
     const [activeChapterTitle, setActiveChapterTitle] = useState('')
     const { moduleData, setModuleData } = getModuleData()
@@ -314,45 +172,20 @@ function Chapter() {
         console.log('isChapterClickedRef.current', isChapterClickedRef.current)
         console.log('activeChapterRef.current', activeChapterRef.current)
         console.log('scrollAreaRef.current', scrollAreaRef.current)
-        if (
-            // !isChapterClickedRef.current &&
-            activeChapterRef.current
-            // &&
-            // scrollAreaRef.current
-        ) {
-            // console.log('went inside', isChapterClickedRef.current)
+        if (activeChapterRef.current) {
             // Only scroll if it's not triggered by a chapter click
             activeChapterRef.current.scrollIntoView({
                 // behavior: 'smooth',
-                // block: 'center'
-                // behavior: 'auto',
                 block: 'center',
             })
         }
-        // setInitialLoad(false)
-    }, [activeChapter]) // Adding 'isChapterClicked' to dependencies
-
-    // Reset the isChapterClicked state after some delay
-    // useEffect(() => {
-    //     if (isChapterClicked) {
-    //         const timer = setTimeout(() => {
-    //             isChapterClickedRef.current = false
-    //         }, 300)
-    //         return () => clearTimeout(timer) // Clean up the timer
-    //     }
-    // }, [activeChapter])
-
-    // useEffect(() => {
-    //     if (isNewChapterCreated && scrollAreaRef.current) {
-    //         const scrollableElement = scrollAreaRef.current
-    //         scrollableElement.scrollTop = scrollableElement.scrollHeight // Scroll to the bottom
-    //         setIsNewChapterCreated(false) // Reset the new chapter flag
-    //     }
-    // }, [chapterData, isNewChapterCreated])
+    }, [activeChapter])
 
     return (
         <>
-            <BreadcrumbComponent crumbs={crumbs} />
+            <div className="mb-5">
+                <BreadcrumbComponent crumbs={crumbs} />
+            </div>
             <div className="mb-5 flex">
                 <Dialog>
                     <DialogTrigger asChild>
@@ -366,7 +199,6 @@ function Chapter() {
                     </DialogTrigger>
                     <DialogOverlay />
                     <ChapterModal
-                        // params={params}
                         courseId={courseId}
                         moduleId={moduleId}
                         fetchChapters={fetchChapters}
@@ -375,12 +207,7 @@ function Chapter() {
                     />
                 </Dialog>
             </div>
-            {/* <ScrollArea className="h-dvh pr-4" type="hover"> */}
-            <ScrollArea
-                className="h-[500px] lg:h-[670px] pr-4"
-                type="hover"
-                // ref={scrollAreaRef}
-            >
+            <ScrollArea className="h-[500px] lg:h-[670px] pr-4" type="hover">
                 <Reorder.Group
                     values={chapterData}
                     onReorder={async (newOrderChapters: any) => {
@@ -399,17 +226,7 @@ function Chapter() {
                                             ? 'last-chapter'
                                             : `chapter-${item.chapterId}`
                                     }
-                                    // onClick={() =>
-                                    //     handleChapterClick(item.chapterId)
-                                    // }
                                 >
-                                    {/* <div
-                                        ref={
-                                            item.chapterId === activeChapter
-                                                ? activeChapterRef
-                                                : null
-                                        } // Set ref to active chapter
-                                    > */}
                                     <ChapterItem
                                         key={item.chapterId}
                                         chapterId={item.chapterId}
@@ -425,7 +242,6 @@ function Chapter() {
                                         }
                                         activeChapterRef={activeChapterRef}
                                     />
-                                    {/* </div> */}
                                 </Reorder.Item>
                             )
                         })}

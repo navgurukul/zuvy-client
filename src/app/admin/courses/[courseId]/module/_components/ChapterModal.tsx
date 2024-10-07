@@ -20,21 +20,17 @@ import { toast } from '@/components/ui/use-toast'
 import { useRouter } from 'next/navigation'
 
 function ChapterModal({
-    // params,
     fetchChapters,
     newChapterOrder,
     moduleId,
     courseId,
     scrollToBottom,
-}: // setIsNewChapterCreated
-{
-    // params: { moduleId: string; courseId: string }
+}: {
     fetchChapters: () => void
     newChapterOrder: number
     courseId: any
     moduleId: any
     scrollToBottom: () => void
-    // setIsNewChapterCreated: any
 }) {
     const router = useRouter()
     const createChapter = async (topicId: number) => {
@@ -69,8 +65,6 @@ function ChapterModal({
         setTimeout(() => {
             scrollToBottom()
         }, 500)
-
-        // setIsNewChapterCreated(true)
     }
 
     // const createAssessment = async () => {
