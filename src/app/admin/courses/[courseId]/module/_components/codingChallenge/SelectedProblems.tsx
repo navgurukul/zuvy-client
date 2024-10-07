@@ -34,7 +34,7 @@ const SelectedProblems = ({
         if (response) {
             toast({
                 title: 'Success',
-                description: 'Chapter saved successfully',
+                description: 'Chapter edited successfully',
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
@@ -45,7 +45,7 @@ const SelectedProblems = ({
         <div className="ml-5 pl-5 border-l-2 text-start">
             <h2 className="font-semibold mb-5">Selected Coding Problems</h2>
             <div>
-                {selectedQuestions.map((selectedQuestion: any, index: any) => (
+                {selectedQuestions?.map((selectedQuestion: any, index: any) => (
                     <div
                         key={index}
                         className="flex justify-between items-start mb-7"
@@ -85,7 +85,7 @@ const SelectedProblems = ({
                         />
                     </div>
                 ))}
-                {selectedQuestions.length > 0 && (
+                {selectedQuestions?.length > 0 && (
                     <Button onClick={handleSaveChapter}>Save</Button>
                 )}
             </div>

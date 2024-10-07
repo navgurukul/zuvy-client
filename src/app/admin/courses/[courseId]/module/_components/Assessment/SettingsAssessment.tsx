@@ -48,11 +48,12 @@ type SettingsAssessmentProps = {
     selectedQuizQuesIds: any
     selectedOpenEndedQuesIds: any
     content: any
-    fetchChapterContent: (chapterId: number) => void
+    fetchChapterContent: (chapterId: number, topicId: number) => void
     chapterData: any
     chapterTitle: string
     saveSettings: boolean
     setSaveSettings: (value: boolean) => void
+    topicId: number
 }
 
 const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
@@ -65,6 +66,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     chapterTitle,
     saveSettings,
     setSaveSettings,
+    topicId
 }) => {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -135,7 +137,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
 
         try {
             await api.put(`Content/editAssessment/${content.id}/${chapterData.chapterId}`, data)
-            fetchChapterContent(chapterData.chapterId)
+            fetchChapterContent(chapterData.chapterId, topicId)
             toast({
                 title: 'Assessment Updated Successfully',
                 description: 'Assessment has been updated successfully',
