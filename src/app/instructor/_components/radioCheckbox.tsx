@@ -5,8 +5,13 @@ import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { api } from '@/utils/axios.config'
 import { usePathname } from 'next/navigation'
-import MultipleSelector from '@/components/ui/multiple-selector'
 import { toast } from '@/components/ui/use-toast'
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover' // Assuming Shadcn UI Popover is already imported
+import { Check, ChevronDown } from 'lucide-react' // Shadcn-compatible icons
 
 export interface RadioCheckboxProps {
     fetchSessions: (data: any) => void
@@ -16,6 +21,18 @@ export interface RadioCheckboxProps {
     setPages: any
     setLastPage: any
 }
+
+interface Option {
+    label: string
+    value: string
+}
+
+const options: Option[] = [
+    { label: 'Option 1', value: 'option1' },
+    { label: 'Option 2', value: 'option2' },
+    { label: 'Option 3', value: 'option3' },
+    // Add more options as needed
+]
 
 const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
     fetchSessions,
@@ -27,15 +44,11 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
 }: RadioCheckboxProps) => {
     const [batches, setBatches] = useState<any[]>([])
     const [batchId, setBatchId] = useState<any[]>([])
-    const [timeFrame, setTimeFrame] = useState<any>('all')
-    const [selectedBatches, setSelectedBatches] = useState<any[]>([])
+    const [timeFrame, setTimeFrame] = useState<string>('all')
+    const [weeks, setWeeks] = useState<number>(0)
     const pathname = usePathname()
     const classRecordings = pathname?.includes('/recording')
-
-    const handleChange = (selected: any) => {
-        setSelectedBatches(selected)
-        setBatchId(selected)
-    }
+    const [selectedOptions, setSelectedOptions] = useState<Option[]>([])
 
     const getBatches = useCallback(async () => {
         try {
@@ -46,8 +59,8 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
                     label: item.batchName,
                 })
             )
+            setSelectedOptions([transformedData[0]])
             setBatchId([transformedData[0]])
-            setSelectedBatches([transformedData[0]])
             setBatches(transformedData)
         } catch (error) {
             toast({
@@ -91,7 +104,11 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
                 let ids = ''
                 batchId.map((item) => (ids += '&batchId=' + item.value))
                 const response = await api.get(
-                    `/instructor/getAllCompletedClasses?limit=${position}&offset=${offset}&timeFrame=${timeFrame}${ids}`
+                    `/instructor/getAllCompletedClasses?limit=${position}&offset=${offset}&weeks=${weeks}${ids}`
+                )
+                console.log(
+                    'response.data.data.classDetails',
+                    response.data.data.classDetails
                 )
                 fetchSessions(response.data.data.classDetails)
                 setTotalSessions(response.data.data.totalCompletedClass)
@@ -115,6 +132,8 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
     }, [getBatches])
 
     useEffect(() => {
+        console.log('It is')
+        console.log('offset', offset)
         if (batchId) {
             if (classRecordings) {
                 getSessionsRecording(offset)
@@ -124,16 +143,65 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
         }
     }, [batchId, timeFrame, offset])
 
+    const handleOptionClick = (option: Option) => {
+        if (
+            selectedOptions.some((selected) => selected.value === option.value)
+        ) {
+            setSelectedOptions((prev) =>
+                prev.filter((selected) => selected.value !== option.value)
+            )
+            setBatchId((prev) =>
+                prev.filter((selected) => selected.value !== option.value)
+            )
+        } else {
+            setSelectedOptions((prev) => [...prev, option])
+            setBatchId((prev) => [...prev, option])
+        }
+    }
+
+    const selectedCount = selectedOptions.length
+
+    console.log('batchId', batchId)
+    console.log('selectedOptions', selectedOptions)
+
     return (
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between p-3 w-full lg:w-1/2 gap-y-6 lg:gap-y-0">
             {batches && (
                 <div className="flex flex-col gap-y-3 items-start w-full lg:w-[350px]">
                     <h1 className="font-semibold">Batches</h1>
-                    <MultipleSelector
-                        options={batches}
-                        value={selectedBatches}
-                        onChange={handleChange}
-                    />
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <button className="flex w-full items-center justify-between rounded-md border border-secondary px-4 py-2 text-left focus:outline-none">
+                                <span className="truncate text-secondary">
+                                    {selectedCount > 0
+                                        ? `${selectedCount} selected`
+                                        : 'Select options'}
+                                </span>
+                                <ChevronDown className="ml-2 h-5 w-5 text-secondary" />
+                            </button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-full lg:w-[350px] p-4 border border-secondary text-secondary">
+                            <div className="space-y-2">
+                                {batches.map((option) => (
+                                    <div
+                                        key={option.value}
+                                        className="flex items-center justify-between p-2 hover:bg-gray-100 cursor-pointer rounded-md"
+                                        onClick={() =>
+                                            handleOptionClick(option)
+                                        }
+                                    >
+                                        <span>{option.label}</span>
+                                        {selectedOptions.some(
+                                            (selected) =>
+                                                selected.value === option.value
+                                        ) && (
+                                            <Check className="h-5 w-5 text-secondary" />
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </PopoverContent>
+                    </Popover>
                 </div>
             )}
             <div className="flex flex-col gap-y-3 items-start w-full lg:w-auto lg:ml-6">
@@ -149,7 +217,7 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
                                 id="r1"
                                 onClick={() =>
                                     classRecordings
-                                        ? setTimeFrame(0)
+                                        ? setWeeks(0)
                                         : setTimeFrame('all')
                                 }
                             />
@@ -161,7 +229,7 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
                                 id="r2"
                                 onClick={() =>
                                     classRecordings
-                                        ? setTimeFrame(1)
+                                        ? setWeeks(1)
                                         : setTimeFrame('1 week')
                                 }
                             />
@@ -173,7 +241,7 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
                                 id="r3"
                                 onClick={() =>
                                     classRecordings
-                                        ? setTimeFrame(2)
+                                        ? setWeeks(2)
                                         : setTimeFrame('2 week')
                                 }
                             />

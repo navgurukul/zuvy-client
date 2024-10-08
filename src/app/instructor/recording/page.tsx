@@ -21,6 +21,8 @@ const Recordings = () => {
         setClassRecordings(data)
     }
 
+    console.log('classRecordings', classRecordings)
+
     return (
         <div>
             <h1 className="text-start text-lg font-semibold ">
@@ -41,33 +43,36 @@ const Recordings = () => {
             />
             <div className="p-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-x-8 gap-y-6">
-                    {classRecordings.map((item) => {
-                        return (
-                            <InstructorCard
-                                key={item.id}
-                                batchName={item.bootcampDetail.name}
-                                topicTitle={item.title}
-                                startTime={item.startTime}
-                                endTime={item.endTime}
-                                typeClass={item.status}
-                                classLink={item.hangoutLink}
-                                status={item.status}
-                            />
-                        )
-                    })}
+                    {classRecordings.length > 0 &&
+                        classRecordings.map((item) => {
+                            return (
+                                <InstructorCard
+                                    key={item.id}
+                                    batchName={item.bootcampDetail.name}
+                                    topicTitle={item.title}
+                                    startTime={item.startTime}
+                                    endTime={item.endTime}
+                                    typeClass={item.status}
+                                    classLink={item.hangoutLink}
+                                    status={item.status}
+                                />
+                            )
+                        })}
                 </div>
             </div>
-            <DataTablePagination
-                totalStudents={totalSessions}
-                position={position}
-                setPosition={setPosition}
-                pages={pages}
-                lastPage={lastPage}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                fetchStudentData={fetchSessions}
-                setOffset={setOffset}
-            />
+            {classRecordings.length > 0 && (
+                <DataTablePagination
+                    totalStudents={totalSessions}
+                    position={position}
+                    setPosition={setPosition}
+                    pages={pages}
+                    lastPage={lastPage}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    fetchStudentData={fetchSessions}
+                    setOffset={setOffset}
+                />
+            )}
         </div>
     )
 }
