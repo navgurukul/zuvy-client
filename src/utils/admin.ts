@@ -229,9 +229,15 @@ export const handlerQuizQuestions = (
 export async function getAllTags(setTags: any) {
     const response = await api.get('Content/allTags')
     if (response) {
+        const transformedData = response.data.allTags.map(
+            (item: { id: any; tagName: any }) => ({
+                value: item.id.toString(),
+                label: item.tagName,
+            })
+        )
         const tagArr = [
-            { tagName: 'All Topics', id: -1 },
-            ...response.data.allTags,
+            { value: '-1', label: 'All Topics' },
+            ...transformedData,
         ]
         setTags(tagArr)
     }
@@ -240,25 +246,35 @@ export async function getAllTags(setTags: any) {
 // AddAssessment.tsx functions:-
 export async function filteredCodingQuestions(
     setFilteredQuestions: any,
-    selectedDifficulty: string,
-    selectedTopic: any,
+    difficulty: any,
+    selectedOptions: any,
     selectedLanguage: string,
     debouncedSearch: string
 ) {
     try {
         let url = `/Content/allCodingQuestions`
 
+        let selectedTagIds = ''
+        selectedOptions.map(
+            (item: any) => (selectedTagIds += '&tagId=' + item.value)
+        )
+
+        let selectedDiff = ''
+        difficulty.map(
+            (item: any) => (selectedDiff += '&difficulty=' + item.value)
+        )
+
         const queryParams = []
 
-        if (selectedTopic?.id !== -1) {
-            queryParams.push(`tagId=${selectedTopic.id}`)
+        if (selectedTagIds.length > 0) {
+            if (selectedOptions[0].value !== '-1') {
+                queryParams.push(selectedTagIds.substring(1))
+            }
         }
-        if (
-            selectedDifficulty &&
-            selectedDifficulty !== 'None' &&
-            selectedDifficulty !== 'Any Difficulty'
-        ) {
-            queryParams.push(`difficulty=${selectedDifficulty}`)
+        if (difficulty.length > 0) {
+            if (difficulty[0].value !== 'None') {
+                queryParams.push(selectedDiff.substring(1))
+            }
         }
         if (debouncedSearch) {
             queryParams.push(`searchTerm=${debouncedSearch}`)
@@ -322,25 +338,35 @@ export async function filteredQuizQuestions(
 
 export async function filteredOpenEndedQuestions(
     setFilteredQuestions: any,
-    selectedDifficulty: string,
-    selectedTopic: any,
+    difficulty: any,
+    selectedOptions: any,
     selectedLanguage: string,
     debouncedSearch: string
 ) {
     try {
         let url = `/Content/openEndedQuestions`
 
+        let selectedTagIds = ''
+        selectedOptions.map(
+            (item: any) => (selectedTagIds += '&tagId=' + item.value)
+        )
+
+        let selectedDiff = ''
+        difficulty.map(
+            (item: any) => (selectedDiff += '&difficulty=' + item.value)
+        )
+
         const queryParams = []
 
-        if (selectedTopic?.id !== -1) {
-            queryParams.push(`tagId=${selectedTopic.id}`)
+        if (selectedTagIds.length > 0) {
+            if (selectedOptions[0].value !== '-1') {
+                queryParams.push(selectedTagIds.substring(1))
+            }
         }
-        if (
-            selectedDifficulty &&
-            selectedDifficulty !== 'None' &&
-            selectedDifficulty !== 'Any Difficulty'
-        ) {
-            queryParams.push(`difficulty=${selectedDifficulty}`)
+        if (difficulty.length > 0) {
+            if (difficulty[0].value !== 'None') {
+                queryParams.push(selectedDiff.substring(1))
+            }
         }
         if (debouncedSearch) {
             queryParams.push(`searchTerm=${debouncedSearch}`)

@@ -648,14 +648,19 @@ export const getStoreStudentBatchData = create<storeBatchData>((set) => ({
     },
 }))
 
+interface Option {
+    label: string
+    value: string
+}
+
 type mcqdifficulty = {
-    mcqDifficulty: string
-    setMcqDifficulty: (newValue: string) => void
+    mcqDifficulty: Option[]
+    setMcqDifficulty: (newValue: Option[]) => void
 }
 
 export const getmcqdifficulty = create<mcqdifficulty>((set) => ({
-    mcqDifficulty: 'None',
-    setMcqDifficulty: (newValue: string) => {
+    mcqDifficulty: [{ value: 'None', label: 'All Difficulty' }],
+    setMcqDifficulty: (newValue: Option[]) => {
         set({ mcqDifficulty: newValue })
     },
 }))
