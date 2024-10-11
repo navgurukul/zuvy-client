@@ -14,6 +14,7 @@ import FormComponent from '../../_components/FormComponent'
 import Assignments from './components/assignments'
 import AssesmentSubmissionComponent from './components/AssesmentSubmission'
 import PraticeProblemsComponent from './components/PraticeProblemsComponent'
+import useDebounce from '@/hooks/useDebounce'
 
 const Page = ({ params }: { params: any }) => {
     const [activeTab, setActiveTab] = useState('practice')
@@ -23,25 +24,38 @@ const Page = ({ params }: { params: any }) => {
     const [formData, setFormData] = useState<any>([])
     const [loading, setLoading] = useState(true)
     const [searchAssessment, setsearchAssessment] = useState<string>('')
+    const [search, setSearch] = useState('')
+    const debouncedSearch = useDebounce(search, 1000)
 
     const handleTabChange = (tab: string) => {
         setActiveTab(tab)
-        localStorage.setItem('tab', tab) 
+        localStorage.setItem('tab', tab)
     }
 
     useEffect(() => {
         const lastUpdatedTab = localStorage.getItem('tab')
         if (lastUpdatedTab) {
-            setActiveTab(lastUpdatedTab) 
+            setActiveTab(lastUpdatedTab)
         }
     }, [])
 
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearch(e.target.value)
+    }
 
     const getSubmissions = useCallback(async () => {
         try {
-            const res = await api.get(
-                `/submission/submissionsOfPractiseProblems/${params.courseId}`
-            )
+            // const res = await api.get(
+            //     `/submission/submissionsOfPractiseProblems/${params.courseId}`
+            // )
+            let baseUrl = `/submission/submissionsOfPractiseProblems/${params.courseId}`
+            if (debouncedSearch && activeTab === 'practice') {
+                baseUrl += `?searchPractiseProblem=${encodeURIComponent(
+                    debouncedSearch
+                )}`
+            }
+
+            const res = await api.get(baseUrl)
             setSubmissions(res.data.trackingData)
             setTotalStudents(res.data.totalStudents)
         } catch (error) {
@@ -53,13 +67,25 @@ const Page = ({ params }: { params: any }) => {
                     'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
-    }, [params.courseId])
+    }, [params.courseId, debouncedSearch])
+
+    console.log('search', search)
+    console.log('debouncedSearch', debouncedSearch)
 
     const getProjectsData = useCallback(async () => {
         try {
-            const res = await api.get(
-                `/submission/submissionsOfProjects/${params.courseId}`
-            )
+            // const res = await api.get(
+            //     `/submission/submissionsOfProjects/${params.courseId}`
+            // )
+            let baseUrl = `/submission/submissionsOfProjects/${params.courseId}`
+            if (debouncedSearch && activeTab === 'projects') {
+                baseUrl += `?searchProject=${encodeURIComponent(
+                    debouncedSearch
+                )}`
+            }
+
+            const res = await api.get(baseUrl)
+
             setProjectData(res.data.data.bootcampModules)
             setTotalStudents(res.data.totalStudents)
         } catch (error) {
@@ -71,10 +97,17 @@ const Page = ({ params }: { params: any }) => {
             //         'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             // })
         }
-    }, [params.courseId])
+    }, [params.courseId, debouncedSearch])
 
     const getFormData = useCallback(async () => {
         try {
+            // let baseUrl = `/submission/submissionsOfForms/${params.courseId}`
+            // if (debouncedSearch) {
+            //     baseUrl += `&searchTerm=${encodeURIComponent(debouncedSearch)}`
+            // }
+
+            // const res = await api.get(baseUrl)
+
             const res = await api.get(
                 `/submission/submissionsOfForms/${params.courseId}`
             )
@@ -96,7 +129,13 @@ const Page = ({ params }: { params: any }) => {
             getProjectsData()
             getFormData()
         }
-    }, [getSubmissions, params.courseId, getProjectsData, getFormData])
+    }, [
+        getSubmissions,
+        params.courseId,
+        getProjectsData,
+        getFormData,
+        debouncedSearch,
+    ])
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -179,8 +218,11 @@ const Page = ({ params }: { params: any }) => {
                                 : 'Search '
                         }`}
                         className="lg:w-1/3 w-full my-6 input-with-icon pl-8"
-                        value={searchAssessment}
-                        onChange={(e) => setsearchAssessment(e.target.value)}
+                        // value={searchAssessment}
+                        value={search}
+                        // onChange={(e) => setsearchAssessment(e.target.value)}
+                        // onChange={(e) => setSearch(e.target.value)}
+                        onChange={handleSearch}
                     />
                     <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
                         <Search className="text-gray-400" size={20} />
@@ -205,7 +247,7 @@ const Page = ({ params }: { params: any }) => {
                 )}
                 {activeTab === 'assessments' && (
                     <AssesmentSubmissionComponent
-                        searchTerm={searchAssessment}
+                        searchTerm={search}
                         courseId={params.courseId}
                     />
                 )}
@@ -277,7 +319,10 @@ const Page = ({ params }: { params: any }) => {
                     </div>
                 )}
                 {activeTab === 'assignments' && (
-                    <Assignments courseId={params.courseId} />
+                    <Assignments
+                        debouncedSearch={debouncedSearch}
+                        courseId={params.courseId}
+                    />
                 )}
             </div>
         </div>

@@ -10,9 +10,10 @@ import { Spinner } from '@/components/ui/spinner'
 
 type Props = {
     courseId: number
+    debouncedSearch: string
 }
 
-const Assignments = ({ courseId }: Props) => {
+const Assignments = ({ courseId, debouncedSearch }: Props) => {
     const [assignmentData, setAssignmentData] = useState<any[]>([])
     const [loading, setLoading] = useState<boolean>(false)
 
@@ -20,6 +21,16 @@ const Assignments = ({ courseId }: Props) => {
         const fetchAssignmentDataHandler = async () => {
             setLoading(true)
             try {
+                // let baseUrl = `/submission/submissionsOfAssignment/${courseId}`
+                // if (debouncedSearch) {
+                //     baseUrl += `?searchAssignment=${encodeURIComponent(
+                //         debouncedSearch
+                //     )}`
+                // }
+
+                // const res = await api.get(baseUrl)
+                // setAssignmentData(res.data.data.trackingData)
+
                 await api
                     .get(`/submission/submissionsOfAssignment/${courseId}`)
                     .then((res) => {
@@ -36,7 +47,7 @@ const Assignments = ({ courseId }: Props) => {
         }
 
         fetchAssignmentDataHandler()
-    }, [courseId])
+    }, [courseId, debouncedSearch])
 
     return (
         <>
