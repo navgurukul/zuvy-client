@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { OFFSET, POSITION } from '@/utils/constant'
-
+import useDebounce from '@/hooks/useDebounce'
 import { Input } from '@/components/ui/input'
 import RadioCheckbox from '../_components/radioCheckbox'
 import InstructorCard from '../_components/instructorCard'
@@ -16,12 +16,21 @@ const Recordings = () => {
     const [currentPage, setCurrentPage] = useState<number>(1)
     const [totalSessions, setTotalSessions] = useState<number>(0)
     const [lastPage, setLastPage] = useState<number>(0)
+    const [search, setSearch] = useState('')
+    const debouncedSearch = useDebounce(search, 1000)
 
     const fetchSessions = (data: any) => {
         setClassRecordings(data)
     }
 
     console.log('classRecordings', classRecordings)
+
+    const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearch(e.target.value)
+    }
+
+    console.log('search', search)
+    console.log('debouncedSearch in recording', debouncedSearch)
 
     return (
         <div>
@@ -33,6 +42,12 @@ const Recordings = () => {
                 placeholder="Search By Name"
                 className="w-1/5"
             />
+            <Input
+                value={search}
+                onChange={handleSetSearch}
+                className="lg:w-1/5 w-full"
+                placeholder="Search Class Recordings"
+            />
             <RadioCheckbox
                 fetchSessions={fetchSessions}
                 offset={offset}
@@ -40,10 +55,11 @@ const Recordings = () => {
                 setTotalSessions={setTotalSessions}
                 setPages={setPages}
                 setLastPage={setLastPage}
+                debouncedSearch={debouncedSearch}
             />
             <div className="p-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-x-8 gap-y-6">
-                    {classRecordings.length > 0 &&
+                    {classRecordings?.length > 0 ? (
                         classRecordings.map((item) => {
                             return (
                                 <InstructorCard
@@ -57,10 +73,13 @@ const Recordings = () => {
                                     status={item.status}
                                 />
                             )
-                        })}
+                        })
+                    ) : (
+                        <p>No past classes found</p>
+                    )}
                 </div>
             </div>
-            {classRecordings.length > 0 && (
+            {classRecordings?.length > 0 && (
                 <DataTablePagination
                     totalStudents={totalSessions}
                     position={position}

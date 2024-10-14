@@ -10,8 +10,9 @@ import {
     Popover,
     PopoverContent,
     PopoverTrigger,
-} from '@/components/ui/popover' // Assuming Shadcn UI Popover is already imported
-import { Check, ChevronDown } from 'lucide-react' // Shadcn-compatible icons
+} from '@/components/ui/popover'
+import { Check, ChevronDown } from 'lucide-react'
+import axios, { AxiosError } from 'axios'
 
 export interface RadioCheckboxProps {
     fetchSessions: (data: any) => void
@@ -20,19 +21,13 @@ export interface RadioCheckboxProps {
     setTotalSessions: any
     setPages: any
     setLastPage: any
+    debouncedSearch?: string
 }
 
 interface Option {
     label: string
     value: string
 }
-
-const options: Option[] = [
-    { label: 'Option 1', value: 'option1' },
-    { label: 'Option 2', value: 'option2' },
-    { label: 'Option 3', value: 'option3' },
-    // Add more options as needed
-]
 
 const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
     fetchSessions,
@@ -41,6 +36,7 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
     setTotalSessions,
     setPages,
     setLastPage,
+    debouncedSearch,
 }: RadioCheckboxProps) => {
     const [batches, setBatches] = useState<any[]>([])
     const [batchId, setBatchId] = useState<any[]>([])
@@ -49,6 +45,8 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
     const pathname = usePathname()
     const classRecordings = pathname?.includes('/recording')
     const [selectedOptions, setSelectedOptions] = useState<Option[]>([])
+
+    console.log('debouncedSearch before API', debouncedSearch)
 
     const getBatches = useCallback(async () => {
         try {
@@ -81,15 +79,25 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
                 const response = await api.get(
                     `/instructor/getAllUpcomingClasses?limit=${position}&offset=${offset}&timeFrame=${timeFrame}${ids}`
                 )
+
                 fetchSessions(response.data.data.responses)
                 setTotalSessions(response.data.data.totalUpcomingClasses)
                 setPages(response.data.data.totalUpcomingPages)
                 setLastPage(response.data.data.totalUpcomingPages)
             } catch (error) {
+                let errorMessage = 'An unknown error occurred'
+                // Type checking for error
+                if (axios.isAxiosError(error)) {
+                    // Accessing specific error details from AxiosError
+                    errorMessage =
+                        error.response?.data?.message || error.message
+                } else if (error instanceof Error) {
+                    errorMessage = error.message
+                }
                 toast({
                     title: 'Error fetching Classes:',
-                    description:
-                        'There is an error fetching classes: contact Admin.',
+                    description: errorMessage,
+                    // 'There is an error fetching classes: contact Admin.',
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
@@ -101,11 +109,22 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
     const getSessionsRecording = useCallback(
         async (offset: number) => {
             try {
+                console.log('debouncedSearch in Try', debouncedSearch)
+                console.log('It is in Try')
                 let ids = ''
                 batchId.map((item) => (ids += '&batchId=' + item.value))
-                const response = await api.get(
-                    `/instructor/getAllCompletedClasses?limit=${position}&offset=${offset}&weeks=${weeks}${ids}`
-                )
+                // const response = await api.get(
+                //     `/instructor/getAllCompletedClasses?limit=${position}&offset=${offset}&weeks=${weeks}${ids}`
+                // )
+                let baseUrl = `/instructor/getAllCompletedClasses?limit=${position}&offset=${offset}&weeks=${weeks}${ids}`
+                if (debouncedSearch) {
+                    baseUrl += `&searchTitle=${encodeURIComponent(
+                        debouncedSearch
+                    )}`
+                }
+                console.log('debouncedSearch', debouncedSearch)
+                console.log('baseUrl', baseUrl)
+                const response = await api.get(baseUrl)
                 console.log(
                     'response.data.data.classDetails',
                     response.data.data.classDetails
@@ -115,16 +134,26 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
                 setPages(response.data.data.totalPages)
                 setLastPage(response.data.data.totalPages)
             } catch (error) {
+                let errorMessage = 'An unknown error occurred'
+                // Type checking for error
+                if (axios.isAxiosError(error)) {
+                    // Accessing specific error details from AxiosError
+                    errorMessage =
+                        error.response?.data?.message || error.message
+                } else if (error instanceof Error) {
+                    errorMessage = error.message
+                }
+
+                console.log('Error fetching Class Recordings:', errorMessage)
                 toast({
-                    title: 'Error fetching Class Recordings:',
-                    description:
-                        'There is an error fetching class recordings: contact Admin.',
+                    title: 'Error:',
+                    description: errorMessage,
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             }
         },
-        [batchId, timeFrame]
+        [batchId, weeks, debouncedSearch]
     )
 
     useEffect(() => {
@@ -136,12 +165,13 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
         console.log('offset', offset)
         if (batchId) {
             if (classRecordings) {
+                console.log('It is going inside')
                 getSessionsRecording(offset)
             } else {
                 getSessions(offset)
             }
         }
-    }, [batchId, timeFrame, offset])
+    }, [batchId, timeFrame, weeks, offset, debouncedSearch])
 
     const handleOptionClick = (option: Option) => {
         if (

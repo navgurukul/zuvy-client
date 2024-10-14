@@ -8,6 +8,7 @@ import Link from 'next/link'
 type Props = {}
 
 interface EnrolledCourse {
+    coverImage: string
     id: number
     name: string
 }
@@ -45,9 +46,8 @@ const Page = (props: Props) => {
                             >
                                 <div className="bg-muted flex justify-center h-[200px] relative overflow-hidden rounded-sm">
                                     <OptimizedImageWithFallback
-                                        // src={coverImage}
-                                        src={'/logo_white.png'}
-                                        alt="Placeholder Image"
+                                        src={course.coverImage}
+                                        alt={course.name}
                                         fallBackSrc={'/logo_white.png'}
                                     />
                                 </div>
