@@ -30,18 +30,28 @@ import {
     getEditCodingQuestionDialogs,
     getcodingQuestionState,
 } from '@/store/store'
-import { getAllCodingQuestions, filteredCodingQuestions } from '@/utils/admin'
+import {
+    getAllCodingQuestions,
+    filteredCodingQuestions,
+    filterQuestions,
+} from '@/utils/admin'
 import Image from 'next/image'
 import { Spinner } from '@/components/ui/spinner'
 import EditCodingQuestionForm from '../_components/EditCodingQuestionForm'
 import useDebounce from '@/hooks/useDebounce'
 import MultiSelector from '@/components/ui/multi-selector'
 import difficultyOptions from '@/app/utils'
+import CodingTopics from '../../courses/[courseId]/module/_components/codingChallenge/CodingTopics'
 
 export type Tag = {
     id: number
     tagName: string
 }
+// interface Option {
+//     tagName: string
+//     id: number
+// }
+
 interface Option {
     label: string
     value: string
@@ -70,9 +80,10 @@ const CodingProblems = () => {
         return { tagName: 'All Topics', id: -1 }
     })
     const [selectedOptions, setSelectedOptions] = useState<Option[]>([
+        // { id: -1, tagName: 'All Topics' },
         { value: '-1', label: 'All Topics' },
     ])
-    // const [selectedDifficulty, setSelectedDifficulty] = useState('None')
+    const [selectedDifficulty, setSelectedDifficulty] = useState(['None'])
     const [difficulty, setDifficulty] = useState([
         { value: 'None', label: 'All Difficulty' },
     ])
@@ -187,10 +198,19 @@ const CodingProblems = () => {
             selectedLanguage,
             debouncedSearch
         )
+        // filterQuestions(
+        //     setCodingQuestions,
+        //     selectedDifficulty,
+        //     selectedOptions,
+        //     selectedLanguage,
+        //     debouncedSearch,
+        //     'coding'
+        // )
     }, [
         searchTerm,
         selectedOptions,
         difficulty,
+        // selectedDifficulty,
         debouncedSearch,
         isCodingDialogOpen,
         openEditDialog,
@@ -250,6 +270,15 @@ const CodingProblems = () => {
                                     + Create Problems
                                 </Button>
                             </div>
+                            {/* <CodingTopics
+                                setSearchTerm={setSearchTerm}
+                                searchTerm={searchTerm}
+                                tags={tags}
+                                selectedTopics={selectedOptions}
+                                setSelectedTopics={setSelectedOptions}
+                                selectedDifficulties={selectedDifficulty}
+                                setSelectedDifficulties={setSelectedDifficulty}
+                            /> */}
                             <div className="flex items-center">
                                 <div className="w-full lg:w-[250px]">
                                     <MultiSelector
