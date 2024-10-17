@@ -173,7 +173,7 @@ function Chapter() {
             // Only scroll if it's not triggered by a chapter click
             activeChapterRef.current.scrollIntoView({
                 // behavior: 'smooth',
-                block: 'center',
+                // block: 'center',
             })
         }
     }, [activeChapter])
