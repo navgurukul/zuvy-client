@@ -54,7 +54,7 @@ const PraticeProblems = ({ params }: any) => {
             const res = await api.get(
                 `/submission/practiseProblemStatus/${matchingData?.id}?chapterId=${matchingData?.moduleChapterData[0].id}&questionId=${matchingData?.moduleChapterData[0].codingQuestionDetails.id}`
             )
-
+            
             setStudentDetails(res.data.data)
         } catch (error) {
             console.error('API Error:', error)
