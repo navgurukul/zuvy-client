@@ -76,7 +76,7 @@ export default function Page({
                 if (currentModule?.topicName === 'Quiz') {
                     setChapterContent(
                         response.data
-                            .quizQuestionDetails as QuizQuestionDetails[]
+                        // .quizQuestionDetails as QuizQuestionDetails[]
                     )
                 } else if (currentModule?.topicName === 'Coding Question') {
                     setChapterContent(response.data)
@@ -110,6 +110,10 @@ export default function Page({
             setTopicId(0)
         }
     }, [chapterData, fetchChapterContent])
+
+    console.log('topicId', topicId)
+    console.log('chapterContent', chapterContent)
+    console.log('chapter_id', chapter_id)
 
     const renderChapterContent = () => {
         if (
@@ -176,7 +180,8 @@ export default function Page({
                         />
                     )
                 default:
-                    return <h1>Create New Chapter</h1>
+                    return <h1>Hi Punnu</h1>
+                // <h1>Create New Chapter</h1>
             }
         } else {
             return (
