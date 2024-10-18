@@ -443,15 +443,21 @@ export function cleanUpValues(value: string) {
 }
 
 // --------------------------
-
-export function useFirstRenderValue<T>(value: T): T | undefined {
-    const ref = useRef<T | undefined>(undefined)
-
-    useEffect(() => {
-        if (ref.current === undefined) {
-            ref.current = value
-        }
-    }, [value])
-
-    return ref.current
+export const convertSeconds = (seconds: number) => {
+    const SECONDS_IN_A_MINUTE = 60
+    const SECONDS_IN_AN_HOUR = 60 * SECONDS_IN_A_MINUTE
+    const SECONDS_IN_A_DAY = 24 * SECONDS_IN_AN_HOUR
+    const SECONDS_IN_A_WEEK = 7 * SECONDS_IN_A_DAY
+    const SECONDS_IN_A_MONTH = 28 * SECONDS_IN_A_DAY
+    const months = Math.floor(seconds / SECONDS_IN_A_MONTH)
+    seconds %= SECONDS_IN_A_MONTH
+    const weeks = Math.floor(seconds / SECONDS_IN_A_WEEK)
+    seconds %= SECONDS_IN_A_WEEK
+    const days = Math.floor(seconds / SECONDS_IN_A_DAY)
+    seconds %= SECONDS_IN_A_DAY
+    return {
+        months: months,
+        weeks: weeks,
+        days: days,
+    }
 }

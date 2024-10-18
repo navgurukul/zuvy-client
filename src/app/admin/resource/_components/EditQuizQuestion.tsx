@@ -29,7 +29,7 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { Tag } from '../mcq/page'
 import { DialogFooter } from '@/components/ui/dialog'
-import { getAllQuizQuestion, useFirstRenderValue } from '@/utils/admin'
+import { getAllQuizQuestion } from '@/utils/admin'
 import {
     getCodingQuestionTags,
     getmcqdifficulty,

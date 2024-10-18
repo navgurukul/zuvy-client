@@ -112,11 +112,11 @@ function LoginPage({}: Props) {
             ) : (
                 <>
                     <div className="mb-12 mt-28 sm:mt-40 flex flex-col items-center justify-center text-center">
-                        <div className="mx-auto mb-4 flex max-w-fit items-center justify-center space-x-2 rounded-full border border-gray-600 bg-white px-7 py-2 shadow-md backdrop-blur hover:border-gray-600 hover:bg-white/50">
+                        {/* <div className="mx-auto mb-4 flex max-w-fit items-center justify-center space-x-2 rounded-full border border-gray-600 bg-white px-7 py-2 shadow-md backdrop-blur hover:border-gray-600 hover:bg-white/50">
                             <p className="text-sm font-semibold text-gray-700">
                                 Zuvy is under construction
                             </p>
-                        </div>
+                        </div> */}
                         <h1 className="max-w-4xl text-5xl font-bold md:text-6xl lg:text-6xl">
                             Embark your learning journey with
                             <span className="text-[#2f433a]"> Zuvy </span>

@@ -1,3 +1,4 @@
+import React, { useCallback, useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 import {
     BookOpenText,
@@ -8,22 +9,35 @@ import {
     Video,
     BookOpenCheck,
 } from 'lucide-react'
+import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
 
 function StudentChapterItem({
     title,
     topicId,
     chapterId,
     activeChapter,
-    fetchChapterContent,
+    setActiveChapter,
     status,
+    viewcourses,
+    moduleID,
+    activeChapterRef,
 }: {
     title: string
     topicId: number
     chapterId: number
     activeChapter: number
-    fetchChapterContent: (chapterId: number) => void
+    setActiveChapter: any
     status: string
+    viewcourses: any
+    moduleID: any
+    activeChapterRef: any
 }) {
+    const router = useRouter()
+    const pathname = usePathname()
+    const path = pathname.split('/')[1]
+    const instructor = pathname?.includes('/instructor')
+
     // states and variables
     // functions
     const setTopicIcon = () => {
@@ -51,47 +65,54 @@ function StudentChapterItem({
             : 'text-black hover:bg-secondary/20'
     }
 
-    // async
-
-    // useEffect(() => {
-    //     fetchChapterContent(chapterId)
-    // }, [activeChapter])
+    const handleClick = () => {
+        setActiveChapter(chapterId) // Set the active chapter in the parent component
+    }
 
     return (
-        <div>
-            <div
-                className={cn(
-                    'flex rounded-md p-3  my-1 cursor-pointer justify-between items-center',
-                    setActiveChapterItem()
-                )}
-                onClick={() => {
-                    fetchChapterContent(chapterId)
-                }}
+        <div ref={chapterId === activeChapter ? activeChapterRef : null}>
+            <Link
+                // key={id}
+                href={
+                    instructor
+                        ? `/instructor/courses/${viewcourses}/modules/${moduleID}/chapters/${chapterId}`
+                        : `/student/courses/${viewcourses}/modules/${moduleID}/chapters/${chapterId}`
+                }
             >
-                <div className="flex gap-2 text-start capitalize">
-                    <p>{setTopicIcon()} </p>
-                    <p>{title}</p>
-                </div>
-                <div>
-                    {status === 'Pending' ? null : (
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="lucide lucide-circle-check-big text-primary"
-                        >
-                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                            <path d="m9 11 3 3L22 4" />
-                        </svg>
+                <div
+                    className={cn(
+                        'flex rounded-md p-3  my-1 cursor-pointer justify-between items-center',
+                        setActiveChapterItem()
                     )}
+                    onClick={() => {
+                        handleClick()
+                    }}
+                >
+                    <div className="flex gap-2 text-start capitalize">
+                        <p>{setTopicIcon()} </p>
+                        <p>{title}</p>
+                    </div>
+                    <div>
+                        {status === 'Pending' ? null : (
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="lucide lucide-circle-check-big text-primary"
+                            >
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                <path d="m9 11 3 3L22 4" />
+                            </svg>
+                        )}
+                    </div>
                 </div>
-            </div>
+            </Link>
         </div>
     )
 }

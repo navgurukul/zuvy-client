@@ -152,8 +152,11 @@ const Page: React.FC<pageProps> = () => {
                                                     >
                                                         <Link
                                                             className="gap-3 flex items-center text-secondary"
-                                                            href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`}
-                                                        >
+                                                            href={
+                                                                resumeCourse.typeId === 1
+                                                                    ? `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}/chapters/${resumeCourse.newChapter?.id}`
+                                                                    : `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}/project/${resumeCourse.newChapter?.id}`
+                                                            }                                                        >
                                                             <p>
                                                                 Resume Learning
                                                             </p>
@@ -212,8 +215,11 @@ const Page: React.FC<pageProps> = () => {
                                                     >
                                                         <Link
                                                             className="gap-3 flex items-center text-secondary"
-                                                            href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`}
-                                                        >
+                                                            href={
+                                                                resumeCourse.typeId === 1
+                                                                    ? `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}/chapters/${resumeCourse.newChapter?.id}`
+                                                                    : `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}/project/${resumeCourse.newChapter?.id}`
+                                                            }                                                        >
                                                             <p>
                                                                 Resume Learning
                                                             </p>

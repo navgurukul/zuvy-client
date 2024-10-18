@@ -70,7 +70,7 @@ const AddVideo = ({
         contentDetails: ContentDetail[]
     }
     moduleId: string
-    fetchChapterContent: (chapterId: number) => Promise<void>
+    fetchChapterContent: (chapterId: number, topicId: number) => Promise<void>
 }) => {
     const fileInputRef = useRef<HTMLInputElement>(null)
     const [showVideoBox, setShowVideoBox] = useState<boolean>(true)
@@ -111,7 +111,7 @@ const AddVideo = ({
                             'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     setShowVideoBox(true)
-                    fetchChapterContent(content.id)
+                    fetchChapterContent(content.id, content.topicId)
                 })
         } catch (error) {
             toast({

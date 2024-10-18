@@ -184,12 +184,13 @@ function CodingChallenge({
                         setSelectedLanguage={setSelectedLanguage}
                         tags={tags}
                     />
-                    <ScrollArea className="h-dvh pr-4">
+                    {/* <ScrollArea className="h-dvh pr-4"> */}
+                    <ScrollArea className="h-[500px] pr-4">
                         {filteredQuestions?.map((question: any) => (
                             <div
                                 key={question.id}
                                 className={`p-5 rounded-sm ${
-                                    selectedQuestions.some(
+                                    selectedQuestions?.some(
                                         (selectedQuestion) =>
                                             selectedQuestion?.id === question.id
                                     )
@@ -230,7 +231,7 @@ function CodingChallenge({
                                         </Link>
                                     </div>
                                     <div>
-                                        {selectedQuestions.some(
+                                        {selectedQuestions?.some(
                                             (selectedQuestion) =>
                                                 selectedQuestion?.id ===
                                                 question.id

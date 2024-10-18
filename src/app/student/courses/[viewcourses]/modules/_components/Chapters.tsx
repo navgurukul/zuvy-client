@@ -1,20 +1,19 @@
 'use client'
 
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { useLazyLoadedStudentData } from '@/store/store'
+import { useLazyLoadedStudentData, getParamBatchId } from '@/store/store'
+import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import { api } from '@/utils/axios.config'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState, useRef } from 'react'
 import StudentChapterItem from '../../../_components/StudentChapterItem'
-import Video from './Video'
-import Article from './Article'
-import CodingChallenge from './CodingChallenge'
-import Quiz from './Quiz'
-import Assignment from './Assignment'
-import { useParams } from 'next/navigation'
-import Assessment from './Assessment'
-import FeedbackForm from './FeedbackForm'
+import { useParams, usePathname } from 'next/navigation'
 import { getAssessmentShortInfo } from '@/utils/students'
-import Projects from './Projects'
+import {
+    getStudentChapterContentState,
+    getStudentChaptersState,
+    getTopicId,
+    getModuleName,
+} from '@/store/store'
 
 interface Chapter {
     id: number
@@ -26,22 +25,62 @@ interface Chapter {
 
 function Chapters({ params }: any) {
     // misc
+    const pathname = usePathname()
     const { studentData } = useLazyLoadedStudentData()
+    const { paramBatchId } = getParamBatchId()
+    const { moduleName, setModuleName } = getModuleName()
     const userID = studentData?.id && studentData?.id
-    const { viewcourses, moduleID } = useParams()
-    const urlParams = new URLSearchParams(window.location.search)
-    const nextChapterId = Number(urlParams.get('nextChapterId'))
-    // state and variables
-    const [chapters, setChapters] = useState<any>([])
-    const [activeChapter, setActiveChapter] = useState(0)
-    const [topicId, setTopicId] = useState<any>(null)
-    const [chapterContent, setChapterContent] = useState<any>({})
+    const { viewcourses, moduleID, chapterID } = useParams()
+    const chapter_id = Array.isArray(chapterID)
+        ? Number(chapterID[0])
+        : Number(chapterID)
+    const { chapters, setChapters } = getStudentChaptersState()
+    const [activeChapter, setActiveChapter] = useState(chapter_id)
+    const { topicId, setTopicId } = getTopicId()
+    const { chapterContent, setChapterContent } =
+        getStudentChapterContentState()
     const [chapterId, setChapterId] = useState<number>(0)
-    const [projectId, setProjectId] = useState<number>(0)
+    // const [projectId, setProjectId] = useState<number>(0)
     const [assessmentShortInfo, setAssessmentShortInfo] = useState<any>({})
     const [assessmentOutSourceId, setAssessmentOutSourceId] = useState<any>()
     const [submissionId, setSubmissionId] = useState<any>()
-    const [typeId, setTypeId] = useState<any>(null)
+    const scrollAreaRef = useRef<HTMLDivElement>(null)
+    const activeChapterRef = useRef<HTMLDivElement | null>(null)
+    const isInstructor = pathname?.includes('/instructor')
+
+    const studentCrumbs = [
+        {
+            crumb: 'Courses',
+            href: '/student/courses',
+            isLast: false,
+        },
+        {
+            crumb: 'Curriculum',
+            href: `/student/courses/${viewcourses}/batch/${paramBatchId}`,
+            isLast: false,
+        },
+        {
+            crumb: moduleName,
+            isLast: true,
+        },
+    ]
+
+    const InstructorCrumbs = [
+        {
+            crumb: 'Courses',
+            href: '/instructor/courses',
+            isLast: false,
+        },
+        {
+            crumb: 'Curriculum',
+            href: `/instructor/courses/${viewcourses}`,
+            isLast: false,
+        },
+        {
+            crumb: moduleName,
+            isLast: true,
+        },
+    ]
 
     // func [viewcourses]   [courseId]
     const fetchChapters = useCallback(async () => {
@@ -50,134 +89,23 @@ function Chapters({ params }: any) {
                 `tracking/getAllChaptersWithStatus/${moduleID}`
             )
             setChapters(response.data.trackingData)
-            const firstPending = response.data.trackingData.find(
-                (chapter: Chapter) => chapter.status === 'Pending'
-            )
-            // console.log('response in firstPending.id', response)
-            // console.log(
-            //     'nextChapterId || firstPending.id in if',
-            //     nextChapterId ? nextChapterId : firstPending.id
-            // )
-            // setActiveChapter(nextChapterId || firstPending.id)
-            // fetchChapterContent(nextChapterId || firstPending.id)
-            setTypeId(response?.data.moduleDetails[0]?.typeId)
-            setProjectId(response?.data.moduleDetails[0]?.projectId)
-            setActiveChapter(firstPending?.id)
-            fetchChapterContent(firstPending?.id)
+            // setProjectId(response?.data.moduleDetails[0]?.projectId)
         } catch (error) {
             console.log(error)
         }
     }, [])
 
-    const fetchChapterContent = useCallback(
-        async (chapterId: number) => {
-            if (!userID) return
-            try {
-                const response = await api.get(
-                    `/tracking/getChapterDetailsWithStatus/${chapterId}`
-                    // `/tracking/getChapterDetailsWithStatus/${nextChapterId}`
-                )
-                // console.log('response', response)
-                // console.log(
-                //     'nextChapterId || chapterId',
-                //     nextChapterId || chapterId
-                // )
-                // setActiveChapter(nextChapterId || chapterId)
-                // setChapterId(nextChapterId || response.data.trackingData.id)
-
-                setActiveChapter(chapterId)
-                setChapterId(response.data.trackingData.id)
-                setTopicId(response.data.trackingData.topicId)
-                setChapterContent(response.data.trackingData)
-            } catch (error) {
-                console.error('Error fetching chapter content:', error)
-            }
-        },
-        [userID]
-    )
-
-    const completeChapter = async () => {
-        try {
-            await api.post(
-                `tracking/updateChapterStatus/${viewcourses}/${moduleID}?chapterId=${activeChapter}`
-            )
-            await fetchChapters()
-        } catch (error) {
-            console.error('Error updating chapter status:', error)
+    useEffect(() => {
+        if (activeChapterRef.current) {
+            // Only scroll if it's not triggered by a chapter click
+            setTimeout(() => {
+                activeChapterRef.current?.scrollIntoView({
+                    block: 'center',
+                    // behavior: 'smooth',
+                })
+            }, 100)
         }
-    }
-
-    const renderChapterContent = () => {
-        switch (topicId) {
-            case 1:
-                return (
-                    <Video
-                        content={chapterContent}
-                        completeChapter={completeChapter}
-                    />
-                )
-            case 2:
-                return (
-                    <Article
-                        content={chapterContent}
-                        completeChapter={completeChapter}
-                        key={chapterContent.id}
-                    />
-                )
-            case 3:
-                return (
-                    <CodingChallenge
-                        content={chapterContent}
-                        completeChapter={completeChapter}
-                        fetchChapters={fetchChapters}
-                    />
-                )
-            case 4:
-                return (
-                    <Quiz
-                        content={chapterContent}
-                        moduleId={moduleID.toString()}
-                        // moduleId={moduleIdString}
-                        chapterId={chapterId}
-                        bootcampId={+viewcourses}
-                        fetchChapters={completeChapter}
-                    />
-                )
-            case 5:
-                return (
-                    <Assignment
-                        content={chapterContent}
-                        moduleId={+moduleID}
-                        projectId={projectId}
-                        bootcampId={+viewcourses}
-                        completeChapter={completeChapter}
-                    />
-                )
-            case 6:
-                return (
-                    <Assessment
-                        assessmentShortInfo={assessmentShortInfo}
-                        assessmentOutSourceId={assessmentOutSourceId}
-                        submissionId={submissionId}
-                        chapterContent={chapterContent}
-                    />
-                )
-            case 7:
-                return (
-                    <FeedbackForm
-                        content={chapterContent}
-                        moduleId={moduleID.toString()}
-                        // moduleId={moduleIdString}
-                        chapterId={chapterId}
-                        bootcampId={+viewcourses}
-                        completeChapter={completeChapter}
-                        // bootcampId={viewcourses}
-                    />
-                )
-            default:
-                return <h1>No Chapters Available Right Now</h1>
-        }
-    }
+    }, [activeChapter, chapters])
 
     // async
     useEffect(() => {
@@ -188,9 +116,28 @@ function Chapters({ params }: any) {
 
     useEffect(() => {
         if (chapters.length > 0) {
-            fetchChapterContent(chapters[0]?.id)
+            setChapterId(chapter_id)
+            setActiveChapter(chapter_id)
         }
-    }, [chapters])
+    }, [chapters, chapter_id])
+
+    const getModule = useCallback(async () => {
+        try {
+            const response = await api.get(
+                `tracking/getAllChaptersWithStatus/${moduleID}`
+            )
+            setModuleName(response.data.moduleDetails[0].name)
+        } catch (error) {
+            console.log(error)
+        }
+    }, [])
+
+    // async
+    useEffect(() => {
+        if (userID) {
+            getModule()
+        }
+    }, [userID, getModule])
 
     useEffect(() => {
         if (topicId === 6) {
@@ -208,39 +155,35 @@ function Chapters({ params }: any) {
 
     return (
         <>
-            {chapters.length > 0 ? (
-                <div className="grid  grid-cols-4 mt-5">
-                    <div className=" col-span-1">
-                        <ScrollArea className="h-dvh pr-4">
-                            {chapters?.map((item: any, index: any) => {
-                                return (
-                                    <StudentChapterItem
-                                        key={item.id}
-                                        chapterId={item.id}
-                                        title={item.title}
-                                        topicId={item.topicId}
-                                        fetchChapterContent={
-                                            fetchChapterContent
-                                        }
-                                        activeChapter={activeChapter}
-                                        status={item.status}
-                                    />
-                                )
-                            })}
-                        </ScrollArea>
-                    </div>
-                    <div className="col-span-3 mx-4">
-                        {renderChapterContent()}
-                    </div>
-                </div>
-            ) : (
-                <Projects
-                    moduleId={+moduleID}
-                    projectId={projectId}
-                    bootcampId={+viewcourses}
-                    completeChapter={completeChapter}
+            <div className="mb-5">
+                <BreadcrumbComponent
+                    crumbs={isInstructor ? InstructorCrumbs : studentCrumbs}
                 />
-            )}
+            </div>
+            <ScrollArea
+                className="h-[500px] lg:h-[670px] pr-4"
+                type="hover"
+                ref={scrollAreaRef}
+            >
+                {chapters?.map((item: any, index: any) => {
+                    const isLastItem = index === chapters.length - 1
+
+                    return (
+                        <StudentChapterItem
+                            key={item.id}
+                            chapterId={item.id}
+                            title={item.title}
+                            topicId={item.topicId}
+                            activeChapter={activeChapter}
+                            setActiveChapter={setActiveChapter}
+                            status={item.status}
+                            viewcourses={viewcourses}
+                            moduleID={moduleID}
+                            activeChapterRef={activeChapterRef}
+                        />
+                    )
+                })}
+            </ScrollArea>
         </>
     )
 }
