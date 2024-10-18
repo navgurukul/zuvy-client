@@ -172,6 +172,7 @@ function ChapterContent() {
                             content={chapterContent}
                             completeChapter={completeChapter}
                             key={chapterContent.id}
+                            status={chapterContent?.status}
                         />
                     )
                 case 3:
