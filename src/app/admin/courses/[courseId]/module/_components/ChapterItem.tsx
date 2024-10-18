@@ -15,7 +15,6 @@ import DeleteConfirmationModal from '../../_components/deleteModal'
 import { useState } from 'react'
 import { DELETE_CHAPTER_CONFIRMATION } from '@/utils/constant'
 import { toast } from '@/components/ui/use-toast'
-import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 
 function ChapterItem({
@@ -74,6 +73,9 @@ function ChapterItem({
 
     const handleClick = () => {
         setActiveChapter(chapterId) // Set the active chapter in the parent component
+        router.push(
+            `/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterId}`
+        )
     }
 
     const handleDeleteChapter = async () => {
@@ -110,35 +112,31 @@ function ChapterItem({
 
     return (
         <div ref={chapterId === activeChapter ? activeChapterRef : null}>
-            <Link
-                href={`/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterId}`}
+            <div
+                className={cn(
+                    'flex rounded-md p-3  my-1 cursor-pointer justify-between items-center',
+                    setActiveChapterItem()
+                )}
+                onClick={() => {
+                    handleClick()
+                }}
             >
-                <div
-                    className={cn(
-                        'flex rounded-md p-3  my-1 cursor-pointer justify-between items-center',
-                        setActiveChapterItem()
-                    )}
-                    onClick={() => {
-                        handleClick()
-                    }}
-                >
-                    <div className="flex gap-2 capitalize">
-                        <p>{setTopicIcon()} </p>
-                        <p>{title}</p>
-                    </div>
-                    <div className="flex">
-                        <Trash2
-                            onClick={(e) => {
-                                e.stopPropagation()
-                                handleDeleteModal()
-                            }}
-                            className="hover:text-destructive cursor-pointer"
-                            size={15}
-                        />
-                        <GripVertical size={15} />
-                    </div>
+                <div className="flex gap-2 capitalize">
+                    <p>{setTopicIcon()} </p>
+                    <p>{title}</p>
                 </div>
-            </Link>
+                <div className="flex">
+                    <Trash2
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            handleDeleteModal()
+                        }}
+                        className="hover:text-destructive cursor-pointer"
+                        size={15}
+                    />
+                    <GripVertical size={15} />
+                </div>
+            </div>
             <DeleteConfirmationModal
                 isOpen={isDeleteModalOpen}
                 onClose={() => setDeleteModalOpen(false)}

@@ -229,9 +229,15 @@ export const handlerQuizQuestions = (
 export async function getAllTags(setTags: any) {
     const response = await api.get('Content/allTags')
     if (response) {
+        const transformedData = response.data.allTags.map(
+            (item: { id: any; tagName: any }) => ({
+                value: item.id.toString(),
+                label: item.tagName,
+            })
+        )
         const tagArr = [
-            { tagName: 'All Topics', id: -1 },
-            ...response.data.allTags,
+            { value: '-1', label: 'All Topics' },
+            ...transformedData,
         ]
         setTags(tagArr)
     }
@@ -240,25 +246,35 @@ export async function getAllTags(setTags: any) {
 // AddAssessment.tsx functions:-
 export async function filteredCodingQuestions(
     setFilteredQuestions: any,
-    selectedDifficulty: string,
-    selectedTopic: any,
+    difficulty: any,
+    selectedOptions: any,
     selectedLanguage: string,
     debouncedSearch: string
 ) {
     try {
         let url = `/Content/allCodingQuestions`
 
+        let selectedTagIds = ''
+        selectedOptions.map(
+            (item: any) => (selectedTagIds += '&tagId=' + item.value)
+        )
+
+        let selectedDiff = ''
+        difficulty.map(
+            (item: any) => (selectedDiff += '&difficulty=' + item.value)
+        )
+
         const queryParams = []
 
-        if (selectedTopic?.id !== -1) {
-            queryParams.push(`tagId=${selectedTopic.id}`)
+        if (selectedTagIds.length > 0) {
+            if (selectedOptions[0].value !== '-1') {
+                queryParams.push(selectedTagIds.substring(1))
+            }
         }
-        if (
-            selectedDifficulty &&
-            selectedDifficulty !== 'None' &&
-            selectedDifficulty !== 'Any Difficulty'
-        ) {
-            queryParams.push(`difficulty=${selectedDifficulty}`)
+        if (difficulty.length > 0) {
+            if (difficulty[0].value !== 'None') {
+                queryParams.push(selectedDiff.substring(1))
+            }
         }
         if (debouncedSearch) {
             queryParams.push(`searchTerm=${debouncedSearch}`)
@@ -322,25 +338,35 @@ export async function filteredQuizQuestions(
 
 export async function filteredOpenEndedQuestions(
     setFilteredQuestions: any,
-    selectedDifficulty: string,
-    selectedTopic: any,
+    difficulty: any,
+    selectedOptions: any,
     selectedLanguage: string,
     debouncedSearch: string
 ) {
     try {
         let url = `/Content/openEndedQuestions`
 
+        let selectedTagIds = ''
+        selectedOptions.map(
+            (item: any) => (selectedTagIds += '&tagId=' + item.value)
+        )
+
+        let selectedDiff = ''
+        difficulty.map(
+            (item: any) => (selectedDiff += '&difficulty=' + item.value)
+        )
+
         const queryParams = []
 
-        if (selectedTopic?.id !== -1) {
-            queryParams.push(`tagId=${selectedTopic.id}`)
+        if (selectedTagIds.length > 0) {
+            if (selectedOptions[0].value !== '-1') {
+                queryParams.push(selectedTagIds.substring(1))
+            }
         }
-        if (
-            selectedDifficulty &&
-            selectedDifficulty !== 'None' &&
-            selectedDifficulty !== 'Any Difficulty'
-        ) {
-            queryParams.push(`difficulty=${selectedDifficulty}`)
+        if (difficulty.length > 0) {
+            if (difficulty[0].value !== 'None') {
+                queryParams.push(selectedDiff.substring(1))
+            }
         }
         if (debouncedSearch) {
             queryParams.push(`searchTerm=${debouncedSearch}`)
@@ -353,6 +379,87 @@ export async function filteredOpenEndedQuestions(
 
         const response = await api.get(url)
         setFilteredQuestions(response.data.data)
+    } catch (error) {
+        console.error('Error:', error)
+    }
+}
+
+export async function filterQuestions(
+    setFilteredQuestions: any,
+    selectedDifficulties: any[], // Array of difficulties
+    selectedTopics: any[], // Array of topics
+    selectedLanguage: string,
+    debouncedSearch: string,
+    questionType: string // Type of question to determine the endpoint
+) {
+    try {
+        // Set the endpoint based on question type
+        let url = ''
+
+        switch (questionType) {
+            case 'coding':
+                url = `/Content/allCodingQuestions`
+                break
+            case 'mcq':
+                url = `/Content/allQuizQuestions`
+                break
+            case 'open-ended':
+                url = `/Content/openEndedQuestions`
+                break
+        }
+
+        const queryParams: string[] = []
+
+        // Handle multiple selected topics (tags), but ignore 'All Topics' (id: -1 or 0)
+        let selectedTagIds = ''
+        selectedTopics.forEach((topic: any) => {
+            if (topic.id !== -1 && topic.id !== 0) {
+                // Skip 'All Topics'
+                selectedTagIds += `&tagId=${topic.id}`
+            }
+        })
+
+        // Handle multiple selected difficulties, but ignore 'Any Difficulty'
+        let selectedDiff = ''
+        selectedDifficulties.forEach((difficulty: string) => {
+            if (difficulty !== 'Any Difficulty') {
+                selectedDiff += `&difficulty=${difficulty}`
+            }
+        })
+
+        // Add valid topics to query params
+        if (selectedTagIds.length > 0) {
+            queryParams.push(selectedTagIds.substring(1)) // Remove the first '&'
+        }
+
+        // Add valid difficulties to query params
+        if (selectedDiff.length > 0) {
+            queryParams.push(selectedDiff.substring(1)) // Remove the first '&'
+        }
+
+        // Add search term if provided
+        if (debouncedSearch) {
+            queryParams.push(`searchTerm=${debouncedSearch}`)
+        }
+
+        // Combine query parameters into the URL
+        if (queryParams.length > 0) {
+            url += '?' + queryParams.join('&')
+        }
+
+        const response = await api.get(url)
+
+        // Additional filtering for quiz questions, if needed
+        if (questionType === 'quiz') {
+            const filtered = response.data.filter(
+                (question: any) =>
+                    selectedDifficulties.includes('Any Difficulty') ||
+                    selectedDifficulties.includes(question.difficulty)
+            )
+            setFilteredQuestions(filtered)
+        } else {
+            setFilteredQuestions(response.data.data || response.data)
+        }
     } catch (error) {
         console.error('Error:', error)
     }
