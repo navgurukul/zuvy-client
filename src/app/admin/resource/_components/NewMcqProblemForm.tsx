@@ -1,59 +1,43 @@
-// External imports
-import React, { useState } from 'react'
-import * as z from 'zod'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Plus, X } from 'lucide-react'
+'use client'
 
-// Internal imports
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useFieldArray, useForm } from 'react-hook-form'
+import { z } from 'zod'
+
+import { Button } from '@/components/ui/button'
 import {
     Form,
     FormControl,
+    FormDescription,
     FormField,
     FormItem,
     FormLabel,
     FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Tag } from '../mcq/page'
 import {
-    SelectValue,
-    SelectTrigger,
+    Select,
     SelectContent,
     SelectItem,
-    Select,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { api } from '@/utils/axios.config'
-import { toast } from '@/components/ui/use-toast'
-import { Tag } from '../mcq/page'
+import { useState } from 'react'
+import TipTapForForm from './TipTapForForm'
 
-type Props = {}
-
-export type RequestBodyType = {
-    questions: {
-        question: string
-        options: { [key: number]: string }
-        correctOption: number
-        mark: number
-        tagId: number
-        difficulty: string
-    }[]
-}
 const formSchema = z.object({
-    difficulty: z.enum(['Easy', 'Medium', 'Hard'], {
-        required_error: 'You need to select a Difficulty type.',
-    }),
+    difficulty: z.enum(['Easy', 'Medium', 'Hard']),
     topics: z.number().min(1, 'You need to select a Topic'),
-    questionText: z.string().min(1, {
-        message: 'Question Text must be at least 1 characters.',
-    }),
-    options: z.array(z.string()),
-    selectedOption: z.number(),
+    variants: z.array(
+        z.object({
+            questionText: z.string().nonempty('Question text is required'),
+        })
+    ),
 })
 
-const NewMcqProblemForm = ({
+export default function NewMcqForm({
     tags,
     closeModal,
     setStoreQuizData,
@@ -63,173 +47,98 @@ const NewMcqProblemForm = ({
     closeModal: () => void
     setStoreQuizData: any
     getAllQuizQuesiton: any
-}) => {
-    const [selectedOption, setSelectedOption] = useState<number>(1)
-    const [options, setOptions] = useState<string[]>(['', ''])
-    const [variants, setVariants] = useState<number[]>([1])
-    const [selectedVariant, setSelectedVariant] = useState<number>(0)
-    const [hoveredVariantIndex, setHoveredVariantIndex] = useState<
-        number | null
-    >(null)
+}) {
+    const [showTagName, setShowTagName] = useState<boolean>(false)
+    const [activeVariantIndex, setActiveVariantIndex] = useState<number>(0)
 
-    const addOption = () => {
-        setOptions([...options, ''])
-    }
+    const [selectedTag, setSelectedTag] = useState<{
+        id: number
+        tagName: String
+    }>({ id: 0, tagName: '' })
+    const difficulties = ['Easy', 'Medium', 'Hard']
 
-    const removeOption = (index: number) => {
-        if (options.length > 2) {
-            const newOptions = options.filter((_, i) => i !== index)
-            setOptions(newOptions)
-            form.setValue('options', newOptions)
-        }
-    }
-
-    const handleCreateQuizQuestion = async (requestBody: RequestBodyType) => {
-        try {
-            await api.post(`/Content/quiz`, requestBody).then((res) => {
-                toast({
-                    title: res.data.status || 'Success',
-                    description: res.data.message || 'Quiz Question Created',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
-                })
-            })
-        } catch (error) {
-            toast({
-                title: 'Error',
-                description:
-                    'There was an error creating the quiz question. Please try again.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-            })
-        }
-    }
-
+    // ...
     const form = useForm<z.infer<typeof formSchema>>({
+        mode: 'onChange',
         resolver: zodResolver(formSchema),
         defaultValues: {
             difficulty: 'Easy',
             topics: 0,
-            questionText: '',
-            options: options,
-            selectedOption: 1,
+            variants: [{ questionText: '' }],
         },
     })
-
-    const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-        const emptyOptions = values.options.some(
-            (option) => option.trim() === ''
-        )
-
-        if (emptyOptions) {
-            toast({
-                title: 'Error',
-                description: 'Options cannot be empty',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-            })
-            return
-        }
-
-        const optionsObject: { [key: number]: string } = options.reduce(
-            (acc, option, index) => {
-                acc[index + 1] = option
-                return acc
-            },
-            {} as { [key: number]: string }
-        )
-
-        const formattedData = {
-            question: values.questionText,
-            options: optionsObject,
-            correctOption: selectedOption + 1,
-            mark: 1,
-            tagId: values.topics,
-            difficulty: values.difficulty,
-        }
-
-        const requestBody = {
-            questions: [formattedData],
-        }
-
-        console.log(requestBody)
-
-        // await handleCreateQuizQuestion(requestBody)
-        // getAllQuizQuesiton(setStoreQuizData)
-        // closeModal()
+    const { fields, append, remove } = useFieldArray({
+        control: form.control,
+        name: 'variants',
+    })
+    function onSubmit(values: z.infer<typeof formSchema>) {
+        console.log(values)
     }
 
-    const addVariantHandler = () => {
-        setVariants((prevVariants) => [
-            ...prevVariants,
-            prevVariants.length + 1,
-        ])
+    const handleAddVariant = () => {
+        append({ questionText: '' })
+        // Set the active index to the newly added variant
+        setActiveVariantIndex(fields.length) // fields.length is the index of the new item
     }
-    const removeVariant = (indexToRemove: number) => {
-        setVariants((prevVariants) =>
-            prevVariants.filter((_, index) => index !== indexToRemove)
-        )
+
+    const handleRemoveVariant = (index: number) => {
+        if (fields.length > 1) {
+            remove(index)
+            // Adjust the active variant index to stay within bounds
+            if (activeVariantIndex >= fields.length - 1) {
+                setActiveVariantIndex(fields.length - 2)
+            }
+        }
     }
 
     return (
-        <main className="flex flex-col p-3 items-center justify-center">
-            <Form {...form}>
-                <form
-                    onSubmit={form.handleSubmit(handleSubmit)}
-                    className="max-w-md w-full flex flex-col gap-4"
-                >
-                    <FormField
-                        control={form.control}
-                        name="difficulty"
-                        render={({ field }) => (
-                            <FormItem className="space-y-3">
-                                <FormControl>
-                                    <RadioGroup
-                                        onValueChange={field.onChange}
-                                        defaultValue={field.value}
-                                        className="flex space-y-1"
-                                    >
-                                        <FormLabel className="mt-5">
-                                            Difficulty
-                                        </FormLabel>
-                                        <FormItem className="flex items-center space-x-3 space-y-0">
-                                            <FormControl>
-                                                <RadioGroupItem value="Easy" />
-                                            </FormControl>
-                                            <FormLabel className="font-normal">
-                                                Easy
-                                            </FormLabel>
-                                        </FormItem>
-                                        <FormItem className="flex items-center space-x-3 space-y-0">
-                                            <FormControl>
-                                                <RadioGroupItem value="Medium" />
-                                            </FormControl>
-                                            <FormLabel className="font-normal">
-                                                Medium
-                                            </FormLabel>
-                                        </FormItem>
-                                        <FormItem className="flex items-center space-x-3 space-y-0">
-                                            <FormControl>
-                                                <RadioGroupItem value="Hard" />
-                                            </FormControl>
-                                            <FormLabel className="font-normal">
-                                                Hard
-                                            </FormLabel>
-                                        </FormItem>
-                                    </RadioGroup>
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="topics"
-                        render={({ field }) => {
-                            return (
-                                <FormItem className="text-left w-full">
-                                    <FormLabel>Topics</FormLabel>
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <FormField
+                    control={form.control}
+                    name="difficulty"
+                    render={({ field }) => (
+                        <FormItem className="space-y-3">
+                            <FormControl>
+                                <RadioGroup
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                    className="flex space-y-1"
+                                >
+                                    <FormLabel className="mt-5">
+                                        Difficulty
+                                    </FormLabel>
+                                    {difficulties.map((difficulty) => {
+                                        return (
+                                            <FormItem
+                                                key={difficulty}
+                                                className="flex items-center space-x-3 space-y-0"
+                                            >
+                                                <FormControl>
+                                                    <RadioGroupItem
+                                                        value={difficulty}
+                                                    />
+                                                </FormControl>
+                                                <FormLabel className="font-normal">
+                                                    {difficulty}
+                                                </FormLabel>
+                                            </FormItem>
+                                        )
+                                    })}
+                                </RadioGroup>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="topics"
+                    render={({ field }) => {
+                        return (
+                            <FormItem className="text-left w-full">
+                                <FormLabel>Topics</FormLabel>
+                                <div className="flex gap-x-4  ">
                                     <Select
                                         onValueChange={(value) => {
                                             const selectedTag = tags?.find(
@@ -238,10 +147,12 @@ const NewMcqProblemForm = ({
                                             )
                                             if (selectedTag) {
                                                 field.onChange(selectedTag.id)
+                                                setSelectedTag(selectedTag)
+                                                setShowTagName(true)
                                             }
                                         }}
                                     >
-                                        <FormControl>
+                                        <FormControl className="w-1/2">
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Choose Topic" />
                                             </SelectTrigger>
@@ -257,167 +168,87 @@ const NewMcqProblemForm = ({
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )
-                        }}
-                    />
+                                    {showTagName && (
+                                        <div className="flex items-start gap-x-2 bg-[#FFF3E3] pt-1 px-2 rounded-lg  ">
+                                            <h1 className="mt-1 text-sm">
+                                                {selectedTag.tagName}
+                                            </h1>
+                                            <span
+                                                onClick={() =>
+                                                    setShowTagName(false)
+                                                }
+                                                className="cursor-pointer"
+                                            >
+                                                x
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                                <FormMessage />
+                            </FormItem>
+                        )
+                    }}
+                />
 
-                    <div className="flex flex-start">
-                        {variants.map((variant, index) => (
-                            <div
-                                key={index}
-                                onMouseEnter={() =>
-                                    setHoveredVariantIndex(index)
+                <div className="space-y-4">
+                    <div className="flex space-x-4">
+                        {fields.map((field, index) => (
+                            <Button
+                                key={field.id}
+                                variant={
+                                    activeVariantIndex === index
+                                        ? 'default'
+                                        : 'ghost'
                                 }
-                                onMouseLeave={() =>
-                                    setHoveredVariantIndex(null)
-                                }
-                                className="relative flex items-center gap-x-5"
+                                onClick={() => setActiveVariantIndex(index)} // Set active variant index
                             >
-                                <Button
-                                    className={`flex items-center ${
-                                        selectedVariant === index
-                                            ? 'border-b-2 border-secondary'
-                                            : ''
-                                    } rounded-none transition-colors duration-200 relative`}
-                                    variant={'ghost'}
-                                    onClick={() => setSelectedVariant(index)}
-                                >
-                                    Variant {variant}
-                                    {hoveredVariantIndex === index &&
-                                        index !== 0 && ( // Prevent X icon for Variant 1 (index 0)
-                                            <X
-                                                onClick={(e) => {
-                                                    e.stopPropagation() // Prevent button click when clicking X
-                                                    removeVariant(index)
-                                                }}
-                                                size={20}
-                                                className="text-destructive "
-                                            />
-                                        )}
-                                </Button>
-                            </div>
+                                Variant {index + 1}
+                            </Button>
                         ))}
-
-                        <Button onClick={addVariantHandler} variant={'ghost'}>
+                        <Button
+                            type="button"
+                            onClick={() => append({ questionText: '' })}
+                            variant={'ghost'}
+                        >
                             + Add Variant
                         </Button>
                     </div>
 
-                    <FormField
-                        control={form.control}
-                        name="questionText"
-                        render={({ field }) => {
-                            return (
-                                <FormItem className="text-left">
+                    {/* Only display the active variant */}
+                    {fields.length > 0 && (
+                        <FormField
+                            key={fields[activeVariantIndex]?.id}
+                            control={form.control}
+                            name={`variants.${activeVariantIndex}.questionText`}
+                            render={({ field }) => (
+                                <FormItem className="text-left w-full">
                                     <FormLabel>Question Text</FormLabel>
                                     <FormControl>
-                                        <Textarea
-                                            placeholder="Write your Question here"
-                                            {...field}
+                                        <TipTapForForm
+                                            description={field.value}
+                                            onChange={field.onChange}
                                         />
                                     </FormControl>
                                     <FormMessage />
-                                </FormItem>
-                            )
-                        }}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="options"
-                        render={({ field }) => (
-                            <FormItem className="space-y-3 ">
-                                <FormLabel className="mt-5">
-                                    <h1 className="text-left">Options</h1>
-                                </FormLabel>
-                                <RadioGroup
-                                    onValueChange={(value) => {
-                                        const numericValue = Number(value)
-                                        setSelectedOption(numericValue)
-                                        form.setValue(
-                                            'selectedOption',
-                                            numericValue
-                                        )
-                                    }}
-                                    value={selectedOption.toString()}
-                                    className="space-y-1"
-                                >
-                                    {options.map((option, index) => (
-                                        <div
-                                            key={index}
-                                            className="flex items-center space-x-3 space-y-0"
+                                    {activeVariantIndex > 0 && (
+                                        <Button
+                                            type="button"
+                                            onClick={() =>
+                                                remove(activeVariantIndex)
+                                            }
+                                            className="mt-2 text-red-500 bg-white"
                                         >
-                                            <div className="flex gap-x-3 items-center">
-                                                <RadioGroupItem
-                                                    value={index.toString()}
-                                                />
-                                                <Input
-                                                    placeholder={`Option ${
-                                                        index + 1
-                                                    }`}
-                                                    {...form.register(
-                                                        `options.${index}`
-                                                    )}
-                                                    className="w-[350px]"
-                                                    value={option}
-                                                    onChange={(e) => {
-                                                        const newOptions = [
-                                                            ...options,
-                                                        ]
-                                                        newOptions[index] =
-                                                            e.target.value
-                                                        setOptions(newOptions)
-                                                        form.setValue(
-                                                            'options',
-                                                            newOptions
-                                                        )
-                                                    }}
-                                                />
-                                            </div>
-                                            {options.length > 2 &&
-                                                index >= 2 && (
-                                                    <Button
-                                                        variant={'ghost'}
-                                                        onClick={() =>
-                                                            removeOption(index)
-                                                        }
-                                                        type="button"
-                                                    >
-                                                        <X
-                                                            size={15}
-                                                            className="text-destructive"
-                                                        />
-                                                    </Button>
-                                                )}
-                                        </div>
-                                    ))}
-                                </RadioGroup>
-                                <FormMessage />
-                                <div className="flex justify-start">
-                                    <Button
-                                        variant={'outline'}
-                                        onClick={addOption}
-                                        type="button"
-                                    >
-                                        <Plus
-                                            size={20}
-                                            className="text-secondary"
-                                        />{' '}
-                                        Add Option
-                                    </Button>
-                                </div>
-                            </FormItem>
-                        )}
-                    />
+                                            Remove Variant
+                                        </Button>
+                                    )}
+                                </FormItem>
+                            )}
+                        />
+                    )}
+                </div>
 
-                    <Button type="submit" className="w-1/3">
-                        + Create MCQ
-                    </Button>
-                </form>
-            </Form>
-        </main>
+                <Button type="submit">Submit</Button>
+            </form>
+        </Form>
     )
 }
-
-export default NewMcqProblemForm

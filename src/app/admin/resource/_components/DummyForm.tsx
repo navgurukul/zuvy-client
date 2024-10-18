@@ -1,4 +1,5 @@
 // External imports
+'use client'
 import React, { useState } from 'react'
 import * as z from 'zod'
 import { useForm } from 'react-hook-form'
@@ -45,7 +46,7 @@ const formSchema = z.object({
     difficulty: z.enum(['Easy', 'Medium', 'Hard'], {
         required_error: 'You need to select a Difficulty type.',
     }),
-    topics: z.number().min(1, 'You need to select a Topic'),
+    topics: z.number().min(-1, 'You need to select a Topic'),
     variants: z.array(
         z.object({
             questionText: z.string().min(1, {
@@ -163,7 +164,7 @@ const NewMcqProblemForm = ({
     }
 
     return (
-        <main className="flex flex-col p-3 items-center justify-center">
+        <main className="flex flex-col p-3 items-center justify-center mr-14">
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(handleSubmit)}
@@ -270,17 +271,6 @@ const NewMcqProblemForm = ({
                                     onClick={() => setSelectedVariant(index)}
                                 >
                                     Variant {index + 1}
-                                    {hoveredVariantIndex === index &&
-                                        index !== 0 && (
-                                            <X
-                                                onClick={(e) => {
-                                                    e.stopPropagation() // Prevent button click when clicking X
-                                                    removeVariant(index)
-                                                }}
-                                                size={20}
-                                                className="text-destructive"
-                                            />
-                                        )}
                                 </Button>
                             </div>
                         ))}
@@ -442,10 +432,11 @@ const NewMcqProblemForm = ({
                             </FormItem>
                         )}
                     />
-
-                    <Button type="submit" className="w-1/3">
-                        + Create MCQ
-                    </Button>
+                    <div className="flex items-end justify-end ">
+                        <Button type="submit" className="w-1/3 flex">
+                            Add Question
+                        </Button>
+                    </div>
                 </form>
             </Form>
         </main>

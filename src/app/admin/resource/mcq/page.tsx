@@ -22,7 +22,7 @@ import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Separator } from '@/components/ui/separator'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { columns } from './column'
-import NewMcqProblemForm from '../_components/NewMcqProblemForm'
+import NewMcqForm from '../_components/NewMcqProblemForm'
 import { api } from '@/utils/axios.config'
 import {
     getAllQuizData,
@@ -150,16 +150,18 @@ const Mcqs = (props: Props) => {
                         <ChevronLeft />
                         <h1>MCQ Problems</h1>
                     </div>
-                    <h1 className="text-xl mb-4 text-center w-full items-start justify-start">
-                        New MCQ
-                    </h1>
-                    <div className="flex flex-col items-center justify-center w-screen">
+                    <div className="flex items-center justify-center w-full">
+                        <h1 className="text-xl mb-4 font-semibold text-start w-1/5 justify-start ">
+                            New MCQ
+                        </h1>
+                    </div>
+                    <div className="flex flex-col items-center justify-center ">
                         <RadioGroup
                             className="flex flex-col items-center w-1/2"
                             defaultValue="oneatatime"
                             onValueChange={(value) => setMcqType(value)}
                         >
-                            <div className="flex w-1/3 items-start justify-start gap-3">
+                            <div className="flex w-1/2  items-start justify-start ml-9 gap-3">
                                 <div className="flex  space-x-2">
                                     <RadioGroupItem
                                         value="bulk"
@@ -182,19 +184,19 @@ const Mcqs = (props: Props) => {
                         {mcqType === 'bulk' ? (
                             <BulkUploadMcq />
                         ) : (
-                            <div className="flex items-center justify-center w-screen ">
-                                {/* <NewMcqProblemForm
-                                    tags={tags}
-                                    closeModal={closeModal}
-                                    setStoreQuizData={setStoreQuizData}
-                                    getAllQuizQuesiton={getAllQuizQuestion}
-                                /> */}
-                                <NewMcqProblemFormNew
+                            <div className="flex items-start justify-center w-screen ">
+                                <NewMcqForm
                                     tags={tags}
                                     closeModal={closeModal}
                                     setStoreQuizData={setStoreQuizData}
                                     getAllQuizQuesiton={getAllQuizQuestion}
                                 />
+                                {/* <NewMcqProblemFormNew
+                                    tags={tags}
+                                    closeModal={closeModal}
+                                    setStoreQuizData={setStoreQuizData}
+                                    getAllQuizQuesiton={getAllQuizQuestion}
+                                /> */}
                             </div>
                         )}
                     </div>

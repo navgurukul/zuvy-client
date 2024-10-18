@@ -286,7 +286,6 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
     )
 
     const renderChapterContent = () => {
-
         switch (topicId) {
             case 1:
                 return (
@@ -418,7 +417,7 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
     }
 
     return (
-        <>
+        <div>
             <BreadcrumbComponent crumbs={crumbs} />
             {!projectId ? (
                 <div className="grid  grid-cols-4 mt-5">
@@ -601,7 +600,7 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                     </div>
                 </div>
             )}
-        </>
+        </div>
     )
 }
 

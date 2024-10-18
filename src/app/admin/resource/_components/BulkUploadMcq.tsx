@@ -46,7 +46,7 @@ const BulkUploadMcq = (props: Props) => {
     }
 
     return (
-        <main className="flex flex-col  items-center w-screen p-3">
+        <main className="flex flex-col  items-center w-screen ">
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}

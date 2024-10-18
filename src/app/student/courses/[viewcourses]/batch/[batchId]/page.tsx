@@ -200,7 +200,7 @@ function Page({
                                                     classType={classData.status}
                                                     key={index}
                                                     activeTab={'ongoing'}
-                                                    studentSide={false}
+                                                    studentSide={true}
                                                     getClasses={() =>
                                                         console.log('')
                                                     }
@@ -214,7 +214,7 @@ function Page({
                                                     classType={classData.status}
                                                     key={index}
                                                     activeTab={'Upcoming'}
-                                                    studentSide={false}
+                                                    studentSide={true}
                                                     getClasses={() =>
                                                         console.log('')
                                                     }
