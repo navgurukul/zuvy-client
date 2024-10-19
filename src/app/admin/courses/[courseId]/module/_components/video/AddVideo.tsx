@@ -19,7 +19,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import VideoEmbed from './VideoEmbed'
-import { X } from 'lucide-react'
+import { ArrowUpRightSquare, X } from 'lucide-react'
+import PreviewVideo from './PreviewVideo'
 
 const isLinkValid = (link: string) => {
     const urlRegex = /^(https?:\/\/)?([\w-]+\.)*([\w-]+)(:\d{2,5})?(\/\S*)*$/
@@ -73,6 +74,8 @@ const AddVideo = ({
     fetchChapterContent: (chapterId: number, topicId: number) => Promise<void>
 }) => {
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const [showPreview, setShowPreview] = useState<boolean>(false)
+
     const [showVideoBox, setShowVideoBox] = useState<boolean>(true)
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -156,96 +159,114 @@ const AddVideo = ({
 
     return (
         <div className="flex flex-col gap-y-8 mx-auto items-center justify-center w-full">
-            <Form {...form}>
-                <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className=" w-full items-center justify-center flex flex-col space-y-8"
-                >
-                    <FormField
-                        control={form.control}
-                        name="videoTitle"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormControl>
-                                    <Input
-                                        placeholder="Untitled Video"
-                                        {...field}
-                                        className="w-[450px] p-0 text-3xl text-left font-semibold outline-none border-none focus:ring-0"
-                                    />
-                                </FormControl>
+            {showPreview ? (
+                <PreviewVideo
+                    content={content}
+                    setShowPreview={setShowPreview}
+                />
+            ) : (
+                <>
+                    <Form {...form}>
+                        <form
+                            onSubmit={form.handleSubmit(onSubmit)}
+                            className=" w-full items-center justify-center flex flex-col space-y-8"
+                        >
+                            <FormField
+                                control={form.control}
+                                name="videoTitle"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-col items-start">
+                                        <FormControl>
+                                            <Input
+                                                placeholder="Untitled Video"
+                                                {...field}
+                                                className="w-[450px] p-0 text-3xl text-left font-semibold outline-none border-none focus:ring-0"
+                                            />
+                                        </FormControl>
+                                        <Button
+                                            variant={'ghost'}
+                                            type="button"
+                                            className=" text-secondary w-[100px] h-[30px] gap-x-1 "
+                                            onClick={() => setShowPreview(true)}
+                                        >
+                                            <ArrowUpRightSquare />
+                                            <h1>Preview</h1>
+                                        </Button>
 
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <div className=" flex justify-between items-start relative">
-                        {showVideoBox && (
-                            <div className="flex items-start justify-center ">
-                                <VideoEmbed
-                                    title={
-                                        content?.contentDetails?.[0]?.title ||
-                                        ''
-                                    }
-                                    src={
-                                        content?.contentDetails?.[0]
-                                            ?.links?.[0] || ''
-                                    }
-                                />
-                                <X
-                                    className="text-destructive ml-2 cursor-pointer"
-                                    size={17}
-                                    onClick={handleClose}
-                                />
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <div className=" flex justify-between items-start relative">
+                                {showVideoBox && (
+                                    <div className="flex items-start justify-center ">
+                                        <VideoEmbed
+                                            title={
+                                                content?.contentDetails?.[0]
+                                                    ?.title || ''
+                                            }
+                                            src={
+                                                content?.contentDetails?.[0]
+                                                    ?.links?.[0] || ''
+                                            }
+                                        />
+                                        <X
+                                            className="text-destructive ml-2 cursor-pointer"
+                                            size={17}
+                                            onClick={handleClose}
+                                        />
+                                    </div>
+                                )}
                             </div>
-                        )}
-                    </div>
 
-                    <FormField
-                        control={form.control}
-                        name="description"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel className=" flex text-left text-xl font-semibold">
-                                    Description
-                                </FormLabel>
-                                <FormControl>
-                                    <Textarea
-                                        {...field}
-                                        className="w-[450px] px-3 py-2 border rounded-md "
-                                        placeholder="Type your Description here."
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="links"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel className=" flex text-left text-xl font-semibold">
-                                    Embed Link
-                                </FormLabel>
-                                <FormControl>
-                                    <Input
-                                        {...field}
-                                        className="w-[450px] px-3 py-2 border rounded-md "
-                                        placeholder="Paste your link here "
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <Button
-                        type="submit"
-                        className=" flex flex-start  w-[450px]  text-white font-bold py-2 px-4 rounded"
-                    >
-                        Embed Video
-                    </Button>
-                </form>
-            </Form>
+                            <FormField
+                                control={form.control}
+                                name="description"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className=" flex text-left text-xl font-semibold">
+                                            Description
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Textarea
+                                                {...field}
+                                                className="w-[450px] px-3 py-2 border rounded-md "
+                                                placeholder="Type your Description here."
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="links"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className=" flex text-left text-xl font-semibold">
+                                            Embed Link
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                {...field}
+                                                className="w-[450px] px-3 py-2 border rounded-md "
+                                                placeholder="Paste your link here "
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <Button
+                                type="submit"
+                                className=" flex flex-start  w-[450px]  text-white font-bold py-2 px-4 rounded"
+                            >
+                                Embed Video
+                            </Button>
+                        </form>
+                    </Form>
+                </>
+            )}
         </div>
     )
 }

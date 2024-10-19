@@ -12,35 +12,40 @@ function Article({
     content: any
     completeChapter: () => void
 }) {
-    let editorContent;
+    let editorContent
+    console.log(content)
 
-    if (content?.articleContent && Array.isArray(content.articleContent) && content.articleContent.length > 0) {
-        editorContent = content.articleContent[0];
+    if (
+        content?.articleContent &&
+        Array.isArray(content.articleContent) &&
+        content.articleContent.length > 0
+    ) {
+        editorContent = content.articleContent[0]
     } else {
         editorContent = {
-            type: "doc",
+            type: 'doc',
             content: [
                 {
-                    type: "paragraph",
+                    type: 'paragraph',
                     attrs: {
-                        textAlign: "left",
+                        textAlign: 'left',
                     },
                     content: [
                         {
-                            text: "No article added yet. Please come back later for some interesting article to learn from...",
-                            type: "text",
+                            text: 'No article added yet. Please come back later for some interesting article to learn from...',
+                            type: 'text',
                         },
                     ],
                 },
             ],
-        };
+        }
     }
 
     const editor = useEditor({
         extensions,
         content: editorContent,
         editable: false,
-    });
+    })
 
     return (
         <>
@@ -49,7 +54,7 @@ function Article({
                 <Button onClick={completeChapter}>Mark as Done</Button>
             </div>
         </>
-    );
+    )
 }
 
-export default Article;
+export default Article
