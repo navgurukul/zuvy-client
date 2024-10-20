@@ -101,7 +101,7 @@ function QuizLibrary({
 
                 const response = await api.get(url)
 
-                const allQuestions: quizData[] = response.data
+                const allQuestions: quizData[] = response.data.data
 
                 const easyQuestions = allQuestions.filter(
                     (question) => question.difficulty === 'Easy'

@@ -10,8 +10,10 @@ export default function RootLayout({
 }) {
     return (
         <div>
-            <StudentNavbar />
-            <MaxWidthWrapper>{children}</MaxWidthWrapper>
+            <div className="sticky top-0 z-50">
+                <StudentNavbar />
+            </div>
+            <MaxWidthWrapper className="relative">{children}</MaxWidthWrapper>
         </div>
     )
 }
