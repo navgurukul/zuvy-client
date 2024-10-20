@@ -134,7 +134,7 @@ const CodingPlayground = () => {
                             // value={selectedTopic.tagName}
                             // onValueChange={(value) =>
                             //     setSelectedTopic(
-                            //         tags.find((tag) => tag.tagName === value)
+                            //         tags.find((tag) => tag?.tagName === value)
                             //     )
                             // }
                             value={selectedDifficulty}
@@ -176,7 +176,7 @@ const CodingPlayground = () => {
                                     key={tag.id}
                                     onClick={() => handleTopicClick(tag)}
                                 >
-                                    {tag.tagName}
+                                    {tag?.tagName}
                                 </Button>
                             ))}
                         </ScrollArea>

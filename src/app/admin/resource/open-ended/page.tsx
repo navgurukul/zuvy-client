@@ -293,9 +293,9 @@ const OpenEndedQuestions = (props: Props) => {
                                         {tags.map((tag: Tag) => (
                                             <SelectItem
                                                 key={tag.id}
-                                                value={tag.tagName}
+                                                value={tag?.tagName}
                                             >
-                                                {tag.tagName}
+                                                {tag?.tagName}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
