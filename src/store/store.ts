@@ -126,6 +126,22 @@ export const getDeleteStudentStore = create<deleteStudentStore>((set) => ({
 }))
 // ------------------------------
 
+// set assessment preview content in a state:
+
+type assessmentPreviewStore = {
+    assessmentPreviewContent: any
+    setAssessmentPreviewContent: (newValue: any) => void
+}
+
+export const getAssessmentPreviewStore = create<assessmentPreviewStore>(
+    (set) => ({
+        assessmentPreviewContent: null,
+        setAssessmentPreviewContent: (newValue: any) => {
+            set({ assessmentPreviewContent: newValue })
+        },
+    })
+)
+
 // ------------------------------
 // Define the type for the assessment store
 type assessmentStore = {
