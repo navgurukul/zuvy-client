@@ -26,7 +26,7 @@ import {
 type AddFormProps = {
     chapterData: any
     content: any
-    // fetchChapterContent: (chapterId: number) => void
+    // fetchChapterContent: any
     moduleId: any
 }
 
@@ -274,7 +274,7 @@ const AddForm: React.FC<AddFormProps> = ({
 
     return (
         <ScrollArea
-            className="h-[500px] lg:h-[670px] pr-4"
+            className="h-[500px] lg:h-[550px] pr-4"
             type="hover"
             style={{
                 scrollbarWidth: 'none', // Firefox

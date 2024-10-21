@@ -126,6 +126,22 @@ export const getDeleteStudentStore = create<deleteStudentStore>((set) => ({
 }))
 // ------------------------------
 
+// set assessment preview content in a state:
+
+type assessmentPreviewStore = {
+    assessmentPreviewContent: any
+    setAssessmentPreviewContent: (newValue: any) => void
+}
+
+export const getAssessmentPreviewStore = create<assessmentPreviewStore>(
+    (set) => ({
+        assessmentPreviewContent: null,
+        setAssessmentPreviewContent: (newValue: any) => {
+            set({ assessmentPreviewContent: newValue })
+        },
+    })
+)
+
 // ------------------------------
 // Define the type for the assessment store
 type assessmentStore = {
@@ -648,14 +664,19 @@ export const getStoreStudentBatchData = create<storeBatchData>((set) => ({
     },
 }))
 
+interface Option {
+    label: string
+    value: string
+}
+
 type mcqdifficulty = {
-    mcqDifficulty: string
-    setMcqDifficulty: (newValue: string) => void
+    mcqDifficulty: Option[]
+    setMcqDifficulty: (newValue: Option[]) => void
 }
 
 export const getmcqdifficulty = create<mcqdifficulty>((set) => ({
-    mcqDifficulty: 'None',
-    setMcqDifficulty: (newValue: string) => {
+    mcqDifficulty: [{ value: 'None', label: 'All Difficulty' }],
+    setMcqDifficulty: (newValue: Option[]) => {
         set({ mcqDifficulty: newValue })
     },
 }))

@@ -169,85 +169,88 @@ function Chapter() {
     }
 
     useEffect(() => {
-        console.log('isChapterClickedRef.current', isChapterClickedRef.current)
-        console.log('activeChapterRef.current', activeChapterRef.current)
-        console.log('scrollAreaRef.current', scrollAreaRef.current)
         if (activeChapterRef.current) {
             // Only scroll if it's not triggered by a chapter click
             activeChapterRef.current.scrollIntoView({
                 // behavior: 'smooth',
-                block: 'center',
+                // block: 'center',
             })
         }
     }, [activeChapter])
 
     return (
-        <>
+        <div className="flex flex-col h-full">
             <div className="mb-5">
                 <BreadcrumbComponent crumbs={crumbs} />
             </div>
-            <div className="mb-5 flex">
-                <Dialog>
-                    <DialogTrigger asChild>
-                        <Button
-                            variant="secondary"
-                            className="py-2 px-2 h-full w-full mr-4"
-                            onClick={handleAddChapter}
-                        >
-                            Add Chapter
-                        </Button>
-                    </DialogTrigger>
-                    <DialogOverlay />
-                    <ChapterModal
-                        courseId={courseId}
-                        moduleId={moduleId}
-                        fetchChapters={fetchChapters}
-                        newChapterOrder={chapterData.length}
-                        scrollToBottom={scrollToBottom}
-                    />
-                </Dialog>
-            </div>
-            <ScrollArea className="h-[500px] lg:h-[670px] pr-4" type="hover">
-                <Reorder.Group
-                    values={chapterData}
-                    onReorder={async (newOrderChapters: any) => {
-                        handleReorder(newOrderChapters)
-                    }}
+            <div className="flex flex-col flex-grow overflow-hidden">
+                <div className="mb-5 flex">
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button
+                                variant="secondary"
+                                className="py-2 px-2 h-full w-full mr-4"
+                                onClick={handleAddChapter}
+                            >
+                                Add Chapter
+                            </Button>
+                        </DialogTrigger>
+                        <DialogOverlay />
+                        <ChapterModal
+                            courseId={courseId}
+                            moduleId={moduleId}
+                            fetchChapters={fetchChapters}
+                            newChapterOrder={chapterData.length}
+                            scrollToBottom={scrollToBottom}
+                        />
+                    </Dialog>
+                </div>
+                <ScrollArea
+                    className="h-[500px] lg:h-[670px] pr-4"
+                    type="hover"
                 >
-                    {chapterData &&
-                        chapterData?.map((item: any, index: any) => {
-                            const isLastItem = index === chapterData.length - 1
-                            return (
-                                <Reorder.Item
-                                    value={item}
-                                    key={item.chapterId}
-                                    id={
-                                        isLastItem
-                                            ? 'last-chapter'
-                                            : `chapter-${item.chapterId}`
-                                    }
-                                >
-                                    <ChapterItem
+                    <Reorder.Group
+                        values={chapterData}
+                        onReorder={async (newOrderChapters: any) => {
+                            handleReorder(newOrderChapters)
+                        }}
+                    >
+                        {chapterData &&
+                            chapterData?.map((item: any, index: any) => {
+                                const isLastItem =
+                                    index === chapterData.length - 1
+                                return (
+                                    <Reorder.Item
+                                        value={item}
                                         key={item.chapterId}
-                                        chapterId={item.chapterId}
-                                        title={item.chapterTitle}
-                                        topicId={item.topicId}
-                                        topicName={item.topicName}
-                                        fetchChapters={fetchChapters}
-                                        setActiveChapter={setActiveChapter}
-                                        activeChapter={activeChapter}
-                                        moduleId={moduleID}
-                                        isChapterClickedRef={
-                                            isChapterClickedRef
+                                        id={
+                                            isLastItem
+                                                ? 'last-chapter'
+                                                : `chapter-${item.chapterId}`
                                         }
-                                        activeChapterRef={activeChapterRef}
-                                    />
-                                </Reorder.Item>
-                            )
-                        })}
-                </Reorder.Group>
-            </ScrollArea>
-        </>
+                                    >
+                                        <ChapterItem
+                                            key={item.chapterId}
+                                            chapterId={item.chapterId}
+                                            title={item.chapterTitle}
+                                            topicId={item.topicId}
+                                            topicName={item.topicName}
+                                            fetchChapters={fetchChapters}
+                                            setActiveChapter={setActiveChapter}
+                                            activeChapter={activeChapter}
+                                            moduleId={moduleID}
+                                            isChapterClickedRef={
+                                                isChapterClickedRef
+                                            }
+                                            activeChapterRef={activeChapterRef}
+                                        />
+                                    </Reorder.Item>
+                                )
+                            })}
+                    </Reorder.Group>
+                </ScrollArea>
+            </div>
+        </div>
     )
 }
 

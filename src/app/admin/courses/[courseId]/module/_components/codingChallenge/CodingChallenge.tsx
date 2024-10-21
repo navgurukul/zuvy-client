@@ -57,6 +57,11 @@ export type Tag = {
     tagName: string
 }
 
+interface Option {
+    tagName: string
+    id: number
+}
+
 function CodingChallenge({
     content,
     activeChapterTitle,
@@ -77,8 +82,14 @@ function CodingChallenge({
         tagName: 'All Topics',
         id: -1,
     })
-    const [selectedDifficulty, setSelectedDifficulty] =
-        useState<string>('Any Difficulty')
+    const [selectedOptions, setSelectedOptions] = useState<Option[]>([
+        { id: -1, tagName: 'All Topics' },
+    ])
+    const [selectedDifficulty, setSelectedDifficulty] = useState([
+        'Any Difficulty',
+    ])
+    // const [selectedDifficulty, setSelectedDifficulty] =
+    //     useState<string>('Any Difficulty')
     const [selectedLanguage, setSelectedLanguage] =
         useState<string>('All Languages')
     const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([])
@@ -91,16 +102,38 @@ function CodingChallenge({
 
                 const queryParams = []
 
-                if (
-                    selectedDifficulty &&
-                    selectedDifficulty !== 'Any Difficulty'
-                ) {
-                    queryParams.push(
-                        `difficulty=${encodeURIComponent(selectedDifficulty)}`
-                    )
+                // if (
+                //     selectedDifficulty &&
+                //     selectedDifficulty !== 'Any Difficulty'
+                // ) {
+                //     queryParams.push(
+                //         `difficulty=${encodeURIComponent(selectedDifficulty)}`
+                //     )
+                // }
+                // if (selectedTag.id !== -1) {
+                //     queryParams.push(`tagId=${selectedTag.id}`)
+                // }
+                let selectedTagIds = ''
+                selectedOptions.forEach((topic: any) => {
+                    if (topic.id !== -1 && topic.id !== 0) {
+                        // Skip 'All Topics'
+                        selectedTagIds += `&tagId=${topic.id}`
+                    }
+                })
+
+                // Handle multiple selected difficulties, but ignore 'Any Difficulty'
+                let selectedDiff = ''
+                selectedDifficulty.forEach((difficulty: string) => {
+                    if (difficulty !== 'Any Difficulty') {
+                        selectedDiff += `&difficulty=${difficulty}`
+                    }
+                })
+
+                if (selectedTagIds.length > 0) {
+                    queryParams.push(selectedTagIds.substring(1)) // Remove the first '&'
                 }
-                if (selectedTag.id !== -1) {
-                    queryParams.push(`tagId=${selectedTag.id}`)
+                if (selectedDiff.length > 0) {
+                    queryParams.push(selectedDiff.substring(1)) // Remove the first '&'
                 }
                 if (debouncedSearch) {
                     queryParams.push(
@@ -113,19 +146,18 @@ function CodingChallenge({
 
                 const response = await api.get(url)
 
-                // Filter the questions by difficulty
-                // const filtered = response.data.filter((question: Question) =>
-                //     selectedDifficulty === 'Any Difficulty'
-                //         ? true
-                //         : question.difficulty === selectedDifficulty
-                // )
-                setFilteredQuestions(response.data)
+                setFilteredQuestions(response.data.data)
             } catch (error) {
                 console.error('Error:', error)
             }
         }
         getAllCodingQuestions()
-    }, [selectedDifficulty, selectedQuestions, debouncedSearch, selectedTag])
+    }, [
+        selectedDifficulty,
+        selectedQuestions,
+        debouncedSearch,
+        selectedOptions,
+    ])
 
     async function getAllTags() {
         const response = await api.get('Content/allTags')
@@ -174,14 +206,12 @@ function CodingChallenge({
                     <CodingTopics
                         setSearchTerm={setSearchTerm}
                         searchTerm={searchTerm}
-                        selectedTopic={selectedTopic}
-                        setSelectedTopic={setSelectedTopic}
-                        selectedTag={selectedTag}
-                        setSelectedTag={setSelectedTag}
-                        selectedDifficulty={selectedDifficulty}
-                        setSelectedDifficulty={setSelectedDifficulty}
-                        selectedLanguage={selectedLanguage}
-                        setSelectedLanguage={setSelectedLanguage}
+                        selectedTopics={selectedOptions}
+                        setSelectedTopics={setSelectedOptions}
+                        selectedDifficulties={selectedDifficulty}
+                        setSelectedDifficulties={setSelectedDifficulty}
+                        // selectedLanguage={selectedLanguage}
+                        // setSelectedLanguage={setSelectedLanguage}
                         tags={tags}
                     />
                     {/* <ScrollArea className="h-dvh pr-4"> */}
