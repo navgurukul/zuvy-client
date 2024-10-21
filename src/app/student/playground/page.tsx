@@ -72,12 +72,13 @@ const CodingPlayground = () => {
     const getQuestions = async () => {
         try {
             await api.get(`/Content/allCodingQuestions`).then((response) => {
-                setQuestions(response.data)
+                setQuestions(response.data.data)
             })
         } catch (error) {
             toast({
                 title: 'Error:',
-                description: 'An error occurred while fetching coding questions',
+                description:
+                    'An error occurred while fetching coding questions',
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })

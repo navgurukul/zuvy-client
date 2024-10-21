@@ -96,7 +96,7 @@ export const handleConfirm = (
 export async function getAllCodingQuestions(setCodingQuestions: any) {
     try {
         const response = await api.get('Content/allCodingQuestions')
-        setCodingQuestions(response.data)
+        setCodingQuestions(response.data.data)
     } catch (error) {
         console.error(error)
     }
@@ -159,7 +159,7 @@ export const handleQuizConfirm = (
 
 export async function getAllQuizQuestion(
     setQuizQuestion: any,
-    difficulty?: string,
+    difficulty?: any,
     mcqSearch?: string
 ) {
     try {
@@ -256,25 +256,35 @@ export async function getAllTagsWithoutFilter(setTags: any) {
 // AddAssessment.tsx functions:-
 export async function filteredCodingQuestions(
     setFilteredQuestions: any,
-    selectedDifficulty: string,
-    selectedTopic: any,
+    difficulty: any,
+    selectedOptions: any,
     selectedLanguage: string,
     debouncedSearch: string
 ) {
     try {
         let url = `/Content/allCodingQuestions`
 
+        let selectedTagIds = ''
+        selectedOptions.map(
+            (item: any) => (selectedTagIds += '&tagId=' + item.value)
+        )
+
+        let selectedDiff = ''
+        difficulty.map(
+            (item: any) => (selectedDiff += '&difficulty=' + item.value)
+        )
+
         const queryParams = []
 
-        if (selectedTopic?.id !== -1) {
-            queryParams.push(`tagId=${selectedTopic.id}`)
+        if (selectedTagIds.length > 0) {
+            if (selectedOptions[0].value !== '-1') {
+                queryParams.push(selectedTagIds.substring(1))
+            }
         }
-        if (
-            selectedDifficulty &&
-            selectedDifficulty !== 'None' &&
-            selectedDifficulty !== 'Any Difficulty'
-        ) {
-            queryParams.push(`difficulty=${selectedDifficulty}`)
+        if (difficulty.length > 0) {
+            if (difficulty[0].value !== 'None') {
+                queryParams.push(selectedDiff.substring(1))
+            }
         }
         if (debouncedSearch) {
             queryParams.push(`searchTerm=${debouncedSearch}`)
@@ -285,8 +295,7 @@ export async function filteredCodingQuestions(
         }
 
         const response = await api.get(url)
-
-        setFilteredQuestions(response.data)
+        setFilteredQuestions(response.data.data)
     } catch (error) {
         console.error('Error:', error)
     }
@@ -338,25 +347,35 @@ export async function filteredQuizQuestions(
 
 export async function filteredOpenEndedQuestions(
     setFilteredQuestions: any,
-    selectedDifficulty: string,
-    selectedTopic: any,
+    difficulty: any,
+    selectedOptions: any,
     selectedLanguage: string,
     debouncedSearch: string
 ) {
     try {
         let url = `/Content/openEndedQuestions`
 
+        let selectedTagIds = ''
+        selectedOptions.map(
+            (item: any) => (selectedTagIds += '&tagId=' + item.value)
+        )
+
+        let selectedDiff = ''
+        difficulty.map(
+            (item: any) => (selectedDiff += '&difficulty=' + item.value)
+        )
+
         const queryParams = []
 
-        if (selectedTopic?.id !== -1) {
-            queryParams.push(`tagId=${selectedTopic.id}`)
+        if (selectedTagIds.length > 0) {
+            if (selectedOptions[0].value !== '-1') {
+                queryParams.push(selectedTagIds.substring(1))
+            }
         }
-        if (
-            selectedDifficulty &&
-            selectedDifficulty !== 'None' &&
-            selectedDifficulty !== 'Any Difficulty'
-        ) {
-            queryParams.push(`difficulty=${selectedDifficulty}`)
+        if (difficulty.length > 0) {
+            if (difficulty[0].value !== 'None') {
+                queryParams.push(selectedDiff.substring(1))
+            }
         }
         if (debouncedSearch) {
             queryParams.push(`searchTerm=${debouncedSearch}`)
@@ -376,8 +395,8 @@ export async function filteredOpenEndedQuestions(
 
 export async function filterQuestions(
     setFilteredQuestions: any,
-    selectedDifficulties: any[],   // Array of difficulties
-    selectedTopics: any[],         // Array of topics
+    selectedDifficulties: any[], // Array of difficulties
+    selectedTopics: any[], // Array of topics
     selectedLanguage: string,
     debouncedSearch: string,
     questionType: string // Type of question to determine the endpoint
@@ -403,7 +422,8 @@ export async function filterQuestions(
         // Handle multiple selected topics (tags), but ignore 'All Topics' (id: -1 or 0)
         let selectedTagIds = ''
         selectedTopics.forEach((topic: any) => {
-            if (topic.id !== -1 && topic.id !== 0) { // Skip 'All Topics'
+            if (topic.id !== -1 && topic.id !== 0) {
+                // Skip 'All Topics'
                 selectedTagIds += `&tagId=${topic.id}`
             }
         })
@@ -453,7 +473,6 @@ export async function filterQuestions(
         console.error('Error:', error)
     }
 }
-
 
 interface FetchStudentsParams {
     courseId: string
