@@ -26,7 +26,7 @@ import {
 type AddFormProps = {
     chapterData: any
     content: any
-    // fetchChapterContent: (chapterId: number) => void
+    // fetchChapterContent: any
     moduleId: any
 }
 

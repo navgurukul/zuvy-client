@@ -103,7 +103,7 @@ function Page({
             localStorage.getItem('fullScreenExitInstance') || '0',
             10
         )
-        setFullScreenExitInstance(initialFullScreenExitInstance)
+        setFullScreenExitInstance(initialFullScreenExitInstance) 
 
         if (endTime) {
             startTimer(endTime)
@@ -123,7 +123,8 @@ function Page({
                 setFullScreenExitInstance,
                 fullScreenExitInstance,
                 submitAssessment,
-                isCurrentPageSubmitAssessment
+                isCurrentPageSubmitAssessment,
+                setIsFullScreen
             )
         )
 
@@ -141,7 +142,8 @@ function Page({
                     setFullScreenExitInstance,
                     fullScreenExitInstance,
                     submitAssessment,
-                    isCurrentPageSubmitAssessment
+                    isCurrentPageSubmitAssessment,
+                    setIsFullScreen
                 )
             )
             if (intervalId) {
@@ -150,15 +152,15 @@ function Page({
         }
     }, [tabChangeInstance, fullScreenExitInstance])
 
-    useEffect(() => {
-        // Add event listeners for right-click and key presses
-        document.addEventListener('contextmenu', handleRightClick)
-        document.addEventListener('keydown', handleKeyDown)
-        return () => {
-            document.removeEventListener('contextmenu', handleRightClick)
-            document.removeEventListener('keydown', handleKeyDown)
-        }
-    }, [tabChangeInstance, fullScreenExitInstance])
+    // useEffect(() => {
+    //     // Add event listeners for right-click and key presses
+    //     document.addEventListener('contextmenu', handleRightClick)
+    //     document.addEventListener('keydown', handleKeyDown)
+    //     return () => {
+    //         document.removeEventListener('contextmenu', handleRightClick)
+    //         document.removeEventListener('keydown', handleKeyDown)
+    //     }
+    // }, [])
 
 
 
@@ -309,7 +311,7 @@ function Page({
         getSeperateOpenEndedQuestions()
     }, [decodedParams.assessmentOutSourceId])
 
-    if (isSolving) {
+    if (isSolving && isFullScreen) {
         if (
             selectedQuesType === 'quiz' &&
             seperateQuizQuestions[0]?.submissionsData.length == 0
@@ -409,9 +411,8 @@ function Page({
     }
 
 
-
     return (
-        <React.Fragment>
+        <div className='h-auto mb-24'>
             {!isFullScreen ? (
                 <>
                     <div className="flex items-center justify-center gap-2">
@@ -534,7 +535,7 @@ function Page({
                     </Button>
                 </>
             )}
-        </React.Fragment>
+        </div>
     )
 }
 

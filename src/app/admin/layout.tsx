@@ -1,16 +1,21 @@
+'use client'
+
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import StudentNavbar from '../_components/navbar'
 
 import '../globals.css'
+import { usePathname } from 'next/navigation'
 
 export default function RootLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
+    const pathname = usePathname()
+    const adminAssessmentPreviewRoute = pathname?.includes('/admin/courses') && pathname?.includes('/module') && pathname?.includes('/chapter') && pathname?.includes('/assessment') && pathname?.includes('/preview')
     return (
         <div>
-            <StudentNavbar />
+           {!adminAssessmentPreviewRoute && <StudentNavbar />}
             <MaxWidthWrapper>{children}</MaxWidthWrapper>
         </div>
     )
