@@ -11,6 +11,30 @@ type Props = {
 }
 
 const ProjectPreview = ({ content, setShowPreview }: Props) => {
+    console.log()
+
+    const timestamp = content.project[0].deadline
+    const date = new Date(timestamp)
+
+    const options: any = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZone: 'UTC',
+        timeZoneName: 'short',
+    }
+    const options2: any = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    }
+    const formattedDate = date.toLocaleDateString('en-US', options)
+
+    console.log(formattedDate)
+
     let editorContent
 
     if (
@@ -57,6 +81,7 @@ const ProjectPreview = ({ content, setShowPreview }: Props) => {
                         ? content.project[0].title
                         : 'No Title yet'}
                 </h1>
+                <h1 className="font-semibold">Deadline: {formattedDate}</h1>
                 <Button
                     onClick={() => setShowPreview(false)}
                     className="gap-x-1 flex items-center"

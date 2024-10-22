@@ -15,7 +15,25 @@ const PreviewAssignment = ({
     content: any
     setShowPreview: React.Dispatch<React.SetStateAction<boolean>>
 }) => {
-    console.log(content)
+    const timestamp = content.completionDate
+    const date = new Date(timestamp)
+
+    const options: any = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZone: 'UTC',
+        timeZoneName: 'short',
+    }
+    const options2: any = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    }
+    const formattedDate = date.toLocaleDateString('en-US', options)
 
     let editorContent
 
@@ -59,6 +77,8 @@ const PreviewAssignment = ({
                 <h1 className="text-2xl font-semibold text-left">
                     {content?.title ? content.title : 'No Title yet'}
                 </h1>
+                <h1 className="font-semibold">Deadline: {formattedDate}</h1>
+
                 <Button
                     onClick={() => setShowPreview(false)}
                     className="gap-x-1 flex items-center"

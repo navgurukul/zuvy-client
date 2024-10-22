@@ -11,10 +11,13 @@ import { Tag } from '@/app/admin/resource/mcq/page'
 import { toast } from '@/components/ui/use-toast'
 import { getAllQuizQuestion } from '@/utils/admin'
 import { getAllQuizData } from '@/store/store'
+import { ArrowUpRightSquare } from 'lucide-react'
+import QuizPreview from './QuizPreview'
 
 function Quiz(props: any) {
     const [tags, setTags] = useState<Tag[]>([])
     const [isOpen, setIsOpen] = useState(false)
+    const [showPreview, setShowPreview] = useState<boolean>(false)
 
     const [addQuestion, setAddQuestion] = useState<quizData[]>([])
     const [questionId, setQuestionId] = useState()
@@ -98,53 +101,65 @@ function Quiz(props: any) {
         getAllSavedQuizQuestion()
     }, [getAllSavedQuizQuestion])
     return (
-        <>
-            <div className="flex flex-row items-center justify-start gap-x-6 mb-10">
-                <Input
-                    placeholder="Untitled Quiz"
-                    className="p-0 text-3xl w-1/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize"
-                />
-                {/* <Link
-                    className="text-secondary font-semibold flex mt-2"
-                    href=""
-                >
-                    Preview
-                    <ExternalLink size={20} />
-                </Link> */}
-            </div>
-
-            <div className="flex gap-x-2">
-                <QuizLibrary
-                    addQuestion={addQuestion}
-                    handleAddQuestion={handleAddQuestion}
-                    tags={tags}
-                />
-                <Separator
-                    orientation="vertical"
-                    className="mx-4 w-[2px] h-screen rounded"
-                />
-                <ScrollArea className="h-screen w-full rounded-md">
-                    <div>
-                        {addQuestion.map(
-                            (questions: quizData, index: number) => (
-                                <QuizModal
-                                    key={index}
-                                    data={questions}
-                                    removeQuestionById={removeQuestionById}
-                                />
-                            )
-                        )}
-                        {addQuestion.length > 0 && (
-                            <div className="text-end mt-2">
-                                <Button onClick={saveQuizQUestionHandler}>
-                                    Save
-                                </Button>
-                            </div>
-                        )}
+        <div>
+            {showPreview ? (
+                <QuizPreview setShowPreview={setShowPreview} />
+            ) : (
+                <>
+                    {' '}
+                    <div className="flex flex-col items-start justify-start gap-x-6 mb-10">
+                        <Input
+                            placeholder="Untitled Quiz"
+                            className="p-0 text-3xl w-1/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize"
+                        />
+                        <Button
+                            variant={'ghost'}
+                            type="button"
+                            className=" text-secondary w-[100px] h-[30px] gap-x-1 "
+                            onClick={() => setShowPreview(true)}
+                        >
+                            <ArrowUpRightSquare />
+                            <h1>Preview</h1>
+                        </Button>
                     </div>
-                </ScrollArea>
-            </div>
-        </>
+                    <div className="flex gap-x-2">
+                        <QuizLibrary
+                            addQuestion={addQuestion}
+                            handleAddQuestion={handleAddQuestion}
+                            tags={tags}
+                        />
+                        <Separator
+                            orientation="vertical"
+                            className="mx-4 w-[2px] h-screen rounded"
+                        />
+                        <ScrollArea className="h-screen w-full rounded-md">
+                            <div>
+                                {addQuestion.map(
+                                    (questions: quizData, index: number) => (
+                                        <QuizModal
+                                            key={index}
+                                            data={questions}
+                                            removeQuestionById={
+                                                removeQuestionById
+                                            }
+                                        />
+                                    )
+                                )}
+                                {addQuestion.length > 0 && (
+                                    <div className="text-end mt-2">
+                                        <Button
+                                            onClick={saveQuizQUestionHandler}
+                                        >
+                                            Save
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
+                        </ScrollArea>
+                    </div>
+                </>
+            )}
+        </div>
     )
 }
 
