@@ -66,7 +66,11 @@ const CurricullumCard = ({
             const response = await api.get(
                 `tracking/getAllChaptersWithStatus/${moduleId}`
             )
-            setChapterId(response.data.trackingData[0].id)
+            setChapterId(
+                response.data.trackingData.length > 0
+                    ? response.data.trackingData[0].id
+                    : 0
+            )
         } catch (error) {
             console.log(error)
         }

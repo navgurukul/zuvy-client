@@ -85,7 +85,6 @@ function Chapter() {
         },
     ]
 
-    console.log('chapterData', chapterData)
     const fetchChapters = useCallback(async () => {
         try {
             const response = await api.get(

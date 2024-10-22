@@ -99,14 +99,11 @@ export default function Project() {
         mode: 'onChange',
     })
 
-    console.log('title', title)
-
     const fetchProjectDetails = async () => {
         try {
             const response = await api.get(
                 `Content/project/${projectID}?bootcampId=${courseId}`
             )
-            console.log('Title inside', response.data.project[0].title)
             setProjectData(response.data)
             setTitle(response.data.project[0].title)
             const projectDescription =
