@@ -9,8 +9,6 @@ type Props = {
 }
 
 const PreviewVideo = ({ content, setShowPreview }: Props) => {
-    console.log(content)
-
     return (
         <div className="w-full flex items-start">
             <div className="flex  flex-col items-start">

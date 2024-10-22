@@ -5,7 +5,8 @@ import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-co
 
 import { getAllQuizData, getCodingQuestionTags, quiz } from '@/store/store'
 import { Edit, Eye, Pencil, Trash2 } from 'lucide-react'
-import { difficultyColor, difficultyColorNew } from '@/lib/utils'
+// import { difficultyColor, difficultyColorNew } from '@/lib/utils'
+import { difficultyColor } from '@/lib/utils'
 
 import DeleteConfirmationModal from '../../courses/[courseId]/_components/deleteModal'
 import { getDeleteQuizQuestion, getEditQuizQuestion } from '@/store/store'
@@ -69,7 +70,7 @@ export const columns: ColumnDef<quiz>[] = [
             return (
                 <div className="flex items-center gap-3">
                     <div
-                        className={` h-2 w-2 rounded-full font-semibold  ${difficultyColorNew(
+                        className={` h-2 w-2 rounded-full font-semibold  ${difficultyColor(
                             difficulty
                         )}`}
                     />
