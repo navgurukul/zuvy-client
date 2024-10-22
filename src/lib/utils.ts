@@ -18,6 +18,7 @@ export function isPlural(count: number): boolean {
     return count !== 1
 }
 
+// Text Color as per difficulty:
 export function difficultyColor(difficulty: string): string {
     switch (difficulty?.toLowerCase()) {
         case 'easy':
@@ -31,16 +32,17 @@ export function difficultyColor(difficulty: string): string {
     }
 }
 
-export function difficultyColorNew(difficulty: string): string {
+// Background Color as per difficulty:
+export function difficultyBgColor(difficulty: string): string {
     switch (difficulty?.toLowerCase()) {
         case 'easy':
-            return 'bg-secondary'
+            return 'bg-green-100'
         case 'medium':
-            return 'bg-yellow-dark'
+            return 'bg-orange-100'
         case 'hard':
-            return 'bg-destructive'
+            return 'bg-red-100'
         default:
-            return 'bg-gray-500'
+            return 'bg-gray-100'
     }
 }
 

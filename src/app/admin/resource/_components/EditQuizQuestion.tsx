@@ -274,7 +274,7 @@ const EditQuizQuestion = ({
                                                     const selectedTag =
                                                         tags.find(
                                                             (tag: any) =>
-                                                                tag.tagName ===
+                                                                tag?.tagName ===
                                                                 value
                                                         )
                                                     if (selectedTag) {
@@ -302,9 +302,9 @@ const EditQuizQuestion = ({
                                                     {tags.map((tag: any) => (
                                                         <SelectItem
                                                             key={tag.id}
-                                                            value={tag.tagName}
+                                                            value={tag?.tagName}
                                                         >
-                                                            {tag.tagName}
+                                                            {tag?.tagName}
                                                         </SelectItem>
                                                     ))}
                                                 </SelectContent>

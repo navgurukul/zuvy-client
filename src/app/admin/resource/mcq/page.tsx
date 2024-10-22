@@ -219,7 +219,7 @@ const Mcqs = (props: Props) => {
                 url += `?${queryParams.join('&')}`
             }
             const res = await api.get(url)
-            setStoreQuizData(res.data)
+            setStoreQuizData(res.data.data)
             setLoading(false)
         } catch (error) {
             console.error('Error fetching quiz questions:', error)

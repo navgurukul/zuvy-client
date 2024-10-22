@@ -96,7 +96,7 @@ export const handleConfirm = (
 export async function getAllCodingQuestions(setCodingQuestions: any) {
     try {
         const response = await api.get('Content/allCodingQuestions')
-        setCodingQuestions(response.data)
+        setCodingQuestions(response.data.data)
     } catch (error) {
         console.error(error)
     }
@@ -159,7 +159,7 @@ export const handleQuizConfirm = (
 
 export async function getAllQuizQuestion(
     setQuizQuestion: any,
-    difficulty?: string,
+    difficulty?: any,
     mcqSearch?: string
 ) {
     try {
@@ -242,6 +242,16 @@ export async function getAllTags(setTags: any) {
         setTags(tagArr)
     }
 }
+
+// get tags without filtering:
+
+export async function getAllTagsWithoutFilter(setTags: any) {
+    const response = await api.get('Content/allTags')
+    if (response) {
+        setTags([{ id: -1, tagName: 'All Topics' }, ...response.data.allTags])
+    }
+}
+
 // --------------------------------------------
 // AddAssessment.tsx functions:-
 export async function filteredCodingQuestions(
@@ -285,8 +295,7 @@ export async function filteredCodingQuestions(
         }
 
         const response = await api.get(url)
-
-        setFilteredQuestions(response.data)
+        setFilteredQuestions(response.data.data)
     } catch (error) {
         console.error('Error:', error)
     }
@@ -465,29 +474,6 @@ export async function filterQuestions(
     }
 }
 
-export async function getChapterDetailsById(chapterId: any, setChapter: any) {
-    try {
-        const response = await api.get(
-            `Content/chapterDetailsById/${chapterId}`
-        )
-        setChapter(response.data)
-    } catch (error) {
-        console.error('Error:', error)
-    }
-}
-
-type FetchStudentsHandlerParams = {
-    courseId: string
-    limit: number
-    offset: number
-    searchTerm: string
-    setLoading: (value: boolean) => void
-    setStudents: (students: any[]) => void
-    setTotalPages: (pages: number) => void
-    setTotalStudents: (total: number) => void
-    setCurrentPage: (page: number) => void
-}
-
 interface FetchStudentsParams {
     courseId: string
     limit: number
@@ -566,5 +552,23 @@ export const convertSeconds = (seconds: number) => {
         months: months,
         weeks: weeks,
         days: days,
+    }
+}
+
+// --------------------------------------------
+// Preview Assessment Page functions:-
+
+export async function fetchPreviewAssessmentData(
+    params: any,
+    setAssessmentPreviewContent: any
+) {
+    try {
+        const response = await api.get(
+            `Content/chapterDetailsById/${params?.chapterId}?bootcampId=${params?.courseId}&moduleId=${params?.moduleId}&topicId=${params?.topicId}`
+        )
+
+        setAssessmentPreviewContent(response.data)
+    } catch (error) {
+        console.error('Error fetching chapter content:', error)
     }
 }
