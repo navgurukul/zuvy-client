@@ -32,8 +32,6 @@ const InstructorPage = () => {
         setUpcomingSessions(data.upcoming)
     }
 
-    console.log('allSessions', allSessions)
-
     return (
         <MaxWidthWrapper className="">
             <div className="flex items-center justify-start">

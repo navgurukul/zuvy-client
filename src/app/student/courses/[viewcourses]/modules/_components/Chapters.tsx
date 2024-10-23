@@ -100,7 +100,7 @@ function Chapters({ params }: any) {
             // Only scroll if it's not triggered by a chapter click
             setTimeout(() => {
                 activeChapterRef.current?.scrollIntoView({
-                    block: 'center',
+                    // block: 'center',
                     // behavior: 'smooth',
                 })
             }, 100)
@@ -154,7 +154,7 @@ function Chapters({ params }: any) {
     }, [topicId, chapterId])
 
     return (
-        <>
+        <div className="flex flex-col h-full">
             <div className="mb-5">
                 <BreadcrumbComponent
                     crumbs={isInstructor ? InstructorCrumbs : studentCrumbs}
@@ -184,7 +184,7 @@ function Chapters({ params }: any) {
                     )
                 })}
             </ScrollArea>
-        </>
+        </div>
     )
 }
 

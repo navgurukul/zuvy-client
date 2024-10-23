@@ -11,6 +11,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
+
 import {
     Dialog,
     DialogContent,
@@ -25,6 +27,8 @@ import { columns } from '@/app/admin/resource/coding/column'
 import NewCodingProblemForm from '@/app/admin/resource/_components/NewCodingProblemForm'
 import { api } from '@/utils/axios.config'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
+import { OFFSET, POSITION } from '@/utils/constant'
+
 import {
     getCodingQuestionTags,
     getEditCodingQuestionDialogs,
@@ -42,6 +46,7 @@ import useDebounce from '@/hooks/useDebounce'
 import MultiSelector from '@/components/ui/multi-selector'
 import difficultyOptions from '@/app/utils'
 import CodingTopics from '../../courses/[courseId]/module/_components/codingChallenge/CodingTopics'
+// import { POSITION } from '@/utils/constant'
 
 export type Tag = {
     id: number
@@ -90,6 +95,13 @@ const CodingProblems = () => {
 
     const [loading, setLoading] = useState(true)
     const [openEditDialog, setOpenEditDialog] = useState(false)
+    const [position, setPosition] = useState(POSITION)
+    const [currentPage, setCurrentPage] = useState(1)
+    const [TotalCodingQuestion, setTotalCodingQuestion] = useState(0)
+    const [totalPages, setTotalPages] = useState(7)
+    const [lastPage, setLastPage] = useState(0)
+    const [offset, setOffset] = useState<number>(OFFSET)
+   
     const selectedLanguage = ''
 
     const handleTopicClick = (value: string) => {
@@ -192,11 +204,15 @@ const CodingProblems = () => {
     useEffect(() => {
         getAllCodingQuestions(setAllCodingQuestions)
         filteredCodingQuestions(
+            offset,
             setCodingQuestions,
             difficulty,
             selectedOptions,
             selectedLanguage,
-            debouncedSearch
+            debouncedSearch,
+            position,
+            setLastPage,
+            setTotalPages
         )
         // filterQuestions(
         //     setCodingQuestions,
@@ -214,7 +230,11 @@ const CodingProblems = () => {
         debouncedSearch,
         isCodingDialogOpen,
         openEditDialog,
+        position,
+        offset,
+        
     ])
+    console.log("totalpages",totalPages)
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -377,6 +397,17 @@ const CodingProblems = () => {
                             )}
                         </>
                     )}
+                                 <DataTablePagination
+                                        totalStudents={TotalCodingQuestion}
+                                        position={position}
+                                        setPosition={setPosition}
+                                        pages={totalPages}
+                                        lastPage={lastPage}
+                                        currentPage={currentPage}
+                                        setCurrentPage={setCurrentPage}
+                                        fetchStudentData={filteredCodingQuestions}
+                                        setOffset={setOffset}
+                                    />
                 </div>
             )}
         </>

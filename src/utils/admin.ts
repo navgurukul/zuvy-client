@@ -254,16 +254,43 @@ export async function getAllTagsWithoutFilter(setTags: any) {
 
 // --------------------------------------------
 // AddAssessment.tsx functions:-
+// async (offset: number ,position:any) => {
+//     let url = `/allCodingQuestions?limit=${position}&offset=${offset}`
+//     if (debouncedSearch) {
+//         url = `/allCodingQuestions?limit=${position}&searchTerm=${encodeURIComponent(
+//             debouncedSearch
+//         )}`
+//     }
+
 export async function filteredCodingQuestions(
-    setFilteredQuestions: any,
-    difficulty: any,
-    selectedOptions: any,
-    selectedLanguage: string,
-    debouncedSearch: string
+    offset: number,
+    setFilteredQuestions?: any,
+    difficulty?: any,
+    selectedOptions?: any,
+    selectedLanguage?: string,
+    debouncedSearch?: string| undefined,
+    position?:any,
+        // currentPage?:number,
+        // pages?:number,
+        TotalCodingQuestion?:any,
+        setLastPage?:any,
+        setTotalPages?:any
+    // setTotalCodingQuestion: any, // Accepting setTotalBootcamps from parent
+    
+        // setPages?: any,          // Accepting setPages from parent
+        // setLastPage?: any   
+    
 ) {
     try {
-        let url = `/Content/allCodingQuestions`
-
+        let ur = `/Content/allCodingQuestions`
+        console.log("filteroffset",offset)
+        let url = `/Content/allCodingQuestions?&limit=${position}&offset=${offset}`
+            if (debouncedSearch) {
+                url = `/Content/allCodingQuestions?tagId=1&limit=${position}&searchTerm=${encodeURIComponent(
+                    debouncedSearch
+                )}`
+            }
+     
         let selectedTagIds = ''
         selectedOptions.map(
             (item: any) => (selectedTagIds += '&tagId=' + item.value)
@@ -296,20 +323,42 @@ export async function filteredCodingQuestions(
 
         const response = await api.get(url)
         setFilteredQuestions(response.data.data)
+        TotalCodingQuestion(response.data.TotalCodingQuestion)
+        // setTotalPages(response.data.totalPages)
+        setLastPage(response.data.totalPages)
+        console.log("response.data.totalPages",response.data.totalPages)
+        
+     
+       
+        
     } catch (error) {
         console.error('Error:', error)
     }
 }
 
 export async function filteredQuizQuestions(
-    setFilteredQuestions: any,
-    selectedDifficulty: string,
-    selectedTopic: any,
-    selectedLanguage: string,
-    debouncedSearch: string
+    offset: number,
+        setFilteredQuestions?: any,
+        selectedDifficulty?: string,
+        selectedTopic?: any,
+        selectedLanguage ?: string,
+        debouncedSearch?: string| undefined,
+        position?:any,
+        currentPage?:number,
+        pages?:number,
+        TotalMCQQuestion?:any,
+        lastPage?:any
+    // setTotalCodingQues
 ) {
     try {
-        let url = `/Content/allQuizQuestions`
+        // let url = `/Content/allQuizQuestions`
+        console.log("filtercodingquestion offset ",offset)
+        let url = `/Content/allQuizQuestions?tagId=2&limit=${position}&offset=${offset}`
+        if (debouncedSearch) {
+            url = `/Content/allQuizQuestions?tagId=2&limit=2&searchTerm=${encodeURIComponent(
+                debouncedSearch
+            )}`
+        }
 
         const queryParams = []
 
@@ -330,7 +379,7 @@ export async function filteredQuizQuestions(
 
         const response = await api.get(url)
 
-        const filtered = response.data.filter(
+        const filtered = response.data.filter (
             (question: any) =>
                 selectedDifficulty === 'Any Difficulty' ||
                 question.difficulty === selectedDifficulty
@@ -340,20 +389,39 @@ export async function filteredQuizQuestions(
         )
 
         setFilteredQuestions(filtered)
+        TotalMCQQuestion(filtered.TotalCodingQuestion)
+        setPages(filtered.totalPages)
+        lastPage(filtered.totalPages)
+        
+
     } catch (error) {
         console.error('Error:', error)
     }
 }
 
 export async function filteredOpenEndedQuestions(
-    setFilteredQuestions: any,
-    difficulty: any,
-    selectedOptions: any,
-    selectedLanguage: string,
-    debouncedSearch: string
+    offset: number,
+        setFilteredQuestions: any,
+        difficulty: any,
+        selectedOptions: any,
+        selectedLanguage: string|undefined,
+        debouncedSearch: string|undefined,
+        position?:any,
+        TotalOpenEnded?:any,
+        currentPage?:number,
+        pages?:number,
+        lastPage?:any
+
+        
 ) {
     try {
-        let url = `/Content/openEndedQuestions`
+        // let url = `/Content/openEndedQuestions`
+        let url = `/Content/openEndedQuestions?pageNo=${offset}&limit_o=${position}`
+        if (debouncedSearch) {
+            url = `/Content/openEndedQuestions?pageNo=${offset}&searchTerm=${encodeURIComponent(
+                debouncedSearch
+            )}`
+        }
 
         let selectedTagIds = ''
         selectedOptions.map(
@@ -388,6 +456,10 @@ export async function filteredOpenEndedQuestions(
 
         const response = await api.get(url)
         setFilteredQuestions(response.data.data)
+        TotalOpenEnded (response.data.TotalOpenEnded)
+        setPages(response.data.totalPages)
+        lastPage(response.data.totalPages)
+       
     } catch (error) {
         console.error('Error:', error)
     }
@@ -572,3 +644,7 @@ export async function fetchPreviewAssessmentData(
         console.error('Error fetching chapter content:', error)
     }
 }
+function setPages(totalPages: any) {
+    throw new Error('Function not implemented.')
+}
+

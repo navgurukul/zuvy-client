@@ -35,10 +35,13 @@ import {
     getMcqSearch,
 } from '@/store/store'
 import useDebounce from '@/hooks/useDebounce'
-import { getAllQuizQuestion } from '@/utils/admin'
+import { filteredQuizQuestions, getAllQuizQuestion } from '@/utils/admin'
 import { Spinner } from '@/components/ui/spinner'
 import MultiSelector from '@/components/ui/multi-selector'
 import difficultyOptions from '@/app/utils'
+import { OFFSET, POSITION } from '@/utils/constant'
+import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
+
 
 type Props = {}
 export type Tag = {
@@ -55,6 +58,12 @@ const Mcqs = (props: Props) => {
     const [isOpen, setIsOpen] = useState(false)
     const [search, setSearch] = useState('')
     const debouncedSearch = useDebounce(search, 500)
+    const [position, setPosition] = useState(POSITION)
+    const [currentPage, setCurrentPage] = useState(1)
+    const [TotalMCQQuestion, setTotalMCQQuestion] = useState(0)
+    const [pages, setPages] = useState(0)
+    const [lastPage, setLastPage] = useState(0)
+    const [offset, setOffset] = useState<number>(OFFSET)
     // const [difficulty, setDifficulty] = useState<string>('None')
     const { tags, setTags } = getCodingQuestionTags()
     const { quizData, setStoreQuizData } = getAllQuizData()
@@ -217,12 +226,14 @@ const Mcqs = (props: Props) => {
             console.error('Error fetching quiz questions:', error)
         }
     }, [
+        offset,
         difficulty,
         debouncedSearch,
         setStoreQuizData,
         selectedTag.id,
         selectedOptions,
         setmcqSearch,
+        position
     ])
 
     useEffect(() => {
@@ -299,11 +310,23 @@ const Mcqs = (props: Props) => {
                                 handleOptionClick={handleTagOption}
                             />
                         </div>
+                       
                     </div>
 
                     <DataTable data={quizData} columns={columns} />
                 </MaxWidthWrapper>
             )}
+             <DataTablePagination
+                            totalStudents={TotalMCQQuestion}
+                            position={position}
+                            setPosition={setPosition}
+                            pages={pages}
+                            lastPage={lastPage}
+                            currentPage={currentPage}
+                            setCurrentPage={setCurrentPage}
+                            fetchStudentData={filteredQuizQuestions}
+                            setOffset={setOffset}
+                        />
         </>
     )
 }

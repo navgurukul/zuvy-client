@@ -38,6 +38,8 @@ import { Spinner } from '@/components/ui/spinner'
 import useDebounce from '@/hooks/useDebounce'
 import MultiSelector from '@/components/ui/multi-selector'
 import difficultyOptions from '@/app/utils'
+import { OFFSET, POSITION } from '@/utils/constant'
+import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 
 type Props = {}
 export type Tag = {
@@ -72,6 +74,12 @@ const OpenEndedQuestions = (props: Props) => {
         getopenEndedQuestionstate()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
+    const [position, setPosition] = useState(POSITION)
+    const [currentPage, setCurrentPage] = useState(1)
+    const [TotalOpenEnded, setTotalOpenEnded] = useState(0)
+    const [pages, setPages] = useState(0)
+    const [lastPage, setLastPage] = useState(0)
+    const [offset, setOffset] = useState<number>(OFFSET)
     const debouncedSearch = useDebounce(searchTerm, 500)
     const [loading, setLoading] = useState(true)
     const selectedLanguage = ''
@@ -159,12 +167,16 @@ const OpenEndedQuestions = (props: Props) => {
     useEffect(() => {
         getAllOpenEndedQuestions(setAllOpenEndedQuestions)
         filteredOpenEndedQuestions(
+            offset,
             setOpenEndedQuestions,
             difficulty,
             selectedOptions,
             selectedLanguage,
-            debouncedSearch
-        )
+            debouncedSearch,
+            position
+    )
+            
+        
     }, [
         searchTerm,
         selectedOptions,
@@ -365,6 +377,17 @@ const OpenEndedQuestions = (props: Props) => {
                             </MaxWidthWrapper>
                         </>
                     )}
+                      {/* <DataTablePagination
+                            totalStudents={TotalOpenEnded}
+                            position={position}
+                            setPosition={setPosition}
+                            pages={pages}
+                            lastPage={lastPage}
+                            currentPage={currentPage}
+                            setCurrentPage={setCurrentPage}
+                            fetchStudentData={filteredOpenEndedQuestions}
+                            setOffset={setOffset}
+                        /> */}
                 </div>
             )}
         </>
