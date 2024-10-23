@@ -264,51 +264,41 @@ export async function getAllTagsWithoutFilter(setTags: any) {
 
 export async function filteredCodingQuestions(
     offset: number,
-    setFilteredQuestions?: any,
-    difficulty?: any,
-    selectedOptions?: any,
-    selectedLanguage?: string,
-    debouncedSearch?: string| undefined,
-    position?:any,
-        // currentPage?:number,
-        // pages?:number,
-        TotalCodingQuestion?:any,
-        setLastPage?:any,
-        setTotalPages?:any
+    setFilteredQuestions: (newValue: any[]) => void,
+    setTotalCodingQuestion: any,
+    setLastPage: any,
+    setTotalPages: any,
+    difficulty: any,
+    selectedOptions: any,
+    debouncedSearch: string | undefined,
+    position: any,
+    TotalCodingQuestion: any,
+    selectedLanguage?: string
     // setTotalCodingQuestion: any, // Accepting setTotalBootcamps from parent
-    
-        // setPages?: any,          // Accepting setPages from parent
-        // setLastPage?: any   
-    
 ) {
     try {
-        let ur = `/Content/allCodingQuestions`
-        console.log("filteroffset",offset)
-        let url = `/Content/allCodingQuestions?&limit=${position}&offset=${offset}`
-            if (debouncedSearch) {
-                url = `/Content/allCodingQuestions?tagId=1&limit=${position}&searchTerm=${encodeURIComponent(
-                    debouncedSearch
-                )}`
-            }
-     
+        const safeOffset = Math.max(0, offset)
+
+        let url = `/Content/allCodingQuestions?limit=${position}&offset=${offset}`
+
         let selectedTagIds = ''
-        selectedOptions.map(
+        selectedOptions?.map(
             (item: any) => (selectedTagIds += '&tagId=' + item.value)
         )
 
         let selectedDiff = ''
-        difficulty.map(
+        difficulty?.map(
             (item: any) => (selectedDiff += '&difficulty=' + item.value)
         )
 
         const queryParams = []
 
-        if (selectedTagIds.length > 0) {
+        if (selectedTagIds?.length > 0) {
             if (selectedOptions[0].value !== '-1') {
                 queryParams.push(selectedTagIds.substring(1))
             }
         }
-        if (difficulty.length > 0) {
+        if (difficulty?.length > 0) {
             if (difficulty[0].value !== 'None') {
                 queryParams.push(selectedDiff.substring(1))
             }
@@ -318,19 +308,16 @@ export async function filteredCodingQuestions(
         }
 
         if (queryParams.length > 0) {
-            url += '?' + queryParams.join('&')
+            url += '&' + queryParams.join('&')
         }
 
         const response = await api.get(url)
+
         setFilteredQuestions(response.data.data)
-        TotalCodingQuestion(response.data.TotalCodingQuestion)
-        // setTotalPages(response.data.totalPages)
+        setTotalCodingQuestion(response.data.totalRows)
+        setTotalPages(response.data.totalPages)
         setLastPage(response.data.totalPages)
-        console.log("response.data.totalPages",response.data.totalPages)
-        
-     
-       
-        
+        // TotalCodingQuestion(response.data.TotalCodingQuestion)
     } catch (error) {
         console.error('Error:', error)
     }
@@ -338,21 +325,21 @@ export async function filteredCodingQuestions(
 
 export async function filteredQuizQuestions(
     offset: number,
-        setFilteredQuestions?: any,
-        selectedDifficulty?: string,
-        selectedTopic?: any,
-        selectedLanguage ?: string,
-        debouncedSearch?: string| undefined,
-        position?:any,
-        currentPage?:number,
-        pages?:number,
-        TotalMCQQuestion?:any,
-        lastPage?:any
+    setFilteredQuestions?: any,
+    selectedDifficulty?: string,
+    selectedTopic?: any,
+    selectedLanguage?: string,
+    debouncedSearch?: string | undefined,
+    position?: any,
+    currentPage?: number,
+    pages?: number,
+    TotalMCQQuestion?: any,
+    lastPage?: any
     // setTotalCodingQues
 ) {
     try {
         // let url = `/Content/allQuizQuestions`
-        console.log("filtercodingquestion offset ",offset)
+        console.log('filtercodingquestion offset ', offset)
         let url = `/Content/allQuizQuestions?tagId=2&limit=${position}&offset=${offset}`
         if (debouncedSearch) {
             url = `/Content/allQuizQuestions?tagId=2&limit=2&searchTerm=${encodeURIComponent(
@@ -379,7 +366,7 @@ export async function filteredQuizQuestions(
 
         const response = await api.get(url)
 
-        const filtered = response.data.filter (
+        const filtered = response.data.filter(
             (question: any) =>
                 selectedDifficulty === 'Any Difficulty' ||
                 question.difficulty === selectedDifficulty
@@ -392,8 +379,6 @@ export async function filteredQuizQuestions(
         TotalMCQQuestion(filtered.TotalCodingQuestion)
         setPages(filtered.totalPages)
         lastPage(filtered.totalPages)
-        
-
     } catch (error) {
         console.error('Error:', error)
     }
@@ -401,18 +386,16 @@ export async function filteredQuizQuestions(
 
 export async function filteredOpenEndedQuestions(
     offset: number,
-        setFilteredQuestions: any,
-        difficulty: any,
-        selectedOptions: any,
-        selectedLanguage: string|undefined,
-        debouncedSearch: string|undefined,
-        position?:any,
-        TotalOpenEnded?:any,
-        currentPage?:number,
-        pages?:number,
-        lastPage?:any
-
-        
+    setFilteredQuestions: any,
+    difficulty: any,
+    selectedOptions: any,
+    selectedLanguage: string | undefined,
+    debouncedSearch: string | undefined,
+    position?: any,
+    TotalOpenEnded?: any,
+    currentPage?: number,
+    pages?: number,
+    lastPage?: any
 ) {
     try {
         // let url = `/Content/openEndedQuestions`
@@ -456,10 +439,9 @@ export async function filteredOpenEndedQuestions(
 
         const response = await api.get(url)
         setFilteredQuestions(response.data.data)
-        TotalOpenEnded (response.data.TotalOpenEnded)
+        TotalOpenEnded(response.data.TotalOpenEnded)
         setPages(response.data.totalPages)
         lastPage(response.data.totalPages)
-       
     } catch (error) {
         console.error('Error:', error)
     }
@@ -647,4 +629,3 @@ export async function fetchPreviewAssessmentData(
 function setPages(totalPages: any) {
     throw new Error('Function not implemented.')
 }
-

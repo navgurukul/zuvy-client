@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { ChevronLeft, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -97,11 +97,11 @@ const CodingProblems = () => {
     const [openEditDialog, setOpenEditDialog] = useState(false)
     const [position, setPosition] = useState(POSITION)
     const [currentPage, setCurrentPage] = useState(1)
-    const [TotalCodingQuestion, setTotalCodingQuestion] = useState(0)
-    const [totalPages, setTotalPages] = useState(7)
+    const [totalCodingQuestion, setTotalCodingQuestion] = useState(0)
+    const [totalPages, setTotalPages] = useState(0)
     const [lastPage, setLastPage] = useState(0)
     const [offset, setOffset] = useState<number>(OFFSET)
-   
+
     const selectedLanguage = ''
 
     const handleTopicClick = (value: string) => {
@@ -201,19 +201,49 @@ const CodingProblems = () => {
         getAllTags()
     }, [])
 
+    const fetchCodingQuestions = useCallback(
+        async (offset: number) => {
+            filteredCodingQuestions(
+                offset,
+                setCodingQuestions,
+                setTotalCodingQuestion,
+                setLastPage,
+                setTotalPages,
+                difficulty,
+                selectedOptions,
+                debouncedSearch,
+                position,
+                selectedLanguage
+            )
+        },
+        [
+            searchTerm,
+            selectedOptions,
+            difficulty,
+            // selectedDifficulty,
+            debouncedSearch,
+            isCodingDialogOpen,
+            openEditDialog,
+            position,
+            offset,
+        ]
+    )
+
     useEffect(() => {
         getAllCodingQuestions(setAllCodingQuestions)
-        filteredCodingQuestions(
-            offset,
-            setCodingQuestions,
-            difficulty,
-            selectedOptions,
-            selectedLanguage,
-            debouncedSearch,
-            position,
-            setLastPage,
-            setTotalPages
-        )
+        fetchCodingQuestions(offset)
+        // filteredCodingQuestions(
+        //     offset,
+        //     setCodingQuestions,
+        //     difficulty,
+        //     selectedOptions,
+        //     selectedLanguage,
+        //     debouncedSearch,
+        //     position,
+        //     setLastPage,
+        //     setTotalPages,
+        //     setTotalCodingQuestion
+        // )
         // filterQuestions(
         //     setCodingQuestions,
         //     selectedDifficulty,
@@ -232,9 +262,7 @@ const CodingProblems = () => {
         openEditDialog,
         position,
         offset,
-        
     ])
-    console.log("totalpages",totalPages)
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -397,17 +425,17 @@ const CodingProblems = () => {
                             )}
                         </>
                     )}
-                                 <DataTablePagination
-                                        totalStudents={TotalCodingQuestion}
-                                        position={position}
-                                        setPosition={setPosition}
-                                        pages={totalPages}
-                                        lastPage={lastPage}
-                                        currentPage={currentPage}
-                                        setCurrentPage={setCurrentPage}
-                                        fetchStudentData={filteredCodingQuestions}
-                                        setOffset={setOffset}
-                                    />
+                    <DataTablePagination
+                        totalStudents={totalCodingQuestion}
+                        position={position}
+                        setPosition={setPosition}
+                        pages={totalPages}
+                        lastPage={lastPage}
+                        currentPage={currentPage}
+                        setCurrentPage={setCurrentPage}
+                        fetchStudentData={fetchCodingQuestions}
+                        setOffset={setOffset}
+                    />
                 </div>
             )}
         </>
