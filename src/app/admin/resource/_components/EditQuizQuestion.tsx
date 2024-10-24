@@ -29,7 +29,7 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { Tag } from '../mcq/page'
 import { DialogFooter } from '@/components/ui/dialog'
-import { getAllQuizQuestion, useFirstRenderValue } from '@/utils/admin'
+import { getAllQuizQuestion } from '@/utils/admin'
 import {
     getCodingQuestionTags,
     getmcqdifficulty,
@@ -274,7 +274,7 @@ const EditQuizQuestion = ({
                                                     const selectedTag =
                                                         tags.find(
                                                             (tag: any) =>
-                                                                tag.tagName ===
+                                                                tag?.tagName ===
                                                                 value
                                                         )
                                                     if (selectedTag) {
@@ -302,9 +302,9 @@ const EditQuizQuestion = ({
                                                     {tags.map((tag: any) => (
                                                         <SelectItem
                                                             key={tag.id}
-                                                            value={tag.tagName}
+                                                            value={tag?.tagName}
                                                         >
-                                                            {tag.tagName}
+                                                            {tag?.tagName}
                                                         </SelectItem>
                                                     ))}
                                                 </SelectContent>

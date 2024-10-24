@@ -126,6 +126,22 @@ export const getDeleteStudentStore = create<deleteStudentStore>((set) => ({
 }))
 // ------------------------------
 
+// set assessment preview content in a state:
+
+type assessmentPreviewStore = {
+    assessmentPreviewContent: any
+    setAssessmentPreviewContent: (newValue: any) => void
+}
+
+export const getAssessmentPreviewStore = create<assessmentPreviewStore>(
+    (set) => ({
+        assessmentPreviewContent: null,
+        setAssessmentPreviewContent: (newValue: any) => {
+            set({ assessmentPreviewContent: newValue })
+        },
+    })
+)
+
 // ------------------------------
 // Define the type for the assessment store
 type assessmentStore = {
@@ -184,6 +200,150 @@ export const getAllQuizData = create<storequizData>((set) => ({
     quizData: [],
     setStoreQuizData: (newValue: quiz[]) => {
         set({ quizData: newValue })
+    },
+}))
+
+// ----------------Chapter state for Student side--------------
+
+type studentChapterContent = {
+    chapterContent: any
+    setChapterContent: (newValue: any) => void
+}
+
+export const getStudentChapterContentState = create<studentChapterContent>(
+    (set) => ({
+        chapterContent: {},
+        setChapterContent: (newValue: any) => {
+            set({ chapterContent: newValue })
+        },
+    })
+)
+
+type chapters = {
+    chapters: any[]
+    setChapters: (newValue: any[]) => void
+}
+
+export const getStudentChaptersState = create<chapters>((set) => ({
+    chapters: [],
+    setChapters: (newValue: any[]) => {
+        set({ chapters: newValue })
+    },
+}))
+
+type studentModuleName = {
+    moduleName: string
+    setModuleName: (newValue: string) => void
+}
+
+export const getModuleName = create<studentModuleName>((set) => ({
+    moduleName: '',
+    setModuleName: (newValue: string) => {
+        set({ moduleName: newValue })
+    },
+}))
+
+// ------------------------------
+
+// ----------------Chapter state for Admin side--------------
+
+type chapterContent = {
+    chapterContent: any
+    setChapterContent: (newValue: any) => void
+}
+
+export const getChapterContentState = create<chapterContent>((set) => ({
+    chapterContent: null,
+    setChapterContent: (newValue: any) => {
+        set({ chapterContent: newValue })
+    },
+}))
+
+type Chapter = {
+    chapterId: number
+    chapterTitle: string
+    topicId: number
+    topicName: string
+    order: number
+}
+
+type chapterData = {
+    chapterData: Chapter[]
+    setChapterData: (newValue: Chapter[]) => void
+}
+
+export const getChapterDataState = create<chapterData>((set) => ({
+    chapterData: [],
+    setChapterData: (newValue: Chapter[]) => {
+        set({ chapterData: newValue })
+    },
+}))
+
+type currentChapter = {
+    currentChapter: Chapter[]
+    setCurrentChapter: (newValue: Chapter[]) => void
+}
+
+export const getCurrentChapterState = create<currentChapter>((set) => ({
+    currentChapter: [],
+    setCurrentChapter: (newValue: Chapter[]) => {
+        set({ currentChapter: newValue })
+    },
+}))
+
+type topicId = {
+    topicId: number
+    setTopicId: (newValue: number) => void
+}
+
+export const getTopicId = create<topicId>((set) => ({
+    topicId: 1,
+    setTopicId: (newValue: number) => {
+        set({ topicId: newValue })
+    },
+}))
+
+type moduleName = {
+    moduleName: string
+    setModuleName: (newValue: string) => void
+}
+
+export const getCurrentModuleName = create<moduleName>((set) => ({
+    moduleName: '',
+    setModuleName: (newValue: string) => {
+        set({ moduleName: newValue })
+    },
+}))
+
+interface Module {
+    chapterId: number
+    topicName: string
+    chapterTitle: string
+    topicId: number
+    // include other properties as needed
+}
+
+type studentModuleData = {
+    moduleData: Module[]
+    setModuleData: (newValue: Module[]) => void
+}
+
+export const getModuleData = create<studentModuleData>((set) => ({
+    moduleData: [],
+    setModuleData: (newValue: Module[]) => {
+        set({ moduleData: newValue })
+    },
+}))
+
+type scrollPosition = {
+    scrollPosition: number
+    setScrollPosition: (newValue: number) => void
+}
+
+export const getScrollPosition = create<scrollPosition>((set) => ({
+    scrollPosition: 0,
+    setScrollPosition: (newValue: number) => {
+        set({ scrollPosition: newValue })
     },
 }))
 
@@ -504,14 +664,19 @@ export const getStoreStudentBatchData = create<storeBatchData>((set) => ({
     },
 }))
 
+interface Option {
+    label: string
+    value: string
+}
+
 type mcqdifficulty = {
-    mcqDifficulty: string
-    setMcqDifficulty: (newValue: string) => void
+    mcqDifficulty: Option[]
+    setMcqDifficulty: (newValue: Option[]) => void
 }
 
 export const getmcqdifficulty = create<mcqdifficulty>((set) => ({
-    mcqDifficulty: 'None',
-    setMcqDifficulty: (newValue: string) => {
+    mcqDifficulty: [{ value: 'None', label: 'All Difficulty' }],
+    setMcqDifficulty: (newValue: Option[]) => {
         set({ mcqDifficulty: newValue })
     },
 }))

@@ -143,11 +143,11 @@ export function handleVisibilityChange(
             newTabChangeInstance.toString()
         )
         setTabChangeInstance(newTabChangeInstance)
-             if (newTabChangeInstance > 5) {
+             if (newTabChangeInstance > 2) {
             // Check if the current page is the submitAssessment page
             if (isCurrentPageSubmitAssessment()) {
                 // Submit the assessment
-                submitAssessment()
+                // submitAssessment()
                return toast({
                     title: 'Test Ended -> Tab will close now',
                     description: 'You have changed the tab multiple times.',
@@ -175,9 +175,11 @@ export function handleFullScreenChange(
     setFullScreenExitInstance: any,
     fullScreenExitInstance: any,
     submitAssessment: () => void,
-    isCurrentPageSubmitAssessment: () => Boolean
+    isCurrentPageSubmitAssessment: () => Boolean,
+    setIsFullScreen: any
 ) {
     if (!document.fullscreenElement) {
+        setIsFullScreen(false)
         const newFullScreenExitInstance = fullScreenExitInstance + 1
         localStorage.setItem(
             'fullScreenExitInstance',
@@ -185,11 +187,11 @@ export function handleFullScreenChange(
         )
         setFullScreenExitInstance(newFullScreenExitInstance)
 
-          if (newFullScreenExitInstance > 5) {
+          if (newFullScreenExitInstance > 2) {
             // Check if the current page is the submitAssessment page
             if (isCurrentPageSubmitAssessment()) {
                 // Submit the assessment
-                submitAssessment()
+                // submitAssessment()
                return toast({
                     title: 'Test Ended',
                     description: 'You have exited full screen multiple times.',
@@ -225,6 +227,7 @@ export function handleFullScreenChange(
         (event.ctrlKey && event.code === 'KeyU') || // Ctrl+U (view source)
         (event.ctrlKey && event.code === 'KeyS') || // Ctrl+S (save page)
         event.code === 'F12' || // F12 (DevTools)
+        event.code === 'F11' || // F11 (Full Screen toggle)
         event.code === 'Escape' // Escape (exit fullscreen)
     ) {
         event.preventDefault()
