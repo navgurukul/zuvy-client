@@ -56,7 +56,7 @@ const QuizPreview = ({
                                         ([optionId, optionText]) => (
                                             <div
                                                 key={optionId}
-                                                className="flex  items-center"
+                                                className="flex p-4 items-center"
                                             >
                                                 <input
                                                     type="radio"
@@ -72,12 +72,12 @@ const QuizPreview = ({
                                                 <label>
                                                     {optionText as String}
                                                 </label>
-                                                {Number(optionId) ===
+                                                {/* {Number(optionId) ===
                                                     question.correctOption && (
-                                                    <span className="ml-2 text-green-600 font-bold">
-                                                        (Correct)
-                                                    </span>
-                                                )}
+                                                    // <span className="ml-2 text-green-600 font-bold">
+                                                    //     (Correct)
+                                                    // </span>
+                                                )} */}
                                             </div>
                                         )
                                     )}
