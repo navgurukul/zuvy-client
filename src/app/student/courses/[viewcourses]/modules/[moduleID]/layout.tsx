@@ -1,15 +1,20 @@
 'use client'
 
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
-import { useParams } from 'next/navigation'
+import { useParams, usePathname } from 'next/navigation'
 import Chapters from '../_components/Chapters'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     const { projectID } = useParams()
+    const pathname = usePathname()
+    const assessmentRoute =
+        pathname?.includes('/assessment') ||
+        pathname?.includes('/codepanel') ||
+        pathname?.includes('/codingresult')
 
     return (
         <>
-            {projectID ? (
+            {projectID || assessmentRoute ? (
                 <MaxWidthWrapper>{children}</MaxWidthWrapper>
             ) : (
                 // <MaxWidthWrapper><Project /></MaxWidthWrapper>
