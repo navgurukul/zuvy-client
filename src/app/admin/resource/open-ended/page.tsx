@@ -1,7 +1,7 @@
 'use client'
 
 // External imports
-import React, { useEffect, useState } from 'react'
+import React, { useCallback,useEffect, useState } from 'react'
 import { Search } from 'lucide-react'
 import Image from 'next/image'
 
@@ -41,6 +41,7 @@ import difficultyOptions from '@/app/utils'
 import { OFFSET, POSITION } from '@/utils/constant'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 
+
 type Props = {}
 export type Tag = {
     id: number
@@ -76,10 +77,11 @@ const OpenEndedQuestions = (props: Props) => {
     const [searchTerm, setSearchTerm] = useState('')
     const [position, setPosition] = useState(POSITION)
     const [currentPage, setCurrentPage] = useState(1)
-    const [TotalOpenEnded, setTotalOpenEnded] = useState(0)
+    const [totalOpenEndedQuestion,  setTotalOpenEndedQuestion] = useState <any>(0)
+    const [totalPages, setTotalPages] = useState(0)
     const [pages, setPages] = useState(0)
     const [lastPage, setLastPage] = useState(0)
-    const [offset, setOffset] = useState<number>(OFFSET)
+    const [offset, setOffset] = useState<number>(1)
     const debouncedSearch = useDebounce(searchTerm, 500)
     const [loading, setLoading] = useState(true)
     const selectedLanguage = ''
@@ -159,31 +161,75 @@ const OpenEndedQuestions = (props: Props) => {
             }
         }
     }
+    console.log("potion",position)
 
     useEffect(() => {
         getAllTags(setTags)
     }, [setTags])
-
+    
+    const fetchCodingQuestions = useCallback(
+        async (offset: number) => {
+            filteredOpenEndedQuestions(
+                offset,
+                setOpenEndedQuestions,
+                setTotalOpenEndedQuestion,
+                setLastPage,
+                setTotalPages,
+                difficulty,
+                selectedOptions,
+                debouncedSearch,
+                position,
+                selectedLanguage
+            )
+        },
+        [
+            searchTerm,
+            selectedOptions,
+            difficulty,
+            setOpenEndedQuestions,
+            // selectedDifficulty,
+            debouncedSearch,
+            isDialogOpen,
+         
+            position,
+            offset,
+        ]
+    )
     useEffect(() => {
         getAllOpenEndedQuestions(setAllOpenEndedQuestions)
-        filteredOpenEndedQuestions(
-            offset,
-            setOpenEndedQuestions,
-            difficulty,
-            selectedOptions,
-            selectedLanguage,
-            debouncedSearch,
-            position
-    )
-            
-        
+        fetchCodingQuestions(offset)
+     
     }, [
         searchTerm,
         selectedOptions,
         difficulty,
         setOpenEndedQuestions,
+        // selectedDifficulty,
         debouncedSearch,
+        isDialogOpen,
+        position,
+        offset,
     ])
+    // useEffect(() => {
+    //     getAllOpenEndedQuestions(setAllOpenEndedQuestions)
+    //     filteredOpenEndedQuestions(
+    //         offset,
+    //         setOpenEndedQuestions,
+    //         difficulty,
+    //         selectedOptions,
+    //         selectedLanguage,
+    //         debouncedSearch,
+    //         position
+    // )
+            
+        
+    // }, [
+    //     searchTerm,
+    //     selectedOptions,
+    //     difficulty,
+    //     setOpenEndedQuestions,
+    //     debouncedSearch,
+    // ])
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -377,17 +423,17 @@ const OpenEndedQuestions = (props: Props) => {
                             </MaxWidthWrapper>
                         </>
                     )}
-                      {/* <DataTablePagination
-                            totalStudents={TotalOpenEnded}
+                      <DataTablePagination
+                            totalStudents={totalOpenEndedQuestion}
                             position={position}
                             setPosition={setPosition}
-                            pages={pages}
+                            pages={totalPages}
                             lastPage={lastPage}
                             currentPage={currentPage}
                             setCurrentPage={setCurrentPage}
-                            fetchStudentData={filteredOpenEndedQuestions}
+                            fetchStudentData={fetchCodingQuestions}
                             setOffset={setOffset}
-                        /> */}
+                        />
                 </div>
             )}
         </>

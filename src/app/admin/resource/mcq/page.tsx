@@ -35,14 +35,12 @@ import {
     getMcqSearch,
 } from '@/store/store'
 import useDebounce from '@/hooks/useDebounce'
-import { filteredQuizQuestions, getAllQuizQuestion } from '@/utils/admin'
+import { getAllQuizQuestion } from '@/utils/admin'
 import { Spinner } from '@/components/ui/spinner'
 import MultiSelector from '@/components/ui/multi-selector'
 import difficultyOptions from '@/app/utils'
-import { OFFSET, POSITION } from '@/utils/constant'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
-
-
+import { OFFSET, POSITION } from '@/utils/constant'
 type Props = {}
 export type Tag = {
     id: number
@@ -56,14 +54,15 @@ interface Option {
 
 const Mcqs = (props: Props) => {
     const [isOpen, setIsOpen] = useState(false)
-    const [search, setSearch] = useState('')
-    const debouncedSearch = useDebounce(search, 500)
     const [position, setPosition] = useState(POSITION)
     const [currentPage, setCurrentPage] = useState(1)
-    const [TotalMCQQuestion, setTotalMCQQuestion] = useState(0)
+    const [totalMCQQuestion,  setTotalMCQQuestion] = useState <any>(0)
+    const [totalPages, setTotalPages] = useState(0)
     const [pages, setPages] = useState(0)
     const [lastPage, setLastPage] = useState(0)
     const [offset, setOffset] = useState<number>(OFFSET)
+    const [search, setSearch] = useState('')
+    const debouncedSearch = useDebounce(search, 500)
     // const [difficulty, setDifficulty] = useState<string>('None')
     const { tags, setTags } = getCodingQuestionTags()
     const { quizData, setStoreQuizData } = getAllQuizData()
@@ -184,9 +183,10 @@ const Mcqs = (props: Props) => {
         }
     }
 
-    const getAllQuizQuestion = useCallback(async () => {
+    const getAllQuizQuestion = useCallback(async (offset:number) => {
         try {
-            let url = `/Content/allQuizQuestions`
+            const safeOffset = Math.max(0, offset)
+            let url = `/Content/allQuizQuestions?tagId=2&limit=${position}&offset=${offset}`
             setmcqSearch(debouncedSearch)
             let selectedTagIds = ''
             selectedOptions.map(
@@ -217,10 +217,13 @@ const Mcqs = (props: Props) => {
             }
 
             if (queryParams.length > 0) {
-                url += `?${queryParams.join('&')}`
+                url += `&${queryParams.join('&')}`
             }
             const res = await api.get(url)
             setStoreQuizData(res.data.data)
+            setTotalMCQQuestion(res.data.totalRows)
+            setTotalPages(res.data.totalPages)
+            setLastPage(res.data.totalPages)
             setLoading(false)
         } catch (error) {
             console.error('Error fetching quiz questions:', error)
@@ -233,16 +236,19 @@ const Mcqs = (props: Props) => {
         selectedTag.id,
         selectedOptions,
         setmcqSearch,
-        position
+        setTotalMCQQuestion,
+        position,
+       
     ])
+   
 
     useEffect(() => {
         getAllTags()
     }, [])
 
     useEffect(() => {
-        getAllQuizQuestion()
-    }, [getAllQuizQuestion])
+        getAllQuizQuestion(offset)
+    }, [getAllQuizQuestion,offset,position])
 
     const selectedTagCount = selectedOptions.length
     const difficultyCount = difficulty.length
@@ -310,23 +316,22 @@ const Mcqs = (props: Props) => {
                                 handleOptionClick={handleTagOption}
                             />
                         </div>
-                       
                     </div>
 
                     <DataTable data={quizData} columns={columns} />
-                </MaxWidthWrapper>
-            )}
-             <DataTablePagination
-                            totalStudents={TotalMCQQuestion}
+                    <DataTablePagination
+                            totalStudents={totalMCQQuestion}
                             position={position}
                             setPosition={setPosition}
-                            pages={pages}
+                            pages={totalPages}
                             lastPage={lastPage}
                             currentPage={currentPage}
                             setCurrentPage={setCurrentPage}
-                            fetchStudentData={filteredQuizQuestions}
+                            fetchStudentData={getAllQuizQuestion}
                             setOffset={setOffset}
                         />
+                </MaxWidthWrapper>
+            )}
         </>
     )
 }

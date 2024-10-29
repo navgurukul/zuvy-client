@@ -4,6 +4,7 @@ import { api } from '@/utils/axios.config'
 import { useEffect, useRef } from 'react'
 import useDebounce from '@/hooks/useDebounce'
 import { getMcqSearch } from '@/store/store'
+import { Search } from 'lucide-react'
 
 export function handleDelete(
     deleteCodingQuestionId: any,
@@ -317,35 +318,19 @@ export async function filteredCodingQuestions(
         setTotalCodingQuestion(response.data.totalRows)
         setTotalPages(response.data.totalPages)
         setLastPage(response.data.totalPages)
-        // TotalCodingQuestion(response.data.TotalCodingQuestion)
     } catch (error) {
         console.error('Error:', error)
     }
 }
-
 export async function filteredQuizQuestions(
-    offset: number,
-    setFilteredQuestions?: any,
-    selectedDifficulty?: string,
-    selectedTopic?: any,
-    selectedLanguage?: string,
-    debouncedSearch?: string | undefined,
-    position?: any,
-    currentPage?: number,
-    pages?: number,
-    TotalMCQQuestion?: any,
-    lastPage?: any
-    // setTotalCodingQues
+    setFilteredQuestions: any,
+    selectedDifficulty: string,
+    selectedTopic: any,
+    selectedLanguage: string,
+    debouncedSearch: string
 ) {
     try {
-        // let url = `/Content/allQuizQuestions`
-        console.log('filtercodingquestion offset ', offset)
-        let url = `/Content/allQuizQuestions?tagId=2&limit=${position}&offset=${offset}`
-        if (debouncedSearch) {
-            url = `/Content/allQuizQuestions?tagId=2&limit=2&searchTerm=${encodeURIComponent(
-                debouncedSearch
-            )}`
-        }
+        let url = `/Content/allQuizQuestions`
 
         const queryParams = []
 
@@ -376,9 +361,6 @@ export async function filteredQuizQuestions(
         )
 
         setFilteredQuestions(filtered)
-        TotalMCQQuestion(filtered.TotalCodingQuestion)
-        setPages(filtered.totalPages)
-        lastPage(filtered.totalPages)
     } catch (error) {
         console.error('Error:', error)
     }
@@ -386,25 +368,20 @@ export async function filteredQuizQuestions(
 
 export async function filteredOpenEndedQuestions(
     offset: number,
-    setFilteredQuestions: any,
+    setFilteredQuestions: (newValue: any[]) => void,
+    setTotalOpenEndedQuestion: any,
+    setLastPage: any,
+    setTotalPages: any,
     difficulty: any,
     selectedOptions: any,
-    selectedLanguage: string | undefined,
     debouncedSearch: string | undefined,
-    position?: any,
-    TotalOpenEnded?: any,
-    currentPage?: number,
-    pages?: number,
-    lastPage?: any
+    position: any,
+    totalOpenEndedQuestion: any,
+    selectedLanguage?: string
 ) {
     try {
-        // let url = `/Content/openEndedQuestions`
-        let url = `/Content/openEndedQuestions?pageNo=${offset}&limit_o=${position}`
-        if (debouncedSearch) {
-            url = `/Content/openEndedQuestions?pageNo=${offset}&searchTerm=${encodeURIComponent(
-                debouncedSearch
-            )}`
-        }
+        const safeOffset = Math.max(0, offset)
+        let url = `/Content/openEndedQuestions?pageNo=${offset}&limit_=${position}`
 
         let selectedTagIds = ''
         selectedOptions.map(
@@ -433,15 +410,19 @@ export async function filteredOpenEndedQuestions(
         }
         // Add more conditions here as needed, e.g., selectedLanguage, etc.
 
+        // if (queryParams.length > 0) {
+        //     url += '?' + queryParams.join('&')
+        // }
         if (queryParams.length > 0) {
-            url += '?' + queryParams.join('&')
+            url += '&' + queryParams.join('&')
         }
 
         const response = await api.get(url)
+        
         setFilteredQuestions(response.data.data)
-        TotalOpenEnded(response.data.TotalOpenEnded)
-        setPages(response.data.totalPages)
-        lastPage(response.data.totalPages)
+        setTotalOpenEndedQuestion(response.data.totalRows)
+        setTotalPages(response.data.totalPages)
+        setLastPage(response.data.totalPages)
     } catch (error) {
         console.error('Error:', error)
     }
