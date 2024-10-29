@@ -51,7 +51,7 @@ const Page = (props: Props) => {
                         </li>
                     </div>
                 </div>
-                <div className="p-4 flex flex-col gap-y-3 bg-white rounded shadow">
+                <div className="p-4 flex flex-col gap-y-2 bg-white rounded shadow">
                     <h2 className="text-lg text-left font-bold mb-2">
                         Github Link
                     </h2>
@@ -60,15 +60,7 @@ const Page = (props: Props) => {
                             https://github.com/navgurukul/zuvy-client
                         </h2>
                     </Link>
-                    <h2 className="text-lg text-left font-bold mb-2">
-                        Video Walkthrough
-                    </h2>
-                    <div className="">
-                        <p>Video Walk through</p>
-                    </div>
-                    <h2 className="text-lg text-left font-bold mb-2">
-                        Grading
-                    </h2>
+                  
                 </div>
             </div>
         </div>
