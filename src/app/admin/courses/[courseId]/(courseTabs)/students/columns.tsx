@@ -15,10 +15,10 @@ import {
     getStoreStudentData,
 } from '@/store/store'
 import { getAttendanceColorClass } from '@/utils/students'
-
 import { ComboboxStudent } from './components/comboboxStudentDataTable'
-
 import { AlertDialogDemo } from './components/deleteModalNew'
+import { Checkbox } from '@/components/ui/checkbox'
+
 export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'profilePicture',
@@ -108,6 +108,55 @@ export const columns: ColumnDef<Task>[] = [
                         batchId={batchId}
                     />
                 </div>
+            )
+        },
+    },
+    {
+        accessorKey: 'checkbox',
+        header: ({ column }) => {
+            // const { batchName, userId, bootcampId, batchId } = row.original
+            // const { batchData } = getBatchData()
+            // const newBatchData = batchData?.map((data) => {
+            //     return {
+            //         value: data.id,
+            //         label: data.name,
+            //     }
+            // })
+            console.log('column', column)
+            return (
+                <DataTableColumnHeader
+                    column={column}
+                    title="Select Students"
+                />
+                // <div className="flex">
+                //         <ComboboxStudent
+                //             batchData={newBatchData}
+                //             batchName={batchName}
+                //             userId={userId}
+                //             bootcampId={bootcampId}
+                //             batchId={batchId}
+                //         />
+                //     </div>
+            )
+        },
+        cell: ({ row }) => {
+            console.log('row.original', row.original)
+            const { batchName, userId, bootcampId, batchId } = row.original
+            const { batchData } = getBatchData()
+            const newBatchData = batchData?.map((data) => {
+                return {
+                    value: data.id,
+                    label: data.name,
+                }
+            })
+
+            return (
+                <Checkbox
+                    checked={row.getIsSelected()}
+                    onCheckedChange={(value) => row.toggleSelected(!!value)}
+                    aria-label="Select row"
+                    className="translate-y-[2px]"
+                />
             )
         },
     },

@@ -1,4 +1,3 @@
-
 'use client'
 import { useEffect, useState } from 'react'
 
@@ -65,6 +64,8 @@ export default function EditCodingQuestionForm() {
     const { tags } = getCodingQuestionTags()
     const { editCodingQuestionId } = getEditCodingQuestionDialogs()
 
+    console.log('tags', tags)
+
     const {
         setEditCodingQuestionId,
         isCodingEditDialogOpen,
@@ -85,15 +86,17 @@ export default function EditCodingQuestionForm() {
     }
 
     const handleRemoveTestCase = (id: number) => {
-    const updatedTestCases = testCases.filter((testCase: any) => testCase.id !== id);
-    setTestCases(updatedTestCases);
+        const updatedTestCases = testCases.filter(
+            (testCase: any) => testCase.id !== id
+        )
+        setTestCases(updatedTestCases)
 
-    // Sync the form state with updated test cases
-    form.reset({
-        ...form.getValues(),
-        testCases: updatedTestCases
-    });
-};
+        // Sync the form state with updated test cases
+        form.reset({
+            ...form.getValues(),
+            testCases: updatedTestCases,
+        })
+    }
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -112,8 +115,8 @@ export default function EditCodingQuestionForm() {
                 selectCodingQuestion[0]?.testCases?.map((testCase: any) => ({
                     id: testCase.id, // Ensure this is correctly mapped
                     input: JSON.stringify(
-                        testCase.inputs.map(
-                            (input: any) => String(input.parameterValue)
+                        testCase.inputs.map((input: any) =>
+                            String(input.parameterValue)
                         )
                     ),
                     output: JSON.stringify(
@@ -124,7 +127,6 @@ export default function EditCodingQuestionForm() {
     })
 
     async function editCodingQuestion(data: any) {
-
         try {
             const response = await api.put(
                 `codingPlatform/update-question/${editCodingQuestionId}`,
@@ -186,31 +188,34 @@ export default function EditCodingQuestionForm() {
                 ),
             })
             setTestCases(
-                selectCodingQuestion[0]?.testCases?.map(
-                    (testCase: any) => ({
-                        id: testCase.id,
-                        input: testCase.inputs
-                            .map((input: any) => {
-                                let value = input.parameterValue;
-                                if (Array.isArray(value)) {
-                                    value = value.join(', ');
-                                }
-                                // Keep `0` and non-empty values intact, while cleaning other values
-                                return value !== null && value !== undefined ? cleanUpValues(value.toString()) : value;
-                            })
-                            .join(' '),
-                        output: testCase.expectedOutput.parameterValue !== null && testCase.expectedOutput.parameterValue !== undefined
-                            ? cleanUpValues(testCase.expectedOutput.parameterValue.toString())
+                selectCodingQuestion[0]?.testCases?.map((testCase: any) => ({
+                    id: testCase.id,
+                    input: testCase.inputs
+                        .map((input: any) => {
+                            let value = input.parameterValue
+                            if (Array.isArray(value)) {
+                                value = value.join(', ')
+                            }
+                            // Keep `0` and non-empty values intact, while cleaning other values
+                            return value !== null && value !== undefined
+                                ? cleanUpValues(value.toString())
+                                : value
+                        })
+                        .join(' '),
+                    output:
+                        testCase.expectedOutput.parameterValue !== null &&
+                        testCase.expectedOutput.parameterValue !== undefined
+                            ? cleanUpValues(
+                                  testCase.expectedOutput.parameterValue.toString()
+                              )
                             : testCase.expectedOutput.parameterValue,
-                    })
-                )
-            );
-
-
+                }))
+            )
         }
     }, [])
 
     const handleEditSubmit = (values: z.infer<typeof formSchema>) => {
+        console.log('values in handleEditSubmit', values)
         const processInput = (input: string, format: string) => {
             const cleanedInput = cleanUpValues(input)
 
@@ -271,6 +276,8 @@ export default function EditCodingQuestionForm() {
         const generateParameterName = (index: number) => {
             return String.fromCharCode(97 + index) // a, b, c, etc.
         }
+
+        console.log('tagId', values.topics)
 
         const formattedData = {
             title: values.title,
@@ -345,6 +352,8 @@ export default function EditCodingQuestionForm() {
             content: {},
         }
 
+        console.log('formattedData', formattedData)
+
         const hasInvalidTestCase = formattedData.testCases.some(
             (testCase: any) => {
                 return (
@@ -370,8 +379,12 @@ export default function EditCodingQuestionForm() {
         getAllCodingQuestions(setCodingQuestions)
     }
 
-   
-
+    console.log('selectCodingQuestion', selectCodingQuestion)
+    console.log(
+        'placeholder',
+        tags.find((tag) => tag.value == selectCodingQuestion[0]?.tagId)
+            ?.label || 'Choose Topic'
+    )
     return (
         <main className="flex flex-col p-3 w-full items-center ">
             <div
@@ -487,17 +500,39 @@ export default function EditCodingQuestionForm() {
                             <FormItem className="text-left w-full">
                                 <FormLabel>Topics</FormLabel>
                                 <Select
-                                    value={tags.find(
-                                        (tag: any) =>
-                                            tag?.tagName ===
-                                            selectCodingQuestion[0].tagId
-                                    )}
+                                    // value={tags.find(
+                                    //     (tag: any) =>
+                                    //         tag?.value ==
+                                    //         selectCodingQuestion[0].tagId
+                                    // )}
+                                    // value={
+                                    //     tags.find(
+                                    //         (tag) =>
+                                    //             tag.value ==
+                                    //             selectCodingQuestion[0]?.tagId
+                                    //     )?.label || ''
+                                    // }
+                                    value={
+                                        tags.find(
+                                            (tag) => tag.value == field.value
+                                        )?.label ||
+                                        tags.find(
+                                            (tag) =>
+                                                tag.value ==
+                                                selectCodingQuestion[0]?.tagId
+                                        )?.label ||
+                                        ''
+                                    }
                                     onValueChange={(value) => {
+                                        console.log('value', value)
                                         const selectedTag = tags.find(
-                                            (tag: any) => tag?.tagName === value
+                                            (tag: any) => tag?.label == value
                                         )
+                                        console.log('selectedTag', selectedTag)
                                         if (selectedTag) {
-                                            field.onChange(selectedTag.id)
+                                            field.onChange(
+                                                parseInt(selectedTag.value)
+                                            )
                                         }
                                     }}
                                 >
@@ -507,10 +542,10 @@ export default function EditCodingQuestionForm() {
                                                 placeholder={
                                                     tags.find(
                                                         (tag) =>
-                                                            tag.id ===
+                                                            tag.value ==
                                                             selectCodingQuestion[0]
                                                                 ?.tagId
-                                                    )?.tagName || 'Choose Topic'
+                                                    )?.label || 'Choose Topic'
                                                 }
                                             />
                                         </SelectTrigger>
@@ -518,10 +553,10 @@ export default function EditCodingQuestionForm() {
                                     <SelectContent>
                                         {tags.map((tag: any) => (
                                             <SelectItem
-                                                key={tag.id}
-                                                value={tag?.tagName}
+                                                key={tag.value}
+                                                value={tag?.label}
                                             >
-                                                {tag?.tagName}
+                                                {tag?.label}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
@@ -630,7 +665,10 @@ export default function EditCodingQuestionForm() {
                                                 onChange={field.onChange}
                                             />
                                             <p className="text-sm text-gray-500 mt-1 ">
-                                                {form.watch('inputFormat') === 'arrayOfnum' || form.watch('inputFormat') === 'arrayOfStr'
+                                                {form.watch('inputFormat') ===
+                                                    'arrayOfnum' ||
+                                                form.watch('inputFormat') ===
+                                                    'arrayOfStr'
                                                     ? 'Max 1 array accepted (e.g., 1,2,3,4)'
                                                     : 'Enter values separated by spaces (e.g., 2 3 4)'}
                                             </p>
@@ -650,7 +688,10 @@ export default function EditCodingQuestionForm() {
                                                 onChange={field.onChange}
                                             />
                                             <p className="text-sm text-gray-500 mt-1 ">
-                                                {form.watch('outputFormat') === 'arrayOfnum' || form.watch('outputFormat') === 'arrayOfStr'
+                                                {form.watch('outputFormat') ===
+                                                    'arrayOfnum' ||
+                                                form.watch('outputFormat') ===
+                                                    'arrayOfStr'
                                                     ? 'Max 1 array accepted (e.g., 1,2,3,4)'
                                                     : 'Only one value accepted (e.g., 55)'}
                                             </p>
@@ -687,4 +728,3 @@ export default function EditCodingQuestionForm() {
         </main>
     )
 }
-

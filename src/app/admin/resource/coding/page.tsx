@@ -301,7 +301,6 @@ const CodingProblems = () => {
                                     />
                                 </div>
                             </div>
-
                             <DataTable
                                 data={codingQuestions}
                                 columns={columns}
