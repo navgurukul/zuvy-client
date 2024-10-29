@@ -500,18 +500,6 @@ export default function EditCodingQuestionForm() {
                             <FormItem className="text-left w-full">
                                 <FormLabel>Topics</FormLabel>
                                 <Select
-                                    // value={tags.find(
-                                    //     (tag: any) =>
-                                    //         tag?.value ==
-                                    //         selectCodingQuestion[0].tagId
-                                    // )}
-                                    // value={
-                                    //     tags.find(
-                                    //         (tag) =>
-                                    //             tag.value ==
-                                    //             selectCodingQuestion[0]?.tagId
-                                    //     )?.label || ''
-                                    // }
                                     value={
                                         tags.find(
                                             (tag) => tag.value == field.value
@@ -524,11 +512,9 @@ export default function EditCodingQuestionForm() {
                                         ''
                                     }
                                     onValueChange={(value) => {
-                                        console.log('value', value)
                                         const selectedTag = tags.find(
                                             (tag: any) => tag?.label == value
                                         )
-                                        console.log('selectedTag', selectedTag)
                                         if (selectedTag) {
                                             field.onChange(
                                                 parseInt(selectedTag.value)

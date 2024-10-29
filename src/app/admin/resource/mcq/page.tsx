@@ -42,6 +42,8 @@ import difficultyOptions from '@/app/utils'
 
 type Props = {}
 export type Tag = {
+    label: string
+    value: string
     id: number
     tagName: string
 }
