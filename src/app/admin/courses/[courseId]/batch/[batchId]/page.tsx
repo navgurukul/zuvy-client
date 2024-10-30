@@ -47,6 +47,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import BreadcrumbCmponent from '@/app/_components/breadcrumbCmponent'
 import AddStudentsModal from '../../_components/addStudentsmodal'
+import { ComboboxStudent } from '../../(courseTabs)/students/components/comboboxStudentDataTable'
 
 const BatchesInfo = ({
     params,
@@ -58,6 +59,7 @@ const BatchesInfo = ({
     const location = usePathname()
 
     const { studentsData, setStoreStudentData } = getStoreStudentData()
+    const [allBatches, setAllBatches] = useState<any>([])
     const [studentData, setStudentData] = useState<StudentData[]>([])
     const [bootcamp, setBootcamp] = useState<any>([])
     const [search, setSearch] = useState('')
@@ -73,6 +75,7 @@ const BatchesInfo = ({
     const [error, setError] = useState(true)
     const debouncedValue = useDebounce(search, 1000)
     const [loading, setLoading] = useState(true)
+    const [selectedRows, setSelectedRows] = useState<StudentData[]>([])
 
     const crumbs = [
         {
@@ -142,6 +145,28 @@ const BatchesInfo = ({
     }
     const { formState } = form
     const isValid = formState.isValid
+
+    const fetchBatches = useCallback(
+        async (courseId: any) => {
+            try {
+                const response = await api.get(`/bootcamp/batches/${courseId}`)
+                const batchData = response.data.data?.map((data: any) => {
+                    return {
+                        value: data.id,
+                        label: data.name,
+                    }
+                })
+                setAllBatches(batchData)
+            } catch (error) {
+                console.error('Error fetching batches', error)
+            }
+        },
+        [params.courseId]
+    )
+
+    useEffect(() => {
+        fetchBatches(params.courseId)
+    }, [params.courseId])
 
     const fetchInstructorInfo = useCallback(
         async (batchId: string) => {
@@ -270,6 +295,7 @@ const BatchesInfo = ({
     const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value)
     }
+
     return (
         <>
             <BreadcrumbCmponent crumbs={crumbs} />
@@ -482,6 +508,16 @@ const BatchesInfo = ({
                     </div>
                     <div className="flex m-4">
                         <div className="flex items-center mx-4 text-sm">
+                            {selectedRows.length > 0 && (
+                                <ComboboxStudent
+                                    batchData={allBatches}
+                                    bootcampId={params.courseId}
+                                    selectedRows={selectedRows}
+                                    fetchStudentData={fetchStudentData}
+                                />
+                            )}
+                        </div>
+                        <div className="flex items-center mx-4 text-sm">
                             <Dialog>
                                 <DialogTrigger asChild>
                                     <button
@@ -590,7 +626,7 @@ const BatchesInfo = ({
                             ></Trash2>
                             <span
                                 onClick={() => setDeleteModalOpen(true)}
-                                className=" cursor-pointer ml-2"
+                                className=" cursor-pointer ml-1"
                             >
                                 Delete
                             </span>
@@ -629,7 +665,11 @@ const BatchesInfo = ({
                     </div>
                 ) : (
                     <div>
-                        <DataTable columns={columns} data={studentsData} />
+                        <DataTable
+                            columns={columns}
+                            data={studentsData}
+                            setSelectedRows={setSelectedRows}
+                        />
                         <DataTablePagination
                             totalStudents={totalStudents}
                             position={position}

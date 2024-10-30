@@ -29,6 +29,7 @@ export function ComboboxStudent({
     bootcampId,
     batchId,
     selectedRows,
+    fetchStudentData,
 }: {
     batchData: any
     batchName?: any
@@ -36,6 +37,7 @@ export function ComboboxStudent({
     bootcampId: any
     batchId?: any
     selectedRows?: any[]
+    fetchStudentData?: any
 }) {
     const {
         setStudents,
@@ -58,6 +60,9 @@ export function ComboboxStudent({
         setDisplayBatchName(batchName || 'Unassigned')
         setValue(batchId)
     }, [batchName, batchId])
+
+    console.log('selectedRows', selectedRows)
+
     const handleSelectBatchChange = async (
         currentValue: any,
         value: any,
@@ -118,6 +123,7 @@ export function ComboboxStudent({
                         className:
                             'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
+                    fetchStudentData && fetchStudentData()
                     fetchStudentsHandler({
                         courseId,
                         limit,
@@ -149,9 +155,9 @@ export function ComboboxStudent({
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className="w-[200px] justify-between capitalize"
+                    className="w-[200px] justify-between"
                 >
-                    {displaybatchName}
+                    {userId ? displaybatchName : 'Select a Batch'}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
