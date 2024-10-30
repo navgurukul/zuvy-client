@@ -1,0 +1,70 @@
+.sidebar {
+    width: 70px;
+    transition: width 0.3s, padding 0.3s, text-align 0.3s;
+    overflow: hidden;
+    white-space: nowrap;
+    background: #e7e7e7;
+    padding: 8px 16px;
+    text-align: center;
+    height: 100vh;
+    position: fixed;
+}
+
+.sidebar:hover {
+    width: 250px; 
+    padding: 8px 16px;
+    text-align: left;
+}
+
+.sidebar:hover .sidebarItemText,
+.sidebar:focus .sidebarItemText{
+    display: inline-block;
+    margin-left: 16px; 
+}
+
+.sidebar:hover .sidebarItem,
+.sidebar:focus .sidebarItem,
+.sidebar:hover .selectedItem,
+.sidebar:focus .selectedItem {
+    align-items: center;
+    justify-content: left;
+    transition: align-items 0.3s, justify-content 0.3s; /* Add other properties as needed */
+}
+
+.sidebarItem {
+    cursor: pointer;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.sidebarItem:hover {
+    background-color: #ccc;
+    border-radius: 5px; 
+}
+
+.selectedItem {
+    background-color: #fff;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebarItemText {
+    display: none;
+    transition: all 0.3s;
+}
+
+/* .logoContainer {
+    padding: 10px;
+    background: #b1b1b1;
+    border-radius: 10px;
+    margin-bottom: 50px;
+    overflow:hidden;
+} */

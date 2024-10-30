@@ -1,0 +1,255 @@
+.header {
+  border-radius: 16px;
+  background: #e0edff;
+  display: flex;
+  padding: 32px;
+  align-items: center;
+  gap: 8px;
+}
+
+.searchContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+}
+
+.searchInput {
+  width: 35%;
+}
+
+.newCourseBtn {
+  background: #f4f4f4;
+}
+
+.contentContainer {
+  display: flex;
+  margin-top: 24px;
+  align-items: center;
+}
+
+.content {
+  display: flex;
+}
+
+.content span {
+  margin-right: 20px;
+  cursor: pointer;
+  border-radius: 8px;
+  background: #fff;
+  color: #000;
+  transition: all 0.3s;
+  padding: 8px;
+}
+
+.content span.active {
+  background: #e2e2e2;
+}
+
+.filterDropdown {
+  display: flex;
+  align-items: center;
+  background: #e2e2e2;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.courceContainer {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 24px;
+  margin-bottom: 10px;
+  height: calc(65vh - 10px);
+  overflow-y: scroll;
+}
+
+.cardContainer {
+  width: 407px;
+  margin-right: 24px;
+  margin-bottom: 24px;
+}
+
+.cardContent {
+  padding: 10px;
+  text-align: left;
+}
+
+.courseDetails {
+  text-align: left;
+  padding: 10px;
+  margin-right: 10px;
+}
+
+.learnersCount {
+  margin-right: 10px;
+}
+
+.courseNameText {
+}
+
+.dialogContent {
+}
+
+.newCourseBtn {
+  background-color: #f4f4f4;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.inputBox {
+  width: 100%;
+  padding: 8px;
+  margin-top: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.createCourseBtn {
+  background-color: #dedede61;
+  color: black;
+  border: none;
+  padding: 10px 20px;
+  margin-top: 10px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.createCourseBtnDialog {
+  background-color: #dedede61;
+  color: black;
+  border: none;
+  padding: 20px 20px;
+
+  margin-top: 20px;
+  cursor: pointer;
+  border-radius: 4px;
+  float: right;
+}
+.dialogCourseName {
+  color: #000;
+  margin-bottom: 20px;
+  margin-top: 10px;
+}
+.newCourse {
+  margin-bottom: 20px;
+}
+
+.hrLine {
+  width: 100%;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+}
+
+.courseImage {
+  width: auto;
+  height: 200px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.uploadImageButton {
+  margin-bottom: 10px;
+  background-color: #dedede61;
+  padding: 5px;
+  border-radius: 10px;
+  align-items: center;
+  margin-left: 110px;
+  margin-right: 110px;
+}
+
+.label {
+  display: block;
+  margin-top: 20px;
+  text-align: left;
+  clear: left;
+  margin-bottom: 10px;
+}
+
+.textBox {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+  border: 1px solid silver;
+}
+
+.inputBox {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+
+.durationButtons {
+  margin-bottom: 10px;
+  text-align: left;
+  margin-top: 10px;
+}
+
+.durationButton {
+  margin-right: 10px;
+  padding: 5px 10px;
+  background-color: #dedede61;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.durationButton.active {
+  background-color: #ccc;
+}
+
+.languageButtons {
+  display: block;
+  margin-bottom: 20px;
+  text-align: left;
+  margin-top: 10px;
+}
+
+.languageButton {
+  flex: 1;
+  padding: 5px 10px;
+  background-color: #dedede61;
+  cursor: pointer;
+  margin-right: 15px;
+}
+
+.languageButton.active {
+  background-color: #ccc;
+}
+
+.saveChangesButton {
+  display: block;
+  background-color: #dedede61;
+  color: black;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: 110px;
+  margin-right: 110px;
+}
+
+.bootcampName {
+  display: block;
+  text-align: left;
+  margin-bottom: 30px;
+}
+
+.bootcampHeading {
+  display: block;
+  text-align: left;
+  margin-bottom: 10px;
+  font-size: 30px;
+  font-weight: bolder;
+}
+
+.firstCourseText {
+  margin-bottom: 15px;
+}
+
+.needHelpText {
+  margin-bottom: 15px;
+  font-size: medium;
+
+  /* font-weight: 400; */
+}
