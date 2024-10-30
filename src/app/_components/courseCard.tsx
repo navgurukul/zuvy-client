@@ -1,3 +1,4 @@
+import React, { useCallback, useEffect, useState } from 'react'
 import { isPlural } from '@/lib/utils'
 import { CircularProgress } from '@nextui-org/react'
 import {
@@ -11,7 +12,8 @@ import {
     SquareCode,
 } from 'lucide-react'
 import Link from 'next/link'
-import React from 'react'
+import { api } from '@/utils/axios.config'
+import { useRouter, useParams } from 'next/navigation'
 
 function CourseCard({
     param,
@@ -26,6 +28,7 @@ function CourseCard({
     codingProblemsCount,
     quizCount,
     typeId,
+    projectId,
 }: {
     param: string
     name: string
@@ -39,15 +42,48 @@ function CourseCard({
     codingProblemsCount: number
     quizCount: number
     typeId: number
+    projectId: number
 }) {
+    const router = useRouter()
+    const { viewcourses, moduleID } = useParams()
+    const [chapterId, setChapterId] = useState<any>()
     const timeAllotedInWeeks = Math.ceil(timeAlloted / 604800)
     const timeAllotedInDays = Math.ceil(timeAlloted / 86400)
 
+    const getChapterId = useCallback(async () => {
+        try {
+            const response = await api.get(
+                `tracking/getAllChaptersWithStatus/${id}`
+            )
+            setChapterId(response.data.trackingData[0].id)
+        } catch (error) {
+            console.log(error)
+        }
+    }, [])
+
+    useEffect(() => {
+        if (id) {
+            getChapterId()
+        }
+    }, [id, getChapterId])
+
+    const handleModuleRoute = () => {
+        if (typeId === 1) {
+            router.push(
+                `/student/courses/${viewcourses}/modules/${id}/chapters/${chapterId}`
+            )
+        } else if (typeId === 2) {
+            router.push(
+                `/student/courses/${viewcourses}/modules/${id}/project/${projectId}`
+            )
+        }
+    }
+
     return (
-        <Link
+        <div
             key={id}
-            href={`/student/courses/${param}/modules/${id}`}
-            className={`bg-gradient-to-bl my-3 p-3 rounded-xl flex flex-col md:flex-row ${
+            onClick={handleModuleRoute}
+            className={`bg-gradient-to-bl my-3 p-3 rounded-xl flex flex-col md:flex-row cursor-pointer ${
                 typeId === 1
                     ? !isLock
                         ? 'from-blue-50 to-violet-50'
@@ -147,7 +183,7 @@ function CourseCard({
                     )}
                 </div>
             </div>
-        </Link>
+        </div>
     )
 }
 

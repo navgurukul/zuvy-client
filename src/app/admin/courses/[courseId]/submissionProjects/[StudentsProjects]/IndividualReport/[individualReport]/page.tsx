@@ -134,7 +134,7 @@ const Page = ({ params }: any) => {
                 <MaxWidthWrapper>
                     <div className="flex  items-center gap-x-3">
                         <div className="flex flex-col gap-x-2">
-                            <div className="flex gap-x-4 my-4 ">
+                            <div className="flex gap-x-4 my-4">
                                 <Avatar>
                                     <AvatarImage
                                         src="https://github.com/shadcn.png"
@@ -142,20 +142,22 @@ const Page = ({ params }: any) => {
                                     />
                                     <AvatarFallback>CN</AvatarFallback>
                                 </Avatar>
-                                <h1 className="text-left font-semibold text-lg">
-                                    {
-                                        indiviDualStudentData
-                                            ?.projectSubmissionDetails
-                                            ?.projectTrackingData[0].userDetails
-                                            .name
-                                    }
-                                    - Individual Report
-                                </h1>
-                            </div>
-                            <div>
-                                <h3 className="text-left font-semibold ">
-                                    Submitted on {formattedDate}
-                                </h3>
+                                <div className="flex flex-col">
+                                    <h1 className="text-left font-semibold text-lg">
+                                        {
+                                            indiviDualStudentData
+                                                ?.projectSubmissionDetails
+                                                ?.projectTrackingData[0]
+                                                .userDetails.name
+                                        }
+                                    </h1>
+                                    <h3 className="text-left font-semibold">
+                                        Individual Report
+                                    </h3>
+                                    <h3 className="text-left font-semibold">
+                                        Submitted on {formattedDate}
+                                    </h3>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -177,7 +179,7 @@ const Page = ({ params }: any) => {
                                 {editor && <TiptapEditor editor={editor} />}
                             </div>
                         </div>
-                        <div className="p-4 flex flex-col gap-y-3 bg-white rounded shadow">
+                        <div className="p-4 flex flex-col gap-y-1 bg-white rounded shadow">
                             <h2 className="text-lg text-left font-bold mb-2">
                                 Project Link
                             </h2>
@@ -194,15 +196,6 @@ const Page = ({ params }: any) => {
                                     }
                                 </h2>
                             </Link>
-                            <h2 className="text-lg text-left font-bold mb-2">
-                                Video Walkthrough
-                            </h2>
-                            {/* <div className="">
-                                <p>Video Walk through</p>
-                            </div> */}
-                            <h2 className="text-lg text-left font-bold mb-2">
-                                Grading
-                            </h2>
                         </div>
                     </div>
                 </MaxWidthWrapper>

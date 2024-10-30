@@ -143,29 +143,27 @@ export function handleVisibilityChange(
             newTabChangeInstance.toString()
         )
         setTabChangeInstance(newTabChangeInstance)
-             if (newTabChangeInstance > 5) {
+        if (newTabChangeInstance > 2) {
             // Check if the current page is the submitAssessment page
             if (isCurrentPageSubmitAssessment()) {
                 // Submit the assessment
-                submitAssessment()
-               return toast({
+                // submitAssessment()
+                return toast({
                     title: 'Test Ended -> Tab will close now',
                     description: 'You have changed the tab multiple times.',
                     className:
                         'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-destructive text-white',
                 })
             }
-        }else{
-           return toast({
+        } else {
+            return toast({
                 title: 'WARNING',
                 description:
                     'You have changed the tab. If you change the tab again, your test may get submitted automatically.',
-                className: 'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-destructive text-white',
+                className:
+                    'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-destructive text-white',
             })
         }
-
-    
-   
     }
 }
 
@@ -175,9 +173,11 @@ export function handleFullScreenChange(
     setFullScreenExitInstance: any,
     fullScreenExitInstance: any,
     submitAssessment: () => void,
-    isCurrentPageSubmitAssessment: () => Boolean
+    isCurrentPageSubmitAssessment: () => Boolean,
+    setIsFullScreen: any
 ) {
     if (!document.fullscreenElement) {
+        setIsFullScreen(false)
         const newFullScreenExitInstance = fullScreenExitInstance + 1
         localStorage.setItem(
             'fullScreenExitInstance',
@@ -185,39 +185,39 @@ export function handleFullScreenChange(
         )
         setFullScreenExitInstance(newFullScreenExitInstance)
 
-          if (newFullScreenExitInstance > 5) {
+        if (newFullScreenExitInstance > 2) {
             // Check if the current page is the submitAssessment page
             if (isCurrentPageSubmitAssessment()) {
                 // Submit the assessment
-                submitAssessment()
-               return toast({
+                // submitAssessment()
+                return toast({
                     title: 'Test Ended',
                     description: 'You have exited full screen multiple times.',
                     className:
                         'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-destructive text-white',
                 })
             }
-        }else{
+        } else {
             return toast({
                 title: 'WARNING',
                 description:
                     'You have exited full screen. If you exit full screen again, your test may get submitted automatically.',
-                className: 'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-destructive text-white',
+                className:
+                    'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-destructive text-white',
             })
         }
-      
     }
 }
 
 // Disable right click & Function keys & console access:
 
-        // Disable right-click context menu
-      export const handleRightClick = (event: MouseEvent) => {
-            event.preventDefault()
-        }
+// Disable right-click context menu
+export const handleRightClick = (event: MouseEvent) => {
+    event.preventDefault()
+}
 
-  // Disable key combinations for opening DevTools, function keys, and prevent exiting fullscreen
- export const handleKeyDown = (event: KeyboardEvent) => {
+// Disable key combinations for opening DevTools, function keys, and prevent exiting fullscreen
+export const handleKeyDown = (event: KeyboardEvent) => {
     // Prevent common DevTools shortcuts
     if (
         (event.ctrlKey && event.shiftKey && event.code === 'KeyI') || // Ctrl+Shift+I
@@ -225,6 +225,7 @@ export function handleFullScreenChange(
         (event.ctrlKey && event.code === 'KeyU') || // Ctrl+U (view source)
         (event.ctrlKey && event.code === 'KeyS') || // Ctrl+S (save page)
         event.code === 'F12' || // F12 (DevTools)
+        event.code === 'F11' || // F11 (Full Screen toggle)
         event.code === 'Escape' // Escape (exit fullscreen)
     ) {
         event.preventDefault()

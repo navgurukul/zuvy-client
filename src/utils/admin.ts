@@ -4,6 +4,7 @@ import { api } from '@/utils/axios.config'
 import { useEffect, useRef } from 'react'
 import useDebounce from '@/hooks/useDebounce'
 import { getMcqSearch } from '@/store/store'
+import { Search } from 'lucide-react'
 
 export function handleDelete(
     deleteCodingQuestionId: any,
@@ -96,7 +97,7 @@ export const handleConfirm = (
 export async function getAllCodingQuestions(setCodingQuestions: any) {
     try {
         const response = await api.get('Content/allCodingQuestions')
-        setCodingQuestions(response.data)
+        setCodingQuestions(response.data.data)
     } catch (error) {
         console.error(error)
     }
@@ -159,7 +160,7 @@ export const handleQuizConfirm = (
 
 export async function getAllQuizQuestion(
     setQuizQuestion: any,
-    difficulty?: string,
+    difficulty?: any,
     mcqSearch?: string
 ) {
     try {
@@ -229,53 +230,98 @@ export const handlerQuizQuestions = (
 export async function getAllTags(setTags: any) {
     const response = await api.get('Content/allTags')
     if (response) {
+        const transformedData = response.data.allTags.map(
+            (item: { id: any; tagName: any }) => ({
+                value: item.id.toString(),
+                label: item.tagName,
+            })
+        )
         const tagArr = [
-            { tagName: 'All Topics', id: -1 },
-            ...response.data.allTags,
+            { value: '-1', label: 'All Topics' },
+            ...transformedData,
         ]
         setTags(tagArr)
     }
 }
+
+// get tags without filtering:
+
+export async function getAllTagsWithoutFilter(setTags: any) {
+    const response = await api.get('Content/allTags')
+    if (response) {
+        setTags([{ id: -1, tagName: 'All Topics' }, ...response.data.allTags])
+    }
+}
+
 // --------------------------------------------
 // AddAssessment.tsx functions:-
+// async (offset: number ,position:any) => {
+//     let url = `/allCodingQuestions?limit=${position}&offset=${offset}`
+//     if (debouncedSearch) {
+//         url = `/allCodingQuestions?limit=${position}&searchTerm=${encodeURIComponent(
+//             debouncedSearch
+//         )}`
+//     }
+
 export async function filteredCodingQuestions(
-    setFilteredQuestions: any,
-    selectedDifficulty: string,
-    selectedTopic: any,
-    selectedLanguage: string,
-    debouncedSearch: string
+    offset: number,
+    setFilteredQuestions: (newValue: any[]) => void,
+    setTotalCodingQuestion: any,
+    setLastPage: any,
+    setTotalPages: any,
+    difficulty: any,
+    selectedOptions: any,
+    debouncedSearch: string | undefined,
+    position: any,
+    TotalCodingQuestion: any,
+    selectedLanguage?: string
+    // setTotalCodingQuestion: any, // Accepting setTotalBootcamps from parent
 ) {
     try {
-        let url = `/Content/allCodingQuestions`
+        const safeOffset = Math.max(0, offset)
+
+        let url = `/Content/allCodingQuestions?limit=${position}&offset=${offset}`
+
+        let selectedTagIds = ''
+        selectedOptions?.map(
+            (item: any) => (selectedTagIds += '&tagId=' + item.value)
+        )
+
+        let selectedDiff = ''
+        difficulty?.map(
+            (item: any) => (selectedDiff += '&difficulty=' + item.value)
+        )
 
         const queryParams = []
 
-        if (selectedTopic?.id !== -1) {
-            queryParams.push(`tagId=${selectedTopic.id}`)
+        if (selectedTagIds?.length > 0) {
+            if (selectedOptions[0].value !== '-1') {
+                queryParams.push(selectedTagIds.substring(1))
+            }
         }
-        if (
-            selectedDifficulty &&
-            selectedDifficulty !== 'None' &&
-            selectedDifficulty !== 'Any Difficulty'
-        ) {
-            queryParams.push(`difficulty=${selectedDifficulty}`)
+        if (difficulty?.length > 0) {
+            if (difficulty[0].value !== 'None') {
+                queryParams.push(selectedDiff.substring(1))
+            }
         }
         if (debouncedSearch) {
             queryParams.push(`searchTerm=${debouncedSearch}`)
         }
 
         if (queryParams.length > 0) {
-            url += '?' + queryParams.join('&')
+            url += '&' + queryParams.join('&')
         }
 
         const response = await api.get(url)
 
-        setFilteredQuestions(response.data)
+        setFilteredQuestions(response.data.data)
+        setTotalCodingQuestion(response.data.totalRows)
+        setTotalPages(response.data.totalPages)
+        setLastPage(response.data.totalPages)
     } catch (error) {
         console.error('Error:', error)
     }
 }
-
 export async function filteredQuizQuestions(
     setFilteredQuestions: any,
     selectedDifficulty: string,
@@ -321,64 +367,146 @@ export async function filteredQuizQuestions(
 }
 
 export async function filteredOpenEndedQuestions(
-    setFilteredQuestions: any,
-    selectedDifficulty: string,
-    selectedTopic: any,
-    selectedLanguage: string,
-    debouncedSearch: string
+    offset: number,
+    setFilteredQuestions: (newValue: any[]) => void,
+    setTotalOpenEndedQuestion: any,
+    setLastPage: any,
+    setTotalPages: any,
+    difficulty: any,
+    selectedOptions: any,
+    debouncedSearch: string | undefined,
+    position: any,
+    totalOpenEndedQuestion: any,
+    selectedLanguage?: string
 ) {
     try {
-        let url = `/Content/openEndedQuestions`
+        const safeOffset = Math.max(0, offset)
+        let url = `/Content/openEndedQuestions?pageNo=${offset}&limit_=${position}`
+
+        let selectedTagIds = ''
+        selectedOptions.map(
+            (item: any) => (selectedTagIds += '&tagId=' + item.value)
+        )
+
+        let selectedDiff = ''
+        difficulty.map(
+            (item: any) => (selectedDiff += '&difficulty=' + item.value)
+        )
 
         const queryParams = []
 
-        if (selectedTopic?.id !== -1) {
-            queryParams.push(`tagId=${selectedTopic.id}`)
+        if (selectedTagIds.length > 0) {
+            if (selectedOptions[0].value !== '-1') {
+                queryParams.push(selectedTagIds.substring(1))
+            }
         }
-        if (
-            selectedDifficulty &&
-            selectedDifficulty !== 'None' &&
-            selectedDifficulty !== 'Any Difficulty'
-        ) {
-            queryParams.push(`difficulty=${selectedDifficulty}`)
+        if (difficulty.length > 0) {
+            if (difficulty[0].value !== 'None') {
+                queryParams.push(selectedDiff.substring(1))
+            }
         }
         if (debouncedSearch) {
             queryParams.push(`searchTerm=${debouncedSearch}`)
         }
         // Add more conditions here as needed, e.g., selectedLanguage, etc.
 
+        // if (queryParams.length > 0) {
+        //     url += '?' + queryParams.join('&')
+        // }
+        if (queryParams.length > 0) {
+            url += '&' + queryParams.join('&')
+        }
+
+        const response = await api.get(url)
+
+        setFilteredQuestions(response.data.data)
+        setTotalOpenEndedQuestion(response.data.totalRows)
+        setTotalPages(response.data.totalPages)
+        setLastPage(response.data.totalPages)
+    } catch (error) {
+        console.error('Error:', error)
+    }
+}
+
+export async function filterQuestions(
+    setFilteredQuestions: any,
+    selectedDifficulties: any[], // Array of difficulties
+    selectedTopics: any[], // Array of topics
+    selectedLanguage: string,
+    debouncedSearch: string,
+    questionType: string // Type of question to determine the endpoint
+) {
+    try {
+        // Set the endpoint based on question type
+        let url = ''
+
+        switch (questionType) {
+            case 'coding':
+                url = `/Content/allCodingQuestions`
+                break
+            case 'mcq':
+                url = `/Content/allQuizQuestions`
+                break
+            case 'open-ended':
+                url = `/Content/openEndedQuestions`
+                break
+        }
+
+        const queryParams: string[] = []
+
+        // Handle multiple selected topics (tags), but ignore 'All Topics' (id: -1 or 0)
+        let selectedTagIds = ''
+        selectedTopics.forEach((topic: any) => {
+            if (topic.id !== -1 && topic.id !== 0) {
+                // Skip 'All Topics'
+                selectedTagIds += `&tagId=${topic.id}`
+            }
+        })
+
+        // Handle multiple selected difficulties, but ignore 'Any Difficulty'
+        let selectedDiff = ''
+        selectedDifficulties.forEach((difficulty: string) => {
+            if (difficulty !== 'Any Difficulty') {
+                selectedDiff += `&difficulty=${difficulty}`
+            }
+        })
+
+        // Add valid topics to query params
+        if (selectedTagIds.length > 0) {
+            queryParams.push(selectedTagIds.substring(1)) // Remove the first '&'
+        }
+
+        // Add valid difficulties to query params
+        if (selectedDiff.length > 0) {
+            queryParams.push(selectedDiff.substring(1)) // Remove the first '&'
+        }
+
+        // Add search term if provided
+        if (debouncedSearch) {
+            queryParams.push(`searchTerm=${debouncedSearch}`)
+        }
+
+        // Combine query parameters into the URL
         if (queryParams.length > 0) {
             url += '?' + queryParams.join('&')
         }
 
         const response = await api.get(url)
-        setFilteredQuestions(response.data.data)
+
+        // Additional filtering for quiz questions, if needed
+        if (questionType === 'quiz') {
+            const filtered = response.data.filter(
+                (question: any) =>
+                    selectedDifficulties.includes('Any Difficulty') ||
+                    selectedDifficulties.includes(question.difficulty)
+            )
+            setFilteredQuestions(filtered)
+        } else {
+            setFilteredQuestions(response.data.data || response.data)
+        }
     } catch (error) {
         console.error('Error:', error)
     }
-}
-
-export async function getChapterDetailsById(chapterId: any, setChapter: any) {
-    try {
-        const response = await api.get(
-            `Content/chapterDetailsById/${chapterId}`
-        )
-        setChapter(response.data)
-    } catch (error) {
-        console.error('Error:', error)
-    }
-}
-
-type FetchStudentsHandlerParams = {
-    courseId: string
-    limit: number
-    offset: number
-    searchTerm: string
-    setLoading: (value: boolean) => void
-    setStudents: (students: any[]) => void
-    setTotalPages: (pages: number) => void
-    setTotalStudents: (total: number) => void
-    setCurrentPage: (page: number) => void
 }
 
 interface FetchStudentsParams {
@@ -460,4 +588,25 @@ export const convertSeconds = (seconds: number) => {
         weeks: weeks,
         days: days,
     }
+}
+
+// --------------------------------------------
+// Preview Assessment Page functions:-
+
+export async function fetchPreviewAssessmentData(
+    params: any,
+    setAssessmentPreviewContent: any
+) {
+    try {
+        const response = await api.get(
+            `Content/chapterDetailsById/${params?.chapterId}?bootcampId=${params?.courseId}&moduleId=${params?.moduleId}&topicId=${params?.topicId}`
+        )
+
+        setAssessmentPreviewContent(response.data)
+    } catch (error) {
+        console.error('Error fetching chapter content:', error)
+    }
+}
+function setPages(totalPages: any) {
+    throw new Error('Function not implemented.')
 }

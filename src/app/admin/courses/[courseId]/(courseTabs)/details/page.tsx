@@ -55,10 +55,10 @@ interface CourseData {
 }
 
 function Page({ params }: { params: any }) {
-    const [image, setImage] = useState<string | null>(null);
-    const [cropper, setCropper] = useState<Cropper | null>(null);
-    const [isCropping, setIsCropping] = useState(false);
-    const [croppedImage, setCroppedImage] = useState<string | null>(null);
+    const [image, setImage] = useState<string | null>(null)
+    const [cropper, setCropper] = useState<Cropper | null>(null)
+    const [isCropping, setIsCropping] = useState(false)
+    const [croppedImage, setCroppedImage] = useState<string | null>(null)
 
     const { courseData, setCourseData } = getCourseData()
     const { setStoreStudentData } = getStoreStudentData()
@@ -66,79 +66,101 @@ function Page({ params }: { params: any }) {
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
-            name: courseData?.name || '',
-            bootcampTopic: courseData?.bootcampTopic || '',
-            coverImage: courseData?.coverImage || '',
-            duration: courseData?.duration || '',
-            language: courseData?.language || '',
-            startTime: courseData?.startTime
-                ? new Date(courseData.startTime)
-                : undefined,
+            name: '',
+            bootcampTopic: '',
+            coverImage: '',
+            duration: '',
+            language: '',
+            startTime: undefined,
         },
     })
 
+    useEffect(() => {
+        if (courseData) {
+            form.reset({
+                name: courseData.name || '',
+                bootcampTopic: courseData.bootcampTopic || '',
+                coverImage: courseData.coverImage || '',
+                duration: courseData.duration || '',
+                language: courseData.language || '',
+                startTime: courseData.startTime
+                    ? new Date(courseData.startTime)
+                    : undefined,
+            })
+        }
+    }, [courseData, form])
+
     async function onSubmit(data: z.infer<typeof FormSchema>) {
         try {
-            let coverImage = data.coverImage || '';
+            let coverImage = data.coverImage || ''
             if (croppedImage) {
-                const response = await fetch(croppedImage);
-                const blob = await response.blob();
-                const file = new File([blob], 'cropped-image.png', { type: 'image/png' });
+                const response = await fetch(croppedImage)
+                const blob = await response.blob()
+                const file = new File([blob], 'cropped-image.png', {
+                    type: 'image/png',
+                })
 
-                const formData = new FormData();
-                formData.append('image', file);
+                const formData = new FormData()
+                formData.append('image', file)
 
-                const res = await apiMeraki.post('/courseEditor/ImageUploadS3', formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                });
-                coverImage = res.data.file.url;
+                const res = await apiMeraki.post(
+                    '/courseEditor/ImageUploadS3',
+                    formData,
+                    {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    }
+                )
+                coverImage = res.data.file.url
             }
 
-            await api.patch(
-                `/bootcamp/${courseData?.id}`,
-                {
-                    ...data,
-                    coverImage,
-                },
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
+            await api
+                .patch(
+                    `/bootcamp/${courseData?.id}`,
+                    {
+                        ...data,
+                        coverImage,
                     },
-                }
-            ).then((res) => {
-                const {
-                    id,
-                    name,
-                    bootcampTopic,
-                    coverImage,
-                    startTime,
-                    duration,
-                    language,
-                    unassigned_students,
-                } = res.data.updatedBootcamp[0];
-                setCourseData({
-                    id,
-                    name,
-                    bootcampTopic,
-                    coverImage,
-                    startTime,
-                    duration,
-                    language,
-                    unassigned_students,
-                });
-                toast({
-                    title: res.data.status,
-                    description: res.data.message,
-                });
-            });
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    }
+                )
+                .then((res) => {
+                    const {
+                        id,
+                        name,
+                        bootcampTopic,
+                        coverImage,
+                        startTime,
+                        duration,
+                        language,
+                        unassigned_students,
+                    } = res.data.updatedBootcamp[0]
+                    setCourseData({
+                        id,
+                        name,
+                        bootcampTopic,
+                        coverImage,
+                        startTime,
+                        duration,
+                        language,
+                        unassigned_students,
+                    })
+                    toast({
+                        title: res.data.status,
+                        description: res.data.message,
+                    })
+                })
         } catch (error) {
             toast({
                 title: 'Failed',
                 variant: 'destructive',
-                className: 'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-            });
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+            })
         }
     }
 
@@ -153,75 +175,85 @@ function Page({ params }: { params: any }) {
     ) => {
         const file = event.target.files?.[0]
         if (file) {
-            const reader = new FileReader();
+            const reader = new FileReader()
             reader.onloadend = () => {
-                setImage(reader.result as string);
-                setIsCropping(true);
-            };
-            reader.readAsDataURL(file);
+                setImage(reader.result as string)
+                setIsCropping(true)
+            }
+            reader.readAsDataURL(file)
         }
     }
 
     const handleCrop = () => {
         if (cropper) {
             const croppedCanvas = cropper.getCroppedCanvas({
-                width: 800,  // Adjust width as needed
-                height: 400, // Adjust height as needed
-            });
-            setCroppedImage(croppedCanvas.toDataURL());
-            setIsCropping(false);
+                width: 800,
+                height: 400,
+            })
+            setCroppedImage(croppedCanvas.toDataURL())
+            setIsCropping(false)
             toast({
-                description: 'Image cropped successfully. You can now upload it.',
-            });
+                description:
+                    'Image cropped successfully. You can now upload it.',
+            })
         }
     }
 
     return (
         <div className="max-w-[400px] m-auto">
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <div className="image-container bg-muted flex justify-center items-center rounded-sm my-3 overflow-hidden" style={{ height: '200px', width: '400px' }}>
+                <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-4"
+                >
+                    <div
+                        className="image-container bg-muted flex justify-center items-center rounded-sm my-3 overflow-hidden"
+                        style={{ height: '200px', width: '400px' }}
+                    >
                         {!isCropping && croppedImage ? (
-                            <img
-                                src={croppedImage}
-                                alt="Cropped Preview"
-                                // className="object-cover  h-full"
-                            />
+                            <img src={croppedImage} alt="Cropped Preview" />
                         ) : image ? (
                             <Cropper
                                 src={image}
                                 style={{ height: 200, width: '100%' }}
                                 aspectRatio={16 / 9}
-                                onInitialized={(instance) => setCropper(instance)}
+                                onInitialized={(instance) =>
+                                    setCropper(instance)
+                                }
                             />
                         ) : (
                             <OptimizedImageWithFallback
-                                src={courseData?.coverImage || '/logo_white.png'}
+                                src={
+                                    courseData?.coverImage || '/logo_white.png'
+                                }
                                 alt={courseData?.name || 'Cover Image'}
                                 fallBackSrc={'/logo_white.png'}
                             />
                         )}
                     </div>
-                        <Input
-                            id="picture"
-                            type="file"
-                            onChange={handleFileChange}
-                            className="hidden"
-                            ref={fileInputRef}
-                        />
+                    <Input
+                        id="picture"
+                        type="file"
+                        onChange={handleFileChange}
+                        className="hidden"
+                        ref={fileInputRef}
+                    />
+                    <Button
+                        variant={'outline'}
+                        type="button"
+                        onClick={handleButtonClick}
+                    >
+                        Upload Course Image
+                    </Button>
+                    {image && (
                         <Button
+                            onClick={handleCrop}
                             variant={'outline'}
                             type="button"
-                            onClick={handleButtonClick}
                         >
-                            Upload Course Image
+                            Crop Image
                         </Button>
-                        {image && (
-                            <Button onClick={handleCrop} variant={'outline'} type="button">
-                                Crop Image
-                            </Button>
-                        )}
-                   
+                    )}
 
                     <FormField
                         control={form.control}
@@ -232,8 +264,7 @@ function Page({ params }: { params: any }) {
                                 <FormControl>
                                     <Input
                                         placeholder="Enter Bootcamp Name"
-                                        {...field}
-                                        className="capitalize"
+                                        {...(field || '')}
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -250,7 +281,7 @@ function Page({ params }: { params: any }) {
                                 <FormControl>
                                     <Input
                                         placeholder="Enter Bootcamp Topic"
-                                        {...field}
+                                        {...(field || '')}
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -271,7 +302,8 @@ function Page({ params }: { params: any }) {
                                                 variant={'outline'}
                                                 className={cn(
                                                     'pl-3 text-left font-normal w-full',
-                                                    !field.value && 'text-muted-foreground'
+                                                    !field.value &&
+                                                        'text-muted-foreground'
                                                 )}
                                             >
                                                 {field.value
@@ -290,7 +322,9 @@ function Page({ params }: { params: any }) {
                                                     field.onChange(date)
                                                 }
                                             }}
-                                            disabled={(date) => date < new Date()}
+                                            disabled={(date) =>
+                                                date < new Date()
+                                            }
                                         />
                                     </PopoverContent>
                                 </Popover>
@@ -308,7 +342,7 @@ function Page({ params }: { params: any }) {
                                 <FormControl>
                                     <Input
                                         placeholder="Enter Bootcamp Duration"
-                                        {...field}
+                                        {...(field || '')}
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -316,7 +350,7 @@ function Page({ params }: { params: any }) {
                         )}
                     />
 
-<FormField
+                    <FormField
                         control={form.control}
                         name="language"
                         render={({ field }) => (
@@ -325,13 +359,18 @@ function Page({ params }: { params: any }) {
                                 <FormControl>
                                     <RadioGroup
                                         onValueChange={field.onChange}
-                                        defaultValue={field.value}
+                                        value={field.value || ''} // Use value instead of defaultValue
                                         className="flex gap-4"
                                     >
                                         {LANGUAGES.map((language, index) => (
-                                            <FormItem key={index} className="flex flex-row items-center space-x-3 space-y-0">
+                                            <FormItem
+                                                key={index}
+                                                className="flex flex-row items-center space-x-3 space-y-0"
+                                            >
                                                 <FormControl>
-                                                    <RadioGroupItem value={language} />
+                                                    <RadioGroupItem
+                                                        value={language}
+                                                    />
                                                 </FormControl>
                                                 <FormLabel className="font-normal">
                                                     {language}
@@ -344,7 +383,6 @@ function Page({ params }: { params: any }) {
                             </FormItem>
                         )}
                     />
-
 
                     <Button type="submit">Submit</Button>
                 </form>

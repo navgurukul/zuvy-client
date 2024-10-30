@@ -123,7 +123,8 @@ function Page({
                 setFullScreenExitInstance,
                 fullScreenExitInstance,
                 submitAssessment,
-                isCurrentPageSubmitAssessment
+                isCurrentPageSubmitAssessment,
+                setIsFullScreen
             )
         )
 
@@ -141,7 +142,8 @@ function Page({
                     setFullScreenExitInstance,
                     fullScreenExitInstance,
                     submitAssessment,
-                    isCurrentPageSubmitAssessment
+                    isCurrentPageSubmitAssessment,
+                    setIsFullScreen
                 )
             )
             if (intervalId) {
@@ -150,17 +152,15 @@ function Page({
         }
     }, [tabChangeInstance, fullScreenExitInstance])
 
-    useEffect(() => {
-        // Add event listeners for right-click and key presses
-        document.addEventListener('contextmenu', handleRightClick)
-        document.addEventListener('keydown', handleKeyDown)
-        return () => {
-            document.removeEventListener('contextmenu', handleRightClick)
-            document.removeEventListener('keydown', handleKeyDown)
-        }
-    }, [tabChangeInstance, fullScreenExitInstance])
-
-
+    // useEffect(() => {
+    //     // Add event listeners for right-click and key presses
+    //     document.addEventListener('contextmenu', handleRightClick)
+    //     document.addEventListener('keydown', handleKeyDown)
+    //     return () => {
+    //         document.removeEventListener('contextmenu', handleRightClick)
+    //         document.removeEventListener('keydown', handleKeyDown)
+    //     }
+    // }, [])
 
     useEffect(() => {
         if (remainingTime === 0 && intervalId) {
@@ -309,7 +309,7 @@ function Page({
         getSeperateOpenEndedQuestions()
     }, [decodedParams.assessmentOutSourceId])
 
-    if (isSolving) {
+    if (isSolving && isFullScreen) {
         if (
             selectedQuesType === 'quiz' &&
             seperateQuizQuestions[0]?.submissionsData.length == 0
@@ -408,10 +408,8 @@ function Page({
         setIsFullScreen(true)
     }
 
-
-
     return (
-        <React.Fragment>
+        <div className="h-auto mb-24">
             {!isFullScreen ? (
                 <>
                     <div className="flex items-center justify-center gap-2">
@@ -502,8 +500,9 @@ function Page({
                                 <QuestionCard
                                     id={1}
                                     title="Quiz"
-                                    description={`${assessmentData.Quizzes || 0
-                                        } questions`}
+                                    description={`${
+                                        assessmentData.Quizzes || 0
+                                    } questions`}
                                     onSolveChallenge={() =>
                                         handleSolveChallenge('quiz')
                                     }
@@ -520,8 +519,9 @@ function Page({
                                 <QuestionCard
                                     id={1}
                                     title="Open-Ended Questions"
-                                    description={`${assessmentData.OpenEndedQuestions || 0
-                                        } questions`}
+                                    description={`${
+                                        assessmentData.OpenEndedQuestions || 0
+                                    } questions`}
                                     onSolveChallenge={() =>
                                         handleSolveChallenge('open-ended')
                                     }
@@ -534,7 +534,7 @@ function Page({
                     </Button>
                 </>
             )}
-        </React.Fragment>
+        </div>
     )
 }
 

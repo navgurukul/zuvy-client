@@ -18,7 +18,7 @@ function UpcomingClasses({
                           key={classObj.meetingId}
                           classType="ongoing"
                           activeTab={'ongoing'}
-                          studentSide={false}
+                          studentSide={true}
                           getClasses={() => console.log('')}
                       />
                   ))
@@ -30,7 +30,7 @@ function UpcomingClasses({
                         key={classObj.meetingId}
                         classType="Upcoming"
                         activeTab={'upcoming'}
-                        studentSide={false}
+                        studentSide={true}
                         getClasses={() => console.log('')}
                     />
                 ))

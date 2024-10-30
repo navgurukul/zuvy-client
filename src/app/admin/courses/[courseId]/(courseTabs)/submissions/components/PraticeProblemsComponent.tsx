@@ -7,18 +7,22 @@ import { Spinner } from '@/components/ui/spinner'
 
 type Props = {
     courseId: number
+    debouncedSearch: string
 }
 
-const PraticeProblemsComponent = ({ courseId }: Props) => {
+const PraticeProblemsComponent = ({ courseId, debouncedSearch }: Props) => {
     const [submissions, setSubmissions] = useState<any[]>([])
     const [totalStudents, setTotalStudents] = useState(0)
-    const [loading, setLoading] = useState(true)
 
     const getSubmissions = useCallback(async () => {
         try {
-            const res = await api.get(
-                `/submission/submissionsOfPractiseProblems/${courseId}`
-            )
+            // const res = await api.get(
+            //     `/submission/submissionsOfPractiseProblems/${courseId}`
+            // )
+            const url = debouncedSearch
+                ? `/submission/submissionsOfPractiseProblems/${courseId}?searchPractiseProblem=${debouncedSearch}`
+                : `/submission/submissionsOfPractiseProblems/${courseId}`
+            const res = await api.get(url)
             setSubmissions(res.data.trackingData)
             setTotalStudents(res.data.totalStudents)
         } catch (error) {
@@ -30,21 +34,12 @@ const PraticeProblemsComponent = ({ courseId }: Props) => {
                     'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         } finally {
-            setLoading(false)
         }
-    }, [courseId])
+    }, [courseId, debouncedSearch])
 
     useEffect(() => {
         getSubmissions()
     }, [getSubmissions])
-
-    if (loading) {
-        return (
-            <div className="text-center">
-                <Spinner className="text-secondary" />
-            </div>
-        )
-    }
 
     const allEmpty = submissions.every(
         ({ moduleChapterData }) => moduleChapterData.length === 0

@@ -1,9 +1,9 @@
-'use client';
+'use client'
 
-import React, { useState, useEffect } from 'react';
-import * as z from 'zod';
-import { useForm, useFieldArray, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import React, { useState, useEffect } from 'react'
+import * as z from 'zod'
+import { useForm, useFieldArray, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import {
     Form,
     FormControl,
@@ -11,42 +11,47 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import {
     SelectValue,
     SelectTrigger,
     SelectContent,
     SelectItem,
     Select,
-} from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Plus, X } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
-import { Spinner } from '@/components/ui/spinner';
-import { api } from '@/utils/axios.config'; 
-import axios from 'axios'; 
+} from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Plus, X } from 'lucide-react'
+import { toast } from '@/components/ui/use-toast'
+import { Spinner } from '@/components/ui/spinner'
+import { api } from '@/utils/axios.config'
+import axios from 'axios'
 
-const noSpecialCharacters = /^[a-zA-Z0-9\s]*$/;
+const noSpecialCharacters = /^[a-zA-Z0-9\s]*$/
 
 // Define the schema for individual test cases
 const testCaseSchema = z.object({
     input: z.string().min(1, 'Input cannot be empty.'),
     output: z.string().min(1, 'Output cannot be empty.'),
-});
+})
 
 // Define the main form schema
 const formSchema = z.object({
-    title: z.string()
+    title: z
+        .string()
         .min(5, 'Title must be at least 5 characters long.')
         .max(25, 'Title must be at most 25 characters long.')
-        .refine(value => noSpecialCharacters.test(value), {
+        .refine((value) => noSpecialCharacters.test(value), {
             message: 'Title must not contain special characters.',
         }),
-    description: z.string().min(10, 'Problem statement must be at least 10 characters long.'),
-    constraints: z.string().min(5, 'Constraints must be at least 5 characters long.'),
+    description: z
+        .string()
+        .min(10, 'Problem statement must be at least 10 characters long.'),
+    constraints: z
+        .string()
+        .min(5, 'Constraints must be at least 5 characters long.'),
     difficulty: z.enum(['Easy', 'Medium', 'Hard'], {
         required_error: 'You need to select a Difficulty type.',
     }),
@@ -57,108 +62,135 @@ const formSchema = z.object({
     outputFormat: z.enum(['str', 'int', 'float', 'arrayOfnum', 'arrayOfStr'], {
         required_error: 'You need to select an Output Format',
     }),
-    testCases: z.array(testCaseSchema).min(2, 'At least two test cases are required.'),
+    testCases: z
+        .array(testCaseSchema)
+        .min(2, 'At least two test cases are required.'),
     bulkDifficulties: z.array(z.enum(['Easy', 'Medium', 'Hard'])).default([]),
     bulkTopicIds: z.array(z.number()).default([]),
-    bulkQuantity: z.number().min(1, 'Please enter at least 1 question.').optional(), // Made optional to remove default value
-});
+    bulkQuantity: z
+        .number()
+        .min(1, 'Please enter at least 1 question.')
+        .optional(), // Made optional to remove default value
+})
 
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = z.infer<typeof formSchema>
 
 // Helper function to process input based on format
 const processInput = (input: string, format: string): any => {
     // Remove brackets if present
-    const cleanedInput = input.replace(/[\[\]]/g, '').trim();
+    const cleanedInput = input.replace(/[\[\]]/g, '').trim()
 
     switch (format) {
         case 'int':
-            const intVal = parseInt(cleanedInput, 10);
-            return isNaN(intVal) ? null : intVal;
+            const intVal = parseInt(cleanedInput, 10)
+            return isNaN(intVal) ? null : intVal
         case 'float':
-            const floatVal = parseFloat(cleanedInput);
-            return isNaN(floatVal) ? null : floatVal;
+            const floatVal = parseFloat(cleanedInput)
+            return isNaN(floatVal) ? null : floatVal
         case 'str':
-            return cleanedInput;
+            return cleanedInput
         case 'arrayOfnum':
-            return cleanedInput.split(',').map(item => parseFloat(item.trim())).filter(item => !isNaN(item));
+            return cleanedInput
+                .split(',')
+                .map((item) => parseFloat(item.trim()))
+                .filter((item) => !isNaN(item))
         case 'arrayOfStr':
-            return cleanedInput.split(',').map(item => item.trim());
+            return cleanedInput.split(',').map((item) => item.trim())
         default:
-            return cleanedInput;
+            return cleanedInput
     }
-};
+}
 
 // Helper function to generate parameter names (a, b, c, ...)
 const generateParameterName = (index: number): string => {
-    return String.fromCharCode(97 + index); 
-};
+    return String.fromCharCode(97 + index)
+}
 
 const extractGeneratedText = (responseData: any): string | null => {
     if (responseData.candidates && responseData.candidates.length > 0) {
-        const firstCandidate = responseData.candidates[0];
+        const firstCandidate = responseData.candidates[0]
         if (firstCandidate.content?.parts[0]?.text) {
-            return firstCandidate.content.parts[0].text.trim();
+            return firstCandidate.content.parts[0].text.trim()
         }
     }
-    return null;
-};
+    return null
+}
 
 const mapFormat = (rawFormat: string): string => {
-    const normalizedFormat = rawFormat.toLowerCase().trim();
+    const normalizedFormat = rawFormat.toLowerCase().trim()
     switch (normalizedFormat) {
         case 'string':
-            return 'str';
+            return 'str'
         case 'number':
-            return 'int';
+            return 'int'
         case 'float':
-            return 'float';
+            return 'float'
         case 'array of numbers':
-            return 'arrayOfnum';
+            return 'arrayOfnum'
         case 'array of strings':
-            return 'arrayOfStr';
+            return 'arrayOfStr'
         default:
-            console.warn(`Unknown format encountered: "${rawFormat}". Defaulting to 'int'.`);
-            return 'int'; 
+            console.warn(
+                `Unknown format encountered: "${rawFormat}". Defaulting to 'int'.`
+            )
+            return 'int'
     }
-};
+}
 
 const parseGeneratedText = (text: string) => {
-    const titleMatch = text.match(/Title:\s*(.+)/i);
-    const problemStatementMatch = text.match(/Problem Statement:\s*([\s\S]*?)(?=Constraints:|$)/i);
-    const constraintsMatch = text.match(/Constraints:\s*([\s\S]*?)(?=Input format:|$)/i);
-    const inputFormatMatch = text.match(/Input format:\s*(.+)/i);
-    const outputFormatMatch = text.match(/Output format:\s*(.+)/i);
-    const testCasesMatch = text.match(/Test Cases:\s*([\s\S]*?)(?=---|$)/i);
+    const titleMatch = text.match(/Title:\s*(.+)/i)
+    const problemStatementMatch = text.match(
+        /Problem Statement:\s*([\s\S]*?)(?=Constraints:|$)/i
+    )
+    const constraintsMatch = text.match(
+        /Constraints:\s*([\s\S]*?)(?=Input format:|$)/i
+    )
+    const inputFormatMatch = text.match(/Input format:\s*(.+)/i)
+    const outputFormatMatch = text.match(/Output format:\s*(.+)/i)
+    const testCasesMatch = text.match(/Test Cases:\s*([\s\S]*?)(?=---|$)/i)
 
-    const cleanText = (text: string) => text.replace(/[*#"]/g, '').trim();
+    const cleanText = (text: string) => text.replace(/[*#"]/g, '').trim()
 
-    const title = titleMatch ? cleanText(titleMatch[1]) : '';
-    const problemStatement = problemStatementMatch ? cleanText(problemStatementMatch[1]) : '';
-    const constraints = constraintsMatch ? cleanText(constraintsMatch[1]) : '';
-    const inputFormatRaw = inputFormatMatch ? cleanText(inputFormatMatch[1]) : 'Number';
-    const outputFormatRaw = outputFormatMatch ? cleanText(outputFormatMatch[1]) : 'Number';
+    const title = titleMatch ? cleanText(titleMatch[1]) : ''
+    const problemStatement = problemStatementMatch
+        ? cleanText(problemStatementMatch[1])
+        : ''
+    const constraints = constraintsMatch ? cleanText(constraintsMatch[1]) : ''
+    const inputFormatRaw = inputFormatMatch
+        ? cleanText(inputFormatMatch[1])
+        : 'Number'
+    const outputFormatRaw = outputFormatMatch
+        ? cleanText(outputFormatMatch[1])
+        : 'Number'
 
-    const inputFormat = mapFormat(inputFormatRaw);
-    const outputFormat = mapFormat(outputFormatRaw);
+    const inputFormat = mapFormat(inputFormatRaw)
+    const outputFormat = mapFormat(outputFormatRaw)
 
-    const testCases: { input: string, output: string }[] = [];
+    const testCases: { input: string; output: string }[] = []
     if (testCasesMatch) {
-        const testCasesText = testCasesMatch[1];
-        const testCaseRegex = /\d+\.\s*Input:\s*(.+?)\s*Output:\s*(.+)/gi;
-        const matchesIterator = testCasesText.matchAll(testCaseRegex);
-        const matches = Array.from(matchesIterator);
+        const testCasesText = testCasesMatch[1]
+        const testCaseRegex = /\d+\.\s*Input:\s*(.+?)\s*Output:\s*(.+)/gi
+        const matchesIterator = testCasesText.matchAll(testCaseRegex)
+        const matches = Array.from(matchesIterator)
 
         for (const match of matches) {
-            if (match.length === 3) { 
-                const input = cleanText(match[1]);
-                const output = cleanText(match[2]);
-                testCases.push({ input, output });
+            if (match.length === 3) {
+                const input = cleanText(match[1])
+                const output = cleanText(match[2])
+                testCases.push({ input, output })
             }
         }
     }
 
-    if (!title || !problemStatement || !constraints || !inputFormat || !outputFormat || testCases.length < 2) {
-        return null;
+    if (
+        !title ||
+        !problemStatement ||
+        !constraints ||
+        !inputFormat ||
+        !outputFormat ||
+        testCases.length < 2
+    ) {
+        return null
     }
 
     return {
@@ -168,82 +200,96 @@ const parseGeneratedText = (text: string) => {
         inputFormat,
         outputFormat,
         testCases,
-    };
-};
+    }
+}
 
-const prepareFormattedData = (parsedData: any, difficulty: string, tagId: number) => {
+const prepareFormattedData = (
+    parsedData: any,
+    difficulty: string,
+    tagId: number
+) => {
     return {
         title: parsedData.title,
         description: parsedData.problemStatement,
         constraints: parsedData.constraints,
         difficulty: difficulty,
         tagId: tagId,
-        testCases: parsedData.testCases.map((testCase: any) => {
-            const processedInput = processInput(
-                testCase.input,
-                parsedData.inputFormat
-            );
+        testCases: parsedData.testCases
+            .map((testCase: any) => {
+                const processedInput = processInput(
+                    testCase.input,
+                    parsedData.inputFormat
+                )
 
-            if (processedInput === null) {
-                return null;
-            }
+                if (processedInput === null) {
+                    return null
+                }
 
-            let inputs;
+                let inputs
 
-            if (Array.isArray(processedInput) &&
-                (parsedData.inputFormat === 'arrayOfnum' || parsedData.inputFormat === 'arrayOfStr')) {
-                inputs = [
-                    {
-                        parameterType: parsedData.inputFormat,
-                        parameterValue: processedInput,
-                        parameterName: 'a',
+                if (
+                    Array.isArray(processedInput) &&
+                    (parsedData.inputFormat === 'arrayOfnum' ||
+                        parsedData.inputFormat === 'arrayOfStr')
+                ) {
+                    inputs = [
+                        {
+                            parameterType: parsedData.inputFormat,
+                            parameterValue: processedInput,
+                            parameterName: 'a',
+                        },
+                    ]
+                } else {
+                    const inputValues = testCase.input
+                        .trim()
+                        .split(' ')
+                        .filter(Boolean)
+
+                    inputs = inputValues.map(
+                        (value: string, index: number) => ({
+                            parameterType: parsedData.inputFormat,
+                            parameterValue: processInput(
+                                value,
+                                parsedData.inputFormat
+                            ),
+                            parameterName: generateParameterName(index),
+                        })
+                    )
+                }
+
+                const expectedOutput = processInput(
+                    testCase.output,
+                    parsedData.outputFormat
+                )
+
+                if (expectedOutput === null) {
+                    return null
+                }
+
+                return {
+                    inputs,
+                    expectedOutput: {
+                        parameterType: parsedData.outputFormat,
+                        parameterValue: expectedOutput,
                     },
-                ];
-            } else {
-                const inputValues = testCase.input
-                    .trim()
-                    .split(' ')
-                    .filter(Boolean);
-
-                inputs = inputValues.map((value: string, index: number) => ({
-                    parameterType: parsedData.inputFormat,
-                    parameterValue: processInput(value, parsedData.inputFormat),
-                    parameterName: generateParameterName(index),
-                }));
-            }
-
-            const expectedOutput = processInput(
-                testCase.output,
-                parsedData.outputFormat
-            );
-
-            if (expectedOutput === null) {
-                return null;
-            }
-
-            return {
-                inputs,
-                expectedOutput: {
-                    parameterType: parsedData.outputFormat,
-                    parameterValue: expectedOutput,
-                },
-            };
-        }).filter(Boolean),
+                }
+            })
+            .filter(Boolean),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         content: {},
-    };
-};
+    }
+}
 
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 const jaccardSimilarity = (str1: string, str2: string): number => {
-    const set1 = Array.from(new Set(str1.toLowerCase().split(/\s+/)));
-    const set2 = Array.from(new Set(str2.toLowerCase().split(/\s+/)));
-    const intersection = set1.filter(x => set2.includes(x));
-    const union = Array.from(new Set([...set1, ...set2]));
-    return union.length === 0 ? 0 : intersection.length / union.length;
-};
+    const set1 = Array.from(new Set(str1.toLowerCase().split(/\s+/)))
+    const set2 = Array.from(new Set(str2.toLowerCase().split(/\s+/)))
+    const intersection = set1.filter((x) => set2.includes(x))
+    const union = Array.from(new Set([...set1, ...set2]))
+    return union.length === 0 ? 0 : intersection.length / union.length
+}
 
 export default function NewCodingProblemForm({
     tags,
@@ -256,21 +302,21 @@ export default function NewCodingProblemForm({
     getAllCodingQuestions: any
     setCodingQuestions: any
 }) {
-    const [loadingAI, setLoadingAI] = useState<boolean>(false);
-    const [bulkLoading, setBulkLoading] = useState<boolean>(false);
-    const [generatedCount, setGeneratedCount] = useState<number>(0);
-    const [duplicatesSkipped, setDuplicatesSkipped] = useState<number>(0); 
-    const [totalToGenerate, setTotalToGenerate] = useState<number>(0);
-    const [codingQuestionsLocal, setCodingQuestionsLocal] = useState<any[]>([]);
+    const [loadingAI, setLoadingAI] = useState<boolean>(false)
+    const [bulkLoading, setBulkLoading] = useState<boolean>(false)
+    const [generatedCount, setGeneratedCount] = useState<number>(0)
+    const [duplicatesSkipped, setDuplicatesSkipped] = useState<number>(0)
+    const [totalToGenerate, setTotalToGenerate] = useState<number>(0)
+    const [codingQuestionsLocal, setCodingQuestionsLocal] = useState<any[]>([])
 
     useEffect(() => {
-        const storedQuestions = localStorage.getItem('codingQuestions');
+        const storedQuestions = localStorage.getItem('codingQuestions')
         if (storedQuestions) {
-            const parsedQuestions = JSON.parse(storedQuestions);
-            setCodingQuestionsLocal(parsedQuestions);
-            setCodingQuestions(parsedQuestions);
+            const parsedQuestions = JSON.parse(storedQuestions)
+            setCodingQuestionsLocal(parsedQuestions)
+            setCodingQuestions(parsedQuestions)
         }
-    }, [setCodingQuestions]);
+    }, [setCodingQuestions])
 
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -289,45 +335,46 @@ export default function NewCodingProblemForm({
             bulkDifficulties: [],
             bulkTopicIds: [],
         },
-    });
+    })
 
     const { fields, append, remove } = useFieldArray({
         control: form.control,
         name: 'testCases',
-    });
+    })
 
     const handleAddTestCase = () => {
-        if (fields.length < 20) { 
-            append({ input: '', output: '' });
+        if (fields.length < 20) {
+            append({ input: '', output: '' })
         } else {
             toast({
                 title: 'Limit Reached',
                 description: 'Maximum of 20 test cases allowed.',
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
-            });
+            })
         }
-    };
+    }
 
     const handleRemoveTestCase = (index: number) => {
         if (fields.length > 2) {
-            remove(index);
+            remove(index)
         }
-    };
+    }
 
     const saveQuestionsToLocal = (questions: any[]) => {
-        localStorage.setItem('codingQuestions', JSON.stringify(questions));
-        setCodingQuestionsLocal(questions);
-        setCodingQuestions(questions);
-    };
+        localStorage.setItem('codingQuestions', JSON.stringify(questions))
+        setCodingQuestionsLocal(questions)
+        setCodingQuestions(questions)
+    }
 
     // Function for single question creation
     async function generateCodingProblemUsingGemini() {
-        setLoadingAI(true);
+        setLoadingAI(true)
         try {
-            const difficulty = form.getValues('difficulty');
-            const topicId = form.getValues('tagId');
-            const topic = tags.find((t: any) => t.id === topicId)?.tagName || 'General';
+            const difficulty = form.getValues('difficulty')
+            const topicId = form.getValues('tagId')
+            const topic =
+                tags.find((t: any) => t.id === topicId)?.tagName || 'General'
 
             const promptText = `You are an assistant that creates coding problems. Please generate a ${difficulty.toLowerCase()} difficulty coding problem on the topic "${topic}" with the following strict structure. Do not add any additional information or explanations.
 
@@ -348,12 +395,16 @@ Test Cases:
 2. Input: [Second test case input]
    Output: [Second test case output] (similarly add more test cases)
 ---
-Only provide the content between the '---' markers in the specified format.`;
+Only provide the content between the '---' markers in the specified format.`
 
-            const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'AIzaSyAm3e9-VoLFVVVLRIla-cZ40jwAqqd1FDY'; 
+            const apiKey =
+                process.env.NEXT_PUBLIC_GEMINI_API_KEY ||
+                'AIzaSyAm3e9-VoLFVVVLRIla-cZ40jwAqqd1FDY'
 
             if (!apiKey) {
-                throw new Error('Gemini API key is not set. Please configure it properly.');
+                throw new Error(
+                    'Gemini API key is not set. Please configure it properly.'
+                )
             }
 
             const response = await axios.post(
@@ -374,47 +425,60 @@ Only provide the content between the '---' markers in the specified format.`;
                         'Content-Type': 'application/json',
                     },
                 }
-            );
+            )
 
-            const responseData = response.data;
-            const generatedText = extractGeneratedText(responseData);
-            console.log("Generated Text:", generatedText);
+            const responseData = response.data
+            const generatedText = extractGeneratedText(responseData)
+            console.log('Generated Text:', generatedText)
 
             if (generatedText) {
-    
-                const parsedData = parseGeneratedText(generatedText);
-                
+                const parsedData = parseGeneratedText(generatedText)
+
                 if (parsedData) {
-                    const existingTitles = codingQuestionsLocal.map(q => q.title);
-                    let isUnique = true;
+                    const existingTitles = codingQuestionsLocal.map(
+                        (q) => q.title
+                    )
+                    let isUnique = true
                     for (let existingTitle of existingTitles) {
-                        const similarity = jaccardSimilarity(existingTitle, parsedData.title);
+                        const similarity = jaccardSimilarity(
+                            existingTitle,
+                            parsedData.title
+                        )
                         if (similarity >= 0.8) {
-                            isUnique = false;
-                            break;
+                            isUnique = false
+                            break
                         }
                     }
 
                     if (!isUnique) {
                         toast({
                             title: 'Duplicate Detected',
-                            description: 'Generated question is too similar to an existing question. Skipping.',
+                            description:
+                                'Generated question is too similar to an existing question. Skipping.',
                             className:
                                 'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
-                        });
+                        })
                     } else {
-                        const formattedData = prepareFormattedData(parsedData, difficulty, topicId);
+                        const formattedData = prepareFormattedData(
+                            parsedData,
+                            difficulty,
+                            topicId
+                        )
 
-                        await api.post('codingPlatform/create-question', formattedData);
+                        await api.post(
+                            'codingPlatform/create-question',
+                            formattedData
+                        )
                         toast({
                             title: 'Success',
-                            description: 'Coding problem generated successfully using Gemini.',
+                            description:
+                                'Coding problem generated successfully using Gemini.',
                             className:
                                 'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
-                        });
-                        setIsDialogOpen(false);
-                        getAllCodingQuestions(setCodingQuestions);
-                        form.reset(); 
+                        })
+                        setIsDialogOpen(false)
+                        getAllCodingQuestions(setCodingQuestions)
+                        form.reset()
                     }
                 } else {
                     toast({
@@ -423,7 +487,7 @@ Only provide the content between the '---' markers in the specified format.`;
                             'Failed to parse the coding problem correctly. Please try generating again.',
                         className:
                             'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                    });
+                    })
                 }
             } else {
                 toast({
@@ -432,17 +496,21 @@ Only provide the content between the '---' markers in the specified format.`;
                         "Failed to generate coding problem. Couldn't understand the response from the API.",
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                });
+                })
             }
         } catch (error: any) {
-            console.error('Error generating coding problem:', error);
-            let errorMessage = 'Failed to generate coding problem. Please try again.';
+            console.error('Error generating coding problem:', error)
+            let errorMessage =
+                'Failed to generate coding problem. Please try again.'
             if (error.response) {
-                errorMessage = `Error ${error.response.status}: ${error.response.data.error.message || 'An error occurred.'}`;
+                errorMessage = `Error ${error.response.status}: ${
+                    error.response.data.error.message || 'An error occurred.'
+                }`
             } else if (error.request) {
-                errorMessage = 'No response from the server. Please check your network connection.';
+                errorMessage =
+                    'No response from the server. Please check your network connection.'
             } else {
-                errorMessage = error.message;
+                errorMessage = error.message
             }
 
             toast({
@@ -450,9 +518,9 @@ Only provide the content between the '---' markers in the specified format.`;
                 description: errorMessage,
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-            });
+            })
         }
-        setLoadingAI(false);
+        setLoadingAI(false)
     }
 
     // Function to handle form submission for single question
@@ -463,150 +531,183 @@ Only provide the content between the '---' markers in the specified format.`;
             constraints: values.constraints,
             difficulty: values.difficulty,
             tagId: values.tagId,
-            testCases: values.testCases.map((testCase) => {
-                const processedInput = processInput(
-                    testCase.input,
-                    values.inputFormat
-                );
+            testCases: values.testCases
+                .map((testCase) => {
+                    const processedInput = processInput(
+                        testCase.input,
+                        values.inputFormat
+                    )
 
-                if (processedInput === null) {
-                    return null;
-                }
+                    if (processedInput === null) {
+                        return null
+                    }
 
-                let inputs;
+                    let inputs
 
-                if (Array.isArray(processedInput) &&
-                    (values.inputFormat === 'arrayOfnum' || values.inputFormat === 'arrayOfStr')) {
-                    inputs = [
-                        {
-                            parameterType: values.inputFormat,
-                            parameterValue: processedInput,
-                            parameterName: 'a',
+                    if (
+                        Array.isArray(processedInput) &&
+                        (values.inputFormat === 'arrayOfnum' ||
+                            values.inputFormat === 'arrayOfStr')
+                    ) {
+                        inputs = [
+                            {
+                                parameterType: values.inputFormat,
+                                parameterValue: processedInput,
+                                parameterName: 'a',
+                            },
+                        ]
+                    } else {
+                        const inputValues = testCase.input
+                            .trim()
+                            .split(' ')
+                            .filter(Boolean)
+
+                        inputs = inputValues.map(
+                            (value: string, index: number) => ({
+                                parameterType: values.inputFormat,
+                                parameterValue: processInput(
+                                    value,
+                                    values.inputFormat
+                                ),
+                                parameterName: generateParameterName(index),
+                            })
+                        )
+                    }
+
+                    const expectedOutput = processInput(
+                        testCase.output,
+                        values.outputFormat
+                    )
+
+                    if (expectedOutput === null) {
+                        return null
+                    }
+
+                    return {
+                        inputs,
+                        expectedOutput: {
+                            parameterType: values.outputFormat,
+                            parameterValue: expectedOutput,
                         },
-                    ];
-                } else {
-                    const inputValues = testCase.input
-                        .trim()
-                        .split(' ')
-                        .filter(Boolean);
-
-                    inputs = inputValues.map((value: string, index: number) => ({
-                        parameterType: values.inputFormat,
-                        parameterValue: processInput(value, values.inputFormat),
-                        parameterName: generateParameterName(index),
-                    }));
-                }
-
-                const expectedOutput = processInput(
-                    testCase.output,
-                    values.outputFormat
-                );
-
-                if (expectedOutput === null) {
-                    return null;
-                }
-
-                return {
-                    inputs,
-                    expectedOutput: {
-                        parameterType: values.outputFormat,
-                        parameterValue: expectedOutput,
-                    },
-                };
-            }).filter(Boolean),
+                    }
+                })
+                .filter(Boolean),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             content: {},
-        };
+        }
 
-        const hasInvalidTestCase = formattedData.testCases.some((testCase: any) => {
-            return testCase?.inputs?.some((input: any) => input.parameterValue === null) ||
-                testCase?.expectedOutput.parameterValue === null;
-        });
+        const hasInvalidTestCase = formattedData.testCases.some(
+            (testCase: any) => {
+                return (
+                    testCase?.inputs?.some(
+                        (input: any) => input.parameterValue === null
+                    ) || testCase?.expectedOutput.parameterValue === null
+                )
+            }
+        )
 
         if (hasInvalidTestCase || formattedData.testCases.length === 0) {
             toast({
                 title: 'Please enter valid test cases.',
-                description: 'Submission failed: One or more test cases have invalid inputs or outputs.',
+                description:
+                    'Submission failed: One or more test cases have invalid inputs or outputs.',
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-            });
-            return;
+            })
+            return
         }
 
         try {
-            console.log("Formatted Data to API:", formattedData); 
-            await api.post('codingPlatform/create-question', formattedData);
+            console.log('Formatted Data to API:', formattedData)
+            await api.post('codingPlatform/create-question', formattedData)
             toast({
                 title: 'Success',
                 description: 'Coding problem created successfully.',
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
-            });
-            setIsDialogOpen(false);
-            getAllCodingQuestions(setCodingQuestions);
-            form.reset(); 
+            })
+            setIsDialogOpen(false)
+            getAllCodingQuestions(setCodingQuestions)
+            form.reset()
         } catch (error: any) {
-            console.error('Error creating coding questions:', error);
+            console.error('Error creating coding questions:', error)
             toast({
                 title: 'Error',
                 description:
-                    error?.response?.data?.message || 'An error occurred while saving the questions.',
+                    error?.response?.data?.message ||
+                    'An error occurred while saving the questions.',
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-            });
+            })
         }
-    };
+    }
 
     const bulkGenerateCodingProblems = async () => {
-        const { bulkDifficulties, bulkTopicIds, bulkQuantity } = form.getValues();
+        const { bulkDifficulties, bulkTopicIds, bulkQuantity } =
+            form.getValues()
 
         // Validation checks
         if (bulkDifficulties.length === 0 || bulkTopicIds.length === 0) {
             toast({
                 title: 'Validation Error',
-                description: 'Please select at least one difficulty and one topic for bulk generation.',
+                description:
+                    'Please select at least one difficulty and one topic for bulk generation.',
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-            });
-            return;
+            })
+            return
         }
 
         if (!bulkQuantity || bulkQuantity < 1) {
             toast({
                 title: 'Validation Error',
-                description: 'Please enter a valid number of questions to generate.',
+                description:
+                    'Please enter a valid number of questions to generate.',
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-            });
-            return;
+            })
+            return
         }
 
-        setBulkLoading(true);
-        setTotalToGenerate(bulkQuantity);
-        setGeneratedCount(0);
-        setDuplicatesSkipped(0); 
+        setBulkLoading(true)
+        setTotalToGenerate(bulkQuantity)
+        setGeneratedCount(0)
+        setDuplicatesSkipped(0)
 
-        let localGeneratedCount = 0;
-        let localDuplicatesSkipped = 0;
+        let localGeneratedCount = 0
+        let localDuplicatesSkipped = 0
 
-        const existingQuestions: string[] = codingQuestionsLocal.map(q => q.title);
+        const existingQuestions: string[] = codingQuestionsLocal.map(
+            (q) => q.title
+        )
 
-        const batchSize = 5; 
-        const delayBetweenBatches = 7000;
+        const batchSize = 5
+        const delayBetweenBatches = 7000
 
-        let attempts = 0;
-        const maxAttempts = bulkQuantity * 10; // Prevent infinite loops
+        let attempts = 0
+        const maxAttempts = bulkQuantity * 10 // Prevent infinite loops
 
         while (localGeneratedCount < bulkQuantity && attempts < maxAttempts) {
-            const currentBatchSize = Math.min(batchSize, bulkQuantity - localGeneratedCount);
-            const batchPromises = [];
+            const currentBatchSize = Math.min(
+                batchSize,
+                bulkQuantity - localGeneratedCount
+            )
+            const batchPromises = []
 
             for (let i = 0; i < currentBatchSize; i++) {
                 // Select random difficulty and topic from selected options
-                const randomDifficulty = bulkDifficulties[Math.floor(Math.random() * bulkDifficulties.length)];
-                const randomTopicId = bulkTopicIds[Math.floor(Math.random() * bulkTopicIds.length)];
-                const randomTopic = tags.find((t: any) => t.id === randomTopicId)?.tagName || 'General';
+                const randomDifficulty =
+                    bulkDifficulties[
+                        Math.floor(Math.random() * bulkDifficulties.length)
+                    ]
+                const randomTopicId =
+                    bulkTopicIds[
+                        Math.floor(Math.random() * bulkTopicIds.length)
+                    ]
+                const randomTopic =
+                    tags.find((t: any) => t.id === randomTopicId)?.tagName ||
+                    'General'
 
                 const generateQuestion = async () => {
                     try {
@@ -629,12 +730,16 @@ Test Cases:
 2. Input: [Second test case input]
    Output: [Second test case output] (similarly add more test cases)
 ---
-Only provide the content between the '---' markers in the specified format.`;
+Only provide the content between the '---' markers in the specified format.`
 
-                        const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'AIzaSyAm3e9-VoLFVVVLRIla-cZ40jwAqqd1FDY';
+                        const apiKey =
+                            process.env.NEXT_PUBLIC_GEMINI_API_KEY ||
+                            'AIzaSyAm3e9-VoLFVVVLRIla-cZ40jwAqqd1FDY'
 
                         if (!apiKey) {
-                            throw new Error('Gemini API key is not set. Please configure it properly.');
+                            throw new Error(
+                                'Gemini API key is not set. Please configure it properly.'
+                            )
                         }
 
                         const response = await axios.post(
@@ -655,88 +760,122 @@ Only provide the content between the '---' markers in the specified format.`;
                                     'Content-Type': 'application/json',
                                 },
                             }
-                        );
+                        )
 
-                        const responseData = response.data;
-                        const generatedText = extractGeneratedText(responseData);
-                        console.log(`Generated Text for Question ${localGeneratedCount + 1}:`, generatedText);
+                        const responseData = response.data
+                        const generatedText = extractGeneratedText(responseData)
+                        console.log(
+                            `Generated Text for Question ${
+                                localGeneratedCount + 1
+                            }:`,
+                            generatedText
+                        )
 
                         if (generatedText) {
-                            const parsedData = parseGeneratedText(generatedText);
+                            const parsedData = parseGeneratedText(generatedText)
 
                             if (parsedData) {
-                                
-                                let isUnique = true;
+                                let isUnique = true
                                 for (let existingTitle of existingQuestions) {
-                                    const similarity = jaccardSimilarity(existingTitle, parsedData.title);
-                                    if (similarity >= 0.8) { 
-                                        isUnique = false;
-                                        break;
+                                    const similarity = jaccardSimilarity(
+                                        existingTitle,
+                                        parsedData.title
+                                    )
+                                    if (similarity >= 0.8) {
+                                        isUnique = false
+                                        break
                                     }
                                 }
 
                                 if (isUnique) {
-                                    const formattedData = prepareFormattedData(parsedData, randomDifficulty, randomTopicId);
+                                    const formattedData = prepareFormattedData(
+                                        parsedData,
+                                        randomDifficulty,
+                                        randomTopicId
+                                    )
 
-                                    await api.post('codingPlatform/create-question', formattedData);
+                                    await api.post(
+                                        'codingPlatform/create-question',
+                                        formattedData
+                                    )
 
-                                    existingQuestions.push(parsedData.title);
+                                    existingQuestions.push(parsedData.title)
 
-                                    localGeneratedCount += 1;
-                                    setGeneratedCount(localGeneratedCount); 
+                                    localGeneratedCount += 1
+                                    setGeneratedCount(localGeneratedCount)
 
                                     toast({
                                         title: `Success`,
                                         description: `Question ${localGeneratedCount} generated successfully.`,
                                         className:
                                             'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
-                                    });
+                                    })
                                 } else {
-                                
-                                    localDuplicatesSkipped += 1;
-                                    setDuplicatesSkipped(localDuplicatesSkipped); 
-                                    console.log(`Question ${localGeneratedCount + 1} is a duplicate. Skipping.`);
+                                    localDuplicatesSkipped += 1
+                                    setDuplicatesSkipped(localDuplicatesSkipped)
+                                    console.log(
+                                        `Question ${
+                                            localGeneratedCount + 1
+                                        } is a duplicate. Skipping.`
+                                    )
                                 }
                             } else {
                                 // Parsing failed, increment duplicatesSkipped
-                                localDuplicatesSkipped += 1;
-                                setDuplicatesSkipped(localDuplicatesSkipped); 
-                                console.log(`Failed to parse the coding problem correctly for question ${localGeneratedCount + 1}. Skipping.`);
+                                localDuplicatesSkipped += 1
+                                setDuplicatesSkipped(localDuplicatesSkipped)
+                                console.log(
+                                    `Failed to parse the coding problem correctly for question ${
+                                        localGeneratedCount + 1
+                                    }. Skipping.`
+                                )
                             }
                         } else {
                             // No text generated, increment duplicatesSkipped
-                            localDuplicatesSkipped += 1;
-                            setDuplicatesSkipped(localDuplicatesSkipped); 
-                            console.log(`No text generated from AI for question ${localGeneratedCount + 1}. Skipping.`);
+                            localDuplicatesSkipped += 1
+                            setDuplicatesSkipped(localDuplicatesSkipped)
+                            console.log(
+                                `No text generated from AI for question ${
+                                    localGeneratedCount + 1
+                                }. Skipping.`
+                            )
                         }
                     } catch (error: any) {
-                        console.error(`Error generating question ${localGeneratedCount + 1}:`, error);
+                        console.error(
+                            `Error generating question ${
+                                localGeneratedCount + 1
+                            }:`,
+                            error
+                        )
                     }
-                };
+                }
 
-                batchPromises.push(generateQuestion());
+                batchPromises.push(generateQuestion())
             }
 
-            await Promise.all(batchPromises);
+            await Promise.all(batchPromises)
 
             if (localGeneratedCount < bulkQuantity) {
-                console.log(`Waiting for ${delayBetweenBatches / 1000} seconds before next batch...`);
-                await sleep(delayBetweenBatches);
+                console.log(
+                    `Waiting for ${
+                        delayBetweenBatches / 1000
+                    } seconds before next batch...`
+                )
+                await sleep(delayBetweenBatches)
             }
 
-            attempts++;
+            attempts++
         }
 
-        setBulkLoading(false);
+        setBulkLoading(false)
         toast({
             title: 'Bulk Generation Complete',
             description: `${localGeneratedCount} out of ${bulkQuantity} questions generated successfully. ${localDuplicatesSkipped} duplicates were skipped.`,
             className:
                 'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
-        });
+        })
 
-        getAllCodingQuestions(setCodingQuestions);
-    };
+        getAllCodingQuestions(setCodingQuestions)
+    }
 
     return (
         <main className="flex flex-col p-3 w-full items-center">
@@ -848,16 +987,19 @@ Only provide the content between the '---' markers in the specified format.`;
                             <FormItem className="text-left w-full">
                                 <FormLabel>Topics</FormLabel>
                                 <Select
-                                    onValueChange={(value: string) => { // Added type annotation
+                                    onValueChange={(value: string) => {
+                                        // Added type annotation
                                         const selectedTag = tags.find(
                                             (tag: any) => tag.tagName === value
-                                        );
+                                        )
                                         if (selectedTag) {
-                                            field.onChange(selectedTag.id);
+                                            field.onChange(selectedTag.id)
                                         }
                                     }}
                                     value={
-                                        tags.find((tag: any) => tag.id === field.value)?.tagName || ''
+                                        tags.find(
+                                            (tag: any) => tag.id === field.value
+                                        )?.tagName || ''
                                     }
                                 >
                                     <FormControl>
@@ -868,10 +1010,10 @@ Only provide the content between the '---' markers in the specified format.`;
                                     <SelectContent>
                                         {tags.map((tag: any) => (
                                             <SelectItem
-                                                key={tag.id}
-                                                value={tag.tagName}
+                                                key={tag?.id}
+                                                value={tag?.tagName}
                                             >
-                                                {tag.tagName}
+                                                {tag?.tagName}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
@@ -882,7 +1024,11 @@ Only provide the content between the '---' markers in the specified format.`;
                     />
 
                     {/* Input and Output Format Fields */}
-                    <h6 className='text-left text-sm font-semibold'> Note: Max 20 test cases supported & a minimum of 2 test cases should be provided</h6>
+                    <h6 className="text-left text-sm font-semibold">
+                        {' '}
+                        Note: Max 20 test cases supported & a minimum of 2 test
+                        cases should be provided
+                    </h6>
                     <div className="flex justify-between gap-2">
                         <FormField
                             control={form.control}
@@ -978,8 +1124,10 @@ Only provide the content between the '---' markers in the specified format.`;
                                                 {...field}
                                             />
                                             <p className="text-sm text-gray-500 mt-1">
-                                                {form.watch('inputFormat') === 'arrayOfnum' ||
-                                                    form.watch('inputFormat') === 'arrayOfStr'
+                                                {form.watch('inputFormat') ===
+                                                    'arrayOfnum' ||
+                                                form.watch('inputFormat') ===
+                                                    'arrayOfStr'
                                                     ? 'Max 1 array accepted (e.g., 1,2,3,4)'
                                                     : 'Enter values separated by spaces (e.g., 2 3 4)'}
                                             </p>
@@ -997,8 +1145,10 @@ Only provide the content between the '---' markers in the specified format.`;
                                                 {...field}
                                             />
                                             <p className="text-sm text-gray-500 mt-1">
-                                                {form.watch('outputFormat') === 'arrayOfnum' ||
-                                                    form.watch('outputFormat') === 'arrayOfStr'
+                                                {form.watch('outputFormat') ===
+                                                    'arrayOfnum' ||
+                                                form.watch('outputFormat') ===
+                                                    'arrayOfStr'
                                                     ? 'Max 1 array accepted (e.g., 1,2,3,4)'
                                                     : 'Only one value accepted (e.g., 55)'}
                                             </p>
@@ -1031,7 +1181,9 @@ Only provide the content between the '---' markers in the specified format.`;
 
                     {/* Bulk Generation Section */}
                     <div className="border-t border-gray-300 mt-6 pt-6">
-                        <h2 className="text-xl font-semibold">Bulk Generate Coding Problems</h2>
+                        <h2 className="text-xl font-semibold">
+                            Bulk Generate Coding Problems
+                        </h2>
                         <div className="mt-4 space-y-4">
                             {/* Difficulty Selection */}
                             <FormItem className="space-y-1">
@@ -1041,13 +1193,29 @@ Only provide the content between the '---' markers in the specified format.`;
                                         <input
                                             type="checkbox"
                                             value="Easy"
-                                            checked={form.watch('bulkDifficulties').includes('Easy')}
-                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => { // Added type annotation
-                                                const selected = form.watch('bulkDifficulties');
+                                            checked={form
+                                                .watch('bulkDifficulties')
+                                                .includes('Easy')}
+                                            onChange={(
+                                                e: React.ChangeEvent<HTMLInputElement>
+                                            ) => {
+                                                // Added type annotation
+                                                const selected =
+                                                    form.watch(
+                                                        'bulkDifficulties'
+                                                    )
                                                 if (e.target.checked) {
-                                                    form.setValue('bulkDifficulties', [...selected, 'Easy']);
+                                                    form.setValue(
+                                                        'bulkDifficulties',
+                                                        [...selected, 'Easy']
+                                                    )
                                                 } else {
-                                                    form.setValue('bulkDifficulties', selected.filter((d) => d !== 'Easy'));
+                                                    form.setValue(
+                                                        'bulkDifficulties',
+                                                        selected.filter(
+                                                            (d) => d !== 'Easy'
+                                                        )
+                                                    )
                                                 }
                                             }}
                                         />
@@ -1057,13 +1225,30 @@ Only provide the content between the '---' markers in the specified format.`;
                                         <input
                                             type="checkbox"
                                             value="Medium"
-                                            checked={form.watch('bulkDifficulties').includes('Medium')}
-                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => { // Added type annotation
-                                                const selected = form.watch('bulkDifficulties');
+                                            checked={form
+                                                .watch('bulkDifficulties')
+                                                .includes('Medium')}
+                                            onChange={(
+                                                e: React.ChangeEvent<HTMLInputElement>
+                                            ) => {
+                                                // Added type annotation
+                                                const selected =
+                                                    form.watch(
+                                                        'bulkDifficulties'
+                                                    )
                                                 if (e.target.checked) {
-                                                    form.setValue('bulkDifficulties', [...selected, 'Medium']);
+                                                    form.setValue(
+                                                        'bulkDifficulties',
+                                                        [...selected, 'Medium']
+                                                    )
                                                 } else {
-                                                    form.setValue('bulkDifficulties', selected.filter((d) => d !== 'Medium'));
+                                                    form.setValue(
+                                                        'bulkDifficulties',
+                                                        selected.filter(
+                                                            (d) =>
+                                                                d !== 'Medium'
+                                                        )
+                                                    )
                                                 }
                                             }}
                                         />
@@ -1073,13 +1258,29 @@ Only provide the content between the '---' markers in the specified format.`;
                                         <input
                                             type="checkbox"
                                             value="Hard"
-                                            checked={form.watch('bulkDifficulties').includes('Hard')}
-                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => { // Added type annotation
-                                                const selected = form.watch('bulkDifficulties');
+                                            checked={form
+                                                .watch('bulkDifficulties')
+                                                .includes('Hard')}
+                                            onChange={(
+                                                e: React.ChangeEvent<HTMLInputElement>
+                                            ) => {
+                                                // Added type annotation
+                                                const selected =
+                                                    form.watch(
+                                                        'bulkDifficulties'
+                                                    )
                                                 if (e.target.checked) {
-                                                    form.setValue('bulkDifficulties', [...selected, 'Hard']);
+                                                    form.setValue(
+                                                        'bulkDifficulties',
+                                                        [...selected, 'Hard']
+                                                    )
                                                 } else {
-                                                    form.setValue('bulkDifficulties', selected.filter((d) => d !== 'Hard'));
+                                                    form.setValue(
+                                                        'bulkDifficulties',
+                                                        selected.filter(
+                                                            (d) => d !== 'Hard'
+                                                        )
+                                                    )
                                                 }
                                             }}
                                         />
@@ -1094,18 +1295,40 @@ Only provide the content between the '---' markers in the specified format.`;
                                 <FormLabel>Select Topics</FormLabel>
                                 <div className="flex flex-wrap gap-4">
                                     {tags.map((tag: any) => (
-                                        <label key={tag.id} className="flex items-center space-x-2">
+                                        <label
+                                            key={tag.id}
+                                            className="flex items-center space-x-2"
+                                        >
                                             <input
                                                 type="checkbox"
                                                 value={tag.id}
-                                                checked={form.watch('bulkTopicIds').includes(tag.id)}
-                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => { // Added type annotation
-                                                    const selected = form.watch('bulkTopicIds');
-                                                    const id = Number(e.target.value);
+                                                checked={form
+                                                    .watch('bulkTopicIds')
+                                                    .includes(tag.id)}
+                                                onChange={(
+                                                    e: React.ChangeEvent<HTMLInputElement>
+                                                ) => {
+                                                    // Added type annotation
+                                                    const selected =
+                                                        form.watch(
+                                                            'bulkTopicIds'
+                                                        )
+                                                    const id = Number(
+                                                        e.target.value
+                                                    )
                                                     if (e.target.checked) {
-                                                        form.setValue('bulkTopicIds', [...selected, id]);
+                                                        form.setValue(
+                                                            'bulkTopicIds',
+                                                            [...selected, id]
+                                                        )
                                                     } else {
-                                                        form.setValue('bulkTopicIds', selected.filter((tid) => tid !== id));
+                                                        form.setValue(
+                                                            'bulkTopicIds',
+                                                            selected.filter(
+                                                                (tid) =>
+                                                                    tid !== id
+                                                            )
+                                                        )
                                                     }
                                                 }}
                                             />
@@ -1121,7 +1344,9 @@ Only provide the content between the '---' markers in the specified format.`;
                                 name="bulkQuantity"
                                 render={({ field }) => (
                                     <FormItem className="space-y-1">
-                                        <FormLabel>Number of Questions</FormLabel>
+                                        <FormLabel>
+                                            Number of Questions
+                                        </FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="number"
@@ -1140,19 +1365,25 @@ Only provide the content between the '---' markers in the specified format.`;
                             {bulkLoading && (
                                 <div className="bg-gray-100 p-4 rounded-md">
                                     <p className="text-sm text-gray-700">
-                                        Generating Coding Problems: {generatedCount} / {totalToGenerate}
+                                        Generating Coding Problems:{' '}
+                                        {generatedCount} / {totalToGenerate}
                                     </p>
                                     <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
                                         <div
                                             className="bg-blue-600 h-2.5 rounded-full"
                                             style={{
-                                                width: `${(generatedCount / totalToGenerate) * 100}%`,
+                                                width: `${
+                                                    (generatedCount /
+                                                        totalToGenerate) *
+                                                    100
+                                                }%`,
                                             }}
                                         ></div>
                                     </div>
                                     {duplicatesSkipped > 0 && (
                                         <p className="text-sm text-gray-500 mt-2">
-                                            Duplicates Skipped: {duplicatesSkipped}
+                                            Duplicates Skipped:{' '}
+                                            {duplicatesSkipped}
                                         </p>
                                     )}
                                 </div>
@@ -1168,7 +1399,10 @@ Only provide the content between the '---' markers in the specified format.`;
                             >
                                 {bulkLoading ? (
                                     <>
-                                        <Spinner size="small" className="mr-2" />
+                                        <Spinner
+                                            size="small"
+                                            className="mr-2"
+                                        />
                                         Generating...
                                     </>
                                 ) : (

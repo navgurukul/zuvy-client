@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { ChevronLeft, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,6 +11,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
+
 import {
     Dialog,
     DialogContent,
@@ -25,20 +27,39 @@ import { columns } from '@/app/admin/resource/coding/column'
 import NewCodingProblemForm from '@/app/admin/resource/_components/NewCodingProblemForm'
 import { api } from '@/utils/axios.config'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
+import { OFFSET, POSITION } from '@/utils/constant'
+
 import {
     getCodingQuestionTags,
     getEditCodingQuestionDialogs,
     getcodingQuestionState,
 } from '@/store/store'
-import { getAllCodingQuestions, filteredCodingQuestions } from '@/utils/admin'
+import {
+    getAllCodingQuestions,
+    filteredCodingQuestions,
+    filterQuestions,
+} from '@/utils/admin'
 import Image from 'next/image'
 import { Spinner } from '@/components/ui/spinner'
 import EditCodingQuestionForm from '../_components/EditCodingQuestionForm'
 import useDebounce from '@/hooks/useDebounce'
+import MultiSelector from '@/components/ui/multi-selector'
+import difficultyOptions from '@/app/utils'
+// import CodingTopics from '../../courses/[courseId]/module/_components/codingChallenge/CodingTopics'
+// import { POSITION } from '@/utils/constant'
 
 export type Tag = {
     id: number
     tagName: string
+}
+// interface Option {
+//     tagName: string
+//     id: number
+// }
+
+interface Option {
+    label: string
+    value: string
 }
 
 const CodingProblems = () => {
@@ -63,9 +84,24 @@ const CodingProblems = () => {
         }
         return { tagName: 'All Topics', id: -1 }
     })
-    const [selectedDifficulty, setSelectedDifficulty] = useState('None')
+    const [selectedOptions, setSelectedOptions] = useState<Option[]>([
+        // { id: -1, tagName: 'All Topics' },
+        { value: '-1', label: 'All Topics' },
+    ])
+    const [selectedDifficulty, setSelectedDifficulty] = useState(['None'])
+    const [difficulty, setDifficulty] = useState([
+        { value: 'None', label: 'All Difficulty' },
+    ])
+
     const [loading, setLoading] = useState(true)
     const [openEditDialog, setOpenEditDialog] = useState(false)
+    const [position, setPosition] = useState(POSITION)
+    const [currentPage, setCurrentPage] = useState(1)
+    const [totalCodingQuestion, setTotalCodingQuestion] = useState(0)
+    const [totalPages, setTotalPages] = useState(0)
+    const [lastPage, setLastPage] = useState(0)
+    const [offset, setOffset] = useState<number>(OFFSET)
+
     const selectedLanguage = ''
 
     const handleTopicClick = (value: string) => {
@@ -77,12 +113,85 @@ const CodingProblems = () => {
         localStorage.setItem('codingCurrentTag', JSON.stringify(tag))
     }
 
+    const handleTagOption = (option: Option) => {
+        if (option.value === '-1') {
+            if (selectedOptions.some((item) => item.value === option.value)) {
+                setSelectedOptions((prev) =>
+                    prev.filter((selected) => selected.value !== option.value)
+                )
+            } else {
+                setSelectedOptions([option])
+            }
+        } else {
+            if (selectedOptions.some((item) => item.value === '-1')) {
+                setSelectedOptions([option])
+            } else {
+                if (
+                    selectedOptions.some(
+                        (selected) => selected.value === option.value
+                    )
+                ) {
+                    setSelectedOptions((prev) =>
+                        prev.filter(
+                            (selected) => selected.value !== option.value
+                        )
+                    )
+                } else {
+                    setSelectedOptions((prev) => [...prev, option])
+                }
+            }
+        }
+    }
+
+    const handleDifficulty = (option: Option) => {
+        // When user selects All Difficulty
+        if (option.value === 'None') {
+            // It will check if the user has already selected All Difficulty or not
+            if (difficulty.some((item) => item.value === option.value)) {
+                // If All Difficulty is already selected it will remove
+                const filteredDifficulty = difficulty.filter(
+                    (item) => item.value !== option.value
+                )
+                setDifficulty(filteredDifficulty)
+            } else {
+                // If user selects All Difficulty when it is not already selected,
+                // Rest other difficulties will be removed and only All Difficulty will be added in the array
+                setDifficulty([option])
+            }
+        } else {
+            // When user selects other Difficulties
+            if (difficulty.some((item) => item.value === 'None')) {
+                // When All Difficulty is already selected and user selects other difficulties
+                // then All Difficulty will be removed and new difficulty will be added to the list
+                setDifficulty([option])
+            } else {
+                if (difficulty.some((item) => item.value === option.value)) {
+                    // Removing other difficulty when already selected
+                    const filteredDifficulty = difficulty.filter(
+                        (item) => item.value !== option.value
+                    )
+                    setDifficulty(filteredDifficulty)
+                } else {
+                    // Add other difficulties
+                    const filteredDifficulty = [...difficulty, option]
+                    setDifficulty(filteredDifficulty)
+                }
+            }
+        }
+    }
+
     async function getAllTags() {
         const response = await api.get('Content/allTags')
         if (response) {
+            const transformedData = response.data.allTags.map(
+                (item: { id: any; tagName: any }) => ({
+                    value: item.id.toString(),
+                    label: item.tagName,
+                })
+            )
             const tagArr = [
-                { tagName: 'All Topics', id: -1 },
-                ...response.data.allTags,
+                { value: '-1', label: 'All Topics' },
+                ...transformedData,
             ]
             setTags(tagArr)
         }
@@ -92,16 +201,68 @@ const CodingProblems = () => {
         getAllTags()
     }, [])
 
+    const fetchCodingQuestions = useCallback(
+        async (offset: number) => {
+            filteredCodingQuestions(
+                offset,
+                setCodingQuestions,
+                setTotalCodingQuestion,
+                setLastPage,
+                setTotalPages,
+                difficulty,
+                selectedOptions,
+                debouncedSearch,
+                position,
+                selectedLanguage
+            )
+        },
+        [
+            searchTerm,
+            selectedOptions,
+            difficulty,
+            // selectedDifficulty,
+            debouncedSearch,
+            isCodingDialogOpen,
+            openEditDialog,
+            position,
+            offset,
+        ]
+    )
+
     useEffect(() => {
         getAllCodingQuestions(setAllCodingQuestions)
-        filteredCodingQuestions(
-            setCodingQuestions,
-            selectedDifficulty,
-            selectedTag,
-            selectedLanguage,
-            debouncedSearch
-        )
-    }, [searchTerm, selectedTag.id, selectedDifficulty, debouncedSearch, isCodingDialogOpen, openEditDialog])
+        fetchCodingQuestions(offset)
+        // filteredCodingQuestions(
+        //     offset,
+        //     setCodingQuestions,
+        //     difficulty,
+        //     selectedOptions,
+        //     selectedLanguage,
+        //     debouncedSearch,
+        //     position,
+        //     setLastPage,
+        //     setTotalPages,
+        //     setTotalCodingQuestion
+        // )
+        // filterQuestions(
+        //     setCodingQuestions,
+        //     selectedDifficulty,
+        //     selectedOptions,
+        //     selectedLanguage,
+        //     debouncedSearch,
+        //     'coding'
+        // )
+    }, [
+        searchTerm,
+        selectedOptions,
+        difficulty,
+        // selectedDifficulty,
+        debouncedSearch,
+        isCodingDialogOpen,
+        openEditDialog,
+        position,
+        offset,
+    ])
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -114,6 +275,9 @@ const CodingProblems = () => {
     useEffect(() => {
         setOpenEditDialog(isCodingEditDialogOpen)
     }, [isCodingEditDialogOpen])
+
+    const selectedTagCount = selectedOptions.length
+    const difficultyCount = difficulty.length
 
     return (
         <>
@@ -154,54 +318,36 @@ const CodingProblems = () => {
                                     + Create Problems
                                 </Button>
                             </div>
+                            {/* <CodingTopics
+                                setSearchTerm={setSearchTerm}
+                                searchTerm={searchTerm}
+                                tags={tags}
+                                selectedTopics={selectedOptions}
+                                setSelectedTopics={setSelectedOptions}
+                                selectedDifficulties={selectedDifficulty}
+                                setSelectedDifficulties={setSelectedDifficulty}
+                            /> */}
                             <div className="flex items-center">
-                                <Select
-                                    onValueChange={(value) =>
-                                        setSelectedDifficulty(value)
-                                    }
-                                >
-                                    <SelectTrigger className="w-[180px]">
-                                        <SelectValue placeholder="Difficulty" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            <SelectItem value="None">
-                                                Any Difficulty
-                                            </SelectItem>
-                                            <SelectItem value="Easy">
-                                                Easy
-                                            </SelectItem>
-                                            <SelectItem value="Medium">
-                                                Medium
-                                            </SelectItem>
-                                            <SelectItem value="Hard">
-                                                Hard
-                                            </SelectItem>
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
+                                <div className="w-full lg:w-[250px]">
+                                    <MultiSelector
+                                        selectedCount={difficultyCount}
+                                        options={difficultyOptions}
+                                        selectedOptions={difficulty}
+                                        handleOptionClick={handleDifficulty}
+                                    />
+                                </div>
                                 <Separator
                                     orientation="vertical"
                                     className="w-1 h-12 mx-4 bg-gray-400 rounded-lg"
                                 />
-                                <Select
-                                    value={selectedTag.tagName}
-                                    onValueChange={handleTopicClick}
-                                >
-                                    <SelectTrigger className="w-[180px]">
-                                        <SelectValue placeholder="Choose Topic" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {tags.map((tag: Tag) => (
-                                            <SelectItem
-                                                key={tag.id}
-                                                value={tag.tagName}
-                                            >
-                                                {tag.tagName}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <div className="w-full lg:w-[250px]">
+                                    <MultiSelector
+                                        selectedCount={selectedTagCount}
+                                        options={tags}
+                                        selectedOptions={selectedOptions}
+                                        handleOptionClick={handleTagOption}
+                                    />
+                                </div>
                             </div>
 
                             <DataTable
@@ -279,6 +425,17 @@ const CodingProblems = () => {
                             )}
                         </>
                     )}
+                    <DataTablePagination
+                        totalStudents={totalCodingQuestion}
+                        position={position}
+                        setPosition={setPosition}
+                        pages={totalPages}
+                        lastPage={lastPage}
+                        currentPage={currentPage}
+                        setCurrentPage={setCurrentPage}
+                        fetchStudentData={fetchCodingQuestions}
+                        setOffset={setOffset}
+                    />
                 </div>
             )}
         </>
