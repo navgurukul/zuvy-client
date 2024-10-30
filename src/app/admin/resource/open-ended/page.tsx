@@ -244,68 +244,31 @@ const OpenEndedQuestions = (props: Props) => {
                                     </DialogContent>
                                 </Dialog>
                             </div>
-                            <div className="flex items-center">
-                                {/* <Select
-                                    onValueChange={(value) =>
-                                        setSelectedDifficulty(value)
-                                    }
-                                >
-                                    <SelectTrigger className="w-[180px]">
-                                        <SelectValue placeholder="Any Difficulty" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            <SelectItem value="None">
-                                                Any Difficulty
-                                            </SelectItem>
-                                            <SelectItem value="Easy">
-                                                Easy
-                                            </SelectItem>
-                                            <SelectItem value="Medium">
-                                                Medium
-                                            </SelectItem>
-                                            <SelectItem value="Hard">
-                                                Hard
-                                            </SelectItem>
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select> */}
+                            <div className="flex items-center gap-4">
                                 <div className="w-full lg:w-[250px]">
                                     <MultiSelector
                                         selectedCount={difficultyCount}
                                         options={difficultyOptions}
                                         selectedOptions={difficulty}
                                         handleOptionClick={handleDifficulty}
+                                        type={
+                                            difficultyCount > 1
+                                                ? 'Difficulties'
+                                                : 'Difficulty'
+                                        }
                                     />
                                 </div>
-                                <Separator
-                                    orientation="vertical"
-                                    className="w-1 h-12 mx-4 bg-gray-400 rounded-lg"
-                                />
-                                {/* <Select
-                                    value={selectedTag.tagName}
-                                    onValueChange={handleTopicClick}
-                                >
-                                    <SelectTrigger className="w-[180px]">
-                                        <SelectValue placeholder="Choose Topic" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {tags.map((tag: Tag) => (
-                                            <SelectItem
-                                                key={tag.id}
-                                                value={tag?.tagName}
-                                            >
-                                                {tag?.tagName}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select> */}
                                 <div className="w-full lg:w-[250px]">
                                     <MultiSelector
                                         selectedCount={selectedTagCount}
                                         options={tags}
                                         selectedOptions={selectedOptions}
                                         handleOptionClick={handleTagOption}
+                                        type={
+                                            selectedTagCount > 1
+                                                ? 'Topics'
+                                                : 'Topic'
+                                        }
                                     />
                                 </div>
                             </div>

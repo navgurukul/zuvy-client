@@ -280,25 +280,27 @@ const Mcqs = (props: Props) => {
                             </DialogContent>
                         </Dialog>
                     </div>
-                    <div className="flex items-center">
+                    <div className="flex items-center gap-4">
                         <div className="w-full lg:w-[250px]">
                             <MultiSelector
                                 selectedCount={difficultyCount}
                                 options={difficultyOptions}
                                 selectedOptions={difficulty}
                                 handleOptionClick={handleDifficulty}
+                                type={
+                                    difficultyCount > 1
+                                        ? 'Difficulties'
+                                        : 'Difficulty'
+                                }
                             />
                         </div>
-                        <Separator
-                            orientation="vertical"
-                            className="w-1 h-12 mx-4 bg-gray-400 rounded-lg"
-                        />
                         <div className="w-full lg:w-[250px]">
                             <MultiSelector
                                 selectedCount={selectedTagCount}
                                 options={tags}
                                 selectedOptions={selectedOptions}
                                 handleOptionClick={handleTagOption}
+                                type={selectedTagCount > 1 ? 'Topics' : 'Topic'}
                             />
                         </div>
                     </div>
