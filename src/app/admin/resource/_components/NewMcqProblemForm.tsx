@@ -987,14 +987,14 @@ Correct Answer: [Write the correct option number here]
                                 <div className="flex flex-wrap gap-4">
                                     {tags.map((tag: Tag) => (
                                         <label
-                                            key={tag.id}
+                                            key={tag.value}
                                             className="flex items-center space-x-2"
                                         >
                                             <input
                                                 type="checkbox"
-                                                value={tag.id}
+                                                value={tag.value}
                                                 checked={bulkTopicIds.includes(
-                                                    tag.id
+                                                    parseInt(tag.value)
                                                 )}
                                                 onChange={(e) => {
                                                     const id = Number(
@@ -1015,7 +1015,7 @@ Correct Answer: [Write the correct option number here]
                                                     }
                                                 }}
                                             />
-                                            <span>{tag.tagName}</span>
+                                            <span>{tag.label}</span>
                                         </label>
                                     ))}
                                 </div>
