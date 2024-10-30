@@ -157,10 +157,12 @@ function NewOpenEndedQuestionForm({
                                         onValueChange={(value) => {
                                             const selectedTag = tags.find(
                                                 (tag: any) =>
-                                                    tag?.tagName === value
+                                                    tag?.label === value
                                             )
                                             if (selectedTag) {
-                                                field.onChange(selectedTag.id)
+                                                field.onChange(
+                                                    parseInt(selectedTag.value)
+                                                )
                                             }
                                         }}
                                     >
@@ -172,10 +174,10 @@ function NewOpenEndedQuestionForm({
                                         <SelectContent>
                                             {tags.map((tag: any) => (
                                                 <SelectItem
-                                                    key={tag.id}
-                                                    value={tag?.tagName}
+                                                    key={tag.value}
+                                                    value={tag?.label}
                                                 >
-                                                    {tag?.tagName}
+                                                    {tag?.label}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>

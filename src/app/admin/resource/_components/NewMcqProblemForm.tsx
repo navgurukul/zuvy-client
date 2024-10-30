@@ -32,6 +32,8 @@ import { Spinner } from '@/components/ui/spinner'
 import axios from 'axios'
 
 export type Tag = {
+    label: string
+    value: string
     id: number
     tagName: string
 }
@@ -753,16 +755,20 @@ Correct Answer: [Write the correct option number here]
                                         onValueChange={(value) => {
                                             const selectedTag = tags?.find(
                                                 (tag: Tag) =>
-                                                    tag?.tagName === value
+                                                    tag?.label === value
                                             )
                                             if (selectedTag) {
-                                                field.onChange(selectedTag.id)
+                                                field.onChange(
+                                                    parseInt(selectedTag.value)
+                                                )
                                             }
                                         }}
                                         value={
                                             tags.find(
-                                                (tag) => tag.id === field.value
-                                            )?.tagName || ''
+                                                (tag) =>
+                                                    parseInt(tag.value) ===
+                                                    field.value
+                                            )?.label || ''
                                         }
                                     >
                                         <FormControl>
@@ -773,10 +779,10 @@ Correct Answer: [Write the correct option number here]
                                         <SelectContent>
                                             {tags.map((tag: any) => (
                                                 <SelectItem
-                                                    key={tag.id}
-                                                    value={tag?.tagName}
+                                                    key={tag.value}
+                                                    value={tag?.label}
                                                 >
-                                                    {tag?.tagName}
+                                                    {tag?.label}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>

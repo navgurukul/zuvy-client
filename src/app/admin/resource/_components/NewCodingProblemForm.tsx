@@ -990,16 +990,19 @@ Only provide the content between the '---' markers in the specified format.`
                                     onValueChange={(value: string) => {
                                         // Added type annotation
                                         const selectedTag = tags.find(
-                                            (tag: any) => tag.tagName === value
+                                            (tag: any) => tag.label === value
                                         )
                                         if (selectedTag) {
-                                            field.onChange(selectedTag.id)
+                                            field.onChange(
+                                                parseInt(selectedTag.value)
+                                            )
                                         }
                                     }}
                                     value={
                                         tags.find(
-                                            (tag: any) => tag.id === field.value
-                                        )?.tagName || ''
+                                            (tag: any) =>
+                                                tag.value == field.value
+                                        )?.label || ''
                                     }
                                 >
                                     <FormControl>
@@ -1010,10 +1013,10 @@ Only provide the content between the '---' markers in the specified format.`
                                     <SelectContent>
                                         {tags.map((tag: any) => (
                                             <SelectItem
-                                                key={tag?.id}
-                                                value={tag?.tagName}
+                                                key={tag?.value}
+                                                value={tag?.label}
                                             >
-                                                {tag?.tagName}
+                                                {tag?.label}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
@@ -1296,15 +1299,15 @@ Only provide the content between the '---' markers in the specified format.`
                                 <div className="flex flex-wrap gap-4">
                                     {tags.map((tag: any) => (
                                         <label
-                                            key={tag.id}
+                                            key={tag.value}
                                             className="flex items-center space-x-2"
                                         >
                                             <input
                                                 type="checkbox"
-                                                value={tag.id}
+                                                value={tag.value}
                                                 checked={form
                                                     .watch('bulkTopicIds')
-                                                    .includes(tag.id)}
+                                                    .includes(tag.value)}
                                                 onChange={(
                                                     e: React.ChangeEvent<HTMLInputElement>
                                                 ) => {
@@ -1332,7 +1335,7 @@ Only provide the content between the '---' markers in the specified format.`
                                                     }
                                                 }}
                                             />
-                                            <span>{tag.tagName}</span>
+                                            <span>{tag.label}</span>
                                         </label>
                                     ))}
                                 </div>

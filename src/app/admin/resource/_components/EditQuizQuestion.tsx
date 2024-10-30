@@ -270,16 +270,31 @@ const EditQuizQuestion = ({
                                         <FormItem className="text-left w-full">
                                             <FormLabel>Topics</FormLabel>
                                             <Select
+                                                value={
+                                                    tags.find(
+                                                        (tag) =>
+                                                            tag.value ==
+                                                            field.value
+                                                    )?.label ||
+                                                    tags.find(
+                                                        (tag) =>
+                                                            tag.value ==
+                                                            selectedQuizQuestion?.tagId
+                                                    )?.label ||
+                                                    ''
+                                                }
                                                 onValueChange={(value) => {
                                                     const selectedTag =
                                                         tags.find(
                                                             (tag: any) =>
-                                                                tag?.tagName ===
+                                                                tag?.label ===
                                                                 value
                                                         )
                                                     if (selectedTag) {
                                                         field.onChange(
-                                                            selectedTag.id
+                                                            parseInt(
+                                                                selectedTag.value
+                                                            )
                                                         )
                                                     }
                                                 }}
@@ -290,9 +305,9 @@ const EditQuizQuestion = ({
                                                             placeholder={
                                                                 tags.find(
                                                                     (tag) =>
-                                                                        tag.id ===
+                                                                        tag.value ==
                                                                         selectedQuizQuestion?.tagId
-                                                                )?.tagName ||
+                                                                )?.label ||
                                                                 'Choose Topic'
                                                             }
                                                         />
@@ -301,10 +316,10 @@ const EditQuizQuestion = ({
                                                 <SelectContent>
                                                     {tags.map((tag: any) => (
                                                         <SelectItem
-                                                            key={tag.id}
-                                                            value={tag?.tagName}
+                                                            key={tag.value}
+                                                            value={tag?.label}
                                                         >
-                                                            {tag?.tagName}
+                                                            {tag?.label}
                                                         </SelectItem>
                                                     ))}
                                                 </SelectContent>
