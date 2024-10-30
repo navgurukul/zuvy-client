@@ -21,6 +21,37 @@ import { Checkbox } from '@/components/ui/checkbox'
 
 export const columns: ColumnDef<Task>[] = [
     {
+        id: 'select',
+        header: ({ table }) => {
+            return (
+                <div className="ml-5">
+                    <Checkbox
+                        checked={
+                            table.getIsAllPageRowsSelected() ||
+                            (table.getIsSomePageRowsSelected() &&
+                                'indeterminate')
+                        }
+                        onCheckedChange={(value) =>
+                            table.toggleAllPageRowsSelected(!!value)
+                        }
+                        aria-label="Select all"
+                        className="translate-y-[2px]"
+                    />
+                </div>
+            )
+        },
+        cell: ({ row }) => (
+            <Checkbox
+                checked={row.getIsSelected()}
+                onCheckedChange={(value) => row.toggleSelected(!!value)}
+                aria-label="Select row"
+                className="translate-y-[2px]"
+            />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+    },
+    {
         accessorKey: 'profilePicture',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Profile Pitcure" />
@@ -108,55 +139,6 @@ export const columns: ColumnDef<Task>[] = [
                         batchId={batchId}
                     />
                 </div>
-            )
-        },
-    },
-    {
-        accessorKey: 'checkbox',
-        header: ({ column }) => {
-            // const { batchName, userId, bootcampId, batchId } = row.original
-            // const { batchData } = getBatchData()
-            // const newBatchData = batchData?.map((data) => {
-            //     return {
-            //         value: data.id,
-            //         label: data.name,
-            //     }
-            // })
-            console.log('column', column)
-            return (
-                <DataTableColumnHeader
-                    column={column}
-                    title="Select Students"
-                />
-                // <div className="flex">
-                //         <ComboboxStudent
-                //             batchData={newBatchData}
-                //             batchName={batchName}
-                //             userId={userId}
-                //             bootcampId={bootcampId}
-                //             batchId={batchId}
-                //         />
-                //     </div>
-            )
-        },
-        cell: ({ row }) => {
-            console.log('row.original', row.original)
-            const { batchName, userId, bootcampId, batchId } = row.original
-            const { batchData } = getBatchData()
-            const newBatchData = batchData?.map((data) => {
-                return {
-                    value: data.id,
-                    label: data.name,
-                }
-            })
-
-            return (
-                <Checkbox
-                    checked={row.getIsSelected()}
-                    onCheckedChange={(value) => row.toggleSelected(!!value)}
-                    aria-label="Select row"
-                    className="translate-y-[2px]"
-                />
             )
         },
     },

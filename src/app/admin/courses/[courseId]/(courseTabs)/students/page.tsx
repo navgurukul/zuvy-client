@@ -1,15 +1,16 @@
 'use client'
+import React, { useState, useEffect } from 'react'
 import { ArrowLeft, ArrowRight, ChevronDown, Plus } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { DataTable } from '@/app/_components/datatable/data-table'
-
+import { Table } from '@tanstack/react-table'
 import { ROWS_PER_PAGE } from '@/utils/constant'
 import AddStudentsModal from '../../_components/addStudentsmodal'
 import { columns } from './columns'
-
+import { getBatchData } from '@/store/store'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -22,6 +23,7 @@ import {
 import { useStudentData } from './components/useStudentData'
 import useAttendanceData from './components/studentAttendanceAnalytics'
 import AttandanceRefreshComp from './components/AttandanceRefreshComp'
+import { ComboboxStudent } from './components/comboboxStudentDataTable'
 export type StudentData = {
     email: string
     name: string
@@ -46,7 +48,16 @@ const Page = ({ params }: { params: any }) => {
         onLimitChange,
         handleSetSearch,
     } = useStudentData(params.courseId)
+    const { batchData } = getBatchData()
     const { attendanceData } = useAttendanceData(params.courseId)
+    const [selectedRows, setSelectedRows] = useState<StudentData[]>([])
+
+    const newBatchData = batchData?.map((data) => {
+        return {
+            value: data.id,
+            label: data.name,
+        }
+    })
 
     return (
         <div>
@@ -59,6 +70,15 @@ const Page = ({ params }: { params: any }) => {
                         onChange={handleSetSearch}
                     />
                     <div className="flex flex-col md:flex-row items-center gap-x-2 gap-y-4">
+                        {selectedRows.length > 0 && (
+                            <ComboboxStudent
+                                batchData={newBatchData}
+                                bootcampId={
+                                    batchData && batchData[0].bootcampId
+                                }
+                                selectedRows={selectedRows}
+                            />
+                        )}
                         <Dialog>
                             <DialogTrigger asChild>
                                 <Button className="gap-x-2">
@@ -83,7 +103,11 @@ const Page = ({ params }: { params: any }) => {
 
                 <div>
                     <div className="mt-5">
-                        <DataTable data={students} columns={columns} />
+                        <DataTable
+                            data={students}
+                            columns={columns}
+                            setSelectedRows={setSelectedRows}
+                        />
                     </div>
                     <div className="flex items-center justify-end mt-2 px-2 gap-x-2">
                         <p className="text-sm font-medium">Rows Per Page</p>
