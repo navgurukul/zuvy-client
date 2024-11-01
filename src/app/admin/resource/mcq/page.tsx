@@ -186,7 +186,7 @@ const Mcqs = (props: Props) => {
     const getAllQuizQuestion = useCallback(async (offset:number) => {
         try {
             const safeOffset = Math.max(0, offset)
-            let url = `/Content/allQuizQuestions?tagId=2&limit=${position}&offset=${offset}`
+            let url = `/Content/allQuizQuestions?limit=${position}&offset=${offset}`
             setmcqSearch(debouncedSearch)
             let selectedTagIds = ''
             selectedOptions.map(
