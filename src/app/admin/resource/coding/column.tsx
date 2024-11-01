@@ -3,8 +3,8 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 import { CodingQuestion } from '@/utils/data/schema'
-import { Edit, Pencil, Trash2 } from 'lucide-react'
-
+import { Edit, Info, Pencil, Star, Trash2, ExternalLink } from 'lucide-react'
+import { Dialog, DialogContent, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import { DELETE_CODING_QUESTION_CONFIRMATION } from '@/utils/constant'
 import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
 import {
@@ -21,6 +21,9 @@ import {
     getAllCodingQuestions,
     handleEditCodingQuestion,
 } from '@/utils/admin'
+import QuestionDescriptionModal from '../../courses/[courseId]/module/_components/Assessment/QuestionDescriptionModal'
+
+
 
 export const columns: ColumnDef<CodingQuestion>[] = [
     {
@@ -30,9 +33,27 @@ export const columns: ColumnDef<CodingQuestion>[] = [
         ),
         cell: ({ row }) => {
             const codingQuestion = row.original
+            
 
             return (
-                <div className="flex items-center">{codingQuestion.title}</div>
+                <Dialog>
+                    <div className="flex items-center gap-2 cursor-pointer">
+                        <span>{codingQuestion.title}</span>
+                <DialogTrigger asChild>
+                        <ExternalLink className="text-[#518672] hover:text-green-800 w-4 h-4" />
+                </DialogTrigger>
+                        </div>
+    
+                <DialogOverlay>
+                    <DialogContent>
+                        <QuestionDescriptionModal
+                            question={codingQuestion}
+                            type="coding"
+                            />
+                    </DialogContent>
+                </DialogOverlay>
+            </Dialog>
+            
             )
         },
         enableSorting: false,

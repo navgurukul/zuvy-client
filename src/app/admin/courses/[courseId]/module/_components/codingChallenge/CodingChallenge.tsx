@@ -12,6 +12,8 @@ import { Input } from '@/components/ui/input'
 import { api } from '@/utils/axios.config'
 import useDebounce from '@/hooks/useDebounce'
 import { getCodingQuestionTags } from '@/store/store'
+import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
+import QuestionDescriptionModal from '../Assessment/QuestionDescriptionModal'
 
 interface Example {
     input: number[]
@@ -253,12 +255,20 @@ function CodingChallenge({
                                                 )}
                                             </p>
                                         </div>
-                                        <Link
-                                            href={''}
-                                            className="font-semibold text-sm mt-2 text-secondary"
-                                        >
-                                            View Full Description
-                                        </Link>
+                                        <Dialog>
+                                <DialogTrigger asChild>
+                                    <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer">
+                                        View Full Description
+                                    </p>
+                                </DialogTrigger>
+                                <DialogOverlay />
+                                <QuestionDescriptionModal
+                                    question={question}
+                                    type="coding"
+                                    
+                                />
+                            </Dialog>
+
                                     </div>
                                     <div>
                                         {selectedQuestions?.some(
