@@ -37,7 +37,7 @@ const TipTapForForm = ({
         content: description,
         editorProps: {
             attributes: {
-                class: 'rounded-md min-h-[150px] border-input  ',
+                class: 'rounded-md min-h-[150px]  border-input  ',
             },
         },
         onUpdate({ editor }) {
@@ -46,9 +46,11 @@ const TipTapForForm = ({
     })
 
     return (
-        <div className="w-full">
+        <div className="w-full ">
             <TipTapToolbarforForm editor={editor} />
-            <EditorContent editor={editor} />
+            <div className="">
+                <EditorContent editor={editor} />
+            </div>
         </div>
     )
 }

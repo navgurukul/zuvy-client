@@ -2,22 +2,15 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { boolean, z } from 'zod'
+import { z } from 'zod'
 
 import { Button } from '@/components/ui/button'
-import {
-    Form,
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+import { Form } from '@/components/ui/form'
 import { toast } from '@/components/ui/use-toast'
-import AddStudentsModal from '../../courses/[courseId]/_components/addStudentsmodal'
-import Dropzone from '../../courses/[courseId]/_components/dropzone'
+
+import { useState } from 'react'
+import DropzoneforMcq from './DropzoneforMcq'
+import { api } from '@/utils/axios.config'
 
 type Props = {}
 const FormSchema = z.object({
@@ -25,69 +18,47 @@ const FormSchema = z.object({
 })
 
 const BulkUploadMcq = (props: Props) => {
-    const form = useForm<z.infer<typeof FormSchema>>({
-        resolver: zodResolver(FormSchema),
-        defaultValues: {
-            sheeturl: '',
-        },
-    })
+    const [mcqData, setMcqData] = useState(null)
 
-    function onSubmit(data: z.infer<typeof FormSchema>) {
-        toast({
-            title: 'You submitted the following values:',
-            description: (
-                <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-                    <code className="text-white">
-                        {JSON.stringify(data, null, 2)}
-                    </code>
-                </pre>
-            ),
-        })
+    async function handleSubmit(e: any) {
+        e.preventDefault()
+        console.log(mcqData)
+        try {
+            await api.post(`/Content/quiz`, mcqData)
+            toast({
+                title: 'Success',
+                description: 'Question Created Successfully',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+            })
+        } catch (error: any) {
+            toast({
+                title: 'Error',
+                description: error?.data?.message || 'An error occurred',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+            })
+        }
     }
 
     return (
-        <main className="flex flex-col  items-center w-screen ">
-            <Form {...form}>
-                <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="w-2/3 space-y-6"
-                >
-                    <FormField
-                        control={form.control}
-                        name="sheeturl"
-                        render={({ field }) => (
-                            <FormItem className="flex flex-col justify-center  items-center">
-                                <FormLabel className="w-[450px] text-left">
-                                    Google Sheets URL
-                                </FormLabel>
-                                <FormControl>
-                                    <Input
-                                        placeholder="Google Sheet URL"
-                                        {...field}
-                                        className="w-[450px]"
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
+        <main className="flex flex-col ml-40 items-center w-screen ">
+            <form onSubmit={handleSubmit} className="w-2/3 space-y-6">
+                <div className="flex flex-col justify-center  items-center">
+                    <DropzoneforMcq
+                        mcqSide={true}
+                        className="px-5 py-2 mt-10 border-dashed border-2 rounded-[10px] block w-[450px]"
+                        setMcqData={setMcqData}
+                        mcqData={mcqData}
                     />
-                    <h1>or</h1>
-                    <div className="flex flex-col justify-center  items-center">
-                        <Dropzone
-                            studentData={[]}
-                            setStudentData={() => {}}
-                            mcqSide={true}
-                            className="px-5 py-2 mt-10 border-dashed border-2 rounded-[10px] block w-[450px]"
-                        />
-                    </div>
+                </div>
 
-                    <div className="flex items-end justify-end w-[860px]">
-                        <Button className="" type="submit">
-                            Add Questions
-                        </Button>
-                    </div>
-                </form>
-            </Form>
+                <div className="flex items-end justify-end w-[860px]">
+                    <Button className="" type="submit">
+                        Add Questions
+                    </Button>
+                </div>
+            </form>
         </main>
     )
 }

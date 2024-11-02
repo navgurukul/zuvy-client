@@ -222,7 +222,6 @@ const Mcqs = (props: Props) => {
         difficulty,
         debouncedSearch,
         setStoreQuizData,
-        selectedTag.id,
         selectedOptions,
         setmcqSearch,
     ])
@@ -237,11 +236,14 @@ const Mcqs = (props: Props) => {
 
     const selectedTagCount = selectedOptions.length
     const difficultyCount = difficulty.length
-
+    const transformedTags = tags?.map((tag) => ({
+        id: +tag.value,
+        tagName: tag.label,
+    }))
     return (
         <>
             {isMcqModalOpen && (
-                <div className="flex flex-col items-start ">
+                <div className=" ">
                     <div
                         className="flex cursor-pointer p-5 text-secondary"
                         onClick={() =>
@@ -251,55 +253,57 @@ const Mcqs = (props: Props) => {
                         <ChevronLeft />
                         <h1>MCQ Problems</h1>
                     </div>
-                    <div className="flex items-center justify-center w-full">
-                        <h1 className="text-xl mb-4 font-semibold text-start w-1/5 justify-start ">
-                            New MCQ
-                        </h1>
-                    </div>
+                    <div className="flex items-center justify-center w-full"></div>
                     <div className="flex flex-col items-center justify-center ">
-                        <RadioGroup
-                            className="flex flex-col items-center w-1/2"
-                            defaultValue="oneatatime"
-                            onValueChange={(value) => setMcqType(value)}
-                        >
-                            <div className="flex w-1/2  items-start justify-start ml-9 gap-3">
-                                <div className="flex  space-x-2">
-                                    <RadioGroupItem
-                                        value="bulk"
-                                        id="r1"
-                                        className="text-secondary"
-                                    />
-                                    <Label htmlFor="r1">Bulk</Label>
+                        <div>
+                            <RadioGroup
+                                className="flex flex-col items-center w-full  "
+                                defaultValue="oneatatime"
+                                onValueChange={(value) => setMcqType(value)}
+                            >
+                                <h1 className="text-xl mb-4 ml-4 font-semibold text-start w-[300px] justify-start ">
+                                    New MCQ
+                                </h1>
+                                <div className="flex w-[300px] items-start justify-start ml-4 gap-3">
+                                    <div className="flex  space-x-2">
+                                        <RadioGroupItem
+                                            value="bulk"
+                                            id="r1"
+                                            className="text-secondary"
+                                        />
+                                        <Label htmlFor="r1">Bulk</Label>
+                                    </div>
+                                    <div className="flex  space-x-2">
+                                        <RadioGroupItem
+                                            value="oneatatime"
+                                            id="r2"
+                                            className="text-secondary"
+                                        />
+                                        <Label htmlFor="r2">
+                                            One At A Time
+                                        </Label>
+                                    </div>
                                 </div>
-                                <div className="flex  space-x-2">
-                                    <RadioGroupItem
-                                        value="oneatatime"
-                                        id="r2"
-                                        className="text-secondary"
+                            </RadioGroup>
+                            {mcqType === 'bulk' ? (
+                                <BulkUploadMcq />
+                            ) : (
+                                <div className="flex items-start justify-center w-screen ">
+                                    <NewMcqForm
+                                        tags={transformedTags}
+                                        closeModal={closeModal}
+                                        setStoreQuizData={setStoreQuizData}
+                                        getAllQuizQuesiton={getAllQuizQuestion}
                                     />
-                                    <Label htmlFor="r2">One At A Time</Label>
-                                </div>
-                            </div>
-                        </RadioGroup>
-
-                        {mcqType === 'bulk' ? (
-                            <BulkUploadMcq />
-                        ) : (
-                            <div className="flex items-start justify-center w-screen ">
-                                <NewMcqForm
-                                    tags={tags}
-                                    closeModal={closeModal}
-                                    setStoreQuizData={setStoreQuizData}
-                                    getAllQuizQuesiton={getAllQuizQuestion}
-                                />
-                                {/* <NewMcqProblemFormNew
+                                    {/* <NewMcqProblemFormNew
                                     tags={tags}
                                     closeModal={closeModal}
                                     setStoreQuizData={setStoreQuizData}
                                     getAllQuizQuesiton={getAllQuizQuestion}
                                 /> */}
-                            </div>
-                        )}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}

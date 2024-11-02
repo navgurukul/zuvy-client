@@ -3,7 +3,12 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 
-import { getAllQuizData, getCodingQuestionTags, quiz } from '@/store/store'
+import {
+    getAllQuizData,
+    getCodingQuestionTags,
+    getMcqIds,
+    quiz,
+} from '@/store/store'
 import { Edit, Eye, Pencil, Trash2 } from 'lucide-react'
 import { difficultyColor } from '@/lib/utils'
 
@@ -25,8 +30,50 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import EditQuizQuestion from '../_components/EditQuizQuestion'
+import { Checkbox } from '@/components/ui/checkbox'
+import CheckboxAndDeleteHandler from '../_components/CheckBoxAndDeleteCombo'
 
 export const columns: ColumnDef<quiz>[] = [
+    {
+        id: 'select',
+        header: ({ table }) => {
+            return (
+                <Checkbox
+                    checked={
+                        table.getIsAllPageRowsSelected() ||
+                        (table.getIsSomePageRowsSelected() && 'indeterminate')
+                    }
+                    onCheckedChange={(value) =>
+                        table.toggleAllPageRowsSelected(!!value)
+                    }
+                    aria-label="Select all"
+                />
+            )
+        },
+
+        cell: ({ table, row }) => {
+            const selectedRows = table.getSelectedRowModel().rows
+
+            const selectedQuestionIds = selectedRows.map((row) => {
+                return row.original.id
+            })
+
+            return (
+                <CheckboxAndDeleteHandler
+                    checked={row.getIsSelected()}
+                    onCheckedChange={(value) => {
+                        // console.log(row)
+                        row.toggleSelected(!!value)
+                    }}
+                    selectedQuestionIds={selectedQuestionIds}
+                    aria-label="Select row"
+                />
+            )
+        },
+        enableSorting: false,
+        enableHiding: false,
+    },
+
     {
         accessorKey: 'question',
         header: ({ column }) => (

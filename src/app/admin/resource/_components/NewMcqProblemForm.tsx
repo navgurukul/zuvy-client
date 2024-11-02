@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button'
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -16,7 +15,6 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Tag } from '../mcq/page'
 import {
     Select,
     SelectContent,
@@ -26,6 +24,8 @@ import {
 } from '@/components/ui/select'
 import { useState } from 'react'
 import TipTapForForm from './TipTapForForm'
+import { api } from '@/utils/axios.config'
+import { toast } from '@/components/ui/use-toast'
 
 const formSchema = z.object({
     difficulty: z.enum(['Easy', 'Medium', 'Hard']),
@@ -33,6 +33,16 @@ const formSchema = z.object({
     variants: z.array(
         z.object({
             questionText: z.string().nonempty('Question text is required'),
+            selectedOption: z.number().nonnegative(),
+            options: z
+                .array(
+                    z.object({
+                        optionText: z
+                            .string()
+                            .nonempty('Option text is required'),
+                    })
+                )
+                .min(2, 'At least two options are required'),
         })
     ),
 })
@@ -43,78 +53,129 @@ export default function NewMcqForm({
     setStoreQuizData,
     getAllQuizQuesiton,
 }: {
-    tags: Tag[]
+    tags: any[]
     closeModal: () => void
     setStoreQuizData: any
     getAllQuizQuesiton: any
 }) {
     const [showTagName, setShowTagName] = useState<boolean>(false)
     const [activeVariantIndex, setActiveVariantIndex] = useState<number>(0)
-
     const [selectedTag, setSelectedTag] = useState<{
         id: number
         tagName: String
     }>({ id: 0, tagName: '' })
     const difficulties = ['Easy', 'Medium', 'Hard']
 
-    // ...
     const form = useForm<z.infer<typeof formSchema>>({
         mode: 'onChange',
         resolver: zodResolver(formSchema),
         defaultValues: {
             difficulty: 'Easy',
             topics: 0,
-            variants: [{ questionText: '' }],
+            variants: [
+                {
+                    questionText: '',
+                    selectedOption: 0,
+                    options: [{ optionText: '' }, { optionText: '' }],
+                },
+            ],
         },
     })
+
     const { fields, append, remove } = useFieldArray({
         control: form.control,
         name: 'variants',
     })
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values)
-    }
 
     const handleAddVariant = () => {
-        append({ questionText: '' })
-        // Set the active index to the newly added variant
-        setActiveVariantIndex(fields.length) // fields.length is the index of the new item
+        append({
+            questionText: '',
+            selectedOption: 0,
+            options: [{ optionText: '' }, { optionText: '' }],
+        })
+        setActiveVariantIndex(fields.length)
     }
 
     const handleRemoveVariant = (index: number) => {
         if (fields.length > 1) {
             remove(index)
-            // Adjust the active variant index to stay within bounds
             if (activeVariantIndex >= fields.length - 1) {
                 setActiveVariantIndex(fields.length - 2)
             }
         }
     }
 
+    const {
+        fields: optionFields,
+        append: appendOption,
+        remove: removeOption,
+    } = useFieldArray({
+        control: form.control,
+        name: `variants.${activeVariantIndex}.options`,
+    })
+
+    const onSubmitHandler = async (values: z.infer<typeof formSchema>) => {
+        const transformedObj = {
+            title: 'Introduction to Quantum Physics',
+            difficulty: values.difficulty,
+            tagId: values.topics,
+            content:
+                'Detailed content explaining quantum theories and experiments.',
+            isRandomOptions: false,
+            variantMCQs: values.variants.map((variant, index) => ({
+                question: variant.questionText,
+                options: variant.options.reduce((acc: any, option, idx) => {
+                    acc[idx + 1] = option.optionText
+                    return acc
+                }, {}),
+                correctOption: variant.selectedOption + 1,
+            })),
+        }
+
+        try {
+            await api.post(`/Content/quiz`, transformedObj)
+            toast({
+                title: 'Success',
+                description: 'Question Created Successfully',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+            })
+        } catch (error: any) {
+            toast({
+                title: 'Error',
+                description: error?.data?.message || 'An error occurred',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+            })
+        }
+    }
+
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form
+                onSubmit={form.handleSubmit(onSubmitHandler)}
+                className="space-y-8 mr-12 w-[600px] flex flex-col justify-center items-center "
+            >
                 <FormField
                     control={form.control}
                     name="difficulty"
                     render={({ field }) => (
-                        <FormItem className="space-y-3">
+                        <FormItem className="space-y-3 text-start ">
                             <FormControl>
                                 <RadioGroup
                                     onValueChange={field.onChange}
                                     defaultValue={field.value}
-                                    className="flex space-y-1"
                                 >
                                     <FormLabel className="mt-5">
                                         Difficulty
                                     </FormLabel>
-                                    {difficulties.map((difficulty) => {
-                                        return (
+                                    <div className="flex gap-x-5 ">
+                                        {difficulties.map((difficulty) => (
                                             <FormItem
                                                 key={difficulty}
                                                 className="flex items-center space-x-3 space-y-0"
                                             >
-                                                <FormControl>
+                                                <FormControl className="">
                                                     <RadioGroupItem
                                                         value={difficulty}
                                                     />
@@ -123,127 +184,225 @@ export default function NewMcqForm({
                                                     {difficulty}
                                                 </FormLabel>
                                             </FormItem>
-                                        )
-                                    })}
+                                        ))}
+                                    </div>
                                 </RadioGroup>
                             </FormControl>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
+
                 <FormField
                     control={form.control}
                     name="topics"
-                    render={({ field }) => {
-                        return (
-                            <FormItem className="text-left w-full">
-                                <FormLabel>Topics</FormLabel>
-                                <div className="flex gap-x-4  ">
-                                    <Select
-                                        onValueChange={(value) => {
-                                            const selectedTag = tags?.find(
-                                                (tag: Tag) =>
-                                                    tag?.tagName === value
-                                            )
-                                            if (selectedTag) {
-                                                field.onChange(selectedTag.id)
-                                                setSelectedTag(selectedTag)
-                                                setShowTagName(true)
-                                            }
-                                        }}
-                                    >
-                                        <FormControl className="w-1/2">
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Choose Topic" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {tags.map((tag: any) => (
-                                                <SelectItem
-                                                    key={tag.id}
-                                                    value={tag?.tagName}
-                                                >
-                                                    {tag?.tagName}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {showTagName && (
-                                        <div className="flex items-start gap-x-2 bg-[#FFF3E3] pt-1 px-2 rounded-lg  ">
-                                            <h1 className="mt-1 text-sm">
-                                                {selectedTag.tagName}
-                                            </h1>
-                                            <span
-                                                onClick={() =>
-                                                    setShowTagName(false)
-                                                }
-                                                className="cursor-pointer"
+                    render={({ field }) => (
+                        <FormItem className="text-left flex flex-col  w-[300px] ml-[70px] ">
+                            <FormLabel>Topics</FormLabel>
+                            <div className="flex gap-x-4">
+                                <Select
+                                    onValueChange={(value) => {
+                                        const selectedTag = tags.find(
+                                            (tag) => tag.tagName === value
+                                        )
+                                        if (selectedTag) {
+                                            field.onChange(selectedTag.id)
+                                            setSelectedTag(selectedTag)
+                                            setShowTagName(true)
+                                        }
+                                    }}
+                                >
+                                    <FormControl className="w-1/2">
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Choose Topic" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {tags.map((tag) => (
+                                            <SelectItem
+                                                key={tag.id}
+                                                value={tag.tagName}
                                             >
-                                                x
-                                            </span>
-                                        </div>
-                                    )}
-                                </div>
-                                <FormMessage />
-                            </FormItem>
-                        )
-                    }}
+                                                {tag.tagName}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+
+                                {showTagName && (
+                                    <div className="flex items-start gap-x-2 bg-[#FFF3E3] pt-1 px-2 rounded-lg">
+                                        <h1 className="mt-1 text-sm">
+                                            {selectedTag.tagName}
+                                        </h1>
+                                        <span
+                                            onClick={() =>
+                                                setShowTagName(false)
+                                            }
+                                            className="cursor-pointer"
+                                        >
+                                            x
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                            <FormMessage />
+                        </FormItem>
+                    )}
                 />
 
-                <div className="space-y-4">
+                <div className="space-y-4 ml-[75px]">
                     <div className="flex space-x-4">
                         {fields.map((field, index) => (
                             <Button
                                 key={field.id}
-                                variant={
+                                className={`${
                                     activeVariantIndex === index
-                                        ? 'default'
-                                        : 'ghost'
-                                }
-                                onClick={() => setActiveVariantIndex(index)} // Set active variant index
+                                        ? 'border-b-4 border-secondary'
+                                        : ''
+                                } rounded-none`}
+                                variant="ghost"
+                                type="button"
+                                onClick={() => setActiveVariantIndex(index)}
                             >
                                 Variant {index + 1}
                             </Button>
                         ))}
                         <Button
                             type="button"
-                            onClick={() => append({ questionText: '' })}
-                            variant={'ghost'}
+                            onClick={handleAddVariant}
+                            variant="ghost"
                         >
                             + Add Variant
                         </Button>
                     </div>
 
-                    {/* Only display the active variant */}
                     {fields.length > 0 && (
-                        <FormField
-                            key={fields[activeVariantIndex]?.id}
-                            control={form.control}
-                            name={`variants.${activeVariantIndex}.questionText`}
-                            render={({ field }) => (
-                                <FormItem className="text-left w-full">
-                                    <FormLabel>Question Text</FormLabel>
-                                    <FormControl>
-                                        <TipTapForForm
-                                            description={field.value}
-                                            onChange={field.onChange}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                    {activeVariantIndex > 0 && (
-                                        <Button
-                                            type="button"
-                                            onClick={() =>
-                                                remove(activeVariantIndex)
+                        <>
+                            <FormField
+                                key={fields[activeVariantIndex]?.id}
+                                control={form.control}
+                                name={`variants.${activeVariantIndex}.questionText`}
+                                render={({ field }) => (
+                                    <FormItem className="text-left w-full">
+                                        <FormLabel>Question Text</FormLabel>
+                                        <FormControl>
+                                            <TipTapForForm
+                                                description={field.value}
+                                                onChange={field.onChange}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            {/* Options for the active variant with Radio Buttons */}
+                            <div className="space-y-4">
+                                <FormField
+                                    key={fields[activeVariantIndex]?.id}
+                                    control={form.control}
+                                    name={`variants.${activeVariantIndex}.selectedOption`}
+                                    render={({ field }) => (
+                                        <RadioGroup
+                                            value={field.value.toString()}
+                                            onValueChange={(value) =>
+                                                field.onChange(Number(value))
                                             }
-                                            className="mt-2 text-red-500 bg-white"
                                         >
-                                            Remove Variant
-                                        </Button>
+                                            <FormLabel className="text-left">
+                                                Answer Choices
+                                            </FormLabel>
+                                            {optionFields.map(
+                                                (optionField, optionIndex) => (
+                                                    <div
+                                                        key={optionField.id}
+                                                        className="flex items-center space-x-4"
+                                                    >
+                                                        <FormControl>
+                                                            <RadioGroupItem
+                                                                value={optionIndex.toString()}
+                                                            />
+                                                        </FormControl>
+                                                        <FormField
+                                                            control={
+                                                                form.control
+                                                            }
+                                                            name={`variants.${activeVariantIndex}.options.${optionIndex}.optionText`}
+                                                            render={({
+                                                                field,
+                                                            }) => (
+                                                                <FormItem className="w-[300px]">
+                                                                    {/* <FormLabel>
+                                                                        Option
+                                                                        Text{' '}
+                                                                        {optionIndex +
+                                                                            1}
+                                                                    </FormLabel> */}
+                                                                    <FormControl>
+                                                                        <Input
+                                                                            value={
+                                                                                field.value
+                                                                            }
+                                                                            onChange={
+                                                                                field.onChange
+                                                                            }
+                                                                        />
+                                                                    </FormControl>
+                                                                    <FormMessage />
+                                                                </FormItem>
+                                                            )}
+                                                        />
+
+                                                        {/* Radio Button to select this option */}
+
+                                                        {optionFields.length >
+                                                            2 && (
+                                                            <Button
+                                                                type="button"
+                                                                variant="outline"
+                                                                className="text-red-500"
+                                                                onClick={() =>
+                                                                    removeOption(
+                                                                        optionIndex
+                                                                    )
+                                                                }
+                                                            >
+                                                                X
+                                                            </Button>
+                                                        )}
+                                                    </div>
+                                                )
+                                            )}
+                                        </RadioGroup>
                                     )}
-                                </FormItem>
-                            )}
-                        />
+                                />
+
+                                <div className="flex ">
+                                    <Button
+                                        type="button"
+                                        variant={'ghost'}
+                                        onClick={() =>
+                                            appendOption({ optionText: '' })
+                                        }
+                                        className="text-left text-secondary"
+                                    >
+                                        + Add Option
+                                    </Button>
+                                </div>
+                            </div>
+                        </>
+                    )}
+
+                    {activeVariantIndex > 0 && (
+                        <Button
+                            type="button"
+                            onClick={() =>
+                                handleRemoveVariant(activeVariantIndex)
+                            }
+                            className="mt-2 text-red-500 bg-white"
+                        >
+                            Remove Variant
+                        </Button>
                     )}
                 </div>
 
