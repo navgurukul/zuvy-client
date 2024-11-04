@@ -64,8 +64,6 @@ export default function EditCodingQuestionForm() {
     const { tags } = getCodingQuestionTags()
     const { editCodingQuestionId } = getEditCodingQuestionDialogs()
 
-    console.log('tags', tags)
-
     const {
         setEditCodingQuestionId,
         isCodingEditDialogOpen,
@@ -215,7 +213,6 @@ export default function EditCodingQuestionForm() {
     }, [])
 
     const handleEditSubmit = (values: z.infer<typeof formSchema>) => {
-        console.log('values in handleEditSubmit', values)
         const processInput = (input: string, format: string) => {
             const cleanedInput = cleanUpValues(input)
 
@@ -276,8 +273,6 @@ export default function EditCodingQuestionForm() {
         const generateParameterName = (index: number) => {
             return String.fromCharCode(97 + index) // a, b, c, etc.
         }
-
-        console.log('tagId', values.topics)
 
         const formattedData = {
             title: values.title,
@@ -352,8 +347,6 @@ export default function EditCodingQuestionForm() {
             content: {},
         }
 
-        console.log('formattedData', formattedData)
-
         const hasInvalidTestCase = formattedData.testCases.some(
             (testCase: any) => {
                 return (
@@ -379,12 +372,6 @@ export default function EditCodingQuestionForm() {
         getAllCodingQuestions(setCodingQuestions)
     }
 
-    console.log('selectCodingQuestion', selectCodingQuestion)
-    console.log(
-        'placeholder',
-        tags.find((tag) => tag.value == selectCodingQuestion[0]?.tagId)
-            ?.label || 'Choose Topic'
-    )
     return (
         <main className="flex flex-col p-3 w-full items-center ">
             <div

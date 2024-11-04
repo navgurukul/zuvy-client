@@ -19,8 +19,6 @@ import {
 } from '@/components/ui/popover'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
-import { fetchStudentsHandler } from '@/utils/admin'
-import { useStudentData } from './useStudentData'
 
 export function ComboboxStudent({
     batchData,
@@ -39,16 +37,6 @@ export function ComboboxStudent({
     selectedRows?: any[]
     fetchStudentData?: any
 }) {
-    const {
-        setStudents,
-        limit,
-        offset,
-        search,
-        setLoading,
-        setTotalPages,
-        setTotalStudents,
-        setCurrentPage,
-    } = useStudentData(bootcampId)
     const [open, setOpen] = React.useState(false)
     const [value, setValue] = React.useState('')
     const [displaybatchName, setDisplayBatchName] = React.useState(
@@ -60,8 +48,6 @@ export function ComboboxStudent({
         setDisplayBatchName(batchName || 'Unassigned')
         setValue(batchId)
     }, [batchName, batchId])
-
-    console.log('selectedRows', selectedRows)
 
     const handleSelectBatchChange = async (
         currentValue: any,
@@ -124,17 +110,6 @@ export function ComboboxStudent({
                             'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     fetchStudentData && fetchStudentData()
-                    fetchStudentsHandler({
-                        courseId,
-                        limit,
-                        offset,
-                        searchTerm: search,
-                        setLoading,
-                        setStudents,
-                        setTotalPages,
-                        setTotalStudents,
-                        setCurrentPage,
-                    })
                 })
         } catch (error: any) {
             if (error.response.data.message === 'Batch is full')

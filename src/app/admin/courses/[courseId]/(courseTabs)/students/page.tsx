@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { ArrowLeft, ArrowRight, ChevronDown, Plus } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -24,6 +24,8 @@ import { useStudentData } from './components/useStudentData'
 import useAttendanceData from './components/studentAttendanceAnalytics'
 import AttandanceRefreshComp from './components/AttandanceRefreshComp'
 import { ComboboxStudent } from './components/comboboxStudentDataTable'
+import { api } from '@/utils/axios.config'
+
 export type StudentData = {
     email: string
     name: string
@@ -41,6 +43,8 @@ const Page = ({ params }: { params: any }) => {
         totalPages,
         currentPage,
         limit,
+        offset,
+        setStudents,
         nextPageHandler,
         previousPageHandler,
         firstPageHandler,
@@ -58,6 +62,19 @@ const Page = ({ params }: { params: any }) => {
             label: data.name,
         }
     })
+
+    const fetchStudentData = useCallback(async () => {
+        try {
+            await api
+                .get(
+                    `/bootcamp/students/${params.courseId}?limit=${limit}&offset=${offset}`
+                )
+                .then((res) => {
+                    setSelectedRows([])
+                    setStudents(res.data.modifiedStudentInfo)
+                })
+        } catch (error: any) {}
+    }, [params.courseId, limit, offset, setStudents])
 
     return (
         <div>
@@ -77,6 +94,7 @@ const Page = ({ params }: { params: any }) => {
                                     batchData && batchData[0].bootcampId
                                 }
                                 selectedRows={selectedRows}
+                                fetchStudentData={fetchStudentData}
                             />
                         )}
                         <Dialog>
