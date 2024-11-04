@@ -83,6 +83,9 @@ const CodingProblems = () => {
         // { id: -1, tagName: 'All Topics' },
         { value: '-1', label: 'All Topics' },
     ])
+    const [options, setOptions] = useState<Option[]>([
+        { value: '-1', label: 'All Topics' },
+    ])
     const [selectedDifficulty, setSelectedDifficulty] = useState(['None'])
     const [difficulty, setDifficulty] = useState([
         { value: 'None', label: 'All Difficulty' },
@@ -171,17 +174,25 @@ const CodingProblems = () => {
     async function getAllTags() {
         const response = await api.get('Content/allTags')
         if (response) {
-            const transformedData = response.data.allTags.map(
+            const tagArr = [
+                { id: -1, tagName: 'All Topics' },
+                ...response.data.allTags,
+            ]
+            const transformedTags = tagArr.map(
+                (item: { id: any; tagName: any }) => ({
+                    id: item.id,
+                    tagName: item.tagName,
+                })
+            )
+            const transformedData = tagArr.map(
                 (item: { id: any; tagName: any }) => ({
                     value: item.id.toString(),
                     label: item.tagName,
                 })
             )
-            const tagArr = [
-                { value: '-1', label: 'All Topics' },
-                ...transformedData,
-            ]
-            setTags(tagArr)
+
+            setTags(transformedTags)
+            setOptions(transformedData)
         }
     }
 
@@ -296,7 +307,7 @@ const CodingProblems = () => {
                                 <div className="w-full lg:w-[250px]">
                                     <MultiSelector
                                         selectedCount={selectedTagCount}
-                                        options={tags}
+                                        options={options}
                                         selectedOptions={selectedOptions}
                                         handleOptionClick={handleTagOption}
                                         type={

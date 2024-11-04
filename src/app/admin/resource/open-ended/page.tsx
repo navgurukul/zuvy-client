@@ -63,6 +63,9 @@ const OpenEndedQuestions = (props: Props) => {
     const [selectedOptions, setSelectedOptions] = useState<Option[]>([
         { value: '-1', label: 'All Topics' },
     ])
+    const [options, setOptions] = useState<Option[]>([
+        { value: '-1', label: 'All Topics' },
+    ])
     const { tags, setTags } = getCodingQuestionTags()
     const [difficulty, setDifficulty] = useState([
         { value: 'None', label: 'All Difficulty' },
@@ -153,7 +156,7 @@ const OpenEndedQuestions = (props: Props) => {
     }
 
     useEffect(() => {
-        getAllTags(setTags)
+        getAllTags(setTags, setOptions)
     }, [setTags])
 
     useEffect(() => {
@@ -261,7 +264,7 @@ const OpenEndedQuestions = (props: Props) => {
                                 <div className="w-full lg:w-[250px]">
                                     <MultiSelector
                                         selectedCount={selectedTagCount}
-                                        options={tags}
+                                        options={options}
                                         selectedOptions={selectedOptions}
                                         handleOptionClick={handleTagOption}
                                         type={

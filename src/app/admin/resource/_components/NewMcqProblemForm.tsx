@@ -215,12 +215,10 @@ const NewMcqProblemForm = ({
                                         onValueChange={(value) => {
                                             const selectedTag = tags?.find(
                                                 (tag: Tag) =>
-                                                    tag?.label === value
+                                                    tag?.tagName === value
                                             )
                                             if (selectedTag) {
-                                                field.onChange(
-                                                    parseInt(selectedTag.value)
-                                                )
+                                                field.onChange(selectedTag.id)
                                             }
                                         }}
                                     >
@@ -232,10 +230,10 @@ const NewMcqProblemForm = ({
                                         <SelectContent>
                                             {tags.map((tag: any) => (
                                                 <SelectItem
-                                                    key={tag.value}
-                                                    value={tag?.label}
+                                                    key={tag.id}
+                                                    value={tag?.tagName}
                                                 >
-                                                    {tag?.label}
+                                                    {tag?.tagName}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>

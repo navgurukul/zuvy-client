@@ -489,23 +489,21 @@ export default function EditCodingQuestionForm() {
                                 <Select
                                     value={
                                         tags.find(
-                                            (tag) => tag.value == field.value
-                                        )?.label ||
+                                            (tag) => tag.id === field.value
+                                        )?.tagName ||
                                         tags.find(
                                             (tag) =>
-                                                tag.value ==
+                                                tag.id ===
                                                 selectCodingQuestion[0]?.tagId
-                                        )?.label ||
+                                        )?.tagName ||
                                         ''
                                     }
                                     onValueChange={(value) => {
                                         const selectedTag = tags.find(
-                                            (tag: any) => tag?.label == value
+                                            (tag: any) => tag?.tagName === value
                                         )
                                         if (selectedTag) {
-                                            field.onChange(
-                                                parseInt(selectedTag.value)
-                                            )
+                                            field.onChange(selectedTag.id)
                                         }
                                     }}
                                 >
@@ -515,10 +513,10 @@ export default function EditCodingQuestionForm() {
                                                 placeholder={
                                                     tags.find(
                                                         (tag) =>
-                                                            tag.value ==
+                                                            tag.id ===
                                                             selectCodingQuestion[0]
                                                                 ?.tagId
-                                                    )?.label || 'Choose Topic'
+                                                    )?.tagName || 'Choose Topic'
                                                 }
                                             />
                                         </SelectTrigger>
@@ -526,10 +524,10 @@ export default function EditCodingQuestionForm() {
                                     <SelectContent>
                                         {tags.map((tag: any) => (
                                             <SelectItem
-                                                key={tag.value}
-                                                value={tag?.label}
+                                                key={tag.id}
+                                                value={tag?.tagName}
                                             >
-                                                {tag?.label}
+                                                {tag?.tagName}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>

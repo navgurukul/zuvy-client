@@ -165,25 +165,22 @@ function EditOpenEndedQuestionForm({
                                     <Select
                                         value={
                                             tags.find(
-                                                (tag) =>
-                                                    tag.value == field.value
-                                            )?.label ||
+                                                (tag) => tag.id === field.value
+                                            )?.tagName ||
                                             tags.find(
                                                 (tag) =>
-                                                    tag.value ==
+                                                    tag.id ===
                                                     selectedQuestion[0]?.tagId
-                                            )?.label ||
+                                            )?.tagName ||
                                             ''
                                         }
                                         onValueChange={(value) => {
                                             const selectedTag = tags.find(
                                                 (tag: any) =>
-                                                    tag?.label == value
+                                                    tag?.tagName === value
                                             )
                                             if (selectedTag) {
-                                                field.onChange(
-                                                    parseInt(selectedTag.value)
-                                                )
+                                                field.onChange(selectedTag.id)
                                             }
                                         }}
                                     >
@@ -193,10 +190,10 @@ function EditOpenEndedQuestionForm({
                                                     placeholder={
                                                         tags.find(
                                                             (tag) =>
-                                                                tag.value ==
+                                                                tag.id ===
                                                                 selectedQuestion[0]
                                                                     ?.tagId
-                                                        )?.label ||
+                                                        )?.tagName ||
                                                         'Choose Topic'
                                                     }
                                                 />
@@ -205,10 +202,10 @@ function EditOpenEndedQuestionForm({
                                         <SelectContent>
                                             {tags.map((tag: any) => (
                                                 <SelectItem
-                                                    key={tag.value}
-                                                    value={tag?.label}
+                                                    key={tag.id}
+                                                    value={tag?.tagName}
                                                 >
-                                                    {tag?.label}
+                                                    {tag?.tagName}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
