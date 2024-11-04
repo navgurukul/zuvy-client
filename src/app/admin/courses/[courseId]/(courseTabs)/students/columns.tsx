@@ -17,9 +17,41 @@ import {
 import { getAttendanceColorClass } from '@/utils/students'
 
 import { ComboboxStudent } from './components/comboboxStudentDataTable'
-
+import { Checkbox } from '@/components/ui/checkbox'
 import { AlertDialogDemo } from './components/deleteModalNew'
+
 export const columns: ColumnDef<Task>[] = [
+    {
+        id: 'select',
+        header: ({ table }) => {
+            return (
+                <div className="ml-5">
+                    <Checkbox
+                        checked={
+                            table.getIsAllPageRowsSelected() ||
+                            (table.getIsSomePageRowsSelected() &&
+                                'indeterminate')
+                        }
+                        onCheckedChange={(value) =>
+                            table.toggleAllPageRowsSelected(!!value)
+                        }
+                        aria-label="Select all"
+                        className="translate-y-[2px]"
+                    />
+                </div>
+            )
+        },
+        cell: ({ row }) => (
+            <Checkbox
+                checked={row.getIsSelected()}
+                onCheckedChange={(value) => row.toggleSelected(!!value)}
+                aria-label="Select row"
+                className="translate-y-[2px]"
+            />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+    },
     {
         accessorKey: 'profilePicture',
         header: ({ column }) => (
