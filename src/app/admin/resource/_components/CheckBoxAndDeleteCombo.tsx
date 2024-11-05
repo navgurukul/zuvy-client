@@ -1,17 +1,14 @@
 type CheckboxProps = React.InputHTMLAttributes<HTMLInputElement> & {
     checked: boolean
     onCheckedChange: (checked: boolean) => void
-    selectedQuestionIds: number[]
 }
 
 const CheckboxAndDeleteHandler: React.FC<CheckboxProps> = ({
     checked,
     onCheckedChange,
-    selectedQuestionIds,
+
     ...props
 }) => {
-    console.log(selectedQuestionIds)
-
     return (
         <input
             type="checkbox"

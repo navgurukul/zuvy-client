@@ -3,12 +3,7 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 
-import {
-    getAllQuizData,
-    getCodingQuestionTags,
-    getMcqIds,
-    quiz,
-} from '@/store/store'
+import { getAllQuizData, getCodingQuestionTags, quiz } from '@/store/store'
 import { Edit, Eye, Pencil, Trash2 } from 'lucide-react'
 import { difficultyColor } from '@/lib/utils'
 
@@ -19,6 +14,7 @@ import {
     handleQuizDelete,
     handleDeleteQuizModal,
     getAllQuizQuestion,
+    mcqBulkDeleteHandler,
     // handlerQuizQuestions,
 } from '@/utils/admin'
 import { DELETE_QUIZ_QUESTION_CONFIRMATION } from '@/utils/constant'
@@ -32,6 +28,7 @@ import {
 import EditQuizQuestion from '../_components/EditQuizQuestion'
 import { Checkbox } from '@/components/ui/checkbox'
 import CheckboxAndDeleteHandler from '../_components/CheckBoxAndDeleteCombo'
+import PreviewMCQ from '../_components/PreviewMCQ'
 
 export const columns: ColumnDef<quiz>[] = [
     {
@@ -52,12 +49,6 @@ export const columns: ColumnDef<quiz>[] = [
         },
 
         cell: ({ table, row }) => {
-            const selectedRows = table.getSelectedRowModel().rows
-
-            const selectedQuestionIds = selectedRows.map((row) => {
-                return row.original.id
-            })
-
             return (
                 <CheckboxAndDeleteHandler
                     checked={row.getIsSelected()}
@@ -65,7 +56,6 @@ export const columns: ColumnDef<quiz>[] = [
                         // console.log(row)
                         row.toggleSelected(!!value)
                     }}
-                    selectedQuestionIds={selectedQuestionIds}
                     aria-label="Select row"
                 />
             )
@@ -134,7 +124,7 @@ export const columns: ColumnDef<quiz>[] = [
 
             return (
                 <>
-                    <Eye className="cursor-pointer" />
+                    <PreviewMCQ />
                 </>
             )
         },

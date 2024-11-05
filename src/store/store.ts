@@ -693,14 +693,14 @@ export const getMcqSearch = create<mcqSearch>((set) => ({
     },
 }))
 
-type mcqQuestionIds = {
-    mcqId: number[]
-    setMcqId: (newvalue: number[]) => void
+type mcqvariantDeletion = {
+    mcqVariantDeleted: any[]
+    setIsMcqVariantDeleted: (newvalue: any[]) => void
 }
 
-export const getMcqIds = create<mcqQuestionIds>((set) => ({
-    mcqId: [],
-    setMcqId: (newValue: number[]) => {
-        set({ mcqId: newValue })
+export const handleMcqDelete = create<mcqvariantDeletion>((set) => ({
+    mcqVariantDeleted: [],
+    setIsMcqVariantDeleted: (newValue: any[]) => {
+        set({ mcqVariantDeleted: newValue })
     },
 }))

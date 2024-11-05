@@ -2,7 +2,7 @@
 
 // External imports
 import React, { useState, useEffect, useCallback } from 'react'
-import { ChevronLeft, Search } from 'lucide-react'
+import { ChevronLeft, Search, Trash2 } from 'lucide-react'
 
 // Internal imports
 import { Button } from '@/components/ui/button'
@@ -29,6 +29,7 @@ import {
     getCodingQuestionTags,
     getmcqdifficulty,
     getMcqSearch,
+    handleMcqDelete,
 } from '@/store/store'
 import useDebounce from '@/hooks/useDebounce'
 import BulkUploadMcq from '../_components/BulkUploadMcq'
@@ -269,17 +270,25 @@ const Mcqs = (props: Props) => {
                                         <RadioGroupItem
                                             value="bulk"
                                             id="r1"
-                                            className="text-secondary"
+                                            className="text-secondary mt-1"
                                         />
-                                        <Label htmlFor="r1">Bulk</Label>
+                                        <Label
+                                            className="font-semibold text-md"
+                                            htmlFor="r1"
+                                        >
+                                            Bulk
+                                        </Label>
                                     </div>
                                     <div className="flex  space-x-2">
                                         <RadioGroupItem
                                             value="oneatatime"
                                             id="r2"
-                                            className="text-secondary"
+                                            className="text-secondary mt-1"
                                         />
-                                        <Label htmlFor="r2">
+                                        <Label
+                                            className="font-semibold text-md"
+                                            htmlFor="r2"
+                                        >
                                             One At A Time
                                         </Label>
                                     </div>
@@ -324,13 +333,16 @@ const Mcqs = (props: Props) => {
                                 <Search className="text-gray-400" size={20} />
                             </div>
                         </div>
-                        <Button
-                            onClick={() =>
-                                setIsMcqModalOpen((prevState) => !prevState)
-                            }
-                        >
-                            + Create MCQ
-                        </Button>
+                        <div className="flex flex-row items-center gap-2">
+                            <Button
+                                onClick={() =>
+                                    setIsMcqModalOpen((prevState) => !prevState)
+                                }
+                                className=""
+                            >
+                                + Create MCQ
+                            </Button>
+                        </div>
                     </div>
                     <div className="flex items-center">
                         <div className="w-full lg:w-[250px]">
@@ -355,7 +367,11 @@ const Mcqs = (props: Props) => {
                         </div>
                     </div>
 
-                    <DataTable data={quizData} columns={columns} />
+                    <DataTable
+                        data={quizData}
+                        columns={columns}
+                        mcqSide={true}
+                    />
                 </MaxWidthWrapper>
             )}
         </>

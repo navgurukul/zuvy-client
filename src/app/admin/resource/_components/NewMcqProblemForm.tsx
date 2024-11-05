@@ -154,7 +154,7 @@ export default function NewMcqForm({
         <Form {...form}>
             <form
                 onSubmit={form.handleSubmit(onSubmitHandler)}
-                className="space-y-8 mr-12 w-[600px] flex flex-col justify-center items-center "
+                className="space-y-8 mr-12 w-[700px] flex flex-col justify-center items-center "
             >
                 <FormField
                     control={form.control}
@@ -166,21 +166,22 @@ export default function NewMcqForm({
                                     onValueChange={field.onChange}
                                     defaultValue={field.value}
                                 >
-                                    <FormLabel className="mt-5">
-                                        Difficulty
-                                    </FormLabel>
-                                    <div className="flex gap-x-5 ">
+                                    <div className="flex gap-x-5 ml-[98px]">
+                                        <FormLabel className="mt-5 font-semibold text-md ">
+                                            Difficulty
+                                        </FormLabel>
                                         {difficulties.map((difficulty) => (
                                             <FormItem
                                                 key={difficulty}
-                                                className="flex items-center space-x-3 space-y-0"
+                                                className="flex items-center space-x-2 space-y-0"
                                             >
                                                 <FormControl className="">
                                                     <RadioGroupItem
                                                         value={difficulty}
+                                                        className="text-secondary"
                                                     />
                                                 </FormControl>
-                                                <FormLabel className="font-normal">
+                                                <FormLabel className="font-normal text-md ">
                                                     {difficulty}
                                                 </FormLabel>
                                             </FormItem>
@@ -198,7 +199,9 @@ export default function NewMcqForm({
                     name="topics"
                     render={({ field }) => (
                         <FormItem className="text-left flex flex-col  w-[300px] ml-[70px] ">
-                            <FormLabel>Topics</FormLabel>
+                            <FormLabel className="font-semibold text-md">
+                                Topics
+                            </FormLabel>
                             <div className="flex gap-x-4">
                                 <Select
                                     onValueChange={(value) => {
@@ -212,7 +215,7 @@ export default function NewMcqForm({
                                         }
                                     }}
                                 >
-                                    <FormControl className="w-1/2">
+                                    <FormControl className="w-[190px]">
                                         <SelectTrigger>
                                             <SelectValue placeholder="Choose Topic" />
                                         </SelectTrigger>
@@ -250,14 +253,17 @@ export default function NewMcqForm({
                     )}
                 />
 
-                <div className="space-y-4 ml-[75px]">
+                <div className="space-y-4 ml-[145px]">
+                    <FormLabel className="mt-5 font-semibold text-md flex ">
+                        Variants
+                    </FormLabel>
                     <div className="flex space-x-4">
                         {fields.map((field, index) => (
                             <Button
                                 key={field.id}
                                 className={`${
                                     activeVariantIndex === index
-                                        ? 'border-b-4 border-secondary'
+                                        ? 'border-b-4 border-secondary text-secondary text-md'
                                         : ''
                                 } rounded-none`}
                                 variant="ghost"
@@ -271,6 +277,7 @@ export default function NewMcqForm({
                             type="button"
                             onClick={handleAddVariant}
                             variant="ghost"
+                            className="font-semibold text-md"
                         >
                             + Add Variant
                         </Button>
@@ -284,7 +291,9 @@ export default function NewMcqForm({
                                 name={`variants.${activeVariantIndex}.questionText`}
                                 render={({ field }) => (
                                     <FormItem className="text-left w-full">
-                                        <FormLabel>Question Text</FormLabel>
+                                        <FormLabel className="text-md font-normal">
+                                            Question Text
+                                        </FormLabel>
                                         <FormControl>
                                             <TipTapForForm
                                                 description={field.value}
@@ -309,7 +318,7 @@ export default function NewMcqForm({
                                                 field.onChange(Number(value))
                                             }
                                         >
-                                            <FormLabel className="text-left">
+                                            <FormLabel className="text-left text-md font-normal">
                                                 Answer Choices
                                             </FormLabel>
                                             {optionFields.map(
@@ -331,7 +340,7 @@ export default function NewMcqForm({
                                                             render={({
                                                                 field,
                                                             }) => (
-                                                                <FormItem className="w-[300px]">
+                                                                <FormItem className="w-[350px]">
                                                                     {/* <FormLabel>
                                                                         Option
                                                                         Text{' '}
@@ -384,7 +393,7 @@ export default function NewMcqForm({
                                         onClick={() =>
                                             appendOption({ optionText: '' })
                                         }
-                                        className="text-left text-secondary"
+                                        className="text-left text-secondary font-semibold text-md"
                                     >
                                         + Add Option
                                     </Button>
@@ -405,8 +414,11 @@ export default function NewMcqForm({
                         </Button>
                     )}
                 </div>
-
-                <Button type="submit">Submit</Button>
+                <div className="flex flex-col justify-end items-end w-[550px]">
+                    <Button className="" type="submit">
+                        Add Question
+                    </Button>
+                </div>
             </form>
         </Form>
     )

@@ -644,3 +644,7 @@ export function transformQuizzes(data: any): { quizzes: any[] } {
 
     return { quizzes: Object.values(quizzesMap) }
 }
+
+export const mcqBulkDeleteHandler = (value: any) => {
+    console.log(value)
+}
