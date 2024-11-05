@@ -43,6 +43,8 @@ import { DataTablePagination } from '@/app/_components/datatable/data-table-pagi
 import { OFFSET, POSITION } from '@/utils/constant'
 type Props = {}
 export type Tag = {
+    label: string
+    value: string
     id: number
     tagName: string
 }
@@ -72,7 +74,9 @@ const Mcqs = (props: Props) => {
     const [selectedOptions, setSelectedOptions] = useState<Option[]>([
         { value: '-1', label: 'All Topics' },
     ])
-
+    const [options, setOptions] = useState<Option[]>([
+        { value: '-1', label: 'All Topics' },
+    ])
     const [selectedTag, setSelectedTag] = useState<Tag>(() => {
         if (typeof window !== 'undefined') {
             const storedTag = localStorage.getItem('MCQCurrentTag')
@@ -169,17 +173,25 @@ const Mcqs = (props: Props) => {
     async function getAllTags() {
         const response = await api.get('Content/allTags')
         if (response) {
-            const transformedData = response.data.allTags.map(
+            const tagArr = [
+                { id: -1, tagName: 'All Topics' },
+                ...response.data.allTags,
+            ]
+            const transformedTags = tagArr.map(
+                (item: { id: any; tagName: any }) => ({
+                    id: item.id,
+                    tagName: item.tagName,
+                })
+            )
+            const transformedData = tagArr.map(
                 (item: { id: any; tagName: any }) => ({
                     value: item.id.toString(),
                     label: item.tagName,
                 })
             )
-            const tagArr = [
-                { value: '-1', label: 'All Topics' },
-                ...transformedData,
-            ]
-            setTags(tagArr)
+
+            setTags(transformedTags)
+            setOptions(transformedData)
         }
     }
 
@@ -295,25 +307,27 @@ const Mcqs = (props: Props) => {
                             </DialogContent>
                         </Dialog>
                     </div>
-                    <div className="flex items-center">
+                    <div className="flex items-center gap-4">
                         <div className="w-full lg:w-[250px]">
                             <MultiSelector
                                 selectedCount={difficultyCount}
                                 options={difficultyOptions}
                                 selectedOptions={difficulty}
                                 handleOptionClick={handleDifficulty}
+                                type={
+                                    difficultyCount > 1
+                                        ? 'Difficulties'
+                                        : 'Difficulty'
+                                }
                             />
                         </div>
-                        <Separator
-                            orientation="vertical"
-                            className="w-1 h-12 mx-4 bg-gray-400 rounded-lg"
-                        />
                         <div className="w-full lg:w-[250px]">
                             <MultiSelector
                                 selectedCount={selectedTagCount}
-                                options={tags}
+                                options={options}
                                 selectedOptions={selectedOptions}
                                 handleOptionClick={handleTagOption}
+                                type={selectedTagCount > 1 ? 'Topics' : 'Topic'}
                             />
                         </div>
                     </div>

@@ -12,12 +12,7 @@ export default function RootLayout({
     children: React.ReactNode
 }) {
     const pathname = usePathname()
-    const adminAssessmentPreviewRoute =
-        pathname?.includes('/admin/courses') &&
-        pathname?.includes('/module') &&
-        pathname?.includes('/chapter') &&
-        pathname?.includes('/assessment') &&
-        pathname?.includes('/preview')
+    const adminAssessmentPreviewRoute = pathname?.includes('/preview')
     return (
         <div>
             {!adminAssessmentPreviewRoute && <StudentNavbar />}

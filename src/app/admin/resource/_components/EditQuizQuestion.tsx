@@ -270,6 +270,19 @@ const EditQuizQuestion = ({
                                         <FormItem className="text-left w-full">
                                             <FormLabel>Topics</FormLabel>
                                             <Select
+                                                value={
+                                                    tags.find(
+                                                        (tag) =>
+                                                            tag.id ===
+                                                            field.value
+                                                    )?.tagName ||
+                                                    tags.find(
+                                                        (tag) =>
+                                                            tag.id ===
+                                                            selectedQuizQuestion?.tagId
+                                                    )?.tagName ||
+                                                    ''
+                                                }
                                                 onValueChange={(value) => {
                                                     const selectedTag =
                                                         tags.find(

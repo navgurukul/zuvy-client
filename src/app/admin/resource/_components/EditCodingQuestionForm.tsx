@@ -1,4 +1,3 @@
-
 'use client'
 import { useEffect, useState } from 'react'
 
@@ -85,15 +84,17 @@ export default function EditCodingQuestionForm() {
     }
 
     const handleRemoveTestCase = (id: number) => {
-    const updatedTestCases = testCases.filter((testCase: any) => testCase.id !== id);
-    setTestCases(updatedTestCases);
+        const updatedTestCases = testCases.filter(
+            (testCase: any) => testCase.id !== id
+        )
+        setTestCases(updatedTestCases)
 
-    // Sync the form state with updated test cases
-    form.reset({
-        ...form.getValues(),
-        testCases: updatedTestCases
-    });
-};
+        // Sync the form state with updated test cases
+        form.reset({
+            ...form.getValues(),
+            testCases: updatedTestCases,
+        })
+    }
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -112,8 +113,8 @@ export default function EditCodingQuestionForm() {
                 selectCodingQuestion[0]?.testCases?.map((testCase: any) => ({
                     id: testCase.id, // Ensure this is correctly mapped
                     input: JSON.stringify(
-                        testCase.inputs.map(
-                            (input: any) => String(input.parameterValue)
+                        testCase.inputs.map((input: any) =>
+                            String(input.parameterValue)
                         )
                     ),
                     output: JSON.stringify(
@@ -124,7 +125,6 @@ export default function EditCodingQuestionForm() {
     })
 
     async function editCodingQuestion(data: any) {
-
         try {
             const response = await api.put(
                 `codingPlatform/update-question/${editCodingQuestionId}`,
@@ -186,27 +186,29 @@ export default function EditCodingQuestionForm() {
                 ),
             })
             setTestCases(
-                selectCodingQuestion[0]?.testCases?.map(
-                    (testCase: any) => ({
-                        id: testCase.id,
-                        input: testCase.inputs
-                            .map((input: any) => {
-                                let value = input.parameterValue;
-                                if (Array.isArray(value)) {
-                                    value = value.join(', ');
-                                }
-                                // Keep `0` and non-empty values intact, while cleaning other values
-                                return value !== null && value !== undefined ? cleanUpValues(value.toString()) : value;
-                            })
-                            .join(' '),
-                        output: testCase.expectedOutput.parameterValue !== null && testCase.expectedOutput.parameterValue !== undefined
-                            ? cleanUpValues(testCase.expectedOutput.parameterValue.toString())
+                selectCodingQuestion[0]?.testCases?.map((testCase: any) => ({
+                    id: testCase.id,
+                    input: testCase.inputs
+                        .map((input: any) => {
+                            let value = input.parameterValue
+                            if (Array.isArray(value)) {
+                                value = value.join(', ')
+                            }
+                            // Keep `0` and non-empty values intact, while cleaning other values
+                            return value !== null && value !== undefined
+                                ? cleanUpValues(value.toString())
+                                : value
+                        })
+                        .join(' '),
+                    output:
+                        testCase.expectedOutput.parameterValue !== null &&
+                        testCase.expectedOutput.parameterValue !== undefined
+                            ? cleanUpValues(
+                                  testCase.expectedOutput.parameterValue.toString()
+                              )
                             : testCase.expectedOutput.parameterValue,
-                    })
-                )
-            );
-
-
+                }))
+            )
         }
     }, [])
 
@@ -370,8 +372,6 @@ export default function EditCodingQuestionForm() {
         getAllCodingQuestions(setCodingQuestions)
     }
 
-   
-
     return (
         <main className="flex flex-col p-3 w-full items-center ">
             <div
@@ -487,11 +487,17 @@ export default function EditCodingQuestionForm() {
                             <FormItem className="text-left w-full">
                                 <FormLabel>Topics</FormLabel>
                                 <Select
-                                    value={tags.find(
-                                        (tag: any) =>
-                                            tag?.tagName ===
-                                            selectCodingQuestion[0].tagId
-                                    )}
+                                    value={
+                                        tags.find(
+                                            (tag) => tag.id === field.value
+                                        )?.tagName ||
+                                        tags.find(
+                                            (tag) =>
+                                                tag.id ===
+                                                selectCodingQuestion[0]?.tagId
+                                        )?.tagName ||
+                                        ''
+                                    }
                                     onValueChange={(value) => {
                                         const selectedTag = tags.find(
                                             (tag: any) => tag?.tagName === value
@@ -630,7 +636,10 @@ export default function EditCodingQuestionForm() {
                                                 onChange={field.onChange}
                                             />
                                             <p className="text-sm text-gray-500 mt-1 ">
-                                                {form.watch('inputFormat') === 'arrayOfnum' || form.watch('inputFormat') === 'arrayOfStr'
+                                                {form.watch('inputFormat') ===
+                                                    'arrayOfnum' ||
+                                                form.watch('inputFormat') ===
+                                                    'arrayOfStr'
                                                     ? 'Max 1 array accepted (e.g., 1,2,3,4)'
                                                     : 'Enter values separated by spaces (e.g., 2 3 4)'}
                                             </p>
@@ -650,7 +659,10 @@ export default function EditCodingQuestionForm() {
                                                 onChange={field.onChange}
                                             />
                                             <p className="text-sm text-gray-500 mt-1 ">
-                                                {form.watch('outputFormat') === 'arrayOfnum' || form.watch('outputFormat') === 'arrayOfStr'
+                                                {form.watch('outputFormat') ===
+                                                    'arrayOfnum' ||
+                                                form.watch('outputFormat') ===
+                                                    'arrayOfStr'
                                                     ? 'Max 1 array accepted (e.g., 1,2,3,4)'
                                                     : 'Only one value accepted (e.g., 55)'}
                                             </p>
@@ -687,4 +699,3 @@ export default function EditCodingQuestionForm() {
         </main>
     )
 }
-

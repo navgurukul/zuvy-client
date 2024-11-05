@@ -167,6 +167,12 @@ export async function getAllQuizQuestion(
         const mcqtagId: any = localStorage.getItem('MCQCurrentTag')
         const MCQCurrentTagId = JSON.parse(mcqtagId)
         let url = `/Content/allQuizQuestions`
+
+        let selectedDiff = ''
+        difficulty.map(
+            (item: any) => (selectedDiff += '&difficulty=' + item.value)
+        )
+
         const queryParams: string[] = []
 
         if (mcqSearch && mcqSearch !== 'None') {
@@ -176,8 +182,10 @@ export async function getAllQuizQuestion(
             queryParams.push(`tagId=${MCQCurrentTagId.id}`)
         }
 
-        if (difficulty && difficulty !== 'None') {
-            queryParams.push(`difficulty=${difficulty}`)
+        if (difficulty.length > 0) {
+            if (difficulty[0].value !== 'None') {
+                queryParams.push(selectedDiff.substring(1))
+            }
         }
 
         if (queryParams.length > 0) {
@@ -185,7 +193,7 @@ export async function getAllQuizQuestion(
         }
 
         const response = await api.get(url)
-        setQuizQuestion(response.data)
+        setQuizQuestion(response.data.data)
     } catch (error) {
         console.error(error)
     }
@@ -227,20 +235,28 @@ export const handlerQuizQuestions = (
     setIsQuizQuestionId(quizQuestion.id)
 }
 
-export async function getAllTags(setTags: any) {
+export async function getAllTags(setTags: any, setOptions?: any) {
     const response = await api.get('Content/allTags')
     if (response) {
-        const transformedData = response.data.allTags.map(
+        const tagArr = [
+            { id: -1, tagName: 'All Topics' },
+            ...response.data.allTags,
+        ]
+        const transformedTags = tagArr.map(
+            (item: { id: any; tagName: any }) => ({
+                id: item.id,
+                tagName: item.tagName,
+            })
+        )
+        const transformedData = tagArr.map(
             (item: { id: any; tagName: any }) => ({
                 value: item.id.toString(),
                 label: item.tagName,
             })
         )
-        const tagArr = [
-            { value: '-1', label: 'All Topics' },
-            ...transformedData,
-        ]
-        setTags(tagArr)
+
+        setTags(transformedTags)
+        setOptions(transformedData)
     }
 }
 
