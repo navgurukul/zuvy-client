@@ -5,9 +5,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { getAssessmentPreviewStore } from '@/store/store'
 import { fetchPreviewAssessmentData } from '@/utils/admin'
 import { api } from '@/utils/axios.config'
-import { AlertOctagon } from 'lucide-react'
+import { AlertOctagon, ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
+import Link from 'next/link'
 
 const PreviewAssessment = ({ params }: { params: any }) => {
 
@@ -117,14 +118,19 @@ const PreviewAssessment = ({ params }: { params: any }) => {
                 </div>
             </div>
 
-            <div className="mt-4 flex flex-col items-center justify-center">
-                {(
-                    <>    
-                            {hasQuestions && ( 
-                                <Button onClick={startPreviewAssessment}>
-                                Start Preview Assessment
-                            </Button>)}
-                    </>
+            <div className="mt-4 flex flex-col items-center justify-center space-y-4">
+                {hasQuestions && (
+                    <div className="flex items-center space-x-4">
+                     
+                        <Link href={`/admin/courses/${params.courseId}/module/${params.moduleId}/chapters/${params.chapterId}`} className="flex items-center space-x-2">
+                            <ArrowLeft size={20} />
+                            <p className="ml-1 text-sm font-medium text-gray-800">Go back</p>
+                        </Link>
+
+                        <Button onClick={startPreviewAssessment}>
+                            Start Preview Assessment
+                        </Button>
+                    </div>
                 )}
             </div>
         </>
