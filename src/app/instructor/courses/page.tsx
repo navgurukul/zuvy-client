@@ -31,7 +31,7 @@ const Page = (props: Props) => {
     return (
         <div className="flex flex-col items-center justify-center mt-6">
             <div className="mb-5 flex items-center justify-start w-full">
-                <h1 className="p-1 mx-4 text-xl font-semibold ">
+                <h1 className="p-1 mx-4 text-2xl font-semibold">
                     Enrolled Courses
                 </h1>
             </div>

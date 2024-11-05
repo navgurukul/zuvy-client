@@ -46,8 +46,6 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
     const classRecordings = pathname?.includes('/recording')
     const [selectedOptions, setSelectedOptions] = useState<Option[]>([])
 
-    console.log('debouncedSearch before API', debouncedSearch)
-
     const getBatches = useCallback(async () => {
         try {
             const response = await api.get(`/instructor/batchOfInstructor`)
@@ -109,8 +107,6 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
     const getSessionsRecording = useCallback(
         async (offset: number) => {
             try {
-                console.log('debouncedSearch in Try', debouncedSearch)
-                console.log('It is in Try')
                 let ids = ''
                 batchId.map((item) => (ids += '&batchId=' + item.value))
                 // const response = await api.get(
@@ -122,13 +118,7 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
                         debouncedSearch
                     )}`
                 }
-                console.log('debouncedSearch', debouncedSearch)
-                console.log('baseUrl', baseUrl)
                 const response = await api.get(baseUrl)
-                console.log(
-                    'response.data.data.classDetails',
-                    response.data.data.classDetails
-                )
                 fetchSessions(response.data.data.classDetails)
                 setTotalSessions(response.data.data.totalCompletedClass)
                 setPages(response.data.data.totalPages)
@@ -144,7 +134,6 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
                     errorMessage = error.message
                 }
 
-                console.log('Error fetching Class Recordings:', errorMessage)
                 toast({
                     title: 'Error:',
                     description: errorMessage,
@@ -161,11 +150,8 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
     }, [getBatches])
 
     useEffect(() => {
-        console.log('It is')
-        console.log('offset', offset)
         if (batchId) {
             if (classRecordings) {
-                console.log('It is going inside')
                 getSessionsRecording(offset)
             } else {
                 getSessions(offset)
@@ -191,9 +177,6 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
 
     const selectedCount = selectedOptions.length
 
-    console.log('batchId', batchId)
-    console.log('selectedOptions', selectedOptions)
-
     return (
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between p-3 w-full lg:w-1/2 gap-y-6 lg:gap-y-0">
             {batches && (
@@ -204,7 +187,9 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
                             <button className="flex w-full items-center justify-between rounded-md border border-secondary px-4 py-2 text-left focus:outline-none">
                                 <span className="truncate text-secondary">
                                     {selectedCount > 0
-                                        ? `${selectedCount} selected`
+                                        ? selectedCount === 1
+                                            ? selectedOptions[0].label
+                                            : `${selectedCount} selected`
                                         : 'Select options'}
                                 </span>
                                 <ChevronDown className="ml-2 h-5 w-5 text-secondary" />
