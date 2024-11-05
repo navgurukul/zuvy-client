@@ -4,6 +4,7 @@ import { api } from '@/utils/axios.config'
 import { useEffect, useRef } from 'react'
 import useDebounce from '@/hooks/useDebounce'
 import { getMcqSearch } from '@/store/store'
+import { Search } from 'lucide-react'
 
 export function handleDelete(
     deleteCodingQuestionId: any,
@@ -254,34 +255,51 @@ export async function getAllTagsWithoutFilter(setTags: any) {
 
 // --------------------------------------------
 // AddAssessment.tsx functions:-
+// async (offset: number ,position:any) => {
+//     let url = `/allCodingQuestions?limit=${position}&offset=${offset}`
+//     if (debouncedSearch) {
+//         url = `/allCodingQuestions?limit=${position}&searchTerm=${encodeURIComponent(
+//             debouncedSearch
+//         )}`
+//     }
+
 export async function filteredCodingQuestions(
-    setFilteredQuestions: any,
+    offset: number,
+    setFilteredQuestions: (newValue: any[]) => void,
+    setTotalCodingQuestion: any,
+    setLastPage: any,
+    setTotalPages: any,
     difficulty: any,
     selectedOptions: any,
-    selectedLanguage: string,
-    debouncedSearch: string
+    debouncedSearch: string | undefined,
+    position: any,
+    TotalCodingQuestion: any,
+    selectedLanguage?: string
+    // setTotalCodingQuestion: any, // Accepting setTotalBootcamps from parent
 ) {
     try {
-        let url = `/Content/allCodingQuestions`
+        const safeOffset = Math.max(0, offset)
+
+        let url = `/Content/allCodingQuestions?limit=${position}&offset=${offset}`
 
         let selectedTagIds = ''
-        selectedOptions.map(
+        selectedOptions?.map(
             (item: any) => (selectedTagIds += '&tagId=' + item.value)
         )
 
         let selectedDiff = ''
-        difficulty.map(
+        difficulty?.map(
             (item: any) => (selectedDiff += '&difficulty=' + item.value)
         )
 
         const queryParams = []
 
-        if (selectedTagIds.length > 0) {
+        if (selectedTagIds?.length > 0) {
             if (selectedOptions[0].value !== '-1') {
                 queryParams.push(selectedTagIds.substring(1))
             }
         }
-        if (difficulty.length > 0) {
+        if (difficulty?.length > 0) {
             if (difficulty[0].value !== 'None') {
                 queryParams.push(selectedDiff.substring(1))
             }
@@ -291,16 +309,19 @@ export async function filteredCodingQuestions(
         }
 
         if (queryParams.length > 0) {
-            url += '?' + queryParams.join('&')
+            url += '&' + queryParams.join('&')
         }
 
         const response = await api.get(url)
+
         setFilteredQuestions(response.data.data)
+        setTotalCodingQuestion(response.data.totalRows)
+        setTotalPages(response.data.totalPages)
+        setLastPage(response.data.totalPages)
     } catch (error) {
         console.error('Error:', error)
     }
 }
-
 export async function filteredQuizQuestions(
     setFilteredQuestions: any,
     selectedDifficulty: string,
@@ -346,14 +367,21 @@ export async function filteredQuizQuestions(
 }
 
 export async function filteredOpenEndedQuestions(
-    setFilteredQuestions: any,
+    offset: number,
+    setFilteredQuestions: (newValue: any[]) => void,
+    setTotalOpenEndedQuestion: any,
+    setLastPage: any,
+    setTotalPages: any,
     difficulty: any,
     selectedOptions: any,
-    selectedLanguage: string,
-    debouncedSearch: string
+    debouncedSearch: string | undefined,
+    position: any,
+    totalOpenEndedQuestion: any,
+    selectedLanguage?: string
 ) {
     try {
-        let url = `/Content/openEndedQuestions`
+        const safeOffset = Math.max(0, offset)
+        let url = `/Content/openEndedQuestions?pageNo=${offset}&limit_=${position}`
 
         let selectedTagIds = ''
         selectedOptions.map(
@@ -382,12 +410,19 @@ export async function filteredOpenEndedQuestions(
         }
         // Add more conditions here as needed, e.g., selectedLanguage, etc.
 
+        // if (queryParams.length > 0) {
+        //     url += '?' + queryParams.join('&')
+        // }
         if (queryParams.length > 0) {
-            url += '?' + queryParams.join('&')
+            url += '&' + queryParams.join('&')
         }
 
         const response = await api.get(url)
+
         setFilteredQuestions(response.data.data)
+        setTotalOpenEndedQuestion(response.data.totalRows)
+        setTotalPages(response.data.totalPages)
+        setLastPage(response.data.totalPages)
     } catch (error) {
         console.error('Error:', error)
     }
@@ -647,4 +682,8 @@ export function transformQuizzes(data: any): { quizzes: any[] } {
 
 export const mcqBulkDeleteHandler = (value: any) => {
     console.log(value)
+}
+
+function setPages(totalPages: any) {
+    throw new Error('Function not implemented.')
 }

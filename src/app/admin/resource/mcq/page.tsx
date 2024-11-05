@@ -38,7 +38,8 @@ import { getAllQuizQuestion } from '@/utils/admin'
 import { Spinner } from '@/components/ui/spinner'
 import MultiSelector from '@/components/ui/multi-selector'
 import difficultyOptions from '@/app/utils'
-
+import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
+import { OFFSET, POSITION } from '@/utils/constant'
 type Props = {}
 export type Tag = {
     id: number
@@ -52,6 +53,13 @@ interface Option {
 
 const Mcqs = (props: Props) => {
     const [isOpen, setIsOpen] = useState(false)
+    const [position, setPosition] = useState(POSITION)
+    const [currentPage, setCurrentPage] = useState(1)
+    const [totalMCQQuestion, setTotalMCQQuestion] = useState<any>(0)
+    const [totalPages, setTotalPages] = useState(0)
+    const [pages, setPages] = useState(0)
+    const [lastPage, setLastPage] = useState(0)
+    const [offset, setOffset] = useState<number>(OFFSET)
     const [search, setSearch] = useState('')
     const debouncedSearch = useDebounce(search, 500)
     // const [difficulty, setDifficulty] = useState<string>('None')
@@ -178,62 +186,72 @@ const Mcqs = (props: Props) => {
         }
     }
 
-    const getAllQuizQuestion = useCallback(async () => {
-        try {
-            let url = `/Content/allQuizQuestions`
-            setmcqSearch(debouncedSearch)
-            let selectedTagIds = ''
-            selectedOptions.map(
-                (item: any) => (selectedTagIds += '&tagId=' + item.value)
-            )
-
-            let selectedDiff = ''
-            difficulty.map(
-                (item: any) => (selectedDiff += '&difficulty=' + item.value)
-            )
-
-            const queryParams = []
-
-            if (difficulty.length > 0) {
-                if (difficulty[0].value !== 'None') {
-                    queryParams.push(selectedDiff.substring(1))
-                }
-            }
-            if (selectedTagIds.length > 0) {
-                if (selectedOptions[0].value !== '-1') {
-                    queryParams.push(selectedTagIds.substring(1))
-                }
-            }
-            if (debouncedSearch) {
-                queryParams.push(
-                    `searchTerm=${encodeURIComponent(debouncedSearch)}`
+    const getAllQuizQuestion = useCallback(
+        async (offset: number) => {
+            try {
+                const safeOffset = Math.max(0, offset)
+                let url = `/Content/allQuizQuestions?limit=${position}&offset=${offset}`
+                setmcqSearch(debouncedSearch)
+                let selectedTagIds = ''
+                selectedOptions.map(
+                    (item: any) => (selectedTagIds += '&tagId=' + item.value)
                 )
-            }
 
-            if (queryParams.length > 0) {
-                url += `?${queryParams.join('&')}`
+                let selectedDiff = ''
+                difficulty.map(
+                    (item: any) => (selectedDiff += '&difficulty=' + item.value)
+                )
+
+                const queryParams = []
+
+                if (difficulty.length > 0) {
+                    if (difficulty[0].value !== 'None') {
+                        queryParams.push(selectedDiff.substring(1))
+                    }
+                }
+                if (selectedTagIds.length > 0) {
+                    if (selectedOptions[0].value !== '-1') {
+                        queryParams.push(selectedTagIds.substring(1))
+                    }
+                }
+                if (debouncedSearch) {
+                    queryParams.push(
+                        `searchTerm=${encodeURIComponent(debouncedSearch)}`
+                    )
+                }
+
+                if (queryParams.length > 0) {
+                    url += `&${queryParams.join('&')}`
+                }
+                const res = await api.get(url)
+                setStoreQuizData(res.data.data)
+                setTotalMCQQuestion(res.data.totalRows)
+                setTotalPages(res.data.totalPages)
+                setLastPage(res.data.totalPages)
+                setLoading(false)
+            } catch (error) {
+                console.error('Error fetching quiz questions:', error)
             }
-            const res = await api.get(url)
-            setStoreQuizData(res.data.data)
-            setLoading(false)
-        } catch (error) {
-            console.error('Error fetching quiz questions:', error)
-        }
-    }, [
-        difficulty,
-        debouncedSearch,
-        setStoreQuizData,
-        selectedOptions,
-        setmcqSearch,
-    ])
+        },
+        [
+            offset,
+            difficulty,
+            debouncedSearch,
+            setStoreQuizData,
+            selectedOptions,
+            setmcqSearch,
+            setTotalMCQQuestion,
+            position,
+        ]
+    )
 
     useEffect(() => {
         getAllTags()
     }, [])
 
     useEffect(() => {
-        getAllQuizQuestion()
-    }, [getAllQuizQuestion])
+        getAllQuizQuestion(offset)
+    }, [getAllQuizQuestion, offset, position])
 
     const selectedTagCount = selectedOptions.length
     const difficultyCount = difficulty.length
@@ -367,10 +385,17 @@ const Mcqs = (props: Props) => {
                         </div>
                     </div>
 
-                    <DataTable
-                        data={quizData}
-                        columns={columns}
-                        mcqSide={true}
+                    <DataTable data={quizData} columns={columns} />
+                    <DataTablePagination
+                        totalStudents={totalMCQQuestion}
+                        position={position}
+                        setPosition={setPosition}
+                        pages={totalPages}
+                        lastPage={lastPage}
+                        currentPage={currentPage}
+                        setCurrentPage={setCurrentPage}
+                        fetchStudentData={getAllQuizQuestion}
+                        setOffset={setOffset}
                     />
                 </MaxWidthWrapper>
             )}
