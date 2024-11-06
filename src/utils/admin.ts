@@ -434,7 +434,7 @@ export async function filteredOpenEndedQuestions(
         }
 
         const response = await api.get(url)
-        
+
         setFilteredQuestions(response.data.data)
         setTotalOpenEndedQuestion(response.data.totalRows)
         setTotalPages(response.data.totalPages)
@@ -625,4 +625,76 @@ export async function fetchPreviewAssessmentData(
 }
 function setPages(totalPages: any) {
     throw new Error('Function not implemented.')
+}
+
+export function removeNulls<T>(obj: T): T {
+    if (Array.isArray(obj)) {
+        return obj
+            .map((item) => removeNulls(item))
+            .filter(
+                (item) => item && Object.keys(item).length > 0
+            ) as unknown as T
+    } else if (obj && typeof obj === 'object') {
+        return Object.entries(obj).reduce((acc, [key, value]) => {
+            const filteredValue = removeNulls(value)
+            if (filteredValue !== null && filteredValue !== undefined) {
+                ;(acc as any)[key] = filteredValue
+            }
+            return acc
+        }, {} as T)
+    }
+    return obj
+}
+
+export function transformQuizzes(data: any): { quizzes: any[] } {
+    const quizzesMap: { [key: string]: any } = {}
+
+    data.forEach((item: any) => {
+        const title = item['quizzes/title']
+        if (!quizzesMap[title]) {
+            quizzesMap[title] = {
+                title: item['quizzes/title'],
+                difficulty: item['quizzes/difficulty'],
+                tagId: item['quizzes/tagId'],
+                content: item['quizzes/content'],
+                isRandomOptions: item['quizzes/isRandomOptions'],
+                variantMCQs: [],
+            }
+        }
+
+        // Collect variantMCQs
+        let mcqIndex = 0
+        while (true) {
+            const questionKey = `quizzes/variantMCQs/${mcqIndex}/question`
+            const question = item[questionKey]
+
+            if (!question) break // Exit if no more questions
+
+            const options: any = {}
+            let optionIndex = 1
+
+            // Collect options dynamically
+            while (true) {
+                const optionKey = `quizzes/variantMCQs/${mcqIndex}/options/${optionIndex}`
+                const optionValue = item[optionKey]
+
+                if (!optionValue) break // Exit if no more options
+
+                options[optionIndex.toString()] = optionValue
+                optionIndex++
+            }
+
+            const correctOption =
+                item[`quizzes/variantMCQs/${mcqIndex}/correctOption`]
+
+            quizzesMap[title].variantMCQs.push({
+                question,
+                options,
+                correctOption,
+            })
+            mcqIndex++
+        }
+    })
+
+    return { quizzes: Object.values(quizzesMap) }
 }
