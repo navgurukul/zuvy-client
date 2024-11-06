@@ -1,6 +1,6 @@
 'use client'
 
-import * as React from 'react'
+import React, { useEffect } from 'react'
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -35,12 +35,25 @@ interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
     mcqSide?: boolean
+    setSelectedRows?: any
+}
+
+type StudentData = {
+    email: string
+    name: string
+    userId: number
+    bootcampId: number
+    batchName: string
+    batchId: number
+    progress: number
+    profilePicture: string
 }
 
 export function DataTable<TData, TValue>({
     columns,
     data,
     mcqSide,
+    setSelectedRows,
 }: DataTableProps<TData, TValue>) {
     const [rowSelection, setRowSelection] = React.useState({})
     const { mcqVariantDeleted, setIsMcqVariantDeleted } = handleMcqDelete()
@@ -73,10 +86,14 @@ export function DataTable<TData, TValue>({
 
     const logSelectedRows = () => {
         const selectedRows = table.getSelectedRowModel().rows
-        // setIsMcqVariantDeleted(selectedRows)
-        // console.log('Selected Rows:', selectedRows)
         return selectedRows
     }
+    useEffect(() => {
+        const selectedRows = table
+            .getSelectedRowModel()
+            .rows.map((row) => row.original)
+        setSelectedRows && setSelectedRows(selectedRows)
+    }, [table.getSelectedRowModel().rows])
 
     return (
         <div className="space-y-4 relative">

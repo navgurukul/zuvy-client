@@ -7,12 +7,7 @@ import { useParams, usePathname } from 'next/navigation'
 export default function Layout({ children }: { children: React.ReactNode }) {
     const { courseId, moduleId, projectID } = useParams()
     const pathname = usePathname()
-    const adminAssessmentPreviewRoute =
-        pathname?.includes('/admin/courses') &&
-        pathname?.includes('/module') &&
-        pathname?.includes('/chapter') &&
-        pathname?.includes('/assessment') &&
-        pathname?.includes('/preview')
+    const adminAssessmentPreviewRoute = pathname?.includes('/preview')
 
     return (
         <>
