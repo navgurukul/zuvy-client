@@ -23,7 +23,7 @@ import { useRouter } from 'next/navigation'
 type AddAssessmentProps = {
     chapterData: any
     content: any
-    fetchChapterContent: (chapterId: number, topicId:number) => void
+    fetchChapterContent: (chapterId: number, topicId: number) => void
     moduleId: any
     topicId: any
 }
@@ -38,18 +38,21 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     content,
     fetchChapterContent,
     moduleId,
-    topicId
+    topicId,
 }) => {
     const [searchQuestionsInAssessment, setSearchQuestionsInAssessment] =
         useState<string>('')
 
-    const [selectedDifficulties, setSelectedDifficulties] =
-        useState(['Any Difficulty'])
+    const [selectedDifficulties, setSelectedDifficulties] = useState([
+        'Any Difficulty',
+    ])
 
-    const [selectedTopics, setSelectedTopics] = useState([{
-        tagName: 'All Topics',
-        id: -1,
-    }])
+    const [selectedTopics, setSelectedTopics] = useState([
+        {
+            tagName: 'All Topics',
+            id: -1,
+        },
+    ])
 
     const [selectedLanguage, setSelectedLanguage] =
         useState<string>('All Languages')
@@ -93,8 +96,10 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
 
     const router = useRouter()
 
-    const [selectCodingDifficultyCount, setSelectCodingDifficultyCount] = useState<Object>({})
-    const [selectQuizDifficultyCount, setSelectQuizDifficultyCount] = useState<Object>({})
+    const [selectCodingDifficultyCount, setSelectCodingDifficultyCount] =
+        useState<Object>({})
+    const [selectQuizDifficultyCount, setSelectQuizDifficultyCount] =
+        useState<Object>({})
 
     const handleCodingButtonClick = () => {
         setQuestionType('coding')
@@ -143,7 +148,9 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     function previewAssessment() {
         if (content) {
             setAssessmentPreviewContent(content)
-            router.push(`/admin/courses/${content.bootcampId}/module/${content.moduleId}/chapter/${content.chapterId}/assessment/${topicId}/preview`)
+            router.push(
+                `/admin/courses/${content.bootcampId}/module/${content.moduleId}/chapter/${content.chapterId}/assessment/${topicId}/preview`
+            )
         }
     }
 
@@ -176,40 +183,33 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                 'open-ended'
             )
         }
-    }, [
-        questionType,
-        selectedDifficulties,
-        selectedTopics,
-        debouncedSearch,
-    ])
+    }, [questionType, selectedDifficulties, selectedTopics, debouncedSearch])
 
     useEffect(() => {
         const difficultyCount = selectedCodingQuestions.reduce(
             (acc: any, question: any) => {
-                const key = `codingProblems${question.difficulty}`; // Construct the key
-                acc[key] = acc[key] ? acc[key] + 1 : 1; // Increment the count
-                return acc;
+                const key = `codingProblems${question.difficulty}` // Construct the key
+                acc[key] = acc[key] ? acc[key] + 1 : 1 // Increment the count
+                return acc
             },
             {}
-        );
+        )
 
-        setSelectCodingDifficultyCount(difficultyCount);
-    }, [selectedCodingQuestions]);
+        setSelectCodingDifficultyCount(difficultyCount)
+    }, [selectedCodingQuestions])
 
     useEffect(() => {
         const difficultyCount = selectedQuizQuestions.reduce(
             (acc: any, question: any) => {
-                const key = `mcqs${question.difficulty}`; // Construct the key
-                acc[key] = acc[key] ? acc[key] + 1 : 1; // Increment the count
-                return acc;
+                const key = `mcqs${question.difficulty}` // Construct the key
+                acc[key] = acc[key] ? acc[key] + 1 : 1 // Increment the count
+                return acc
             },
             {}
-        );
+        )
 
-        setSelectQuizDifficultyCount(difficultyCount);
-
+        setSelectQuizDifficultyCount(difficultyCount)
     }, [selectedQuizQuestions])
-
 
     useEffect(() => {
         setChapterTitle(content.ModuleAssessment?.title)
@@ -287,63 +287,76 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                         <Input
                             required
                             onChange={(e) => {
-                                setChapterTitle(e.target.value);
+                                setChapterTitle(e.target.value)
                             }}
                             placeholder="Untitled Assessment"
                             className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
                             autoFocus
                         />
-                        <Pencil fill='true' fillOpacity={0.40} size={20} className="absolute text-gray-100 pointer-events-none mt-1 right-5" />
+                        <Pencil
+                            fill="true"
+                            fillOpacity={0.4}
+                            size={20}
+                            className="absolute text-gray-100 pointer-events-none mt-1 right-5"
+                        />
                     </div>
-
-
 
                     {/* preview & settings buttons */}
                     <div className="text-[#4A4A4A] flex font-semibold items-center cursor-pointer">
-                        <div id='previewAssessment' onClick={previewAssessment} className='flex'>
+                        <div
+                            id="previewAssessment"
+                            onClick={previewAssessment}
+                            className="flex"
+                        >
                             <Eye size={18} />
                             <h6 className="mr-5 ml-1 text-sm">Preview</h6>
                         </div>
 
-                        <div onClick={handleSettingsButtonClick} id='settingsAssessment' className='flex'>
+                        <div
+                            onClick={handleSettingsButtonClick}
+                            id="settingsAssessment"
+                            className="flex"
+                        >
                             <Settings size={18} />
                             <h6 className="mx-1 text-sm">Settings</h6>
                         </div>
                     </div>
-
                 </div>
             )}
             {/* select type of questions */}
             {questionType !== 'settings' && (
                 <div className="flex gap-2 mb-5">
                     <Button
-                        className={`${questionType === 'coding'
-                            ? 'bg-transparent text-secondary border-b-4 border-secondary rounded-none my-0 mx-2 p-0'
-                            : 'bg-transparent text-[#6E6E6E] border-none my-0 mx-2 p-0'
-                            }`}
+                        className={`${
+                            questionType === 'coding'
+                                ? 'bg-transparent text-secondary border-b-4 border-secondary rounded-none my-0 mx-2 p-0'
+                                : 'bg-transparent text-[#6E6E6E] border-none my-0 mx-2 p-0'
+                        }`}
                         onClick={handleCodingButtonClick}
                     >
                         Coding Problems ({selectedCodingQuestions.length})
                     </Button>
                     <Button
-                        className={`${questionType === 'mcq'
-                            ? 'bg-transparent text-secondary border-b-4 border-secondary rounded-none my-0 mx-2 p-0'
-                            : 'bg-transparent text-[#6E6E6E] border-none my-0 mx-2 p-0'
-                            }`}
+                        className={`${
+                            questionType === 'mcq'
+                                ? 'bg-transparent text-secondary border-b-4 border-secondary rounded-none my-0 mx-2 p-0'
+                                : 'bg-transparent text-[#6E6E6E] border-none my-0 mx-2 p-0'
+                        }`}
                         onClick={handleMCQButtonClick}
                     >
                         MCQs ({selectedQuizQuestions.length})
                     </Button>
                     <Button
-                        className={`${questionType === 'open-ended'
-                            ? 'bg-transparent text-secondary border-b-4 border-secondary rounded-none my-0 mx-2 p-0'
-                            : 'bg-transparent text-[#6E6E6E] border-none my-0 mx-2 p-0'
-                            }`}
+                        className={`${
+                            questionType === 'open-ended'
+                                ? 'bg-transparent text-secondary border-b-4 border-secondary rounded-none my-0 mx-2 p-0'
+                                : 'bg-transparent text-[#6E6E6E] border-none my-0 mx-2 p-0'
+                        }`}
                         onClick={handleOpenEndedButtonClick}
                     >
-                        Open-Ended Questions ({selectedOpenEndedQuestions.length})
+                        Open-Ended Questions (
+                        {selectedOpenEndedQuestions.length})
                     </Button>
-
                 </div>
             )}
 
@@ -352,12 +365,8 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                 <>
                     <div className="mb-5 grid grid-cols-2">
                         <CodingTopics
-                            searchTerm={
-                                searchQuestionsInAssessment
-                            }
-                            setSearchTerm={
-                                setSearchQuestionsInAssessment
-                            }
+                            searchTerm={searchQuestionsInAssessment}
+                            setSearchTerm={setSearchQuestionsInAssessment}
                             tags={tags}
                             selectedTopics={selectedTopics}
                             setSelectedTopics={setSelectedTopics}
@@ -374,10 +383,10 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                         {questionType === 'coding'
                             ? 'Coding Problem Library'
                             : questionType === 'mcq'
-                                ? 'MCQ Library'
-                                : questionType === 'open-ended'
-                                    ? 'Open-Ended Question Library'
-                                    : ''}
+                            ? 'MCQ Library'
+                            : questionType === 'open-ended'
+                            ? 'Open-Ended Question Library'
+                            : ''}
                     </h3>
                     <ScrollArea className="h-auto">
                         {questionType === 'coding' ? (
@@ -396,24 +405,26 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                 selectedQuestions={selectedQuizQuestions}
                                 tags={tags}
                             />
-                        ) : questionType === 'open-ended' && (
-                            <OpenEndedQuestions
-                                questions={filteredQuestions}
-                                setSelectedQuestions={
-                                    setSelectedOpenEndedQuestions
-                                }
-                                selectedQuestions={selectedOpenEndedQuestions}
-                                tags={tags}
-                            />
+                        ) : (
+                            questionType === 'open-ended' && (
+                                <OpenEndedQuestions
+                                    questions={filteredQuestions}
+                                    setSelectedQuestions={
+                                        setSelectedOpenEndedQuestions
+                                    }
+                                    selectedQuestions={
+                                        selectedOpenEndedQuestions
+                                    }
+                                    tags={tags}
+                                />
+                            )
                         )}
                     </ScrollArea>
                 </div>
 
-
                 {questionType !== 'settings' && (
                     <>
                         <div>
-
                             <h1 className="text-left font-bold mb-5">
                                 Selected Questions
                             </h1>
@@ -423,9 +434,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                 selectedCodingQuestions={
                                     selectedCodingQuestions
                                 }
-                                selectedQuizQuestions={
-                                    selectedQuizQuestions
-                                }
+                                selectedQuizQuestions={selectedQuizQuestions}
                                 selectedOpenEndedQuestions={
                                     selectedOpenEndedQuestions
                                 }
@@ -439,7 +448,6 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                     setSelectedOpenEndedQuestions
                                 }
                                 questionType={questionType}
-
                                 tags={tags}
                             />
                         </div>
@@ -450,9 +458,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                 <SettingsAssessment
                     selectedCodingQuesIds={selectedCodingQuesIds}
                     selectedQuizQuesIds={selectedQuizQuesIds}
-                    selectedOpenEndedQuesIds={
-                        selectedOpenEndedQuesIds
-                    }
+                    selectedOpenEndedQuesIds={selectedOpenEndedQuesIds}
                     content={content}
                     fetchChapterContent={fetchChapterContent}
                     chapterData={chapterData}

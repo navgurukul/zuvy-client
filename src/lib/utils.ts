@@ -36,16 +36,15 @@ export function difficultyColor(difficulty: string): string {
 export function difficultyBgColor(difficulty: string): string {
     switch (difficulty?.toLowerCase()) {
         case 'easy':
-            return 'bg-green-100' 
+            return 'bg-green-100'
         case 'medium':
-            return 'bg-orange-100' 
+            return 'bg-orange-100'
         case 'hard':
-            return 'bg-red-100' 
+            return 'bg-red-100'
         default:
             return 'bg-gray-100'
     }
 }
-
 
 export function statusColor(status: string): string {
     switch (status?.toLowerCase()) {

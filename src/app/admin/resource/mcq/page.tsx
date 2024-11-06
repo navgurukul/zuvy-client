@@ -37,6 +37,7 @@ import {
 import useDebounce from '@/hooks/useDebounce'
 import { getAllQuizQuestion } from '@/utils/admin'
 import { Spinner } from '@/components/ui/spinner'
+
 import MultiSelector from '@/components/ui/multi-selector'
 import difficultyOptions from '@/app/utils'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
@@ -264,10 +265,41 @@ const Mcqs = (props: Props) => {
 
     const selectedTagCount = selectedOptions.length
     const difficultyCount = difficulty.length
-    const transformedTags = tags?.map((tag) => ({
-        id: +tag.value,
-        tagName: tag.label,
-    }))
+    // const transformedTags = tags?.map((tag) => ({
+    //     id: +tag.value,
+    //     tagName: tag.label,
+    // }))
+
+    const renderComponent = () => {
+        switch (mcqType) {
+            case 'bulk':
+                return <BulkUploadMcq />
+            case 'oneatatime':
+                return (
+                    <div className="flex items-start justify-center w-screen ">
+                        <NewMcqForm
+                            tags={tags}
+                            closeModal={closeModal}
+                            setStoreQuizData={setStoreQuizData}
+                            getAllQuizQuesiton={getAllQuizQuestion}
+                        />
+                    </div>
+                )
+            case 'AI':
+                return (
+                    <div className="flex items-start justify-center w-screen ">
+                        <NewMcqProblemForm
+                            tags={tags}
+                            closeModal={closeModal}
+                            setStoreQuizData={setStoreQuizData}
+                            getAllQuizQuesiton={getAllQuizQuestion}
+                        />
+                    </div>
+                )
+            default:
+                return <h1>Create New Chapter</h1>
+        }
+    }
 
     return (
         <>
@@ -320,9 +352,23 @@ const Mcqs = (props: Props) => {
                                             One At A Time
                                         </Label>
                                     </div>
+                                    <div className="flex  space-x-2">
+                                        <RadioGroupItem
+                                            value="AI"
+                                            id="r2"
+                                            className="text-secondary mt-1"
+                                        />
+                                        <Label
+                                            className="font-semibold text-md"
+                                            htmlFor="r2"
+                                        >
+                                            Generate with AI
+                                        </Label>
+                                    </div>
                                 </div>
                             </RadioGroup>
-                            {mcqType === 'bulk' ? (
+                            {renderComponent()}
+                            {/* {mcqType === 'bulk' ? (
                                 <BulkUploadMcq />
                             ) : (
                                 <div className="flex items-start justify-center w-screen ">
@@ -332,14 +378,8 @@ const Mcqs = (props: Props) => {
                                         setStoreQuizData={setStoreQuizData}
                                         getAllQuizQuesiton={getAllQuizQuestion}
                                     />
-                                    {/* <NewMcqProblemFormNew
-                                    tags={tags}
-                                    closeModal={closeModal}
-                                    setStoreQuizData={setStoreQuizData}
-                                    getAllQuizQuesiton={getAllQuizQuestion}
-                                /> */}
                                 </div>
-                            )}
+                            )} */}
                         </div>
                     </div>
                 </div>

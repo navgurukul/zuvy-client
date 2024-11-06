@@ -60,7 +60,6 @@ const Page = (props: Props) => {
                             https://github.com/navgurukul/zuvy-client
                         </h2>
                     </Link>
-                  
                 </div>
             </div>
         </div>

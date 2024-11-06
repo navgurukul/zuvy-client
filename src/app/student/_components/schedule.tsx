@@ -265,7 +265,8 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                                         <Link
                                                             className="gap-3 flex items-center text-secondary"
                                                             href={
-                                                                resumeCourse.typeId === 1
+                                                                resumeCourse.typeId ===
+                                                                1
                                                                     ? `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}/chapters/${resumeCourse.newChapter?.id}`
                                                                     : `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}/project/${resumeCourse.newChapter?.id}`
                                                             }
@@ -339,10 +340,12 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                                     <Link
                                                         className="gap-3 flex items-center text-secondary"
                                                         href={
-                                                            resumeCourse.typeId === 1
+                                                            resumeCourse.typeId ===
+                                                            1
                                                                 ? `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}/chapters/${resumeCourse.newChapter?.id}`
                                                                 : `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}/project/${resumeCourse.newChapter?.id}`
-                                                        }                                                    >
+                                                        }
+                                                    >
                                                         <p>Resume Learning</p>
                                                         <ChevronRight
                                                             size={15}

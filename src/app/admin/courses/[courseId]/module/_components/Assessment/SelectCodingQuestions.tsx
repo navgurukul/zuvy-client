@@ -15,13 +15,14 @@ const SelectCodingQuestions = ({
     tags: any
     type: string
 }) => {
-    
     return (
         <>
             <div className="w-full">
                 {selectedQuestions.map((question: any) => {
                     // Find the tag name corresponding to the question's tagId
-                    const tag = tags?.find((tag: any) => tag.id === question.tagId)
+                    const tag = tags?.find(
+                        (tag: any) => tag.id === question.tagId
+                    )
 
                     return (
                         <div key={question.id}>
@@ -40,8 +41,12 @@ const SelectCodingQuestions = ({
                                             <span
                                                 className={cn(
                                                     `text-sm rounded-[100px] px-[8px]`,
-                                                    difficultyColor(question.difficulty), // Text color
-                                                    difficultyBgColor(question.difficulty) // Background color
+                                                    difficultyColor(
+                                                        question.difficulty
+                                                    ), // Text color
+                                                    difficultyBgColor(
+                                                        question.difficulty
+                                                    ) // Background color
                                                 )}
                                             >
                                                 {question.difficulty}
@@ -49,30 +54,33 @@ const SelectCodingQuestions = ({
                                         </div>
                                         <div className="w-full">
                                             <p className="text-gray-600 mt-1 text-left">
-                                                {ellipsis(question.description, 60)}
+                                                {ellipsis(
+                                                    question.description,
+                                                    60
+                                                )}
                                             </p>
                                         </div>
                                         <Dialog>
-                                <DialogTrigger asChild>
-                                    <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer text-left">
-                                        View Full Description
-                                    </p>
-                                </DialogTrigger>
-                                <DialogOverlay />
-                                <QuestionDescriptionModal
-                                    question={question}
-                                    type="coding"
-                                    tagName={tag?.tagName}
-                                />
-                            </Dialog>
+                                            <DialogTrigger asChild>
+                                                <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer text-left">
+                                                    View Full Description
+                                                </p>
+                                            </DialogTrigger>
+                                            <DialogOverlay />
+                                            <QuestionDescriptionModal
+                                                question={question}
+                                                type="coding"
+                                                tagName={tag?.tagName}
+                                            />
+                                        </Dialog>
                                     </div>
                                     <div className="flex items-center">
-                                       
                                         <X
                                             onClick={() =>
                                                 setSelectedQuestions(
                                                     selectedQuestions.filter(
-                                                        (q: any) => q.id !== question.id
+                                                        (q: any) =>
+                                                            q.id !== question.id
                                                     )
                                                 )
                                             }

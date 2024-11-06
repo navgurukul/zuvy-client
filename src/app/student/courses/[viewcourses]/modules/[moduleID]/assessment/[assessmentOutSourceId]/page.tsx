@@ -103,7 +103,7 @@ function Page({
             localStorage.getItem('fullScreenExitInstance') || '0',
             10
         )
-        setFullScreenExitInstance(initialFullScreenExitInstance) 
+        setFullScreenExitInstance(initialFullScreenExitInstance)
 
         if (endTime) {
             startTimer(endTime)
@@ -161,8 +161,6 @@ function Page({
     //         document.removeEventListener('keydown', handleKeyDown)
     //     }
     // }, [])
-
-
 
     useEffect(() => {
         if (remainingTime === 0 && intervalId) {
@@ -410,9 +408,8 @@ function Page({
         setIsFullScreen(true)
     }
 
-
     return (
-        <div className='h-auto mb-24'>
+        <div className="h-auto mb-24">
             {!isFullScreen ? (
                 <>
                     <div className="flex items-center justify-center gap-2">
@@ -503,8 +500,9 @@ function Page({
                                 <QuestionCard
                                     id={1}
                                     title="Quiz"
-                                    description={`${assessmentData.Quizzes || 0
-                                        } questions`}
+                                    description={`${
+                                        assessmentData.Quizzes || 0
+                                    } questions`}
                                     onSolveChallenge={() =>
                                         handleSolveChallenge('quiz')
                                     }
@@ -521,8 +519,9 @@ function Page({
                                 <QuestionCard
                                     id={1}
                                     title="Open-Ended Questions"
-                                    description={`${assessmentData.OpenEndedQuestions || 0
-                                        } questions`}
+                                    description={`${
+                                        assessmentData.OpenEndedQuestions || 0
+                                    } questions`}
                                     onSolveChallenge={() =>
                                         handleSolveChallenge('open-ended')
                                     }
