@@ -21,6 +21,7 @@ import { DELETE_QUIZ_QUESTION_CONFIRMATION } from '@/utils/constant'
 import {
     Dialog,
     DialogContent,
+    DialogDescription,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
@@ -29,6 +30,8 @@ import EditQuizQuestion from '../_components/EditQuizQuestion'
 import { Checkbox } from '@/components/ui/checkbox'
 import CheckboxAndDeleteHandler from '../_components/CheckBoxAndDeleteCombo'
 import PreviewMCQ from '../_components/PreviewMCQ'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
 
 export const columns: ColumnDef<quiz>[] = [
     {
@@ -75,7 +78,7 @@ export const columns: ColumnDef<quiz>[] = [
         ),
 
         cell: ({ row }) => {
-            const question = row.original?.question
+            const question = row.original?.quizVariants[0]?.question
             return (
                 <pre
                     className="text-left text-md p-2 w-[900px] font-[16px] hover:bg-slate-200 rounded-lg transition ease-in-out delay-150 overflow-hidden text-ellipsis"
@@ -120,11 +123,18 @@ export const columns: ColumnDef<quiz>[] = [
     {
         id: 'actions1',
         cell: ({ row }) => {
-            const quizQuestion = row.original
+            const quizQuestionId = row.original.id
 
             return (
                 <>
-                    <PreviewMCQ />
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Eye className="cursor-pointer" />
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                            <PreviewMCQ quizQuestionId={quizQuestionId} />
+                        </DialogContent>
+                    </Dialog>
                 </>
             )
         },

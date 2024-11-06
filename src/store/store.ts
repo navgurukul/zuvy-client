@@ -64,6 +64,7 @@ export interface quiz {
     difficulty: 'Easy' | 'Medium' | 'Hard'
     tagId: number
     usage: number
+    quizVariants: any[]
 }
 
 export const getCourseData = create<StoreCourseData>((set) => ({

@@ -321,6 +321,7 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
             case 6:
                 return (
                     <AddAssessment
+                        topicId={topicId}
                         key={chapterId}
                         chapterData={currentChapter}
                         content={chapterContent}
@@ -435,7 +436,9 @@ function Page({ params }: { params: { moduleId: any; courseId: any } }) {
                                 </DialogTrigger>
                                 <DialogOverlay />
                                 <ChapterModal
-                                    params={params}
+                                    scrollToBottom={scrollToBottom}
+                                    moduleId={moduleId}
+                                    courseId={courseId}
                                     fetchChapters={fetchChapters}
                                     newChapterOrder={chapterData.length}
                                 />

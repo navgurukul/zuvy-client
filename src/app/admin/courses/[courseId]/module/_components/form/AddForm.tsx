@@ -26,7 +26,7 @@ import {
 type AddFormProps = {
     chapterData: any
     content: any
-    // fetchChapterContent: any
+    fetchChapterContent: any
     moduleId: any
 }
 
@@ -59,7 +59,7 @@ const formSchema = z.object({
 const AddForm: React.FC<AddFormProps> = ({
     chapterData,
     content,
-    // fetchChapterContent,
+    fetchChapterContent,
     moduleId,
 }) => {
     const form = useForm<z.infer<typeof formSchema>>({
