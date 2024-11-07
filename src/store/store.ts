@@ -360,8 +360,33 @@ export const getcodingQuestionState = create<codingQuestions>((set) => ({
         set({ codingQuestions: newValue })
     },
 }))
+// type  option = {
+//     value: string;
+//     label: string;
+// };
+type selectedOptions = {
+    selectedOptions: any[]
+    setSelectedOptions: (newValue: any[]) => void
+}
+export const  getSelectedOptions = create<selectedOptions>((set) => ({
+    selectedOptions: [{ value: '-1', label: 'All Topics' }],
+    setSelectedOptions: (newValue: any[]) => {
+        set({ selectedOptions: newValue });
+    }
+}));
+type difficulty = {
+    difficulty: any[]
+    setDifficulty: (newValue: any[]) => void
+}
+export const  getDifficulty = create< difficulty>((set) => ({
+    difficulty: [{value: 'None', label: 'All Difficulty'}],
+    setDifficulty: (newValue: any[]) => {
+        set({ difficulty: newValue });
+    }
+}));
 
-// ------------------------------
+
+// // ------------------------------
 
 type deleteCodingQuestion = {
     isDeleteModalOpen: boolean

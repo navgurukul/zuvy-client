@@ -11,6 +11,8 @@ import {
     getDeleteCodingQuestion,
     getEditCodingQuestionDialogs,
     getcodingQuestionState,
+    getSelectedOptions,
+    getDifficulty,
 } from '@/store/store'
 import { cn, difficultyColor } from '@/lib/utils'
 
@@ -20,6 +22,7 @@ import {
     handleDeleteModal,
     getAllCodingQuestions,
     handleEditCodingQuestion,
+    filteredCodingQuestions,
 } from '@/utils/admin'
 import QuestionDescriptionModal from '../../courses/[courseId]/module/_components/Assessment/QuestionDescriptionModal'
 
@@ -118,6 +121,10 @@ export const columns: ColumnDef<CodingQuestion>[] = [
 
             const { codingQuestions, setCodingQuestions } =
                 getcodingQuestionState()
+                const { selectedOptions, setSelectedOptions } = getSelectedOptions()
+                const {difficulty, setDifficulty} = getDifficulty()
+                console.log("selectedoption.column", selectedOptions)
+                console.log("difficulty.collumn", difficulty )
 
             return (
                 <>
@@ -155,7 +162,11 @@ export const columns: ColumnDef<CodingQuestion>[] = [
                                     setDeleteModalOpen,
                                     deleteCodingQuestionId,
                                     getAllCodingQuestions,
-                                    setCodingQuestions
+                                    filteredCodingQuestions,
+                                    setCodingQuestions,
+                                    selectedOptions,
+                                    difficulty,
+
                                 )
                             }}
                             modalText={DELETE_CODING_QUESTION_CONFIRMATION}

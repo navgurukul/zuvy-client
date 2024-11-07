@@ -5,12 +5,18 @@ import { useEffect, useRef } from 'react'
 import useDebounce from '@/hooks/useDebounce'
 import { getMcqSearch } from '@/store/store'
 import { Search } from 'lucide-react'
+import { SelectScrollDownButton } from '@radix-ui/react-select'
 
 export function handleDelete(
     deleteCodingQuestionId: any,
-    getAllCodingQuestions: any,
-    setCodingQuestions: any
+    setCodingQuestions: any,
+    selectedOptions?:any,
+    difficulty?:any,
+    getAllCodingQuestions?: any,
+    filteredCodingQuestions?:any,
 ) {
+    console.log("selectedoption", selectedOptions)
+    console.log("difficulty", difficulty )
     api({
         method: 'delete',
         url: 'Content/deleteCodingQuestion',
@@ -26,6 +32,7 @@ export function handleDelete(
                     'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
             getAllCodingQuestions(setCodingQuestions)
+            filteredCodingQuestions(setCodingQuestions)
         })
         .catch((error) => {
             toast({
@@ -84,12 +91,20 @@ export const handleConfirm = (
     setDeleteModalOpen: any,
     deleteCodingQuestionId: any,
     getAllCodingQuestions: any,
-    setCodingQuestions: any
+    filteredCodingQuestions:any,
+    setCodingQuestions: any,
+    difficulty?:any,
+    selectedOptions?:any,
 ) => {
+    console.log(" selectedoption and handleconform",selectedOptions)
+    console.log(" difficuty and handleconform",difficulty)
     handleDelete(
         deleteCodingQuestionId,
+        setCodingQuestions,
         getAllCodingQuestions,
-        setCodingQuestions
+        filteredCodingQuestions,
+        selectedOptions,
+        difficulty,
     )
     setDeleteModalOpen(false)
 }
@@ -291,6 +306,7 @@ export async function filteredCodingQuestions(
     position: any,
     TotalCodingQuestion: any,
     selectedLanguage?: string
+    
     // setTotalCodingQuestion: any, // Accepting setTotalBootcamps from parent
 ) {
     try {

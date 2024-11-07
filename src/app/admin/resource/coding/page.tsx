@@ -33,6 +33,8 @@ import {
     getCodingQuestionTags,
     getEditCodingQuestionDialogs,
     getcodingQuestionState,
+    getSelectedOptions,
+    getDifficulty,
 } from '@/store/store'
 import {
     getAllCodingQuestions,
@@ -84,17 +86,13 @@ const CodingProblems = () => {
         }
         return { tagName: 'All Topics', id: -1 }
     })
-    const [selectedOptions, setSelectedOptions] = useState<Option[]>([
-        // { id: -1, tagName: 'All Topics' },
-        { value: '-1', label: 'All Topics' },
-    ])
+    // const [selectedOptions, setSelectedOptions] = getSelectedOptions()
+    const { selectedOptions, setSelectedOptions } = getSelectedOptions()
     const [options, setOptions] = useState<Option[]>([
         { value: '-1', label: 'All Topics' },
     ])
     const [selectedDifficulty, setSelectedDifficulty] = useState(['None'])
-    const [difficulty, setDifficulty] = useState([
-        { value: 'None', label: 'All Difficulty' },
-    ])
+    const {difficulty, setDifficulty} = getDifficulty()
 
     const [loading, setLoading] = useState(true)
     const [openEditDialog, setOpenEditDialog] = useState(false)
@@ -119,8 +117,14 @@ const CodingProblems = () => {
     const handleTagOption = (option: Option) => {
         if (option.value === '-1') {
             if (selectedOptions.some((item) => item.value === option.value)) {
-                setSelectedOptions((prev) =>
-                    prev.filter((selected) => selected.value !== option.value)
+                // setSelectedOptions((prev) =>
+                //     prev.filter((selected) => selected.value !== option.value)
+                // )
+                setSelectedOptions(
+                    selectedOptions.filter(
+                        (selected) => selected.value !== option.value
+                    )
+                    
                 )
             } else {
                 setSelectedOptions([option])
@@ -134,13 +138,19 @@ const CodingProblems = () => {
                         (selected) => selected.value === option.value
                     )
                 ) {
-                    setSelectedOptions((prev) =>
-                        prev.filter(
+                    // setSelectedOptions((prev) =>
+                    //     prev.filter(
+                    //         (selected) => selected.value !== option.value
+                    //     )
+                    // )
+                    setSelectedOptions(
+                        selectedOptions.filter(
                             (selected) => selected.value !== option.value
                         )
                     )
                 } else {
-                    setSelectedOptions((prev) => [...prev, option])
+                    // setSelectedOptions((prev) => [...prev, option])
+                    setSelectedOptions([...selectedOptions, option])
                 }
             }
         }
@@ -182,6 +192,7 @@ const CodingProblems = () => {
             }
         }
     }
+    console.log("Debounced Search:", debouncedSearch);
 
     async function getAllTags() {
         const response = await api.get('Content/allTags')
@@ -224,7 +235,8 @@ const CodingProblems = () => {
                 selectedOptions,
                 debouncedSearch,
                 position,
-                selectedLanguage
+                selectedLanguage,
+               
             )
         },
         [
@@ -239,6 +251,7 @@ const CodingProblems = () => {
             offset,
         ]
     )
+    console.log("Search Term:", searchTerm);
 
     useEffect(() => {
         getAllCodingQuestions(setAllCodingQuestions)
