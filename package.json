@@ -106,6 +106,13 @@
         "eslint-config-next": "^14.1.0",
         "postcss": "^8",
         "tailwindcss": "^3.4.1",
-        "typescript": "^5"
-    }
+        "typescript": "^5",
+        "cypress": "^13.15.0",
+        "cypress-cucumber-preprocessor": "^4.3.1"
+    },
+
+    "cypress-cucumber-preprocessor": {
+    "nonGlobalStepDefinitions": false,
+    "step_definitions": "cypress/e2e/Tests"
+  }
 }
