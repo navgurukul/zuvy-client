@@ -7,6 +7,8 @@ import {
     handleRightClick,
     handleVisibilityChange,
     requestFullScreen,
+    updateProctoringData,
+    getProctoringData
 } from '@/utils/students'
 import { Clock, Fullscreen, Timer } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
@@ -21,6 +23,8 @@ import { useParams, usePathname } from 'next/navigation'
 import { useRouter } from 'next/navigation'
 import { getAssessmentStore } from '@/store/store'
 import TimerDisplay from './TimerDisplay'
+import { start } from 'repl'
+import { AlertProvider } from './ProctoringAlerts'
 
 function Page({
     params,
@@ -45,12 +49,8 @@ function Page({
     }
 
     const {
-        tabChangeInstance,
-        setTabChangeInstance,
         setFullScreenExitInstance,
         fullScreenExitInstance,
-        setCopyPasteAttempt,
-        copyPasteAttempt,
     } = getAssessmentStore()
 
     const [selectedQuesType, setSelectedQuesType] = useState<
@@ -74,9 +74,16 @@ function Page({
         useState<any>()
     const [chapterId, setChapterId] = useState<any>()
 
-    const [isCodingQuesSubmitted, setIsCodingQuesSubmitted] = useState(false)
+    // Check if Proctoring is set on by admin for tab switching, copy paste, etc.
+    const [isTabProctorOn, setIsTabProctorOn] = useState(assessmentData.tabChange)
+    const [isFullScreenProctorOn, setIsFullScreenProctorOn] = useState(assessmentData.screenRecord)
+    const [isCopyPasteProctorOn, setIsCopyPasteProctorOn] = useState(assessmentData.copyPaste)
+    const [isEyeTrackingProctorOn, setIsEyeTrackingProctorOn] = useState(null)
+    const [startedAt, setStartedAt] = useState(new Date(assessmentData?.submission?.startedAt).getTime())
+
 
     const pathname = usePathname()
+
 
     function isCurrentPageSubmitAssessment() {
         return (
@@ -90,86 +97,6 @@ function Page({
             `tracking/updateChapterStatus/${params.viewcourses}/${params.moduleID}?chapterId=${chapterId}`
         )
     }
-
-    useEffect(() => {
-        const endTime = parseInt(localStorage.getItem('endTime') || '0', 10)
-        const initialTabChangeInstance = parseInt(
-            localStorage.getItem('tabChangeInstance') || '0',
-            10
-        )
-        setTabChangeInstance(initialTabChangeInstance)
-
-        const initialFullScreenExitInstance = parseInt(
-            localStorage.getItem('fullScreenExitInstance') || '0',
-            10
-        )
-        setFullScreenExitInstance(initialFullScreenExitInstance) 
-
-        if (endTime) {
-            startTimer(endTime)
-        }
-
-        document.addEventListener('visibilitychange', () =>
-            handleVisibilityChange(
-                setTabChangeInstance,
-                tabChangeInstance,
-                submitAssessment,
-                isCurrentPageSubmitAssessment
-            )
-        )
-
-        document.addEventListener('fullscreenchange', () =>
-            handleFullScreenChange(
-                setFullScreenExitInstance,
-                fullScreenExitInstance,
-                submitAssessment,
-                isCurrentPageSubmitAssessment,
-                setIsFullScreen
-            )
-        )
-
-        return () => {
-            document.removeEventListener('visibilitychange', () =>
-                handleVisibilityChange(
-                    setTabChangeInstance,
-                    tabChangeInstance,
-                    submitAssessment,
-                    isCurrentPageSubmitAssessment
-                )
-            )
-            document.removeEventListener('fullscreenchange', () =>
-                handleFullScreenChange(
-                    setFullScreenExitInstance,
-                    fullScreenExitInstance,
-                    submitAssessment,
-                    isCurrentPageSubmitAssessment,
-                    setIsFullScreen
-                )
-            )
-            if (intervalId) {
-                clearInterval(intervalId)
-            }
-        }
-    }, [tabChangeInstance, fullScreenExitInstance])
-
-    // useEffect(() => {
-    //     // Add event listeners for right-click and key presses
-    //     document.addEventListener('contextmenu', handleRightClick)
-    //     document.addEventListener('keydown', handleKeyDown)
-    //     return () => {
-    //         document.removeEventListener('contextmenu', handleRightClick)
-    //         document.removeEventListener('keydown', handleKeyDown)
-    //     }
-    // }, [])
-
-
-
-    useEffect(() => {
-        if (remainingTime === 0 && intervalId) {
-            clearInterval(intervalId)
-            submitAssessment()
-        }
-    }, [remainingTime])
 
     const startTimer = (endTime: number) => {
         const newIntervalId = setInterval(() => {
@@ -191,11 +118,93 @@ function Page({
             }
 
             if (newRemainingTime === 0 && newIntervalId) {
+                submitAssessment()
                 clearInterval(newIntervalId)
+                
             }
         }, 1000)
         setIntervalId(newIntervalId)
     }
+
+    useEffect(() => {
+        console.log('startedAt', startedAt);
+        console.log('assessmentData.timeLimit', assessmentData.timeLimit);
+        const endTime = startedAt + assessmentData.timeLimit * 1000
+
+        // get all the proctoring violation counts data for tab switching, copy paste, etc.:-
+        if(assessmentSubmitId){
+            getProctoringData(assessmentSubmitId)
+        }
+
+        if (endTime) {
+            startTimer(endTime)
+        }
+
+        isTabProctorOn && document.addEventListener('visibilitychange', () =>
+            handleVisibilityChange(
+                submitAssessment,
+                isCurrentPageSubmitAssessment,
+                assessmentSubmitId,
+            )
+        )
+
+       isFullScreenProctorOn && document.addEventListener('fullscreenchange', () =>
+            handleFullScreenChange(
+                submitAssessment,
+                isCurrentPageSubmitAssessment,
+                setIsFullScreen,
+                assessmentSubmitId
+            )
+        )
+
+        return () => {
+            document.removeEventListener('visibilitychange', () =>
+                handleVisibilityChange(
+                    submitAssessment,
+                    isCurrentPageSubmitAssessment,
+                    assessmentSubmitId,
+                )
+            )
+            document.removeEventListener('fullscreenchange', () =>
+                handleFullScreenChange(
+                    submitAssessment,
+                    isCurrentPageSubmitAssessment,
+                    setIsFullScreen,
+                    assessmentSubmitId
+                )
+            )
+            if (intervalId) {
+                clearInterval(intervalId)
+            }
+        }
+    }, [isTabProctorOn, isFullScreenProctorOn, isCopyPasteProctorOn, isEyeTrackingProctorOn, startedAt])
+
+    // useEffect(() => {
+    //     // Add event listeners for right-click and key presses
+    //     document.addEventListener('contextmenu', handleRightClick)
+    //     document.addEventListener('keydown', handleKeyDown)
+    //     return () => {
+    //         document.removeEventListener('contextmenu', handleRightClick)
+    //         document.removeEventListener('keydown', handleKeyDown)
+    //     }
+    // }, [])
+
+
+    useEffect(()=>{
+        // console.log('isCopyPasteProctorOn', isCopyPasteProctorOn)
+        // console.log('isEyeTrackingProctorOn', isEyeTrackingProctorOn)
+        // console.log('isFullScreenProctorOn', isFullScreenProctorOn)
+        // console.log('isTabProctorOn', isTabProctorOn)
+    },[isCopyPasteProctorOn, isEyeTrackingProctorOn, isFullScreenProctorOn, isTabProctorOn])
+
+    useEffect(() => {
+        if (remainingTime === 0 && intervalId) {
+            clearInterval(intervalId)
+            submitAssessment()
+        }
+    }, [remainingTime])
+
+
 
     async function getCodingSubmissionsData(
         codingOutsourseId: any,
@@ -207,7 +216,6 @@ function Page({
                 `codingPlatform/submissions/questionId=${questionId}?assessmentSubmissionId=${assessmentSubmissionId}&codingOutsourseId=${codingOutsourseId}`
             )
             const action = res.data.data.action
-            setIsCodingQuesSubmitted(action == 'submit')
             return action
         } catch (error) {
             console.error('Error fetching coding submissions data:', error)
@@ -276,9 +284,14 @@ function Page({
             const res = await api.get(
                 `/Content/startAssessmentForStudent/assessmentOutsourseId=${decodedParams.assessmentOutSourceId}`
             )
-            setAssessmentData(res.data)
-            setAssessmentSubmitId(res.data.submission.id)
-            setChapterId(res.data.chapterId)
+            setAssessmentData(res?.data)
+            setStartedAt(new Date(res?.data?.submission?.startedAt).getTime())
+            setIsTabProctorOn(res?.data.canTabChange)
+            setIsFullScreenProctorOn(res?.data.canScreenExit)
+            setIsCopyPasteProctorOn(res?.data.CanCopyPaste)
+            setIsEyeTrackingProctorOn(res?.data.canEyeTrack)
+            setAssessmentSubmitId(res?.data.submission.id)
+            setChapterId(res?.data.chapterId)
         } catch (e) {
             console.error(e)
         }
@@ -358,51 +371,51 @@ function Page({
 
     async function submitAssessment() {
         setDisableSubmit(true)
-        try {
-            await api.patch(
-                `/submission/assessment/submit?assessmentSubmissionId=${assessmentSubmitId}`,
-                {
-                    tabChange: tabChangeInstance,
-                    copyPaste: copyPasteAttempt,
-                    embeddedGoogleSearch: 0,
-                    typeOfsubmission: 'studentSubmit',
-                }
-            )
-            toast({
-                title: 'Assessment Submitted',
-                description: 'Your assessment has been submitted successfully',
-                className: 'text-left capitalize',
-            })
+        if(assessmentSubmitId){
+            const { tabChange, copyPaste, fullScreenExit, eyeMomentCount } = await getProctoringData(assessmentSubmitId);
 
-            completeChapter()
+            try {
+                await api.patch(
+                    `/submission/assessment/submit?assessmentSubmissionId=${assessmentSubmitId}`,
+                    {
+                        tabChange: tabChange,
+                        copyPaste: copyPaste,
+                        embeddedGoogleSearch: 0,
+                        typeOfsubmission: 'studentSubmit',
+                    }
+                )
+                toast({
+                    title: 'Assessment Submitted',
+                    description: 'Your assessment has been submitted successfully',
+                    className: 'text-left capitalize',
+                })
+    
+                completeChapter()
+                    
+                setTimeout(() => {
+                    window.close()
+                }, 4000)
+            } catch (e) {
+                console.error(e)
+            }
+        }
 
-            const newTabChangeInstance = 0
+    }
 
-            setTabChangeInstance(newTabChangeInstance)
-            localStorage.setItem(
-                'tabChangeInstance',
-                JSON.stringify(newTabChangeInstance)
-            )
-
-            const newFullScreenExitInstance = 0
-            localStorage.setItem(
-                'fullScreenExitInstance',
-                newFullScreenExitInstance.toString()
-            )
-            setFullScreenExitInstance(newFullScreenExitInstance)
-
-            setTimeout(() => {
-                window.close()
-            }, 4000)
-        } catch (e) {
-            console.error(e)
+    async function handleCopyPasteAttempt(event: any) {
+        console.log('copy paste event', event);
+        if(assessmentSubmitId){
+            if (isCopyPasteProctorOn) {
+                const { tabChange, copyPaste, fullScreenExit, eyeMomentCount } = await getProctoringData(assessmentSubmitId);
+                
+                console.log('Fetched Proctoring Data:', { tabChange, copyPaste });
+                console.log('Updated Copy Paste Attempt:', copyPaste + 1);
+                updateProctoringData(assessmentSubmitId, tabChange, copyPaste + 1, fullScreenExit, eyeMomentCount);
+            }
         }
     }
-
-    function handleCopyPasteAttempt(event: any) {
-        event.preventDefault()
-        setCopyPasteAttempt(copyPasteAttempt + 1)
-    }
+    
+    
 
     const handleFullScreenRequest = () => {
         const element = document.documentElement
@@ -412,7 +425,9 @@ function Page({
 
 
     return (
-        <div className='h-auto mb-24'>
+       <AlertProvider>
+         <div onPaste={(e) => handleCopyPasteAttempt(e)}
+                    onCopy={(e) => handleCopyPasteAttempt(e)} className='h-auto mb-24'>
             {!isFullScreen ? (
                 <>
                     <div className="flex items-center justify-center gap-2">
@@ -433,7 +448,8 @@ function Page({
                     </div>
                 </>
             ) : (
-                <>
+                <div onPaste={(e) => handleCopyPasteAttempt(e)}
+                    onCopy={(e) => handleCopyPasteAttempt(e)}>
                     <div className="flex items-center justify-center gap-2">
                         <div className="font-bold text-xl">
                             <TimerDisplay remainingTime={remainingTime} />
@@ -442,8 +458,6 @@ function Page({
                     <Separator className="my-6" />
                     <div
                         className="flex justify-center"
-                        onPaste={(e) => handleCopyPasteAttempt(e)}
-                        onCopy={(e) => handleCopyPasteAttempt(e)}
                     >
                         <div className="flex flex-col gap-5 w-1/2 text-left">
                             <h2 className="font-bold">
@@ -468,10 +482,17 @@ function Page({
                                 Minutes
                             </p>
                             <p className="description">
-                                All the problems i.e. coding challenges, MCQs
-                                and open-ended questions can be submitted only
-                                once.
+                                Timer has started. Questions will disappear if you exit full screen. All the problems i.e. coding challenges, MCQs and open-ended questions have to be completed all at once
                             </p>
+
+                            <h1 className='font-bold'>Proctoring Rules</h1>
+                            <p>To ensure fair assessments, the assessments are proctored are proctored for the following cases below. Please avoid violating the rules:</p>
+                            <ul>
+                                <li>Copy and pasting</li>
+                                <li>Tab switching</li>
+                                <li>Assessment screen exit</li>
+                                <li>Eye Tracking</li>
+                            </ul>
                         </div>
                     </div>
                     <div className="flex justify-center">
@@ -533,9 +554,10 @@ function Page({
                     <Button onClick={submitAssessment} disabled={disableSubmit}>
                         Submit Assessment
                     </Button>
-                </>
+                </div>
             )}
         </div>
+       </AlertProvider>
     )
 }
 

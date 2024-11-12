@@ -114,6 +114,7 @@ export const columns: ColumnDef<CodingQuestion>[] = [
                 setEditCodingQuestionId,
                 isCodingEditDialogOpen,
                 setIsCodingEditDialogOpen,
+                setIsQuestionUsed,
             } = getEditCodingQuestionDialogs()
 
             const { codingQuestions, setCodingQuestions } =
@@ -129,7 +130,8 @@ export const columns: ColumnDef<CodingQuestion>[] = [
                                         handleEditCodingQuestion(
                                             codingQuestion,
                                             setIsCodingEditDialogOpen,
-                                            setEditCodingQuestionId
+                                            setEditCodingQuestionId,
+                                            setIsQuestionUsed
                                         )
                                     }}
                                 />
