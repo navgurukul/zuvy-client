@@ -33,7 +33,6 @@ export function difficultyColor(difficulty: string): string {
 }
 
 export function difficultyQuestionBgColor(difficulty: string): string {
-    console.log('difficulty', difficulty)
     switch (difficulty?.toLowerCase()) {
         case 'easy':
             return 'bg-secondary'

@@ -36,6 +36,7 @@ import { toast } from '@/components/ui/use-toast'
 import { Spinner } from '@/components/ui/spinner'
 import axios from 'axios'
 import QuestionCard from '@/app/student/courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/QuestionCard'
+import { AIQuestionCard } from './AIQuestionCard'
 
 export type Tag = {
     label: string
@@ -330,6 +331,7 @@ Option 3: [Write the third option here]
 Option 4: [Write the fourth option here]
 
 Correct Answer: [Write the correct option number here]
+QuestionId: [Write a unique]
 
 **Important:** 
 - Do not include any additional text or explanations outside of this format.
@@ -374,6 +376,7 @@ Correct Answer: [Write the correct option number here]
                 const correctAnswerMatch = generatedText.match(
                     /Correct Answer:\s*(\d+)/i
                 )
+                const id = generatedText.match(/QuestionId:\s*(.+)/i)
 
                 const cleanText = (text: string) =>
                     text.replace(/[*#"]/g, '').trim()
@@ -393,6 +396,7 @@ Correct Answer: [Write the correct option number here]
                 const opt4 = option4Match
                     ? cleanText(option4Match[1] as string)
                     : ''
+                const questionId = id ? cleanText(id[1]) : ''
                 let correctAnswer: number | null = null
 
                 if (correctAnswerMatch) {
@@ -413,6 +417,7 @@ Correct Answer: [Write the correct option number here]
                     !opt2 ||
                     !opt3 ||
                     !opt4 ||
+                    !questionId ||
                     correctAnswer === null
                 ) {
                     toast({
@@ -462,6 +467,7 @@ Correct Answer: [Write the correct option number here]
                     mark: 1,
                     tagId: topicId[0].value,
                     difficulty: difficulty[0],
+                    questionId: questionId,
                 })
 
                 if (generatedQuestions.length > 0) {
@@ -471,15 +477,6 @@ Correct Answer: [Write the correct option number here]
                     const requestBody = {
                         quizzes: [
                             {
-                                // question,
-                                // options: {
-                                //     1: opt1,
-                                //     2: opt2,
-                                //     3: opt3,
-                                //     4: opt4,
-                                // },
-                                // correctOption: correctAnswer + 1,
-                                // mark: 1,
                                 tagId: topicId[0].value,
                                 difficulty: difficulty[0],
                                 variantMCQs: [
@@ -648,6 +645,7 @@ Option 3: [Write the third option here]
 Option 4: [Write the fourth option here]
 
 Correct Answer: [Write the correct option number here]
+QuestionId: [Write a unique]
 
 **Important:** 
 - Do not include any additional text or explanations outside of this format.
@@ -679,6 +677,8 @@ Correct Answer: [Write the correct option number here]
 
                     const responseData = response.data
 
+                    console.log('responseData', responseData)
+
                     const generatedText =
                         responseData?.candidates?.[0]?.content?.parts?.[0]?.text?.trim()
 
@@ -697,6 +697,12 @@ Correct Answer: [Write the correct option number here]
                         const correctAnswerMatch = generatedText.match(
                             /Correct Answer:\s*(\d+)/i
                         )
+                        const id = generatedText.match(/QuestionId:\s*(.+)/i)
+
+                        console.log('generatedText', generatedText)
+                        console.log('correctAnswerMatch', correctAnswerMatch)
+                        console.log('questionMatch', questionMatch)
+                        console.log('questionId', id)
 
                         const cleanText = (text: string) =>
                             text.replace(/[*#"]/g, '').trim()
@@ -716,6 +722,7 @@ Correct Answer: [Write the correct option number here]
                         const opt4 = option4Match
                             ? cleanText(option4Match[1] as string)
                             : ''
+                        const questionId = id ? cleanText(id[1]) : ''
                         let correctAnswer: number | null = null
 
                         if (correctAnswerMatch) {
@@ -737,6 +744,7 @@ Correct Answer: [Write the correct option number here]
                             !opt2 ||
                             !opt3 ||
                             !opt4 ||
+                            !questionId ||
                             correctAnswer === null
                         ) {
                             console.warn('Failed to parse MCQ correctly.')
@@ -788,6 +796,7 @@ Correct Answer: [Write the correct option number here]
                             mark: 1,
                             tagId: topicId,
                             difficulty: difficulty,
+                            questionId: questionId,
                         })
 
                         existingQuestions.push(question.toLowerCase())
@@ -846,12 +855,52 @@ Correct Answer: [Write the correct option number here]
             }
 
             if (generatedQuestions.length > 0) {
+                const bulkQuestions = generatedQuestions.map((question) => {
+                    return {
+                        tagId: question.tagId,
+                        difficulty: question.difficulty,
+                        variantMCQs: [
+                            {
+                                question: question.question,
+                                options: question.options,
+                                correctOption: question.correctOption,
+                            },
+                        ],
+                    }
+                })
+                console.log('bulkQuestions', bulkQuestions)
+                // const requestBody = {
+                //     questions: generatedQuestions,
+                // }
                 const requestBody = {
-                    questions: generatedQuestions,
+                    quizzes: bulkQuestions,
+                    // [
+                    //     {
+                    //         tagId: topicId,
+                    //         difficulty: difficulty,
+                    //         variantMCQs: [
+                    //             {
+                    //                 question: question,
+                    //                 options: {
+                    //                     1: opt1,
+                    //                     2: opt2,
+                    //                     3: opt3,
+                    //                     4: opt4,
+                    //                 },
+                    //                 correctOption: correctAnswer + 1,
+                    //             },
+                    //         ],
+                    //     },
+                    // ],
+                    // generatedQuestions,
                 }
+                console.log('for requestBody requestBody', requestBody)
                 setGeneratedQuestions(generatedQuestions)
 
-                console.log('requestBody', requestBody)
+                setRequestBody(requestBody)
+                // setGeneratedQuestions(generatedQuestions)
+                // setGeneratedQuestions([...generatedQuestions])
+
                 // await handleCreateQuizQuestion(requestBody)
                 await getAllQuizQuesiton(setStoreQuizData)
                 closeModal()
@@ -902,9 +951,30 @@ Correct Answer: [Write the correct option number here]
         return union === 0 ? 0 : intersection / union
     }
 
-    // console.log('form.watch', form.watch())
+    const handleClear = () => {
+        form.reset({
+            difficulty: [],
+            topics: [{ value: 0 }],
+            numbersOfQuestions: [{ value: '' }],
+        })
+        setGeneratedQuestions([])
+    }
 
-    // console.log('generatedQuestions', generatedQuestions)
+    const handleQuestionConfirm = (
+        questionId: any,
+        setDeleteModalOpen: any
+    ) => {
+        setGeneratedQuestions((prevQuestions: any) => {
+            return prevQuestions.filter(
+                (item: any) => item.questionId !== questionId
+            )
+        })
+        setDeleteModalOpen(false)
+    }
+
+    console.log('form.watch', form.watch())
+
+    console.log('generatedQuestions', generatedQuestions)
 
     return (
         <main className="flex flex-col px-3 h-full">
@@ -1566,78 +1636,91 @@ Correct Answer: [Write the correct option number here]
                             <p className="text-2xl font-semibold text-start">
                                 {generatedQuestions.length} MCQs generated
                             </p>
-                            {generatedQuestions.map((item: any, index: any) => (
-                                <Card className="bg-white rounded-lg shadow-md p-5">
-                                    {/* <Card className="bg-white rounded-lg p-5 border-non shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F]"> */}
-                                    {/* <CardBody className="px-6 py-4"> */}
-                                    <div className="flex flex-row gap-4">
-                                        <Badge
-                                            // variant="yellow"
-                                            className="mb-3 text-white"
-                                        >
-                                            {
-                                                tags.find(
-                                                    (t) => t.id === item.tagId
-                                                )?.tagName
-                                            }
-                                        </Badge>
-                                        <Badge
-                                            variant="yellow"
-                                            // className="mb-3 bg-gray-400 text-white"
-                                            className={cn(
-                                                `mb-3 text-white`,
-                                                difficultyQuestionBgColor(
-                                                    item.difficulty
-                                                )
-                                            )}
-                                        >
-                                            {item.difficulty}
-                                            {/* {difficultyQuestionBgColor(item.difficulty)} */}
-                                        </Badge>
-                                    </div>
+                            {generatedQuestions.map((item: any, index: any) => {
+                                console.log(
+                                    'Mapping question:',
+                                    item.questionId
+                                )
+                                return (
+                                    // <Card className="bg-white rounded-lg shadow-md p-5">
+                                    //     <div className="flex flex-row gap-4">
+                                    //         <Badge
+                                    //             // variant="yellow"
+                                    //             className="mb-3 text-white"
+                                    //         >
+                                    //             {
+                                    //                 tags.find(
+                                    //                     (t) => t.id === item.tagId
+                                    //                 )?.tagName
+                                    //             }
+                                    //         </Badge>
+                                    //         <Badge
+                                    //             variant="yellow"
+                                    //             // className="mb-3 bg-gray-400 text-white"
+                                    //             className={cn(
+                                    //                 `mb-3 text-white`,
+                                    //                 difficultyQuestionBgColor(
+                                    //                     item.difficulty
+                                    //                 )
+                                    //             )}
+                                    //         >
+                                    //             {item.difficulty}
+                                    //         </Badge>
+                                    //     </div>
 
-                                    <p className="ml-4 text-start text-md font-semibold">
-                                        {item.question}
-                                    </p>
-                                    {/* tags.find((t) => t.id === topicId[0].value)?.tagName */}
-                                    <div className="space-y-2 mt-4">
-                                        <div className="flex items-center px-4 py-3 rounded-md hover:bg-gray-100 cursor-pointer">
-                                            <span className="font-medium mr-2">
-                                                A.
-                                            </span>
-                                            <span>{item.options[1]}</span>
-                                        </div>
-                                        <div className="flex items-center px-4 py-3 rounded-md hover:bg-gray-100 cursor-pointer">
-                                            <span className="font-medium mr-2">
-                                                B.
-                                            </span>
-                                            <span>{item.options[2]}</span>
-                                        </div>
-                                        <div className="flex items-center px-4 py-3 rounded-md hover:bg-gray-100 cursor-pointer">
-                                            <span className="font-medium mr-2">
-                                                C.
-                                            </span>
-                                            <span>{item.options[3]}</span>
-                                        </div>
-                                        <div className="flex items-center px-4 py-3 rounded-md hover:bg-gray-100 cursor-pointer">
-                                            <span className="font-medium mr-2">
-                                                D.
-                                            </span>
-                                            <span>{item.options[4]}</span>
-                                        </div>
-                                    </div>
-                                    {/* </CardBody> */}
-                                    {/* <CardFooter className="flex justify-end px-6 py-4 border-t">
-                            <Button variant="primary">Submit</Button>
-                        </CardFooter> */}
-                                </Card>
-                                // <QuestionCard
-                                //   key={index}
-                                //   question={question.question}
-                                //   options={question.options}
-                                //   correctOption={question.correctOption}
-                                // />
-                            ))}
+                                    //     <p className="ml-4 text-start text-md font-semibold">
+                                    //         {item.question}
+                                    //     </p>
+                                    //     <div className="space-y-2 mt-4">
+                                    //         <div className="flex items-center px-4 py-3 rounded-md hover:bg-gray-100 cursor-pointer">
+                                    //             <span className="font-medium mr-2">
+                                    //                 A.
+                                    //             </span>
+                                    //             <span>{item.options[1]}</span>
+                                    //         </div>
+                                    //         <div className="flex items-center px-4 py-3 rounded-md hover:bg-gray-100 cursor-pointer">
+                                    //             <span className="font-medium mr-2">
+                                    //                 B.
+                                    //             </span>
+                                    //             <span>{item.options[2]}</span>
+                                    //         </div>
+                                    //         <div className="flex items-center px-4 py-3 rounded-md hover:bg-gray-100 cursor-pointer">
+                                    //             <span className="font-medium mr-2">
+                                    //                 C.
+                                    //             </span>
+                                    //             <span>{item.options[3]}</span>
+                                    //         </div>
+                                    //         <div className="flex items-center px-4 py-3 rounded-md hover:bg-gray-100 cursor-pointer">
+                                    //             <span className="font-medium mr-2">
+                                    //                 D.
+                                    //             </span>
+                                    //             <span>{item.options[4]}</span>
+                                    //         </div>
+                                    //     </div>
+                                    // </Card>
+                                    // <QuestionCard
+                                    //   key={index}
+                                    //   question={item.question}
+                                    //   options={item.options}
+                                    //   correctOption={item.correctOption}
+                                    // />
+                                    <AIQuestionCard
+                                        key={index}
+                                        questionId={item.questionId}
+                                        question={item.question}
+                                        options={item.options}
+                                        correctOption={item.correctOption}
+                                        difficulty={item.difficulty}
+                                        tagId={item.tagId}
+                                        tags={tags}
+                                        handleQuestionConfirm={
+                                            handleQuestionConfirm
+                                        }
+                                        // isDeleteModalOpen={isDeleteModalOpen}
+                                        // setDeleteModalOpen={setDeleteModalOpen}
+                                    />
+                                )
+                            })}
                         </>
                     )}
 
@@ -1667,7 +1750,7 @@ Correct Answer: [Write the correct option number here]
                             <Button
                                 type="button"
                                 // variant="outline"
-                                // onClick={setGeneratedQuestions([])}
+                                onClick={handleClear}
                                 // disabled={
                                 //     loadingAI ||
                                 //     !form.watch('difficulty') ||
