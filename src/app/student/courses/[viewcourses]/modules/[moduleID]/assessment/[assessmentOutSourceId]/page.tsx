@@ -127,8 +127,6 @@ function Page({
     }
 
     useEffect(() => {
-        console.log('startedAt', startedAt);
-        console.log('assessmentData.timeLimit', assessmentData.timeLimit);
         const endTime = startedAt + assessmentData.timeLimit * 1000
 
         // get all the proctoring violation counts data for tab switching, copy paste, etc.:-
@@ -188,14 +186,6 @@ function Page({
     //         document.removeEventListener('keydown', handleKeyDown)
     //     }
     // }, [])
-
-
-    useEffect(()=>{
-        // console.log('isCopyPasteProctorOn', isCopyPasteProctorOn)
-        // console.log('isEyeTrackingProctorOn', isEyeTrackingProctorOn)
-        // console.log('isFullScreenProctorOn', isFullScreenProctorOn)
-        // console.log('isTabProctorOn', isTabProctorOn)
-    },[isCopyPasteProctorOn, isEyeTrackingProctorOn, isFullScreenProctorOn, isTabProctorOn])
 
     useEffect(() => {
         if (remainingTime === 0 && intervalId) {
@@ -403,13 +393,10 @@ function Page({
     }
 
     async function handleCopyPasteAttempt(event: any) {
-        console.log('copy paste event', event);
         if(assessmentSubmitId){
             if (isCopyPasteProctorOn) {
                 const { tabChange, copyPaste, fullScreenExit, eyeMomentCount } = await getProctoringData(assessmentSubmitId);
                 
-                console.log('Fetched Proctoring Data:', { tabChange, copyPaste });
-                console.log('Updated Copy Paste Attempt:', copyPaste + 1);
                 updateProctoringData(assessmentSubmitId, tabChange, copyPaste + 1, fullScreenExit, eyeMomentCount);
             }
         }

@@ -133,8 +133,6 @@ export function requestFullScreen(element: HTMLElement) {
 export async function getProctoringData(assessmentSubmissionId: any) {
     try {
         const res = await api.get(`tracking/assessment/properting/${assessmentSubmissionId}`);
-        console.log('Proctoring data:', res.data.data);
-
         const eyeMomentCount = res?.data?.data?.eyeMomentCount;
         const fullScreenExit = res?.data?.data?.fullScreenExit;
         const copyPaste = res?.data?.data?.copyPaste;

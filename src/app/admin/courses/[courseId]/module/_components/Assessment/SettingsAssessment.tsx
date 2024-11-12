@@ -235,7 +235,6 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     }, [codingMax, mcqMax, form]);
 
     async function onSubmit(values: any) {
-        console.log('values', typeof values.hour, values.minute);
         const timeLimit = Number(values.hour) * 3600 + Number(values.minute) * 60;
         const data = {
             title: chapterTitle,
