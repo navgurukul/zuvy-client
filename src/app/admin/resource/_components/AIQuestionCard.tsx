@@ -12,15 +12,10 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import DeleteConfirmationModal from '../../courses/[courseId]/_components/deleteModal'
-import { getDeleteQuizQuestion, getEditQuizQuestion } from '@/store/store'
+import { getDeleteQuizQuestion } from '@/store/store'
 import { DELETE_AI_QUESTION_CONFIRMATION } from '@/utils/constant'
-import {
-    // handleQuizConfirm,
-    // handleQuizDelete,
-    handleDeleteQuizModal,
-    // getAllQuizQuestion,
-    // handlerQuizQuestions,
-} from '@/utils/admin'
+import { handleDeleteQuizModal } from '@/utils/admin'
+import EditAIQuestion from './EditAIQuestions'
 
 interface QuestionCardProps {
     questionId: any
@@ -43,16 +38,11 @@ export const AIQuestionCard = ({
     tags,
     handleQuestionConfirm,
 }: QuestionCardProps) => {
-    const {
-        // isDeleteModalOpen,
-        // setDeleteModalOpen,
-        deleteQuizQuestionId,
-        setDeleteQuizQuestionId,
-    } = getDeleteQuizQuestion()
+    const { deleteQuizQuestionId, setDeleteQuizQuestionId } =
+        getDeleteQuizQuestion()
 
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
-
-    console.log('AIQuestionCard rendered with questionId:', questionId)
+    const [isEditModalOpen, setEditModalOpen] = useState(false)
 
     return (
         <>
@@ -65,7 +55,6 @@ export const AIQuestionCard = ({
                     </Badge>
                     <Badge
                         variant="yellow"
-                        // className="mb-3 bg-gray-400 text-white"
                         className={cn(
                             `mb-3 text-white`,
                             difficultyQuestionBgColor(difficulty)
@@ -74,39 +63,39 @@ export const AIQuestionCard = ({
                         {difficulty}
                     </Badge>
                     <div className="flex  ml-auto items-center">
-                        <div id="editQuizDialog" data-state="closed">
-                            <Dialog>
-                                <DialogTrigger asChild>
-                                    <Pencil
-                                        className="cursor-pointer mr-5"
-                                        size={20}
-                                        // onClick={openDialog}
-                                    />
-                                </DialogTrigger>
-
-                                {/* <DialogContent
+                        <Dialog
+                            open={isEditModalOpen}
+                            onOpenChange={setEditModalOpen}
+                        >
+                            <DialogTrigger asChild>
+                                <Pencil
+                                    className="cursor-pointer mr-5"
+                                    size={20}
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        setEditModalOpen(true)
+                                    }}
+                                />
+                            </DialogTrigger>
+                            <DialogContent
                                 className="sm:max-w-[518px] max-h-[90vh] overflow-y-auto overflow-x-hidden"
                                 data-state="closed"
+                                aria-describedby="edit-question-dialog-description"
                             >
                                 <DialogHeader>
-                                    <DialogTitle>Edit MCQ</DialogTitle>
+                                    <DialogTitle>Edit Question</DialogTitle>
                                 </DialogHeader>
-                                <EditQuizQuestion
-                                    setStoreQuizData={setStoreQuizData}
-                                    quizId={quizQuestion.id}
+                                <EditAIQuestion
+                                    questionId={questionId}
+                                    setEditModalOpen={setEditModalOpen}
                                 />
-                            </DialogContent> */}
-                            </Dialog>
-                        </div>
+                            </DialogContent>
+                        </Dialog>
 
                         <Trash2
                             onClick={(e) => {
                                 e.stopPropagation()
-                                handleDeleteQuizModal(
-                                    setDeleteModalOpen,
-                                    setDeleteQuizQuestionId,
-                                    questionId
-                                )
+                                setDeleteModalOpen(true)
                             }}
                             className="text-destructive cursor-pointer"
                             size={20}

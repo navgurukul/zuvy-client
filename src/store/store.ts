@@ -694,3 +694,15 @@ export const getMcqSearch = create<mcqSearch>((set) => ({
         set({ mcqSearch: newValue })
     },
 }))
+
+type generatedQuestions = {
+    generatedQuestions: any[]
+    setGeneratedQuestions: (newValue: any[]) => void
+}
+
+export const getGeneratedQuestions = create<generatedQuestions>((set) => ({
+    generatedQuestions: [],
+    setGeneratedQuestions: (newValue: any[]) => {
+        set({ generatedQuestions: newValue })
+    },
+}))

@@ -141,6 +141,9 @@ export const handleDeleteQuizModal = (
 ) => {
     setDeleteModalOpen(true)
     setDeleteQuizQuestionId(quizQuestion.id)
+    // setDeleteQuizQuestionId(
+    //     typeof quizQuestion === 'string' ? quizQuestion : quizQuestion.id
+    // )
 }
 
 export const handleQuizConfirm = (

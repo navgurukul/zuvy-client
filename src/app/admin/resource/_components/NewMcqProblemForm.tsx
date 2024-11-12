@@ -37,6 +37,7 @@ import { Spinner } from '@/components/ui/spinner'
 import axios from 'axios'
 import QuestionCard from '@/app/student/courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/QuestionCard'
 import { AIQuestionCard } from './AIQuestionCard'
+import { getGeneratedQuestions } from '@/store/store'
 
 export type Tag = {
     label: string
@@ -129,9 +130,11 @@ const NewMcqProblemForm = ({
     const [requestBody, setRequestBody] = useState<RequestBodyType>({
         quizzes: [],
     })
+    const { generatedQuestions, setGeneratedQuestions } =
+        getGeneratedQuestions()
 
     // **New State Variables for Progress Tracking**
-    const [generatedQuestions, setGeneratedQuestions] = useState<any>([])
+    // const [generatedQuestions, setGeneratedQuestions] = useState<any>([])
     //     {
     //         correctOption: 2,
     //         difficulty: 'Hard',
@@ -964,15 +967,14 @@ QuestionId: [Write a unique]
         questionId: any,
         setDeleteModalOpen: any
     ) => {
-        setGeneratedQuestions((prevQuestions: any) => {
-            return prevQuestions.filter(
-                (item: any) => item.questionId !== questionId
-            )
-        })
+        const updateQuestions = generatedQuestions.filter(
+            (item: any) => item.questionId !== questionId
+        )
+        setGeneratedQuestions(updateQuestions)
         setDeleteModalOpen(false)
     }
 
-    console.log('form.watch', form.watch())
+    // console.log('form.watch', form.watch())
 
     console.log('generatedQuestions', generatedQuestions)
 
@@ -1637,10 +1639,10 @@ QuestionId: [Write a unique]
                                 {generatedQuestions.length} MCQs generated
                             </p>
                             {generatedQuestions.map((item: any, index: any) => {
-                                console.log(
-                                    'Mapping question:',
-                                    item.questionId
-                                )
+                                // console.log(
+                                //     'Mapping question:',
+                                //     item.questionId
+                                // )
                                 return (
                                     // <Card className="bg-white rounded-lg shadow-md p-5">
                                     //     <div className="flex flex-row gap-4">
