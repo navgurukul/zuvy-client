@@ -3,7 +3,7 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 
-import { getAllQuizData, getCodingQuestionTags, quiz } from '@/store/store'
+import { getAllQuizData, getCodingQuestionTags, getmcqdifficulty, getOffset, getPosition, getSelectedOptions, quiz } from '@/store/store'
 import { Edit, Eye, Pencil, Trash2 } from 'lucide-react'
 import { difficultyColor } from '@/lib/utils'
 
@@ -13,10 +13,11 @@ import {
     handleQuizConfirm,
     handleQuizDelete,
     handleDeleteQuizModal,
-    getAllQuizQuestion,
+    // getAllQuizQuestion,
     // handlerQuizQuestions,
+    filteredQuizQuestions,
 } from '@/utils/admin'
-import { DELETE_QUIZ_QUESTION_CONFIRMATION } from '@/utils/constant'
+import { DELETE_QUIZ_QUESTION_CONFIRMATION, OFFSET, POSITION } from '@/utils/constant'
 import {
     Dialog,
     DialogContent,
@@ -37,7 +38,7 @@ export const columns: ColumnDef<quiz>[] = [
             />
         ),
         cell: ({ row }) => {
-            const question = row.original?.question
+            const question = row.original?.title
             return <p className="text-left text-md font-[14px] ">{question}</p>
         },
         enableSorting: false,
@@ -53,7 +54,9 @@ export const columns: ColumnDef<quiz>[] = [
             />
         ),
         cell: ({ row }) => {
+            console.log("row.origin",row.original)
             const difficulty = row.original.difficulty
+            
             return (
                 <p
                     className={` text-left ml-3 text-[15px] font-semibold  ${difficultyColor(
@@ -94,7 +97,13 @@ export const columns: ColumnDef<quiz>[] = [
                 setDeleteQuizQuestionId,
             } = getDeleteQuizQuestion()
             const { setStoreQuizData } = getAllQuizData()
-
+            const { selectedOptions, setSelectedOptions } = getSelectedOptions()
+            const { mcqDifficulty: difficulty, setMcqDifficulty: setDifficulty } =
+            getmcqdifficulty()
+            const { offset, setOffset} = getOffset()
+            const {position, setPosition} = getPosition()
+            console.log("offset",OFFSET)
+            console.log("position",POSITION)
             return (
                 <div className="flex">
                     <div id="editQuizDialog" data-state="closed">
@@ -142,8 +151,13 @@ export const columns: ColumnDef<quiz>[] = [
                                 handleQuizDelete,
                                 setDeleteModalOpen,
                                 deleteQuizQuestionId,
-                                getAllQuizQuestion,
-                                setStoreQuizData
+                                // getAllQuizQuestion,
+                                filteredQuizQuestions,
+                                setStoreQuizData,
+                                selectedOptions,
+                                difficulty,
+                                offset,
+                                position,
                             )
                         }}
                         modalText={DELETE_QUIZ_QUESTION_CONFIRMATION}

@@ -35,6 +35,8 @@ import {
     getcodingQuestionState,
     getSelectedOptions,
     getDifficulty,
+    getOffset,
+    getPosition,
 } from '@/store/store'
 import {
     getAllCodingQuestions,
@@ -63,7 +65,6 @@ interface Option {
     label: string
     value: string
 }
-
 const CodingProblems = () => {
     const { codingQuestions, setCodingQuestions } = getcodingQuestionState()
     const [allCodingQuestions, setAllCodingQuestions] = useState([])
@@ -96,15 +97,16 @@ const CodingProblems = () => {
 
     const [loading, setLoading] = useState(true)
     const [openEditDialog, setOpenEditDialog] = useState(false)
-    const [position, setPosition] = useState(POSITION)
+    // const [position, setPosition] = useState(POSITION)
     const [currentPage, setCurrentPage] = useState(1)
     const [totalCodingQuestion, setTotalCodingQuestion] = useState(0)
     const [totalPages, setTotalPages] = useState(0)
     const [lastPage, setLastPage] = useState(0)
-    const [offset, setOffset] = useState<number>(OFFSET)
+    // const [offset, setOffset] = useState<number>(OFFSET)
+    const { offset, setOffset} = getOffset()
+    const {position, setPosition} = getPosition()
 
     const selectedLanguage = ''
-
     const handleTopicClick = (value: string) => {
         const tag = tags.find((t: Tag) => t.tagName === value) || {
             tagName: 'All Topics',
@@ -192,7 +194,7 @@ const CodingProblems = () => {
             }
         }
     }
-    console.log("Debounced Search:", debouncedSearch);
+ 
 
     async function getAllTags() {
         const response = await api.get('Content/allTags')
@@ -226,16 +228,17 @@ const CodingProblems = () => {
     const fetchCodingQuestions = useCallback(
         async (offset: number) => {
             filteredCodingQuestions(
-                offset,
                 setCodingQuestions,
+                offset,
+                position,
+                difficulty,
+                selectedOptions,
                 setTotalCodingQuestion,
                 setLastPage,
                 setTotalPages,
-                difficulty,
-                selectedOptions,
                 debouncedSearch,
-                position,
                 selectedLanguage,
+              
                
             )
         },
@@ -302,7 +305,7 @@ const CodingProblems = () => {
 
     const selectedTagCount = selectedOptions.length
     const difficultyCount = difficulty.length
-
+console.log("offset",offset)
     return (
         <>
             {loading ? (

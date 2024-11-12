@@ -13,6 +13,8 @@ import {
     getcodingQuestionState,
     getSelectedOptions,
     getDifficulty,
+    getOffset,
+    getPosition
 } from '@/store/store'
 import { cn, difficultyColor } from '@/lib/utils'
 
@@ -25,6 +27,7 @@ import {
     filteredCodingQuestions,
 } from '@/utils/admin'
 import QuestionDescriptionModal from '../../courses/[courseId]/module/_components/Assessment/QuestionDescriptionModal'
+
 
 
 
@@ -123,8 +126,10 @@ export const columns: ColumnDef<CodingQuestion>[] = [
                 getcodingQuestionState()
                 const { selectedOptions, setSelectedOptions } = getSelectedOptions()
                 const {difficulty, setDifficulty} = getDifficulty()
-                console.log("selectedoption.column", selectedOptions)
-                console.log("difficulty.collumn", difficulty )
+                const { offset, setOffset} = getOffset()
+                const {position, setPosition} = getPosition()
+
+              
 
             return (
                 <>
@@ -161,11 +166,12 @@ export const columns: ColumnDef<CodingQuestion>[] = [
                                     handleDelete,
                                     setDeleteModalOpen,
                                     deleteCodingQuestionId,
-                                    getAllCodingQuestions,
                                     filteredCodingQuestions,
                                     setCodingQuestions,
                                     selectedOptions,
                                     difficulty,
+                                    offset,
+                                    position,
 
                                 )
                             }}

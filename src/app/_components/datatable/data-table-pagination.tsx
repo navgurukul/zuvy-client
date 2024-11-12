@@ -54,13 +54,16 @@ export function DataTablePagination<TData>({
         setOffset(0)
     }
     const nextPageHandler = () => {
+        const newOffset = (currentPage) * +position;  
         setCurrentPage((prevState: number) => prevState + 1)
-        setOffset((prevState: number) => prevState + +position)
+        setOffset(newOffset);
     }
 
     const prevPageHandler = () => {
+        const newOffset = Math.max(0, (currentPage - 2) * +position);
         setCurrentPage((prevState: number) => prevState - 1)
-        setOffset((prevState: number) => Math.max(0, prevState - +position))
+        // setOffset((prevState: number) => Math.max(0, prevState - +position))
+        setOffset(newOffset);
     }
 
     const previousDisabledHandler = () => {
