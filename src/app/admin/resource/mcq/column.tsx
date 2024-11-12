@@ -3,7 +3,7 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 
-import { getAllQuizData, getCodingQuestionTags, getmcqdifficulty, getOffset, getPosition, getSelectedOptions, quiz } from '@/store/store'
+import { getAllQuizData, getCodingQuestionTags, getmcqdifficulty, getOffset, getPosition, getSelectedMCQOptions, quiz } from '@/store/store'
 import { Edit, Eye, Pencil, Trash2 } from 'lucide-react'
 import { difficultyColor } from '@/lib/utils'
 
@@ -97,7 +97,7 @@ export const columns: ColumnDef<quiz>[] = [
                 setDeleteQuizQuestionId,
             } = getDeleteQuizQuestion()
             const { setStoreQuizData } = getAllQuizData()
-            const { selectedOptions, setSelectedOptions } = getSelectedOptions()
+            const { selectedOptions, setSelectedOptions } = getSelectedMCQOptions()
             const { mcqDifficulty: difficulty, setMcqDifficulty: setDifficulty } =
             getmcqdifficulty()
             const { offset, setOffset} = getOffset()

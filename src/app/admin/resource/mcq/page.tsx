@@ -35,7 +35,7 @@ import {
     getMcqSearch,
     getOffset,
     getPosition,
-    getSelectedOptions,
+    getSelectedMCQOptions,
 } from '@/store/store'
 import useDebounce from '@/hooks/useDebounce'
 import { getAllQuizQuestion } from '@/utils/admin'
@@ -78,7 +78,7 @@ const Mcqs = (props: Props) => {
     const { setmcqSearch } = getMcqSearch()
     // const [selectedOptions, setSelectedOptions] = useState<Option[]>([
     //     { value: '-1', label: 'All Topics' }, // ])   
-     const { selectedOptions,setSelectedOptions } =getSelectedOptions()
+     const { selectedOptions,setSelectedOptions } =getSelectedMCQOptions()
 
     const [options, setOptions] = useState<Option[]>([
         { value: '-1', label: 'All Topics' },

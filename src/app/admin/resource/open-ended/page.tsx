@@ -34,7 +34,7 @@ import {
     getOffset,
     getPosition,
     getSelectedOpenEndedOptions,
-    getDifficulty,
+    getOpenEndedDifficulty,
 
 } from '@/store/store'
 import {
@@ -78,7 +78,7 @@ const OpenEndedQuestions = (props: Props) => {
     ])
     const { tags, setTags } = getCodingQuestionTags()
 
-    const {difficulty, setDifficulty} = getDifficulty()
+    const {difficulty, setDifficulty} = getOpenEndedDifficulty()
 
     const [allOpenEndedQuestions, setAllOpenEndedQuestions] = useState([])
     const { openEndedQuestions, setOpenEndedQuestions } =

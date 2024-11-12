@@ -371,11 +371,24 @@ export const  getSelectedOpenEndedOptions = create<selectedOptions>((set) => ({
         set({ selectedOptions: newValue });
     }
 }));
+export const  getSelectedMCQOptions = create<selectedOptions>((set) => ({
+    selectedOptions: [{ value: '-1', label: 'All Topics' }],
+    setSelectedOptions: (newValue: any[]) => {
+        set({ selectedOptions: newValue });
+    }
+}));
 type difficulty = {
     difficulty: any[]
     setDifficulty: (newValue: any[]) => void
 }
 export const  getDifficulty = create< difficulty>((set) => ({
+    difficulty: [{value: 'None', label: 'All Difficulty'}],
+    setDifficulty: (newValue: any[]) => {
+        set({ difficulty: newValue });
+    }
+}));
+
+export const  getOpenEndedDifficulty = create< difficulty>((set) => ({
     difficulty: [{value: 'None', label: 'All Difficulty'}],
     setDifficulty: (newValue: any[]) => {
         set({ difficulty: newValue });

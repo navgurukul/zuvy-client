@@ -9,7 +9,7 @@ import {
     getopenEndedQuestionstate,
     getEditOpenEndedDialogs,
     getSelectedOpenEndedOptions,
-    getDifficulty,
+    getOpenEndedDifficulty,
     getOffset,
     getPosition,
 } from '@/store/store'
@@ -94,7 +94,7 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
             const { openEndedQuestions, setOpenEndedQuestions } =
                 getopenEndedQuestionstate()
                 const { selectedOptions, setSelectedOptions } =  getSelectedOpenEndedOptions()
-                const {difficulty, setDifficulty} = getDifficulty()
+                const {difficulty, setDifficulty} =getOpenEndedDifficulty()
                 const { offset, setOffset} = getOffset()
                 const {position, setPosition} = getPosition()
 
