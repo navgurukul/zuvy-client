@@ -32,6 +32,20 @@ export function difficultyColor(difficulty: string): string {
     }
 }
 
+export function difficultyQuestionBgColor(difficulty: string): string {
+    console.log('difficulty', difficulty)
+    switch (difficulty?.toLowerCase()) {
+        case 'easy':
+            return 'bg-secondary'
+        case 'medium':
+            return 'bg-yellow-dark'
+        case 'hard':
+            return 'bg-destructive'
+        default:
+            return 'bg-gray-500'
+    }
+}
+
 // Background Color as per difficulty:
 export function difficultyBgColor(difficulty: string): string {
     switch (difficulty?.toLowerCase()) {

@@ -37,7 +37,10 @@ export const columns: ColumnDef<quiz>[] = [
             />
         ),
         cell: ({ row }) => {
-            const question = row.original?.question
+            const question =
+                row.original?.title ||
+                row.original?.quizVariants[0].question ||
+                ''
             return <p className="text-left text-md font-[14px] ">{question}</p>
         },
         enableSorting: false,

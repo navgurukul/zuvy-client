@@ -232,6 +232,7 @@ const Mcqs = (props: Props) => {
                 if (queryParams.length > 0) {
                     url += `&${queryParams.join('&')}`
                 }
+
                 const res = await api.get(url)
                 setStoreQuizData(res.data.data)
                 setTotalMCQQuestion(res.data.totalRows)
@@ -276,7 +277,7 @@ const Mcqs = (props: Props) => {
                 return <BulkUploadMcq />
             case 'oneatatime':
                 return (
-                    <div className="flex items-start justify-center w-screen ">
+                    <div className="flex items-start justify-center w-full">
                         <NewMcqForm
                             tags={tags}
                             closeModal={closeModal}
@@ -287,7 +288,7 @@ const Mcqs = (props: Props) => {
                 )
             case 'AI':
                 return (
-                    <div className="flex items-start justify-center w-screen ">
+                    <div className="flex items-start justify-center w-full">
                         <NewMcqProblemForm
                             tags={tags}
                             closeModal={closeModal}
@@ -297,9 +298,21 @@ const Mcqs = (props: Props) => {
                     </div>
                 )
             default:
-                return <h1>Create New Chapter</h1>
+                return (
+                    <div className="flex items-start justify-center w-full">
+                        <NewMcqForm
+                            tags={tags}
+                            closeModal={closeModal}
+                            setStoreQuizData={setStoreQuizData}
+                            getAllQuizQuesiton={getAllQuizQuestion}
+                        />
+                    </div>
+                )
         }
     }
+
+    // console.log('offset', offset)
+    // console.log('OFFSET', OFFSET)
 
     return (
         <>
@@ -315,51 +328,51 @@ const Mcqs = (props: Props) => {
                         <h1>MCQ Problems</h1>
                     </div>
                     <div className="flex items-center justify-center w-full"></div>
-                    <div className="flex flex-col items-center justify-center ">
+                    <div className="flex flex-col items-center justify-center">
                         <div>
                             <RadioGroup
-                                className="flex flex-col items-center w-full  "
+                                className="flex flex-col items-center w-full"
                                 defaultValue="oneatatime"
                                 onValueChange={(value) => setMcqType(value)}
                             >
-                                <h1 className="text-xl mb-4 ml-4 font-semibold text-start w-[300px] justify-start ">
-                                    New MCQ
+                                <h1 className="text-3xl mb-4 px-9 font-semibold text-start w-[750px] justify-start">
+                                    New MCQs
                                 </h1>
-                                <div className="flex w-[300px] items-start justify-start ml-4 gap-3">
-                                    <div className="flex  space-x-2">
+                                <div className="flex w-[750px] items-start justify-start ml-4 px-8 gap-3">
+                                    <div className="flex space-x-2 pr-2">
                                         <RadioGroupItem
                                             value="bulk"
                                             id="r1"
                                             className="text-secondary mt-1"
                                         />
                                         <Label
-                                            className="font-semibold text-md"
+                                            className="font-semibold text-lg"
                                             htmlFor="r1"
                                         >
-                                            Bulk
+                                            Bulk Upload
                                         </Label>
                                     </div>
-                                    <div className="flex  space-x-2">
+                                    <div className="flex space-x-2 pr-2">
                                         <RadioGroupItem
                                             value="oneatatime"
                                             id="r2"
                                             className="text-secondary mt-1"
                                         />
                                         <Label
-                                            className="font-semibold text-md"
+                                            className="font-semibold text-lg"
                                             htmlFor="r2"
                                         >
                                             One At A Time
                                         </Label>
                                     </div>
-                                    <div className="flex  space-x-2">
+                                    <div className="flex space-x-2 pr-2">
                                         <RadioGroupItem
                                             value="AI"
                                             id="r2"
                                             className="text-secondary mt-1"
                                         />
                                         <Label
-                                            className="font-semibold text-md"
+                                            className="font-semibold text-lg"
                                             htmlFor="r2"
                                         >
                                             Generate with AI

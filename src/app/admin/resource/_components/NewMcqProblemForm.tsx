@@ -5,6 +5,11 @@ import * as z from 'zod'
 import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Plus, X } from 'lucide-react'
+import { Checkbox } from '@/components/ui/checkbox'
+// import { Card } from '@/components/ui/card'
+import { Card, CardHeader, CardFooter } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { cn, difficultyQuestionBgColor } from '@/lib/utils'
 
 // Internal imports
 import {
@@ -30,6 +35,7 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { Spinner } from '@/components/ui/spinner'
 import axios from 'axios'
+import QuestionCard from '@/app/student/courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/QuestionCard'
 
 export type Tag = {
     label: string
@@ -41,20 +47,52 @@ export type Tag = {
 type Props = {}
 
 export type RequestBodyType = {
-    questions: {
-        question: string
-        options: { [key: number]: string }
-        correctOption: number
-        mark: number
+    quizzes: {
         tagId: number
         difficulty: string
+        variantMCQs: {
+            question: string
+            options: { 1: string; 2: string; 3: string; 4: string }
+        }[]
     }[]
 }
+
+// const formSchema = z.object({
+//     difficulty: z.enum(['Easy', 'Medium', 'Hard'], {
+//         required_error: 'You need to select a Difficulty type.',
+//     }),
+//     topics: z.number().min(1, 'You need to select a Topic'),
+//     questionText: z.string().min(1, {
+//         message: 'Question Text must be at least 1 character.',
+//     }),
+//     options: z
+//         .array(
+//             z.object({
+//                 value: z.string().min(1, 'Option cannot be empty.'),
+//             })
+//         )
+//         .min(2, 'At least two options are required.'),
+//     selectedOption: z.number().min(0, 'Please select the correct option.'),
+// })
+
 const formSchema = z.object({
-    difficulty: z.enum(['Easy', 'Medium', 'Hard'], {
-        required_error: 'You need to select a Difficulty type.',
-    }),
-    topics: z.number().min(1, 'You need to select a Topic'),
+    difficulty: z
+        .array(z.enum(['Easy', 'Medium', 'Hard']), {
+            required_error: 'You need to select at least one Difficulty type.',
+        })
+        .min(1, 'You need to select at least one Difficulty type.'),
+    // topics: z.array(z.number().min(1, 'You need to select a Topic')),
+    // topics: z.number().min(1, 'You need to select a Topic'),
+    topics: z.array(
+        z.object({
+            value: z.number().min(1, 'You need to select a Topic'),
+        })
+    ),
+    numbersOfQuestions: z.array(
+        z.object({
+            value: z.string().min(1, 'You need to select a Topic'),
+        })
+    ),
     questionText: z.string().min(1, {
         message: 'Question Text must be at least 1 character.',
     }),
@@ -87,16 +125,63 @@ const NewMcqProblemForm = ({
     const [bulkTopicIds, setBulkTopicIds] = useState<number[]>([])
     const [bulkQuantity, setBulkQuantity] = useState<number>(50) // Default to 50
     const [bulkLoading, setBulkLoading] = useState<boolean>(false)
+    const [requestBody, setRequestBody] = useState<RequestBodyType>({
+        quizzes: [],
+    })
 
     // **New State Variables for Progress Tracking**
+    const [generatedQuestions, setGeneratedQuestions] = useState<any>([])
+    //     {
+    //         correctOption: 2,
+    //         difficulty: 'Hard',
+    //         mark: 1,
+    //         options: {
+    //             1: '0 1 2 3 4 5 6 7 8 9',
+    //             2: '0 2 4 6 8',
+    //             3: '1 3 5 7 9',
+    //             4: '0 1 2 3 4 5 6 7 8 9 10',
+    //         },
+    //         question:
+    //             'Consider the following code snippet:\n\n```python\ni = 0\nwhile i < 10:\n if i % 2 == 0:\n print(i)\n i += 1\n```\n\nWhat will be the output of this code?',
+    //         tagId: 4,
+    //     },
+    //     {
+    //         correctOption: 2,
+    //         difficulty: 'Hard',
+    //         mark: 1,
+    //         options: {
+    //             1: '0 1 2 3 4 5 6 7 8 9',
+    //             2: '0 2 4 6 8',
+    //             3: '1 3 5 7 9',
+    //             4: '0 1 2 3 4 5 6 7 8 9 10',
+    //         },
+    //         question:
+    //             'Consider the following code snippet:\n\n```python\ni = 0\nwhile i < 10:\n if i % 2 == 0:\n print(i)\n i += 1\n```\n\nWhat will be the output of this code?',
+    //         tagId: 4,
+    //     },
+    // ])
     const [generatedCount, setGeneratedCount] = useState<number>(0)
     const [totalToGenerate, setTotalToGenerate] = useState<number>(0)
+
+    // const form = useForm<FormValues>({
+    //     resolver: zodResolver(formSchema),
+    //     defaultValues: {
+    //         difficulty: 'Easy',
+    //         topics: 0,
+    //         questionText: '',
+    //         options: [{ value: '' }, { value: '' }],
+    //         selectedOption: 0,
+    //     },
+    // })
 
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            difficulty: 'Easy',
-            topics: 0,
+            difficulty: [], // Starts with no difficulties selected
+            // topics: [0],
+            topics: [{ value: 0 }],
+            // topics: 0,
+            numbersOfQuestions: [{ value: '' }],
             questionText: '',
             options: [{ value: '' }, { value: '' }],
             selectedOption: 0,
@@ -105,16 +190,38 @@ const NewMcqProblemForm = ({
 
     const { fields, append, remove } = useFieldArray({
         control: form.control,
-        name: 'options',
+        // name: 'options',
+        name: 'topics',
     })
+
+    const {
+        fields: numQuestionsFields,
+        append: appendNumQuestions,
+        remove: removeNumQuestions,
+    } = useFieldArray({
+        control: form.control,
+        name: 'numbersOfQuestions',
+    })
+
+    // const { fields: topicFields, append: appendTopic } = useFieldArray({
+    //     control: form.control,
+    //     name: 'topics', // Now targets the topics field in form
+    // });
+
+    const addTopicField = () => {
+        append({ value: 0 })
+        appendNumQuestions({ value: '' })
+    }
 
     // Utility function to pause execution for given milliseconds
     const sleep = (ms: number) =>
         new Promise((resolve) => setTimeout(resolve, ms))
 
     const handleCreateQuizQuestion = async (requestBody: RequestBodyType) => {
+        console.log('requestBody', requestBody)
         try {
             const res = await api.post(`/Content/quiz`, requestBody)
+            console.log('res', res)
             toast({
                 title: res.data.status || 'Success',
                 description: res.data.message || 'Quiz Question Created',
@@ -132,7 +239,10 @@ const NewMcqProblemForm = ({
         }
     }
 
+    const { control, handleSubmit, setValue } = form
+
     const handleSubmitForm = async (values: FormValues) => {
+        console.log('values', values)
         const emptyOptions = values.options.some(
             (option) => option.value.trim() === ''
         )
@@ -164,15 +274,32 @@ const NewMcqProblemForm = ({
             difficulty: values.difficulty,
         }
 
-        const requestBody = {
-            questions: [formattedData],
-        }
+        // const requestBody = {
+        //     questions: [formattedData],
+        // }
+
+        // console.log('requestBody single', requestBody)
 
         setSaving(true)
-        await handleCreateQuizQuestion(requestBody)
+        if (requestBody) await handleCreateQuizQuestion(requestBody)
         await getAllQuizQuesiton(setStoreQuizData)
         setSaving(false)
         closeModal()
+    }
+
+    const generateQuestions = async () => {
+        const fieldValues = form.watch()
+        if (
+            fieldValues.numbersOfQuestions &&
+            (fieldValues.numbersOfQuestions?.length > 1 ||
+                Number(fieldValues.numbersOfQuestions[0].value) > 1)
+        ) {
+            console.log('Generating in bulk')
+            bulkGenerateMCQUsingGemini()
+        } else {
+            console.log('Generating single question')
+            generateMCQUsingGemini()
+        }
     }
 
     const generateMCQUsingGemini = async () => {
@@ -182,12 +309,18 @@ const NewMcqProblemForm = ({
                 process.env.NEXT_PUBLIC_GEMINI_API_KEY ||
                 'AIzaSyAm3e9-VoLFVVVLRIla-cZ40jwAqqd1FDY'
 
+            const generatedQuestions: any[] = []
             const difficulty = form.getValues('difficulty')
             const topicId = form.getValues('topics')
             const topic =
-                tags.find((t) => t.id === topicId)?.tagName || 'General'
+                tags.find((t) => t.id === topicId[0].value)?.tagName ||
+                'General'
+            // console.log('topic', topic)
+            // tags.find((t) => t.id === topicId[0])?.tagName || 'General'
+            // tags.find((t) => t.id === topicId)?.tagName || 'General'
+            // console.log('difficulty', difficulty)
 
-            const promptText = `Create a ${difficulty.toLowerCase()} difficulty Multiple Choice Question (MCQ) on the topic "${topic}" with the following format. Please ensure that the response strictly follows this format without any deviations:
+            const promptText = `Create a ${difficulty[0].toLowerCase()} difficulty Multiple Choice Question (MCQ) on the topic "${topic}" with the following format. Please ensure that the response strictly follows this format without any deviations:
 
 Question: [Write your full question here, including any necessary code blocks or descriptions]
 
@@ -317,16 +450,73 @@ Correct Answer: [Write the correct option number here]
                     })
                 }
 
-                form.reset({
-                    difficulty: difficulty,
-                    topics: topicId,
-                    questionText: question,
-                    options:
-                        newOptions.length >= 2
-                            ? newOptions.slice(0, 4)
-                            : [{ value: '' }, { value: '' }],
-                    selectedOption: newSelectedOption,
+                generatedQuestions.push({
+                    question,
+                    options: {
+                        1: opt1,
+                        2: opt2,
+                        3: opt3,
+                        4: opt4,
+                    },
+                    correctOption: correctAnswer + 1,
+                    mark: 1,
+                    tagId: topicId[0].value,
+                    difficulty: difficulty[0],
                 })
+
+                if (generatedQuestions.length > 0) {
+                    // const requestBody = {
+                    //     questions: generatedQuestions,
+                    // }
+                    const requestBody = {
+                        quizzes: [
+                            {
+                                // question,
+                                // options: {
+                                //     1: opt1,
+                                //     2: opt2,
+                                //     3: opt3,
+                                //     4: opt4,
+                                // },
+                                // correctOption: correctAnswer + 1,
+                                // mark: 1,
+                                tagId: topicId[0].value,
+                                difficulty: difficulty[0],
+                                variantMCQs: [
+                                    {
+                                        question: question,
+                                        options: {
+                                            1: opt1,
+                                            2: opt2,
+                                            3: opt3,
+                                            4: opt4,
+                                        },
+                                        correctOption: correctAnswer + 1,
+                                    },
+                                ],
+                            },
+                        ],
+                        // generatedQuestions,
+                    }
+                    setGeneratedQuestions(generatedQuestions)
+
+                    setRequestBody(requestBody)
+                    console.log('requestBody in single ', requestBody)
+                    // await handleCreateQuizQuestion(requestBody)
+                    await getAllQuizQuesiton(setStoreQuizData)
+                    closeModal()
+                }
+
+                // form.reset({
+                //     difficulty: difficulty,
+                //     topics: topicId,
+                //     questionText: question,
+                //     options:
+                //         newOptions.length >= 2
+                //             ? newOptions.slice(0, 4)
+                //             : [{ value: '' }, { value: '' }],
+                //     selectedOption: newSelectedOption,
+                // })
 
                 toast({
                     title: 'Success',
@@ -359,13 +549,26 @@ Correct Answer: [Write the correct option number here]
     const bulkGenerateMCQUsingGemini = async () => {
         setBulkLoading(true)
         setGeneratedCount(0) // Reset generated count
-        setTotalToGenerate(bulkQuantity) // Set total to generate
+        // setTotalToGenerate(numbersOfQuestions) // Set total to generate
         try {
+            const difficulties = form.getValues('difficulty')
+            const topicId = form.getValues('topics')
+            const topicIds = topicId.map((item) => item.value)
+
+            const numbersOfQuestions = form.getValues('numbersOfQuestions')
+            const totalNumbersOfQuestions = numbersOfQuestions.reduce(
+                (acc, curr) => acc + Number(curr.value),
+                0
+            )
+
+            setTotalToGenerate(totalNumbersOfQuestions) // Set total to generate
+
             const apiKey =
                 process.env.NEXT_PUBLIC_GEMINI_API_KEY ||
                 'AIzaSyAm3e9-VoLFVVVLRIla-cZ40jwAqqd1FDY'
 
-            if (bulkDifficulties.length === 0) {
+            // if (bulkDifficulties.length === 0) {
+            if (difficulties.length === 0) {
                 toast({
                     title: 'Error',
                     description: 'Please select at least one difficulty level.',
@@ -376,7 +579,8 @@ Correct Answer: [Write the correct option number here]
                 return
             }
 
-            if (bulkTopicIds.length === 0) {
+            // if (bulkTopicIds.length === 0) {
+            if (topicIds.length === 0) {
                 toast({
                     title: 'Error',
                     description: 'Please select at least one topic.',
@@ -387,7 +591,7 @@ Correct Answer: [Write the correct option number here]
                 return
             }
 
-            if (bulkQuantity < 1) {
+            if (totalNumbersOfQuestions < 1) {
                 toast({
                     title: 'Error',
                     description: 'Please enter a valid number of questions.',
@@ -408,25 +612,31 @@ Correct Answer: [Write the correct option number here]
 
             const generatedQuestions: any[] = []
             let attempts = 0
-            const maxAttempts = bulkQuantity * 5 // Allow up to 5 attempts per required question
+            const maxAttempts = totalNumbersOfQuestions * 5 // Allow up to 5 attempts per required question
 
             while (
-                generatedQuestions.length < bulkQuantity &&
+                generatedQuestions.length < totalNumbersOfQuestions &&
                 attempts < maxAttempts
             ) {
                 attempts += 1
 
                 const difficulty =
-                    bulkDifficulties[
-                        Math.floor(Math.random() * bulkDifficulties.length)
+                    difficulties[
+                        Math.floor(Math.random() * difficulties.length)
                     ]
 
                 const topicId =
-                    bulkTopicIds[
-                        Math.floor(Math.random() * bulkTopicIds.length)
-                    ]
+                    topicIds[Math.floor(Math.random() * topicIds.length)]
+
+                // const topic = tags.map((t) => t.tagName)
+
+                // let string = ''
+                // const topicssss = string.join('&')
+                // console.log
                 const topic =
                     tags.find((t) => t.id === topicId)?.tagName || 'General'
+
+                // queryParams.join('&')
 
                 const promptText = `Create a ${difficulty.toLowerCase()} difficulty Multiple Choice Question (MCQ) on the topic "${topic}" with the following format. Please ensure that the response strictly follows this format without any deviations:
 
@@ -583,7 +793,7 @@ Correct Answer: [Write the correct option number here]
                         existingQuestions.push(question.toLowerCase())
                         setGeneratedCount(generatedQuestions.length) // **Update Generated Count**
                         console.log(
-                            `Generated ${generatedQuestions.length}/${bulkQuantity} MCQs`
+                            `Generated ${generatedQuestions.length}/${totalNumbersOfQuestions} MCQs`
                         )
                     } else {
                         console.warn(
@@ -619,7 +829,7 @@ Correct Answer: [Write the correct option number here]
                 return
             }
 
-            if (generatedQuestions.length < bulkQuantity) {
+            if (generatedQuestions.length < totalNumbersOfQuestions) {
                 toast({
                     title: 'Warning',
                     description: `Only ${generatedQuestions.length} unique MCQs were generated.`,
@@ -639,8 +849,10 @@ Correct Answer: [Write the correct option number here]
                 const requestBody = {
                     questions: generatedQuestions,
                 }
+                setGeneratedQuestions(generatedQuestions)
 
-                await handleCreateQuizQuestion(requestBody)
+                console.log('requestBody', requestBody)
+                // await handleCreateQuizQuestion(requestBody)
                 await getAllQuizQuesiton(setStoreQuizData)
                 closeModal()
             }
@@ -690,19 +902,23 @@ Correct Answer: [Write the correct option number here]
         return union === 0 ? 0 : intersection / union
     }
 
+    // console.log('form.watch', form.watch())
+
+    // console.log('generatedQuestions', generatedQuestions)
+
     return (
-        <main className="flex flex-col p-3 h-full overflow-y-auto">
+        <main className="flex flex-col px-3 h-full">
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(handleSubmitForm)}
                     className="max-w-2xl mx-auto w-full flex flex-col gap-6 h-full"
                 >
                     {/* Difficulty Field */}
-                    <FormField
+                    {/* <FormField
                         control={form.control}
                         name="difficulty"
                         render={({ field }) => (
-                            <FormItem className="space-y-3">
+                            <FormItem className="space-y-3 flex flex-row items-center">
                                 <FormLabel className="text-lg font-medium">
                                     Difficulty
                                 </FormLabel>
@@ -741,56 +957,283 @@ Correct Answer: [Write the correct option number here]
                                 <FormMessage />
                             </FormItem>
                         )}
+                    /> */}
+                    <FormField
+                        control={form.control}
+                        name="difficulty"
+                        render={({ field }) => (
+                            <FormItem className="flex items-center space-x-6">
+                                <FormLabel className="text-lg font-semibold mt-8">
+                                    Difficulty
+                                </FormLabel>
+                                {/* Checkbox options */}
+                                <FormControl>
+                                    <div className="flex flex-row space-x-4 items-center">
+                                        {/* Easy option */}
+                                        <FormItem className="flex items-center space-x-2">
+                                            <Checkbox
+                                                checked={field.value.includes(
+                                                    'Easy'
+                                                )}
+                                                onCheckedChange={(checked) => {
+                                                    const newValue = checked
+                                                        ? [
+                                                              ...field.value,
+                                                              'Easy',
+                                                          ]
+                                                        : field.value.filter(
+                                                              (val) =>
+                                                                  val !== 'Easy'
+                                                          )
+                                                    field.onChange(newValue)
+                                                }}
+                                                aria-label="Select Easy"
+                                                className="translate-y-[2px]"
+                                            />
+                                            <FormLabel className="text-lg">
+                                                Easy
+                                            </FormLabel>
+                                        </FormItem>
+
+                                        {/* Medium option */}
+                                        <FormItem className="flex items-center space-x-2">
+                                            <Checkbox
+                                                checked={field.value.includes(
+                                                    'Medium'
+                                                )}
+                                                onCheckedChange={(checked) => {
+                                                    const newValue = checked
+                                                        ? [
+                                                              ...field.value,
+                                                              'Medium',
+                                                          ]
+                                                        : field.value.filter(
+                                                              (val) =>
+                                                                  val !==
+                                                                  'Medium'
+                                                          )
+                                                    field.onChange(newValue)
+                                                }}
+                                                aria-label="Select Medium"
+                                                className="translate-y-[2px]"
+                                            />
+                                            <FormLabel className="text-lg">
+                                                Medium
+                                            </FormLabel>
+                                        </FormItem>
+
+                                        {/* Hard option */}
+                                        <FormItem className="flex items-center space-x-2">
+                                            <Checkbox
+                                                checked={field.value.includes(
+                                                    'Hard'
+                                                )}
+                                                onCheckedChange={(checked) => {
+                                                    const newValue = checked
+                                                        ? [
+                                                              ...field.value,
+                                                              'Hard',
+                                                          ]
+                                                        : field.value.filter(
+                                                              (val) =>
+                                                                  val !== 'Hard'
+                                                          )
+                                                    field.onChange(newValue)
+                                                }}
+                                                aria-label="Select Hard"
+                                                className="translate-y-[2px]"
+                                            />
+                                            <FormLabel className="text-lg">
+                                                Hard
+                                            </FormLabel>
+                                        </FormItem>
+                                    </div>
+                                </FormControl>
+
+                                <FormMessage />
+                            </FormItem>
+                        )}
                     />
 
                     {/* Topics Field */}
-                    <FormField
-                        control={form.control}
-                        name="topics"
-                        render={({ field }) => {
-                            return (
-                                <FormItem className="text-left w-full">
-                                    <FormLabel>Topics</FormLabel>
-                                    <Select
-                                        onValueChange={(value) => {
-                                            const selectedTag = tags?.find(
-                                                (tag: Tag) =>
-                                                    tag?.tagName === value
-                                            )
-                                            if (selectedTag) {
-                                                field.onChange(selectedTag.id)
+                    {/* <div className="flex flex-col"> */}
+                    {/* <p className="text-lg font-semibold text-start">
+                            Topic Name and No. of Questions
+                        </p> */}
+                    <div className="flex flex-row gap-6">
+                        {/* <FormField
+                            control={form.control}
+                            name="topics"
+                            render={({ field }) => {
+                                console.log('field', field)
+                                return (
+                                    <FormItem className="text-left w-full my-2">
+                                        <FormLabel className="text-lg font-semibold">
+                                            Topic Name and No. of Questions
+                                        </FormLabel>
+                                        <Select
+                                            onValueChange={(value) => {
+                                                console.log('value', value)
+                                                const selectedTag = tags?.find(
+                                                    (tag: Tag) =>
+                                                        tag?.tagName === value
+                                                    // tag?.tagName === value[0]
+                                                )
+                                                console.log(
+                                                    'selectedTag',
+                                                    selectedTag
+                                                )
+                                                if (selectedTag) {
+                                                    field.onChange(
+                                                        selectedTag.id
+                                                    )
+                                                }
+                                            }}
+                                            value={
+                                                tags.find(
+                                                    (tag) =>
+                                                        // tag.id === field.value
+                                                        // tag.id ===
+                                                        // field.value[0]
+                                                        tag.id ===
+                                                        field.value[0].value
+                                                )?.tagName || ''
                                             }
-                                        }}
-                                        value={
-                                            tags.find(
-                                                (tag) => tag.id === field.value
-                                            )?.tagName || ''
-                                        }
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Choose Topic" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {tags.map((tag: any) => (
-                                                <SelectItem
-                                                    key={tag.id}
-                                                    value={tag?.tagName}
-                                                >
-                                                    {tag?.tagName}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                        >
+                                            <FormControl>
+                                                <SelectTrigger className="rounded-md">
+                                                    <SelectValue placeholder="Choose Topic" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {tags.map((tag: any) => (
+                                                    <SelectItem
+                                                        key={tag.id}
+                                                        value={tag?.tagName}
+                                                    >
+                                                        {tag?.tagName}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )
+                            }}
+                        /> */}
+                        {/* <FormField
+                            control={form.control}
+                            name="description"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="flex text-left text-md font-semibold mb-1">
+                                        Description
+                                    </FormLabel>
+                                    <FormControl> */}
+                        {/* <Input
+                            // {...field}
+                            className="w-[350px] px-3 mt-11 border rounded-md"
+                            placeholder="Placeholder"
+                        /> */}
+                        {/* </FormControl>
                                     <FormMessage />
                                 </FormItem>
-                            )
-                        }}
-                    />
+                            )}
+                        /> */}
+                    </div>
+                    {/* </div> */}
+
+                    <div className="flex flex-col gap-4">
+                        <p className="text-lg font-semibold text-start">
+                            Topic Name and No. of Questions
+                        </p>
+                        {/* <div className="flex flex-row gap-6"> */}
+                        {fields.map((field, index) => (
+                            <div className="flex flex-row gap-6">
+                                <FormField
+                                    key={field.id}
+                                    control={form.control}
+                                    name={`topics.${index}.value`}
+                                    render={({ field }) => (
+                                        <FormItem className="text-left w-full my-2">
+                                            {/* <FormLabel className="text-lg font-semibold">
+                                                Topic Name
+                                            </FormLabel> */}
+                                            <Select
+                                                onValueChange={(value) => {
+                                                    const selectedTag =
+                                                        tags.find(
+                                                            (tag) =>
+                                                                tag.tagName ===
+                                                                value
+                                                        )
+                                                    if (selectedTag) {
+                                                        field.onChange(
+                                                            selectedTag.id
+                                                        )
+                                                    }
+                                                }}
+                                                value={
+                                                    tags.find(
+                                                        (tag) =>
+                                                            tag.id ===
+                                                            field.value
+                                                    )?.tagName || ''
+                                                }
+                                            >
+                                                <FormControl>
+                                                    <SelectTrigger className="rounded-md">
+                                                        <SelectValue placeholder="Choose Topic" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    {tags.map((tag) => (
+                                                        <SelectItem
+                                                            key={tag.id}
+                                                            value={tag.tagName}
+                                                        >
+                                                            {tag.tagName}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name={`numbersOfQuestions.${index}.value`}
+                                    render={({ field }) => (
+                                        <Input
+                                            {...field}
+                                            className="w-[350px] px-3 border rounded-md"
+                                            placeholder="Min 1 to Max 40"
+                                        />
+                                    )}
+                                />
+                            </div>
+                        ))}
+                        {/* <Input
+                                // {...field}
+                                className="w-[350px] px-3 border rounded-md"
+                                placeholder="Placeholder"
+                            />
+                        </div> */}
+
+                        {/* Add Topic Button */}
+                        <Button
+                            type="button"
+                            variant={'ghost'}
+                            onClick={addTopicField}
+                            className="mt-4 justify-start"
+                        >
+                            + Add Topic
+                        </Button>
+                    </div>
 
                     {/* Question Text Field */}
-                    <FormField
+                    {/* <FormField
                         control={form.control}
                         name="questionText"
                         render={({ field }) => {
@@ -808,10 +1251,10 @@ Correct Answer: [Write the correct option number here]
                                 </FormItem>
                             )
                         }}
-                    />
+                    /> */}
 
                     {/* Options Field */}
-                    <FormField
+                    {/* <FormField
                         control={form.control}
                         name="options"
                         render={({ field }) => (
@@ -876,7 +1319,7 @@ Correct Answer: [Write the correct option number here]
                                 <div className="flex justify-start">
                                     <Button
                                         variant={'outline'}
-                                        onClick={() => append({ value: '' })}
+                                        onClick={() => append({ value: 0 })}
                                         type="button"
                                         className="flex items-center mt-2"
                                     >
@@ -889,15 +1332,41 @@ Correct Answer: [Write the correct option number here]
                                 </div>
                             </FormItem>
                         )}
-                    />
+                    /> */}
 
+                    <div className="border-t border-gray-300"></div>
+
+                    <div className="flex justify-end items-center gap-4">
+                        <Button
+                            type="button"
+                            onClick={generateMCQUsingGemini}
+                            className="flex items-center bg-gray-300 text-black"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            type="button"
+                            // onClick={generateMCQUsingGemini}
+                            onClick={generateQuestions}
+                            className="flex items-center"
+                        >
+                            {loadingAI ? (
+                                <>
+                                    <Spinner size="small" className="mr-2" />
+                                    Generating...
+                                </>
+                            ) : (
+                                'Generate Questions'
+                            )}
+                        </Button>
+                    </div>
                     {/* Bulk Generate Section */}
-                    <div className="border-t border-gray-300 mt-6 pt-6">
+                    {/* <div className="border-t border-gray-300 mt-6 pt-6">
                         <h2 className="text-xl font-semibold">
                             Bulk Generate MCQs
                         </h2>
                         <div className="mt-4 space-y-4">
-                            {/* Difficulty Selection */}
+                            Difficulty Selection
                             <FormItem className="space-y-1">
                                 <FormLabel>Select Difficulty Levels</FormLabel>
                                 <div className="flex flex-wrap gap-4">
@@ -977,7 +1446,7 @@ Correct Answer: [Write the correct option number here]
                                 </div>
                             </FormItem>
 
-                            {/* Topics Selection */}
+                            Topics Selection
                             <FormItem className="space-y-1">
                                 <FormLabel>Select Topics</FormLabel>
                                 <div className="flex flex-wrap gap-4">
@@ -1017,7 +1486,7 @@ Correct Answer: [Write the correct option number here]
                                 </div>
                             </FormItem>
 
-                            {/* Number of Questions */}
+                            Number of Questions
                             <FormField
                                 name="bulkQuantity"
                                 render={() => (
@@ -1047,7 +1516,7 @@ Correct Answer: [Write the correct option number here]
                                 )}
                             />
 
-                            {/* **Progress Display** */}
+                            **Progress Display**
                             {bulkLoading && (
                                 <div className="bg-gray-100 p-4 rounded-md">
                                     <p className="text-sm text-gray-700">
@@ -1069,7 +1538,7 @@ Correct Answer: [Write the correct option number here]
                                 </div>
                             )}
 
-                            {/* Bulk Generate Button */}
+                            Bulk Generate Button
                             <Button
                                 type="button"
                                 variant="secondary"
@@ -1090,11 +1559,92 @@ Correct Answer: [Write the correct option number here]
                                 )}
                             </Button>
                         </div>
-                    </div>
+                    </div> */}
+
+                    {generatedQuestions.length > 0 && (
+                        <>
+                            <p className="text-2xl font-semibold text-start">
+                                {generatedQuestions.length} MCQs generated
+                            </p>
+                            {generatedQuestions.map((item: any, index: any) => (
+                                <Card className="bg-white rounded-lg shadow-md p-5">
+                                    {/* <Card className="bg-white rounded-lg p-5 border-non shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F]"> */}
+                                    {/* <CardBody className="px-6 py-4"> */}
+                                    <div className="flex flex-row gap-4">
+                                        <Badge
+                                            // variant="yellow"
+                                            className="mb-3 text-white"
+                                        >
+                                            {
+                                                tags.find(
+                                                    (t) => t.id === item.tagId
+                                                )?.tagName
+                                            }
+                                        </Badge>
+                                        <Badge
+                                            variant="yellow"
+                                            // className="mb-3 bg-gray-400 text-white"
+                                            className={cn(
+                                                `mb-3 text-white`,
+                                                difficultyQuestionBgColor(
+                                                    item.difficulty
+                                                )
+                                            )}
+                                        >
+                                            {item.difficulty}
+                                            {/* {difficultyQuestionBgColor(item.difficulty)} */}
+                                        </Badge>
+                                    </div>
+
+                                    <p className="ml-4 text-start text-md font-semibold">
+                                        {item.question}
+                                    </p>
+                                    {/* tags.find((t) => t.id === topicId[0].value)?.tagName */}
+                                    <div className="space-y-2 mt-4">
+                                        <div className="flex items-center px-4 py-3 rounded-md hover:bg-gray-100 cursor-pointer">
+                                            <span className="font-medium mr-2">
+                                                A.
+                                            </span>
+                                            <span>{item.options[1]}</span>
+                                        </div>
+                                        <div className="flex items-center px-4 py-3 rounded-md hover:bg-gray-100 cursor-pointer">
+                                            <span className="font-medium mr-2">
+                                                B.
+                                            </span>
+                                            <span>{item.options[2]}</span>
+                                        </div>
+                                        <div className="flex items-center px-4 py-3 rounded-md hover:bg-gray-100 cursor-pointer">
+                                            <span className="font-medium mr-2">
+                                                C.
+                                            </span>
+                                            <span>{item.options[3]}</span>
+                                        </div>
+                                        <div className="flex items-center px-4 py-3 rounded-md hover:bg-gray-100 cursor-pointer">
+                                            <span className="font-medium mr-2">
+                                                D.
+                                            </span>
+                                            <span>{item.options[4]}</span>
+                                        </div>
+                                    </div>
+                                    {/* </CardBody> */}
+                                    {/* <CardFooter className="flex justify-end px-6 py-4 border-t">
+                            <Button variant="primary">Submit</Button>
+                        </CardFooter> */}
+                                </Card>
+                                // <QuestionCard
+                                //   key={index}
+                                //   question={question.question}
+                                //   options={question.options}
+                                //   correctOption={question.correctOption}
+                                // />
+                            ))}
+                        </>
+                    )}
 
                     {/* Action Buttons */}
-                    <div className="flex justify-between items-center mt-8">
-                        <Button
+                    {generatedQuestions.length > 0 && (
+                        <div className="flex justify-end items-center gap-4">
+                            {/* <Button
                             type="button"
                             variant="outline"
                             onClick={generateMCQUsingGemini}
@@ -1113,22 +1663,60 @@ Correct Answer: [Write the correct option number here]
                             ) : (
                                 'Generate Using AI'
                             )}
-                        </Button>
-                        <Button
-                            type="submit"
-                            disabled={saving}
-                            className="w-1/3 flex items-center justify-center"
-                        >
-                            {saving ? (
-                                <>
-                                    <Spinner size="small" className="mr-2" />
-                                    Saving...
-                                </>
-                            ) : (
-                                '+ Create MCQ'
-                            )}
-                        </Button>
-                    </div>
+                        </Button> */}
+                            <Button
+                                type="button"
+                                // variant="outline"
+                                // onClick={setGeneratedQuestions([])}
+                                // disabled={
+                                //     loadingAI ||
+                                //     !form.watch('difficulty') ||
+                                //     !form.watch('topics')
+                                // }
+                                className="flex items-center bg-gray-300 text-black"
+                            >
+                                Clear Questions
+                            </Button>
+                            {/* <Button
+                                type="submit"
+                                disabled={saving}
+                                className="w-1/3 flex items-center justify-center"
+                            >
+                                {saving ? (
+                                    <>
+                                        <Spinner
+                                            size="small"
+                                            className="mr-2"
+                                        />
+                                        Saving...
+                                    </>
+                                ) : (
+                                    'Add Questions'
+                                )}
+                            </Button> */}
+                            <Button
+                                type="button"
+                                // disabled={saving}
+                                onClick={() =>
+                                    handleCreateQuizQuestion(requestBody)
+                                }
+                                className="w-1/3 flex items-center justify-center"
+                            >
+                                {/* {saving ? (
+                                    <>
+                                        <Spinner
+                                            size="small"
+                                            className="mr-2"
+                                        />
+                                        Saving...
+                                    </>
+                                ) : (
+                                    'Add Questions'
+                                )} */}
+                                Add Questions
+                            </Button>
+                        </div>
+                    )}
                 </form>
             </Form>
         </main>

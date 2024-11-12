@@ -54,6 +54,8 @@ interface StoreBatchData {
 }
 
 export interface quiz {
+    quizVariants: any
+    title: any
     id: number
     question: string
     options: {
