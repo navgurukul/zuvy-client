@@ -56,10 +56,6 @@ const Assessment = ({
         try {
             const assessmentUrl = `/student/courses/${viewcourses}/modules/${moduleID}/assessment/${assessmentOutSourceId}`
 
-            const startTime = Date.now()
-            const endTime = startTime + testDuration * 1000
-            localStorage.setItem('endTime', endTime.toString())
-
             let newWindow: any
 
             if (typeof window !== 'undefined') {
@@ -158,7 +154,7 @@ const Assessment = ({
                             )}
 
                             <div>
-                                <div className="flex items-center gap-2">
+                                {/* <div className="flex items-center gap-2">
                                     <AlertOctagon
                                         size={16}
                                         className="text-destructive"
@@ -188,7 +184,7 @@ const Assessment = ({
                                         MCQs & Open-ended Questions can be
                                         submitted only once.
                                     </p>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
                     )}

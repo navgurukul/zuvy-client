@@ -15,7 +15,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <MaxWidthWrapper>{children}</MaxWidthWrapper>
             ) : (
                 // <MaxWidthWrapper><Project /></MaxWidthWrapper>
-                <div className="flex h-screen flex-col md:flex-row md:overflow-hidden">
+                <div className="flex h-full flex-col md:flex-row md:overflow-hidden">
                     {/* <div className="w-full flex-none md:w-[25%]"> */}
                     {/* <div className="w-full flex-none md:w-[25%] sticky top-0 h-screen overflow-y-auto"> */}
                     <div className="w-full flex-none md:w-[25%] sticky top-0 h-screen">
