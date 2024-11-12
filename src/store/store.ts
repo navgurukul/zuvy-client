@@ -147,26 +147,14 @@ export const getAssessmentPreviewStore = create<assessmentPreviewStore>(
 // ------------------------------
 // Define the type for the assessment store
 type assessmentStore = {
-    tabChangeInstance: number
-    setTabChangeInstance: (newValue: number) => void
     fullScreenExitInstance: number
     setFullScreenExitInstance: (newValue: number) => void
-    copyPasteAttempt: number
-    setCopyPasteAttempt: (newValue: number) => void
 }
 
 export const getAssessmentStore = create<assessmentStore>((set) => ({
-    tabChangeInstance: 0,
-    setTabChangeInstance: (newValue: number) => {
-        set({ tabChangeInstance: newValue })
-    },
-    fullScreenExitInstance: 0,
+     fullScreenExitInstance: 0,
     setFullScreenExitInstance: (newValue: number) => {
         set({ fullScreenExitInstance: newValue })
-    },
-    copyPasteAttempt: 0,
-    setCopyPasteAttempt: (newValue: number) => {
-        set({ copyPasteAttempt: newValue })
     },
 }))
 // ------------------------------
@@ -549,6 +537,8 @@ type editCodingQuestionDialogs = {
     setIsCodingEditDialogOpen: (newValue: boolean) => void
     editCodingQuestionId: null
     setEditCodingQuestionId: (newValue: any) => void
+    isQuestionUsed: boolean
+    setIsQuestionUsed: (newValue: boolean) => void
 }
 
 export const getEditCodingQuestionDialogs = create<editCodingQuestionDialogs>(
@@ -565,6 +555,10 @@ export const getEditCodingQuestionDialogs = create<editCodingQuestionDialogs>(
         setEditCodingQuestionId: (newValue: any) => {
             set({ editCodingQuestionId: newValue })
         },
+        isQuestionUsed: false,
+        setIsQuestionUsed: (newValue: boolean) => {
+            set({ isQuestionUsed: newValue })
+        }
     })
 )
 

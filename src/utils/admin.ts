@@ -3,7 +3,7 @@ import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
 import { useEffect, useRef } from 'react'
 import useDebounce from '@/hooks/useDebounce'
-import { getMcqSearch } from '@/store/store'
+import { getEditCodingQuestionDialogs } from '@/store/store'
 import { Search } from 'lucide-react'
 import { SelectScrollDownButton } from '@radix-ui/react-select'
 import { POSITION } from './constant'
@@ -267,10 +267,16 @@ export const handleEditOpenEndedQuestion = (
 export const handleEditCodingQuestion = (
     codingQuestion: any,
     setIsCodingEditDialogOpen: any,
-    setEditCodingQuestionId: any
+    setEditCodingQuestionId: any,
+    setIsQuestionUsed: any
 ) => {
     setIsCodingEditDialogOpen(true)
     setEditCodingQuestionId(codingQuestion.id)
+    if(codingQuestion?.usage){
+        setIsQuestionUsed(true)
+    }else{
+        setIsQuestionUsed(false)
+    }
 }
 export const handlerQuizQuestions = (
     quizQuestion: any,
