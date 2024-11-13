@@ -15,6 +15,8 @@ import { getCodingQuestionTags } from '@/store/store'
 import { ArrowUpRightSquare } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import PreviewCodingChallenge from './PreviewCodingChallenge'
+import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
+import QuestionDescriptionModal from '../Assessment/QuestionDescriptionModal'
 
 interface Example {
     input: number[]
@@ -320,6 +322,26 @@ function CodingChallenge({
                                                 )}
                                             </div>
                                         </div>
+                                        <div className="w-full">
+                                            <p className="text-gray-600 mt-1">
+                                                {ellipsis(
+                                                    question.description,
+                                                    60
+                                                )}
+                                            </p>
+                                        </div>
+                                        <Dialog>
+                                            <DialogTrigger asChild>
+                                                <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer">
+                                                    View Full Description
+                                                </p>
+                                            </DialogTrigger>
+                                            <DialogOverlay />
+                                            <QuestionDescriptionModal
+                                                question={question}
+                                                type="coding"
+                                            />
+                                        </Dialog>
                                     </div>
                                 ))}
                             </ScrollArea>

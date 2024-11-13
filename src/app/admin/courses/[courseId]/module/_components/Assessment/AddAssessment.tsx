@@ -23,7 +23,7 @@ import { useRouter } from 'next/navigation'
 type AddAssessmentProps = {
     chapterData: any
     content: any
-    fetchChapterContent: (chapterId: number, topicId:number) => void
+    fetchChapterContent: (chapterId: number, topicId: number) => void
     moduleId: any
     topicId: any
 }
@@ -76,8 +76,12 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     const [selectedCodingQuesIds, setSelectedCodingQuesIds] = useState<
         number[]
     >([])
+    const [selectedCodingQuesTagIds, setSelectedCodingQuesTagIds] = useState<
+        number[]
+    >([])
 
     const [selectedQuizQuesIds, setSelectedQuizQuesIds] = useState<number[]>([])
+    const [selectedQuizQuesTagIds, setSelectedQuizQuesTagIds] = useState<number[]>([])
 
     const [selectedOpenEndedQuesIds, setSelectedOpenEndedQuesIds] = useState<
         number[]
@@ -246,29 +250,17 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     }, [content])
 
     useEffect(() => {
-        setSelectedCodingQuesIds(
-            Array.from(
-                new Set(selectedCodingQuestions.map((question) => question.id))
-            )
-        )
+        setSelectedCodingQuesIds(Array.from(new Set(selectedCodingQuestions.map((question) => question.id))))
+        setSelectedCodingQuesTagIds(Array.from(new Set(selectedCodingQuestions.map((question) => question.tagId))))
     }, [selectedCodingQuestions])
 
     useEffect(() => {
-        setSelectedQuizQuesIds(
-            Array.from(
-                new Set(selectedQuizQuestions.map((question) => question.id))
-            )
-        )
+        setSelectedQuizQuesIds(Array.from(new Set(selectedQuizQuestions.map((question) => question.id))))
+        setSelectedQuizQuesTagIds(Array.from(new Set(selectedQuizQuestions.map((question) => question.tagId))))
     }, [selectedQuizQuestions])
 
     useEffect(() => {
-        setSelectedOpenEndedQuesIds(
-            Array.from(
-                new Set(
-                    selectedOpenEndedQuestions.map((question) => question.id)
-                )
-            )
-        )
+        setSelectedOpenEndedQuesIds(Array.from(new Set(selectedOpenEndedQuestions.map((question) => question.id))))
     }, [selectedOpenEndedQuestions])
 
     useEffect(() => {
@@ -450,9 +442,9 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                 <SettingsAssessment
                     selectedCodingQuesIds={selectedCodingQuesIds}
                     selectedQuizQuesIds={selectedQuizQuesIds}
-                    selectedOpenEndedQuesIds={
-                        selectedOpenEndedQuesIds
-                    }
+                    selectedOpenEndedQuesIds={selectedOpenEndedQuesIds}
+                    selectedCodingQuesTagIds={selectedCodingQuesTagIds}
+                    selectedQuizQuesTagIds={selectedQuizQuesTagIds}
                     content={content}
                     fetchChapterContent={fetchChapterContent}
                     chapterData={chapterData}

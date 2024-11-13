@@ -63,6 +63,7 @@ export default function Page({
                 const response = await api.get(
                     `Content/chapterDetailsById/${chapterId}?bootcampId=${courseId}&moduleId=${moduleId}&topicId=${topicId}`
                 )
+
                 setChapterId(chapterId)
                 const currentModule: any = moduleData.find(
                     (myModule: any) => myModule.chapterId === chapterId
@@ -95,6 +96,9 @@ export default function Page({
                 setKey((prevKey: any) => prevKey + 1)
             } catch (error) {
                 console.error('Error fetching chapter content:', error)
+                setTimeout(() => {
+                    setLoading(false) // Set loading to false after the delay
+                }, 100)
             }
         },
         [moduleData, courseId, moduleId]
@@ -108,12 +112,11 @@ export default function Page({
             setChapterContent([])
             setActiveChapterTitle('')
             setTopicId(0)
+            setTimeout(() => {
+                setLoading(false) // Set loading to false after the delay
+            }, 100)
         }
     }, [chapterData, fetchChapterContent])
-
-    console.log('topicId', topicId)
-    console.log('chapterContent', chapterContent)
-    console.log('chapter_id', chapter_id)
 
     const renderChapterContent = () => {
         if (

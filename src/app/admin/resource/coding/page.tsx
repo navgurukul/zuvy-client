@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { ChevronLeft, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,6 +11,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
+
 import {
     Dialog,
     DialogContent,
@@ -25,6 +27,8 @@ import { columns } from '@/app/admin/resource/coding/column'
 import NewCodingProblemForm from '@/app/admin/resource/_components/NewCodingProblemForm'
 import { api } from '@/utils/axios.config'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
+import { OFFSET, POSITION } from '@/utils/constant'
+
 import {
     getCodingQuestionTags,
     getEditCodingQuestionDialogs,
@@ -42,6 +46,7 @@ import useDebounce from '@/hooks/useDebounce'
 import MultiSelector from '@/components/ui/multi-selector'
 import difficultyOptions from '@/app/utils'
 import CodingTopics from '../../courses/[courseId]/module/_components/codingChallenge/CodingTopics'
+// import { POSITION } from '@/utils/constant'
 
 export type Tag = {
     id: number
@@ -83,6 +88,9 @@ const CodingProblems = () => {
         // { id: -1, tagName: 'All Topics' },
         { value: '-1', label: 'All Topics' },
     ])
+    const [options, setOptions] = useState<Option[]>([
+        { value: '-1', label: 'All Topics' },
+    ])
     const [selectedDifficulty, setSelectedDifficulty] = useState(['None'])
     const [difficulty, setDifficulty] = useState([
         { value: 'None', label: 'All Difficulty' },
@@ -90,6 +98,13 @@ const CodingProblems = () => {
 
     const [loading, setLoading] = useState(true)
     const [openEditDialog, setOpenEditDialog] = useState(false)
+    const [position, setPosition] = useState(POSITION)
+    const [currentPage, setCurrentPage] = useState(1)
+    const [totalCodingQuestion, setTotalCodingQuestion] = useState(0)
+    const [totalPages, setTotalPages] = useState(0)
+    const [lastPage, setLastPage] = useState(0)
+    const [offset, setOffset] = useState<number>(OFFSET)
+
     const selectedLanguage = ''
 
     const handleTopicClick = (value: string) => {
@@ -171,17 +186,25 @@ const CodingProblems = () => {
     async function getAllTags() {
         const response = await api.get('Content/allTags')
         if (response) {
-            const transformedData = response.data.allTags.map(
+            const tagArr = [
+                { id: -1, tagName: 'All Topics' },
+                ...response.data.allTags,
+            ]
+            const transformedTags = tagArr.map(
+                (item: { id: any; tagName: any }) => ({
+                    id: item.id,
+                    tagName: item.tagName,
+                })
+            )
+            const transformedData = tagArr.map(
                 (item: { id: any; tagName: any }) => ({
                     value: item.id.toString(),
                     label: item.tagName,
                 })
             )
-            const tagArr = [
-                { value: '-1', label: 'All Topics' },
-                ...transformedData,
-            ]
-            setTags(tagArr)
+
+            setTags(transformedTags)
+            setOptions(transformedData)
         }
     }
 
@@ -189,15 +212,49 @@ const CodingProblems = () => {
         getAllTags()
     }, [])
 
+    const fetchCodingQuestions = useCallback(
+        async (offset: number) => {
+            filteredCodingQuestions(
+                offset,
+                setCodingQuestions,
+                setTotalCodingQuestion,
+                setLastPage,
+                setTotalPages,
+                difficulty,
+                selectedOptions,
+                debouncedSearch,
+                position,
+                selectedLanguage
+            )
+        },
+        [
+            searchTerm,
+            selectedOptions,
+            difficulty,
+            // selectedDifficulty,
+            debouncedSearch,
+            isCodingDialogOpen,
+            openEditDialog,
+            position,
+            offset,
+        ]
+    )
+
     useEffect(() => {
         getAllCodingQuestions(setAllCodingQuestions)
-        filteredCodingQuestions(
-            setCodingQuestions,
-            difficulty,
-            selectedOptions,
-            selectedLanguage,
-            debouncedSearch
-        )
+        fetchCodingQuestions(offset)
+        // filteredCodingQuestions(
+        //     offset,
+        //     setCodingQuestions,
+        //     difficulty,
+        //     selectedOptions,
+        //     selectedLanguage,
+        //     debouncedSearch,
+        //     position,
+        //     setLastPage,
+        //     setTotalPages,
+        //     setTotalCodingQuestion
+        // )
         // filterQuestions(
         //     setCodingQuestions,
         //     selectedDifficulty,
@@ -214,6 +271,8 @@ const CodingProblems = () => {
         debouncedSearch,
         isCodingDialogOpen,
         openEditDialog,
+        position,
+        offset,
     ])
 
     useEffect(() => {
@@ -279,29 +338,34 @@ const CodingProblems = () => {
                                 selectedDifficulties={selectedDifficulty}
                                 setSelectedDifficulties={setSelectedDifficulty}
                             /> */}
-                            <div className="flex items-center">
+                            <div className="flex items-center gap-4">
                                 <div className="w-full lg:w-[250px]">
                                     <MultiSelector
                                         selectedCount={difficultyCount}
                                         options={difficultyOptions}
                                         selectedOptions={difficulty}
                                         handleOptionClick={handleDifficulty}
+                                        type={
+                                            difficultyCount > 1
+                                                ? 'Difficulties'
+                                                : 'Difficulty'
+                                        }
                                     />
                                 </div>
-                                <Separator
-                                    orientation="vertical"
-                                    className="w-1 h-12 mx-4 bg-gray-400 rounded-lg"
-                                />
                                 <div className="w-full lg:w-[250px]">
                                     <MultiSelector
                                         selectedCount={selectedTagCount}
-                                        options={tags}
+                                        options={options}
                                         selectedOptions={selectedOptions}
                                         handleOptionClick={handleTagOption}
+                                        type={
+                                            selectedTagCount > 1
+                                                ? 'Topics'
+                                                : 'Topic'
+                                        }
                                     />
                                 </div>
                             </div>
-
                             <DataTable
                                 data={codingQuestions}
                                 columns={columns}
@@ -377,6 +441,17 @@ const CodingProblems = () => {
                             )}
                         </>
                     )}
+                    <DataTablePagination
+                        totalStudents={totalCodingQuestion}
+                        position={position}
+                        setPosition={setPosition}
+                        pages={totalPages}
+                        lastPage={lastPage}
+                        currentPage={currentPage}
+                        setCurrentPage={setCurrentPage}
+                        fetchStudentData={fetchCodingQuestions}
+                        setOffset={setOffset}
+                    />
                 </div>
             )}
         </>

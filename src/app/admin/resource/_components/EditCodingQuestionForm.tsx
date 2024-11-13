@@ -1,4 +1,3 @@
-
 'use client'
 import { useEffect, useState } from 'react'
 
@@ -55,6 +54,7 @@ const formSchema = z.object({
             id: z.any().optional(), // Optional ID
             input: z.string().min(1),
             output: z.string().min(1),
+            isExisting: z.boolean().optional(), // Disable existing test cases if question is used
         })
     ),
 })
@@ -63,7 +63,7 @@ export default function EditCodingQuestionForm() {
     const [testCases, setTestCases] = useState<any>([])
 
     const { tags } = getCodingQuestionTags()
-    const { editCodingQuestionId } = getEditCodingQuestionDialogs()
+    const { editCodingQuestionId, isQuestionUsed } = getEditCodingQuestionDialogs()
 
     const {
         setEditCodingQuestionId,
@@ -80,20 +80,31 @@ export default function EditCodingQuestionForm() {
     const handleAddTestCase = () => {
         setTestCases((prevTestCases: any) => [
             ...prevTestCases,
-            { id: Date.now(), input: '', output: '' }, // Temporary ID
+            { id: Date.now(), input: '', output: '', isExisting: false }, // Temporary ID
         ])
     }
 
     const handleRemoveTestCase = (id: number) => {
-    const updatedTestCases = testCases.filter((testCase: any) => testCase.id !== id);
-    setTestCases(updatedTestCases);
+        // Only allow removing non-existing test cases when question is used
+        const testCase = testCases.find((tc: any) => tc.id === id)
+        if (isQuestionUsed && testCase?.isExisting) {
+            toast({
+                title: 'Cannot remove existing test case',
+                description: 'This question is in use. You can only remove newly added test cases.',
+                className: 'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+            })
+            return
+        }
 
-    // Sync the form state with updated test cases
-    form.reset({
-        ...form.getValues(),
-        testCases: updatedTestCases
-    });
-};
+        const updatedTestCases = testCases.filter((testCase: any) => testCase.id !== id);
+        setTestCases(updatedTestCases);
+
+        // Sync the form state with updated test cases
+        form.reset({
+            ...form.getValues(),
+            testCases: updatedTestCases
+        });
+    };
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -112,19 +123,19 @@ export default function EditCodingQuestionForm() {
                 selectCodingQuestion[0]?.testCases?.map((testCase: any) => ({
                     id: testCase.id, // Ensure this is correctly mapped
                     input: JSON.stringify(
-                        testCase.inputs.map(
-                            (input: any) => String(input.parameterValue)
+                        testCase.inputs.map((input: any) =>
+                            String(input.parameterValue)
                         )
                     ),
                     output: JSON.stringify(
                         testCase.expectedOutput.parameterValue
                     ),
+                    isExisting: true, // Mark existing test cases
                 })) || [],
         },
     })
 
     async function editCodingQuestion(data: any) {
-
         try {
             const response = await api.put(
                 `codingPlatform/update-question/${editCodingQuestionId}`,
@@ -149,64 +160,36 @@ export default function EditCodingQuestionForm() {
         }
     }
 
+ 
+
     useEffect(() => {
         if (selectCodingQuestion) {
+            const existingTestCases = selectCodingQuestion[0]?.testCases?.map((testCase: any) => ({
+                id: testCase.id,
+                input: testCase.inputs
+                    .map((input: any) => {
+                        let value = input.parameterValue;
+                        if (Array.isArray(value)) {
+                            value = value.join(', ');
+                        }
+                        return value !== null && value !== undefined ? cleanUpValues(value.toString()) : value;
+                    })
+                    .join(' '),
+                output: testCase.expectedOutput.parameterValue !== null && testCase.expectedOutput.parameterValue !== undefined
+                    ? cleanUpValues(testCase.expectedOutput.parameterValue.toString())
+                    : testCase.expectedOutput.parameterValue,
+                isExisting: true // Mark as existing test case
+            }))
+
+            setTestCases(existingTestCases)
             form.reset({
                 title: selectCodingQuestion[0].title,
                 problemStatement: selectCodingQuestion[0].description,
                 constraints: selectCodingQuestion[0].constraints,
                 difficulty: selectCodingQuestion[0].difficulty,
                 topics: selectCodingQuestion[0].tagId,
-                testCases: selectCodingQuestion[0].testCases.map(
-                    (testCase: any) => ({
-                        id: testCase.id, // Ensure IDs are correctly set here
-                        input: cleanUpValues(
-                            testCase.inputs
-                                .map((input: any) => {
-                                    let value = input.parameterValue
-                                    let type = input.parameterType
-                                    if (Array.isArray(value)) {
-                                        if (
-                                            type === 'arrayOfnum' ||
-                                            type === 'arrayOfStr'
-                                        ) {
-                                            value = value.join(', ')
-                                        } else {
-                                            value = value.join(' ')
-                                        }
-                                    }
-                                    return cleanUpValues(String(value))
-                                })
-                                .join(' ')
-                        ),
-                        output: cleanUpValues(
-                            String(testCase.expectedOutput.parameterValue)
-                        ),
-                    })
-                ),
+                testCases: existingTestCases,
             })
-            setTestCases(
-                selectCodingQuestion[0]?.testCases?.map(
-                    (testCase: any) => ({
-                        id: testCase.id,
-                        input: testCase.inputs
-                            .map((input: any) => {
-                                let value = input.parameterValue;
-                                if (Array.isArray(value)) {
-                                    value = value.join(', ');
-                                }
-                                // Keep `0` and non-empty values intact, while cleaning other values
-                                return value !== null && value !== undefined ? cleanUpValues(value.toString()) : value;
-                            })
-                            .join(' '),
-                        output: testCase.expectedOutput.parameterValue !== null && testCase.expectedOutput.parameterValue !== undefined
-                            ? cleanUpValues(testCase.expectedOutput.parameterValue.toString())
-                            : testCase.expectedOutput.parameterValue,
-                    })
-                )
-            );
-
-
         }
     }, [])
 
@@ -370,7 +353,7 @@ export default function EditCodingQuestionForm() {
         getAllCodingQuestions(setCodingQuestions)
     }
 
-   
+
 
     return (
         <main className="flex flex-col p-3 w-full items-center ">
@@ -487,11 +470,17 @@ export default function EditCodingQuestionForm() {
                             <FormItem className="text-left w-full">
                                 <FormLabel>Topics</FormLabel>
                                 <Select
-                                    value={tags.find(
-                                        (tag: any) =>
-                                            tag?.tagName ===
-                                            selectCodingQuestion[0].tagId
-                                    )}
+                                    value={
+                                        tags.find(
+                                            (tag) => tag.id === field.value
+                                        )?.tagName ||
+                                        tags.find(
+                                            (tag) =>
+                                                tag.id ===
+                                                selectCodingQuestion[0]?.tagId
+                                        )?.tagName ||
+                                        ''
+                                    }
                                     onValueChange={(value) => {
                                         const selectedTag = tags.find(
                                             (tag: any) => tag?.tagName === value
@@ -500,6 +489,8 @@ export default function EditCodingQuestionForm() {
                                             field.onChange(selectedTag.id)
                                         }
                                     }}
+
+                                    disabled={isQuestionUsed}
                                 >
                                     <FormControl>
                                         <SelectTrigger>
@@ -546,6 +537,7 @@ export default function EditCodingQuestionForm() {
                                     <Select
                                         onValueChange={field.onChange}
                                         defaultValue={String(field.value)}
+                                        disabled={isQuestionUsed}
                                     >
                                         <FormControl>
                                             <SelectTrigger>
@@ -583,6 +575,7 @@ export default function EditCodingQuestionForm() {
                                     <Select
                                         onValueChange={field.onChange}
                                         defaultValue={String(field.value)}
+                                        disabled={isQuestionUsed}
                                     >
                                         <FormControl>
                                             <SelectTrigger>
@@ -613,63 +606,64 @@ export default function EditCodingQuestionForm() {
                         />
                     </div>
                     <div className="text-left">
-                        <FormLabel>Test Cases</FormLabel>
-                        {testCases.map((testCase: any, index: number) => (
-                            <div
-                                key={testCase.id} // Use `testCase.id` as the key for unique identification
-                                className="flex items-center gap-2 mt-2"
-                            >
-                                <FormField
-                                    control={form.control}
-                                    name={`testCases.${index}.input`}
-                                    render={({ field }) => (
-                                        <FormItem className="text-left w-full">
-                                            <Input
-                                                placeholder="Input"
-                                                value={field.value} // Ensure 0 is shown
-                                                onChange={field.onChange}
-                                            />
-                                            <p className="text-sm text-gray-500 mt-1 ">
-                                                {form.watch('inputFormat') === 'arrayOfnum' || form.watch('inputFormat') === 'arrayOfStr'
-                                                    ? 'Max 1 array accepted (e.g., 1,2,3,4)'
-                                                    : 'Enter values separated by spaces (e.g., 2 3 4)'}
-                                            </p>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name={`testCases.${index}.output`}
-                                    render={({ field }) => (
-                                        <FormItem className="text-left w-full">
-                                            <Input
-                                                placeholder="Output"
-                                                value={field.value} // Ensure 0 is shown
-                                                onChange={field.onChange}
-                                            />
-                                            <p className="text-sm text-gray-500 mt-1 ">
-                                                {form.watch('outputFormat') === 'arrayOfnum' || form.watch('outputFormat') === 'arrayOfStr'
-                                                    ? 'Max 1 array accepted (e.g., 1,2,3,4)'
-                                                    : 'Only one value accepted (e.g., 55)'}
-                                            </p>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                {
-                                    <X
-                                        className="cursor-pointer"
-                                        onClick={() =>
-                                            handleRemoveTestCase(testCase.id)
-                                        } // Pass `testCase.id` to remove the correct test case
+                <FormLabel>Test Cases</FormLabel>
+                {testCases.map((testCase: any, index: number) => (
+                    <div
+                        key={testCase.id}
+                        className="flex items-center gap-2 mt-2"
+                    >
+                        <FormField
+                            control={form.control}
+                            name={`testCases.${index}.input`}
+                            render={({ field }) => (
+                                <FormItem className="text-left w-full">
+                                    <Input
+                                        placeholder="Input"
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        disabled={isQuestionUsed && testCase.isExisting}
                                     />
-                                }
-                            </div>
-                        ))}
+                                    <p className="text-sm text-gray-500 mt-1">
+                                        {form.watch('inputFormat') === 'arrayOfnum' || form.watch('inputFormat') === 'arrayOfStr'
+                                            ? 'Max 1 array accepted (e.g., 1,2,3,4)'
+                                            : 'Enter values separated by spaces (e.g., 2 3 4)'}
+                                    </p>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name={`testCases.${index}.output`}
+                            render={({ field }) => (
+                                <FormItem className="text-left w-full">
+                                    <Input
+                                        placeholder="Output"
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        disabled={isQuestionUsed && testCase.isExisting}
+                                    />
+                                    <p className="text-sm text-gray-500 mt-1">
+                                        {form.watch('outputFormat') === 'arrayOfnum' || form.watch('outputFormat') === 'arrayOfStr'
+                                            ? 'Max 1 array accepted (e.g., 1,2,3,4)'
+                                            : 'Only one value accepted (e.g., 55)'}
+                                    </p>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        {(
+                            <X
+                                className="cursor-pointer"
+                                onClick={() => handleRemoveTestCase(testCase.id)}
+                            />
+                        )}
                     </div>
+                ))}
+            </div>
+
 
                     <div className="flex justify-end gap-3">
                         <Button
@@ -687,4 +681,3 @@ export default function EditCodingQuestionForm() {
         </main>
     )
 }
-

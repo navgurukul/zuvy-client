@@ -1,6 +1,6 @@
 'use client'
 
-import * as React from 'react'
+import React, { useEffect } from 'react'
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -31,11 +31,24 @@ import { getBatchData } from '@/store/store'
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
+    setSelectedRows?: any
+}
+
+type StudentData = {
+    email: string
+    name: string
+    userId: number
+    bootcampId: number
+    batchName: string
+    batchId: number
+    progress: number
+    profilePicture: string
 }
 
 export function DataTable<TData, TValue>({
     columns,
     data,
+    setSelectedRows,
 }: DataTableProps<TData, TValue>) {
     const [rowSelection, setRowSelection] = React.useState({})
 
@@ -64,6 +77,13 @@ export function DataTable<TData, TValue>({
         getFacetedRowModel: getFacetedRowModel(),
         getFacetedUniqueValues: getFacetedUniqueValues(),
     })
+
+    useEffect(() => {
+        const selectedRows = table
+            .getSelectedRowModel()
+            .rows.map((row) => row.original)
+        setSelectedRows && setSelectedRows(selectedRows)
+    }, [table.getSelectedRowModel().rows])
 
     return (
         <div className="space-y-4">

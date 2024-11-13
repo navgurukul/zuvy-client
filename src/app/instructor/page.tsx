@@ -8,6 +8,7 @@ import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { OFFSET, POSITION } from '@/utils/constant'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import { useLazyLoadedStudentData } from '@/store/store'
+import Image from 'next/image'
 
 const InstructorPage = () => {
     const { studentData } = useLazyLoadedStudentData()
@@ -32,8 +33,6 @@ const InstructorPage = () => {
         setUpcomingSessions(data.upcoming)
     }
 
-    console.log('allSessions', allSessions)
-
     return (
         <MaxWidthWrapper className="">
             <div className="flex items-center justify-start">
@@ -54,36 +53,55 @@ const InstructorPage = () => {
             />
             <div className="p-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-x-8 gap-y-6">
-                    {ongoingSessions.map((item) => {
-                        return (
-                            <InstructorCard
-                                key={item.id}
-                                batchName={item.bootcampName}
-                                topicTitle={item.title}
-                                startTime={item.startTime}
-                                endTime={item.endTime}
-                                typeClass={item.status}
-                                classLink={item.hangoutLink}
-                                status={item.status}
-                            />
-                        )
-                    })}
-                    {upcomingSessions.map((item) => {
-                        return (
-                            <InstructorCard
-                                key={item.id}
-                                batchName={item.bootcampName}
-                                topicTitle={item.title}
-                                startTime={item.startTime}
-                                endTime={item.endTime}
-                                typeClass={item.status}
-                                classLink={item.hangoutLink}
-                                status={item.status}
-                            />
-                        )
-                    })}
+                    {ongoingSessions.length > 0 &&
+                        ongoingSessions.map((item) => {
+                            return (
+                                <InstructorCard
+                                    key={item.id}
+                                    batchName={item.bootcampName}
+                                    topicTitle={item.title}
+                                    startTime={item.startTime}
+                                    endTime={item.endTime}
+                                    typeClass={item.status}
+                                    classLink={item.hangoutLink}
+                                    status={item.status}
+                                />
+                            )
+                        })}
+                    {upcomingSessions.length > 0 &&
+                        upcomingSessions.map((item) => {
+                            return (
+                                <InstructorCard
+                                    key={item.id}
+                                    batchName={item.bootcampName}
+                                    topicTitle={item.title}
+                                    startTime={item.startTime}
+                                    endTime={item.endTime}
+                                    typeClass={item.status}
+                                    classLink={item.hangoutLink}
+                                    status={item.status}
+                                />
+                            )
+                        })}
                 </div>
             </div>
+            {allSessions.length < 1 && (
+                <div className="flex flex-col items-start mt-7">
+                    <div className="w-full flex flex-col items-center lg:flex-row lg:justify-between gap-8">
+                        <div className="flex flex-col items-center mt-12 w-full">
+                            <Image
+                                src="/no-class.svg"
+                                alt="No classes"
+                                width={240}
+                                height={240}
+                            />
+                            <p className="text-lg mt-3 text-center">
+                                There are no classes scheduled
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
             {allSessions.length > 0 && (
                 <DataTablePagination
                     totalStudents={totalSessions}
