@@ -31,15 +31,12 @@ import {
     getMcqSearch,
 } from '@/store/store'
 import useDebounce from '@/hooks/useDebounce'
-<<<<<<< HEAD
 import BulkUploadMcq from '../_components/BulkUploadMcq'
 import NewMcqProblemFormNew from '../_components/DummyForm'
-=======
 import { getAllQuizQuestion } from '@/utils/admin'
 import { Spinner } from '@/components/ui/spinner'
 import MultiSelector from '@/components/ui/multi-selector'
 import difficultyOptions from '@/app/utils'
->>>>>>> 7cdf51275d2674642aa457c23993515f86d1cef1
 
 type Props = {}
 export type Tag = {
@@ -62,12 +59,9 @@ const Mcqs = (props: Props) => {
     const { quizData, setStoreQuizData } = getAllQuizData()
     const { mcqDifficulty: difficulty, setMcqDifficulty: setDifficulty } =
         getmcqdifficulty()
-<<<<<<< HEAD
 
     const [mcqType, setMcqType] = useState<string>('')
 
-=======
->>>>>>> 7cdf51275d2674642aa457c23993515f86d1cef1
     const { setmcqSearch } = getMcqSearch()
     const [selectedOptions, setSelectedOptions] = useState<Option[]>([
         { value: '-1', label: 'All Topics' },

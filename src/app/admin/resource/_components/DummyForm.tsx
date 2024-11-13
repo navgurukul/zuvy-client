@@ -325,7 +325,7 @@ const NewMcqProblemForm = ({
                                     }}
                                     value={
                                         variants[selectedVariant]
-                                            .selectedOption !== null
+                                            ?.selectedOption !== null
                                             ? variants[
                                                   selectedVariant
                                               ].selectedOption.toString()
