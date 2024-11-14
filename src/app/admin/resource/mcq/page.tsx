@@ -294,6 +294,7 @@ const Mcqs = (props: Props) => {
                             closeModal={closeModal}
                             setStoreQuizData={setStoreQuizData}
                             getAllQuizQuesiton={getAllQuizQuestion}
+                            setIsMcqModalOpen={setIsMcqModalOpen}
                         />
                     </div>
                 )

@@ -94,11 +94,13 @@ const NewMcqProblemForm = ({
     closeModal,
     setStoreQuizData,
     getAllQuizQuesiton,
+    setIsMcqModalOpen,
 }: {
     tags: Tag[]
     closeModal: () => void
     setStoreQuizData: any
     getAllQuizQuesiton: any
+    setIsMcqModalOpen: any
 }) => {
     const [loadingAI, setLoadingAI] = useState<boolean>(false)
     const [saving, setSaving] = useState<boolean>(false)
@@ -153,6 +155,7 @@ const NewMcqProblemForm = ({
         try {
             const res = await api.post(`/Content/quiz`, requestBody)
             console.log('res', res)
+            setIsMcqModalOpen(false)
             toast({
                 title: res.data.status || 'Success',
                 description: res.data.message || 'Quiz Question Created',
