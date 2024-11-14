@@ -3,6 +3,7 @@ import { create } from 'zustand'
 import { useEffect } from 'react'
 import { api } from '@/utils/axios.config'
 import { string } from 'zod'
+import { OFFSET, POSITION } from '@/utils/constant'
 
 type CounterStore = {
     studentData: {
@@ -54,6 +55,7 @@ interface StoreBatchData {
 }
 
 export interface quiz {
+    title: any
     id: number
     question: string
     options: {
@@ -348,8 +350,75 @@ export const getcodingQuestionState = create<codingQuestions>((set) => ({
         set({ codingQuestions: newValue })
     },
 }))
+// type  option = {
+//     value: string;
+//     label: string;
+// };
+type selectedOptions = {
+    selectedOptions: any[]
+    setSelectedOptions: (newValue: any[]) => void
+}
+export const  getSelectedOptions = create<selectedOptions>((set) => ({
+    selectedOptions: [{ value: '-1', label: 'All Topics' }],
+    setSelectedOptions: (newValue: any[]) => {
+        set({ selectedOptions: newValue });
+    }
+}));
 
-// ------------------------------
+export const  getSelectedOpenEndedOptions = create<selectedOptions>((set) => ({
+    selectedOptions: [{ value: '-1', label: 'All Topics' }],
+    setSelectedOptions: (newValue: any[]) => {
+        set({ selectedOptions: newValue });
+    }
+}));
+export const  getSelectedMCQOptions = create<selectedOptions>((set) => ({
+    selectedOptions: [{ value: '-1', label: 'All Topics' }],
+    setSelectedOptions: (newValue: any[]) => {
+        set({ selectedOptions: newValue });
+    }
+}));
+type difficulty = {
+    difficulty: any[]
+    setDifficulty: (newValue: any[]) => void
+}
+export const  getDifficulty = create< difficulty>((set) => ({
+    difficulty: [{value: 'None', label: 'All Difficulty'}],
+    setDifficulty: (newValue: any[]) => {
+        set({ difficulty: newValue });
+    }
+}));
+
+export const  getOpenEndedDifficulty = create< difficulty>((set) => ({
+    difficulty: [{value: 'None', label: 'All Difficulty'}],
+    setDifficulty: (newValue: any[]) => {
+        set({ difficulty: newValue });
+    }
+}));
+
+type offset = {
+    offset: number;
+    setOffset: (newValue: number) => void;
+};
+
+export const getOffset = create<offset>((set) => ({
+    offset:  OFFSET, 
+    setOffset: (newValue: number) => {
+        set({ offset: newValue });
+    }
+}));
+
+type position = {
+    position: string;
+    setPosition: (newValue: string) => void;
+};
+
+export const getPosition = create<position>((set) => ({
+    position: POSITION,
+    setPosition: (newValue: string) => {
+        set({ position: newValue });
+    }
+}));
+// --------------------------
 
 type deleteCodingQuestion = {
     isDeleteModalOpen: boolean

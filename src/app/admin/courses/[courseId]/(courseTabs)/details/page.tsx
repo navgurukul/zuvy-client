@@ -314,7 +314,7 @@ function Page({ params }: { params: any }) {
                                 <FormLabel>Duration</FormLabel>
                                 <FormControl>
                                     <Input
-                                        placeholder="Enter Bootcamp Duration"
+                                        placeholder="Enter Duration in Weeks"  
                                         {...field||""}
                                     />
                                 </FormControl>
@@ -322,6 +322,7 @@ function Page({ params }: { params: any }) {
                             </FormItem>
                         )}
                     />
+
 
                     <FormField
                         control={form.control}

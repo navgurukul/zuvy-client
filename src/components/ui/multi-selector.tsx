@@ -24,13 +24,18 @@ export default function MultiSelector({
                 <PopoverTrigger asChild>
                     <button className="flex w-full items-center justify-between rounded-md border border-secondary px-4 py-2 text-left focus:outline-none">
                         <span className="truncate text-secondary">
-                            {selectedOptions.length === 1 &&
+                            {/* {selectedOptions.length === 1 &&
                             (selectedOptions[0].value == -1 ||
                                 selectedOptions[0].value == 'None')
                                 ? selectedOptions[0].label
                                 : selectedCount > 0
                                 ? `${selectedCount} ${type} Selected`
-                                : 'Select options'}
+                                : 'Select options'} */}
+                                 {selectedCount > 0
+                                        ? selectedCount === 1
+                                            ? selectedOptions[0].label
+                                            : `${selectedCount} selected`
+                                        : 'Select options'}
                         </span>
                         <ChevronDown className="ml-2 h-5 w-5 text-secondary" />
                     </button>
