@@ -6,7 +6,6 @@ import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Plus, X } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
-// import { Card } from '@/components/ui/card'
 import { Card, CardHeader, CardFooter } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { cn, difficultyQuestionBgColor } from '@/lib/utils'
@@ -37,7 +36,7 @@ import { Spinner } from '@/components/ui/spinner'
 import axios from 'axios'
 import QuestionCard from '@/app/student/courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/QuestionCard'
 import { AIQuestionCard } from './AIQuestionCard'
-import { getGeneratedQuestions } from '@/store/store'
+import { getGeneratedQuestions, getRequestBody } from '@/store/store'
 
 export type Tag = {
     label: string
@@ -59,32 +58,12 @@ export type RequestBodyType = {
     }[]
 }
 
-// const formSchema = z.object({
-//     difficulty: z.enum(['Easy', 'Medium', 'Hard'], {
-//         required_error: 'You need to select a Difficulty type.',
-//     }),
-//     topics: z.number().min(1, 'You need to select a Topic'),
-//     questionText: z.string().min(1, {
-//         message: 'Question Text must be at least 1 character.',
-//     }),
-//     options: z
-//         .array(
-//             z.object({
-//                 value: z.string().min(1, 'Option cannot be empty.'),
-//             })
-//         )
-//         .min(2, 'At least two options are required.'),
-//     selectedOption: z.number().min(0, 'Please select the correct option.'),
-// })
-
 const formSchema = z.object({
     difficulty: z
         .array(z.enum(['Easy', 'Medium', 'Hard']), {
             required_error: 'You need to select at least one Difficulty type.',
         })
         .min(1, 'You need to select at least one Difficulty type.'),
-    // topics: z.array(z.number().min(1, 'You need to select a Topic')),
-    // topics: z.number().min(1, 'You need to select a Topic'),
     topics: z.array(
         z.object({
             value: z.number().min(1, 'You need to select a Topic'),
@@ -127,56 +106,12 @@ const NewMcqProblemForm = ({
     const [bulkTopicIds, setBulkTopicIds] = useState<number[]>([])
     const [bulkQuantity, setBulkQuantity] = useState<number>(50) // Default to 50
     const [bulkLoading, setBulkLoading] = useState<boolean>(false)
-    const [requestBody, setRequestBody] = useState<RequestBodyType>({
-        quizzes: [],
-    })
+    const { requestBody, setRequestBody } = getRequestBody()
     const { generatedQuestions, setGeneratedQuestions } =
         getGeneratedQuestions()
-
     // **New State Variables for Progress Tracking**
-    // const [generatedQuestions, setGeneratedQuestions] = useState<any>([])
-    //     {
-    //         correctOption: 2,
-    //         difficulty: 'Hard',
-    //         mark: 1,
-    //         options: {
-    //             1: '0 1 2 3 4 5 6 7 8 9',
-    //             2: '0 2 4 6 8',
-    //             3: '1 3 5 7 9',
-    //             4: '0 1 2 3 4 5 6 7 8 9 10',
-    //         },
-    //         question:
-    //             'Consider the following code snippet:\n\n```python\ni = 0\nwhile i < 10:\n if i % 2 == 0:\n print(i)\n i += 1\n```\n\nWhat will be the output of this code?',
-    //         tagId: 4,
-    //     },
-    //     {
-    //         correctOption: 2,
-    //         difficulty: 'Hard',
-    //         mark: 1,
-    //         options: {
-    //             1: '0 1 2 3 4 5 6 7 8 9',
-    //             2: '0 2 4 6 8',
-    //             3: '1 3 5 7 9',
-    //             4: '0 1 2 3 4 5 6 7 8 9 10',
-    //         },
-    //         question:
-    //             'Consider the following code snippet:\n\n```python\ni = 0\nwhile i < 10:\n if i % 2 == 0:\n print(i)\n i += 1\n```\n\nWhat will be the output of this code?',
-    //         tagId: 4,
-    //     },
-    // ])
     const [generatedCount, setGeneratedCount] = useState<number>(0)
     const [totalToGenerate, setTotalToGenerate] = useState<number>(0)
-
-    // const form = useForm<FormValues>({
-    //     resolver: zodResolver(formSchema),
-    //     defaultValues: {
-    //         difficulty: 'Easy',
-    //         topics: 0,
-    //         questionText: '',
-    //         options: [{ value: '' }, { value: '' }],
-    //         selectedOption: 0,
-    //     },
-    // })
 
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -184,7 +119,6 @@ const NewMcqProblemForm = ({
             difficulty: [], // Starts with no difficulties selected
             // topics: [0],
             topics: [{ value: 0 }],
-            // topics: 0,
             numbersOfQuestions: [{ value: '' }],
             questionText: '',
             options: [{ value: '' }, { value: '' }],
@@ -194,7 +128,6 @@ const NewMcqProblemForm = ({
 
     const { fields, append, remove } = useFieldArray({
         control: form.control,
-        // name: 'options',
         name: 'topics',
     })
 
@@ -207,11 +140,6 @@ const NewMcqProblemForm = ({
         name: 'numbersOfQuestions',
     })
 
-    // const { fields: topicFields, append: appendTopic } = useFieldArray({
-    //     control: form.control,
-    //     name: 'topics', // Now targets the topics field in form
-    // });
-
     const addTopicField = () => {
         append({ value: 0 })
         appendNumQuestions({ value: '' })
@@ -222,7 +150,6 @@ const NewMcqProblemForm = ({
         new Promise((resolve) => setTimeout(resolve, ms))
 
     const handleCreateQuizQuestion = async (requestBody: RequestBodyType) => {
-        console.log('requestBody', requestBody)
         try {
             const res = await api.post(`/Content/quiz`, requestBody)
             console.log('res', res)
@@ -285,7 +212,7 @@ const NewMcqProblemForm = ({
         // console.log('requestBody single', requestBody)
 
         setSaving(true)
-        if (requestBody) await handleCreateQuizQuestion(requestBody)
+        // if (requestBody) await handleCreateQuizQuestion(requestBody)
         await getAllQuizQuesiton(setStoreQuizData)
         setSaving(false)
         closeModal()
@@ -319,27 +246,23 @@ const NewMcqProblemForm = ({
             const topic =
                 tags.find((t) => t.id === topicId[0].value)?.tagName ||
                 'General'
-            // console.log('topic', topic)
-            // tags.find((t) => t.id === topicId[0])?.tagName || 'General'
-            // tags.find((t) => t.id === topicId)?.tagName || 'General'
-            // console.log('difficulty', difficulty)
 
             const promptText = `Create a ${difficulty[0].toLowerCase()} difficulty Multiple Choice Question (MCQ) on the topic "${topic}" with the following format. Please ensure that the response strictly follows this format without any deviations:
 
-Question: [Write your full question here, including any necessary code blocks or descriptions]
+                Question: [Write your full question here, including any necessary code blocks or descriptions]
 
-Option 1: [Write the first option here]
-Option 2: [Write the second option here]
-Option 3: [Write the third option here]
-Option 4: [Write the fourth option here]
+                Option 1: [Write the first option here]
+                Option 2: [Write the second option here]
+                Option 3: [Write the third option here]
+                Option 4: [Write the fourth option here]
 
-Correct Answer: [Write the correct option number here]
-QuestionId: [Write a unique]
+                Correct Answer: [Write the correct option number here]
+                QuestionId: [Write a unique]
 
-**Important:** 
-- Do not include any additional text or explanations outside of this format.
-- Ensure that the Correct Answer is a number between 1 and 4 corresponding to the correct option.
-- Avoid using quotes or any special characters in the options.`
+                **Important:** 
+                - Do not include any additional text or explanations outside of this format.
+                - Ensure that the Correct Answer is a number between 1 and 4 corresponding to the correct option.
+                - Avoid using quotes or any special characters in the options.`
 
             const requestBodyAI = {
                 contents: [
@@ -474,9 +397,6 @@ QuestionId: [Write a unique]
                 })
 
                 if (generatedQuestions.length > 0) {
-                    // const requestBody = {
-                    //     questions: generatedQuestions,
-                    // }
                     const requestBody = {
                         quizzes: [
                             {
@@ -496,7 +416,6 @@ QuestionId: [Write a unique]
                                 ],
                             },
                         ],
-                        // generatedQuestions,
                     }
                     setGeneratedQuestions(generatedQuestions)
 
@@ -506,17 +425,6 @@ QuestionId: [Write a unique]
                     await getAllQuizQuesiton(setStoreQuizData)
                     closeModal()
                 }
-
-                // form.reset({
-                //     difficulty: difficulty,
-                //     topics: topicId,
-                //     questionText: question,
-                //     options:
-                //         newOptions.length >= 2
-                //             ? newOptions.slice(0, 4)
-                //             : [{ value: '' }, { value: '' }],
-                //     selectedOption: newSelectedOption,
-                // })
 
                 toast({
                     title: 'Success',
@@ -549,7 +457,6 @@ QuestionId: [Write a unique]
     const bulkGenerateMCQUsingGemini = async () => {
         setBulkLoading(true)
         setGeneratedCount(0) // Reset generated count
-        // setTotalToGenerate(numbersOfQuestions) // Set total to generate
         try {
             const difficulties = form.getValues('difficulty')
             const topicId = form.getValues('topics')
@@ -561,13 +468,20 @@ QuestionId: [Write a unique]
                 0
             )
 
+            const topicRequirements = topicId.map(
+                (topic: any, index: number) => ({
+                    topicId: topic.value,
+                    requiredCount: Number(numbersOfQuestions[index].value),
+                    currentCount: 0,
+                })
+            )
+
             setTotalToGenerate(totalNumbersOfQuestions) // Set total to generate
 
             const apiKey =
                 process.env.NEXT_PUBLIC_GEMINI_API_KEY ||
                 'AIzaSyAm3e9-VoLFVVVLRIla-cZ40jwAqqd1FDY'
 
-            // if (bulkDifficulties.length === 0) {
             if (difficulties.length === 0) {
                 toast({
                     title: 'Error',
@@ -579,7 +493,6 @@ QuestionId: [Write a unique]
                 return
             }
 
-            // if (bulkTopicIds.length === 0) {
             if (topicIds.length === 0) {
                 toast({
                     title: 'Error',
@@ -611,222 +524,214 @@ QuestionId: [Write a unique]
                 ) || []
 
             const generatedQuestions: any[] = []
-            let attempts = 0
-            const maxAttempts = totalNumbersOfQuestions * 5 // Allow up to 5 attempts per required question
 
-            while (
-                generatedQuestions.length < totalNumbersOfQuestions &&
-                attempts < maxAttempts
-            ) {
-                attempts += 1
+            for (const topicReq of topicRequirements) {
+                const maxAttemptsPerTopic = topicReq.requiredCount * 5 // Allow up to 5 attempts per required question
+                let attempts = 0
+                let questionsGeneratedForTopic = 0
 
-                const difficulty =
-                    difficulties[
-                        Math.floor(Math.random() * difficulties.length)
-                    ]
+                while (
+                    questionsGeneratedForTopic < topicReq.requiredCount &&
+                    attempts < maxAttemptsPerTopic
+                ) {
+                    attempts += 1
+                    questionsGeneratedForTopic += 1
 
-                const topicId =
-                    topicIds[Math.floor(Math.random() * topicIds.length)]
+                    const difficulty =
+                        difficulties[
+                            Math.floor(Math.random() * difficulties.length)
+                        ]
 
-                // const topic = tags.map((t) => t.tagName)
+                    const topic =
+                        tags.find((t) => t.id === topicReq.topicId)?.tagName ||
+                        'General'
 
-                // let string = ''
-                // const topicssss = string.join('&')
-                // console.log
-                const topic =
-                    tags.find((t) => t.id === topicId)?.tagName || 'General'
+                    const promptText = `Create a ${difficulty.toLowerCase()} difficulty Multiple Choice Question (MCQ) on the topic "${topic}" with the following format. Please ensure that the response strictly follows this format without any deviations:
 
-                // queryParams.join('&')
+                    Question: [Write your full question here, including any necessary code blocks or descriptions]
 
-                const promptText = `Create a ${difficulty.toLowerCase()} difficulty Multiple Choice Question (MCQ) on the topic "${topic}" with the following format. Please ensure that the response strictly follows this format without any deviations:
+                    Option 1: [Write the first option here]
+                    Option 2: [Write the second option here]
+                    Option 3: [Write the third option here]
+                    Option 4: [Write the fourth option here]
 
-Question: [Write your full question here, including any necessary code blocks or descriptions]
+                    Correct Answer: [Write the correct option number here]
+                    QuestionId: [Write a unique]
 
-Option 1: [Write the first option here]
-Option 2: [Write the second option here]
-Option 3: [Write the third option here]
-Option 4: [Write the fourth option here]
+                    **Important:** 
+                    - Do not include any additional text or explanations outside of this format.
+                    - Ensure that the Correct Answer is a number between 1 and 4 corresponding to the correct option.
+                    - Avoid using quotes or any special characters in the options.`
 
-Correct Answer: [Write the correct option number here]
-QuestionId: [Write a unique]
+                    const requestBodyAI = {
+                        contents: [
+                            {
+                                parts: [
+                                    {
+                                        text: promptText,
+                                    },
+                                ],
+                            },
+                        ],
+                    }
 
-**Important:** 
-- Do not include any additional text or explanations outside of this format.
-- Ensure that the Correct Answer is a number between 1 and 4 corresponding to the correct option.
-- Avoid using quotes or any special characters in the options.`
-
-                const requestBodyAI = {
-                    contents: [
-                        {
-                            parts: [
-                                {
-                                    text: promptText,
+                    try {
+                        const response = await axios.post(
+                            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
+                            requestBodyAI,
+                            {
+                                headers: {
+                                    'Content-Type': 'application/json',
                                 },
-                            ],
-                        },
-                    ],
-                }
-
-                try {
-                    const response = await axios.post(
-                        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
-                        requestBodyAI,
-                        {
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                        }
-                    )
-
-                    const responseData = response.data
-
-                    console.log('responseData', responseData)
-
-                    const generatedText =
-                        responseData?.candidates?.[0]?.content?.parts?.[0]?.text?.trim()
-
-                    if (generatedText) {
-                        const questionMatch = generatedText.match(
-                            /Question:\s*([\s\S]*?)(?=Option 1:|$)/i
-                        )
-                        const option1Match =
-                            generatedText.match(/Option 1:\s*(.+)/i)
-                        const option2Match =
-                            generatedText.match(/Option 2:\s*(.+)/i)
-                        const option3Match =
-                            generatedText.match(/Option 3:\s*(.+)/i)
-                        const option4Match =
-                            generatedText.match(/Option 4:\s*(.+)/i)
-                        const correctAnswerMatch = generatedText.match(
-                            /Correct Answer:\s*(\d+)/i
-                        )
-                        const id = generatedText.match(/QuestionId:\s*(.+)/i)
-
-                        console.log('generatedText', generatedText)
-                        console.log('correctAnswerMatch', correctAnswerMatch)
-                        console.log('questionMatch', questionMatch)
-                        console.log('questionId', id)
-
-                        const cleanText = (text: string) =>
-                            text.replace(/[*#"]/g, '').trim()
-
-                        const question = questionMatch
-                            ? cleanText(questionMatch[1])
-                            : ''
-                        const opt1 = option1Match
-                            ? cleanText(option1Match[1] as string)
-                            : ''
-                        const opt2 = option2Match
-                            ? cleanText(option2Match[1] as string)
-                            : ''
-                        const opt3 = option3Match
-                            ? cleanText(option3Match[1] as string)
-                            : ''
-                        const opt4 = option4Match
-                            ? cleanText(option4Match[1] as string)
-                            : ''
-                        const questionId = id ? cleanText(id[1]) : ''
-                        let correctAnswer: number | null = null
-
-                        if (correctAnswerMatch) {
-                            const parsedAnswer =
-                                parseInt(correctAnswerMatch[1] as string, 10) -
-                                1
-                            if (
-                                !isNaN(parsedAnswer) &&
-                                parsedAnswer >= 0 &&
-                                parsedAnswer < 4
-                            ) {
-                                correctAnswer = parsedAnswer
                             }
-                        }
-
-                        if (
-                            !question ||
-                            !opt1 ||
-                            !opt2 ||
-                            !opt3 ||
-                            !opt4 ||
-                            !questionId ||
-                            correctAnswer === null
-                        ) {
-                            console.warn('Failed to parse MCQ correctly.')
-                            continue
-                        }
-
-                        // Check for uniqueness
-                        const isDuplicate = existingQuestions.some(
-                            (existingQ) =>
-                                jaccardSimilarity(
-                                    existingQ,
-                                    question.toLowerCase()
-                                ) > 0.8
                         )
 
-                        if (isDuplicate) {
+                        const responseData = response.data
+
+                        const generatedText =
+                            responseData?.candidates?.[0]?.content?.parts?.[0]?.text?.trim()
+
+                        if (generatedText) {
+                            const questionMatch = generatedText.match(
+                                /Question:\s*([\s\S]*?)(?=Option 1:|$)/i
+                            )
+                            const option1Match =
+                                generatedText.match(/Option 1:\s*(.+)/i)
+                            const option2Match =
+                                generatedText.match(/Option 2:\s*(.+)/i)
+                            const option3Match =
+                                generatedText.match(/Option 3:\s*(.+)/i)
+                            const option4Match =
+                                generatedText.match(/Option 4:\s*(.+)/i)
+                            const correctAnswerMatch = generatedText.match(
+                                /Correct Answer:\s*(\d+)/i
+                            )
+                            const id =
+                                generatedText.match(/QuestionId:\s*(.+)/i)
+
+                            const cleanText = (text: string) =>
+                                text.replace(/[*#"]/g, '').trim()
+
+                            const question = questionMatch
+                                ? cleanText(questionMatch[1])
+                                : ''
+                            const opt1 = option1Match
+                                ? cleanText(option1Match[1] as string)
+                                : ''
+                            const opt2 = option2Match
+                                ? cleanText(option2Match[1] as string)
+                                : ''
+                            const opt3 = option3Match
+                                ? cleanText(option3Match[1] as string)
+                                : ''
+                            const opt4 = option4Match
+                                ? cleanText(option4Match[1] as string)
+                                : ''
+                            const questionId = id ? cleanText(id[1]) : ''
+                            let correctAnswer: number | null = null
+
+                            if (correctAnswerMatch) {
+                                const parsedAnswer =
+                                    parseInt(
+                                        correctAnswerMatch[1] as string,
+                                        10
+                                    ) - 1
+                                if (
+                                    !isNaN(parsedAnswer) &&
+                                    parsedAnswer >= 0 &&
+                                    parsedAnswer < 4
+                                ) {
+                                    correctAnswer = parsedAnswer
+                                }
+                            }
+
+                            if (
+                                !question ||
+                                !opt1 ||
+                                !opt2 ||
+                                !opt3 ||
+                                !opt4 ||
+                                !questionId ||
+                                correctAnswer === null
+                            ) {
+                                console.warn('Failed to parse MCQ correctly.')
+                                continue
+                            }
+
+                            // Check for uniqueness
+                            const isDuplicate = existingQuestions.some(
+                                (existingQ) =>
+                                    jaccardSimilarity(
+                                        existingQ,
+                                        question.toLowerCase()
+                                    ) > 0.8
+                            )
+
+                            if (isDuplicate) {
+                                console.warn(
+                                    'Duplicate question detected:',
+                                    question
+                                )
+                                continue
+                            }
+
+                            const isBatchDuplicate = generatedQuestions.some(
+                                (generatedQ) =>
+                                    jaccardSimilarity(
+                                        generatedQ.question.toLowerCase(),
+                                        question.toLowerCase()
+                                    ) > 0.8
+                            )
+
+                            if (isBatchDuplicate) {
+                                console.warn(
+                                    'Batch duplicate question detected:',
+                                    question
+                                )
+                                continue
+                            }
+
+                            generatedQuestions.push({
+                                question,
+                                options: {
+                                    1: opt1,
+                                    2: opt2,
+                                    3: opt3,
+                                    4: opt4,
+                                },
+                                correctOption: correctAnswer + 1,
+                                mark: 1,
+                                tagId: topicReq.topicId,
+                                difficulty: difficulty,
+                                questionId: questionId,
+                            })
+
+                            existingQuestions.push(question.toLowerCase())
+                            setGeneratedCount(generatedQuestions.length) // **Update Generated Count**
+                            console.log(
+                                `Generated ${generatedQuestions.length}/${totalNumbersOfQuestions} MCQs`
+                            )
+                        } else {
                             console.warn(
-                                'Duplicate question detected:',
-                                question
+                                'Unexpected response structure:',
+                                responseData
                             )
                             continue
                         }
-
-                        const isBatchDuplicate = generatedQuestions.some(
-                            (generatedQ) =>
-                                jaccardSimilarity(
-                                    generatedQ.question.toLowerCase(),
-                                    question.toLowerCase()
-                                ) > 0.8
-                        )
-
-                        if (isBatchDuplicate) {
-                            console.warn(
-                                'Batch duplicate question detected:',
-                                question
-                            )
-                            continue
-                        }
-
-                        generatedQuestions.push({
-                            question,
-                            options: {
-                                1: opt1,
-                                2: opt2,
-                                3: opt3,
-                                4: opt4,
-                            },
-                            correctOption: correctAnswer + 1,
-                            mark: 1,
-                            tagId: topicId,
-                            difficulty: difficulty,
-                            questionId: questionId,
-                        })
-
-                        existingQuestions.push(question.toLowerCase())
-                        setGeneratedCount(generatedQuestions.length) // **Update Generated Count**
-                        console.log(
-                            `Generated ${generatedQuestions.length}/${totalNumbersOfQuestions} MCQs`
-                        )
-                    } else {
-                        console.warn(
-                            'Unexpected response structure:',
-                            responseData
-                        )
+                    } catch (error: any) {
+                        console.error('Error generating MCQ:', error)
                         continue
                     }
-                } catch (error: any) {
-                    console.error('Error generating MCQ:', error)
-                    continue
-                }
 
-                // **Change Delay from 5-10 seconds to 3-4 seconds**
-                const randomDelay = Math.floor(Math.random() * 1000) + 3000
-                console.log(
-                    `Waiting for ${
-                        randomDelay / 1000
-                    } seconds before next request...`
-                )
-                await sleep(randomDelay)
+                    // **Change Delay from 5-10 seconds to 3-4 seconds**
+                    const randomDelay = Math.floor(Math.random() * 1000) + 3000
+                    console.log(
+                        `Waiting for ${
+                            randomDelay / 1000
+                        } seconds before next request...`
+                    )
+                    await sleep(randomDelay)
+                }
             }
 
             if (generatedQuestions.length === 0) {
@@ -871,40 +776,13 @@ QuestionId: [Write a unique]
                         ],
                     }
                 })
-                console.log('bulkQuestions', bulkQuestions)
-                // const requestBody = {
-                //     questions: generatedQuestions,
-                // }
+
                 const requestBody = {
                     quizzes: bulkQuestions,
-                    // [
-                    //     {
-                    //         tagId: topicId,
-                    //         difficulty: difficulty,
-                    //         variantMCQs: [
-                    //             {
-                    //                 question: question,
-                    //                 options: {
-                    //                     1: opt1,
-                    //                     2: opt2,
-                    //                     3: opt3,
-                    //                     4: opt4,
-                    //                 },
-                    //                 correctOption: correctAnswer + 1,
-                    //             },
-                    //         ],
-                    //     },
-                    // ],
-                    // generatedQuestions,
                 }
-                console.log('for requestBody requestBody', requestBody)
+
                 setGeneratedQuestions(generatedQuestions)
-
                 setRequestBody(requestBody)
-                // setGeneratedQuestions(generatedQuestions)
-                // setGeneratedQuestions([...generatedQuestions])
-
-                // await handleCreateQuizQuestion(requestBody)
                 await getAllQuizQuesiton(setStoreQuizData)
                 closeModal()
             }
@@ -985,51 +863,6 @@ QuestionId: [Write a unique]
                     onSubmit={form.handleSubmit(handleSubmitForm)}
                     className="max-w-2xl mx-auto w-full flex flex-col gap-6 h-full"
                 >
-                    {/* Difficulty Field */}
-                    {/* <FormField
-                        control={form.control}
-                        name="difficulty"
-                        render={({ field }) => (
-                            <FormItem className="space-y-3 flex flex-row items-center">
-                                <FormLabel className="text-lg font-medium">
-                                    Difficulty
-                                </FormLabel>
-                                <FormControl>
-                                    <RadioGroup
-                                        onValueChange={field.onChange}
-                                        value={field.value}
-                                        className="flex flex-row justify-start space-x-4 items-center"
-                                    >
-                                        <FormItem className="flex items-center space-x-2">
-                                            <FormControl>
-                                                <RadioGroupItem value="Easy" />
-                                            </FormControl>
-                                            <FormLabel className="font-normal">
-                                                Easy
-                                            </FormLabel>
-                                        </FormItem>
-                                        <FormItem className="flex items-center space-x-2">
-                                            <FormControl>
-                                                <RadioGroupItem value="Medium" />
-                                            </FormControl>
-                                            <FormLabel className="font-normal">
-                                                Medium
-                                            </FormLabel>
-                                        </FormItem>
-                                        <FormItem className="flex items-center space-x-2">
-                                            <FormControl>
-                                                <RadioGroupItem value="Hard" />
-                                            </FormControl>
-                                            <FormLabel className="font-normal">
-                                                Hard
-                                            </FormLabel>
-                                        </FormItem>
-                                    </RadioGroup>
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    /> */}
                     <FormField
                         control={form.control}
                         name="difficulty"
@@ -1127,110 +960,19 @@ QuestionId: [Write a unique]
                         )}
                     />
 
-                    {/* Topics Field */}
-                    {/* <div className="flex flex-col"> */}
-                    {/* <p className="text-lg font-semibold text-start">
-                            Topic Name and No. of Questions
-                        </p> */}
-                    <div className="flex flex-row gap-6">
-                        {/* <FormField
-                            control={form.control}
-                            name="topics"
-                            render={({ field }) => {
-                                console.log('field', field)
-                                return (
-                                    <FormItem className="text-left w-full my-2">
-                                        <FormLabel className="text-lg font-semibold">
-                                            Topic Name and No. of Questions
-                                        </FormLabel>
-                                        <Select
-                                            onValueChange={(value) => {
-                                                console.log('value', value)
-                                                const selectedTag = tags?.find(
-                                                    (tag: Tag) =>
-                                                        tag?.tagName === value
-                                                    // tag?.tagName === value[0]
-                                                )
-                                                console.log(
-                                                    'selectedTag',
-                                                    selectedTag
-                                                )
-                                                if (selectedTag) {
-                                                    field.onChange(
-                                                        selectedTag.id
-                                                    )
-                                                }
-                                            }}
-                                            value={
-                                                tags.find(
-                                                    (tag) =>
-                                                        // tag.id === field.value
-                                                        // tag.id ===
-                                                        // field.value[0]
-                                                        tag.id ===
-                                                        field.value[0].value
-                                                )?.tagName || ''
-                                            }
-                                        >
-                                            <FormControl>
-                                                <SelectTrigger className="rounded-md">
-                                                    <SelectValue placeholder="Choose Topic" />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                {tags.map((tag: any) => (
-                                                    <SelectItem
-                                                        key={tag.id}
-                                                        value={tag?.tagName}
-                                                    >
-                                                        {tag?.tagName}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage />
-                                    </FormItem>
-                                )
-                            }}
-                        /> */}
-                        {/* <FormField
-                            control={form.control}
-                            name="description"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel className="flex text-left text-md font-semibold mb-1">
-                                        Description
-                                    </FormLabel>
-                                    <FormControl> */}
-                        {/* <Input
-                            // {...field}
-                            className="w-[350px] px-3 mt-11 border rounded-md"
-                            placeholder="Placeholder"
-                        /> */}
-                        {/* </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        /> */}
-                    </div>
-                    {/* </div> */}
-
                     <div className="flex flex-col gap-4">
                         <p className="text-lg font-semibold text-start">
                             Topic Name and No. of Questions
                         </p>
-                        {/* <div className="flex flex-row gap-6"> */}
                         {fields.map((field, index) => (
                             <div className="flex flex-row gap-6">
+                                {/* Topics Field */}
                                 <FormField
                                     key={field.id}
                                     control={form.control}
                                     name={`topics.${index}.value`}
                                     render={({ field }) => (
                                         <FormItem className="text-left w-full my-2">
-                                            {/* <FormLabel className="text-lg font-semibold">
-                                                Topic Name
-                                            </FormLabel> */}
                                             <Select
                                                 onValueChange={(value) => {
                                                     const selectedTag =
@@ -1273,6 +1015,7 @@ QuestionId: [Write a unique]
                                         </FormItem>
                                     )}
                                 />
+                                {/* Number of Questions Field */}
                                 <FormField
                                     control={form.control}
                                     name={`numbersOfQuestions.${index}.value`}
@@ -1286,12 +1029,6 @@ QuestionId: [Write a unique]
                                 />
                             </div>
                         ))}
-                        {/* <Input
-                                // {...field}
-                                className="w-[350px] px-3 border rounded-md"
-                                placeholder="Placeholder"
-                            />
-                        </div> */}
 
                         {/* Add Topic Button */}
                         <Button
@@ -1304,114 +1041,13 @@ QuestionId: [Write a unique]
                         </Button>
                     </div>
 
-                    {/* Question Text Field */}
-                    {/* <FormField
-                        control={form.control}
-                        name="questionText"
-                        render={({ field }) => {
-                            return (
-                                <FormItem className="text-left">
-                                    <FormLabel>Question Text</FormLabel>
-                                    <FormControl>
-                                        <Textarea
-                                            placeholder="Write your Question here"
-                                            {...field}
-                                            className="h-32"
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )
-                        }}
-                    /> */}
-
-                    {/* Options Field */}
-                    {/* <FormField
-                        control={form.control}
-                        name="options"
-                        render={({ field }) => (
-                            <FormItem className="space-y-3">
-                                <FormLabel className="mt-5 text-lg font-medium">
-                                    Options
-                                </FormLabel>
-                                <RadioGroup
-                                    onValueChange={(value) => {
-                                        const numericValue = Number(value)
-                                        form.setValue(
-                                            'selectedOption',
-                                            numericValue
-                                        )
-                                    }}
-                                    value={form
-                                        .watch('selectedOption')
-                                        .toString()}
-                                    className="space-y-2"
-                                >
-                                    {fields.map((item, index) => (
-                                        <div
-                                            key={item.id}
-                                            className="flex items-center space-x-3"
-                                        >
-                                            <RadioGroupItem
-                                                value={index.toString()}
-                                            />
-                                            <Controller
-                                                control={form.control}
-                                                name={`options.${index}.value`}
-                                                render={({ field }) => (
-                                                    <Input
-                                                        placeholder={`Option ${
-                                                            index + 1
-                                                        }`}
-                                                        {...field}
-                                                        className="w-full"
-                                                    />
-                                                )}
-                                            />
-                                            {fields.length > 2 &&
-                                                index >= 2 && (
-                                                    <Button
-                                                        variant={'ghost'}
-                                                        onClick={() =>
-                                                            remove(index)
-                                                        }
-                                                        type="button"
-                                                        size="icon"
-                                                    >
-                                                        <X
-                                                            size={15}
-                                                            className="text-destructive"
-                                                        />
-                                                    </Button>
-                                                )}
-                                        </div>
-                                    ))}
-                                </RadioGroup>
-                                <FormMessage />
-                                <div className="flex justify-start">
-                                    <Button
-                                        variant={'outline'}
-                                        onClick={() => append({ value: 0 })}
-                                        type="button"
-                                        className="flex items-center mt-2"
-                                    >
-                                        <Plus
-                                            size={20}
-                                            className="text-secondary mr-2"
-                                        />{' '}
-                                        Add Option
-                                    </Button>
-                                </div>
-                            </FormItem>
-                        )}
-                    /> */}
-
                     <div className="border-t border-gray-300"></div>
 
                     <div className="flex justify-end items-center gap-4">
                         <Button
                             type="button"
-                            onClick={generateMCQUsingGemini}
+                            // onClick={generateMCQUsingGemini}
+                            onClick={handleClear}
                             className="flex items-center bg-gray-300 text-black"
                         >
                             Cancel
@@ -1432,332 +1068,36 @@ QuestionId: [Write a unique]
                             )}
                         </Button>
                     </div>
-                    {/* Bulk Generate Section */}
-                    {/* <div className="border-t border-gray-300 mt-6 pt-6">
-                        <h2 className="text-xl font-semibold">
-                            Bulk Generate MCQs
-                        </h2>
-                        <div className="mt-4 space-y-4">
-                            Difficulty Selection
-                            <FormItem className="space-y-1">
-                                <FormLabel>Select Difficulty Levels</FormLabel>
-                                <div className="flex flex-wrap gap-4">
-                                    <label className="flex items-center space-x-2">
-                                        <input
-                                            type="checkbox"
-                                            value="Easy"
-                                            checked={bulkDifficulties.includes(
-                                                'Easy'
-                                            )}
-                                            onChange={(e) => {
-                                                if (e.target.checked) {
-                                                    setBulkDifficulties([
-                                                        ...bulkDifficulties,
-                                                        'Easy',
-                                                    ])
-                                                } else {
-                                                    setBulkDifficulties(
-                                                        bulkDifficulties.filter(
-                                                            (d) => d !== 'Easy'
-                                                        )
-                                                    )
-                                                }
-                                            }}
-                                        />
-                                        <span>Easy</span>
-                                    </label>
-                                    <label className="flex items-center space-x-2">
-                                        <input
-                                            type="checkbox"
-                                            value="Medium"
-                                            checked={bulkDifficulties.includes(
-                                                'Medium'
-                                            )}
-                                            onChange={(e) => {
-                                                if (e.target.checked) {
-                                                    setBulkDifficulties([
-                                                        ...bulkDifficulties,
-                                                        'Medium',
-                                                    ])
-                                                } else {
-                                                    setBulkDifficulties(
-                                                        bulkDifficulties.filter(
-                                                            (d) =>
-                                                                d !== 'Medium'
-                                                        )
-                                                    )
-                                                }
-                                            }}
-                                        />
-                                        <span>Medium</span>
-                                    </label>
-                                    <label className="flex items-center space-x-2">
-                                        <input
-                                            type="checkbox"
-                                            value="Hard"
-                                            checked={bulkDifficulties.includes(
-                                                'Hard'
-                                            )}
-                                            onChange={(e) => {
-                                                if (e.target.checked) {
-                                                    setBulkDifficulties([
-                                                        ...bulkDifficulties,
-                                                        'Hard',
-                                                    ])
-                                                } else {
-                                                    setBulkDifficulties(
-                                                        bulkDifficulties.filter(
-                                                            (d) => d !== 'Hard'
-                                                        )
-                                                    )
-                                                }
-                                            }}
-                                        />
-                                        <span>Hard</span>
-                                    </label>
-                                </div>
-                            </FormItem>
-
-                            Topics Selection
-                            <FormItem className="space-y-1">
-                                <FormLabel>Select Topics</FormLabel>
-                                <div className="flex flex-wrap gap-4">
-                                    {tags.map((tag: Tag) => (
-                                        <label
-                                            key={tag.id}
-                                            className="flex items-center space-x-2"
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                value={tag.id}
-                                                checked={bulkTopicIds.includes(
-                                                    tag.id
-                                                )}
-                                                onChange={(e) => {
-                                                    const id = Number(
-                                                        e.target.value
-                                                    )
-                                                    if (e.target.checked) {
-                                                        setBulkTopicIds([
-                                                            ...bulkTopicIds,
-                                                            id,
-                                                        ])
-                                                    } else {
-                                                        setBulkTopicIds(
-                                                            bulkTopicIds.filter(
-                                                                (tid) =>
-                                                                    tid !== id
-                                                            )
-                                                        )
-                                                    }
-                                                }}
-                                            />
-                                            <span>{tag.tagName}</span>
-                                        </label>
-                                    ))}
-                                </div>
-                            </FormItem>
-
-                            Number of Questions
-                            <FormField
-                                name="bulkQuantity"
-                                render={() => (
-                                    <FormItem className="space-y-1">
-                                        <FormLabel>
-                                            Number of Questions
-                                        </FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                type="number"
-                                                min={1}
-                                                value={bulkQuantity}
-                                                onChange={(e) =>
-                                                    setBulkQuantity(
-                                                        parseInt(
-                                                            e.target.value,
-                                                            10
-                                                        )
-                                                    )
-                                                }
-                                                placeholder="Enter number of questions"
-                                                className="w-full"
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            **Progress Display**
-                            {bulkLoading && (
-                                <div className="bg-gray-100 p-4 rounded-md">
-                                    <p className="text-sm text-gray-700">
-                                        Generating MCQs: {generatedCount} /{' '}
-                                        {totalToGenerate}
-                                    </p>
-                                    <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-                                        <div
-                                            className="bg-blue-600 h-2.5 rounded-full"
-                                            style={{
-                                                width: `${
-                                                    (generatedCount /
-                                                        totalToGenerate) *
-                                                    100
-                                                }%`,
-                                            }}
-                                        ></div>
-                                    </div>
-                                </div>
-                            )}
-
-                            Bulk Generate Button
-                            <Button
-                                type="button"
-                                variant="secondary"
-                                onClick={bulkGenerateMCQUsingGemini}
-                                disabled={bulkLoading}
-                                className="w-full flex items-center justify-center"
-                            >
-                                {bulkLoading ? (
-                                    <>
-                                        <Spinner
-                                            size="small"
-                                            className="mr-2"
-                                        />
-                                        Generating...
-                                    </>
-                                ) : (
-                                    'Bulk Generate AI'
-                                )}
-                            </Button>
-                        </div>
-                    </div> */}
 
                     {generatedQuestions.length > 0 && (
                         <>
                             <p className="text-2xl font-semibold text-start">
                                 {generatedQuestions.length} MCQs generated
                             </p>
-                            {generatedQuestions.map((item: any, index: any) => {
-                                // console.log(
-                                //     'Mapping question:',
-                                //     item.questionId
-                                // )
-                                return (
-                                    // <Card className="bg-white rounded-lg shadow-md p-5">
-                                    //     <div className="flex flex-row gap-4">
-                                    //         <Badge
-                                    //             // variant="yellow"
-                                    //             className="mb-3 text-white"
-                                    //         >
-                                    //             {
-                                    //                 tags.find(
-                                    //                     (t) => t.id === item.tagId
-                                    //                 )?.tagName
-                                    //             }
-                                    //         </Badge>
-                                    //         <Badge
-                                    //             variant="yellow"
-                                    //             // className="mb-3 bg-gray-400 text-white"
-                                    //             className={cn(
-                                    //                 `mb-3 text-white`,
-                                    //                 difficultyQuestionBgColor(
-                                    //                     item.difficulty
-                                    //                 )
-                                    //             )}
-                                    //         >
-                                    //             {item.difficulty}
-                                    //         </Badge>
-                                    //     </div>
-
-                                    //     <p className="ml-4 text-start text-md font-semibold">
-                                    //         {item.question}
-                                    //     </p>
-                                    //     <div className="space-y-2 mt-4">
-                                    //         <div className="flex items-center px-4 py-3 rounded-md hover:bg-gray-100 cursor-pointer">
-                                    //             <span className="font-medium mr-2">
-                                    //                 A.
-                                    //             </span>
-                                    //             <span>{item.options[1]}</span>
-                                    //         </div>
-                                    //         <div className="flex items-center px-4 py-3 rounded-md hover:bg-gray-100 cursor-pointer">
-                                    //             <span className="font-medium mr-2">
-                                    //                 B.
-                                    //             </span>
-                                    //             <span>{item.options[2]}</span>
-                                    //         </div>
-                                    //         <div className="flex items-center px-4 py-3 rounded-md hover:bg-gray-100 cursor-pointer">
-                                    //             <span className="font-medium mr-2">
-                                    //                 C.
-                                    //             </span>
-                                    //             <span>{item.options[3]}</span>
-                                    //         </div>
-                                    //         <div className="flex items-center px-4 py-3 rounded-md hover:bg-gray-100 cursor-pointer">
-                                    //             <span className="font-medium mr-2">
-                                    //                 D.
-                                    //             </span>
-                                    //             <span>{item.options[4]}</span>
-                                    //         </div>
-                                    //     </div>
-                                    // </Card>
-                                    // <QuestionCard
-                                    //   key={index}
-                                    //   question={item.question}
-                                    //   options={item.options}
-                                    //   correctOption={item.correctOption}
-                                    // />
-                                    <AIQuestionCard
-                                        key={index}
-                                        questionId={item.questionId}
-                                        question={item.question}
-                                        options={item.options}
-                                        correctOption={item.correctOption}
-                                        difficulty={item.difficulty}
-                                        tagId={item.tagId}
-                                        tags={tags}
-                                        handleQuestionConfirm={
-                                            handleQuestionConfirm
-                                        }
-                                        // isDeleteModalOpen={isDeleteModalOpen}
-                                        // setDeleteModalOpen={setDeleteModalOpen}
-                                    />
-                                )
-                            })}
+                            {generatedQuestions.map((item: any, index: any) => (
+                                <AIQuestionCard
+                                    key={index}
+                                    questionId={item.questionId}
+                                    question={item.question}
+                                    options={item.options}
+                                    correctOption={item.correctOption}
+                                    difficulty={item.difficulty}
+                                    tagId={item.tagId}
+                                    tags={tags}
+                                    handleQuestionConfirm={
+                                        handleQuestionConfirm
+                                    }
+                                />
+                            ))}
                         </>
                     )}
 
                     {/* Action Buttons */}
                     {generatedQuestions.length > 0 && (
                         <div className="flex justify-end items-center gap-4">
-                            {/* <Button
-                            type="button"
-                            variant="outline"
-                            onClick={generateMCQUsingGemini}
-                            disabled={
-                                loadingAI ||
-                                !form.watch('difficulty') ||
-                                !form.watch('topics')
-                            }
-                            className="flex items-center"
-                        >
-                            {loadingAI ? (
-                                <>
-                                    <Spinner size="small" className="mr-2" />
-                                    Generating...
-                                </>
-                            ) : (
-                                'Generate Using AI'
-                            )}
-                        </Button> */}
                             <Button
                                 type="button"
-                                // variant="outline"
                                 onClick={handleClear}
-                                // disabled={
-                                //     loadingAI ||
-                                //     !form.watch('difficulty') ||
-                                //     !form.watch('topics')
-                                // }
                                 className="flex items-center bg-gray-300 text-black"
                             >
                                 Clear Questions
@@ -1781,23 +1121,11 @@ QuestionId: [Write a unique]
                             </Button> */}
                             <Button
                                 type="button"
-                                // disabled={saving}
                                 onClick={() =>
                                     handleCreateQuizQuestion(requestBody)
                                 }
                                 className="w-1/3 flex items-center justify-center"
                             >
-                                {/* {saving ? (
-                                    <>
-                                        <Spinner
-                                            size="small"
-                                            className="mr-2"
-                                        />
-                                        Saving...
-                                    </>
-                                ) : (
-                                    'Add Questions'
-                                )} */}
                                 Add Questions
                             </Button>
                         </div>

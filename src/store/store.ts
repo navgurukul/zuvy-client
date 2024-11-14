@@ -706,3 +706,28 @@ export const getGeneratedQuestions = create<generatedQuestions>((set) => ({
         set({ generatedQuestions: newValue })
     },
 }))
+
+export type RequestBodyType = {
+    quizzes: {
+        tagId: number
+        difficulty: string
+        variantMCQs: {
+            question: string
+            options: { 1: string; 2: string; 3: string; 4: string }
+        }[]
+    }[]
+}
+
+type requestBody = {
+    requestBody: RequestBodyType
+    setRequestBody: (newValue: RequestBodyType) => void
+}
+
+export const getRequestBody = create<requestBody>((set) => ({
+    requestBody: {
+        quizzes: [],
+    },
+    setRequestBody: (newValue: RequestBodyType) => {
+        set({ requestBody: newValue })
+    },
+}))

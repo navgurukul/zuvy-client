@@ -120,24 +120,15 @@ export const AIQuestionCard = ({
                 <p className="ml-4 text-start text-md font-semibold">
                     {question}
                 </p>
-                {/* tags.find((t) => t.id === topicId[0].value)?.tagName */}
                 <div className="space-y-2 mt-4">
-                    <div className="flex items-center px-4 py-3 rounded-md hover:bg-gray-100 cursor-pointer">
-                        <span className="font-medium mr-2">A.</span>
-                        <span>{options[1]}</span>
-                    </div>
-                    <div className="flex items-center px-4 py-3 rounded-md hover:bg-gray-100 cursor-pointer">
-                        <span className="font-medium mr-2">B.</span>
-                        <span>{options[2]}</span>
-                    </div>
-                    <div className="flex items-center px-4 py-3 rounded-md hover:bg-gray-100 cursor-pointer">
-                        <span className="font-medium mr-2">C.</span>
-                        <span>{options[3]}</span>
-                    </div>
-                    <div className="flex items-center px-4 py-3 rounded-md hover:bg-gray-100 cursor-pointer">
-                        <span className="font-medium mr-2">D.</span>
-                        <span>{options[4]}</span>
-                    </div>
+                    {Object.values(options).map((option, index) => (
+                        <div className="flex items-center px-4 py-3 rounded-md hover:bg-gray-100 cursor-pointer">
+                            <span className="font-medium mr-2">
+                                {String.fromCharCode(65 + index)}.
+                            </span>
+                            <span>{option}</span>
+                        </div>
+                    ))}
                 </div>
             </Card>
         </>

@@ -19,7 +19,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { DialogFooter } from '@/components/ui/dialog'
-import { getGeneratedQuestions } from '@/store/store'
+import { getGeneratedQuestions, getRequestBody } from '@/store/store'
 
 const formSchema = z.object({
     questionText: z.string().min(1, {
@@ -40,6 +40,7 @@ const EditAIQuestion = ({
     const [options, setOptions] = useState<string[]>(['', ''])
     const { generatedQuestions, setGeneratedQuestions } =
         getGeneratedQuestions()
+    const { requestBody, setRequestBody } = getRequestBody()
 
     const question = generatedQuestions.find(
         (item) => item.questionId === questionId
@@ -53,8 +54,6 @@ const EditAIQuestion = ({
             selectedOption: question?.correctOption || 0,
         },
     })
-
-    console.log('form.watch', form.watch())
 
     useEffect(() => {
         setOptions(Object.values(question.options))
@@ -87,6 +86,26 @@ const EditAIQuestion = ({
         question.options = optionObject
         question.question = values.questionText
         question.correctOption = values.selectedOption
+
+        if (generatedQuestions.length > 0) {
+            const bulkQuestions = generatedQuestions.map((question) => {
+                return {
+                    tagId: question.tagId,
+                    difficulty: question.difficulty,
+                    variantMCQs: [
+                        {
+                            question: question.question,
+                            options: question.options,
+                            correctOption: question.correctOption,
+                        },
+                    ],
+                }
+            })
+            const requestBody = {
+                quizzes: bulkQuestions,
+            }
+            setRequestBody(requestBody)
+        }
 
         setEditModalOpen(false)
     }
