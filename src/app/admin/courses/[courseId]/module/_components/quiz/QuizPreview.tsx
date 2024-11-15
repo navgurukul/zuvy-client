@@ -13,13 +13,14 @@ const QuizPreview = ({
     const [quizData, setQuizData] = useState<any>()
 
     const fetchAllQuizQuestions = useCallback(async () => {
-        await api
-            .get(
+        try {
+            const res = await api.get(
                 `/Content/chapterDetailsById/${params.chapterID}?bootcampId=${params.courseId}&moduleId=${params.moduleId}&topicId=0`
             )
-            .then((res) => {
-                setQuizData(res.data)
-            })
+            setQuizData(res.data)
+        } catch (error) {
+            console.error("Failed to fetch quiz questions:", error)
+        }
     }, [params])
 
     useEffect(() => {
@@ -27,7 +28,9 @@ const QuizPreview = ({
     }, [fetchAllQuizQuestions])
 
     console.log(quizData)
-    if (quizData?.quizQuestionDetails.length > 0)
+
+    // Guard against undefined or null quizData or quizQuestionDetails
+    if (quizData?.quizQuestionDetails?.length > 0) {
         return (
             <div>
                 <div>
@@ -52,11 +55,11 @@ const QuizPreview = ({
 
                                 {/* Render options */}
                                 <div className="mt-2">
-                                    {Object.entries(question.options).map(
+                                    {Object.entries(question.options || {}).map(
                                         ([optionId, optionText]) => (
                                             <div
                                                 key={optionId}
-                                                className="flex  items-center"
+                                                className="flex items-center"
                                             >
                                                 <input
                                                     type="radio"
@@ -88,13 +91,13 @@ const QuizPreview = ({
                 </div>
             </div>
         )
-    else
+    } else {
         return (
             <div>
-                There is nothing to preview oyu havenot Selected any Quiz
-                Questions
+                There is nothing to preview. You have not selected any quiz questions.
             </div>
         )
+    }
 }
 
 export default QuizPreview

@@ -16,6 +16,7 @@ import { ArrowUpRightSquare } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import PreviewCodingChallenge from './PreviewCodingChallenge'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
+import { toast } from '@/components/ui/use-toast'
 import QuestionDescriptionModal from '../Assessment/QuestionDescriptionModal'
 
 interface Example {
@@ -100,6 +101,18 @@ function CodingChallenge({
     const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([])
     const [chapterTitle, setChapterTitle] = useState<string>(activeChapterTitle)
     const [showPreview, setShowPreview] = useState<boolean>(false)
+    const handlePreviewClick = () => {
+           if (selectedQuestions.length === 0){
+            // Show toast if no questions are added
+            toast({
+                title: 'No Questions',
+                description: 'Please add at least one question to preview the codiing question',
+               className: 'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
+            })
+        } else {
+            setShowPreview(true)
+        }
+    }
 
     useEffect(() => {
         async function getAllCodingQuestions() {
@@ -212,12 +225,13 @@ function CodingChallenge({
                         <Button
                             variant={'ghost'}
                             type="button"
-                            className="mt-2 text-secondary w-[100px] h-[30px] gap-x-1 "
-                            onClick={() => setShowPreview(true)}
+                            className=" text-secondary w-[100px] h-[30px] gap-x-1 "
+                            onClick={handlePreviewClick}  
                         >
                             <ArrowUpRightSquare />
                             <h1>Preview</h1>
                         </Button>
+
 
                         {/* <div className="text-secondary flex font-semibold items-center">
                     <h6 className="mr-2 text-sm">Preview</h6>

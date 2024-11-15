@@ -17,9 +17,10 @@ const PreviewCodingChallenge = ({ content, tags, setShowPreview }: Props) => {
     const router = useRouter()
     const [showCodePanel, setShowCodePanel] = useState(false)
 
-    const tag = tags.find(
-        (item: any) => item.id == content.codingQuestionDetails[0].tagId
-    )
+    // Add a check to prevent accessing properties of undefined
+    const tag = content.codingQuestionDetails && content.codingQuestionDetails.length > 0
+        ? tags.find((item: any) => item.id === content.codingQuestionDetails[0].tagId)
+        : null;
 
     useEffect(() => {
         if (showCodePanel) requestFullScreen(document.documentElement)
@@ -46,7 +47,7 @@ const PreviewCodingChallenge = ({ content, tags, setShowPreview }: Props) => {
                 {showCodePanel ? (
                     <IDE
                         params={{
-                            editor: String(content.codingQuestionDetails[0].id),
+                            editor: String(content.codingQuestionDetails[0]?.id), // Use optional chaining here
                         }}
                         onBack={() => console.log('Here..!')}
                         remainingTime={remainingTime}
@@ -62,7 +63,7 @@ const PreviewCodingChallenge = ({ content, tags, setShowPreview }: Props) => {
                                 id={question.id}
                                 title={question.title}
                                 difficulty={question.difficulty}
-                                tagName={tag?.tagName}
+                                tagName={tag?.tagName} // Optional chaining for safety
                                 description={question.description}
                                 status={'Pending'}
                                 onSolveChallenge={() => setShowCodePanel(true)}

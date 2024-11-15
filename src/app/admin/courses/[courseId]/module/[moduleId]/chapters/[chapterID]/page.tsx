@@ -56,6 +56,7 @@ export default function Page({
     const [topicId, setTopicId] = useState(1)
     const [key, setKey] = useState(0)
     const [loading, setLoading] = useState(true)
+    const[articleUpdateOnPreview,setArticleUpdateOnPreview]=useState(false)
 
     const fetchChapterContent = useCallback(
         async (chapterId: number, topicId: number) => {
@@ -113,10 +114,10 @@ export default function Page({
             setActiveChapterTitle('')
             setTopicId(0)
             setTimeout(() => {
-                setLoading(false) // Set loading to false after the delay
+                setLoading(false) 
             }, 100)
         }
-    }, [chapterData, fetchChapterContent])
+    }, [chapterData, fetchChapterContent, articleUpdateOnPreview])
 
     const renderChapterContent = () => {
         if (
@@ -137,7 +138,12 @@ export default function Page({
                     )
                 case 2:
                     return (
-                        <AddArticle key={chapterId} content={chapterContent} />
+                        <AddArticle key={chapterId} content={chapterContent} 
+                        articleUpdateOnPreview={articleUpdateOnPreview}
+                        setArticleUpdateOnPreview={setArticleUpdateOnPreview}
+
+
+                        />
                     )
                 case 3:
                     return (

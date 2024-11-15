@@ -39,7 +39,7 @@ interface Content {
     contentDetails: ContentDetail[]
 }
 
-const AddArticle = ({ content }: { content: any }) => {
+const AddArticle = ({ content ,articleUpdateOnPreview ,setArticleUpdateOnPreview}: { content: any , articleUpdateOnPreview:any,setArticleUpdateOnPreview:any}) => {
     // state
     const [title, setTitle] = useState('')
     const [showPreview, setShowPreview] = useState<boolean>(false)
@@ -62,6 +62,20 @@ const AddArticle = ({ content }: { content: any }) => {
         },
         mode: 'onChange',
     })
+ // Handle Preview Button Click
+const handlePreviewClick = () => {
+    const editorContent = editor?.getText() 
+    if (!editorContent || editorContent.trim() === '') { 
+      
+        toast({
+            title: 'No Questions',
+            description: 'Please add at least one question to preview the quiz.',
+           className: 'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
+        })
+    } else {
+        setShowPreview(true) 
+    }
+}
 
     // functions
     const getArticleContent = async () => {
@@ -88,6 +102,7 @@ const AddArticle = ({ content }: { content: any }) => {
                 `/Content/editChapterOfModule/${content.moduleId}?chapterId=${content.id}`,
                 data
             )
+            setArticleUpdateOnPreview(!articleUpdateOnPreview)
             toast({
                 title: 'Success',
                 description: 'Article Chapter Edited Successfully',
@@ -118,7 +133,9 @@ const AddArticle = ({ content }: { content: any }) => {
                     <PreviewArticle
                         content={content}
                         setShowPreview={setShowPreview}
+                   
                     />
+
                 ) : (
                     <>
                         <Form {...form}>
@@ -147,9 +164,7 @@ const AddArticle = ({ content }: { content: any }) => {
                                                 variant={'ghost'}
                                                 type="button"
                                                 className=" text-secondary w-[100px] h-[30px] gap-x-1 "
-                                                onClick={() =>
-                                                    setShowPreview(true)
-                                                }
+                                                onClick={handlePreviewClick}  
                                             >
                                                 <ArrowUpRightSquare />
                                                 <h1>Preview</h1>

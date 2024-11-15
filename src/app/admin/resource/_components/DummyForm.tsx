@@ -328,7 +328,7 @@ const NewMcqProblemForm = ({
                                             ?.selectedOption !== null
                                             ? variants[
                                                   selectedVariant
-                                              ].selectedOption.toString()
+                                              ]?.selectedOption?.toString()
                                             : ''
                                     }
                                     className="space-y-1"

@@ -36,12 +36,7 @@ const PreviewArticle = ({
                     attrs: {
                         textAlign: 'left',
                     },
-                    content: [
-                        {
-                            text: 'No article added yet. Please come back later for some interesting article to learn from...',
-                            type: 'text',
-                        },
-                    ],
+                   
                 },
             ],
         }
@@ -70,8 +65,9 @@ const PreviewArticle = ({
             </div>
 
             <TiptapEditor editor={editor} />
-            <div className="mt-2 text-end">
-                <Button>Mark as Done</Button>
+            <div className="mt-2 text-end" >
+                <Button disabled>Mark as Done </Button>
+                
             </div>
         </div>
     )

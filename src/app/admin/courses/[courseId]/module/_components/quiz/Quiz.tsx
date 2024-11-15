@@ -35,6 +35,19 @@ function Quiz(props: any) {
             ...uniqueData,
         ])
     }
+    const handlePreviewClick = () => {
+        if (addQuestion.length === 0) {
+            // Show toast if no questions are added
+            toast({
+                title: 'No Questions',
+                description: 'Please add at least one question to preview the quiz.',
+                className: 'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
+            })
+        } else {
+            setShowPreview(true)
+        }
+    }
+
     const openModal = () => setIsOpen(true)
     const closeModal = () => setIsOpen(false)
     async function getAllTags() {
@@ -116,7 +129,7 @@ function Quiz(props: any) {
                             variant={'ghost'}
                             type="button"
                             className=" text-secondary w-[100px] h-[30px] gap-x-1 "
-                            onClick={() => setShowPreview(true)}
+                            onClick={handlePreviewClick}  
                         >
                             <ArrowUpRightSquare />
                             <h1>Preview</h1>
