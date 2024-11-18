@@ -97,6 +97,8 @@ function Quiz(props: any) {
         getAllTags()
         getAllSavedQuizQuestion()
     }, [getAllSavedQuizQuestion])
+
+    console.log(props)
     return (
         <>
             <div className="flex flex-row items-center justify-start gap-x-6 mb-10">

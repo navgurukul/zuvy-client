@@ -3,6 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { z } from 'zod'
+import DOMPurify from 'dompurify'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -26,6 +27,7 @@ import { useState } from 'react'
 import TipTapForForm from './TipTapForForm'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
+import { X } from 'lucide-react'
 
 const formSchema = z.object({
     difficulty: z.enum(['Easy', 'Medium', 'Hard']),
@@ -59,6 +61,7 @@ export default function NewMcqForm({
     getAllQuizQuesiton: any
 }) {
     const [showTagName, setShowTagName] = useState<boolean>(false)
+    const [codeSnippet, setCodeSnippet] = useState<any>()
     const [activeVariantIndex, setActiveVariantIndex] = useState<number>(0)
     const [selectedTag, setSelectedTag] = useState<{
         id: number
@@ -115,7 +118,7 @@ export default function NewMcqForm({
     })
 
     const onSubmitHandler = async (values: z.infer<typeof formSchema>) => {
-        const transformedObj = {
+        const transformedObj: any = {
             title: 'Introduction to Quantum Physics',
             difficulty: values.difficulty,
             tagId: values.topics,
@@ -132,8 +135,16 @@ export default function NewMcqForm({
             })),
         }
 
+        console.log(transformedObj)
+        // const clean = DOMPurify.sanitize(transformedObj.variantMCQs[0].question)
+        // const updatedHtml = clean.replace(
+        //     /<pre>/g,
+        //     '<pre class="text-gray-800 bg-gray-300 p-2 rounded-lg text-left">'
+        // )
+        // setCodeSnippet(updatedHtml)
+
         try {
-            await api.post(`/Content/quiz`, transformedObj)
+            await api.post(`/Content/quiz`, { quizzes: [transformedObj] })
             toast({
                 title: 'Success',
                 description: 'Question Created Successfully',
@@ -152,6 +163,7 @@ export default function NewMcqForm({
 
     return (
         <Form {...form}>
+            {/* <div dangerouslySetInnerHTML={{ __html: codeSnippet }} /> */}
             <form
                 onSubmit={form.handleSubmit(onSubmitHandler)}
                 className="space-y-8 mr-12 w-[700px] flex flex-col justify-center items-center "
@@ -160,37 +172,39 @@ export default function NewMcqForm({
                     control={form.control}
                     name="difficulty"
                     render={({ field }) => (
-                        <FormItem className="space-y-3 text-start ">
-                            <FormControl>
-                                <RadioGroup
-                                    onValueChange={field.onChange}
-                                    defaultValue={field.value}
-                                >
-                                    <div className="flex gap-x-5 ml-[98px]">
-                                        <FormLabel className="mt-5 font-semibold text-md ">
-                                            Difficulty
-                                        </FormLabel>
-                                        {difficulties.map((difficulty) => (
-                                            <FormItem
-                                                key={difficulty}
-                                                className="flex items-center space-x-2 space-y-0"
-                                            >
-                                                <FormControl className="">
-                                                    <RadioGroupItem
-                                                        value={difficulty}
-                                                        className="text-secondary"
-                                                    />
-                                                </FormControl>
-                                                <FormLabel className="font-normal text-md ">
-                                                    {difficulty}
-                                                </FormLabel>
-                                            </FormItem>
-                                        ))}
-                                    </div>
-                                </RadioGroup>
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
+                        <div className="w-full ml-[140px]">
+                            <FormItem className="space-y-3 text-start ">
+                                <FormControl>
+                                    <RadioGroup
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value}
+                                    >
+                                        <div className="flex gap-x-5 ">
+                                            <FormLabel className="mt-5 font-semibold text-md ">
+                                                Difficulty
+                                            </FormLabel>
+                                            {difficulties.map((difficulty) => (
+                                                <FormItem
+                                                    key={difficulty}
+                                                    className="flex items-center space-x-2 space-y-0"
+                                                >
+                                                    <FormControl className="">
+                                                        <RadioGroupItem
+                                                            value={difficulty}
+                                                            className="text-secondary"
+                                                        />
+                                                    </FormControl>
+                                                    <FormLabel className="font-normal text-md ">
+                                                        {difficulty}
+                                                    </FormLabel>
+                                                </FormItem>
+                                            ))}
+                                        </div>
+                                    </RadioGroup>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        </div>
                     )}
                 />
 
@@ -198,58 +212,60 @@ export default function NewMcqForm({
                     control={form.control}
                     name="topics"
                     render={({ field }) => (
-                        <FormItem className="text-left flex flex-col  w-[300px] ml-[70px] ">
-                            <FormLabel className="font-semibold text-md">
-                                Topics
-                            </FormLabel>
-                            <div className="flex gap-x-4">
-                                <Select
-                                    onValueChange={(value) => {
-                                        const selectedTag = tags.find(
-                                            (tag) => tag.tagName === value
-                                        )
-                                        if (selectedTag) {
-                                            field.onChange(selectedTag.id)
-                                            setSelectedTag(selectedTag)
-                                            setShowTagName(true)
-                                        }
-                                    }}
-                                >
-                                    <FormControl className="w-[190px]">
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Choose Topic" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        {tags.map((tag) => (
-                                            <SelectItem
-                                                key={tag.id}
-                                                value={tag.tagName}
-                                            >
-                                                {tag.tagName}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-
-                                {showTagName && (
-                                    <div className="flex items-start gap-x-2 bg-[#FFF3E3] pt-1 px-2 rounded-lg">
-                                        <h1 className="mt-1 text-sm">
-                                            {selectedTag.tagName}
-                                        </h1>
-                                        <span
-                                            onClick={() =>
-                                                setShowTagName(false)
+                        <div className="w-full ml-[140px]">
+                            <FormItem className="text-start flex flex-col flex-start  ">
+                                <FormLabel className="font-semibold text-md">
+                                    Topics
+                                </FormLabel>
+                                <div className="flex gap-x-4">
+                                    <Select
+                                        onValueChange={(value) => {
+                                            const selectedTag = tags.find(
+                                                (tag) => tag.tagName === value
+                                            )
+                                            if (selectedTag) {
+                                                field.onChange(selectedTag.id)
+                                                setSelectedTag(selectedTag)
+                                                setShowTagName(true)
                                             }
-                                            className="cursor-pointer"
-                                        >
-                                            x
-                                        </span>
-                                    </div>
-                                )}
-                            </div>
-                            <FormMessage />
-                        </FormItem>
+                                        }}
+                                    >
+                                        <FormControl className="w-[190px]">
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Choose Topic" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {tags.map((tag) => (
+                                                <SelectItem
+                                                    key={tag.id}
+                                                    value={tag.tagName}
+                                                >
+                                                    {tag.tagName}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+
+                                    {showTagName && (
+                                        <div className="flex items-start gap-x-2 bg-[#FFF3E3] pt-1 px-2 rounded-lg">
+                                            <h1 className="mt-1 text-sm">
+                                                {selectedTag.tagName}
+                                            </h1>
+                                            <span
+                                                onClick={() =>
+                                                    setShowTagName(false)
+                                                }
+                                                className="cursor-pointer"
+                                            >
+                                                x
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                                <FormMessage />
+                            </FormItem>
+                        </div>
                     )}
                 />
 
@@ -273,6 +289,17 @@ export default function NewMcqForm({
                                 Variant {index + 1}
                             </Button>
                         ))}
+                        {activeVariantIndex > 0 && (
+                            <X
+                                size={18}
+                                onClick={() =>
+                                    handleRemoveVariant(activeVariantIndex)
+                                }
+                                className="mt-3 ml-5 text-red-500 bg-white cursor-pointer"
+                            />
+                            // <Button type="button">
+                            // </Button>
+                        )}
                         <Button
                             type="button"
                             onClick={handleAddVariant}
@@ -340,7 +367,7 @@ export default function NewMcqForm({
                                                             render={({
                                                                 field,
                                                             }) => (
-                                                                <FormItem className="w-[350px]">
+                                                                <FormItem className="w-full">
                                                                     {/* <FormLabel>
                                                                         Option
                                                                         Text{' '}
@@ -400,18 +427,6 @@ export default function NewMcqForm({
                                 </div>
                             </div>
                         </>
-                    )}
-
-                    {activeVariantIndex > 0 && (
-                        <Button
-                            type="button"
-                            onClick={() =>
-                                handleRemoveVariant(activeVariantIndex)
-                            }
-                            className="mt-2 text-red-500 bg-white"
-                        >
-                            Remove Variant
-                        </Button>
                     )}
                 </div>
                 <div className="flex flex-col justify-end items-end w-[550px]">

@@ -14,12 +14,15 @@ const QuizModal = ({ data, removeQuestionById }: any) => {
     const handleClick = () => {
         removeQuestionById(data.id)
     }
+
+    console.log(data)
+
     return (
         <div className="flex justify-between py-3 items-center">
             <div className="flex flex-col gap-2  ">
                 <div className="flex gap-2">
                     <h1 className="font-semibold">
-                        {ellipsis(data.question, 40)}
+                        {/* {ellipsis(data?.quizVariants[0]?.question, 40)} */}
                     </h1>
                     <h2
                         className={`${difficultyColor(

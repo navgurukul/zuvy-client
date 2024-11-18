@@ -1,16 +1,9 @@
 import React from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
-// import TiptapToolbar from '@/app/_components/editor/TiptapToolbar'
-import TiptapToolbar from './TipTapToolbarforForm'
-import Paragraph from '@tiptap/extension-paragraph'
-import Dropcursor from '@tiptap/extension-dropcursor'
-import Text from '@tiptap/extension-text'
-import Image from '@tiptap/extension-image'
-import Document from '@tiptap/extension-document'
-import Code from '@tiptap/extension-code'
-import Bold from '@tiptap/extension-bold'
-import Heading from '@tiptap/extension-heading'
+
+import TiptapEditor from '@/app/_components/editor/TiptapEditor'
+import extensions from '@/app/_components/editor/TiptapExtensions'
+import TiptapToolbarforForm from './TipTapToolbarforForm'
 
 type Props = {}
 
@@ -22,24 +15,8 @@ const TipTapForForm = ({
     onChange: (richText: String) => void
 }) => {
     const editor = useEditor({
-        extensions: [
-            Document,
-            Paragraph,
-            Text,
-            Image,
-            Dropcursor,
-            Code,
-            Bold,
-            Heading.configure({
-                levels: [2],
-            }),
-        ],
+        extensions,
         content: description,
-        editorProps: {
-            attributes: {
-                class: 'rounded-md min-h-[150px]  border-input  ',
-            },
-        },
         onUpdate({ editor }) {
             onChange(editor.getHTML())
         },
@@ -47,9 +24,13 @@ const TipTapForForm = ({
 
     return (
         <div className="w-full ">
-            <TiptapToolbar editor={editor} />
-            <div className="">
-                <EditorContent editor={editor} />
+            <div className="text-left  ">
+                <div className="w-1/2">
+                    <TiptapToolbarforForm editor={editor} />
+                </div>
+                <div className="outline-1 outline">
+                    <TiptapEditor editor={editor} />
+                </div>
             </div>
         </div>
     )

@@ -31,6 +31,7 @@ import { api } from '@/utils/axios.config'
 import {
     getAllQuizData,
     getCodingQuestionTags,
+    getEditQuizQuestion,
     getmcqdifficulty,
     getMcqSearch,
 } from '@/store/store'
@@ -45,6 +46,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import BulkUploadMcq from '../_components/BulkMcqForm'
 import NewMcqForm from '../_components/NewMcqForm'
+import EditMcqForm from '../_components/EditMcqForm'
 type Props = {}
 export type Tag = {
     label: string
@@ -61,7 +63,6 @@ interface Option {
 const Mcqs = (props: Props) => {
     const [isOpen, setIsOpen] = useState(false)
     const [isMcqModalOpen, setIsMcqModalOpen] = useState<boolean>(false)
-
     const [position, setPosition] = useState(POSITION)
     const [currentPage, setCurrentPage] = useState(1)
     const [totalMCQQuestion, setTotalMCQQuestion] = useState<any>(0)
@@ -95,6 +96,7 @@ const Mcqs = (props: Props) => {
         return { id: -1, tagName: 'All Topics' }
     })
     const [loading, setLoading] = useState(true)
+    const { isEditQuizModalOpen, setIsEditModalOpen } = getEditQuizQuestion()
 
     const handleTagOption = (option: Option) => {
         if (option.value === '-1') {
@@ -264,13 +266,31 @@ const Mcqs = (props: Props) => {
 
     const selectedTagCount = selectedOptions.length
     const difficultyCount = difficulty.length
-    const transformedTags = tags?.map((tag) => ({
-        id: +tag.value,
-        tagName: tag.label,
-    }))
 
     return (
         <>
+            {isEditQuizModalOpen && (
+                <div>
+                    <div
+                        className="flex cursor-pointer p-5 text-secondary"
+                        onClick={() => setIsEditModalOpen(false)}
+                    >
+                        <ChevronLeft />
+                        <h1>MCQ Problems</h1>
+                    </div>
+                    <div className="flex flex-col items-center justify-center">
+                        <h1 className="text-xl mb-4 ml-4 font-semibold text-start w-[590px] justify-start ">
+                            Edit MCQ
+                        </h1>
+                        <EditMcqForm
+                            tags={tags}
+                            closeModal={closeModal}
+                            setStoreQuizData={setStoreQuizData}
+                            getAllQuizQuesiton={getAllQuizQuestion}
+                        />
+                    </div>
+                </div>
+            )}
             {isMcqModalOpen && (
                 <div className=" ">
                     <div
@@ -282,7 +302,6 @@ const Mcqs = (props: Props) => {
                         <ChevronLeft />
                         <h1>MCQ Problems</h1>
                     </div>
-                    <div className="flex items-center justify-center w-full"></div>
                     <div className="flex flex-col items-center justify-center ">
                         <div>
                             <RadioGroup
@@ -290,35 +309,37 @@ const Mcqs = (props: Props) => {
                                 defaultValue="oneatatime"
                                 onValueChange={(value) => setMcqType(value)}
                             >
-                                <h1 className="text-xl mb-4 ml-4 font-semibold text-start w-[300px] justify-start ">
-                                    New MCQ
-                                </h1>
-                                <div className="flex w-[300px] items-start justify-start ml-4 gap-3">
-                                    <div className="flex  space-x-2">
-                                        <RadioGroupItem
-                                            value="bulk"
-                                            id="r1"
-                                            className="text-secondary mt-1"
-                                        />
-                                        <Label
-                                            className="font-semibold text-md"
-                                            htmlFor="r1"
-                                        >
-                                            Bulk
-                                        </Label>
-                                    </div>
-                                    <div className="flex  space-x-2">
-                                        <RadioGroupItem
-                                            value="oneatatime"
-                                            id="r2"
-                                            className="text-secondary mt-1"
-                                        />
-                                        <Label
-                                            className="font-semibold text-md"
-                                            htmlFor="r2"
-                                        >
-                                            One At A Time
-                                        </Label>
+                                <div className="flex w-[630px] flex-col items-start justify-start ml-4 gap-3">
+                                    <h1 className="font-semibold text-xl mb-4 ">
+                                        New MCQ
+                                    </h1>
+                                    <div className="flex gap-x-6 ">
+                                        <div className="flex  space-x-2">
+                                            <RadioGroupItem
+                                                value="bulk"
+                                                id="r1"
+                                                className="text-secondary mt-1"
+                                            />
+                                            <Label
+                                                className="font-semibold text-md"
+                                                htmlFor="r1"
+                                            >
+                                                Bulk
+                                            </Label>
+                                        </div>
+                                        <div className="flex  space-x-2">
+                                            <RadioGroupItem
+                                                value="oneatatime"
+                                                id="r2"
+                                                className="text-secondary mt-1"
+                                            />
+                                            <Label
+                                                className="font-semibold text-md"
+                                                htmlFor="r2"
+                                            >
+                                                One At A Time
+                                            </Label>
+                                        </div>
                                     </div>
                                 </div>
                             </RadioGroup>
@@ -327,7 +348,7 @@ const Mcqs = (props: Props) => {
                             ) : (
                                 <div className="flex items-start justify-center w-screen ">
                                     <NewMcqForm
-                                        tags={transformedTags}
+                                        tags={tags}
                                         closeModal={closeModal}
                                         setStoreQuizData={setStoreQuizData}
                                         getAllQuizQuesiton={getAllQuizQuestion}
@@ -344,7 +365,7 @@ const Mcqs = (props: Props) => {
                     </div>
                 </div>
             )}
-            {!isMcqModalOpen && (
+            {!isMcqModalOpen && !isEditQuizModalOpen && (
                 <MaxWidthWrapper>
                     <h1 className="text-left font-semibold text-2xl">
                         Resource Library - MCQs
@@ -366,7 +387,7 @@ const Mcqs = (props: Props) => {
                                 onClick={() =>
                                     setIsMcqModalOpen((prevState) => !prevState)
                                 }
-                                className=""
+                                className="mt-5"
                             >
                                 + Create MCQ
                             </Button>
@@ -397,7 +418,11 @@ const Mcqs = (props: Props) => {
                         </div>
                     </div>
 
-                    <DataTable data={quizData} columns={columns} />
+                    <DataTable
+                        data={quizData}
+                        columns={columns}
+                        mcqSide={true}
+                    />
                     <DataTablePagination
                         totalStudents={totalMCQQuestion}
                         position={position}
