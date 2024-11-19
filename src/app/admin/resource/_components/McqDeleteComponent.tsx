@@ -18,14 +18,17 @@ const McqDeleteVaiarntComp = ({ logSelectedRows }: Props) => {
             return selectedRow.original.id
         })
         const transformedBody: any = {
-            questionIds: selectedQuestionIds,
+            questionIds: selectedQuestionIds.map((questionIds) => {
+                return {
+                    id: questionIds,
+                    type: 'main',
+                }
+            }),
         }
-
-        console.log(transformedBody)
 
         await api({
             method: 'delete',
-            url: 'Content/deleteQuizQuestion',
+            url: 'Content/deleteMainQuizOrVariant',
             data: transformedBody,
         })
             .then((res) => {
@@ -47,49 +50,33 @@ const McqDeleteVaiarntComp = ({ logSelectedRows }: Props) => {
                         'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             })
-
-        // try {
-        //     await api
-        //         .delete('/Content/deleteQuizQuestion', transformedBody)
-        //         .then((res) => {
-        //             toast({
-        //                 title: 'Success',
-        //                 description: res.data.message,
-        //                 className:
-        //                     'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
-        //             })
-        //         })
-        // } catch (error: any) {
-        //     toast({
-        //         title: 'Error',
-        //         description:
-        //             error.response?.data?.message || 'An error occurred',
-        //         className:
-        //             'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-        //     })
-        // } finally {
-        //     setDeleteModalOpen(false)
-        // }
     }
 
     return (
         <div>
-            <Button
-                className="border-2 border-red-300 flex items-center p-2 ml-[50px]   left-0 "
-                variant={'ghost'}
-                onClick={() => setDeleteModalOpen(true)}
-                disabled={selectedRows.length > 0 ? false : true}
-            >
-                <Trash2 className="text-red-400" size={17} /> Delete MCQ
-            </Button>
-            <DeleteConfirmationModal
-                isOpen={isDeleteModalOpen}
-                onClose={() => setDeleteModalOpen(false)}
-                onConfirm={deleteMcqHalderinBulk}
-                modalText={'Are You Sure you want to delete Selected Mcq ?'}
-                buttonText="Delete Quiz Question"
-                input={false}
-            />
+            {selectedRows.length > 0 ? (
+                <div>
+                    <Button
+                        className="border-2 border-red-300 flex items-center p-2 ml-[50px]   left-0 "
+                        variant={'ghost'}
+                        onClick={() => setDeleteModalOpen(true)}
+                    >
+                        <Trash2 className="text-red-400" size={17} /> Delete MCQ
+                    </Button>
+                    <DeleteConfirmationModal
+                        isOpen={isDeleteModalOpen}
+                        onClose={() => setDeleteModalOpen(false)}
+                        onConfirm={deleteMcqHalderinBulk}
+                        modalText={
+                            'Are You Sure you want to delete Selected Mcqs ?'
+                        }
+                        buttonText="Delete Quiz Question"
+                        input={false}
+                    />
+                </div>
+            ) : (
+                <div></div>
+            )}
         </div>
     )
 }

@@ -92,8 +92,8 @@ export function DataTable<TData, TValue>({
     }, [table.getSelectedRowModel().rows])
 
     return (
-        <div className="space-y-4">
-            <div className="flex flex-col justify-end items-end">
+        <div className="space-y-4 relative">
+            <div className="flex flex-col justify-end items-end absolute top-[-111px] right-[130px] ">
                 {mcqSide && (
                     <McqDeleteVaiarntComp logSelectedRows={logSelectedRows} />
                 )}
