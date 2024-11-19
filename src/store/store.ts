@@ -3,6 +3,7 @@ import { create } from 'zustand'
 import { useEffect } from 'react'
 import { api } from '@/utils/axios.config'
 import { string } from 'zod'
+import { OFFSET, POSITION } from '@/utils/constant'
 
 type CounterStore = {
     studentData: {
@@ -54,6 +55,7 @@ interface StoreBatchData {
 }
 
 export interface quiz {
+    title: any
     id: number
     question: string
     options: {
@@ -146,26 +148,14 @@ export const getAssessmentPreviewStore = create<assessmentPreviewStore>(
 // ------------------------------
 // Define the type for the assessment store
 type assessmentStore = {
-    tabChangeInstance: number
-    setTabChangeInstance: (newValue: number) => void
     fullScreenExitInstance: number
     setFullScreenExitInstance: (newValue: number) => void
-    copyPasteAttempt: number
-    setCopyPasteAttempt: (newValue: number) => void
 }
 
 export const getAssessmentStore = create<assessmentStore>((set) => ({
-    tabChangeInstance: 0,
-    setTabChangeInstance: (newValue: number) => {
-        set({ tabChangeInstance: newValue })
-    },
-    fullScreenExitInstance: 0,
+     fullScreenExitInstance: 0,
     setFullScreenExitInstance: (newValue: number) => {
         set({ fullScreenExitInstance: newValue })
-    },
-    copyPasteAttempt: 0,
-    setCopyPasteAttempt: (newValue: number) => {
-        set({ copyPasteAttempt: newValue })
     },
 }))
 // ------------------------------
@@ -361,8 +351,75 @@ export const getcodingQuestionState = create<codingQuestions>((set) => ({
         set({ codingQuestions: newValue })
     },
 }))
+// type  option = {
+//     value: string;
+//     label: string;
+// };
+type selectedOptions = {
+    selectedOptions: any[]
+    setSelectedOptions: (newValue: any[]) => void
+}
+export const  getSelectedOptions = create<selectedOptions>((set) => ({
+    selectedOptions: [{ value: '-1', label: 'All Topics' }],
+    setSelectedOptions: (newValue: any[]) => {
+        set({ selectedOptions: newValue });
+    }
+}));
 
-// ------------------------------
+export const  getSelectedOpenEndedOptions = create<selectedOptions>((set) => ({
+    selectedOptions: [{ value: '-1', label: 'All Topics' }],
+    setSelectedOptions: (newValue: any[]) => {
+        set({ selectedOptions: newValue });
+    }
+}));
+export const  getSelectedMCQOptions = create<selectedOptions>((set) => ({
+    selectedOptions: [{ value: '-1', label: 'All Topics' }],
+    setSelectedOptions: (newValue: any[]) => {
+        set({ selectedOptions: newValue });
+    }
+}));
+type difficulty = {
+    difficulty: any[]
+    setDifficulty: (newValue: any[]) => void
+}
+export const  getDifficulty = create< difficulty>((set) => ({
+    difficulty: [{value: 'None', label: 'All Difficulty'}],
+    setDifficulty: (newValue: any[]) => {
+        set({ difficulty: newValue });
+    }
+}));
+
+export const  getOpenEndedDifficulty = create< difficulty>((set) => ({
+    difficulty: [{value: 'None', label: 'All Difficulty'}],
+    setDifficulty: (newValue: any[]) => {
+        set({ difficulty: newValue });
+    }
+}));
+
+type offset = {
+    offset: number;
+    setOffset: (newValue: number) => void;
+};
+
+export const getOffset = create<offset>((set) => ({
+    offset:  OFFSET, 
+    setOffset: (newValue: number) => {
+        set({ offset: newValue });
+    }
+}));
+
+type position = {
+    position: string;
+    setPosition: (newValue: string) => void;
+};
+
+export const getPosition = create<position>((set) => ({
+    position: POSITION,
+    setPosition: (newValue: string) => {
+        set({ position: newValue });
+    }
+}));
+// --------------------------
 
 type deleteCodingQuestion = {
     isDeleteModalOpen: boolean
@@ -494,6 +551,8 @@ type editCodingQuestionDialogs = {
     setIsCodingEditDialogOpen: (newValue: boolean) => void
     editCodingQuestionId: null
     setEditCodingQuestionId: (newValue: any) => void
+    isQuestionUsed: boolean
+    setIsQuestionUsed: (newValue: boolean) => void
 }
 
 export const getEditCodingQuestionDialogs = create<editCodingQuestionDialogs>(
@@ -510,6 +569,10 @@ export const getEditCodingQuestionDialogs = create<editCodingQuestionDialogs>(
         setEditCodingQuestionId: (newValue: any) => {
             set({ editCodingQuestionId: newValue })
         },
+        isQuestionUsed: false,
+        setIsQuestionUsed: (newValue: boolean) => {
+            set({ isQuestionUsed: newValue })
+        }
     })
 )
 

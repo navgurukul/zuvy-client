@@ -6,7 +6,10 @@ import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-co
 import {
     getAllQuizData,
     getCodingQuestionTags,
-    getisPreviewModalOpen,
+    getmcqdifficulty,
+    getOffset,
+    getPosition,
+    getSelectedMCQOptions,
     quiz,
 } from '@/store/store'
 import { Edit, Eye, Pencil, Trash2 } from 'lucide-react'
@@ -18,10 +21,15 @@ import {
     handleQuizConfirm,
     handleQuizDelete,
     handleDeleteQuizModal,
-    getAllQuizQuestion,
+    // getAllQuizQuestion,
     // handlerQuizQuestions,
+    filteredQuizQuestions,
 } from '@/utils/admin'
-import { DELETE_QUIZ_QUESTION_CONFIRMATION } from '@/utils/constant'
+import {
+    DELETE_QUIZ_QUESTION_CONFIRMATION,
+    OFFSET,
+    POSITION,
+} from '@/utils/constant'
 import {
     Dialog,
     DialogContent,
@@ -139,7 +147,9 @@ export const columns: ColumnDef<quiz>[] = [
             />
         ),
         cell: ({ row }) => {
+            console.log('row.origin', row.original)
             const difficulty = row.original.difficulty
+
             return (
                 <p
                     className={` text-left ml-3 text-[15px] font-semibold  ${difficultyColor(
@@ -263,7 +273,16 @@ export const columns: ColumnDef<quiz>[] = [
                 setDeleteQuizQuestionId,
             } = getDeleteQuizQuestion()
             const { setStoreQuizData } = getAllQuizData()
-
+            const { selectedOptions, setSelectedOptions } =
+                getSelectedMCQOptions()
+            const {
+                mcqDifficulty: difficulty,
+                setMcqDifficulty: setDifficulty,
+            } = getmcqdifficulty()
+            const { offset, setOffset } = getOffset()
+            const { position, setPosition } = getPosition()
+            console.log('offset', OFFSET)
+            console.log('position', POSITION)
             return (
                 <div className="ml-[-30px]">
                     <Trash2
@@ -286,8 +305,13 @@ export const columns: ColumnDef<quiz>[] = [
                                 handleQuizDelete,
                                 setDeleteModalOpen,
                                 deleteQuizQuestionId,
-                                getAllQuizQuestion,
-                                setStoreQuizData
+                                // getAllQuizQuestion,
+                                filteredQuizQuestions,
+                                setStoreQuizData,
+                                selectedOptions,
+                                difficulty,
+                                offset,
+                                position
                             )
                         }}
                         modalText={DELETE_QUIZ_QUESTION_CONFIRMATION}

@@ -34,6 +34,9 @@ import {
     getEditQuizQuestion,
     getmcqdifficulty,
     getMcqSearch,
+    getOffset,
+    getPosition,
+    getSelectedMCQOptions,
 } from '@/store/store'
 import useDebounce from '@/hooks/useDebounce'
 import { getAllQuizQuestion } from '@/utils/admin'
@@ -63,13 +66,16 @@ interface Option {
 const Mcqs = (props: Props) => {
     const [isOpen, setIsOpen] = useState(false)
     const [isMcqModalOpen, setIsMcqModalOpen] = useState<boolean>(false)
-    const [position, setPosition] = useState(POSITION)
+    // const [position, setPosition] = useState(POSITION)
+    // const [position, setPosition] = useState(POSITION)
+    const { position, setPosition } = getPosition()
     const [currentPage, setCurrentPage] = useState(1)
     const [totalMCQQuestion, setTotalMCQQuestion] = useState<any>(0)
     const [totalPages, setTotalPages] = useState(0)
     const [pages, setPages] = useState(0)
     const [lastPage, setLastPage] = useState(0)
-    const [offset, setOffset] = useState<number>(OFFSET)
+    // const [offset, setOffset] = useState<number>(OFFSET)
+    const { offset, setOffset } = getOffset()
     const [search, setSearch] = useState('')
     const debouncedSearch = useDebounce(search, 500)
     // const [difficulty, setDifficulty] = useState<string>('None')
@@ -80,9 +86,13 @@ const Mcqs = (props: Props) => {
     const { setmcqSearch } = getMcqSearch()
     const [mcqType, setMcqType] = useState<string>('')
 
-    const [selectedOptions, setSelectedOptions] = useState<Option[]>([
-        { value: '-1', label: 'All Topics' },
-    ])
+    // const [selectedOptions, setSelectedOptions] = useState<Option[]>([
+    //     { value: '-1', label: 'All Topics' },
+    // ])
+    // const [selectedOptions, setSelectedOptions] = useState<Option[]>([
+    //     { value: '-1', label: 'All Topics' }, // ])
+    const { selectedOptions, setSelectedOptions } = getSelectedMCQOptions()
+
     const [options, setOptions] = useState<Option[]>([
         { value: '-1', label: 'All Topics' },
     ])
@@ -101,8 +111,13 @@ const Mcqs = (props: Props) => {
     const handleTagOption = (option: Option) => {
         if (option.value === '-1') {
             if (selectedOptions.some((item) => item.value === option.value)) {
-                setSelectedOptions((prev) =>
-                    prev.filter((selected) => selected.value !== option.value)
+                // setSelectedOptions((prev) =>
+                //     prev.filter((selected) => selected.value !== option.value)
+                // )
+                setSelectedOptions(
+                    selectedOptions.filter(
+                        (selected) => selected.value !== option.value
+                    )
                 )
             } else {
                 setSelectedOptions([option])
@@ -116,13 +131,19 @@ const Mcqs = (props: Props) => {
                         (selected) => selected.value === option.value
                     )
                 ) {
-                    setSelectedOptions((prev) =>
-                        prev.filter(
+                    // setSelectedOptions((prev) =>
+                    //     prev.filter(
+                    //         (selected) => selected.value !== option.value
+                    //     )
+                    // )
+                    setSelectedOptions(
+                        selectedOptions.filter(
                             (selected) => selected.value !== option.value
                         )
                     )
                 } else {
-                    setSelectedOptions((prev) => [...prev, option])
+                    // setSelectedOptions((prev) => [...prev, option])
+                    setSelectedOptions([...selectedOptions, option])
                 }
             }
         }
@@ -200,29 +221,29 @@ const Mcqs = (props: Props) => {
         async (offset: number) => {
             try {
                 const safeOffset = Math.max(0, offset)
-                let url = `/Content/allQuizQuestions?limit=${position}&offset=${offset}`
+                let url = `/Content/allQuizQuestions?limit=${position}&offset=${safeOffset}`
                 setmcqSearch(debouncedSearch)
+
                 let selectedTagIds = ''
-                selectedOptions.map(
-                    (item: any) => (selectedTagIds += '&tagId=' + item.value)
+                selectedOptions.forEach(
+                    (item: any) => (selectedTagIds += `&tagId=${item.value}`)
                 )
 
                 let selectedDiff = ''
-                difficulty.map(
-                    (item: any) => (selectedDiff += '&difficulty=' + item.value)
+                difficulty.forEach(
+                    (item: any) => (selectedDiff += `&difficulty=${item.value}`)
                 )
 
                 const queryParams = []
 
-                if (difficulty.length > 0) {
-                    if (difficulty[0].value !== 'None') {
-                        queryParams.push(selectedDiff.substring(1))
-                    }
+                if (difficulty.length > 0 && difficulty[0].value !== 'None') {
+                    queryParams.push(selectedDiff.substring(1))
                 }
-                if (selectedTagIds.length > 0) {
-                    if (selectedOptions[0].value !== '-1') {
-                        queryParams.push(selectedTagIds.substring(1))
-                    }
+                if (
+                    selectedOptions.length > 0 &&
+                    selectedOptions[0].value !== '-1'
+                ) {
+                    queryParams.push(selectedTagIds.substring(1))
                 }
                 if (debouncedSearch) {
                     queryParams.push(
@@ -233,7 +254,10 @@ const Mcqs = (props: Props) => {
                 if (queryParams.length > 0) {
                     url += `&${queryParams.join('&')}`
                 }
+
                 const res = await api.get(url)
+                console.log('response.data.data', res.data.data)
+
                 setStoreQuizData(res.data.data)
                 setTotalMCQQuestion(res.data.totalRows)
                 setTotalPages(res.data.totalPages)
@@ -244,15 +268,13 @@ const Mcqs = (props: Props) => {
             }
         },
         [
-            offset,
+            position,
             difficulty,
+            selectedOptions,
+            setTotalMCQQuestion,
             debouncedSearch,
             setStoreQuizData,
-            selectedTag.id,
-            selectedOptions,
             setmcqSearch,
-            setTotalMCQQuestion,
-            position,
         ]
     )
 
