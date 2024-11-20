@@ -13,6 +13,7 @@ function QuizList({
     addQuestion: any[]
     handleAddQuestion: (questions: any[]) => void
 }) {
+    console.log(questionData)
     return (
         <ScrollArea className="h-[550px] w-full  ">
             {questionData.map((question: any) => {
@@ -33,7 +34,9 @@ function QuizList({
                         <div className="flex items-center justify-between gap-x-4 py-4">
                             <div className="flex justify-start items-center gap-x-5">
                                 <h1 className="scroll-m-20 text-4xl  font-semibold tracking-tight lg:text-lg">
-                                    {ellipsis(question.question, 40)}
+                                    {question.quizVariants.map((ques: any) => {
+                                        return ellipsis(ques.question, 40)
+                                    })}
                                 </h1>
                                 <span
                                     className={`font-semibold ${difficultyColor(

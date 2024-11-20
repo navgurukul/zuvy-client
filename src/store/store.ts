@@ -66,6 +66,7 @@ export interface quiz {
     difficulty: 'Easy' | 'Medium' | 'Hard'
     tagId: number
     usage: number
+    quizVariants: any[]
 }
 
 export const getCourseData = create<StoreCourseData>((set) => ({
@@ -753,5 +754,17 @@ export const getMcqSearch = create<mcqSearch>((set) => ({
     mcqSearch: 'None',
     setmcqSearch: (newValue: string) => {
         set({ mcqSearch: newValue })
+    },
+}))
+
+type isPreviewModalOpen = {
+    isPreviewModalOpen: boolean
+    setIsPreviewModalOpen: (newValue: boolean) => void
+}
+
+export const getisPreviewModalOpen = create<isPreviewModalOpen>((set) => ({
+    isPreviewModalOpen: false,
+    setIsPreviewModalOpen: (newValue: boolean) => {
+        set({ isPreviewModalOpen: newValue })
     },
 }))

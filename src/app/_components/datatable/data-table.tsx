@@ -27,11 +27,13 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import { getBatchData } from '@/store/store'
+import McqDeleteVaiarntComp from '@/app/admin/resource/_components/McqDeleteComponent'
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
     setSelectedRows?: any
+    mcqSide?: boolean
 }
 
 type StudentData = {
@@ -49,6 +51,7 @@ export function DataTable<TData, TValue>({
     columns,
     data,
     setSelectedRows,
+    mcqSide,
 }: DataTableProps<TData, TValue>) {
     const [rowSelection, setRowSelection] = React.useState({})
 
@@ -77,7 +80,10 @@ export function DataTable<TData, TValue>({
         getFacetedRowModel: getFacetedRowModel(),
         getFacetedUniqueValues: getFacetedUniqueValues(),
     })
-
+    const logSelectedRows = () => {
+        const selectedRows = table.getSelectedRowModel().rows
+        return selectedRows
+    }
     useEffect(() => {
         const selectedRows = table
             .getSelectedRowModel()
@@ -86,7 +92,12 @@ export function DataTable<TData, TValue>({
     }, [table.getSelectedRowModel().rows])
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 relative">
+            <div className="flex flex-col justify-end items-end absolute top-[-111px] right-[130px] ">
+                {mcqSide && (
+                    <McqDeleteVaiarntComp logSelectedRows={logSelectedRows} />
+                )}
+            </div>
             <DataTableToolbar table={table} />
             <div className="rounded-md border">
                 <Table>

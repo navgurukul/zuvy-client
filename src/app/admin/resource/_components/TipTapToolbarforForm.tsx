@@ -68,7 +68,12 @@ enum Level {
     Level6 = 6,
 }
 
-const TiptapToolbar = ({ editor }: { editor: any; mcqSide?: boolean }) => {
+const TiptapToolbarforForm = ({
+    editor,
+}: {
+    editor: any
+    mcqSide?: boolean
+}) => {
     const [selectedHeading, setSelectedHeading] = useState('H1')
     const [isDropdownOpen, setDropdownOpen] = useState(false)
     const [isDialogOpen, setDialogOpen] = useState(false)
@@ -111,17 +116,11 @@ const TiptapToolbar = ({ editor }: { editor: any; mcqSide?: boolean }) => {
                 <Button
                     type="button"
                     onClick={addImage}
-                    className="mr-2 px-2 py-1 bg-white text-black hover:bg-secondary hover:text-white"
+                    className="mr-2 px-2 py-1 bg-white text-black hover:bg-secondary hover:text-white
+                    
+                    "
                 >
-                    <ImageIcon />
-                </Button>
-
-                <Button
-                    type="button"
-                    onClick={addYoutubeVideo}
-                    className="mr-2 px-2 py-1 bg-white text-black hover:bg-secondary hover:text-white"
-                >
-                    <Video />
+                    <ImageIcon size={20} />
                 </Button>
 
                 <Button
@@ -134,7 +133,7 @@ const TiptapToolbar = ({ editor }: { editor: any; mcqSide?: boolean }) => {
                             : inActiveBtnStyles
                     }`}
                 >
-                    <Bold />
+                    <Bold size={20} />
                 </Button>
                 <Button
                     type="button"
@@ -148,7 +147,7 @@ const TiptapToolbar = ({ editor }: { editor: any; mcqSide?: boolean }) => {
                             : inActiveBtnStyles
                     }
                 >
-                    <Italic />
+                    <Italic size={20} />
                 </Button>
                 <Button
                     type="button"
@@ -162,7 +161,7 @@ const TiptapToolbar = ({ editor }: { editor: any; mcqSide?: boolean }) => {
                             : inActiveBtnStyles
                     }
                 >
-                    <Strikethrough />
+                    <Strikethrough size={20} />
                 </Button>
                 <Button
                     type="button"
@@ -175,7 +174,7 @@ const TiptapToolbar = ({ editor }: { editor: any; mcqSide?: boolean }) => {
                             : inActiveBtnStyles
                     }
                 >
-                    <LucideUnderline />
+                    <LucideUnderline size={20} />
                 </Button>
                 <Button
                     type="button"
@@ -188,7 +187,7 @@ const TiptapToolbar = ({ editor }: { editor: any; mcqSide?: boolean }) => {
                             : inActiveBtnStyles
                     }
                 >
-                    <AlignLeft />
+                    <AlignLeft size={20} />
                 </Button>
                 <Button
                     onClick={() =>
@@ -200,7 +199,7 @@ const TiptapToolbar = ({ editor }: { editor: any; mcqSide?: boolean }) => {
                             : inActiveBtnStyles
                     }
                 >
-                    <AlignCenter />
+                    <AlignCenter size={20} />
                 </Button>
                 <Button
                     onClick={() =>
@@ -212,7 +211,7 @@ const TiptapToolbar = ({ editor }: { editor: any; mcqSide?: boolean }) => {
                             : inActiveBtnStyles
                     }
                 >
-                    <AlignRight />
+                    <AlignRight size={20} />
                 </Button>
 
                 <Button
@@ -225,7 +224,7 @@ const TiptapToolbar = ({ editor }: { editor: any; mcqSide?: boolean }) => {
                             : inActiveBtnStyles
                     }
                 >
-                    <Code />
+                    <Code size={20} />
                 </Button>
 
                 <Button
@@ -300,7 +299,7 @@ const TiptapToolbar = ({ editor }: { editor: any; mcqSide?: boolean }) => {
                             : inActiveBtnStyles
                     }
                 >
-                    <List />
+                    <List size={20} />
                 </Button>
                 <Button
                     type="button"
@@ -313,7 +312,7 @@ const TiptapToolbar = ({ editor }: { editor: any; mcqSide?: boolean }) => {
                             : inActiveBtnStyles
                     }
                 >
-                    <ListOrdered />
+                    <ListOrdered size={20} />
                 </Button>
 
                 <Button
@@ -323,7 +322,7 @@ const TiptapToolbar = ({ editor }: { editor: any; mcqSide?: boolean }) => {
                     }
                     className="mr-2 bg-white text-black hover:bg-secondary hover:text-white px-2 py-1"
                 >
-                    <Minus />
+                    <Minus size={20} />
                 </Button>
 
                 <Button
@@ -332,7 +331,7 @@ const TiptapToolbar = ({ editor }: { editor: any; mcqSide?: boolean }) => {
                     disabled={!editor?.can().chain().focus().undo().run()}
                     className="mr-2 px-2 py-1 bg-white text-black hover:bg-secondary hover:text-white"
                 >
-                    <Undo />
+                    <Undo size={20} />
                 </Button>
                 <Button
                     type="button"
@@ -340,7 +339,7 @@ const TiptapToolbar = ({ editor }: { editor: any; mcqSide?: boolean }) => {
                     disabled={!editor?.can().chain().focus().redo().run()}
                     className="mr-2 px-2 py-1 bg-white text-black hover:bg-secondary hover:text-white"
                 >
-                    <Redo />
+                    <Redo size={20} />
                 </Button>
             </div>
 
@@ -376,4 +375,4 @@ const TiptapToolbar = ({ editor }: { editor: any; mcqSide?: boolean }) => {
     )
 }
 
-export default TiptapToolbar
+export default TiptapToolbarforForm

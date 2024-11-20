@@ -3,7 +3,15 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 
-import { getAllQuizData, getCodingQuestionTags, getmcqdifficulty, getOffset, getPosition, getSelectedMCQOptions, quiz } from '@/store/store'
+import {
+    getAllQuizData,
+    getCodingQuestionTags,
+    getmcqdifficulty,
+    getOffset,
+    getPosition,
+    getSelectedMCQOptions,
+    quiz,
+} from '@/store/store'
 import { Edit, Eye, Pencil, Trash2 } from 'lucide-react'
 import { difficultyColor } from '@/lib/utils'
 
@@ -17,7 +25,11 @@ import {
     // handlerQuizQuestions,
     filteredQuizQuestions,
 } from '@/utils/admin'
-import { DELETE_QUIZ_QUESTION_CONFIRMATION, OFFSET, POSITION } from '@/utils/constant'
+import {
+    DELETE_QUIZ_QUESTION_CONFIRMATION,
+    OFFSET,
+    POSITION,
+} from '@/utils/constant'
 import {
     Dialog,
     DialogContent,
@@ -26,8 +38,56 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import EditQuizQuestion from '../_components/EditQuizQuestion'
+import CheckboxAndDeleteHandler from '../_components/CheckBoxAndDeleteCombo'
+import { Checkbox } from '@/components/ui/checkbox'
+import PreviewMCQ from '../_components/PreviewMcq'
+import { Button } from '@/components/ui/button'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { Alert } from '@/components/ui/alert'
+import { AlertDialogTrigger } from '@radix-ui/react-alert-dialog'
+import { AlertDialogContent } from '@/components/ui/alert-dialog'
+import DialogBox from '../_components/PreviewBox'
+import TipTapForForm from '../_components/TipTapForForm'
 
 export const columns: ColumnDef<quiz>[] = [
+    {
+        id: 'select',
+        header: ({ table }) => {
+            return (
+                <Checkbox
+                    checked={
+                        table.getIsAllPageRowsSelected() ||
+                        (table.getIsSomePageRowsSelected() && 'indeterminate')
+                    }
+                    onCheckedChange={(value) =>
+                        table.toggleAllPageRowsSelected(!!value)
+                    }
+                    aria-label="Select all"
+                />
+            )
+        },
+
+        cell: ({ table, row }) => {
+            return (
+                <CheckboxAndDeleteHandler
+                    checked={row.getIsSelected()}
+                    onCheckedChange={(value) => {
+                        // console.log(row)
+                        row.toggleSelected(!!value)
+                    }}
+                    aria-label="Select row"
+                />
+            )
+        },
+        enableSorting: false,
+        enableHiding: false,
+    },
+
     {
         accessorKey: 'question',
         header: ({ column }) => (
@@ -37,13 +97,46 @@ export const columns: ColumnDef<quiz>[] = [
                 title="Question Name"
             />
         ),
+
         cell: ({ row }) => {
-            const question = row.original?.title
-            return <p className="text-left text-md font-[14px] ">{question}</p>
+            const question = row.original?.quizVariants[0]?.question
+            return (
+                <pre
+                    className="text-left text-md p-1 w-[900px] font-[16px] hover:bg-slate-200 rounded-lg transition ease-in-out delay-150 overflow-hidden text-ellipsis"
+                    style={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: 'vertical',
+                    }}
+                >
+                    {question}
+                </pre>
+            )
         },
         enableSorting: false,
         enableHiding: false,
     },
+    {
+        accessorKey: 'usage',
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                className="text-[17px]"
+                column={column}
+                title="Usage"
+            />
+        ),
+        cell: ({ row }) => {
+            const usage = row.original.usage
+            return (
+                <p className={` text-left ml-5 text-[15px] font-semibold `}>
+                    {usage}
+                </p>
+            )
+        },
+        enableSorting: false,
+        enableHiding: false,
+    },
+
     {
         accessorKey: 'difficulty',
         header: ({ column }) => (
@@ -53,10 +146,9 @@ export const columns: ColumnDef<quiz>[] = [
                 title="Difficulty"
             />
         ),
-        cell: ({ row }) => {
-            console.log("row.origin",row.original)
+        cell: ({ row, table }) => {
             const difficulty = row.original.difficulty
-            
+
             return (
                 <p
                     className={` text-left ml-3 text-[15px] font-semibold  ${difficultyColor(
@@ -72,24 +164,67 @@ export const columns: ColumnDef<quiz>[] = [
     },
 
     {
-        id: 'actions',
+        id: 'actions1',
+        cell: ({ row }) => {
+            const quizQuestionId = row.original.id
+            const selectedRows = row.getIsSelected()
+
+            return (
+                <div className="">
+                    <Dialog>
+                        <DialogTrigger>
+                            {!selectedRows && (
+                                <Eye className="cursor-pointer" />
+                            )}
+                        </DialogTrigger>
+                        <DialogContent className="">
+                            <PreviewMCQ quizQuestionId={quizQuestionId} />
+                        </DialogContent>
+                    </Dialog>
+                </div>
+            )
+        },
+    },
+
+    {
+        id: 'actions2',
         header: ({ column }) => (
             <DataTableColumnHeader
                 className="text-[17px]"
                 column={column}
-                title="Actions"
+                title=""
             />
         ),
         cell: ({ row }) => {
-            const quizQuestion = row.original
-
-            const openDialog = () => {
-                const dialog = document.getElementById('editQuizDialog')
-                if (dialog) {
-                    dialog.setAttribute('data-state', 'open') // Simulate opening the dialog
-                }
+            const quizQuestionid = row.original.id
+            const { setIsEditModalOpen, setIsQuizQuestionId } =
+                getEditQuizQuestion()
+            const editQuizHandler = (id: number) => {
+                setIsEditModalOpen(true)
+                setIsQuizQuestionId(id)
             }
+            const selectedRows = row.getIsSelected()
 
+            return (
+                <div className="flex">
+                    <div>
+                        {!selectedRows && (
+                            <Pencil
+                                onClick={() => editQuizHandler(quizQuestionid)}
+                                className="cursor-pointer mr-5"
+                                size={20}
+                            />
+                        )}
+                    </div>
+                </div>
+            )
+        },
+    },
+    {
+        id: 'actions3',
+
+        cell: ({ row }) => {
+            const quizQuestion = row.original
             const {
                 isDeleteModalOpen,
                 setDeleteModalOpen,
@@ -97,52 +232,32 @@ export const columns: ColumnDef<quiz>[] = [
                 setDeleteQuizQuestionId,
             } = getDeleteQuizQuestion()
             const { setStoreQuizData } = getAllQuizData()
-            const { selectedOptions, setSelectedOptions } = getSelectedMCQOptions()
-            const { mcqDifficulty: difficulty, setMcqDifficulty: setDifficulty } =
-            getmcqdifficulty()
-            const { offset, setOffset} = getOffset()
-            const {position, setPosition} = getPosition()
-            console.log("offset",OFFSET)
-            console.log("position",POSITION)
+            const { selectedOptions, setSelectedOptions } =
+                getSelectedMCQOptions()
+            const {
+                mcqDifficulty: difficulty,
+                setMcqDifficulty: setDifficulty,
+            } = getmcqdifficulty()
+            const { offset, setOffset } = getOffset()
+            const { position, setPosition } = getPosition()
+            const selectedRows = row.getIsSelected()
+
             return (
-                <div className="flex">
-                    <div id="editQuizDialog" data-state="closed">
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Pencil
-                                    className="cursor-pointer mr-5"
-                                    size={20}
-                                    onClick={openDialog}
-                                />
-                            </DialogTrigger>
-
-                            <DialogContent
-                                className="sm:max-w-[518px] max-h-[90vh] overflow-y-auto overflow-x-hidden"
-                                data-state="closed"
-                            >
-                                <DialogHeader>
-                                    <DialogTitle>Edit MCQ</DialogTitle>
-                                </DialogHeader>
-                                <EditQuizQuestion
-                                    setStoreQuizData={setStoreQuizData}
-                                    quizId={quizQuestion.id}
-                                />
-                            </DialogContent>
-                        </Dialog>
-                    </div>
-
-                    <Trash2
-                        onClick={(e) => {
-                            e.stopPropagation()
-                            handleDeleteQuizModal(
-                                setDeleteModalOpen,
-                                setDeleteQuizQuestionId,
-                                quizQuestion
-                            )
-                        }}
-                        className="text-destructive cursor-pointer"
-                        size={20}
-                    />
+                <div className="ml-[-30px]">
+                    {!selectedRows && (
+                        <Trash2
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                handleDeleteQuizModal(
+                                    setDeleteModalOpen,
+                                    setDeleteQuizQuestionId,
+                                    quizQuestion
+                                )
+                            }}
+                            className="text-destructive cursor-pointer"
+                            size={20}
+                        />
+                    )}
                     <DeleteConfirmationModal
                         isOpen={isDeleteModalOpen}
                         onClose={() => setDeleteModalOpen(false)}
@@ -157,7 +272,7 @@ export const columns: ColumnDef<quiz>[] = [
                                 selectedOptions,
                                 difficulty,
                                 offset,
-                                position,
+                                position
                             )
                         }}
                         modalText={DELETE_QUIZ_QUESTION_CONFIRMATION}

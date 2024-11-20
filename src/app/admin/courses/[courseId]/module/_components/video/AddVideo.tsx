@@ -25,11 +25,15 @@ const getEmbedLink = (url: string) => {
     if (!url) return ''; 
     try {
         const urlObj = new URL(url); // Parse the URL
-        if (urlObj.hostname.includes('youtube.com') && urlObj.searchParams.has('v')) {
+        if (url.includes('embed')) {
+            return url
+
+        }
+        else if (urlObj.hostname.includes('youtube.com') && urlObj.searchParams.has('v')) {
             // Convert long YouTube URL to embed format
             return `https://www.youtube.com/embed/${urlObj.searchParams.get('v')}`;
         }
-        if (urlObj.hostname.includes('youtu.be')) {
+       else if (urlObj.hostname.includes('youtu.be')) {
             // Convert short YouTube URL to embed format
             const videoId = urlObj.pathname.slice(1);
             return `https://www.youtube.com/embed/${videoId}`;
