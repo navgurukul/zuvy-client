@@ -312,8 +312,8 @@ const OpenEndedQuestions = (props: Props) => {
                                                 setIsDialogOpen={
                                                     setIsDialogOpen
                                                 }
-                                                getAllOpenEndedQuestions={
-                                                    getAllOpenEndedQuestions
+                                                filteredOpenEndedQuestions={
+                                                    filteredOpenEndedQuestions
                                                 }
                                                 setOpenEndedQuestions={
                                                     setOpenEndedQuestions
@@ -394,8 +394,8 @@ const OpenEndedQuestions = (props: Props) => {
                                                 setIsDialogOpen={
                                                     setIsDialogOpen
                                                 }
-                                                getAllOpenEndedQuestions={
-                                                    getAllOpenEndedQuestions
+                                                filteredOpenEndedQuestions={
+                                                    filteredOpenEndedQuestions
                                                 }
                                                 setOpenEndedQuestions={
                                                     setOpenEndedQuestions

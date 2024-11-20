@@ -440,8 +440,8 @@ console.log("offset",offset)
                                                     setIsDialogOpen={
                                                         setIsCodingDialogOpen
                                                     }
-                                                    getAllCodingQuestions={
-                                                        getAllCodingQuestions
+                                                    filteredCodingQuestions={
+                                                        filteredCodingQuestions
                                                     }
                                                     setCodingQuestions={
                                                         setCodingQuestions
