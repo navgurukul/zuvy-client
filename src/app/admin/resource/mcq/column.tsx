@@ -146,8 +146,7 @@ export const columns: ColumnDef<quiz>[] = [
                 title="Difficulty"
             />
         ),
-        cell: ({ row }) => {
-            console.log('row.origin', row.original)
+        cell: ({ row, table }) => {
             const difficulty = row.original.difficulty
 
             return (
@@ -168,63 +167,20 @@ export const columns: ColumnDef<quiz>[] = [
         id: 'actions1',
         cell: ({ row }) => {
             const quizQuestionId = row.original.id
-            const openModal = (): void => {
-                const dialog = document.querySelector<HTMLDivElement>(
-                    `#dialog-${quizQuestionId}`
-                )
-                if (dialog) {
-                    dialog.style.display = 'flex' // Display the dialog when opening
-                }
-            }
-
-            // Function to close the modal
-            const closeModal = (): void => {
-                const dialog = document.querySelector<HTMLDivElement>(
-                    `#dialog-${quizQuestionId}`
-                )
-                if (dialog) {
-                    dialog.style.display = 'none' // Hide the dialog when closing
-                }
-            }
+            const selectedRows = row.getIsSelected()
 
             return (
                 <div className="">
                     <Dialog>
                         <DialogTrigger>
-                            <Eye className="cursor-pointer" />
+                            {!selectedRows && (
+                                <Eye className="cursor-pointer" />
+                            )}
                         </DialogTrigger>
                         <DialogContent className="">
                             <PreviewMCQ quizQuestionId={quizQuestionId} />
                         </DialogContent>
                     </Dialog>
-                    {/* <div className="">
-                        <Eye onClick={openModal} className="cursor-pointer" />
-
-                        <DialogBox
-                            show={isPreviewModalOpen}
-                            quizQuestionId={quizQuestionId}
-                            onClose={closeModal}
-                            title="Confirmation"
-                            message="Are you sure you want to proceed with this action?"
-                        />
-                    </div>
-                    {/* <div className="">
-                        <Eye onClick={openModal} className="cursor-pointer" />
-
-                        <div
-                            id={`dialog-${quizQuestionId}`}
-                            style={{ display: 'none' }} // Initially hidden
-                            className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50"
-                        >
-                            <DialogBox
-                                show={true}
-                                quizQuestionId={quizQuestionId}
-                                onClose={closeModal}
-                                title="Confirmation"
-                                message="Are you sure you want to proceed with this action?"
-                            />
-                        </div>
-                    </div> */}
                 </div>
             )
         },
@@ -247,15 +203,18 @@ export const columns: ColumnDef<quiz>[] = [
                 setIsEditModalOpen(true)
                 setIsQuizQuestionId(id)
             }
+            const selectedRows = row.getIsSelected()
 
             return (
                 <div className="flex">
                     <div>
-                        <Pencil
-                            onClick={() => editQuizHandler(quizQuestionid)}
-                            className="cursor-pointer mr-5"
-                            size={20}
-                        />
+                        {!selectedRows && (
+                            <Pencil
+                                onClick={() => editQuizHandler(quizQuestionid)}
+                                className="cursor-pointer mr-5"
+                                size={20}
+                            />
+                        )}
                     </div>
                 </div>
             )
@@ -281,22 +240,24 @@ export const columns: ColumnDef<quiz>[] = [
             } = getmcqdifficulty()
             const { offset, setOffset } = getOffset()
             const { position, setPosition } = getPosition()
-            console.log('offset', OFFSET)
-            console.log('position', POSITION)
+            const selectedRows = row.getIsSelected()
+
             return (
                 <div className="ml-[-30px]">
-                    <Trash2
-                        onClick={(e) => {
-                            e.stopPropagation()
-                            handleDeleteQuizModal(
-                                setDeleteModalOpen,
-                                setDeleteQuizQuestionId,
-                                quizQuestion
-                            )
-                        }}
-                        className="text-destructive cursor-pointer"
-                        size={20}
-                    />
+                    {!selectedRows && (
+                        <Trash2
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                handleDeleteQuizModal(
+                                    setDeleteModalOpen,
+                                    setDeleteQuizQuestionId,
+                                    quizQuestion
+                                )
+                            }}
+                            className="text-destructive cursor-pointer"
+                            size={20}
+                        />
+                    )}
                     <DeleteConfirmationModal
                         isOpen={isDeleteModalOpen}
                         onClose={() => setDeleteModalOpen(false)}

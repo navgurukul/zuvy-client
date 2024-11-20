@@ -22,7 +22,6 @@ const BulkUploadMcq = (props: Props) => {
 
     async function handleSubmit(e: any) {
         e.preventDefault()
-        console.log(mcqData)
         try {
             await api.post(`/Content/quiz`, mcqData)
             toast({
@@ -42,7 +41,7 @@ const BulkUploadMcq = (props: Props) => {
     }
 
     return (
-        <main className="flex flex-col ml-40 items-center w-screen ">
+        <main className="flex flex-col ml-6 items-start w-full  ">
             <form onSubmit={handleSubmit} className="w-2/3 space-y-6">
                 <div className="flex flex-col justify-center  items-center">
                     <DropzoneforMcq
@@ -53,7 +52,7 @@ const BulkUploadMcq = (props: Props) => {
                     />
                 </div>
 
-                <div className="flex items-end justify-end w-[860px]">
+                <div className="flex justify-end  w-full">
                     <Button className="" type="submit">
                         Add Questions
                     </Button>

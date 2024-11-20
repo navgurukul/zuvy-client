@@ -256,7 +256,6 @@ const Mcqs = (props: Props) => {
                 }
 
                 const res = await api.get(url)
-                console.log('response.data.data', res.data.data)
 
                 setStoreQuizData(res.data.data)
                 setTotalMCQQuestion(res.data.totalRows)
