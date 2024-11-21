@@ -6,7 +6,6 @@ export function middleware(request: NextRequest) {
     // const user = userData === "false" ? "false" : atob(userData);
 
     const path = request.nextUrl.href
-    const currentUrl = request.nextUrl.href
     const redirectedUrl = request.cookies.get('redirectedUrl')?.value ?? false
     const userData = request.cookies.get('secure_typeuser')?.value ?? 'false'
     let user = 'false'
@@ -15,17 +14,15 @@ export function middleware(request: NextRequest) {
     } catch (e) {
         console.error(e)
     }
-    const matcher = ['/', '/student', '/admin', '/volunteer']
-    console.log('redirectedUrl ^^', redirectedUrl)
+    const matcher = ['/', '/student', '/admin', '/instructor']
     let decodedUrl = redirectedUrl ? atob(redirectedUrl) : false
-    console.log('decodedUrl', decodedUrl)
 
     if (user === 'false') {
         if (request.nextUrl.pathname.startsWith('/student')) {
             if (
                 path.includes('/student/course') ||
                 path.includes('/admin/course') ||
-                path.includes('/volunteer/course')
+                path.includes('/instructor/course')
             ) {
                 const redirectUrl = new URL('/', request.url)
                 redirectUrl.searchParams.set('route', request.nextUrl.pathname)
@@ -39,7 +36,21 @@ export function middleware(request: NextRequest) {
             if (
                 path.includes('/student/course') ||
                 path.includes('/admin/course') ||
-                path.includes('/volunteer/course')
+                path.includes('/instructor/course')
+            ) {
+                const redirectUrl = new URL('/', request.url)
+                redirectUrl.searchParams.set('route', request.nextUrl.pathname)
+                return NextResponse.redirect(redirectUrl)
+            } else {
+                const redirectUrl = new URL('/', request.url)
+                return NextResponse.redirect(redirectUrl)
+            }
+        }
+        if (request.nextUrl.pathname.startsWith('/instructor')) {
+            if (
+                path.includes('/student/course') ||
+                path.includes('/admin/course') ||
+                path.includes('/instructor/course')
             ) {
                 const redirectUrl = new URL('/', request.url)
                 redirectUrl.searchParams.set('route', request.nextUrl.pathname)
@@ -61,8 +72,8 @@ export function middleware(request: NextRequest) {
             return NextResponse.redirect(new URL('/', request.url))
         }
     }
-    if (user !== 'volunteer') {
-        if (request.nextUrl.pathname.startsWith('/volunteer')) {
+    if (user !== 'instructor') {
+        if (request.nextUrl.pathname.startsWith('/instructor')) {
             return NextResponse.redirect(new URL('/', request.url))
         }
     }
@@ -76,17 +87,12 @@ export function middleware(request: NextRequest) {
                 return NextResponse.redirect(new URL('/', request.url))
             }
         } else if (decodedUrl && request.url.includes('route')) {
-            console.log('request.url', request.url)
-            console.log('Redirecting to decodedUrl')
-
             const response = NextResponse.redirect(decodedUrl)
-
             // Set a cookie to track the redirect
             response.cookies.set('redirectedUrl', '', {
                 path: '/',
                 maxAge: 60, // Optional: expire after 1 minute
             })
-
             return response
         } else if (user === 'student') {
             if (
@@ -102,7 +108,7 @@ export function middleware(request: NextRequest) {
             ) {
                 return NextResponse.redirect(new URL('/admin', request.url))
             }
-        } else if (user === 'volunteer') {
+        } else if (user === 'instructor') {
             if (
                 request.nextUrl.pathname.startsWith('/') &&
                 request.nextUrl.pathname !== '/instructor'

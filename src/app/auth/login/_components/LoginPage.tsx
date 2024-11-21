@@ -33,17 +33,10 @@ function LoginPage({}: Props) {
         const tokenVal = urlParams.get('token')
         const loggedOutToken = urlParams.get('loggedOutToken')
 
-        console.log('window.location.href', window.location.href)
         let redirectedUrl = localStorage.getItem('redirectedUrl')
         if (window.location.href.includes('route')) {
             const route = urlParams.get('route')
             redirectedUrl = route ?? ''
-            // const decodedRoute = decodeURIComponent(window.location.href)
-            // const base = decodedRoute.split('?')[0]
-            // const route = decodedRoute.split('=')[1]
-            // console.log('base', base)
-            // console.log('route', route)
-            // redirectedUrl = base + route
             localStorage.setItem('redirectedUrl', redirectedUrl)
             setCookie('redirectedUrl', JSON.stringify(btoa(redirectedUrl)))
         }
@@ -81,7 +74,6 @@ function LoginPage({}: Props) {
                     } else {
                         return router.push('student')
                     }
-                    // return router.push('/student')
                 } else if (resp.data.user.rolesList[0]) {
                     const userRole = resp.data.user.rolesList[0]
                     setCookie(
@@ -92,6 +84,8 @@ function LoginPage({}: Props) {
                         return router.push(redirectedUrl)
                     } else if (userRole === 'admin') {
                         return router.push('/admin/courses')
+                    } else if (userRole === 'instructor') {
+                        return router.push('/instructor')
                     }
 
                     return router.push(`/${resp.data.user.rolesList[0]}`)
@@ -121,6 +115,7 @@ function LoginPage({}: Props) {
 
         if (!localStorage.getItem('token')) {
             localStorage.setItem('token', '')
+            setCookie('redirectedUrl', JSON.stringify(btoa('')))
         }
         if (!localStorage.getItem('loggedOut')) {
             localStorage.setItem('loggedOut', String(false))
