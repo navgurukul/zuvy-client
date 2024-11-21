@@ -33,6 +33,23 @@ function LoginPage({}: Props) {
         const tokenVal = urlParams.get('token')
         const loggedOutToken = urlParams.get('loggedOutToken')
 
+        console.log('window.location.href', window.location.href)
+        let redirectedUrl = localStorage.getItem('redirectedUrl')
+        if (window.location.href.includes('route')) {
+            const route = urlParams.get('route')
+            redirectedUrl = route ?? ''
+            // const decodedRoute = decodeURIComponent(window.location.href)
+            // const base = decodedRoute.split('?')[0]
+            // const route = decodedRoute.split('=')[1]
+            // console.log('base', base)
+            // console.log('route', route)
+            // redirectedUrl = base + route
+            localStorage.setItem('redirectedUrl', redirectedUrl)
+            setCookie('redirectedUrl', JSON.stringify(btoa(redirectedUrl)))
+        }
+
+        console.log('redirectedUrl', redirectedUrl)
+
         const sendGoogleUserData = async (token: any) => {
             try {
                 const resp = await apiMeraki.get(`/users/me`, {
@@ -59,15 +76,23 @@ function LoginPage({}: Props) {
                         JSON.stringify(btoa('student'))
                     )
 
-                    return router.push('/student')
+                    if (redirectedUrl) {
+                        return router.push(redirectedUrl)
+                    } else {
+                        return router.push('student')
+                    }
+                    // return router.push('/student')
                 } else if (resp.data.user.rolesList[0]) {
                     const userRole = resp.data.user.rolesList[0]
                     setCookie(
                         'secure_typeuser',
                         JSON.stringify(btoa(resp.data.user.rolesList[0]))
                     )
-                    if (userRole === 'admin')
+                    if (redirectedUrl) {
+                        return router.push(redirectedUrl)
+                    } else if (userRole === 'admin') {
                         return router.push('/admin/courses')
+                    }
 
                     return router.push(`/${resp.data.user.rolesList[0]}`)
                 }
