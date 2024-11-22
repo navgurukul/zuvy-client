@@ -99,9 +99,18 @@ export const columns: ColumnDef<quiz>[] = [
         ),
 
         cell: ({ row }) => {
+            const truncateWords = (text: string, wordLimit: number) => {
+                if (!text) return '' // Handle empty or undefined text
+                const words = text.split(' ')
+                return words.length > wordLimit
+                    ? words.slice(0, wordLimit).join(' ') + '...'
+                    : text
+            }
+
             const question = row.original?.quizVariants[0]?.question
+            const truncatedQuestion = truncateWords(question, 10)
             return (
-                <pre
+                <div
                     className="text-left text-md p-1 w-[900px] font-[16px] hover:bg-slate-200 rounded-lg transition ease-in-out delay-150 overflow-hidden text-ellipsis"
                     style={{
                         display: '-webkit-box',
@@ -109,8 +118,11 @@ export const columns: ColumnDef<quiz>[] = [
                         WebkitBoxOrient: 'vertical',
                     }}
                 >
-                    {question}
-                </pre>
+                    <span
+                        dangerouslySetInnerHTML={{ __html: truncatedQuestion }}
+                    />
+                    {/* {question} */}
+                </div>
             )
         },
         enableSorting: false,
@@ -165,12 +177,19 @@ export const columns: ColumnDef<quiz>[] = [
 
     {
         id: 'actions1',
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                className="text-[17px]"
+                column={column}
+                title="Preview"
+            />
+        ),
         cell: ({ row }) => {
             const quizQuestionId = row.original.id
             const selectedRows = row.getIsSelected()
 
             return (
-                <div className="">
+                <div className="mr-5">
                     <Dialog>
                         <DialogTrigger>
                             {!selectedRows && (

@@ -13,10 +13,16 @@ import { AlertDialogTitle } from '@radix-ui/react-alert-dialog'
 
 type Props = {
     quizQuestionId: number
+    tags?: any
+    assesmentSide?: boolean
 }
 
-const PreviewMCQ = ({ quizQuestionId }: Props) => {
-    const { quizData, difficulty, tagName } = useGetMCQs({ id: quizQuestionId })
+const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide }: Props) => {
+    const { quizData, difficulty, tagName } = useGetMCQs({
+        id: quizQuestionId,
+        tags,
+        assesmentSide,
+    })
     const [activeTab, setActiveTab] = useState<string | null>(null)
     const [codeSnippet, setCodeSnippet] = useState<any>()
 
@@ -43,11 +49,11 @@ const PreviewMCQ = ({ quizQuestionId }: Props) => {
     const difficultyColor = (difficulty: string) => {
         switch (difficulty) {
             case 'Easy':
-                return 'bg-green-200 text-green-800'
+                return 'bg-green-100 text-secondary'
             case 'Medium':
-                return 'bg-yellow-200 text-yellow-800'
+                return 'bg-orange-100 text-yellow-dark'
             case 'Hard':
-                return 'bg-red-200 text-red-800'
+                return 'bg-red-100 text-destructive'
             default:
                 return 'bg-gray-200 text-gray-800'
         }
@@ -70,14 +76,14 @@ const PreviewMCQ = ({ quizQuestionId }: Props) => {
         const clean = DOMPurify.sanitize(codeQuestion)
         const updatedHtml = clean.replace(
             /<pre>/g,
-            '<pre class="text-gray-800 font-light bg-gray-300 p-1 rounded-lg text-left text-wrap overflow-y-scroll  overflow-scroll w-full">'
+            '<pre class="text-gray-800 font-light bg-gray-300 p-0 rounded-lg text-left text-wrap overflow-y-scroll  overflow-scroll w-[550px]">'
         )
 
         return updatedHtml
     }
 
     return (
-        <div className="w-full ">
+        <div className="w-full p-2">
             <DialogHeader>
                 <div className="flex gap-x-3">
                     Question Preview{' '}

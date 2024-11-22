@@ -4,14 +4,18 @@ import { getCodingQuestionTags } from '@/store/store'
 
 type Props = {
     id: number
+    tags?: any
+    assesmentSide?: boolean
 }
 
-const useGetMCQs = ({ id }: Props) => {
+const useGetMCQs = ({ id, tags: tag, assesmentSide }: Props) => {
     const [quizData, setQuizData] = useState<any>(null)
     const [noofExistingVariants, setNoofExistingVariants] = useState<number>(0)
     const [difficulty, setDifficulty] = useState<string | null>(null)
     const [tagName, setTagName] = useState<string | null>(null)
-    const { tags } = getCodingQuestionTags() // Assume this returns the list of tags
+    const { tags } = getCodingQuestionTags()
+
+    const newTags = assesmentSide ? tag : tags
 
     const fetchQuizHandler = useCallback(async () => {
         try {
@@ -23,7 +27,9 @@ const useGetMCQs = ({ id }: Props) => {
             setNoofExistingVariants(quiz.quizVariants.length)
 
             // Find the tag name based on the `tagId`
-            const matchingTag = tags.find((tag) => tag.id === quiz.tagId)
+            const matchingTag = newTags.find(
+                (tag: any) => tag.id === quiz.tagId
+            )
             setTagName(matchingTag ? matchingTag.tagName : null)
         } catch (error: any) {
             console.error(
