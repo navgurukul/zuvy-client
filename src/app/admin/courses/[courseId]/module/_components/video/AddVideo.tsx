@@ -20,6 +20,30 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import VideoEmbed from './VideoEmbed'
 import { X } from 'lucide-react'
+// Helper function to convert links to embed-friendly format
+const getEmbedLink = (url: string) => {
+    if (!url) return ''; 
+    try {
+        const urlObj = new URL(url); // Parse the URL
+        if (url.includes('embed')) {
+            return url
+
+        }
+        else if (urlObj.hostname.includes('youtube.com') && urlObj.searchParams.has('v')) {
+            // Convert long YouTube URL to embed format
+            return `https://www.youtube.com/embed/${urlObj.searchParams.get('v')}`;
+        }
+       else if (urlObj.hostname.includes('youtu.be')) {
+            // Convert short YouTube URL to embed format
+            const videoId = urlObj.pathname.slice(1);
+            return `https://www.youtube.com/embed/${videoId}`;
+        }
+    } catch (error) {
+        console.error('Invalid URL:', url, error); // Log invalid URLs for debugging
+    }
+    return ''; // Return empty string for invalid URLs
+};
+
 
 const isLinkValid = (link: string) => {
     const urlRegex = /^(https?:\/\/)?([\w-]+\.)*([\w-]+)(:\d{2,5})?(\/\S*)*$/
@@ -178,18 +202,12 @@ const AddVideo = ({
                             </FormItem>
                         )}
                     />
-                    <div className=" flex justify-between items-start relative">
+                    <div className=" flex justify-between items-start relative text-red" >
                         {showVideoBox && (
                             <div className="flex items-start justify-center ">
-                                <VideoEmbed
-                                    title={
-                                        content?.contentDetails?.[0]?.title ||
-                                        ''
-                                    }
-                                    src={
-                                        content?.contentDetails?.[0]
-                                            ?.links?.[0] || ''
-                                    }
+                             <VideoEmbed
+                                    title={content?.contentDetails?.[0]?.title || ''}
+                                    src={getEmbedLink(content?.contentDetails?.[0]?.links?.[0] || '')}
                                 />
                                 <X
                                     className="text-destructive ml-2 cursor-pointer"
