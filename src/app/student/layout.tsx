@@ -3,6 +3,7 @@
 import StudentNavbar from '@/app/_components/navbar'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { usePathname } from 'next/navigation'
+import UnauthorizedUser from '@/components/UnauthorizedUser'
 import '../globals.css'
 
 interface User {
@@ -27,10 +28,12 @@ export default function RootLayout({
         pathname?.includes('/assessment')
     const AUTH = localStorage.getItem('AUTH') || false
     const user = AUTH && (JSON.parse(AUTH) as User)
+    const rolesList =
+        user && (user.rolesList.length === 0 ? 'student' : user.rolesList[0])
     return (
         <>
             {user && user.rolesList.length !== 0 ? (
-                <h1>Unauthorized User</h1>
+                <UnauthorizedUser rolesList={rolesList} />
             ) : (
                 <div
                 // className={cn(
