@@ -64,17 +64,63 @@ export function middleware(request: NextRequest) {
 
     if (user !== 'student') {
         if (request.nextUrl.pathname.startsWith('/student')) {
-            return NextResponse.redirect(new URL('/', request.url))
+            if (decodedUrl === false) {
+                return NextResponse.next()
+            }
+            if (decodedUrl) {
+                console.log('redirect Condition 1')
+                const response = NextResponse.redirect(
+                    new URL(decodedUrl, request.url)
+                )
+                response.cookies.set('redirectedUrl', '', {
+                    path: '/',
+                    maxAge: 60, // Optional: expire after 1 minute
+                })
+                return response
+            } else {
+                return NextResponse.redirect(new URL('/', request.url))
+            }
         }
     }
     if (user !== 'admin') {
         if (request.nextUrl.pathname.startsWith('/admin')) {
-            return NextResponse.redirect(new URL('/', request.url))
+            // If already redirected, avoid redirecting again
+            if (decodedUrl === false) {
+                return NextResponse.next()
+            }
+            if (decodedUrl) {
+                console.log('redirect Condition 1')
+                const response = NextResponse.redirect(
+                    new URL(decodedUrl, request.url)
+                )
+                response.cookies.set('redirectedUrl', '', {
+                    path: '/',
+                    maxAge: 60, // Optional: expire after 1 minute
+                })
+                return response
+            } else {
+                return NextResponse.redirect(new URL('/', request.url))
+            }
         }
     }
     if (user !== 'instructor') {
         if (request.nextUrl.pathname.startsWith('/instructor')) {
-            return NextResponse.redirect(new URL('/', request.url))
+            if (decodedUrl === false) {
+                return NextResponse.next()
+            }
+            if (decodedUrl) {
+                console.log('redirect Condition 1')
+                const response = NextResponse.redirect(
+                    new URL(decodedUrl, request.url)
+                )
+                response.cookies.set('redirectedUrl', '', {
+                    path: '/',
+                    maxAge: 60, // Optional: expire after 1 minute
+                })
+                return response
+            } else {
+                return NextResponse.redirect(new URL('/', request.url))
+            }
         }
     }
 
@@ -86,8 +132,12 @@ export function middleware(request: NextRequest) {
             if (request.nextUrl.pathname.startsWith('/admin')) {
                 return NextResponse.redirect(new URL('/', request.url))
             }
-        } else if (decodedUrl && request.url.includes('route')) {
-            const response = NextResponse.redirect(decodedUrl)
+            // } else if (decodedUrl && request.url.includes('route')) {
+        } else if (decodedUrl) {
+            console.log('redirect Condition 2')
+            const absoluteUrl = new URL(decodedUrl, request.url) // Construct the full URL
+            const response = NextResponse.redirect(absoluteUrl)
+            // const response = NextResponse.redirect(decodedUrl)
             // Set a cookie to track the redirect
             response.cookies.set('redirectedUrl', '', {
                 path: '/',

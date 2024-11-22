@@ -115,7 +115,7 @@ function LoginPage({}: Props) {
 
         if (!localStorage.getItem('token')) {
             localStorage.setItem('token', '')
-            setCookie('redirectedUrl', JSON.stringify(btoa('')))
+            // setCookie('redirectedUrl', JSON.stringify(btoa('')))
         }
         if (!localStorage.getItem('loggedOut')) {
             localStorage.setItem('loggedOut', String(false))
