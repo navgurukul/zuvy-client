@@ -66,7 +66,6 @@ const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide }: Props) => {
         const selectedVariant = quizData.quizVariants.find(
             (variant: any) => variant.id.toString() === variantId.toString()
         )
-        console.log(selectedVariant)
         if (selectedVariant) {
             updateCodeSnippet(selectedVariant.question)
         }

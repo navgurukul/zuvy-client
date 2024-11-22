@@ -2,7 +2,7 @@
 
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
-
+import { ellipsis } from '@/lib/utils'
 import {
     getAllQuizData,
     getCodingQuestionTags,
@@ -99,16 +99,8 @@ export const columns: ColumnDef<quiz>[] = [
         ),
 
         cell: ({ row }) => {
-            const truncateWords = (text: string, wordLimit: number) => {
-                if (!text) return '' // Handle empty or undefined text
-                const words = text.split(' ')
-                return words.length > wordLimit
-                    ? words.slice(0, wordLimit).join(' ') + '...'
-                    : text
-            }
-
             const question = row.original?.quizVariants[0]?.question
-            const truncatedQuestion = truncateWords(question, 10)
+            const truncatedQuestion = ellipsis(question, 70)
             return (
                 <div
                     className="text-left text-md p-1 w-[900px] font-[16px] hover:bg-slate-200 rounded-lg transition ease-in-out delay-150 overflow-hidden text-ellipsis"
