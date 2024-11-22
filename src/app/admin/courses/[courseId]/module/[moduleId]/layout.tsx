@@ -3,14 +3,41 @@
 import Chapter from '@/components/ui/chapter'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { useParams, usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+    const [screenWidth, setScreenWidth] = useState<number>(window.innerWidth)
+
+    // Update screen width when the window is resized
+    useEffect(() => {
+        const handleResize = () => {
+            setScreenWidth(window.innerWidth)
+        }
+
+        // Listen for resize events
+        window.addEventListener('resize', handleResize)
+
+        // Cleanup event listener on component unmount
+        return () => {
+            window.removeEventListener('resize', handleResize)
+        }
+    }, [])
+
+    // Determine the height class based on screen width
+    let heightClass = 'h-[600px]' // Default height for larger screens
+    if (screenWidth > 1300) {
+        heightClass = 'h-[480px]' // Height for screens greater than 1300px
+    }
+    if (screenWidth > 1500) {
+        heightClass = 'h-[600px]' // Height for screens greater than 1500px
+    }
     const { courseId, moduleId, projectID } = useParams()
     const pathname = usePathname()
     const adminAssessmentPreviewRoute = pathname?.includes('/preview')
+    console.log(window.innerHeight, window.innerWidth)
 
     return (
-        <div className="h-screen-1366 1920x1080:h-screen-1920 overflow-hidden">
+        <div className={`${heightClass} overflow-hidden`}>
             {projectID || adminAssessmentPreviewRoute ? (
                 <MaxWidthWrapper>{children}</MaxWidthWrapper>
             ) : (

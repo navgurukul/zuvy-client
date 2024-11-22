@@ -42,7 +42,7 @@ const CodingQuestions = ({
     tags: any
 }) => {
     return (
-        <div className="h-dvh pr-4 mb-[-350px]">
+        <div className="h-dvh pr-4 mb-[-390px]">
             <ScrollBar orientation="vertical" className="pb-96 h-dvh" />
             {questions.map((question: CodingQuestion) => {
                 const tag = tags?.find(
