@@ -229,6 +229,7 @@ const NewMcqProblemForm = ({
                 Number(fieldValues.numbersOfQuestions[0].value) > 1)
         ) {
             console.log('Generating in bulk')
+            setLoadingAI(true)
             bulkGenerateMCQUsingGemini()
         } else {
             console.log('Generating single question')
@@ -459,6 +460,7 @@ const NewMcqProblemForm = ({
 
     const bulkGenerateMCQUsingGemini = async () => {
         setBulkLoading(true)
+        setLoadingAI(true)
         setGeneratedCount(0) // Reset generated count
         try {
             const difficulties = form.getValues('difficulty')
@@ -493,6 +495,7 @@ const NewMcqProblemForm = ({
                         'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
                 setBulkLoading(false)
+                setLoadingAI(false)
                 return
             }
 
@@ -504,6 +507,7 @@ const NewMcqProblemForm = ({
                         'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
                 setBulkLoading(false)
+                setLoadingAI(false)
                 return
             }
 
@@ -515,6 +519,7 @@ const NewMcqProblemForm = ({
                         'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
                 setBulkLoading(false)
+                setLoadingAI(false)
                 return
             }
 
@@ -746,6 +751,7 @@ const NewMcqProblemForm = ({
                         'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
                 setBulkLoading(false)
+                setLoadingAI(false)
                 return
             }
 
@@ -799,6 +805,7 @@ const NewMcqProblemForm = ({
             })
         }
         setBulkLoading(false)
+        setLoadingAI(false)
     }
 
     const jaccardSimilarity = (text1: string, text2: string): number => {
@@ -1071,6 +1078,13 @@ const NewMcqProblemForm = ({
                             )}
                         </Button>
                     </div>
+
+                    {loadingAI && (
+                        <>
+                            <Spinner size="small" className="mr-2" />
+                            Generating...
+                        </>
+                    )}
 
                     {generatedQuestions.length > 0 && (
                         <>
