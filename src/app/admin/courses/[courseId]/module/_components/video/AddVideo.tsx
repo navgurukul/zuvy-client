@@ -183,7 +183,6 @@ const AddVideo = ({
 
     return (
         <ScrollArea
-            // className="h-[600px] lg:h-[600px] pr-4"
             className={`${heightClass} pr-4`}
             type="hover"
             style={{
