@@ -81,27 +81,7 @@ export const columns: ColumnDef<Task>[] = [
         },
     },
 
-    {
-        accessorKey: 'isChecked',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Checked" />
-        ),
-        cell: ({ row }) => {
-            const isChecked = row.original.isChecked
-            return (
-                <div className="flex space-x-2">
-                    <div className="max-w-[500px] truncate flex items-center gap-x-2 font-medium">
-                        {isChecked ? (
-                            <div className="bg-secondary h-3 w-3 rounded-full" />
-                        ) : (
-                            <div className="bg-red-600 h-3 w-3 rounded-full " />
-                        )}
-                        {isChecked ? 'Checked' : 'Not Checked'}
-                    </div>
-                </div>
-            )
-        },
-    },
+
     {
         id: 'actions',
         cell: ({ row }) => {

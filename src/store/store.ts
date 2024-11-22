@@ -3,6 +3,7 @@ import { create } from 'zustand'
 import { useEffect } from 'react'
 import { api } from '@/utils/axios.config'
 import { string } from 'zod'
+import { OFFSET, POSITION } from '@/utils/constant'
 
 type CounterStore = {
     studentData: {
@@ -54,6 +55,7 @@ interface StoreBatchData {
 }
 
 export interface quiz {
+    title: any
     id: number
     question: string
     options: {
@@ -64,6 +66,7 @@ export interface quiz {
     difficulty: 'Easy' | 'Medium' | 'Hard'
     tagId: number
     usage: number
+    quizVariants: any[]
 }
 
 export const getCourseData = create<StoreCourseData>((set) => ({
@@ -126,29 +129,33 @@ export const getDeleteStudentStore = create<deleteStudentStore>((set) => ({
 }))
 // ------------------------------
 
+// set assessment preview content in a state:
+
+type assessmentPreviewStore = {
+    assessmentPreviewContent: any
+    setAssessmentPreviewContent: (newValue: any) => void
+}
+
+export const getAssessmentPreviewStore = create<assessmentPreviewStore>(
+    (set) => ({
+        assessmentPreviewContent: null,
+        setAssessmentPreviewContent: (newValue: any) => {
+            set({ assessmentPreviewContent: newValue })
+        },
+    })
+)
+
 // ------------------------------
 // Define the type for the assessment store
 type assessmentStore = {
-    tabChangeInstance: number
-    setTabChangeInstance: (newValue: number) => void
     fullScreenExitInstance: number
     setFullScreenExitInstance: (newValue: number) => void
-    copyPasteAttempt: number
-    setCopyPasteAttempt: (newValue: number) => void
 }
 
 export const getAssessmentStore = create<assessmentStore>((set) => ({
-    tabChangeInstance: 0,
-    setTabChangeInstance: (newValue: number) => {
-        set({ tabChangeInstance: newValue })
-    },
-    fullScreenExitInstance: 0,
+     fullScreenExitInstance: 0,
     setFullScreenExitInstance: (newValue: number) => {
         set({ fullScreenExitInstance: newValue })
-    },
-    copyPasteAttempt: 0,
-    setCopyPasteAttempt: (newValue: number) => {
-        set({ copyPasteAttempt: newValue })
     },
 }))
 // ------------------------------
@@ -187,6 +194,150 @@ export const getAllQuizData = create<storequizData>((set) => ({
     },
 }))
 
+// ----------------Chapter state for Student side--------------
+
+type studentChapterContent = {
+    chapterContent: any
+    setChapterContent: (newValue: any) => void
+}
+
+export const getStudentChapterContentState = create<studentChapterContent>(
+    (set) => ({
+        chapterContent: {},
+        setChapterContent: (newValue: any) => {
+            set({ chapterContent: newValue })
+        },
+    })
+)
+
+type chapters = {
+    chapters: any[]
+    setChapters: (newValue: any[]) => void
+}
+
+export const getStudentChaptersState = create<chapters>((set) => ({
+    chapters: [],
+    setChapters: (newValue: any[]) => {
+        set({ chapters: newValue })
+    },
+}))
+
+type studentModuleName = {
+    moduleName: string
+    setModuleName: (newValue: string) => void
+}
+
+export const getModuleName = create<studentModuleName>((set) => ({
+    moduleName: '',
+    setModuleName: (newValue: string) => {
+        set({ moduleName: newValue })
+    },
+}))
+
+// ------------------------------
+
+// ----------------Chapter state for Admin side--------------
+
+type chapterContent = {
+    chapterContent: any
+    setChapterContent: (newValue: any) => void
+}
+
+export const getChapterContentState = create<chapterContent>((set) => ({
+    chapterContent: null,
+    setChapterContent: (newValue: any) => {
+        set({ chapterContent: newValue })
+    },
+}))
+
+type Chapter = {
+    chapterId: number
+    chapterTitle: string
+    topicId: number
+    topicName: string
+    order: number
+}
+
+type chapterData = {
+    chapterData: Chapter[]
+    setChapterData: (newValue: Chapter[]) => void
+}
+
+export const getChapterDataState = create<chapterData>((set) => ({
+    chapterData: [],
+    setChapterData: (newValue: Chapter[]) => {
+        set({ chapterData: newValue })
+    },
+}))
+
+type currentChapter = {
+    currentChapter: Chapter[]
+    setCurrentChapter: (newValue: Chapter[]) => void
+}
+
+export const getCurrentChapterState = create<currentChapter>((set) => ({
+    currentChapter: [],
+    setCurrentChapter: (newValue: Chapter[]) => {
+        set({ currentChapter: newValue })
+    },
+}))
+
+type topicId = {
+    topicId: number
+    setTopicId: (newValue: number) => void
+}
+
+export const getTopicId = create<topicId>((set) => ({
+    topicId: 1,
+    setTopicId: (newValue: number) => {
+        set({ topicId: newValue })
+    },
+}))
+
+type moduleName = {
+    moduleName: string
+    setModuleName: (newValue: string) => void
+}
+
+export const getCurrentModuleName = create<moduleName>((set) => ({
+    moduleName: '',
+    setModuleName: (newValue: string) => {
+        set({ moduleName: newValue })
+    },
+}))
+
+interface Module {
+    chapterId: number
+    topicName: string
+    chapterTitle: string
+    topicId: number
+    // include other properties as needed
+}
+
+type studentModuleData = {
+    moduleData: Module[]
+    setModuleData: (newValue: Module[]) => void
+}
+
+export const getModuleData = create<studentModuleData>((set) => ({
+    moduleData: [],
+    setModuleData: (newValue: Module[]) => {
+        set({ moduleData: newValue })
+    },
+}))
+
+type scrollPosition = {
+    scrollPosition: number
+    setScrollPosition: (newValue: number) => void
+}
+
+export const getScrollPosition = create<scrollPosition>((set) => ({
+    scrollPosition: 0,
+    setScrollPosition: (newValue: number) => {
+        set({ scrollPosition: newValue })
+    },
+}))
+
 // ------------------------------
 
 type codingQuestions = {
@@ -200,8 +351,75 @@ export const getcodingQuestionState = create<codingQuestions>((set) => ({
         set({ codingQuestions: newValue })
     },
 }))
+// type  option = {
+//     value: string;
+//     label: string;
+// };
+type selectedOptions = {
+    selectedOptions: any[]
+    setSelectedOptions: (newValue: any[]) => void
+}
+export const  getSelectedOptions = create<selectedOptions>((set) => ({
+    selectedOptions: [{ value: '-1', label: 'All Topics' }],
+    setSelectedOptions: (newValue: any[]) => {
+        set({ selectedOptions: newValue });
+    }
+}));
 
-// ------------------------------
+export const  getSelectedOpenEndedOptions = create<selectedOptions>((set) => ({
+    selectedOptions: [{ value: '-1', label: 'All Topics' }],
+    setSelectedOptions: (newValue: any[]) => {
+        set({ selectedOptions: newValue });
+    }
+}));
+export const  getSelectedMCQOptions = create<selectedOptions>((set) => ({
+    selectedOptions: [{ value: '-1', label: 'All Topics' }],
+    setSelectedOptions: (newValue: any[]) => {
+        set({ selectedOptions: newValue });
+    }
+}));
+type difficulty = {
+    difficulty: any[]
+    setDifficulty: (newValue: any[]) => void
+}
+export const  getDifficulty = create< difficulty>((set) => ({
+    difficulty: [{value: 'None', label: 'All Difficulty'}],
+    setDifficulty: (newValue: any[]) => {
+        set({ difficulty: newValue });
+    }
+}));
+
+export const  getOpenEndedDifficulty = create< difficulty>((set) => ({
+    difficulty: [{value: 'None', label: 'All Difficulty'}],
+    setDifficulty: (newValue: any[]) => {
+        set({ difficulty: newValue });
+    }
+}));
+
+type offset = {
+    offset: number;
+    setOffset: (newValue: number) => void;
+};
+
+export const getOffset = create<offset>((set) => ({
+    offset:  OFFSET, 
+    setOffset: (newValue: number) => {
+        set({ offset: newValue });
+    }
+}));
+
+type position = {
+    position: string;
+    setPosition: (newValue: string) => void;
+};
+
+export const getPosition = create<position>((set) => ({
+    position: POSITION,
+    setPosition: (newValue: string) => {
+        set({ position: newValue });
+    }
+}));
+// --------------------------
 
 type deleteCodingQuestion = {
     isDeleteModalOpen: boolean
@@ -333,6 +551,8 @@ type editCodingQuestionDialogs = {
     setIsCodingEditDialogOpen: (newValue: boolean) => void
     editCodingQuestionId: null
     setEditCodingQuestionId: (newValue: any) => void
+    isQuestionUsed: boolean
+    setIsQuestionUsed: (newValue: boolean) => void
 }
 
 export const getEditCodingQuestionDialogs = create<editCodingQuestionDialogs>(
@@ -349,6 +569,10 @@ export const getEditCodingQuestionDialogs = create<editCodingQuestionDialogs>(
         setEditCodingQuestionId: (newValue: any) => {
             set({ editCodingQuestionId: newValue })
         },
+        isQuestionUsed: false,
+        setIsQuestionUsed: (newValue: boolean) => {
+            set({ isQuestionUsed: newValue })
+        }
     })
 )
 
@@ -504,14 +728,19 @@ export const getStoreStudentBatchData = create<storeBatchData>((set) => ({
     },
 }))
 
+interface Option {
+    label: string
+    value: string
+}
+
 type mcqdifficulty = {
-    mcqDifficulty: string
-    setMcqDifficulty: (newValue: string) => void
+    mcqDifficulty: Option[]
+    setMcqDifficulty: (newValue: Option[]) => void
 }
 
 export const getmcqdifficulty = create<mcqdifficulty>((set) => ({
-    mcqDifficulty: 'None',
-    setMcqDifficulty: (newValue: string) => {
+    mcqDifficulty: [{ value: 'None', label: 'All Difficulty' }],
+    setMcqDifficulty: (newValue: Option[]) => {
         set({ mcqDifficulty: newValue })
     },
 }))
@@ -525,5 +754,17 @@ export const getMcqSearch = create<mcqSearch>((set) => ({
     mcqSearch: 'None',
     setmcqSearch: (newValue: string) => {
         set({ mcqSearch: newValue })
+    },
+}))
+
+type isPreviewModalOpen = {
+    isPreviewModalOpen: boolean
+    setIsPreviewModalOpen: (newValue: boolean) => void
+}
+
+export const getisPreviewModalOpen = create<isPreviewModalOpen>((set) => ({
+    isPreviewModalOpen: false,
+    setIsPreviewModalOpen: (newValue: boolean) => {
+        set({ isPreviewModalOpen: newValue })
     },
 }))

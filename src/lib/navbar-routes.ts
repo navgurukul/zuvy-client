@@ -42,11 +42,11 @@ const teacherRoutes = [
     label: "Courses",
     href: "/instructor/courses",
   },
-  {
-    icon: BarChart,
-    label: "Analytics",
-    href: "/instructor/analytics",
-  },
+  // {
+  //   icon: BarChart,
+  //   label: "Analytics",
+  //   href: "/instructor/analytics",
+  // },
 ];
 
 export { teacherRoutes, guestRoutes, adminRoutes };

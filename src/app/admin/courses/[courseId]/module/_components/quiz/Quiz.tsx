@@ -13,7 +13,6 @@ import { getAllQuizQuestion } from '@/utils/admin'
 import { getAllQuizData } from '@/store/store'
 
 function Quiz(props: any) {
-    const [activeTab, setActiveTab] = useState('anydifficulty')
     const [tags, setTags] = useState<Tag[]>([])
     const [isOpen, setIsOpen] = useState(false)
 
@@ -38,7 +37,18 @@ function Quiz(props: any) {
     async function getAllTags() {
         const response = await api.get('Content/allTags')
         if (response) {
-            setTags(response.data.allTags)
+            // setTags(response.data.allTags)
+            const transformedData = response.data.allTags.map(
+                (item: { id: any; tagName: any }) => ({
+                    id: item.id.toString(),
+                    tagName: item.tagName,
+                })
+            )
+            const tagArr = [
+                { id: -1, tagName: 'All Topics' },
+                ...transformedData,
+            ]
+            setTags(tagArr)
         }
     }
     const removeQuestionById = (questionId: number) => {
@@ -87,6 +97,8 @@ function Quiz(props: any) {
         getAllTags()
         getAllSavedQuizQuestion()
     }, [getAllSavedQuizQuestion])
+
+    console.log(props)
     return (
         <>
             <div className="flex flex-row items-center justify-start gap-x-6 mb-10">
@@ -105,8 +117,6 @@ function Quiz(props: any) {
 
             <div className="flex gap-x-2">
                 <QuizLibrary
-                    activeTab={activeTab}
-                    setActiveTab={setActiveTab}
                     addQuestion={addQuestion}
                     handleAddQuestion={handleAddQuestion}
                     tags={tags}
@@ -133,10 +143,8 @@ function Quiz(props: any) {
                                 </Button>
                             </div>
                         )}
-            
                     </div>
                 </ScrollArea>
-
             </div>
         </>
     )

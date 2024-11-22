@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import { isPlural } from '@/lib/utils'
+import { api } from '@/utils/axios.config'
 
 import {
     BookOpenText,
@@ -17,15 +18,41 @@ type Props = {
 
 const CurricullumCard = ({ course }: Props) => {
     const router = useRouter()
+    const { viewcourses } = useParams()
+    const [chapterId, setChapterId] = useState<any>()
+
     const timeAllotedInWeeks = Math.ceil(course.timeAlloted / 604800)
 
+    const getChapterId = useCallback(async () => {
+        try {
+            const response = await api.get(
+                `tracking/getAllChaptersWithStatus/${course.id}`
+            )
+            setChapterId(response.data.trackingData[0].id)
+        } catch (error) {
+            console.log(error)
+        }
+    }, [])
+
+    useEffect(() => {
+        if (course.id) {
+            getChapterId()
+        }
+    }, [course.id, getChapterId])
+
     const handleModuleRoute = () => {
-        router.push(`/instructor/courses/${117}/module/${course.id}`)
+        if (course.typeId === 1) {
+            router.push(
+                `/instructor/courses/${viewcourses}/modules/${course.id}/chapters/${chapterId}`
+            )
+        } else if (course.typeId === 2) {
+            router.push(
+                `/instructor/courses/${viewcourses}/modules/${course.id}/project/${course.projectId}`
+            )
+        }
     }
 
     return (
-        // <Link href={''}>
-        // </Link>
         <div className="w-full flex items-center justify-between gap-y-2 cursor-pointer">
             <div className="w-full p-2" onClick={handleModuleRoute}>
                 <div className="flex mb-2 w-full justify-between">

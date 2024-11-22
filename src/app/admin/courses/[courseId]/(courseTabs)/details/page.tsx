@@ -60,22 +60,33 @@ function Page({ params }: { params: any }) {
     const [isCropping, setIsCropping] = useState(false);
     const [croppedImage, setCroppedImage] = useState<string | null>(null);
 
-    const { courseData, setCourseData } = getCourseData()
-    const { setStoreStudentData } = getStoreStudentData()
+    const { courseData, setCourseData } = getCourseData();
+    const { setStoreStudentData } = getStoreStudentData();
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
-            name: courseData?.name || '',
-            bootcampTopic: courseData?.bootcampTopic || '',
-            coverImage: courseData?.coverImage || '',
-            duration: courseData?.duration || '',
-            language: courseData?.language || '',
-            startTime: courseData?.startTime
-                ? new Date(courseData.startTime)
-                : undefined,
+            name: '',
+            bootcampTopic: '',
+            coverImage: '',
+            duration: '',
+            language: '',
+            startTime: undefined,
         },
-    })
+    });
+
+    useEffect(() => {
+        if (courseData) {
+            form.reset({
+                name: courseData.name||"",
+                bootcampTopic: courseData.bootcampTopic||"",
+                coverImage: courseData.coverImage||"",
+                duration: courseData.duration||"",
+                language: courseData.language||"",
+                startTime: courseData.startTime ? new Date(courseData.startTime) : undefined,
+            });
+        }
+    }, [courseData, form]);
 
     async function onSubmit(data: z.infer<typeof FormSchema>) {
         try {
@@ -142,16 +153,14 @@ function Page({ params }: { params: any }) {
         }
     }
 
-    const fileInputRef = useRef<HTMLInputElement>(null)
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleButtonClick = () => {
-        fileInputRef.current?.click()
-    }
+        fileInputRef.current?.click();
+    };
 
-    const handleFileChange = async (
-        event: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        const file = event.target.files?.[0]
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
         if (file) {
             const reader = new FileReader();
             reader.onloadend = () => {
@@ -160,13 +169,13 @@ function Page({ params }: { params: any }) {
             };
             reader.readAsDataURL(file);
         }
-    }
+    };
 
     const handleCrop = () => {
         if (cropper) {
             const croppedCanvas = cropper.getCroppedCanvas({
-                width: 800,  // Adjust width as needed
-                height: 400, // Adjust height as needed
+                width: 800,
+                height: 400,
             });
             setCroppedImage(croppedCanvas.toDataURL());
             setIsCropping(false);
@@ -174,7 +183,7 @@ function Page({ params }: { params: any }) {
                 description: 'Image cropped successfully. You can now upload it.',
             });
         }
-    }
+    };
 
     return (
         <div className="max-w-[400px] m-auto">
@@ -185,7 +194,6 @@ function Page({ params }: { params: any }) {
                             <img
                                 src={croppedImage}
                                 alt="Cropped Preview"
-                                // className="object-cover  h-full"
                             />
                         ) : image ? (
                             <Cropper
@@ -202,26 +210,25 @@ function Page({ params }: { params: any }) {
                             />
                         )}
                     </div>
-                        <Input
-                            id="picture"
-                            type="file"
-                            onChange={handleFileChange}
-                            className="hidden"
-                            ref={fileInputRef}
-                        />
-                        <Button
-                            variant={'outline'}
-                            type="button"
-                            onClick={handleButtonClick}
-                        >
-                            Upload Course Image
+                    <Input
+                        id="picture"
+                        type="file"
+                        onChange={handleFileChange}
+                        className="hidden"
+                        ref={fileInputRef}
+                    />
+                    <Button
+                        variant={'outline'}
+                        type="button"
+                        onClick={handleButtonClick}
+                    >
+                        Upload Course Image
+                    </Button>
+                    {image && (
+                        <Button onClick={handleCrop} variant={'outline'} type="button">
+                            Crop Image
                         </Button>
-                        {image && (
-                            <Button onClick={handleCrop} variant={'outline'} type="button">
-                                Crop Image
-                            </Button>
-                        )}
-                   
+                    )}
 
                     <FormField
                         control={form.control}
@@ -232,8 +239,8 @@ function Page({ params }: { params: any }) {
                                 <FormControl>
                                     <Input
                                         placeholder="Enter Bootcamp Name"
-                                        {...field}
-                                        className="capitalize"
+                                        {...field||""}
+                                        
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -250,7 +257,7 @@ function Page({ params }: { params: any }) {
                                 <FormControl>
                                     <Input
                                         placeholder="Enter Bootcamp Topic"
-                                        {...field}
+                                        {...field||""}
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -287,7 +294,7 @@ function Page({ params }: { params: any }) {
                                             selected={field.value}
                                             onSelect={(date) => {
                                                 if (date) {
-                                                    field.onChange(date)
+                                                    field.onChange(date);
                                                 }
                                             }}
                                             disabled={(date) => date < new Date()}
@@ -307,8 +314,8 @@ function Page({ params }: { params: any }) {
                                 <FormLabel>Duration</FormLabel>
                                 <FormControl>
                                     <Input
-                                        placeholder="Enter Bootcamp Duration"
-                                        {...field}
+                                        placeholder="Enter Duration in Weeks"  
+                                        {...field||""}
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -316,7 +323,8 @@ function Page({ params }: { params: any }) {
                         )}
                     />
 
-<FormField
+
+                    <FormField
                         control={form.control}
                         name="language"
                         render={({ field }) => (
@@ -325,7 +333,7 @@ function Page({ params }: { params: any }) {
                                 <FormControl>
                                     <RadioGroup
                                         onValueChange={field.onChange}
-                                        defaultValue={field.value}
+                                        value={field.value||""} // Use value instead of defaultValue
                                         className="flex gap-4"
                                     >
                                         {LANGUAGES.map((language, index) => (
@@ -353,4 +361,4 @@ function Page({ params }: { params: any }) {
     )
 }
 
-export default Page
+export default Page;

@@ -1,7 +1,8 @@
-'use client'
-import * as z from 'zod'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import React, { useEffect, useState } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { ChevronLeft, AlertCircle } from 'lucide-react';
 import {
     Form,
     FormControl,
@@ -9,8 +10,8 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
     Select,
     SelectContent,
@@ -18,364 +19,550 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from '@/components/ui/select'
-import { Button } from '@/components/ui/button'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import ToggleSwitch from './ToggleSwitch'
-import { api } from '@/utils/axios.config'
-import { toast } from '@/components/ui/use-toast'
-import { useEffect } from 'react'
-
-const formSchema = z.object({
-    hour: z
-        .number()
-        .min(0, 'Hour must be between 0 and 5')
-        .max(5, 'Hour must be between 0 and 5'),
-    minute: z
-        .number()
-        .min(15, 'Minute must be between 15 and 59')
-        .max(59, 'Minute must be between 15 and 59'),
-    passPercentage: z.string().nonempty('Percentage is required'),
-    copyPaste: z.boolean(),
-    embeddedGoogleSearch: z.boolean(),
-    tabChange: z.boolean(),
-    screenRecord: z.boolean(),
-    webCamera: z.boolean(),
-})
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import ToggleSwitch from './ToggleSwitch';
+import { toast } from '@/components/ui/use-toast';
+import { api } from '@/utils/axios.config';
 
 type SettingsAssessmentProps = {
-    selectedCodingQuesIds: any
-    selectedQuizQuesIds: any
-    selectedOpenEndedQuesIds: any
-    content: any
-    fetchChapterContent: (chapterId: number) => void
-    chapterData: any
-    chapterTitle: string
-    saveSettings: boolean
-    setSaveSettings: (value: boolean) => void
-}
+    selectedCodingQuesIds: any;
+    selectedQuizQuesIds: any;
+    selectedOpenEndedQuesIds: any;
+    selectedCodingQuesTagIds: any;
+    selectedQuizQuesTagIds: any;
+    content: any;
+    fetchChapterContent: any;
+    chapterData: any;
+    chapterTitle: string;
+    saveSettings: boolean;
+    setSaveSettings: (value: boolean) => void;
+    setQuestionType: (value: string) => void;
+    selectCodingDifficultyCount: any;
+    selectQuizDifficultyCount: any;
+};
 
 const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     selectedCodingQuesIds,
     selectedQuizQuesIds,
     selectedOpenEndedQuesIds,
+    selectedCodingQuesTagIds,
+    selectedQuizQuesTagIds,
     content,
     fetchChapterContent,
     chapterData,
     chapterTitle,
     saveSettings,
     setSaveSettings,
+    setQuestionType,
+    selectCodingDifficultyCount,
+    selectQuizDifficultyCount,
 }) => {
+    const codingMax = selectedCodingQuesIds.length;
+    const mcqMax = selectedQuizQuesIds.length;
+    const [codingWeightageDisabled, setCodingWeightageDisabled] = useState(false);
+    const [mcqsWeightageDisabled, setMcqsWeightageDisabled] = useState(false);
+    const [totalQuestions, setTotalQuestions] = useState({
+        codingProblemsEasy: content?.easyCodingQuestions || 0,
+        codingProblemsMedium: content?.mediumCodingQuestions || 0,
+        codingProblemsHard: content?.hardCodingQuestions || 0,
+        mcqsEasy: content?.easyMcqQuestions || 0,
+        mcqsMedium: content?.mediumMcqQuestions || 0,
+        mcqsHard: content?.hardMcqQuestions || 0,
+    });
+    const [totalSelectedCodingQues, setTotalSelectedCodingQues] = useState(0);
+    const [totalSelectedQuizQues, setTotalSelectedQuizQues] = useState(0);
+    const [editingFields, setEditingFields] = useState<Record<string, boolean>>({});
+    const hours = Array.from({ length: 6 }, (_, i) => i);
+    const minutes = [15, 30, 45];
+
+    const formSchema = z
+        .object({
+            codingProblemsEasy: z
+                .number()
+                .min(0)
+                .max(selectCodingDifficultyCount.codingProblemsEasy || 0, {
+                    message: `Cannot exceed ${selectCodingDifficultyCount.codingProblemsEasy || 0}`,
+                }),
+            codingProblemsMedium: z
+                .number()
+                .min(0)
+                .max(selectCodingDifficultyCount.codingProblemsMedium || 0, {
+                    message: `Cannot exceed ${selectCodingDifficultyCount.codingProblemsMedium || 0}`,
+                }),
+            codingProblemsHard: z
+                .number()
+                .min(0)
+                .max(selectCodingDifficultyCount.codingProblemsHard || 0, {
+                    message: `Cannot exceed ${selectCodingDifficultyCount.codingProblemsHard || 0}`,
+                }),
+            mcqsEasy: z
+                .number()
+                .min(0).max(selectQuizDifficultyCount.mcqsEasy || 0, {
+                    message: `Cannot exceed ${selectQuizDifficultyCount.mcqsEasy || 0}`,
+                }),
+            mcqsMedium: z
+                .number()
+                .min(0).max(selectQuizDifficultyCount.mcqsMedium || 0, {
+                    message: `Cannot exceed ${selectQuizDifficultyCount.mcqsMedium || 0}`,
+                }),
+            mcqsHard: z
+                .number()
+                .min(0).max(selectQuizDifficultyCount.mcqsHard || 0, {
+                    message: `Cannot exceed ${selectQuizDifficultyCount.mcqsHard || 0}`,
+                }),
+            codingProblemsWeightage: z.number().min(0),
+            mcqsWeightage: z.number().min(0),
+            copyPaste: z.boolean(),
+            tabSwitch: z.boolean(),
+            screenExit: z.boolean(),
+            eyeTracking: z.boolean(),
+            hour: z.string().max(5),
+            minute: z.string().max(59),
+            passPercentage: z.number().min(0).max(100),
+        })
+        .refine(
+            (data) => data.codingProblemsWeightage + data.mcqsWeightage === 100,
+            {
+                message: 'Total weightage should be 100%',
+                path: ['codingProblemsWeightage'], // You can add path to indicate which field to highlight in case of an error
+            }
+        );
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            hour: content.timeLimit ? Math.floor(content.timeLimit / 3600) : 2,
-            minute: (content.timeLimit / 60) % 60,
-            passPercentage:
-                content.passPercentage != null
-                    ? content.passPercentage.toString()
-                    : '70',
-            copyPaste: content.copyPaste == null ? true : content.copyPaste,
-            embeddedGoogleSearch:
-                content.embeddedGoogleSearch == null
-                    ? false
-                    : content.embeddedGoogleSearch,
-            tabChange: content.tabChange == null ? true : content.tabChange,
-            screenRecord:
-                content.screenRecord == null ? false : content.screenRecord,
-            webCamera: content.webCamera == null ? false : content.webCamera,
+            codingProblemsEasy: 0,
+            codingProblemsMedium: 0,
+            codingProblemsHard: 0,
+            mcqsEasy: 0,
+            mcqsMedium: 0,
+            mcqsHard: 0,
+            codingProblemsWeightage: 0,
+            mcqsWeightage: 0,
+            copyPaste: false,
+            tabSwitch: false,
+            screenExit: false,
+            eyeTracking: false,
+            hour: content.timeLimit ? String(Math.floor(content.timeLimit / 3600)) : '2',
+            minute: content.timeLimit ? String(Math.floor((content.timeLimit % 3600) / 60)) : '15',
+            passPercentage: 70,
         },
-    })
+    });
+
+    const handleInputChange = (field: keyof typeof totalQuestions, value: string) => {
+        // For form state and calculations, use 0 for empty value
+        const numericValue = value === "" ? 0 : Number(value);
+        // Update total questions state with numeric value
+        setTotalQuestions((prevValues) => ({
+            ...prevValues,
+            [field]: numericValue,
+        }));
+        // Update form value
+        form.setValue(field, numericValue, {
+            shouldValidate: true,
+            shouldDirty: true
+        });
+    };
+
+    const handleWeightageChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
+        const value = e.target.value;
+        field.onChange(value === "" ? null : Number(value));
+    }
+
+    useEffect(() => {
+        if (totalQuestions.codingProblemsEasy || totalQuestions.codingProblemsMedium || totalQuestions.codingProblemsHard) {
+            const codingTotal = totalQuestions.codingProblemsEasy +
+                totalQuestions.codingProblemsMedium +
+                totalQuestions.codingProblemsHard;
+            setTotalSelectedCodingQues(Number(codingTotal));
+        } else {
+            const codingTotal = content?.easyCodingQuestions + content?.mediumCodingQuestions + content?.hardCodingQuestions;
+            setTotalSelectedCodingQues(Number(codingTotal));
+        }
+
+        if (totalQuestions.mcqsEasy || totalQuestions.mcqsMedium || totalQuestions.mcqsHard) {
+            const quizTotal = totalQuestions.mcqsEasy +
+                totalQuestions.mcqsMedium +
+                totalQuestions.mcqsHard;
+            setTotalSelectedQuizQues(Number(quizTotal));
+        } else {
+            const quizTotal = content?.easyMcqQuestions + content?.mediumMcqQuestions + content?.hardMcqQuestions;
+            setTotalSelectedQuizQues(Number(quizTotal));
+        }
+    }, [totalQuestions, content]);
 
     useEffect(() => {
         form.reset({
-            hour: content.timeLimit ? Math.floor(content.timeLimit / 3600) : 2,
-            minute: (content.timeLimit / 60) % 60 >= 15 ? (content.timeLimit / 60) % 60 : 15,
-            passPercentage:
-                content.passPercentage != null
-                    ? content.passPercentage.toString()
-                    : '70',
-            copyPaste: content.copyPaste == null ? true : content.copyPaste,
-            embeddedGoogleSearch:
-                content.embeddedGoogleSearch == null
-                    ? false
-                    : content.embeddedGoogleSearch,
-            tabChange: content.tabChange == null ? true : content.tabChange,
-            screenRecord:
-                content.screenRecord == null ? false : content.screenRecord,
-            webCamera: content.webCamera == null ? false : content.webCamera,
-        })
-    }, [content])
+            codingProblemsEasy: content?.easyCodingQuestions || 0,
+            codingProblemsMedium: content?.mediumCodingQuestions || 0,
+            codingProblemsHard: content?.hardCodingQuestions || 0,
+            mcqsEasy: content?.easyMcqQuestions || 0,
+            mcqsMedium: content?.mediumMcqQuestions || 0,
+            mcqsHard: content?.hardMcqQuestions || 0,
+            codingProblemsWeightage: content?.weightageCodingQuestions || 0,
+            mcqsWeightage: content?.weightageMcqQuestions || 0,
+            copyPaste: content?.CanCopyPaste || false,
+            tabSwitch: content?.canTabChange || false,
+            screenExit: content?.canScreenExit || false,
+            hour: content.timeLimit ? String(Math.floor(content.timeLimit / 3600)) : '2',
+            minute: content.timeLimit ? String(Math.floor((Number(content.timeLimit) % 3600) / 60)) : '15',
+            passPercentage: content?.passPercentage || 70,
+        });
+    }, [content]);
 
+    // useEffect to handle logic based on codingMax and mcqMax
     useEffect(() => {
-        if (saveSettings) {
-            form.handleSubmit(handleSubmit)()
-            setSaveSettings(false)
+        if (codingMax === 0 && mcqMax === 0) {
+            form.setValue('codingProblemsWeightage', 0);
+            form.setValue('mcqsWeightage', 0);
+            setCodingWeightageDisabled(true);
+            setMcqsWeightageDisabled(true);
+        } else if (codingMax === 0) {
+            form.setValue('codingProblemsWeightage', 0);
+            form.setValue('mcqsWeightage', 100);
+            setCodingWeightageDisabled(true);
+            setMcqsWeightageDisabled(true);
+        } else if (mcqMax === 0) {
+            form.setValue('codingProblemsWeightage', 100);
+            form.setValue('mcqsWeightage', 0);
+            setCodingWeightageDisabled(true);
+            setMcqsWeightageDisabled(true);
+        } else {
+            setCodingWeightageDisabled(false);
+            setMcqsWeightageDisabled(false);
         }
-    }, [saveSettings])
+    }, [codingMax, mcqMax, form]);
 
-    const handleSubmit = async (values: any) => {
-        const timeLimit = values.hour * 3600 + values.minute * 60
-
+    async function onSubmit(values: any) {
+        const timeLimit = Number(values.hour) * 3600 + Number(values.minute) * 60;
         const data = {
             title: chapterTitle,
-            description:
-                'This assessment has 2 dsa problems,5 mcq and 3 theory questions',
+            description: 'This assessment has 2 dsa problems, 5 mcq and 3 theory questions',
             codingProblemIds: selectedCodingQuesIds,
             mcqIds: selectedQuizQuesIds,
             openEndedQuestionIds: selectedOpenEndedQuesIds,
             passPercentage: Number(values.passPercentage),
             timeLimit: Number(timeLimit),
-            copyPaste: values.copyPaste,
-            embeddedGoogleSearch: values.embeddedGoogleSearch,
-            tabChange: values.tabChange,
-            screenRecord: values.screenRecord,
-            webCamera: values.webCamera,
-        }
+            canEyeTrack: values.eyeTracking,
+            canTabChange: values.tabSwitch,
+            canScreenExit: values.screenExit,
+            canCopyPaste: values.copyPaste,
+            codingQuestionTagId: selectedCodingQuesTagIds,
+            mcqTagId: selectedQuizQuesTagIds,
+            easyCodingQuestions: Number(values.codingProblemsEasy),
+            mediumCodingQuestions: Number(values.codingProblemsMedium),
+            hardCodingQuestions: Number(values.codingProblemsHard),
+            easyMcqQuestions: Number(values.mcqsEasy),
+            mediumMcqQuestions: Number(values.mcqsMedium),
+            hardMcqQuestions: Number(values.mcqsHard),
+            weightageCodingQuestions: Number(values.codingProblemsWeightage),
+            weightageMcqQuestions: Number(values.mcqsWeightage),
+        };
 
         try {
-            await api.put(`Content/editAssessment/${content.id}/${chapterData.chapterId}`, data)
-            fetchChapterContent(chapterData.chapterId)
+            await api.put(`Content/editAssessment/${content.id}/${chapterData.chapterId}`, data);
+            fetchChapterContent(chapterData.chapterId, chapterData.topicId);
             toast({
                 title: 'Assessment Updated Successfully',
                 description: 'Assessment has been updated successfully',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
-            })
+                className: 'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+            });
         } catch (error) {
-            console.error(error)
+            console.error(error);
         }
-    }
-
-    const hours = Array.from({ length: 6 }, (_, i) => i);
-    const minutes = Array.from({ length: 45 }, (_, i) => i + 15)
+    };
 
     return (
-        <main className="flex flex-col p-3">
+        <main className="pb-6 bg-white text-left">
+            <div onClick={() => setQuestionType('coding')} className="flex items-center mb-6 cursor-pointer box-border">
+                <ChevronLeft className="w-4 h-4 mr-2 box-border" />
+                <span className="font-semibold">Back to {content?.ModuleAssessment?.title || 'Assessment'}</span>
+            </div>
+
             <Form {...form}>
-                <form
-                    onSubmit={form.handleSubmit(handleSubmit)}
-                    className="max-w-md w-full flex flex-col gap-4"
-                >
-                    <h1 className="text-left mb-3">Time Limit</h1>
-                    <div className="flex gap-2">
-                        <FormField
-                            control={form.control}
-                            name="hour"
-                            render={({ field }) => (
-                                <FormItem className="text-left w-full">
-                                    <FormLabel>Hour</FormLabel>
-                                    <Select
-                                        onValueChange={(value) =>
-                                            field.onChange(parseInt(value))
-                                        }
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue
-                                                    placeholder={`${
-                                                        field.value
-                                                    } Hour${
-                                                        field.value > 1
-                                                            ? 's'
-                                                            : ''
-                                                    }`}
-                                                />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            <SelectGroup>
-                                                {hours.map((hour) => (
-                                                    <SelectItem
-                                                        key={hour}
-                                                        value={hour.toString()}
-                                                    >
-                                                        {hour} Hour
-                                                        {hour !== 1 ? 's' : ''}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="minute"
-                            render={({ field }) => (
-                                <FormItem className="text-left w-full">
-                                    <FormLabel>Minute</FormLabel>
-                                    <Select
-                                        onValueChange={(value) =>
-                                            field.onChange(parseInt(value))
-                                        }
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue
-                                                    placeholder={`${
-                                                        field.value
-                                                    } Minute${
-                                                        field.value !== 1
-                                                            ? 's'
-                                                            : ''
-                                                    }`}
-                                                />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            <SelectGroup>
-                                                {minutes.map((minute) => (
-                                                    <SelectItem
-                                                        key={minute}
-                                                        value={minute.toString()}
-                                                    >
-                                                        {minute} Minute
-                                                        {minute !== 1
-                                                            ? 's'
-                                                            : ''}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                <form onSubmit={form.handleSubmit(onSubmit)} className="mt-4">
+                    {/* Submit Button */}
+                    <div className='flex justify-between w-full'>
+                        <h1 className="text-lg font-bold">Manage Settings</h1>
+                        {/* Section 6: Submit button */}
+                        <Button type='submit' className="w-1/5">Save Settings</Button>
                     </div>
 
-                    <h2 className="text-left mt-5 font-bold">
-                        Pass Percentage (Out of 100)
-                    </h2>
-                    <FormField
-                        control={form.control}
-                        name="passPercentage"
-                        render={({ field }) => (
-                            <FormItem className="text-left">
-                                <FormControl>
-                                    <Input
-                                        type="number"
-                                        {...field}
-                                        className="w-1/5 outline-none no-spinners border-gray-300"
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                    {/* Section 1: Choose number of questions */}
+                    <section>
+                        <h2 className="font-semibold mb-2">Choose number of questions shown to students</h2>
+                        <p className="text-sm text-gray-600 mb-4">
+                            Students will receive at least 1 question from each difficulty level of each question type. Additionally, the questions will be randomized for each question type.
+                        </p>
 
-                    {/* <div className="proctoring text-left">
-                        <h2 className=" mt-5 font-bold">
-                            Manage Proctoring Boundaries
-                        </h2>
-                        <FormField
-                            control={form.control}
-                            name="copyPaste"
-                            render={({ field }) => (
-                                <FormItem className="flex justify-between">
-                                    <FormLabel className="my-3">
-                                        Copy Paste
-                                    </FormLabel>
-                                    <FormControl>
-                                        <ToggleSwitch
-                                            initialChecked={field.value}
-                                            onToggle={(checked: any) =>
-                                                field.onChange(checked)
-                                            }
+                        <div className="flex justify-between items-start">
+                            {[
+                                { title: 'Coding Problems', fields: ['codingProblemsEasy', 'codingProblemsMedium', 'codingProblemsHard'], counts: selectCodingDifficultyCount, max: codingMax },
+                                { title: 'MCQs', fields: ['mcqsEasy', 'mcqsMedium', 'mcqsHard'], mcqCounts: selectQuizDifficultyCount, max: mcqMax },
+                            ].map((category, index) => (
+                                <div key={index} className="mb-4">
+                                    <h3 className="font-semibold mb-2">{category.title}</h3>
+                                    {category.fields.map((field, idx) => (
+                                        <FormField
+                                            key={field}
+                                            control={form.control}
+                                            name={field as keyof typeof totalQuestions}
+                                            render={({ field }) => {
+                                                const isError = Boolean(form.formState.errors[field.name]);
+                                                return (
+                                                    <FormItem className="flex items-center mb-2">
+                                                    <FormControl>
+                                                        <Input
+                                                            {...field}
+                                                            type="number"
+                                                            className={`w-16 mr-2 no-spinners ${form.formState.errors[field.name] ? 'border-red-500 outline-red-500 text-red-500' : 'border-gray-300'}`}
+                                                            onChange={(e) => {
+                                                                handleInputChange(field.name as keyof typeof totalQuestions, e.target.value);
+                                                            }}
+                                                            onFocus={() => {
+                                                                setEditingFields(prev => ({
+                                                                    ...prev,
+                                                                    [field.name]: true
+                                                                }));
+                                                            }}
+                                                            onBlur={() => {
+                                                                setEditingFields(prev => ({
+                                                                    ...prev,
+                                                                    [field.name]: false
+                                                                }));
+                                                            }}
+                                                            value={editingFields[field.name] ? (field.value === 0 ? "" : field.value) : field.value}
+                                                        />
+                                                    </FormControl>
+                                                    <div className="flex flex-col">
+                                                        {
+                                                            !isError && 
+                                                            <FormLabel className="text-sm m-0 p-0">
+                                                            {['Easy', 'Medium', 'Hard'][idx]} question(s) out of {category.title === 'Coding Problems'
+                                                                ? (category.counts && category.counts[`codingProblems${['Easy', 'Medium', 'Hard'][idx]}`]) || 0
+                                                                : (category.mcqCounts && category.mcqCounts[`${['mcqsEasy', 'mcqsMedium', 'mcqsHard'][idx]}`]) || 0}
+                                                        </FormLabel>
+                                                        }
+                                                        {form.formState.errors[field.name] && (
+                                                            <div className="flex items-center gap-1 mt-1 text-red-500">
+                                                                <AlertCircle color='#db3939' />
+                                                                <FormMessage className="text-sm">
+                                                                    {form.formState.errors[field.name]?.message}
+                                                                </FormMessage>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </FormItem>
+                                                )
+                                            }}
                                         />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
+                                    ))}
+                                </div>
+                            ))}
+
+                            <div className="mb-4">
+                                <h3 className="font-semibold mb-2">Total Selected Questions</h3>
+                                <div className="mt-2">
+                                    <p className="text-sm ml-2 mb-2"><span className='text-sm font-bold ml-2'>Coding: </span> {`${totalSelectedCodingQues} out of ${codingMax}`}</p>
+                                    <p className="text-sm ml-2"> <span className='text-sm font-bold ml-2'>Quiz: </span>  {`${totalSelectedQuizQues} out of ${mcqMax}`}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </section>
+
+                    {/* Section 2: Individual Section Weightage */}
+                    <div className='flex gap-10 my-8'>
+                        <section>
+                            <h2 className="font-semibold mb-2">Individual Section Weightage</h2>
+                            <p className="text-sm text-gray-600 mb-4">Total from both categories should be 100%</p>
+                            {[
+                                { title: 'Coding Problems', field: 'codingProblemsWeightage', disabled: codingWeightageDisabled, max: codingMax },
+                                { title: 'MCQs', field: 'mcqsWeightage', disabled: mcqsWeightageDisabled, max: mcqMax },
+                            ].map((category: any, index: any) => {
+                                // Check if there's an error for either codingProblemsWeightage or mcqsWeightage
+                                const isError = form.formState.errors.codingProblemsWeightage || form.formState.errors.mcqsWeightage;
+                                return (
+                                    <FormField
+                                        key={index}
+                                        control={form.control}
+                                        name={category.field}
+                                        render={({ field }) => (
+                                            <FormItem className="flex items-center mb-2">
+                                                <FormControl>
+                                                    <Input
+                                                        {...field}
+                                                        type="number"
+                                                        className={`w-16 mr-2 no-spinners ${isError ? 'border-red-500 outline-red-500 text-red-500' : 'border-gray-300'}`}
+                                                        disabled={category.disabled}
+                                                        onChange={(e: any) => handleWeightageChange(e, field)}
+                                                    />
+                                                </FormControl>
+                                                <FormLabel className={`text-sm ${isError ? 'text-red-500' : 'text-gray-700'}`}>
+                                                    {category.title}
+                                                </FormLabel>
+                                            </FormItem>
+                                        )}
+                                    />
+                                );
+                            })}
+                            {/* Display error messages if any */}
+                            {form.formState.errors.codingProblemsWeightage && (
+                                <div className='flex gap-2'>
+                                    <AlertCircle color='#db3939' />
+                                    <FormMessage className="text-red-500 text-sm mt-1">{form.formState.errors.codingProblemsWeightage.message}</FormMessage>
+                                </div>
                             )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="embeddedGoogleSearch"
-                            render={({ field }) => (
-                                <FormItem className="flex justify-between">
-                                    <FormLabel className="my-3">
-                                        Embedded Google Search
-                                    </FormLabel>
-                                    <FormControl>
-                                        <ToggleSwitch
-                                            initialChecked={field.value}
-                                            onToggle={(checked: any) =>
-                                                field.onChange(checked)
-                                            }
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
+                            {form.formState.errors.mcqsWeightage && (
+                                <div className='flex gap-2'>
+                                    <AlertCircle color='#db3939' />
+                                    <FormMessage className="text-red-500 text-sm mt-1">{form.formState.errors.mcqsWeightage.message}</FormMessage></div>
                             )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="tabChange"
-                            render={({ field }) => (
-                                <FormItem className="flex justify-between">
-                                    <FormLabel className="my-3">
-                                        Tab Change
-                                    </FormLabel>
-                                    <FormControl>
-                                        <ToggleSwitch
-                                            initialChecked={field.value}
-                                            onToggle={(checked: any) =>
-                                                field.onChange(checked)
-                                            }
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="screenRecord"
-                            render={({ field }) => (
-                                <FormItem className="flex justify-between">
-                                    <FormLabel className="my-3">
-                                        Screen Record
-                                    </FormLabel>
-                                    <FormControl>
-                                        <ToggleSwitch
-                                            initialChecked={field.value}
-                                            onToggle={(checked: any) =>
-                                                field.onChange(checked)
-                                            }
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="webCamera"
-                            render={({ field }) => (
-                                <FormItem className="flex justify-between">
-                                    <FormLabel className="my-3">
-                                        Web Camera
-                                    </FormLabel>
-                                    <FormControl>
-                                        <ToggleSwitch
-                                            initialChecked={field.value}
-                                            onToggle={(checked: any) =>
-                                                field.onChange(checked)
-                                            }
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div> */}
+                        </section>
+
+                        {/* Section 3: Manage Proctoring Settings */}
+                        <section className='w-1/3 ml-24'>
+                            <h2 className="font-semibold mb-4">Manage Proctoring Settings</h2>
+                            {[
+                                { label: 'Copy Paste', name: 'copyPaste' as const },
+                                { label: 'Tab Change', name: 'tabSwitch' as const },
+                                { label: 'Screen Exit', name: 'screenExit' as const },
+                                { label: 'Eye Tracking', name: 'eyeTracking' as const },
+                            ].map((option, index) => (
+                                <FormField
+                                    key={index}
+                                    control={form.control}
+                                    name={option.name}
+                                    render={({ field }) => (
+                                        <FormItem className="">
+                                            <div className='flex items-center justify-between mb-4'>
+                                                <div>
+                                                    <FormLabel className="text-sm text-center font-normal text-gray-600">{option.label}</FormLabel>
+                                                </div>
+                                                <div>
+                                                    <FormControl>
+                                                        <ToggleSwitch
+                                                            initialChecked={field.value as boolean}
+                                                            onToggle={field.onChange}
+                                                        />
+                                                    </FormControl>
+                                                </div>
+                                            </div>
+                                        </FormItem>
+                                    )}
+                                />
+                            ))}
+                        </section>
+                    </div>
+
+                    {/* Section 4: Time limit */}
+                    <div className="flex">
+                        {/* Section 1: Time Limit */}
+                        <section className="w-1/4 mr-5">
+                            <h2 className="font-semibold mb-4">Time limit</h2>
+                            <div className="flex flex-col space-y-4 "> {/* Stack inputs vertically with space-y-4 */}
+                                {/* Hour Selector */}
+                                <div>
+                                    <FormField
+                                        control={form.control}
+                                        name="hour"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <Select onValueChange={field.onChange} defaultValue={field.value.toString()}>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Select hour" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        <SelectGroup>
+                                                            {hours.map((hour) => (
+                                                                <SelectItem key={hour} value={hour.toString()}>
+                                                                    {hour > 1 ? `${hour} Hours` : `${hour} Hour`}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectGroup>
+                                                    </SelectContent>
+                                                </Select>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+
+                                {/* Minute Selector */}
+                                <div>
+                                    <FormField
+                                        control={form.control}
+                                        name="minute"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <Select onValueChange={field.onChange} defaultValue={field.value.toString()}>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Select minute" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        <SelectGroup>
+                                                            {minutes.map((minute) => (
+                                                                <SelectItem key={minute} value={minute.toString()}>
+                                                                    {minute} Min
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectGroup>
+                                                    </SelectContent>
+                                                </Select>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* Section 5: Set Pass Percentage */}
+                        <section className='ml-36'>
+                            <h2 className="font-semibold mb-4">Pass Percentage (Out Of 100)</h2>
+                            <FormField
+                                control={form.control}
+                                name="passPercentage"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-col items-start">
+                                        <div className='flex items-center'>
+                                            <FormControl>
+                                                <Input
+                                                    {...field}
+                                                    type="number"
+                                                    className={`w-16 mr-2 no-spinners ${form.formState.errors.passPercentage ? 'border-red-500 outline-red-500 text-red-500' : 'border-gray-300'}`}
+                                                    onChange={(e) => {
+                                                        const value = e.target.value;
+                                                        field.onChange(value === "" ? null : Number(value));
+                                                    }}
+                                                />
+                                            </FormControl>
+                                            <div className={`text-md ${form.formState.errors.passPercentage ? 'border-red-500 outline-red-500 text-red-500' : 'border-gray-300'}`}>%</div>
+                                        </div>
+                                        {form.formState.errors.passPercentage && (
+                                            <div className='flex items-center gap-2 mt-1 text-red-500'>
+                                                <AlertCircle color='#db3939' />
+                                                <FormMessage className="text-sm">
+                                                    {form.formState.errors.passPercentage.message}
+                                                </FormMessage>
+                                            </div>
+                                        )}
+                                    </FormItem>
+                                )}
+                            />
+                        </section>
+
+
+                    </div>
                 </form>
             </Form>
         </main>
-    )
-}
+    );
+};
 
-export default SettingsAssessment
+export default SettingsAssessment;

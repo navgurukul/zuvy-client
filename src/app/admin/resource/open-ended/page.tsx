@@ -1,7 +1,7 @@
 'use client'
 
 // External imports
-import React, { useEffect, useState } from 'react'
+import React, { useCallback,useEffect, useState } from 'react'
 import { Search } from 'lucide-react'
 import Image from 'next/image'
 
@@ -28,7 +28,15 @@ import { Separator } from '@/components/ui/separator'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { columns } from './column'
 import NewOpenEndedQuestionForm from '@/app/admin/resource/_components/NewOpenEndedQuestionForm'
-import { getCodingQuestionTags, getopenEndedQuestionstate } from '@/store/store'
+import { 
+    getCodingQuestionTags, 
+    getopenEndedQuestionstate ,
+    getOffset,
+    getPosition,
+    getSelectedOpenEndedOptions,
+    getOpenEndedDifficulty,
+
+} from '@/store/store'
 import {
     getAllOpenEndedQuestions,
     getAllTags,
@@ -36,11 +44,21 @@ import {
 } from '@/utils/admin'
 import { Spinner } from '@/components/ui/spinner'
 import useDebounce from '@/hooks/useDebounce'
+import MultiSelector from '@/components/ui/multi-selector'
+import difficultyOptions from '@/app/utils'
+import { OFFSET, POSITION } from '@/utils/constant'
+import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
+
 
 type Props = {}
 export type Tag = {
     id: number
     tagName: string
+}
+
+interface Option {
+    label: string
+    value: string
 }
 
 const OpenEndedQuestions = (props: Props) => {
@@ -53,13 +71,28 @@ const OpenEndedQuestions = (props: Props) => {
         }
         return { tagName: 'All Topics', id: -1 }
     })
+    const { selectedOptions, setSelectedOptions } =  getSelectedOpenEndedOptions()
+  
+    const [options, setOptions] = useState<Option[]>([
+        { value: '-1', label: 'All Topics' },
+    ])
     const { tags, setTags } = getCodingQuestionTags()
-    const [selectedDifficulty, setSelectedDifficulty] = useState('None')
+
+    const {difficulty, setDifficulty} = getOpenEndedDifficulty()
+
     const [allOpenEndedQuestions, setAllOpenEndedQuestions] = useState([])
     const { openEndedQuestions, setOpenEndedQuestions } =
         getopenEndedQuestionstate()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
+    
+    const [currentPage, setCurrentPage] = useState(1)
+    const [totalOpenEndedQuestion,  setTotalOpenEndedQuestion] = useState <any>(0)
+    const [totalPages, setTotalPages] = useState(0)
+    const [pages, setPages] = useState(0)
+    const [lastPage, setLastPage] = useState(0)
+    const { offset, setOffset} = getOffset()
+    const {position, setPosition} = getPosition()
     const debouncedSearch = useDebounce(searchTerm, 500)
     const [loading, setLoading] = useState(true)
     const selectedLanguage = ''
@@ -73,26 +106,151 @@ const OpenEndedQuestions = (props: Props) => {
         localStorage.setItem('openEndedCurrentTag', JSON.stringify(tag))
     }
 
-    useEffect(() => {
-        getAllTags(setTags)
-    }, [setTags])
+    const handleTagOption = (option: Option) => {
+        if (option.value === '-1') {
+            if (selectedOptions.some((item) => item.value === option.value)) {
+                // setSelectedOptions((prev) =>
+                //     prev.filter((selected) => selected.value !== option.value)
+                // )
+                setSelectedOptions(
+                    selectedOptions.filter(
+                        (selected) => selected.value !== option.value
+                    )
+                    
+                )
+            } else {
+                setSelectedOptions([option])
+            }
+        } else {
+            if (selectedOptions.some((item) => item.value === '-1')) {
+                setSelectedOptions([option])
+            } else {
+                if (
+                    selectedOptions.some(
+                        (selected) => selected.value === option.value
+                    )
+                ) {
+                    // setSelectedOptions((prev) =>
+                    //     prev.filter(
+                    //         (selected) => selected.value !== option.value
+                    //     )
+                    // )
+                    setSelectedOptions(
+                        selectedOptions.filter(
+                            (selected) => selected.value !== option.value
+                        )
+                    )
+                } else {
+                    // setSelectedOptions((prev) => [...prev, option])
+                    setSelectedOptions([...selectedOptions, option])
+                }
+            }
+        }
+    }
+
+    const handleDifficulty = (option: Option) => {
+        // When user selects All Difficulty
+        if (option.value === 'None') {
+            // It will check if the user has already selected All Difficulty or not
+            if (difficulty.some((item) => item.value === option.value)) {
+                // If All Difficulty is already selected it will remove
+                const filteredDifficulty = difficulty.filter(
+                    (item) => item.value !== option.value
+                )
+                setDifficulty(filteredDifficulty)
+            } else {
+                // If user selects All Difficulty when it is not already selected,
+                // Rest other difficulties will be removed and only All Difficulty will be added in the array
+                setDifficulty([option])
+            }
+        } else {
+            // When user selects other Difficulties
+            if (difficulty.some((item) => item.value === 'None')) {
+                // When All Difficulty is already selected and user selects other difficulties
+                // then All Difficulty will be removed and new difficulty will be added to the list
+                setDifficulty([option])
+            } else {
+                if (difficulty.some((item) => item.value === option.value)) {
+                    // Removing other difficulty when already selected
+                    const filteredDifficulty = difficulty.filter(
+                        (item) => item.value !== option.value
+                    )
+                    setDifficulty(filteredDifficulty)
+                } else {
+                    // Add other difficulties
+                    const filteredDifficulty = [...difficulty, option]
+                    setDifficulty(filteredDifficulty)
+                }
+            }
+        }
+    }
+    console.log("potion",position)
 
     useEffect(() => {
-        getAllOpenEndedQuestions(setAllOpenEndedQuestions)
-        filteredOpenEndedQuestions(
+        getAllTags(setTags, setOptions)
+    }, [setTags])
+    
+    const fetchCodingQuestions = useCallback(
+        async (offset: number) => {
+            filteredOpenEndedQuestions(
+                setOpenEndedQuestions,
+                offset,
+                position,
+                difficulty,
+                selectedOptions,
+                setTotalOpenEndedQuestion,
+                setLastPage,
+                setTotalPages,
+                debouncedSearch,
+              
+            )
+        },
+        [
+            searchTerm,
+            selectedOptions,
+            difficulty,
             setOpenEndedQuestions,
-            selectedDifficulty,
-            selectedTag,
-            selectedLanguage,
-            debouncedSearch
-        )
+            debouncedSearch,
+            isDialogOpen,
+            position,
+            offset,
+        ]
+    )
+    useEffect(() => {
+        getAllOpenEndedQuestions(setAllOpenEndedQuestions)
+        fetchCodingQuestions(offset)
+     
     }, [
         searchTerm,
-        selectedTag,
-        selectedDifficulty,
+        selectedOptions,
+        difficulty,
         setOpenEndedQuestions,
+        // selectedDifficulty,
         debouncedSearch,
+        isDialogOpen,
+        position,
+        offset,
     ])
+    // useEffect(() => {
+    //     getAllOpenEndedQuestions(setAllOpenEndedQuestions)
+    //     filteredOpenEndedQuestions(
+    //         offset,
+    //         setOpenEndedQuestions,
+    //         difficulty,
+    //         selectedOptions,
+    //         selectedLanguage,
+    //         debouncedSearch,
+    //         position
+    // )
+            
+        
+    // }, [
+    //     searchTerm,
+    //     selectedOptions,
+    //     difficulty,
+    //     setOpenEndedQuestions,
+    //     debouncedSearch,
+    // ])
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -101,6 +259,9 @@ const OpenEndedQuestions = (props: Props) => {
 
         return () => clearTimeout(timer)
     }, [])
+
+    const selectedTagCount = selectedOptions.length
+    const difficultyCount = difficulty.length
 
     return (
         <>
@@ -151,8 +312,8 @@ const OpenEndedQuestions = (props: Props) => {
                                                 setIsDialogOpen={
                                                     setIsDialogOpen
                                                 }
-                                                getAllOpenEndedQuestions={
-                                                    getAllOpenEndedQuestions
+                                                filteredOpenEndedQuestions={
+                                                    filteredOpenEndedQuestions
                                                 }
                                                 setOpenEndedQuestions={
                                                     setOpenEndedQuestions
@@ -162,54 +323,33 @@ const OpenEndedQuestions = (props: Props) => {
                                     </DialogContent>
                                 </Dialog>
                             </div>
-                            <div className="flex items-center">
-                                <Select
-                                    onValueChange={(value) =>
-                                        setSelectedDifficulty(value)
-                                    }
-                                >
-                                    <SelectTrigger className="w-[180px]">
-                                        <SelectValue placeholder="Any Difficulty" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            <SelectItem value="None">
-                                                Any Difficulty
-                                            </SelectItem>
-                                            <SelectItem value="Easy">
-                                                Easy
-                                            </SelectItem>
-                                            <SelectItem value="Medium">
-                                                Medium
-                                            </SelectItem>
-                                            <SelectItem value="Hard">
-                                                Hard
-                                            </SelectItem>
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
-                                <Separator
-                                    orientation="vertical"
-                                    className="w-1 h-12 mx-4 bg-gray-400 rounded-lg"
-                                />
-                                <Select
-                                    value={selectedTag.tagName}
-                                    onValueChange={handleTopicClick}
-                                >
-                                    <SelectTrigger className="w-[180px]">
-                                        <SelectValue placeholder="Choose Topic" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {tags.map((tag: Tag) => (
-                                            <SelectItem
-                                                key={tag.id}
-                                                value={tag.tagName}
-                                            >
-                                                {tag.tagName}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                            <div className="flex items-center gap-4">
+                                <div className="w-full lg:w-[250px]">
+                                    <MultiSelector
+                                        selectedCount={difficultyCount}
+                                        options={difficultyOptions}
+                                        selectedOptions={difficulty}
+                                        handleOptionClick={handleDifficulty}
+                                        type={
+                                            difficultyCount > 1
+                                                ? 'Difficulties'
+                                                : 'Difficulty'
+                                        }
+                                    />
+                                </div>
+                                <div className="w-full lg:w-[250px]">
+                                    <MultiSelector
+                                        selectedCount={selectedTagCount}
+                                        options={options}
+                                        selectedOptions={selectedOptions}
+                                        handleOptionClick={handleTagOption}
+                                        type={
+                                            selectedTagCount > 1
+                                                ? 'Topics'
+                                                : 'Topic'
+                                        }
+                                    />
+                                </div>
                             </div>
 
                             <DataTable
@@ -254,8 +394,8 @@ const OpenEndedQuestions = (props: Props) => {
                                                 setIsDialogOpen={
                                                     setIsDialogOpen
                                                 }
-                                                getAllOpenEndedQuestions={
-                                                    getAllOpenEndedQuestions
+                                                filteredOpenEndedQuestions={
+                                                    filteredOpenEndedQuestions
                                                 }
                                                 setOpenEndedQuestions={
                                                     setOpenEndedQuestions
@@ -267,6 +407,17 @@ const OpenEndedQuestions = (props: Props) => {
                             </MaxWidthWrapper>
                         </>
                     )}
+                      <DataTablePagination
+                            totalStudents={totalOpenEndedQuestion}
+                            position={position}
+                            setPosition={setPosition}
+                            pages={totalPages}
+                            lastPage={lastPage}
+                            currentPage={currentPage}
+                            setCurrentPage={setCurrentPage}
+                            fetchStudentData={fetchCodingQuestions}
+                            setOffset={setOffset}
+                        />
                 </div>
             )}
         </>

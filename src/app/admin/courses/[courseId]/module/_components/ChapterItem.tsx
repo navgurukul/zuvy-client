@@ -15,6 +15,7 @@ import DeleteConfirmationModal from '../../_components/deleteModal'
 import { useState } from 'react'
 import { DELETE_CHAPTER_CONFIRMATION } from '@/utils/constant'
 import { toast } from '@/components/ui/use-toast'
+import { useParams, useRouter } from 'next/navigation'
 
 function ChapterItem({
     title,
@@ -22,20 +23,26 @@ function ChapterItem({
     topicName,
     chapterId,
     activeChapter,
-    fetchChapterContent,
+    setActiveChapter,
     fetchChapters,
     moduleId,
+    activeChapterRef,
+    isChapterClickedRef,
 }: {
     title: string
     topicId: number
     topicName: string
     chapterId: number
     activeChapter: number
-    fetchChapterContent: (chapterId: number) => void
+    setActiveChapter: any
     fetchChapters: () => void
     moduleId: string
+    activeChapterRef: any
+    isChapterClickedRef: any
 }) {
     // states and variables
+    const { courseId } = useParams()
+    const router = useRouter()
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
 
     // functions
@@ -62,6 +69,13 @@ function ChapterItem({
         return activeChapter === chapterId
             ? 'bg-secondary/50 text-primary'
             : 'text-black hover:bg-secondary/20'
+    }
+
+    const handleClick = () => {
+        setActiveChapter(chapterId) // Set the active chapter in the parent component
+        router.push(
+            `/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterId}`
+        )
     }
 
     const handleDeleteChapter = async () => {
@@ -97,14 +111,14 @@ function ChapterItem({
     }
 
     return (
-        <div>
+        <div ref={chapterId === activeChapter ? activeChapterRef : null}>
             <div
                 className={cn(
                     'flex rounded-md p-3  my-1 cursor-pointer justify-between items-center',
                     setActiveChapterItem()
                 )}
                 onClick={() => {
-                    fetchChapterContent(chapterId)
+                    handleClick()
                 }}
             >
                 <div className="flex gap-2 capitalize">
@@ -120,7 +134,7 @@ function ChapterItem({
                         className="hover:text-destructive cursor-pointer"
                         size={15}
                     />
-                    <GripVertical size={15} />
+                     
                 </div>
             </div>
             <DeleteConfirmationModal
