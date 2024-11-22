@@ -18,6 +18,7 @@ import {
     getTopicId,
     getCurrentModuleName,
 } from '@/store/store'
+import { renderChapterContent } from '@/app/admin/courses/[courseId]/module/_components/RenderChapterContent'
 
 type Chapter = {
     chapterId: number
@@ -203,6 +204,17 @@ function Chapter() {
                             scrollToBottom={scrollToBottom}
                         />
                     </Dialog>
+                    <div>
+                        {/* {renderChapterContent({
+                            topicId,
+                            chapterId,
+                            chapterContent,
+                            moduleID,
+                            activeChapterTitle,
+                            loading,
+                            fetchChapterContent,
+                        })} */}
+                    </div>
                 </div>
                 <ScrollArea
                     className="h-[500px] lg:h-[670px] pr-4"

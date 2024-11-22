@@ -134,7 +134,6 @@ function ChapterItem({
                         className="hover:text-destructive cursor-pointer"
                         size={15}
                     />
-                     
                 </div>
             </div>
             <DeleteConfirmationModal

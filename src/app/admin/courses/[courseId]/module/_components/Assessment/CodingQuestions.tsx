@@ -42,8 +42,8 @@ const CodingQuestions = ({
     tags: any
 }) => {
     return (
-        <ScrollArea className="h-dvh pr-4">
-            <ScrollBar orientation="vertical" />
+        <div className="h-dvh pr-4 mb-[-350px]">
+            <ScrollBar orientation="vertical" className="pb-96 h-dvh" />
             {questions.map((question: CodingQuestion) => {
                 const tag = tags?.find(
                     (tag: any) => tag?.id === question?.tagId
@@ -150,7 +150,7 @@ const CodingQuestions = ({
                     </div>
                 )
             })}
-        </ScrollArea>
+        </div>
     )
 }
 

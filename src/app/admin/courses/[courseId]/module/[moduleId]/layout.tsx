@@ -10,7 +10,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     const adminAssessmentPreviewRoute = pathname?.includes('/preview')
 
     return (
-        <>
+        <div className="h-screen">
             {projectID || adminAssessmentPreviewRoute ? (
                 <MaxWidthWrapper>{children}</MaxWidthWrapper>
             ) : (
@@ -18,10 +18,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <div className="flex h-full flex-col md:flex-row md:overflow-hidden">
                     {/* <div className="w-full flex-none md:w-[25%]"> */}
                     {/* <div className="w-full flex-none md:w-[25%] sticky top-0 h-screen overflow-y-auto"> */}
-                    <div className="w-full flex-none md:w-[25%] sticky top-0 h-screen">
+                    <div className="w-full flex-none md:w-[25%] sticky top-0 ">
                         <Chapter />
                     </div>
-                    <div className="flex-grow p-6 md:p-12">
+                    <div className="flex-grow ">
                         {/* <div className="flex-grow overflow-auto p-6 md:p-12"> */}
                         {children}
                     </div>
@@ -33,6 +33,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     </div> */}
                 </div>
             )}
-        </>
+        </div>
     )
 }
