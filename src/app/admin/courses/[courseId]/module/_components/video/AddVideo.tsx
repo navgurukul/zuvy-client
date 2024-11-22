@@ -1,6 +1,5 @@
 'use client'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -12,7 +11,6 @@ import {
     FormLabel,
     FormMessage,
 } from '@/components/ui/form'
-
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -20,30 +18,34 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import VideoEmbed from './VideoEmbed'
 import { X } from 'lucide-react'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import useResponsiveHeight from '@/hooks/useResponsiveHeight'
+
 // Helper function to convert links to embed-friendly format
 const getEmbedLink = (url: string) => {
-    if (!url) return ''; 
+    if (!url) return ''
     try {
-        const urlObj = new URL(url); // Parse the URL
+        const urlObj = new URL(url) // Parse the URL
         if (url.includes('embed')) {
             return url
-
-        }
-        else if (urlObj.hostname.includes('youtube.com') && urlObj.searchParams.has('v')) {
+        } else if (
+            urlObj.hostname.includes('youtube.com') &&
+            urlObj.searchParams.has('v')
+        ) {
             // Convert long YouTube URL to embed format
-            return `https://www.youtube.com/embed/${urlObj.searchParams.get('v')}`;
-        }
-       else if (urlObj.hostname.includes('youtu.be')) {
+            return `https://www.youtube.com/embed/${urlObj.searchParams.get(
+                'v'
+            )}`
+        } else if (urlObj.hostname.includes('youtu.be')) {
             // Convert short YouTube URL to embed format
-            const videoId = urlObj.pathname.slice(1);
-            return `https://www.youtube.com/embed/${videoId}`;
+            const videoId = urlObj.pathname.slice(1)
+            return `https://www.youtube.com/embed/${videoId}`
         }
     } catch (error) {
-        console.error('Invalid URL:', url, error); // Log invalid URLs for debugging
+        console.error('Invalid URL:', url, error) // Log invalid URLs for debugging
     }
-    return ''; // Return empty string for invalid URLs
-};
-
+    return '' // Return empty string for invalid URLs
+}
 
 const isLinkValid = (link: string) => {
     const urlRegex = /^(https?:\/\/)?([\w-]+\.)*([\w-]+)(:\d{2,5})?(\/\S*)*$/
@@ -96,6 +98,7 @@ const AddVideo = ({
     moduleId: string
     fetchChapterContent: (chapterId: number, topicId: number) => Promise<void>
 }) => {
+    const heightClass = useResponsiveHeight()
     const fileInputRef = useRef<HTMLInputElement>(null)
     const [showVideoBox, setShowVideoBox] = useState<boolean>(true)
     const form = useForm<z.infer<typeof formSchema>>({
@@ -179,92 +182,107 @@ const AddVideo = ({
     }
 
     return (
-        <div className="flex flex-col gap-y-8 mx-auto items-center justify-center w-full">
-            <Form {...form}>
-                <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className=" w-full items-center justify-center flex flex-col space-y-8"
-                >
-                    <FormField
-                        control={form.control}
-                        name="videoTitle"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormControl>
-                                    <Input
-                                        placeholder="Untitled Video"
-                                        {...field}
-                                        className="w-[450px] p-0 text-3xl text-left font-semibold outline-none border-none focus:ring-0"
-                                    />
-                                </FormControl>
-
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <div className=" flex justify-between items-start relative text-red" >
-                        {showVideoBox && (
-                            <div className="flex items-start justify-center ">
-                             <VideoEmbed
-                                    title={content?.contentDetails?.[0]?.title || ''}
-                                    src={getEmbedLink(content?.contentDetails?.[0]?.links?.[0] || '')}
-                                />
-                                <X
-                                    className="text-destructive ml-2 cursor-pointer"
-                                    size={17}
-                                    onClick={handleClose}
-                                />
-                            </div>
-                        )}
-                    </div>
-
-                    <FormField
-                        control={form.control}
-                        name="description"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel className=" flex text-left text-xl font-semibold">
-                                    Description
-                                </FormLabel>
-                                <FormControl>
-                                    <Textarea
-                                        {...field}
-                                        className="w-[450px] px-3 py-2 border rounded-md "
-                                        placeholder="Type your Description here."
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="links"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel className=" flex text-left text-xl font-semibold">
-                                    Embed Link
-                                </FormLabel>
-                                <FormControl>
-                                    <Input
-                                        {...field}
-                                        className="w-[450px] px-3 py-2 border rounded-md "
-                                        placeholder="Paste your link here "
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <Button
-                        type="submit"
-                        className=" flex flex-start  w-[450px]  text-white font-bold py-2 px-4 rounded"
+        <ScrollArea
+            className={`${heightClass} pr-4`}
+            type="hover"
+            style={{
+                scrollbarWidth: 'none', // Firefox
+                msOverflowStyle: 'none', // IE and Edge
+            }}
+        >
+            <div className="flex flex-col gap-y-8 mx-auto items-center justify-center w-full">
+                <Form {...form}>
+                    <form
+                        onSubmit={form.handleSubmit(onSubmit)}
+                        className=" w-full items-center justify-center flex flex-col space-y-8"
                     >
-                        Embed Video
-                    </Button>
-                </form>
-            </Form>
-        </div>
+                        <FormField
+                            control={form.control}
+                            name="videoTitle"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="Untitled Video"
+                                            {...field}
+                                            className="w-[450px] p-0 text-3xl text-left font-semibold outline-none border-none focus:ring-0"
+                                        />
+                                    </FormControl>
+
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <div className=" flex justify-between items-start relative text-red">
+                            {showVideoBox && (
+                                <div className="flex items-start justify-center ">
+                                    <VideoEmbed
+                                        title={
+                                            content?.contentDetails?.[0]
+                                                ?.title || ''
+                                        }
+                                        src={getEmbedLink(
+                                            content?.contentDetails?.[0]
+                                                ?.links?.[0] || ''
+                                        )}
+                                    />
+                                    <X
+                                        className="text-destructive ml-2 cursor-pointer"
+                                        size={17}
+                                        onClick={handleClose}
+                                    />
+                                </div>
+                            )}
+                        </div>
+
+                        <FormField
+                            control={form.control}
+                            name="description"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className=" flex text-left text-xl font-semibold">
+                                        Description
+                                    </FormLabel>
+                                    <FormControl>
+                                        <Textarea
+                                            {...field}
+                                            className="w-[450px] px-3 py-2 border rounded-md "
+                                            placeholder="Type your Description here."
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="links"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className=" flex text-left text-xl font-semibold">
+                                        Embed Link
+                                    </FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            {...field}
+                                            className="w-[450px] px-3 py-2 border rounded-md "
+                                            placeholder="Paste your link here "
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <Button
+                            type="submit"
+                            className=" flex flex-start  w-[450px]  text-white font-bold py-2 px-4 rounded"
+                        >
+                            Embed Video
+                        </Button>
+                    </form>
+                </Form>
+            </div>
+        </ScrollArea>
     )
 }
 export default AddVideo

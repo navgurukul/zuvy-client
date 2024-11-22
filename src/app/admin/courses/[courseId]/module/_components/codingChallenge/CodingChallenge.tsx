@@ -184,7 +184,7 @@ function CodingChallenge({
     return (
         <div>
             {/* SearchBar component */}
-            <div className="flex items-center mb-5">
+            <div className="flex items-center mb-15">
                 <Input
                     required
                     onChange={(e) => {
@@ -256,19 +256,17 @@ function CodingChallenge({
                                             </p>
                                         </div>
                                         <Dialog>
-                                <DialogTrigger asChild>
-                                    <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer">
-                                        View Full Description
-                                    </p>
-                                </DialogTrigger>
-                                <DialogOverlay />
-                                <QuestionDescriptionModal
-                                    question={question}
-                                    type="coding"
-                                    
-                                />
-                            </Dialog>
-
+                                            <DialogTrigger asChild>
+                                                <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer">
+                                                    View Full Description
+                                                </p>
+                                            </DialogTrigger>
+                                            <DialogOverlay />
+                                            <QuestionDescriptionModal
+                                                question={question}
+                                                type="coding"
+                                            />
+                                        </Dialog>
                                     </div>
                                     <div>
                                         {selectedQuestions?.some(
