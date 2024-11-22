@@ -274,7 +274,7 @@ const AddForm: React.FC<AddFormProps> = ({
 
     return (
         <ScrollArea
-            className="h-[500px] lg:h-[550px] pr-4"
+            className="h-[600px] lg:h-[600px] pr-4"
             type="hover"
             style={{
                 scrollbarWidth: 'none', // Firefox

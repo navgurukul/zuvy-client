@@ -10,7 +10,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     const adminAssessmentPreviewRoute = pathname?.includes('/preview')
 
     return (
-        <div className="h-screen">
+        <div className="h-[600px] overflow-hidden">
             {projectID || adminAssessmentPreviewRoute ? (
                 <MaxWidthWrapper>{children}</MaxWidthWrapper>
             ) : (
