@@ -37,6 +37,7 @@ import axios from 'axios'
 import QuestionCard from '@/app/student/courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/QuestionCard'
 import { AIQuestionCard } from './AIQuestionCard'
 import { getGeneratedQuestions, getRequestBody } from '@/store/store'
+import LottieLoader from '@/components/ui/lottie-loader'
 
 export type Tag = {
     label: string
@@ -1081,8 +1082,13 @@ const NewMcqProblemForm = ({
 
                     {loadingAI && (
                         <>
-                            <Spinner size="small" className="mr-2" />
-                            Generating...
+                            {/* <Spinner size="small" className="mr-2" />
+                            Generating... */}
+                            <LottieLoader />
+                            {/* <LottieLoader
+                                primaryColor="#518672"
+                                secondaryColor="#FFC374"
+                            /> */}
                         </>
                     )}
 
