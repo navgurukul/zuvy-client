@@ -10,6 +10,7 @@ import './styles/login.css'
 import { toast } from '@/components/ui/use-toast'
 import Link from 'next/link'
 import { apiMeraki } from '@/utils/axios.config'
+import { getUser } from '@/store/store'
 
 type Props = {}
 
@@ -25,7 +26,7 @@ function LoginPage({}: Props) {
     const loginUrl = process.env.NEXT_PUBLIC_ZUVY_LOGIN_URL
 
     const [loading, setLoading] = useState(true)
-
+    const { user, setUser } = getUser()
     const router = useRouter()
 
     useEffect(() => {
@@ -51,6 +52,8 @@ function LoginPage({}: Props) {
                         Authorization: token,
                     },
                 })
+
+                setUser(resp.data.user)
 
                 if (resp.data.user) {
                     toast({

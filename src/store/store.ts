@@ -153,7 +153,7 @@ type assessmentStore = {
 }
 
 export const getAssessmentStore = create<assessmentStore>((set) => ({
-     fullScreenExitInstance: 0,
+    fullScreenExitInstance: 0,
     setFullScreenExitInstance: (newValue: number) => {
         set({ fullScreenExitInstance: newValue })
     },
@@ -359,66 +359,66 @@ type selectedOptions = {
     selectedOptions: any[]
     setSelectedOptions: (newValue: any[]) => void
 }
-export const  getSelectedOptions = create<selectedOptions>((set) => ({
+export const getSelectedOptions = create<selectedOptions>((set) => ({
     selectedOptions: [{ value: '-1', label: 'All Topics' }],
     setSelectedOptions: (newValue: any[]) => {
-        set({ selectedOptions: newValue });
-    }
-}));
+        set({ selectedOptions: newValue })
+    },
+}))
 
-export const  getSelectedOpenEndedOptions = create<selectedOptions>((set) => ({
+export const getSelectedOpenEndedOptions = create<selectedOptions>((set) => ({
     selectedOptions: [{ value: '-1', label: 'All Topics' }],
     setSelectedOptions: (newValue: any[]) => {
-        set({ selectedOptions: newValue });
-    }
-}));
-export const  getSelectedMCQOptions = create<selectedOptions>((set) => ({
+        set({ selectedOptions: newValue })
+    },
+}))
+export const getSelectedMCQOptions = create<selectedOptions>((set) => ({
     selectedOptions: [{ value: '-1', label: 'All Topics' }],
     setSelectedOptions: (newValue: any[]) => {
-        set({ selectedOptions: newValue });
-    }
-}));
+        set({ selectedOptions: newValue })
+    },
+}))
 type difficulty = {
     difficulty: any[]
     setDifficulty: (newValue: any[]) => void
 }
-export const  getDifficulty = create< difficulty>((set) => ({
-    difficulty: [{value: 'None', label: 'All Difficulty'}],
+export const getDifficulty = create<difficulty>((set) => ({
+    difficulty: [{ value: 'None', label: 'All Difficulty' }],
     setDifficulty: (newValue: any[]) => {
-        set({ difficulty: newValue });
-    }
-}));
+        set({ difficulty: newValue })
+    },
+}))
 
-export const  getOpenEndedDifficulty = create< difficulty>((set) => ({
-    difficulty: [{value: 'None', label: 'All Difficulty'}],
+export const getOpenEndedDifficulty = create<difficulty>((set) => ({
+    difficulty: [{ value: 'None', label: 'All Difficulty' }],
     setDifficulty: (newValue: any[]) => {
-        set({ difficulty: newValue });
-    }
-}));
+        set({ difficulty: newValue })
+    },
+}))
 
 type offset = {
-    offset: number;
-    setOffset: (newValue: number) => void;
-};
+    offset: number
+    setOffset: (newValue: number) => void
+}
 
 export const getOffset = create<offset>((set) => ({
-    offset:  OFFSET, 
+    offset: OFFSET,
     setOffset: (newValue: number) => {
-        set({ offset: newValue });
-    }
-}));
+        set({ offset: newValue })
+    },
+}))
 
 type position = {
-    position: string;
-    setPosition: (newValue: string) => void;
-};
+    position: string
+    setPosition: (newValue: string) => void
+}
 
 export const getPosition = create<position>((set) => ({
     position: POSITION,
     setPosition: (newValue: string) => {
-        set({ position: newValue });
-    }
-}));
+        set({ position: newValue })
+    },
+}))
 // --------------------------
 
 type deleteCodingQuestion = {
@@ -572,7 +572,7 @@ export const getEditCodingQuestionDialogs = create<editCodingQuestionDialogs>(
         isQuestionUsed: false,
         setIsQuestionUsed: (newValue: boolean) => {
             set({ isQuestionUsed: newValue })
-        }
+        },
     })
 )
 
@@ -768,3 +768,31 @@ export const getisPreviewModalOpen = create<isPreviewModalOpen>((set) => ({
         set({ isPreviewModalOpen: newValue })
     },
 }))
+
+// ------------------------- User ------------------------
+interface User {
+    rolesList: any[]
+    id: string
+    email: string
+    name: string
+    profile_picture?: string
+    [key: string]: any // Allow additional properties if the structure varies
+}
+type user = {
+    user: User
+    setUser: (newValue: User) => void
+}
+
+export const getUser = create<user>((set) => ({
+    user: {
+        rolesList: [],
+        id: '',
+        email: '',
+        name: '',
+    },
+    setUser: (newValue: User) => {
+        set({ user: newValue })
+    },
+}))
+
+// ------------------------- User ------------------------

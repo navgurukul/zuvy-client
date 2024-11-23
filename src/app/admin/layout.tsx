@@ -5,15 +5,7 @@ import StudentNavbar from '../_components/navbar'
 import '../globals.css'
 import { usePathname } from 'next/navigation'
 import UnauthorizedUser from '@/components/UnauthorizedUser'
-
-interface User {
-    rolesList: any[]
-    id: string
-    email: string
-    name: string
-    profile_picture?: string
-    [key: string]: any // Allow additional properties if the structure varies
-}
+import { getUser } from '@/store/store'
 
 export default function RootLayout({
     children,
@@ -22,8 +14,7 @@ export default function RootLayout({
 }) {
     const pathname = usePathname()
     const adminAssessmentPreviewRoute = pathname?.includes('/preview')
-    const AUTH = localStorage.getItem('AUTH') || false
-    const user = AUTH && (JSON.parse(AUTH) as User)
+    const { user, setUser } = getUser()
     const rolesList =
         user && (user.rolesList.length === 0 ? 'student' : user.rolesList[0])
     return (

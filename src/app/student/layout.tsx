@@ -4,16 +4,8 @@ import StudentNavbar from '@/app/_components/navbar'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { usePathname } from 'next/navigation'
 import UnauthorizedUser from '@/components/UnauthorizedUser'
+import { getUser } from '@/store/store'
 import '../globals.css'
-
-interface User {
-    rolesList: any[]
-    id: string
-    email: string
-    name: string
-    profile_picture?: string
-    [key: string]: any // Allow additional properties if the structure varies
-}
 
 export default function RootLayout({
     children,
@@ -26,8 +18,7 @@ export default function RootLayout({
         pathname?.includes('/student/courses') &&
         pathname?.includes('/modules') &&
         pathname?.includes('/assessment')
-    const AUTH = localStorage.getItem('AUTH') || false
-    const user = AUTH && (JSON.parse(AUTH) as User)
+    const { user, setUser } = getUser()
     const rolesList =
         user && (user.rolesList.length === 0 ? 'student' : user.rolesList[0])
     return (
