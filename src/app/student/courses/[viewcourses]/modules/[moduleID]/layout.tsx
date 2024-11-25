@@ -4,7 +4,6 @@ import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { useParams, usePathname } from 'next/navigation'
 import Chapters from '../_components/Chapters'
 import useResponsiveHeight from '@/hooks/useResponsiveHeight'
-import { ScrollArea } from '@/components/ui/scroll-area'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     const heightClass = useResponsiveHeight()
@@ -17,7 +16,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
     return (
         <>
-            <div className={`h-[500px] overflow-hidden`}>
+            <div className={`${heightClass} overflow-hidden`}>
                 {projectID || assessmentRoute ? (
                     <MaxWidthWrapper>{children}</MaxWidthWrapper>
                 ) : (
