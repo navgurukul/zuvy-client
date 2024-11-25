@@ -3,7 +3,8 @@
 import StudentNavbar from '@/app/_components/navbar'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { usePathname } from 'next/navigation'
-
+import UnauthorizedUser from '@/components/UnauthorizedUser'
+import { getUser } from '@/store/store'
 import '../globals.css'
 
 export default function RootLayout({
@@ -17,16 +18,24 @@ export default function RootLayout({
         pathname?.includes('/student/courses') &&
         pathname?.includes('/modules') &&
         pathname?.includes('/assessment')
-
+    const { user, setUser } = getUser()
+    const rolesList =
+        user && (user.rolesList.length === 0 ? 'student' : user.rolesList[0])
     return (
-        <div
-        // className={cn(
-        //   "min-h-screen text-center antialiased",
-        //   karla.className
-        // )}
-        >
-            {!isAssessmentRoute && <StudentNavbar />}
-            <MaxWidthWrapper>{children}</MaxWidthWrapper>
-        </div>
+        <>
+            {user && user.rolesList.length !== 0 ? (
+                <UnauthorizedUser rolesList={rolesList} />
+            ) : (
+                <div
+                // className={cn(
+                //   "min-h-screen text-center antialiased",
+                //   karla.className
+                // )}
+                >
+                    {!isAssessmentRoute && <StudentNavbar />}
+                    <MaxWidthWrapper>{children}</MaxWidthWrapper>
+                </div>
+            )}
+        </>
     )
 }
