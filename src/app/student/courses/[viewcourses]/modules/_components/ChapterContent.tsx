@@ -17,6 +17,9 @@ import {
     getTopicId,
     getScrollPosition,
 } from '@/store/store'
+import { Button } from '@/components/ui/button'
+import useResponsiveHeight from '@/hooks/useResponsiveHeight'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 interface Chapter {
     id: number
@@ -46,6 +49,7 @@ function ChapterContent() {
     const [submissionId, setSubmissionId] = useState<any>()
     const [typeId, setTypeId] = useState<any>(null)
     const [loading, setLoading] = useState(true)
+    const heightClass = useResponsiveHeight()
 
     const fetchChapterContent = useCallback(
         async (chapterId: number) => {
@@ -152,6 +156,7 @@ function ChapterContent() {
     const renderChapterContent = () => {
         // console.log('chapterContent', chapterContent)
         // console.log('loading', loading)
+        console.log('Content', topicId)
         if (
             topicId &&
             chapterContent &&
@@ -161,19 +166,37 @@ function ChapterContent() {
             switch (topicId) {
                 case 1:
                     return (
+                        // <ScrollArea
+                        //     className={`${heightClass} pr-4`}
+                        //     type="hover"
+                        //     style={{
+                        //         scrollbarWidth: 'none', // Firefox
+                        //         msOverflowStyle: 'none', // IE and Edge
+                        //     }}
+                        // >
                         <Video
                             content={chapterContent}
                             completeChapter={completeChapter}
                         />
+                        // </ScrollArea>
                     )
                 case 2:
                     return (
+                        // <ScrollArea
+                        //     className={`${heightClass} pr-4`}
+                        //     type="hover"
+                        //     style={{
+                        //         scrollbarWidth: 'none', // Firefox
+                        //         msOverflowStyle: 'none', // IE and Edge
+                        //     }}
+                        // >
                         <Article
                             content={chapterContent}
                             completeChapter={completeChapter}
                             key={chapterContent.id}
                             status={chapterContent?.status}
                         />
+                        // </ScrollArea>
                     )
                 case 3:
                     return (
@@ -196,6 +219,14 @@ function ChapterContent() {
                     )
                 case 5:
                     return (
+                        // <ScrollArea
+                        //     className={`${heightClass} pr-4`}
+                        //     type="hover"
+                        //     style={{
+                        //         scrollbarWidth: 'none', // Firefox
+                        //         msOverflowStyle: 'none', // IE and Edge
+                        //     }}
+                        // >
                         <Assignment
                             content={chapterContent}
                             moduleId={+moduleID}
@@ -203,6 +234,7 @@ function ChapterContent() {
                             bootcampId={+viewcourses}
                             completeChapter={completeChapter}
                         />
+                        // </ScrollArea>
                     )
                 case 6:
                     return (
@@ -215,6 +247,14 @@ function ChapterContent() {
                     )
                 case 7:
                     return (
+                        // <ScrollArea
+                        //     className={`${heightClass} pr-4`}
+                        //     type="hover"
+                        //     style={{
+                        //         scrollbarWidth: 'none', // Firefox
+                        //         msOverflowStyle: 'none', // IE and Edge
+                        //     }}
+                        // >
                         <FeedbackForm
                             content={chapterContent}
                             moduleId={moduleID.toString()}
@@ -224,6 +264,7 @@ function ChapterContent() {
                             completeChapter={completeChapter}
                             // bootcampId={viewcourses}
                         />
+                        // </ScrollArea>
                     )
                 default:
                     return <h1>No Chapters Available Right Now</h1>
