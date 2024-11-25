@@ -8,7 +8,7 @@ import { Bell, Menu, Search } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { MobileNavbarRoutes } from './navbar-routes'
 import { useLazyLoadedStudentData } from '@/store/store'
-
+//Test
 const Navbar = () => {
     const { studentData } = useLazyLoadedStudentData()
     return (
