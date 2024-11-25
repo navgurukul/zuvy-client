@@ -115,7 +115,7 @@ function Quiz(props: any) {
                 </Link> */}
             </div>
 
-            <div className="flex gap-x-2">
+            <div className="flex ">
                 <QuizLibrary
                     addQuestion={addQuestion}
                     handleAddQuestion={handleAddQuestion}
@@ -131,6 +131,7 @@ function Quiz(props: any) {
                             (questions: quizData, index: number) => (
                                 <QuizModal
                                     key={index}
+                                    tags={tags}
                                     data={questions}
                                     removeQuestionById={removeQuestionById}
                                 />

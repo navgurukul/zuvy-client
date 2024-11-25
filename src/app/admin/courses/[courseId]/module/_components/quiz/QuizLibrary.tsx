@@ -141,6 +141,7 @@ function QuizLibrary({
                 addQuestion={addQuestion}
                 handleAddQuestion={handleAddQuestion}
                 questionData={quizData.allQuestions}
+                tags={tags}
             />
         )
     }, [quizData, addQuestion, handleAddQuestion])
