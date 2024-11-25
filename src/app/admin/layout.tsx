@@ -22,7 +22,9 @@ export default function RootLayout({
     return (
         <div>
             {user.email.length == 0 ? (
-                <Spinner />
+                <div className="flex items-center justify-center h-[680px]">
+                    <Spinner className="text-secondary" />
+                </div>
             ) : user &&
               (user.rolesList.length === 0 ||
                   (user.rolesList.length > 0 &&

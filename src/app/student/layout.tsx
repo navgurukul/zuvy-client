@@ -5,6 +5,7 @@ import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { usePathname } from 'next/navigation'
 import UnauthorizedUser from '@/components/UnauthorizedUser'
 import { getUser } from '@/store/store'
+import { Spinner } from '@/components/ui/spinner'
 import '../globals.css'
 
 export default function RootLayout({
@@ -23,7 +24,11 @@ export default function RootLayout({
         user && (user.rolesList.length === 0 ? 'student' : user.rolesList[0])
     return (
         <>
-            {user && user.rolesList.length !== 0 ? (
+            {user.email.length == 0 ? (
+                <div className="flex items-center justify-center h-[680px]">
+                    <Spinner className="text-secondary" />
+                </div>
+            ) : user && user.rolesList.length !== 0 ? (
                 <UnauthorizedUser rolesList={rolesList} />
             ) : (
                 <div
