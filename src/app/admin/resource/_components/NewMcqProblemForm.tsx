@@ -1,6 +1,6 @@
 'use client'
 // External imports
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import * as z from 'zod'
 import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -115,6 +115,7 @@ const NewMcqProblemForm = ({
     // **New State Variables for Progress Tracking**
     const [generatedCount, setGeneratedCount] = useState<number>(0)
     const [totalToGenerate, setTotalToGenerate] = useState<number>(0)
+    const messagesEndRef = useRef<HTMLDivElement>(null)
 
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -155,7 +156,6 @@ const NewMcqProblemForm = ({
     const handleCreateQuizQuestion = async (requestBody: RequestBodyType) => {
         try {
             const res = await api.post(`/Content/quiz`, requestBody)
-            console.log('res', res)
             setIsMcqModalOpen(false)
             toast({
                 title: res.data.status || 'Success',
@@ -177,7 +177,6 @@ const NewMcqProblemForm = ({
     const { control, handleSubmit, setValue } = form
 
     const handleSubmitForm = async (values: FormValues) => {
-        console.log('values', values)
         const emptyOptions = values.options.some(
             (option) => option.value.trim() === ''
         )
@@ -209,14 +208,7 @@ const NewMcqProblemForm = ({
             difficulty: values.difficulty,
         }
 
-        // const requestBody = {
-        //     questions: [formattedData],
-        // }
-
-        // console.log('requestBody single', requestBody)
-
         setSaving(true)
-        // if (requestBody) await handleCreateQuizQuestion(requestBody)
         await getAllQuizQuesiton(setStoreQuizData)
         setSaving(false)
         closeModal()
@@ -224,16 +216,15 @@ const NewMcqProblemForm = ({
 
     const generateQuestions = async () => {
         const fieldValues = form.watch()
+        setGeneratedQuestions([])
         if (
             fieldValues.numbersOfQuestions &&
             (fieldValues.numbersOfQuestions?.length > 1 ||
                 Number(fieldValues.numbersOfQuestions[0].value) > 1)
         ) {
-            console.log('Generating in bulk')
             setLoadingAI(true)
             bulkGenerateMCQUsingGemini()
         } else {
-            console.log('Generating single question')
             generateMCQUsingGemini()
         }
     }
@@ -425,7 +416,6 @@ const NewMcqProblemForm = ({
                     setGeneratedQuestions(generatedQuestions)
 
                     setRequestBody(requestBody)
-                    console.log('requestBody in single ', requestBody)
                     // await handleCreateQuizQuestion(requestBody)
                     await getAllQuizQuesiton(setStoreQuizData)
                     closeModal()
@@ -717,9 +707,9 @@ const NewMcqProblemForm = ({
 
                             existingQuestions.push(question.toLowerCase())
                             setGeneratedCount(generatedQuestions.length) // **Update Generated Count**
-                            console.log(
-                                `Generated ${generatedQuestions.length}/${totalNumbersOfQuestions} MCQs`
-                            )
+                            // console.log(
+                            //     `Generated ${generatedQuestions.length}/${totalNumbersOfQuestions} MCQs`
+                            // )
                         } else {
                             console.warn(
                                 'Unexpected response structure:',
@@ -863,9 +853,11 @@ const NewMcqProblemForm = ({
         setDeleteModalOpen(false)
     }
 
-    // console.log('form.watch', form.watch())
-
-    console.log('generatedQuestions', generatedQuestions)
+    useEffect(() => {
+        if (loadingAI) {
+            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+        }
+    }, [loadingAI])
 
     return (
         <main className="flex flex-col px-3 h-full">
@@ -1080,17 +1072,9 @@ const NewMcqProblemForm = ({
                         </Button>
                     </div>
 
-                    {loadingAI && (
-                        <>
-                            {/* <Spinner size="small" className="mr-2" />
-                            Generating... */}
-                            <LottieLoader />
-                            {/* <LottieLoader
-                                primaryColor="#518672"
-                                secondaryColor="#FFC374"
-                            /> */}
-                        </>
-                    )}
+                    <div ref={messagesEndRef} />
+
+                    {loadingAI && <LottieLoader />}
 
                     {generatedQuestions.length > 0 && (
                         <>
