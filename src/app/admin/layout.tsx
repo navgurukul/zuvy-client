@@ -6,6 +6,7 @@ import '../globals.css'
 import { usePathname } from 'next/navigation'
 import UnauthorizedUser from '@/components/UnauthorizedUser'
 import { getUser } from '@/store/store'
+import { Spinner } from '@/components/ui/spinner'
 
 export default function RootLayout({
     children,
@@ -19,11 +20,13 @@ export default function RootLayout({
         user && (user.rolesList.length === 0 ? 'student' : user.rolesList[0])
 
     return (
-        <>
-            {user &&
-            (user.rolesList.length === 0 ||
-                (user.rolesList.length > 0 &&
-                    user.rolesList[0] !== 'admin')) ? (
+        <div>
+            {user.email.length == 0 ? (
+                <Spinner />
+            ) : user &&
+              (user.rolesList.length === 0 ||
+                  (user.rolesList.length > 0 &&
+                      user.rolesList[0] !== 'admin')) ? (
                 <UnauthorizedUser rolesList={rolesList} />
             ) : (
                 <div>
@@ -31,6 +34,6 @@ export default function RootLayout({
                     <MaxWidthWrapper>{children}</MaxWidthWrapper>
                 </div>
             )}
-        </>
+        </div>
     )
 }
