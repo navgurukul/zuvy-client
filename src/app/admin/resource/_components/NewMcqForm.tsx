@@ -247,7 +247,7 @@ export default function NewMcqForm({
                                         </SelectContent>
                                     </Select>
 
-                                    {showTagName && (
+                                    {/* {showTagName && (
                                         <div className="flex items-start gap-x-2 bg-[#FFF3E3] pt-1 px-2 rounded-lg">
                                             <h1 className="mt-1 text-sm">
                                                 {selectedTag.tagName}
@@ -261,7 +261,7 @@ export default function NewMcqForm({
                                                 x
                                             </span>
                                         </div>
-                                    )}
+                                    )} */}
                                 </div>
                                 <FormMessage />
                             </FormItem>
