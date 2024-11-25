@@ -1,21 +1,29 @@
 import { Separator } from '@/components/ui/separator'
 import { PlusCircle } from 'lucide-react'
-import { difficultyColor, ellipsis } from '@/lib/utils'
+import { cn, difficultyBgColor, difficultyColor, ellipsis } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import {
+    Dialog,
+    DialogContent,
+    DialogOverlay,
+    DialogTrigger,
+} from '@/components/ui/dialog'
+import PreviewMCQ from '@/app/admin/resource/_components/PreviewMcq'
 
 function QuizList({
     questionData,
     addQuestion = [],
     handleAddQuestion,
+    tags,
 }: {
     questionData: any[]
     addQuestion: any[]
     handleAddQuestion: (questions: any[]) => void
+    tags: any
 }) {
-    console.log(questionData)
     return (
-        <ScrollArea className="h-[550px] w-full  ">
+        <ScrollArea className="h-[580px] w-full  ">
             {questionData.map((question: any) => {
                 const isSelected = addQuestion?.some(
                     (quest: any) => quest?.id === question.id
@@ -26,49 +34,102 @@ function QuizList({
                     } else {
                     }
                 }
+                const newTagName = tags?.filter(
+                    (tag: any) => tag.id == question.tagId
+                )
+
                 return (
                     <div
                         // className="flex flex-col justify-between"
                         key={question.id}
                     >
-                        <div className="flex items-center justify-between gap-x-4 py-4">
-                            <div className="flex justify-start items-center gap-x-5">
-                                <h1 className="scroll-m-20 text-4xl  font-semibold tracking-tight lg:text-lg">
-                                    {question.quizVariants.map((ques: any) => {
-                                        return ellipsis(ques.question, 40)
-                                    })}
-                                </h1>
-                                <span
-                                    className={`font-semibold ${difficultyColor(
-                                        question.difficulty
-                                    )}`}
-                                >
-                                    {question.difficulty}
-                                </span>
+                        <div className="flex items-center justify-between border-b border-gray-200 py-4">
+                            <div className="w-full space-y-2 ">
+                                <div className="flex justify-between items-center gap-x-2">
+                                    <h1 className="scroll-m-20 text-4xl  font-semibold tracking-tight lg:text-lg">
+                                        {question.quizVariants.map(
+                                            (ques: any) => {
+                                                return (
+                                                    <span
+                                                        key={ques}
+                                                        dangerouslySetInnerHTML={{
+                                                            __html: ellipsis(
+                                                                ques.question,
+                                                                30
+                                                            ),
+                                                        }}
+                                                    />
+                                                )
+                                            }
+                                        )}
+                                    </h1>
+                                    <div className="flex mr-4">
+                                        <div className="space-x-2 mr-4">
+                                            <span className="text-sm text-[#518672] bg-[#DCE7E3] p-1 rounded-[100px] px-[8px]">
+                                                {newTagName[0]?.tagName}
+                                            </span>
+                                            <span
+                                                className={cn(
+                                                    `text-[12px] rounded-[100px] px-2 py-1 mt-5 mr-3 `,
+                                                    difficultyColor(
+                                                        question.difficulty
+                                                    ), // Text color
+                                                    difficultyBgColor(
+                                                        question.difficulty
+                                                    ) // Background color
+                                                )}
+                                            >
+                                                {question.difficulty}
+                                            </span>
+                                        </div>
+                                        <div className="flex mt-0.5">
+                                            {isSelected ? (
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width="20"
+                                                    height="20"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="2"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    className="lucide lucide-circle-check"
+                                                >
+                                                    <circle
+                                                        cx="12"
+                                                        cy="12"
+                                                        r="10"
+                                                    />
+                                                    <path d="m9 12 2 2 4-4" />
+                                                </svg>
+                                            ) : (
+                                                <PlusCircle
+                                                    size={20}
+                                                    className="text-secondary cursor-pointer "
+                                                    onClick={handleClick}
+                                                />
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                        <p className=" text-left font-bold text-sm  text-[#518672] cursor-pointer">
+                                            View Description
+                                        </p>
+                                    </DialogTrigger>
+                                    <DialogOverlay />
+                                    <DialogContent>
+                                        <PreviewMCQ
+                                            quizQuestionId={question.id}
+                                            tags={tags}
+                                            tagId={question.tagId}
+                                        />
+                                    </DialogContent>
+                                </Dialog>
                             </div>
-                            {isSelected ? (
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className="lucide lucide-circle-check"
-                                >
-                                    <circle cx="12" cy="12" r="10" />
-                                    <path d="m9 12 2 2 4-4" />
-                                </svg>
-                            ) : (
-                                <PlusCircle
-                                    size={20}
-                                    className="text-secondary cursor-pointer "
-                                    onClick={handleClick}
-                                />
-                            )}
                         </div>
                         {/* <Separator className="my-4" /> */}
                     </div>
