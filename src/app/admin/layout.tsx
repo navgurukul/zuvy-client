@@ -17,6 +17,7 @@ export default function RootLayout({
     const { user, setUser } = getUser()
     const rolesList =
         user && (user.rolesList.length === 0 ? 'student' : user.rolesList[0])
+
     return (
         <>
             {user &&

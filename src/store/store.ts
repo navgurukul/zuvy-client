@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { api } from '@/utils/axios.config'
 import { string } from 'zod'
 import { OFFSET, POSITION } from '@/utils/constant'
+import { persist } from 'zustand/middleware'
 
 type CounterStore = {
     studentData: {
@@ -778,21 +779,31 @@ interface User {
     profile_picture?: string
     [key: string]: any // Allow additional properties if the structure varies
 }
-type user = {
+
+type UserState = {
     user: User
     setUser: (newValue: User) => void
 }
 
-export const getUser = create<user>((set) => ({
-    user: {
-        rolesList: [],
-        id: '',
-        email: '',
-        name: '',
-    },
-    setUser: (newValue: User) => {
-        set({ user: newValue })
-    },
-}))
+export const getUser = create<UserState>()(
+    persist(
+        (set) => ({
+            user: {
+                rolesList: [],
+                id: '',
+                email: '',
+                name: '',
+            },
+            setUser: (newValue: User) => {
+                set({ user: newValue })
+            },
+        }),
+        {
+            name: 'user-storage', // Key for localStorage or other storage
+            // Optional: Customize storage, serialize/deserialize logic, etc.
+            partialize: (state) => ({ user: state.user }), // Save only the user property
+        }
+    )
+)
 
 // ------------------------- User ------------------------
