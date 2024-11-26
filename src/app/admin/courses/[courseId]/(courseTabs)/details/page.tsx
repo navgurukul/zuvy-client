@@ -55,13 +55,13 @@ interface CourseData {
 }
 
 function Page({ params }: { params: any }) {
-    const [image, setImage] = useState<string | null>(null);
-    const [cropper, setCropper] = useState<Cropper | null>(null);
-    const [isCropping, setIsCropping] = useState(false);
-    const [croppedImage, setCroppedImage] = useState<string | null>(null);
+    const [image, setImage] = useState<string | null>(null)
+    const [cropper, setCropper] = useState<Cropper | null>(null)
+    const [isCropping, setIsCropping] = useState(false)
+    const [croppedImage, setCroppedImage] = useState<string | null>(null)
 
-    const { courseData, setCourseData } = getCourseData();
-    const { setStoreStudentData } = getStoreStudentData();
+    const { courseData, setCourseData } = getCourseData()
+    const { setStoreStudentData } = getStoreStudentData()
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
@@ -73,138 +73,159 @@ function Page({ params }: { params: any }) {
             language: '',
             startTime: undefined,
         },
-    });
+    })
 
     useEffect(() => {
         if (courseData) {
             form.reset({
-                name: courseData.name||"",
-                bootcampTopic: courseData.bootcampTopic||"",
-                coverImage: courseData.coverImage||"",
-                duration: courseData.duration||"",
-                language: courseData.language||"",
-                startTime: courseData.startTime ? new Date(courseData.startTime) : undefined,
-            });
+                name: courseData.name || '',
+                bootcampTopic: courseData.bootcampTopic || '',
+                coverImage: courseData.coverImage || '',
+                duration: courseData.duration || '',
+                language: courseData.language || '',
+                startTime: courseData.startTime
+                    ? new Date(courseData.startTime)
+                    : undefined,
+            })
         }
-    }, [courseData, form]);
+    }, [courseData, form])
 
     async function onSubmit(data: z.infer<typeof FormSchema>) {
         try {
-            let coverImage = data.coverImage || '';
+            let coverImage = data.coverImage || ''
             if (croppedImage) {
-                const response = await fetch(croppedImage);
-                const blob = await response.blob();
-                const file = new File([blob], 'cropped-image.png', { type: 'image/png' });
+                const response = await fetch(croppedImage)
+                const blob = await response.blob()
+                const file = new File([blob], 'cropped-image.png', {
+                    type: 'image/png',
+                })
 
-                const formData = new FormData();
-                formData.append('image', file);
+                const formData = new FormData()
+                formData.append('image', file)
 
-                const res = await apiMeraki.post('/courseEditor/ImageUploadS3', formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                });
-                coverImage = res.data.file.url;
+                const res = await apiMeraki.post(
+                    '/courseEditor/ImageUploadS3',
+                    formData,
+                    {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    }
+                )
+                coverImage = res.data.file.url
             }
 
-            await api.patch(
-                `/bootcamp/${courseData?.id}`,
-                {
-                    ...data,
-                    coverImage,
-                },
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
+            await api
+                .patch(
+                    `/bootcamp/${courseData?.id}`,
+                    {
+                        ...data,
+                        coverImage,
                     },
-                }
-            ).then((res) => {
-                const {
-                    id,
-                    name,
-                    bootcampTopic,
-                    coverImage,
-                    startTime,
-                    duration,
-                    language,
-                    unassigned_students,
-                } = res.data.updatedBootcamp[0];
-                setCourseData({
-                    id,
-                    name,
-                    bootcampTopic,
-                    coverImage,
-                    startTime,
-                    duration,
-                    language,
-                    unassigned_students,
-                });
-                toast({
-                    title: res.data.status,
-                    description: res.data.message,
-                });
-            });
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    }
+                )
+                .then((res) => {
+                    const {
+                        id,
+                        name,
+                        bootcampTopic,
+                        coverImage,
+                        startTime,
+                        duration,
+                        language,
+                        unassigned_students,
+                    } = res.data.updatedBootcamp[0]
+                    setCourseData({
+                        id,
+                        name,
+                        bootcampTopic,
+                        coverImage,
+                        startTime,
+                        duration,
+                        language,
+                        unassigned_students,
+                    })
+                    toast({
+                        title: res.data.status,
+                        description: res.data.message,
+                    })
+                })
         } catch (error) {
             toast({
                 title: 'Failed',
                 variant: 'destructive',
-                className: 'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-            });
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+            })
         }
     }
 
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null)
 
     const handleButtonClick = () => {
-        fileInputRef.current?.click();
-    };
+        fileInputRef.current?.click()
+    }
 
-    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
+    const handleFileChange = async (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const file = event.target.files?.[0]
         if (file) {
-            const reader = new FileReader();
+            const reader = new FileReader()
             reader.onloadend = () => {
-                setImage(reader.result as string);
-                setIsCropping(true);
-            };
-            reader.readAsDataURL(file);
+                setImage(reader.result as string)
+                setIsCropping(true)
+            }
+            reader.readAsDataURL(file)
         }
-    };
+    }
 
     const handleCrop = () => {
         if (cropper) {
             const croppedCanvas = cropper.getCroppedCanvas({
                 width: 800,
                 height: 400,
-            });
-            setCroppedImage(croppedCanvas.toDataURL());
-            setIsCropping(false);
+            })
+            setCroppedImage(croppedCanvas.toDataURL())
+            setIsCropping(false)
             toast({
-                description: 'Image cropped successfully. You can now upload it.',
-            });
+                description:
+                    'Image cropped successfully. You can now upload it.',
+            })
         }
-    };
+    }
 
     return (
         <div className="max-w-[400px] m-auto">
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <div className="image-container bg-muted flex justify-center items-center rounded-sm my-3 overflow-hidden" style={{ height: '200px', width: '400px' }}>
+                <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-4"
+                >
+                    <div
+                        className="image-container bg-muted flex justify-center items-center rounded-sm my-3 overflow-hidden"
+                        style={{ height: '200px', width: '400px' }}
+                    >
                         {!isCropping && croppedImage ? (
-                            <img
-                                src={croppedImage}
-                                alt="Cropped Preview"
-                            />
+                            <img src={croppedImage} alt="Cropped Preview" />
                         ) : image ? (
                             <Cropper
                                 src={image}
                                 style={{ height: 200, width: '100%' }}
                                 aspectRatio={16 / 9}
-                                onInitialized={(instance) => setCropper(instance)}
+                                onInitialized={(instance) =>
+                                    setCropper(instance)
+                                }
                             />
                         ) : (
                             <OptimizedImageWithFallback
-                                src={courseData?.coverImage || '/logo_white.png'}
+                                src={
+                                    courseData?.coverImage || '/logo_white.png'
+                                }
                                 alt={courseData?.name || 'Cover Image'}
                                 fallBackSrc={'/logo_white.png'}
                             />
@@ -225,7 +246,11 @@ function Page({ params }: { params: any }) {
                         Upload Course Image
                     </Button>
                     {image && (
-                        <Button onClick={handleCrop} variant={'outline'} type="button">
+                        <Button
+                            onClick={handleCrop}
+                            variant={'outline'}
+                            type="button"
+                        >
                             Crop Image
                         </Button>
                     )}
@@ -239,8 +264,7 @@ function Page({ params }: { params: any }) {
                                 <FormControl>
                                     <Input
                                         placeholder="Enter Bootcamp Name"
-                                        {...field||""}
-                                        
+                                        {...(field || '')}
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -257,7 +281,7 @@ function Page({ params }: { params: any }) {
                                 <FormControl>
                                     <Input
                                         placeholder="Enter Bootcamp Topic"
-                                        {...field||""}
+                                        {...(field || '')}
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -278,7 +302,8 @@ function Page({ params }: { params: any }) {
                                                 variant={'outline'}
                                                 className={cn(
                                                     'pl-3 text-left font-normal w-full',
-                                                    !field.value && 'text-muted-foreground'
+                                                    !field.value &&
+                                                        'text-muted-foreground'
                                                 )}
                                             >
                                                 {field.value
@@ -294,10 +319,12 @@ function Page({ params }: { params: any }) {
                                             selected={field.value}
                                             onSelect={(date) => {
                                                 if (date) {
-                                                    field.onChange(date);
+                                                    field.onChange(date)
                                                 }
                                             }}
-                                            disabled={(date) => date < new Date()}
+                                            disabled={(date) =>
+                                                date < new Date()
+                                            }
                                         />
                                     </PopoverContent>
                                 </Popover>
@@ -314,15 +341,14 @@ function Page({ params }: { params: any }) {
                                 <FormLabel>Duration</FormLabel>
                                 <FormControl>
                                     <Input
-                                        placeholder="Enter Duration in Weeks"  
-                                        {...field||""}
+                                        placeholder="Enter Duration in Weeks"
+                                        {...(field || '')}
                                     />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
-
 
                     <FormField
                         control={form.control}
@@ -333,13 +359,18 @@ function Page({ params }: { params: any }) {
                                 <FormControl>
                                     <RadioGroup
                                         onValueChange={field.onChange}
-                                        value={field.value||""} // Use value instead of defaultValue
+                                        value={field.value || ''} // Use value instead of defaultValue
                                         className="flex gap-4"
                                     >
                                         {LANGUAGES.map((language, index) => (
-                                            <FormItem key={index} className="flex flex-row items-center space-x-3 space-y-0">
+                                            <FormItem
+                                                key={index}
+                                                className="flex flex-row items-center space-x-3 space-y-0"
+                                            >
                                                 <FormControl>
-                                                    <RadioGroupItem value={language} />
+                                                    <RadioGroupItem
+                                                        value={language}
+                                                    />
                                                 </FormControl>
                                                 <FormLabel className="font-normal">
                                                     {language}
@@ -353,7 +384,6 @@ function Page({ params }: { params: any }) {
                         )}
                     />
 
-
                     <Button type="submit">Submit</Button>
                 </form>
             </Form>
@@ -361,4 +391,4 @@ function Page({ params }: { params: any }) {
     )
 }
 
-export default Page;
+export default Page
