@@ -15,9 +15,10 @@ type Props = {
     quizQuestionId: number
     tags?: any
     assesmentSide?: boolean
+    tagId?: number
 }
 
-const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide }: Props) => {
+const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide, tagId }: Props) => {
     const { quizData, difficulty, tagName } = useGetMCQs({
         id: quizQuestionId,
         tags,
@@ -43,8 +44,6 @@ const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide }: Props) => {
         )
         setCodeSnippet(updatedHtml)
     }
-
-    // console.log(quizData)
 
     const difficultyColor = (difficulty: string) => {
         switch (difficulty) {
@@ -81,6 +80,8 @@ const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide }: Props) => {
         return updatedHtml
     }
 
+    const newTagName = tags.filter((tag: any) => tag.id == tagId)
+
     return (
         <div className="w-full p-2">
             <DialogHeader>
@@ -88,7 +89,7 @@ const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide }: Props) => {
                     Question Preview{' '}
                     <div className="flex gap-x-3 items-center">
                         <span className="font-md text-[14px] bg-green-200 px-2  py-0.5 my-0.5 text-secondary rounded-md">
-                            {tagName}
+                            {assesmentSide ? tagName : newTagName[0].tagName}
                         </span>
                         <span
                             className={`font-normal text-[14px] px-2 py-0.5 my-0.5 rounded-md ${difficultyColor(

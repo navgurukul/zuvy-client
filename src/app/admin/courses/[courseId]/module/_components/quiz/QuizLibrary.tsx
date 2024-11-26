@@ -141,12 +141,13 @@ function QuizLibrary({
                 addQuestion={addQuestion}
                 handleAddQuestion={handleAddQuestion}
                 questionData={quizData.allQuestions}
+                tags={tags}
             />
         )
     }, [quizData, addQuestion, handleAddQuestion])
 
     return (
-        <div className="w-1/2 flex flex-col gap-3">
+        <div className="w-full flex flex-col gap-3">
             <h2 className="text-left text-gray-700 font-semibold">
                 MCQ Library
             </h2>

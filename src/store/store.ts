@@ -1,3 +1,5 @@
+'use client'
+
 import { set } from 'date-fns'
 import { create } from 'zustand'
 import { useEffect } from 'react'

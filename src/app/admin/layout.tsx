@@ -2,11 +2,11 @@
 
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import StudentNavbar from '../_components/navbar'
-import '../globals.css'
+import UnauthorizedUser from '@/components/ui/UnauthorizedUser'
 import { usePathname } from 'next/navigation'
-import UnauthorizedUser from '@/components/UnauthorizedUser'
 import { getUser } from '@/store/store'
 import { Spinner } from '@/components/ui/spinner'
+import '../globals.css'
 
 export default function RootLayout({
     children,

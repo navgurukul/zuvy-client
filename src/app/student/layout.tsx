@@ -2,8 +2,8 @@
 
 import StudentNavbar from '@/app/_components/navbar'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
+import UnauthorizedUser from '@/components/ui/UnauthorizedUser'
 import { usePathname } from 'next/navigation'
-import UnauthorizedUser from '@/components/UnauthorizedUser'
 import { getUser } from '@/store/store'
 import { Spinner } from '@/components/ui/spinner'
 import '../globals.css'
@@ -22,6 +22,7 @@ export default function RootLayout({
     const { user, setUser } = getUser()
     const rolesList =
         user && (user.rolesList.length === 0 ? 'student' : user.rolesList[0])
+
     return (
         <>
             {user.email.length == 0 ? (

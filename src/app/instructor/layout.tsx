@@ -1,8 +1,6 @@
-'use client'
-
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import StudentNavbar from '../_components/navbar'
-import UnauthorizedUser from '@/components/UnauthorizedUser'
+import UnauthorizedUser from '@/components/ui/UnauthorizedUser'
 import { getUser } from '@/store/store'
 import { Spinner } from '@/components/ui/spinner'
 

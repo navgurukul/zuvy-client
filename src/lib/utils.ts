@@ -1,3 +1,4 @@
+import DOMPurify from 'dompurify'
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -5,13 +6,14 @@ export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))
 }
 export function ellipsis(text: string | undefined, maxLength: number): string {
-    if (!text) {
+    const purifiedText = DOMPurify.sanitize(text || '')
+    if (!purifiedText) {
         return ''
     }
-    if (text.length <= maxLength) {
-        return text
+    if (purifiedText.length <= maxLength) {
+        return purifiedText
     }
-    return text.slice(0, maxLength - 3) + '...'
+    return purifiedText.slice(0, maxLength - 3) + '...'
 }
 
 export function isPlural(count: number): boolean {
@@ -36,16 +38,15 @@ export function difficultyColor(difficulty: string): string {
 export function difficultyBgColor(difficulty: string): string {
     switch (difficulty?.toLowerCase()) {
         case 'easy':
-            return 'bg-green-100' 
+            return 'bg-green-100'
         case 'medium':
-            return 'bg-orange-100' 
+            return 'bg-orange-100'
         case 'hard':
-            return 'bg-red-100' 
+            return 'bg-red-100'
         default:
             return 'bg-gray-100'
     }
 }
-
 
 export function statusColor(status: string): string {
     switch (status?.toLowerCase()) {
