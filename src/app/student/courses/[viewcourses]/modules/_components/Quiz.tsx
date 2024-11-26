@@ -116,7 +116,7 @@ function Quiz(props: Props) {
 
     return (
         <div>
-            <ScrollArea className="h-screen w-full rounded-md">
+            <ScrollArea className="h-full w-full rounded-md">
                 <div className="flex flex-col justify-center items-center">
                     <div className="p-4 flex gap-y-4 flex-col items-start">
                         <h1 className="text-xl font-semibold">
