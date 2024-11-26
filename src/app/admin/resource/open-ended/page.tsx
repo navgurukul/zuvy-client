@@ -1,7 +1,7 @@
 'use client'
 
 // External imports
-import React, { useCallback,useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Search } from 'lucide-react'
 import Image from 'next/image'
 
@@ -28,14 +28,13 @@ import { Separator } from '@/components/ui/separator'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { columns } from './column'
 import NewOpenEndedQuestionForm from '@/app/admin/resource/_components/NewOpenEndedQuestionForm'
-import { 
-    getCodingQuestionTags, 
-    getopenEndedQuestionstate ,
+import {
+    getCodingQuestionTags,
+    getopenEndedQuestionstate,
     getOffset,
     getPosition,
     getSelectedOpenEndedOptions,
     getOpenEndedDifficulty,
-
 } from '@/store/store'
 import {
     getAllOpenEndedQuestions,
@@ -48,7 +47,6 @@ import MultiSelector from '@/components/ui/multi-selector'
 import difficultyOptions from '@/app/utils'
 import { OFFSET, POSITION } from '@/utils/constant'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
-
 
 type Props = {}
 export type Tag = {
@@ -71,28 +69,29 @@ const OpenEndedQuestions = (props: Props) => {
         }
         return { tagName: 'All Topics', id: -1 }
     })
-    const { selectedOptions, setSelectedOptions } =  getSelectedOpenEndedOptions()
-  
+    const { selectedOptions, setSelectedOptions } =
+        getSelectedOpenEndedOptions()
+
     const [options, setOptions] = useState<Option[]>([
         { value: '-1', label: 'All Topics' },
     ])
     const { tags, setTags } = getCodingQuestionTags()
 
-    const {difficulty, setDifficulty} = getOpenEndedDifficulty()
+    const { difficulty, setDifficulty } = getOpenEndedDifficulty()
 
     const [allOpenEndedQuestions, setAllOpenEndedQuestions] = useState([])
     const { openEndedQuestions, setOpenEndedQuestions } =
         getopenEndedQuestionstate()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
-    
+
     const [currentPage, setCurrentPage] = useState(1)
-    const [totalOpenEndedQuestion,  setTotalOpenEndedQuestion] = useState <any>(0)
+    const [totalOpenEndedQuestion, setTotalOpenEndedQuestion] = useState<any>(0)
     const [totalPages, setTotalPages] = useState(0)
     const [pages, setPages] = useState(0)
     const [lastPage, setLastPage] = useState(0)
-    const { offset, setOffset} = getOffset()
-    const {position, setPosition} = getPosition()
+    const { offset, setOffset } = getOffset()
+    const { position, setPosition } = getPosition()
     const debouncedSearch = useDebounce(searchTerm, 500)
     const [loading, setLoading] = useState(true)
     const selectedLanguage = ''
@@ -116,7 +115,6 @@ const OpenEndedQuestions = (props: Props) => {
                     selectedOptions.filter(
                         (selected) => selected.value !== option.value
                     )
-                    
                 )
             } else {
                 setSelectedOptions([option])
@@ -184,12 +182,12 @@ const OpenEndedQuestions = (props: Props) => {
             }
         }
     }
-    console.log("potion",position)
+    console.log('potion', position)
 
     useEffect(() => {
         getAllTags(setTags, setOptions)
     }, [setTags])
-    
+
     const fetchCodingQuestions = useCallback(
         async (offset: number) => {
             filteredOpenEndedQuestions(
@@ -201,8 +199,7 @@ const OpenEndedQuestions = (props: Props) => {
                 setTotalOpenEndedQuestion,
                 setLastPage,
                 setTotalPages,
-                debouncedSearch,
-              
+                debouncedSearch
             )
         },
         [
@@ -219,7 +216,6 @@ const OpenEndedQuestions = (props: Props) => {
     useEffect(() => {
         getAllOpenEndedQuestions(setAllOpenEndedQuestions)
         fetchCodingQuestions(offset)
-     
     }, [
         searchTerm,
         selectedOptions,
@@ -242,8 +238,7 @@ const OpenEndedQuestions = (props: Props) => {
     //         debouncedSearch,
     //         position
     // )
-            
-        
+
     // }, [
     //     searchTerm,
     //     selectedOptions,
@@ -407,17 +402,17 @@ const OpenEndedQuestions = (props: Props) => {
                             </MaxWidthWrapper>
                         </>
                     )}
-                      <DataTablePagination
-                            totalStudents={totalOpenEndedQuestion}
-                            position={position}
-                            setPosition={setPosition}
-                            pages={totalPages}
-                            lastPage={lastPage}
-                            currentPage={currentPage}
-                            setCurrentPage={setCurrentPage}
-                            fetchStudentData={fetchCodingQuestions}
-                            setOffset={setOffset}
-                        />
+                    <DataTablePagination
+                        totalStudents={totalOpenEndedQuestion}
+                        position={position}
+                        setPosition={setPosition}
+                        pages={totalPages}
+                        lastPage={lastPage}
+                        currentPage={currentPage}
+                        setCurrentPage={setCurrentPage}
+                        fetchStudentData={fetchCodingQuestions}
+                        setOffset={setOffset}
+                    />
                 </div>
             )}
         </>

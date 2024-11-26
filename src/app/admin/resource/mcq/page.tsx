@@ -41,6 +41,7 @@ import {
 import useDebounce from '@/hooks/useDebounce'
 import { getAllQuizQuestion } from '@/utils/admin'
 import { Spinner } from '@/components/ui/spinner'
+
 import MultiSelector from '@/components/ui/multi-selector'
 import difficultyOptions from '@/app/utils'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
@@ -296,6 +297,56 @@ const Mcqs = (props: Props) => {
 
     const selectedTagCount = selectedOptions.length
     const difficultyCount = difficulty.length
+    // const transformedTags = tags?.map((tag) => ({
+    //     id: +tag.value,
+    //     tagName: tag.label,
+    // }))
+
+    const renderComponent = () => {
+        switch (mcqType) {
+            case 'bulk':
+                return <BulkUploadMcq setIsMcqModalOpen={setIsMcqModalOpen} />
+            case 'oneatatime':
+                return (
+                    <div className="flex items-start justify-center w-full">
+                        <NewMcqForm
+                            setIsMcqModalOpen={setIsMcqModalOpen}
+                            tags={tags}
+                            closeModal={closeModal}
+                            setStoreQuizData={setStoreQuizData}
+                            getAllQuizQuesiton={getAllQuizQuestion}
+                        />
+                    </div>
+                )
+            case 'AI':
+                return (
+                    <div className="flex items-start justify-center w-full">
+                        <NewMcqProblemForm
+                            tags={tags}
+                            closeModal={closeModal}
+                            setStoreQuizData={setStoreQuizData}
+                            getAllQuizQuesiton={getAllQuizQuestion}
+                            setIsMcqModalOpen={setIsMcqModalOpen}
+                        />
+                    </div>
+                )
+            default:
+                return (
+                    <div className="flex items-start justify-center w-full">
+                        <NewMcqForm
+                            setIsMcqModalOpen={setIsMcqModalOpen}
+                            tags={tags}
+                            closeModal={closeModal}
+                            setStoreQuizData={setStoreQuizData}
+                            getAllQuizQuesiton={getAllQuizQuestion}
+                        />
+                    </div>
+                )
+        }
+    }
+
+    // console.log('offset', offset)
+    // console.log('OFFSET', OFFSET)
 
     return (
         <>
@@ -332,15 +383,15 @@ const Mcqs = (props: Props) => {
                         <ChevronLeft />
                         <h1>MCQ Problems</h1>
                     </div>
-                    <div className="flex flex-col items-center justify-center ">
+                    <div className="flex flex-col items-center justify-center">
                         <div>
                             <RadioGroup
-                                className="flex flex-col items-center w-full  "
+                                className="flex flex-col items-center w-full"
                                 defaultValue="oneatatime"
                                 onValueChange={(value) => setMcqType(value)}
                             >
                                 <div className="flex w-[630px] flex-col items-start justify-start ml-4 gap-3">
-                                    <h1 className="font-semibold text-xl mb-4 ">
+                                    <h1 className="font-semibold text-3xl mb-4 ">
                                         New MCQ
                                     </h1>
                                     <div className="flex gap-x-6 ">
@@ -354,7 +405,7 @@ const Mcqs = (props: Props) => {
                                                 className="font-semibold text-md"
                                                 htmlFor="r1"
                                             >
-                                                Bulk
+                                                Bulk Upload
                                             </Label>
                                         </div>
                                         <div className="flex  space-x-2">
@@ -370,13 +421,26 @@ const Mcqs = (props: Props) => {
                                                 One At A Time
                                             </Label>
                                         </div>
+
+                                        <div className="flex space-x-2 pr-2">
+                                            <RadioGroupItem
+                                                value="AI"
+                                                id="r2"
+                                                className="text-secondary mt-1"
+                                            />
+                                            <Label
+                                                className="font-semibold text-lg"
+                                                htmlFor="r2"
+                                            >
+                                                Generate with AI
+                                            </Label>
+                                        </div>
                                     </div>
                                 </div>
                             </RadioGroup>
-                            {mcqType === 'bulk' ? (
-                                <BulkUploadMcq
-                                    setIsMcqModalOpen={setIsMcqModalOpen}
-                                />
+                            {renderComponent()}
+                            {/* {mcqType === 'bulk' ? (
+                                <BulkUploadMcq />
                             ) : (
                                 <div className="flex items-start justify-center w-screen ">
                                     <NewMcqForm
@@ -386,14 +450,8 @@ const Mcqs = (props: Props) => {
                                         getAllQuizQuesiton={getAllQuizQuestion}
                                         setIsMcqModalOpen={setIsMcqModalOpen}
                                     />
-                                    {/* <NewMcqProblemFormNew
-                                    tags={tags}
-                                    closeModal={closeModal}
-                                    setStoreQuizData={setStoreQuizData}
-                                    getAllQuizQuesiton={getAllQuizQuestion}
-                                /> */}
                                 </div>
-                            )}
+                            )} */}
                         </div>
                     </div>
                 </div>

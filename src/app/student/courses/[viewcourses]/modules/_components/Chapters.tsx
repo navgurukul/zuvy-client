@@ -160,30 +160,32 @@ function Chapters({ params }: any) {
                     crumbs={isInstructor ? InstructorCrumbs : studentCrumbs}
                 />
             </div>
-            <ScrollArea
-                className="h-[500px] lg:h-[670px] pr-4"
-                type="hover"
-                ref={scrollAreaRef}
-            >
-                {chapters?.map((item: any, index: any) => {
-                    const isLastItem = index === chapters.length - 1
+            <div className="flex flex-col flex-grow overflow-hidden">
+                <ScrollArea
+                    className="h-[500px] lg:h-[670px] pr-4"
+                    type="hover"
+                    ref={scrollAreaRef}
+                >
+                    {chapters?.map((item: any, index: any) => {
+                        const isLastItem = index === chapters.length - 1
 
-                    return (
-                        <StudentChapterItem
-                            key={item.id}
-                            chapterId={item.id}
-                            title={item.title}
-                            topicId={item.topicId}
-                            activeChapter={activeChapter}
-                            setActiveChapter={setActiveChapter}
-                            status={item.status}
-                            viewcourses={viewcourses}
-                            moduleID={moduleID}
-                            activeChapterRef={activeChapterRef}
-                        />
-                    )
-                })}
-            </ScrollArea>
+                        return (
+                            <StudentChapterItem
+                                key={item.id}
+                                chapterId={item.id}
+                                title={item.title}
+                                topicId={item.topicId}
+                                activeChapter={activeChapter}
+                                setActiveChapter={setActiveChapter}
+                                status={item.status}
+                                viewcourses={viewcourses}
+                                moduleID={moduleID}
+                                activeChapterRef={activeChapterRef}
+                            />
+                        )
+                    })}
+                </ScrollArea>
+            </div>
         </div>
     )
 }

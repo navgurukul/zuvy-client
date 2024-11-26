@@ -10,6 +10,7 @@ interface DeleteConfirmationModalProps {
     isOpen: boolean
     onClose: () => void
     onConfirm: () => void
+    modalTitle?: string
     modalText?: string
     buttonText?: string
     input: boolean
@@ -22,6 +23,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
     isOpen,
     onClose,
     onConfirm,
+    modalTitle,
     modalText,
     buttonText,
     input,
@@ -104,7 +106,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                         leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                     >
                         <div className="w-[500px]  inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle  sm:p-6">
-                            <div className="my-7 mx-5 ">
+                            <div className="mx-5">
                                 <div className="mt-3 text-start m:mt-5">
                                     <Dialog.Title
                                         as="h3"
@@ -112,7 +114,8 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                     >
                                         {input
                                             ? 'Delete Batch'
-                                            : 'Permanent Deletion'}
+                                            : modalTitle ||
+                                              'Permanent Deletion'}
                                     </Dialog.Title>
                                     <div className="mt-2">
                                         <p className="text-sm text-gray-700 my-2 ">
@@ -146,10 +149,12 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                 <Button
                                     variant={'outline'}
                                     type="button"
-                                    className=" p-2 inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4  bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
+                                    className=" p-2 inline-flex justify-center rounded-md border bg-gray-300 border-gray-300 shadow-sm px-4 text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
                                     onClick={onClose}
                                 >
-                                    {input ? 'Cancel' : 'Cancel'}
+                                    {modalTitle
+                                        ? 'Keep the Question'
+                                        : 'Cancel'}
                                 </Button>
                                 {loading ? (
                                     <Button variant={'destructive'} disabled>

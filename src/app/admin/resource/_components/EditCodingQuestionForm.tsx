@@ -498,7 +498,7 @@ export default function EditCodingQuestionForm() {
                                                 placeholder={
                                                     tags.find(
                                                         (tag) =>
-                                                            tag.id ===
+                                                            tag.id ==
                                                             selectCodingQuestion[0]
                                                                 ?.tagId
                                                     )?.tagName || 'Choose Topic'

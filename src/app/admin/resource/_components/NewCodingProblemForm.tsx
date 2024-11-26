@@ -71,16 +71,16 @@ export default function NewCodingProblemForm({
     selectedOptions,
     difficulty,
     offset,
-    position
+    position,
 }: {
     tags: any
-    setIsDialogOpen: any,
+    setIsDialogOpen: any
     setCodingQuestions: any
-    filteredCodingQuestions?:any,
-    selectedOptions?:any,
-    difficulty?:any,
-    offset?:number,
-    position?:String
+    filteredCodingQuestions?: any
+    selectedOptions?: any
+    difficulty?: any
+    offset?: number
+    position?: String
 }) {
     const [testCases, setTestCases] = useState([
         { id: 1, input: '', output: '' },
@@ -292,7 +292,13 @@ export default function NewCodingProblemForm({
         }
 
         createCodingQuestion(formattedData)
-        filteredCodingQuestions(setCodingQuestions ,offset,position, difficulty,selectedOptions)
+        filteredCodingQuestions(
+            setCodingQuestions,
+            offset,
+            position,
+            difficulty,
+            selectedOptions
+        )
     }
 
     return (
