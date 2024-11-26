@@ -50,6 +50,7 @@ import { Label } from '@/components/ui/label'
 import BulkUploadMcq from '../_components/BulkMcqForm'
 import NewMcqForm from '../_components/NewMcqForm'
 import EditMcqForm from '../_components/EditMcqForm'
+import { off } from 'process'
 type Props = {}
 export type Tag = {
     label: string
@@ -285,6 +286,14 @@ const Mcqs = (props: Props) => {
         getAllQuizQuestion(offset)
     }, [getAllQuizQuestion, offset, position])
 
+    useEffect(() => {
+        if (offset < 0) {
+            setOffset(0)
+        } else {
+            getAllQuizQuestion(offset)
+        }
+    }, [getAllQuizQuestion, offset, position])
+
     const selectedTagCount = selectedOptions.length
     const difficultyCount = difficulty.length
 
@@ -365,7 +374,9 @@ const Mcqs = (props: Props) => {
                                 </div>
                             </RadioGroup>
                             {mcqType === 'bulk' ? (
-                                <BulkUploadMcq />
+                                <BulkUploadMcq
+                                    setIsMcqModalOpen={setIsMcqModalOpen}
+                                />
                             ) : (
                                 <div className="flex items-start justify-center w-screen ">
                                     <NewMcqForm
@@ -373,6 +384,7 @@ const Mcqs = (props: Props) => {
                                         closeModal={closeModal}
                                         setStoreQuizData={setStoreQuizData}
                                         getAllQuizQuesiton={getAllQuizQuestion}
+                                        setIsMcqModalOpen={setIsMcqModalOpen}
                                     />
                                     {/* <NewMcqProblemFormNew
                                     tags={tags}

@@ -83,9 +83,9 @@ const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide, tagId }: Props) => {
     const newTagName = tags.filter((tag: any) => tag.id == tagId)
 
     return (
-        <div className="w-full p-2">
-            <DialogHeader>
-                <div className="flex gap-x-3">
+        <div className="w-full  p-2">
+            <DialogHeader className="">
+                <div className="flex gap-x-3 ">
                     Question Preview{' '}
                     <div className="flex gap-x-3 items-center">
                         <span className="font-md text-[14px] bg-green-200 px-2  py-0.5 my-0.5 text-secondary rounded-md">
@@ -104,7 +104,7 @@ const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide, tagId }: Props) => {
 
             <Tabs
                 value={activeTab as any}
-                className="w-4/5"
+                className="w-4/5 mt-5"
                 onValueChange={(value) => setActiveTab(value)}
             >
                 <TabsList className="flex justify-start bg-white">
@@ -141,7 +141,11 @@ const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide, tagId }: Props) => {
                                             <h1>Q.</h1>
                                         </span>
                                         <div
-                                            className=" text-wrap h-96 overflow-scroll"
+                                            className={` text-wrap h-96 ${
+                                                variant.question.includes(
+                                                    'pre'
+                                                ) && 'overflow-scroll'
+                                            } `}
                                             dangerouslySetInnerHTML={{
                                                 __html: generateCodePreview(
                                                     variant.question

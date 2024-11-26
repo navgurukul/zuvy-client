@@ -37,22 +37,9 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
-import EditQuizQuestion from '../_components/EditQuizQuestion'
 import CheckboxAndDeleteHandler from '../_components/CheckBoxAndDeleteCombo'
 import { Checkbox } from '@/components/ui/checkbox'
 import PreviewMCQ from '../_components/PreviewMcq'
-import { Button } from '@/components/ui/button'
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '@/components/ui/tooltip'
-import { Alert } from '@/components/ui/alert'
-import { AlertDialogTrigger } from '@radix-ui/react-alert-dialog'
-import { AlertDialogContent } from '@/components/ui/alert-dialog'
-import DialogBox from '../_components/PreviewBox'
-import TipTapForForm from '../_components/TipTapForForm'
 
 export const columns: ColumnDef<quiz>[] = [
     {
@@ -179,6 +166,7 @@ export const columns: ColumnDef<quiz>[] = [
         cell: ({ row }) => {
             const quizQuestionId = row.original.id
             const selectedRows = row.getIsSelected()
+            const { tags, setTags } = getCodingQuestionTags()
 
             return (
                 <div className="mr-5">
@@ -189,7 +177,11 @@ export const columns: ColumnDef<quiz>[] = [
                             )}
                         </DialogTrigger>
                         <DialogContent className="">
-                            <PreviewMCQ quizQuestionId={quizQuestionId} />
+                            <PreviewMCQ
+                                quizQuestionId={quizQuestionId}
+                                assesmentSide={true}
+                                tags={tags}
+                            />
                         </DialogContent>
                     </Dialog>
                 </div>

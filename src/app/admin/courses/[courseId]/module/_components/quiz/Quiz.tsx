@@ -98,7 +98,6 @@ function Quiz(props: any) {
         getAllSavedQuizQuestion()
     }, [getAllSavedQuizQuestion])
 
-    console.log(props)
     return (
         <>
             <div className="flex flex-row items-center justify-start gap-x-6 mb-10">
@@ -123,27 +122,50 @@ function Quiz(props: any) {
                 />
                 <Separator
                     orientation="vertical"
-                    className="mx-4 w-[2px] h-screen rounded"
+                    className="mx-4 w-[2px] h-96 mt-36 rounded"
                 />
-                <ScrollArea className="h-screen w-full rounded-md">
+                <ScrollArea className="h-screen w-full rounded-md mt-32">
                     <div>
-                        {addQuestion.map(
-                            (questions: quizData, index: number) => (
-                                <QuizModal
-                                    key={index}
-                                    tags={tags}
-                                    data={questions}
-                                    removeQuestionById={removeQuestionById}
-                                />
-                            )
-                        )}
-                        {addQuestion.length > 0 && (
-                            <div className="text-end mt-2">
-                                <Button onClick={saveQuizQUestionHandler}>
-                                    Save
-                                </Button>
+                        <div className="flex flex-col items-center justify-between ">
+                            <div className="flex justify-between w-full ">
+                                <h2 className="text-left text-gray-700 w-full font-semibold">
+                                    Selected Question
+                                </h2>
+                                <div>
+                                    {addQuestion.length > 0 && (
+                                        <div className="text-end  mr-10">
+                                            <Button
+                                                onClick={
+                                                    saveQuizQUestionHandler
+                                                }
+                                                className="  h-8 "
+                                            >
+                                                Save
+                                            </Button>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        )}
+                            <div className="text-left w-full ">
+                                {addQuestion.length == 0 && (
+                                    <h1 className="text-left italic">
+                                        No Selected Questions
+                                    </h1>
+                                )}
+                            </div>
+                        </div>
+                        <div className="h-96 overflow-scroll ">
+                            {addQuestion.map(
+                                (questions: quizData, index: number) => (
+                                    <QuizModal
+                                        key={index}
+                                        tags={tags}
+                                        data={questions}
+                                        removeQuestionById={removeQuestionById}
+                                    />
+                                )
+                            )}
+                        </div>
                     </div>
                 </ScrollArea>
             </div>

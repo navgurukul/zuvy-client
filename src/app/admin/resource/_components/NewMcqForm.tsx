@@ -54,11 +54,13 @@ export default function NewMcqForm({
     closeModal,
     setStoreQuizData,
     getAllQuizQuesiton,
+    setIsMcqModalOpen,
 }: {
     tags: any[]
     closeModal: () => void
     setStoreQuizData: any
     getAllQuizQuesiton: any
+    setIsMcqModalOpen: any
 }) {
     const [showTagName, setShowTagName] = useState<boolean>(false)
     const [codeSnippet, setCodeSnippet] = useState<any>()
@@ -151,6 +153,7 @@ export default function NewMcqForm({
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
+            setIsMcqModalOpen(false)
         } catch (error: any) {
             toast({
                 title: 'Error',
