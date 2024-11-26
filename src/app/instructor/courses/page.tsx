@@ -37,7 +37,7 @@ const Page = (props: Props) => {
             </div>
             <div className="container mx-auto p-1">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4">
-                    {enrolledCourse.length > 0 ? (
+                    {enrolledCourse?.length > 0 ? (
                         enrolledCourse.map((course) => (
                             <Link
                                 key={course.id}
