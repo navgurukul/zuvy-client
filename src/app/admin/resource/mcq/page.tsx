@@ -372,7 +372,7 @@ const Mcqs = (props: Props) => {
                         <ChevronLeft />
                         <h1>MCQ Problems</h1>
                     </div>
-                    <div className="flex flex-col items-center justify-center ">
+                    <div className="flex flex-col items-center justify-center">
                         <div>
                             <RadioGroup
                                 className="flex flex-col items-center w-full"

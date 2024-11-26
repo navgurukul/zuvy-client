@@ -860,7 +860,7 @@ const NewMcqProblemForm = ({
     }, [loadingAI])
 
     return (
-        <main className="flex flex-col px-3 h-full">
+        <main className="flex flex-col px-3 h-full ml-[65px]">
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(handleSubmitForm)}
