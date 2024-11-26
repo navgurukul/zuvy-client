@@ -3,14 +3,23 @@ import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
 import { useEffect, useRef } from 'react'
 import useDebounce from '@/hooks/useDebounce'
-import { getMcqSearch } from '@/store/store'
+import { getEditCodingQuestionDialogs } from '@/store/store'
 import { Search } from 'lucide-react'
+import { SelectScrollDownButton } from '@radix-ui/react-select'
+import { POSITION } from './constant'
 
 export function handleDelete(
     deleteCodingQuestionId: any,
-    getAllCodingQuestions: any,
-    setCodingQuestions: any
+    setCodingQuestions: any,
+    filteredCodingQuestions?: any,
+    selectedOptions?: any,
+    difficulty?: any,
+    offset?: number,
+    position?: String
 ) {
+    // console.log("selectedoption", selectedOptions)
+    // console.log("difficulty", difficulty )
+    // const offset=10
     api({
         method: 'delete',
         url: 'Content/deleteCodingQuestion',
@@ -25,7 +34,14 @@ export function handleDelete(
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
-            getAllCodingQuestions(setCodingQuestions)
+            // getAllCodingQuestions(setCodingQuestions)
+            filteredCodingQuestions(
+                setCodingQuestions,
+                offset,
+                position,
+                difficulty,
+                selectedOptions
+            )
         })
         .catch((error) => {
             toast({
@@ -40,8 +56,13 @@ export function handleDelete(
 
 export function deleteOpenEndedQuestion(
     deleteOpenEndedQuestionId: any,
-    getAllOpenEndedQuestions: any,
-    setOpenEndedQuestions: any
+    setOpenEndedQuestions: any,
+    // getAllOpenEndedQuestions?: any,
+    filteredOpenEndedQuestions?: any,
+    selectedOptions?: any,
+    difficulty?: any,
+    offset?: number,
+    position?: String
 ) {
     api({
         method: 'delete',
@@ -57,7 +78,13 @@ export function deleteOpenEndedQuestion(
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
-            getAllOpenEndedQuestions(setOpenEndedQuestions)
+            filteredOpenEndedQuestions(
+                setOpenEndedQuestions,
+                offset,
+                position,
+                difficulty,
+                selectedOptions
+            )
         })
         .catch((error) => {
             toast({
@@ -83,13 +110,23 @@ export const handleConfirm = (
     handleDelete: any,
     setDeleteModalOpen: any,
     deleteCodingQuestionId: any,
-    getAllCodingQuestions: any,
-    setCodingQuestions: any
+    filteredCodingQuestions: any,
+    setCodingQuestions: any,
+    difficulty?: any,
+    selectedOptions?: any,
+    offset?: number,
+    position?: String
 ) => {
+    //     console.log(" selectedoption and handleconform",selectedOptions)
+    //     console.log(" difficuty and handleconform",difficulty)
     handleDelete(
         deleteCodingQuestionId,
-        getAllCodingQuestions,
-        setCodingQuestions
+        setCodingQuestions,
+        filteredCodingQuestions,
+        difficulty,
+        selectedOptions,
+        offset,
+        position
     )
     setDeleteModalOpen(false)
 }
@@ -104,14 +141,24 @@ export async function getAllCodingQuestions(setCodingQuestions: any) {
 }
 export function handleQuizDelete(
     deleteQuizQuestionId: any,
-    getAllQUizQuestions: any,
-    setQuizQuestions: any
+    // getAllQUizQuestions: any,
+    filteredQuizQuestions?: any,
+    setStoreQuizData?: any,
+    selectedOptions?: any,
+    difficulty?: any,
+    offset?: number,
+    position?: string
 ) {
     api({
         method: 'delete',
-        url: 'Content/deleteQuizQuestion',
+        url: 'Content/deleteMainQuizOrVariant',
         data: {
-            questionIds: [deleteQuizQuestionId],
+            questionIds: [
+                {
+                    id: deleteQuizQuestionId,
+                    type: 'main',
+                },
+            ],
         },
     })
         .then((res) => {
@@ -121,7 +168,14 @@ export function handleQuizDelete(
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
-            getAllQUizQuestions(setQuizQuestions)
+            // getAllQUizQuestions(getAllQUizQuestions,offset,position,difficulty,selectedOptions)
+            filteredQuizQuestions(
+                setStoreQuizData,
+                offset,
+                position,
+                difficulty,
+                selectedOptions
+            )
         })
         .catch((error) => {
             toast({
@@ -150,13 +204,23 @@ export const handleQuizConfirm = (
     handleQuizDelete: any,
     setDeleteModalOpen: any,
     deleteQuizQuestionId: any,
-    getAllQuizQuestions: any,
-    setQuizQuestions: any
+    // getAllQuizQuestions: any,
+    filteredQuizQuestions: any,
+    setQuizQuestions: any,
+    difficulty: any,
+    selectedOptions: any,
+    offset: number,
+    position: string
 ) => {
     handleQuizDelete(
         deleteQuizQuestionId,
-        getAllQuizQuestions,
-        setQuizQuestions
+        // getAllQuizQuestions,
+        filteredQuizQuestions,
+        setQuizQuestions,
+        difficulty,
+        selectedOptions,
+        offset,
+        position
     )
     setDeleteModalOpen(false)
 }
@@ -224,10 +288,16 @@ export const handleEditOpenEndedQuestion = (
 export const handleEditCodingQuestion = (
     codingQuestion: any,
     setIsCodingEditDialogOpen: any,
-    setEditCodingQuestionId: any
+    setEditCodingQuestionId: any,
+    setIsQuestionUsed: any
 ) => {
     setIsCodingEditDialogOpen(true)
     setEditCodingQuestionId(codingQuestion.id)
+    if (codingQuestion?.usage) {
+        setIsQuestionUsed(true)
+    } else {
+        setIsQuestionUsed(false)
+    }
 }
 export const handlerQuizQuestions = (
     quizQuestion: any,
@@ -283,19 +353,25 @@ export async function getAllTagsWithoutFilter(setTags: any) {
 //     }
 
 export async function filteredCodingQuestions(
-    offset: number,
+    // offset: number,
     setFilteredQuestions: (newValue: any[]) => void,
-    setTotalCodingQuestion: any,
-    setLastPage: any,
-    setTotalPages: any,
-    difficulty: any,
-    selectedOptions: any,
-    debouncedSearch: string | undefined,
-    position: any,
-    TotalCodingQuestion: any,
+    offset: number,
+    position?: string,
+    difficulty?: any,
+    selectedOptions?: any,
+    setTotalCodingQuestion?: any,
+    setLastPage?: any,
+    setTotalPages?: any,
+    // difficulty?: any,
+    // selectedOptions?: any,
+    debouncedSearch?: string | undefined,
+    // position?: any,
+    // TotalCodingQuestion?: any,
     selectedLanguage?: string
+
     // setTotalCodingQuestion: any, // Accepting setTotalBootcamps from parent
 ) {
+    // console.log("selectedoption in filtercodingquestion",selectedOptions)
     try {
         const safeOffset = Math.max(0, offset)
 
@@ -342,65 +418,84 @@ export async function filteredCodingQuestions(
     }
 }
 export async function filteredQuizQuestions(
-    setFilteredQuestions: any,
-    selectedDifficulty: string,
-    selectedTopic: any,
-    selectedLanguage: string,
-    debouncedSearch: string
+    setStoreQuizData?: any,
+    // setFilteredQuestions: (newValue: any[]) => void,
+    offset?: number,
+    position?: string,
+    difficulty?: any,
+    selectedOptions?: any,
+    setTotalMCQQuestion?: any,
+    selectedTopic?: any,
+    setLastPage?: any,
+    setTotalPages?: any,
+    selectedLanguage?: string,
+    debouncedSearch?: string | undefined
 ) {
     try {
-        let url = `/Content/allQuizQuestions`
+        // const safeOffset = Math.max(0, offset)
+        let url = `/Content/allQuizQuestions?limit=${position}&offset=${offset}`
+
+        let selectedTagIds = ''
+        selectedOptions.map(
+            (item: any) => (selectedTagIds += '&tagId=' + item.value)
+        )
+
+        let selectedDiff = ''
+        difficulty.map(
+            (item: any) => (selectedDiff += '&difficulty=' + item.value)
+        )
 
         const queryParams = []
 
+        if (difficulty.length > 0) {
+            if (difficulty[0].value !== 'None') {
+                queryParams.push(selectedDiff.substring(1))
+            }
+        }
+        if (selectedTagIds.length > 0) {
+            if (selectedOptions[0].value !== '-1') {
+                queryParams.push(selectedTagIds.substring(1))
+            }
+        }
         if (debouncedSearch) {
-            queryParams.push(`searchTerm=${debouncedSearch}`)
+            queryParams.push(
+                `searchTerm=${encodeURIComponent(debouncedSearch)}`
+            )
         }
-        if (selectedTopic !== 'All Topics' && selectedTopic != 0) {
-            queryParams.push(`tagId=${+selectedTopic}`)
-        }
-        if (selectedDifficulty !== 'Any Difficulty') {
-            queryParams.push(`difficulty=${selectedDifficulty}`)
-        }
-        // Add more conditions here as needed, e.g., selectedLanguage, etc.
 
         if (queryParams.length > 0) {
-            url += '?' + queryParams.join('&')
+            url += `&${queryParams.join('&')}`
         }
-
-        const response = await api.get(url)
-
-        const filtered = response.data.filter(
-            (question: any) =>
-                selectedDifficulty === 'Any Difficulty' ||
-                question.difficulty === selectedDifficulty
-            // Uncomment and modify the following lines if needed:
-            // && (selectedTopic === 'All Topics' || question.tags.includes(selectedTopic))
-            // && (selectedLanguage === 'All Languages' || question.language === selectedLanguage)
-        )
-
-        setFilteredQuestions(filtered)
+        const res = await api.get(url)
+        console.log('response.data.data', res.data.data)
+        setStoreQuizData(res.data.data)
+        setTotalMCQQuestion(res.data.totalRows)
+        setTotalPages(res.data.totalPages)
+        setLastPage(res.data.totalPages)
     } catch (error) {
-        console.error('Error:', error)
+        console.error('Error fetching quiz questions:', error)
     }
 }
 
 export async function filteredOpenEndedQuestions(
-    offset: number,
     setFilteredQuestions: (newValue: any[]) => void,
-    setTotalOpenEndedQuestion: any,
-    setLastPage: any,
-    setTotalPages: any,
-    difficulty: any,
-    selectedOptions: any,
-    debouncedSearch: string | undefined,
-    position: any,
-    totalOpenEndedQuestion: any,
-    selectedLanguage?: string
+    offset: number,
+    position?: string,
+    difficulty?: any,
+    selectedOptions?: any,
+    setTotalOpenEndedQuestion?: any,
+    setLastPage?: any,
+    setTotalPages?: any,
+    selectedLanguage?: string,
+    debouncedSearch?: string | undefined
 ) {
+    console.log('setopenendedquestion', setTotalOpenEndedQuestion)
     try {
         const safeOffset = Math.max(0, offset)
-        let url = `/Content/openEndedQuestions?pageNo=${offset}&limit_=${position}`
+
+        let url = `/Content/openEndedQuestions?pageNo=${
+            offset + 1
+        }&limit_=${position}`
 
         let selectedTagIds = ''
         selectedOptions.map(
@@ -442,6 +537,7 @@ export async function filteredOpenEndedQuestions(
         setTotalOpenEndedQuestion(response.data.totalRows)
         setTotalPages(response.data.totalPages)
         setLastPage(response.data.totalPages)
+        console.log('response.data.data', response)
     } catch (error) {
         console.error('Error:', error)
     }

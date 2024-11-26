@@ -28,7 +28,14 @@ import { Separator } from '@/components/ui/separator'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { columns } from './column'
 import NewOpenEndedQuestionForm from '@/app/admin/resource/_components/NewOpenEndedQuestionForm'
-import { getCodingQuestionTags, getopenEndedQuestionstate } from '@/store/store'
+import {
+    getCodingQuestionTags,
+    getopenEndedQuestionstate,
+    getOffset,
+    getPosition,
+    getSelectedOpenEndedOptions,
+    getOpenEndedDifficulty,
+} from '@/store/store'
 import {
     getAllOpenEndedQuestions,
     getAllTags,
@@ -62,28 +69,29 @@ const OpenEndedQuestions = (props: Props) => {
         }
         return { tagName: 'All Topics', id: -1 }
     })
-    const [selectedOptions, setSelectedOptions] = useState<Option[]>([
-        { value: '-1', label: 'All Topics' },
-    ])
+    const { selectedOptions, setSelectedOptions } =
+        getSelectedOpenEndedOptions()
+
     const [options, setOptions] = useState<Option[]>([
         { value: '-1', label: 'All Topics' },
     ])
     const { tags, setTags } = getCodingQuestionTags()
-    const [difficulty, setDifficulty] = useState([
-        { value: 'None', label: 'All Difficulty' },
-    ])
+
+    const { difficulty, setDifficulty } = getOpenEndedDifficulty()
+
     const [allOpenEndedQuestions, setAllOpenEndedQuestions] = useState([])
     const { openEndedQuestions, setOpenEndedQuestions } =
         getopenEndedQuestionstate()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
-    const [position, setPosition] = useState(POSITION)
+
     const [currentPage, setCurrentPage] = useState(1)
     const [totalOpenEndedQuestion, setTotalOpenEndedQuestion] = useState<any>(0)
     const [totalPages, setTotalPages] = useState(0)
     const [pages, setPages] = useState(0)
     const [lastPage, setLastPage] = useState(0)
-    const [offset, setOffset] = useState<number>(1)
+    const { offset, setOffset } = getOffset()
+    const { position, setPosition } = getPosition()
     const debouncedSearch = useDebounce(searchTerm, 500)
     const [loading, setLoading] = useState(true)
     const selectedLanguage = ''
@@ -100,8 +108,13 @@ const OpenEndedQuestions = (props: Props) => {
     const handleTagOption = (option: Option) => {
         if (option.value === '-1') {
             if (selectedOptions.some((item) => item.value === option.value)) {
-                setSelectedOptions((prev) =>
-                    prev.filter((selected) => selected.value !== option.value)
+                // setSelectedOptions((prev) =>
+                //     prev.filter((selected) => selected.value !== option.value)
+                // )
+                setSelectedOptions(
+                    selectedOptions.filter(
+                        (selected) => selected.value !== option.value
+                    )
                 )
             } else {
                 setSelectedOptions([option])
@@ -115,13 +128,19 @@ const OpenEndedQuestions = (props: Props) => {
                         (selected) => selected.value === option.value
                     )
                 ) {
-                    setSelectedOptions((prev) =>
-                        prev.filter(
+                    // setSelectedOptions((prev) =>
+                    //     prev.filter(
+                    //         (selected) => selected.value !== option.value
+                    //     )
+                    // )
+                    setSelectedOptions(
+                        selectedOptions.filter(
                             (selected) => selected.value !== option.value
                         )
                     )
                 } else {
-                    setSelectedOptions((prev) => [...prev, option])
+                    // setSelectedOptions((prev) => [...prev, option])
+                    setSelectedOptions([...selectedOptions, option])
                 }
             }
         }
@@ -172,16 +191,15 @@ const OpenEndedQuestions = (props: Props) => {
     const fetchCodingQuestions = useCallback(
         async (offset: number) => {
             filteredOpenEndedQuestions(
-                offset,
                 setOpenEndedQuestions,
+                offset,
+                position,
+                difficulty,
+                selectedOptions,
                 setTotalOpenEndedQuestion,
                 setLastPage,
                 setTotalPages,
-                difficulty,
-                selectedOptions,
-                debouncedSearch,
-                position,
-                selectedLanguage
+                debouncedSearch
             )
         },
         [
@@ -189,10 +207,8 @@ const OpenEndedQuestions = (props: Props) => {
             selectedOptions,
             difficulty,
             setOpenEndedQuestions,
-            // selectedDifficulty,
             debouncedSearch,
             isDialogOpen,
-
             position,
             offset,
         ]
@@ -291,8 +307,8 @@ const OpenEndedQuestions = (props: Props) => {
                                                 setIsDialogOpen={
                                                     setIsDialogOpen
                                                 }
-                                                getAllOpenEndedQuestions={
-                                                    getAllOpenEndedQuestions
+                                                filteredOpenEndedQuestions={
+                                                    filteredOpenEndedQuestions
                                                 }
                                                 setOpenEndedQuestions={
                                                     setOpenEndedQuestions
@@ -373,8 +389,8 @@ const OpenEndedQuestions = (props: Props) => {
                                                 setIsDialogOpen={
                                                     setIsDialogOpen
                                                 }
-                                                getAllOpenEndedQuestions={
-                                                    getAllOpenEndedQuestions
+                                                filteredOpenEndedQuestions={
+                                                    filteredOpenEndedQuestions
                                                 }
                                                 setOpenEndedQuestions={
                                                     setOpenEndedQuestions

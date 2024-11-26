@@ -79,8 +79,14 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     const [selectedCodingQuesIds, setSelectedCodingQuesIds] = useState<
         number[]
     >([])
+    const [selectedCodingQuesTagIds, setSelectedCodingQuesTagIds] = useState<
+        number[]
+    >([])
 
     const [selectedQuizQuesIds, setSelectedQuizQuesIds] = useState<number[]>([])
+    const [selectedQuizQuesTagIds, setSelectedQuizQuesTagIds] = useState<
+        number[]
+    >([])
 
     const [selectedOpenEndedQuesIds, setSelectedOpenEndedQuesIds] = useState<
         number[]
@@ -251,12 +257,24 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                 new Set(selectedCodingQuestions.map((question) => question.id))
             )
         )
+        setSelectedCodingQuesTagIds(
+            Array.from(
+                new Set(
+                    selectedCodingQuestions.map((question) => question.tagId)
+                )
+            )
+        )
     }, [selectedCodingQuestions])
 
     useEffect(() => {
         setSelectedQuizQuesIds(
             Array.from(
                 new Set(selectedQuizQuestions.map((question) => question.id))
+            )
+        )
+        setSelectedQuizQuesTagIds(
+            Array.from(
+                new Set(selectedQuizQuestions.map((question) => question.tagId))
             )
         )
     }, [selectedQuizQuestions])
@@ -390,14 +408,16 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                     </h3>
                     <ScrollArea className="h-auto">
                         {questionType === 'coding' ? (
-                            <CodingQuestions
-                                questions={filteredQuestions}
-                                setSelectedQuestions={
-                                    setSelectedCodingQuestions
-                                }
-                                selectedQuestions={selectedCodingQuestions}
-                                tags={tags}
-                            />
+                            <div className="">
+                                <CodingQuestions
+                                    questions={filteredQuestions}
+                                    setSelectedQuestions={
+                                        setSelectedCodingQuestions
+                                    }
+                                    selectedQuestions={selectedCodingQuestions}
+                                    tags={tags}
+                                />
+                            </div>
                         ) : questionType === 'mcq' ? (
                             <QuizQuestions
                                 questions={filteredQuestions}
@@ -459,6 +479,8 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                     selectedCodingQuesIds={selectedCodingQuesIds}
                     selectedQuizQuesIds={selectedQuizQuesIds}
                     selectedOpenEndedQuesIds={selectedOpenEndedQuesIds}
+                    selectedCodingQuesTagIds={selectedCodingQuesTagIds}
+                    selectedQuizQuesTagIds={selectedQuizQuesTagIds}
                     content={content}
                     fetchChapterContent={fetchChapterContent}
                     chapterData={chapterData}

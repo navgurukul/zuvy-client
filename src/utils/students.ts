@@ -3,6 +3,7 @@ import { api } from './axios.config'
 import { OFFSET, POSITION } from './constant'
 import { fetchStudentsHandler } from './admin'
 import { getStoreStudentDataNew } from '@/store/store'
+import { showProctoringAlert } from '@/app/student/courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/ProctoringAlerts'
 
 export const fetchStudentData = async (
     id: number,
@@ -129,81 +130,132 @@ export function requestFullScreen(element: HTMLElement) {
     }
 }
 
-// tab change event listener
-export function handleVisibilityChange(
-    setTabChangeInstance: any,
+export async function getProctoringData(assessmentSubmissionId: any) {
+    try {
+        const res = await api.get(
+            `tracking/assessment/properting/${assessmentSubmissionId}`
+        )
+        const eyeMomentCount = res?.data?.data?.eyeMomentCount
+        const fullScreenExit = res?.data?.data?.fullScreenExit
+        const copyPaste = res?.data?.data?.copyPaste
+        const tabChange = res?.data?.data?.tabChange
+
+        // Check if the values are valid
+        if (tabChange === undefined || copyPaste === undefined) {
+            throw new Error('Invalid data structure received from API')
+        }
+
+        return { eyeMomentCount, fullScreenExit, copyPaste, tabChange } // Return as an object
+    } catch (error) {
+        console.error('Error fetching Proctoring data:', error)
+        throw error // Rethrow the error to be handled by the calling function
+    }
+}
+
+export async function updateProctoringData(
+    assessmentSubmitId: any,
     tabChangeInstance: any,
+    copyPasteAttempt: any,
+    fullScreenExit: any,
+    eyeMomentCount: any
+) {
+    try {
+        const res = await api.patch(
+            `submission/assessment/properting?assessment_submission_id=${assessmentSubmitId}`,
+            {
+                tabChange: tabChangeInstance,
+                copyPaste: copyPasteAttempt,
+                fullScreenExit: fullScreenExit,
+                eyeMomentCount: eyeMomentCount,
+            }
+        )
+    } catch (error) {
+        console.error('Error updating Proctoring data:', error)
+        return null
+    }
+}
+
+// tab change event listener
+export async function handleVisibilityChange(
     submitAssessment: () => void,
-    isCurrentPageSubmitAssessment: () => Boolean
+    isCurrentPageSubmitAssessment: () => boolean,
+    assessmentSubmitId: any
 ) {
     if (document.hidden) {
-        const newTabChangeInstance = tabChangeInstance + 1
-        localStorage.setItem(
-            'tabChangeInstance',
-            newTabChangeInstance.toString()
-        )
-        setTabChangeInstance(newTabChangeInstance)
-        if (newTabChangeInstance > 2) {
-            // Check if the current page is the submitAssessment page
-            if (isCurrentPageSubmitAssessment()) {
-                // Submit the assessment
-                // submitAssessment()
-                return toast({
-                    title: 'Test Ended -> Tab will close now',
-                    description: 'You have changed the tab multiple times.',
-                    className:
-                        'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-destructive text-white',
+        try {
+            const { tabChange, copyPaste, fullScreenExit, eyeMomentCount } =
+                await getProctoringData(assessmentSubmitId)
+            const newTabChangeInstance = tabChange + 1
+
+            // Update the proctoring data with the new values
+            await updateProctoringData(
+                assessmentSubmitId,
+                newTabChangeInstance,
+                copyPaste,
+                fullScreenExit,
+                eyeMomentCount
+            )
+
+            if (newTabChangeInstance > 3) {
+                if (isCurrentPageSubmitAssessment()) {
+                    submitAssessment()
+                    return showProctoringAlert({
+                        title: 'Test Ended -> Tab will close now',
+                        description: 'You have changed the tab multiple times.',
+                        violationCount: `${newTabChangeInstance} of 3`,
+                    })
+                }
+            } else {
+                return showProctoringAlert({
+                    title: 'Tab Switch Detected',
+                    description:
+                        'You have changed the tab. If you change the tab again, your test may get submitted automatically.',
+                    violationCount: `${newTabChangeInstance} of 3`,
                 })
             }
-        } else {
-            return toast({
-                title: 'WARNING',
-                description:
-                    'You have changed the tab. If you change the tab again, your test may get submitted automatically.',
-                className:
-                    'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-destructive text-white',
-            })
+        } catch (error) {
+            console.error('Failed to handle visibility change:', error)
         }
     }
 }
 
 // Request full screen as full screen is only allowed by user click
 
-export function handleFullScreenChange(
-    setFullScreenExitInstance: any,
-    fullScreenExitInstance: any,
+export async function handleFullScreenChange(
     submitAssessment: () => void,
     isCurrentPageSubmitAssessment: () => Boolean,
-    setIsFullScreen: any
+    setIsFullScreen: any,
+    assessmentSubmitId: any
 ) {
     if (!document.fullscreenElement) {
         setIsFullScreen(false)
-        const newFullScreenExitInstance = fullScreenExitInstance + 1
-        localStorage.setItem(
-            'fullScreenExitInstance',
-            newFullScreenExitInstance.toString()
+        const { tabChange, copyPaste, fullScreenExit, eyeMomentCount } =
+            await getProctoringData(assessmentSubmitId)
+        const newFullScreenExitInstance = fullScreenExit + 1
+        await updateProctoringData(
+            assessmentSubmitId,
+            tabChange,
+            copyPaste,
+            newFullScreenExitInstance,
+            eyeMomentCount
         )
-        setFullScreenExitInstance(newFullScreenExitInstance)
 
-        if (newFullScreenExitInstance > 2) {
+        if (newFullScreenExitInstance > 3) {
             // Check if the current page is the submitAssessment page
             if (isCurrentPageSubmitAssessment()) {
-                // Submit the assessment
-                // submitAssessment()
-                return toast({
+                submitAssessment()
+                return showProctoringAlert({
                     title: 'Test Ended',
                     description: 'You have exited full screen multiple times.',
-                    className:
-                        'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-destructive text-white',
+                    violationCount: `${newFullScreenExitInstance} of 3`,
                 })
             }
         } else {
-            return toast({
-                title: 'WARNING',
+            return showProctoringAlert({
+                title: 'Full Screen Exit Detected',
                 description:
                     'You have exited full screen. If you exit full screen again, your test may get submitted automatically.',
-                className:
-                    'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-destructive text-white',
+                violationCount: `${newFullScreenExitInstance} of 3`,
             })
         }
     }

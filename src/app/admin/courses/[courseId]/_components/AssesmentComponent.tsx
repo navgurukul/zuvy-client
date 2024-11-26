@@ -7,7 +7,6 @@ import Link from 'next/link'
 import React, { useRef } from 'react'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
-import { toast } from 'react-toastify'
 
 type Props = {
     title: string

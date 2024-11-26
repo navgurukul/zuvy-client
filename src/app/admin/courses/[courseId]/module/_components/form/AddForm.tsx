@@ -22,6 +22,7 @@ import {
     FormLabel,
     FormMessage,
 } from '@/components/ui/form'
+import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 
 type AddFormProps = {
     chapterData: any
@@ -62,6 +63,7 @@ const AddForm: React.FC<AddFormProps> = ({
     // fetchChapterContent,
     moduleId,
 }) => {
+    const heightClass = useResponsiveHeight()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -274,7 +276,8 @@ const AddForm: React.FC<AddFormProps> = ({
 
     return (
         <ScrollArea
-            className="h-[500px] lg:h-[550px] pr-4"
+            // className="h-[600px] lg:h-[600px] pr-4"
+            className={`${heightClass} pr-4`}
             type="hover"
             style={{
                 scrollbarWidth: 'none', // Firefox

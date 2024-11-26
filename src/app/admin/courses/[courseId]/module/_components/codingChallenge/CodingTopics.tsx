@@ -80,6 +80,26 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
         })
     }
 
+    const getTopicsButtonText = () => {
+        if (selectedTopics.length === 0) {
+            return 'All Topics'
+        } else if (selectedTopics.length === 1) {
+            return selectedTopics[0].tagName
+        } else {
+            return `${selectedTopics.length} Topics Selected`
+        }
+    }
+
+    const getDifficultiesButtonText = () => {
+        if (selectedDifficulties.length === 0) {
+            return 'Any Difficulty'
+        } else if (selectedDifficulties.length === 1) {
+            return selectedDifficulties[0]
+        } else {
+            return `${selectedDifficulties.length} Difficulties Selected`
+        }
+    }
+
     return (
         <div className="flex flex-col mb-5">
             <Input
@@ -96,13 +116,7 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
                             variant="outline"
                             className="w-48 sm:w-56 justify-between"
                         >
-                            {selectedTopics.length > 0
-                                ? `${
-                                      selectedTopics.length > 1
-                                          ? `${selectedTopics.length} Topics Selected`
-                                          : '1 Topic Selected'
-                                  } `
-                                : 'Choose Topics'}
+                            {getTopicsButtonText()}
                             <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                     </PopoverTrigger>
@@ -136,9 +150,7 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
                             variant="outline"
                             className="w-48 sm:w-56 justify-between"
                         >
-                            {selectedDifficulties.length > 0
-                                ? selectedDifficulties.join(', ')
-                                : 'Choose Difficulties'}
+                            {getDifficultiesButtonText()}
                             <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                     </PopoverTrigger>

@@ -57,7 +57,7 @@ const config = {
                 yellow: {
                     DEFAULT: '#FEE8B0',
                     foreground: '#eab308',
-                    dark:"#f59e0b"
+                    dark: '#f59e0b',
                 },
             },
             borderRadius: {
@@ -79,22 +79,36 @@ const config = {
                 'accordion-down': 'accordion-down 0.2s ease-out',
                 'accordion-up': 'accordion-up 0.2s ease-out',
             },
+            screens: {
+                '1920x1080': {
+                    raw: '(min-width: 1920px) and (min-height: 1080px)',
+                },
+                '1366x768': {
+                    raw: '(max-width: 1366px) and (max-height: 768px)',
+                },
+                // Add more custom breakpoints as needed
+            },
+            height: {
+                'screen-1366': '480px', // For 1366x768 resolution
+                'screen-1920': '600px', // For 1920x1080 resolution
+            },
         },
     },
     plugins: [
         require('tailwindcss-animate'),
         require('@tailwindcss/typography'),
-        function({ addComponents }: PluginAPI) {
+        function ({ addComponents }: PluginAPI) {
             addComponents({
-              '.no-spinners': {
-                '-moz-appearance': 'textfield',
-                '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
-                  '-webkit-appearance': 'none',
-                  'margin': '0',
+                '.no-spinners': {
+                    '-moz-appearance': 'textfield',
+                    '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button':
+                        {
+                            '-webkit-appearance': 'none',
+                            margin: '0',
+                        },
                 },
-              },
             })
-          },
+        },
     ],
 } satisfies Config
 

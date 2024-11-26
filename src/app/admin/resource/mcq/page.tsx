@@ -31,8 +31,12 @@ import { api } from '@/utils/axios.config'
 import {
     getAllQuizData,
     getCodingQuestionTags,
+    getEditQuizQuestion,
     getmcqdifficulty,
     getMcqSearch,
+    getOffset,
+    getPosition,
+    getSelectedMCQOptions,
 } from '@/store/store'
 import useDebounce from '@/hooks/useDebounce'
 import { getAllQuizQuestion } from '@/utils/admin'
@@ -46,6 +50,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import BulkUploadMcq from '../_components/BulkMcqForm'
 import NewMcqForm from '../_components/NewMcqForm'
+import EditMcqForm from '../_components/EditMcqForm'
 type Props = {}
 export type Tag = {
     label: string
@@ -62,14 +67,16 @@ interface Option {
 const Mcqs = (props: Props) => {
     const [isOpen, setIsOpen] = useState(false)
     const [isMcqModalOpen, setIsMcqModalOpen] = useState<boolean>(false)
-
-    const [position, setPosition] = useState(POSITION)
+    // const [position, setPosition] = useState(POSITION)
+    // const [position, setPosition] = useState(POSITION)
+    const { position, setPosition } = getPosition()
     const [currentPage, setCurrentPage] = useState(1)
     const [totalMCQQuestion, setTotalMCQQuestion] = useState<any>(0)
     const [totalPages, setTotalPages] = useState(0)
     const [pages, setPages] = useState(0)
     const [lastPage, setLastPage] = useState(0)
-    const [offset, setOffset] = useState<number>(OFFSET)
+    // const [offset, setOffset] = useState<number>(OFFSET)
+    const { offset, setOffset } = getOffset()
     const [search, setSearch] = useState('')
     const debouncedSearch = useDebounce(search, 500)
     // const [difficulty, setDifficulty] = useState<string>('None')
@@ -80,9 +87,13 @@ const Mcqs = (props: Props) => {
     const { setmcqSearch } = getMcqSearch()
     const [mcqType, setMcqType] = useState<string>('')
 
-    const [selectedOptions, setSelectedOptions] = useState<Option[]>([
-        { value: '-1', label: 'All Topics' },
-    ])
+    // const [selectedOptions, setSelectedOptions] = useState<Option[]>([
+    //     { value: '-1', label: 'All Topics' },
+    // ])
+    // const [selectedOptions, setSelectedOptions] = useState<Option[]>([
+    //     { value: '-1', label: 'All Topics' }, // ])
+    const { selectedOptions, setSelectedOptions } = getSelectedMCQOptions()
+
     const [options, setOptions] = useState<Option[]>([
         { value: '-1', label: 'All Topics' },
     ])
@@ -96,12 +107,18 @@ const Mcqs = (props: Props) => {
         return { id: -1, tagName: 'All Topics' }
     })
     const [loading, setLoading] = useState(true)
+    const { isEditQuizModalOpen, setIsEditModalOpen } = getEditQuizQuestion()
 
     const handleTagOption = (option: Option) => {
         if (option.value === '-1') {
             if (selectedOptions.some((item) => item.value === option.value)) {
-                setSelectedOptions((prev) =>
-                    prev.filter((selected) => selected.value !== option.value)
+                // setSelectedOptions((prev) =>
+                //     prev.filter((selected) => selected.value !== option.value)
+                // )
+                setSelectedOptions(
+                    selectedOptions.filter(
+                        (selected) => selected.value !== option.value
+                    )
                 )
             } else {
                 setSelectedOptions([option])
@@ -115,13 +132,19 @@ const Mcqs = (props: Props) => {
                         (selected) => selected.value === option.value
                     )
                 ) {
-                    setSelectedOptions((prev) =>
-                        prev.filter(
+                    // setSelectedOptions((prev) =>
+                    //     prev.filter(
+                    //         (selected) => selected.value !== option.value
+                    //     )
+                    // )
+                    setSelectedOptions(
+                        selectedOptions.filter(
                             (selected) => selected.value !== option.value
                         )
                     )
                 } else {
-                    setSelectedOptions((prev) => [...prev, option])
+                    // setSelectedOptions((prev) => [...prev, option])
+                    setSelectedOptions([...selectedOptions, option])
                 }
             }
         }
@@ -199,29 +222,29 @@ const Mcqs = (props: Props) => {
         async (offset: number) => {
             try {
                 const safeOffset = Math.max(0, offset)
-                let url = `/Content/allQuizQuestions?limit=${position}&offset=${offset}`
+                let url = `/Content/allQuizQuestions?limit=${position}&offset=${safeOffset}`
                 setmcqSearch(debouncedSearch)
+
                 let selectedTagIds = ''
-                selectedOptions.map(
-                    (item: any) => (selectedTagIds += '&tagId=' + item.value)
+                selectedOptions.forEach(
+                    (item: any) => (selectedTagIds += `&tagId=${item.value}`)
                 )
 
                 let selectedDiff = ''
-                difficulty.map(
-                    (item: any) => (selectedDiff += '&difficulty=' + item.value)
+                difficulty.forEach(
+                    (item: any) => (selectedDiff += `&difficulty=${item.value}`)
                 )
 
                 const queryParams = []
 
-                if (difficulty.length > 0) {
-                    if (difficulty[0].value !== 'None') {
-                        queryParams.push(selectedDiff.substring(1))
-                    }
+                if (difficulty.length > 0 && difficulty[0].value !== 'None') {
+                    queryParams.push(selectedDiff.substring(1))
                 }
-                if (selectedTagIds.length > 0) {
-                    if (selectedOptions[0].value !== '-1') {
-                        queryParams.push(selectedTagIds.substring(1))
-                    }
+                if (
+                    selectedOptions.length > 0 &&
+                    selectedOptions[0].value !== '-1'
+                ) {
+                    queryParams.push(selectedTagIds.substring(1))
                 }
                 if (debouncedSearch) {
                     queryParams.push(
@@ -234,6 +257,7 @@ const Mcqs = (props: Props) => {
                 }
 
                 const res = await api.get(url)
+
                 setStoreQuizData(res.data.data)
                 setTotalMCQQuestion(res.data.totalRows)
                 setTotalPages(res.data.totalPages)
@@ -244,15 +268,13 @@ const Mcqs = (props: Props) => {
             }
         },
         [
-            offset,
+            position,
             difficulty,
+            selectedOptions,
+            setTotalMCQQuestion,
             debouncedSearch,
             setStoreQuizData,
-            selectedTag.id,
-            selectedOptions,
             setmcqSearch,
-            setTotalMCQQuestion,
-            position,
         ]
     )
 
@@ -317,6 +339,28 @@ const Mcqs = (props: Props) => {
 
     return (
         <>
+            {isEditQuizModalOpen && (
+                <div>
+                    <div
+                        className="flex cursor-pointer p-5 text-secondary"
+                        onClick={() => setIsEditModalOpen(false)}
+                    >
+                        <ChevronLeft />
+                        <h1>MCQ Problems</h1>
+                    </div>
+                    <div className="flex flex-col items-center justify-center">
+                        <h1 className="text-xl mb-4 ml-4 font-semibold text-start w-[590px] justify-start ">
+                            Edit MCQ
+                        </h1>
+                        <EditMcqForm
+                            tags={tags}
+                            closeModal={closeModal}
+                            setStoreQuizData={setStoreQuizData}
+                            getAllQuizQuesiton={getAllQuizQuestion}
+                        />
+                    </div>
+                </div>
+            )}
             {isMcqModalOpen && (
                 <div className=" ">
                     <div
@@ -328,56 +372,58 @@ const Mcqs = (props: Props) => {
                         <ChevronLeft />
                         <h1>MCQ Problems</h1>
                     </div>
-                    <div className="flex items-center justify-center w-full"></div>
-                    <div className="flex flex-col items-center justify-center">
+                    <div className="flex flex-col items-center justify-center ">
                         <div>
                             <RadioGroup
                                 className="flex flex-col items-center w-full"
                                 defaultValue="oneatatime"
                                 onValueChange={(value) => setMcqType(value)}
                             >
-                                <h1 className="text-3xl mb-4 px-9 font-semibold text-start w-[750px] justify-start">
-                                    New MCQs
-                                </h1>
-                                <div className="flex w-[750px] items-start justify-start ml-4 px-8 gap-3">
-                                    <div className="flex space-x-2 pr-2">
-                                        <RadioGroupItem
-                                            value="bulk"
-                                            id="r1"
-                                            className="text-secondary mt-1"
-                                        />
-                                        <Label
-                                            className="font-semibold text-lg"
-                                            htmlFor="r1"
-                                        >
-                                            Bulk Upload
-                                        </Label>
-                                    </div>
-                                    <div className="flex space-x-2 pr-2">
-                                        <RadioGroupItem
-                                            value="oneatatime"
-                                            id="r2"
-                                            className="text-secondary mt-1"
-                                        />
-                                        <Label
-                                            className="font-semibold text-lg"
-                                            htmlFor="r2"
-                                        >
-                                            One At A Time
-                                        </Label>
-                                    </div>
-                                    <div className="flex space-x-2 pr-2">
-                                        <RadioGroupItem
-                                            value="AI"
-                                            id="r2"
-                                            className="text-secondary mt-1"
-                                        />
-                                        <Label
-                                            className="font-semibold text-lg"
-                                            htmlFor="r2"
-                                        >
-                                            Generate with AI
-                                        </Label>
+                                <div className="flex w-[630px] flex-col items-start justify-start ml-4 gap-3">
+                                    <h1 className="font-semibold text-3xl mb-4 ">
+                                        New MCQ
+                                    </h1>
+                                    <div className="flex gap-x-6 ">
+                                        <div className="flex  space-x-2">
+                                            <RadioGroupItem
+                                                value="bulk"
+                                                id="r1"
+                                                className="text-secondary mt-1"
+                                            />
+                                            <Label
+                                                className="font-semibold text-md"
+                                                htmlFor="r1"
+                                            >
+                                                Bulk Upload
+                                            </Label>
+                                        </div>
+                                        <div className="flex  space-x-2">
+                                            <RadioGroupItem
+                                                value="oneatatime"
+                                                id="r2"
+                                                className="text-secondary mt-1"
+                                            />
+                                            <Label
+                                                className="font-semibold text-md"
+                                                htmlFor="r2"
+                                            >
+                                                One At A Time
+                                            </Label>
+                                        </div>
+
+                                        <div className="flex space-x-2 pr-2">
+                                            <RadioGroupItem
+                                                value="AI"
+                                                id="r2"
+                                                className="text-secondary mt-1"
+                                            />
+                                            <Label
+                                                className="font-semibold text-lg"
+                                                htmlFor="r2"
+                                            >
+                                                Generate with AI
+                                            </Label>
+                                        </div>
                                     </div>
                                 </div>
                             </RadioGroup>
@@ -387,7 +433,7 @@ const Mcqs = (props: Props) => {
                             ) : (
                                 <div className="flex items-start justify-center w-screen ">
                                     <NewMcqForm
-                                        tags={transformedTags}
+                                        tags={tags}
                                         closeModal={closeModal}
                                         setStoreQuizData={setStoreQuizData}
                                         getAllQuizQuesiton={getAllQuizQuestion}
@@ -398,7 +444,7 @@ const Mcqs = (props: Props) => {
                     </div>
                 </div>
             )}
-            {!isMcqModalOpen && (
+            {!isMcqModalOpen && !isEditQuizModalOpen && (
                 <MaxWidthWrapper>
                     <h1 className="text-left font-semibold text-2xl">
                         Resource Library - MCQs
@@ -420,7 +466,7 @@ const Mcqs = (props: Props) => {
                                 onClick={() =>
                                     setIsMcqModalOpen((prevState) => !prevState)
                                 }
-                                className=""
+                                className="mt-5"
                             >
                                 + Create MCQ
                             </Button>
@@ -451,7 +497,11 @@ const Mcqs = (props: Props) => {
                         </div>
                     </div>
 
-                    <DataTable data={quizData} columns={columns} />
+                    <DataTable
+                        data={quizData}
+                        columns={columns}
+                        mcqSide={true}
+                    />
                     <DataTablePagination
                         totalStudents={totalMCQQuestion}
                         position={position}
