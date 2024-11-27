@@ -30,13 +30,14 @@ import TiptapEditor from '@/app/_components/editor/TiptapEditor'
 import TiptapToolbar from '@/app/_components/editor/TiptapToolbar'
 import extensions from '@/app/_components/editor/TiptapExtensions'
 import '@/app/_components/editor/Tiptap.css'
-import { CalendarIcon } from 'lucide-react'
+import { ArrowUpRightSquare, CalendarIcon } from 'lucide-react'
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover'
 import { Calendar } from '@/components/ui/calendar'
+import PreviewAssignment from './PreviewAssignment'
 
 interface ContentDetail {
     title: string
@@ -60,6 +61,8 @@ interface AssignmentProps {
 
 const AddAssignent = ({ content }: AssignmentProps) => {
     // misc
+
+    const [showPreview, setShowPreview] = useState<boolean>(false)
 
     const formSchema = z.object({
         title: z.string().min(2, {
@@ -156,86 +159,115 @@ const AddAssignent = ({ content }: AssignmentProps) => {
     return (
         <div>
             <div className="w-full ">
-                <Form {...form}>
-                    <form
-                        id="myForm"
-                        onSubmit={form.handleSubmit(editAssignmentContent)}
-                        className="space-y-8 mb-10"
-                    >
-                        <FormField
-                            control={form.control}
-                            name="title"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel></FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            placeholder="Untitled Article"
-                                            className="p-0 text-3xl w-2/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize"
-                                            {...field}
-                                            {...form.register('title')}
-                                            onChange={(e) =>
-                                                setTitle(e.target.value)
-                                            }
-                                        />
-                                    </FormControl>
-                                    <FormMessage className="h-5" />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="startDate"
-                            render={({ field }) => (
-                                <FormItem className="flex flex-col justify-start gap-x-2 text-left">
-                                    <FormLabel className="m-0">
-                                        <span className="text-xl">
-                                            Choose Deadline Date
-                                        </span>
-                                        <span className="text-red-500">*</span>{' '}
-                                    </FormLabel>
-                                    <Popover>
-                                        <PopoverTrigger asChild>
+                {showPreview ? (
+                    <PreviewAssignment
+                        content={content}
+                        setShowPreview={setShowPreview}
+                    />
+                ) : (
+                    <>
+                        <Form {...form}>
+                            <form
+                                id="myForm"
+                                onSubmit={form.handleSubmit(
+                                    editAssignmentContent
+                                )}
+                                className="space-y-8 mb-10"
+                            >
+                                <FormField
+                                    control={form.control}
+                                    name="title"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel></FormLabel>
                                             <FormControl>
-                                                <Button
-                                                    variant={'outline'}
-                                                    className={`w-[230px]  text-left font-normal ${
-                                                        !field.value &&
-                                                        'text-muted-foreground'
-                                                    }`}
-                                                >
-                                                    {field.value
-                                                        ? format(
-                                                              field.value,
-                                                              'EEEE, MMMM d, yyyy'
-                                                          )
-                                                        : 'Pick a date'}
-                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                </Button>
+                                                <Input
+                                                    placeholder="Untitled Article"
+                                                    className="p-0 text-3xl w-2/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize"
+                                                    {...field}
+                                                    {...form.register('title')}
+                                                    onChange={(e) =>
+                                                        setTitle(e.target.value)
+                                                    }
+                                                />
                                             </FormControl>
-                                        </PopoverTrigger>
-                                        <PopoverContent
-                                            className="w-auto p-0"
-                                            align="start"
-                                        >
-                                            <Calendar
-                                                mode="single"
-                                                selected={field.value}
-                                                onSelect={field.onChange}
-                                                disabled={(date: any) =>
-                                                    date <=
-                                                    addDays(new Date(), -1)
-                                                } // Disable past dates
-                                                initialFocus
-                                            />
-                                        </PopoverContent>
-                                    </Popover>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </form>
-                </Form>
+                                            <Button
+                                                variant={'ghost'}
+                                                type="button"
+                                                className=" text-secondary w-[100px] h-[30px] gap-x-1 "
+                                                onClick={() =>
+                                                    setShowPreview(true)
+                                                }
+                                            >
+                                                <ArrowUpRightSquare />
+                                                <h1>Preview</h1>
+                                            </Button>
+                                            <FormMessage className="h-5" />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="startDate"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col justify-start gap-x-2 text-left">
+                                            <FormLabel className="m-0">
+                                                <span className="text-xl">
+                                                    Choose Deadline Date
+                                                </span>
+                                                <span className="text-red-500">
+                                                    *
+                                                </span>{' '}
+                                            </FormLabel>
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <FormControl>
+                                                        <Button
+                                                            variant={'outline'}
+                                                            className={`w-[230px]  text-left font-normal ${
+                                                                !field.value &&
+                                                                'text-muted-foreground'
+                                                            }`}
+                                                        >
+                                                            {field.value
+                                                                ? format(
+                                                                      field.value,
+                                                                      'EEEE, MMMM d, yyyy'
+                                                                  )
+                                                                : 'Pick a date'}
+                                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                        </Button>
+                                                    </FormControl>
+                                                </PopoverTrigger>
+                                                <PopoverContent
+                                                    className="w-auto p-0"
+                                                    align="start"
+                                                >
+                                                    <Calendar
+                                                        mode="single"
+                                                        selected={field.value}
+                                                        onSelect={
+                                                            field.onChange
+                                                        }
+                                                        disabled={(date: any) =>
+                                                            date <=
+                                                            addDays(
+                                                                new Date(),
+                                                                -1
+                                                            )
+                                                        } // Disable past dates
+                                                        initialFocus
+                                                    />
+                                                </PopoverContent>
+                                            </Popover>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </form>
+                        </Form>
+                    </>
+                )}
             </div>
             <div className="text-left">
                 <TiptapToolbar editor={editor} />

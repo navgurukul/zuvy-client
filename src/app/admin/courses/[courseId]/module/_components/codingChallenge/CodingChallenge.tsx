@@ -14,6 +14,9 @@ import useDebounce from '@/hooks/useDebounce'
 import { getCodingQuestionTags } from '@/store/store'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import QuestionDescriptionModal from '../Assessment/QuestionDescriptionModal'
+import { ArrowUpRightSquare } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import PreviewCodingChallenge from './PreviewCodingChallenge'
 
 interface Example {
     input: number[]
@@ -96,6 +99,7 @@ function CodingChallenge({
         useState<string>('All Languages')
     const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([])
     const [chapterTitle, setChapterTitle] = useState<string>(activeChapterTitle)
+    const [showPreview, setShowPreview] = useState<boolean>(false)
 
     useEffect(() => {
         async function getAllCodingQuestions() {
@@ -182,147 +186,163 @@ function CodingChallenge({
     }, [content])
 
     return (
-        <div>
-            {/* SearchBar component */}
-            <div className="flex items-center mb-15">
-                <Input
-                    required
-                    onChange={(e) => {
-                        setChapterTitle(e.target.value)
-                    }}
-                    placeholder={`${
-                        activeChapterTitle
-                            ? activeChapterTitle
-                            : 'Untitled Coding Problem'
-                    }`}
-                    className="p-0 text-3xl w-2/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize"
-                />
-
-                {/* <div className="text-secondary flex font-semibold items-center">
-                    <h6 className="mr-2 text-sm">Preview</h6>
-                    <ExternalLink size={15} />
-                </div> */}
-            </div>
-            <div className="grid grid-cols-2">
-                <div>
-                    <CodingTopics
-                        setSearchTerm={setSearchTerm}
-                        searchTerm={searchTerm}
-                        selectedTopics={selectedOptions}
-                        setSelectedTopics={setSelectedOptions}
-                        selectedDifficulties={selectedDifficulty}
-                        setSelectedDifficulties={setSelectedDifficulty}
-                        // selectedLanguage={selectedLanguage}
-                        // setSelectedLanguage={setSelectedLanguage}
-                        tags={tags}
-                    />
-                    {/* <ScrollArea className="h-dvh pr-4"> */}
-                    <ScrollArea className="h-[500px] pr-4">
-                        {filteredQuestions?.map((question: any) => (
-                            <div
-                                key={question.id}
-                                className={`p-5 rounded-sm ${
-                                    selectedQuestions?.some(
-                                        (selectedQuestion) =>
-                                            selectedQuestion?.id === question.id
-                                    )
-                                        ? 'bg-gray-200'
-                                        : ''
-                                }`}
-                            >
-                                <div className="flex justify-between text-start items-center">
-                                    <div>
-                                        <div className="flex items-center gap-2">
-                                            <h2 className="font-bold text-lg">
-                                                {question.title}
-                                            </h2>
-                                            <span
-                                                className={cn(
-                                                    `font-semibold text-secondary`,
-                                                    difficultyColor(
-                                                        question.difficulty
-                                                    )
-                                                )}
-                                            >
-                                                {question.difficulty}
-                                            </span>
-                                        </div>
-                                        <div className="w-full">
-                                            <p className="text-gray-600 mt-1">
-                                                {ellipsis(
-                                                    question.description,
-                                                    60
-                                                )}
-                                            </p>
-                                        </div>
-                                        <Dialog>
-                                            <DialogTrigger asChild>
-                                                <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer">
-                                                    View Full Description
-                                                </p>
-                                            </DialogTrigger>
-                                            <DialogOverlay />
-                                            <QuestionDescriptionModal
-                                                question={question}
-                                                type="coding"
-                                            />
-                                        </Dialog>
-                                    </div>
-                                    <div>
-                                        {selectedQuestions?.some(
-                                            (selectedQuestion) =>
-                                                selectedQuestion?.id ===
-                                                question.id
-                                        ) ? (
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                width="20"
-                                                height="20"
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                strokeWidth="2"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                className="lucide lucide-circle-check"
-                                            >
-                                                <circle
-                                                    cx="12"
-                                                    cy="12"
-                                                    r="10"
-                                                />
-                                                <path d="m9 12 2 2 4-4" />
-                                            </svg>
-                                        ) : (
-                                            <PlusCircle
-                                                onClick={() => {
-                                                    setSelectedQuestions([
-                                                        question,
-                                                    ])
-                                                }}
-                                                className="text-secondary cursor-pointer"
-                                                size={20}
-                                            />
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </ScrollArea>
-                </div>
-                <SelectedProblems
-                    chapterTitle={chapterTitle}
-                    selectedQuestions={selectedQuestions as Question[]}
-                    setSelectedQuestions={
-                        setSelectedQuestions as React.Dispatch<
-                            React.SetStateAction<Question[]>
-                        >
-                    }
+        <>
+            {showPreview ? (
+                <PreviewCodingChallenge
                     content={content}
-                    moduleId={moduleId}
+                    setShowPreview={setShowPreview}
+                    tags={tags}
                 />
-            </div>
-        </div>
+            ) : (
+                <div>
+                    {/* SearchBar component */}
+                    <div className="flex items-center mb-15">
+                        <Input
+                            required
+                            onChange={(e) => {
+                                setChapterTitle(e.target.value)
+                            }}
+                            placeholder={`${
+                                activeChapterTitle
+                                    ? activeChapterTitle
+                                    : 'Untitled Coding Problem'
+                            }`}
+                            className="p-0 text-3xl w-2/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize"
+                        />
+                        <Button
+                            variant={'ghost'}
+                            type="button"
+                            className="mt-2 text-secondary w-[100px] h-[30px] gap-x-1 "
+                            onClick={() => setShowPreview(true)}
+                        >
+                            <ArrowUpRightSquare />
+                            <h1>Preview</h1>
+                        </Button>
+                    </div>
+                    <div className="grid grid-cols-2">
+                        <div>
+                            <CodingTopics
+                                setSearchTerm={setSearchTerm}
+                                searchTerm={searchTerm}
+                                selectedTopics={selectedOptions}
+                                setSelectedTopics={setSelectedOptions}
+                                selectedDifficulties={selectedDifficulty}
+                                setSelectedDifficulties={setSelectedDifficulty}
+                                // selectedLanguage={selectedLanguage}
+                                // setSelectedLanguage={setSelectedLanguage}
+                                tags={tags}
+                            />
+                            {/* <ScrollArea className="h-dvh pr-4"> */}
+                            <ScrollArea className="h-[500px] pr-4">
+                                {filteredQuestions?.map((question: any) => (
+                                    <div
+                                        key={question.id}
+                                        className={`p-5 rounded-sm ${
+                                            selectedQuestions?.some(
+                                                (selectedQuestion) =>
+                                                    selectedQuestion?.id ===
+                                                    question.id
+                                            )
+                                                ? 'bg-gray-200'
+                                                : ''
+                                        }`}
+                                    >
+                                        <div className="flex justify-between text-start items-center">
+                                            <div>
+                                                <div className="flex items-center gap-2">
+                                                    <h2 className="font-bold text-lg">
+                                                        {question.title}
+                                                    </h2>
+                                                    <span
+                                                        className={cn(
+                                                            `font-semibold text-secondary`,
+                                                            difficultyColor(
+                                                                question.difficulty
+                                                            )
+                                                        )}
+                                                    >
+                                                        {question.difficulty}
+                                                    </span>
+                                                </div>
+                                                <div className="w-full">
+                                                    <p className="text-gray-600 mt-1">
+                                                        {ellipsis(
+                                                            question.description,
+                                                            60
+                                                        )}
+                                                    </p>
+                                                </div>
+                                                <Dialog>
+                                                    <DialogTrigger asChild>
+                                                        <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer">
+                                                            View Full
+                                                            Description
+                                                        </p>
+                                                    </DialogTrigger>
+                                                    <DialogOverlay />
+                                                    <QuestionDescriptionModal
+                                                        question={question}
+                                                        type="coding"
+                                                    />
+                                                </Dialog>
+                                            </div>
+                                            <div>
+                                                {selectedQuestions?.some(
+                                                    (selectedQuestion) =>
+                                                        selectedQuestion?.id ===
+                                                        question.id
+                                                ) ? (
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        width="20"
+                                                        height="20"
+                                                        viewBox="0 0 24 24"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        strokeWidth="2"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        className="lucide lucide-circle-check"
+                                                    >
+                                                        <circle
+                                                            cx="12"
+                                                            cy="12"
+                                                            r="10"
+                                                        />
+                                                        <path d="m9 12 2 2 4-4" />
+                                                    </svg>
+                                                ) : (
+                                                    <PlusCircle
+                                                        onClick={() => {
+                                                            setSelectedQuestions(
+                                                                [question]
+                                                            )
+                                                        }}
+                                                        className="text-secondary cursor-pointer"
+                                                        size={20}
+                                                    />
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </ScrollArea>
+                        </div>
+                        <SelectedProblems
+                            chapterTitle={chapterTitle}
+                            selectedQuestions={selectedQuestions as Question[]}
+                            setSelectedQuestions={
+                                setSelectedQuestions as React.Dispatch<
+                                    React.SetStateAction<Question[]>
+                                >
+                            }
+                            content={content}
+                            moduleId={moduleId}
+                        />
+                    </div>
+                </div>
+            )}
+        </>
     )
 }
 
