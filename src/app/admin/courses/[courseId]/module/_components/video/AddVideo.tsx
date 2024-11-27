@@ -209,7 +209,7 @@ const AddVideo = ({
                                     control={form.control}
                                     name="videoTitle"
                                     render={({ field }) => (
-                                        <FormItem>
+                                        <FormItem className="flex flex-col">
                                             <FormControl>
                                                 <Input
                                                     placeholder="Untitled Video"
@@ -220,7 +220,7 @@ const AddVideo = ({
                                             <Button
                                                 variant={'ghost'}
                                                 type="button"
-                                                className=" text-secondary w-[100px] h-[30px] gap-x-1 "
+                                                className="text-secondary w-[100px] h-[30px] gap-x-1 "
                                                 onClick={() =>
                                                     setShowPreview(true)
                                                 }
