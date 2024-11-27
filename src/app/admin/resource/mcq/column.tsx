@@ -176,7 +176,7 @@ export const columns: ColumnDef<quiz>[] = [
                                 <Eye className="cursor-pointer" />
                             )}
                         </DialogTrigger>
-                        <DialogContent className="">
+                        <DialogContent className="w-full">
                             <PreviewMCQ
                                 quizQuestionId={quizQuestionId}
                                 assesmentSide={true}
