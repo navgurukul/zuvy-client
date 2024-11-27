@@ -303,9 +303,36 @@ const Page: React.FC<pageProps> = () => {
                                                     <div className="px-1 py-4">
                                                         {name}
                                                     </div>
-                                                    <Loader
-                                                        progress={progress}
-                                                    />
+                                                    <div
+                                                        style={{
+                                                            position:
+                                                                'relative',
+                                                            width: '100%',
+                                                        }}
+                                                    >
+                                                        <Loader
+                                                            progress={progress}
+                                                        />
+                                                        <div
+                                                            style={{
+                                                                position:
+                                                                    'absolute',
+                                                                bottom: '-30px', // Adjust position as needed
+                                                                width: '100%',
+                                                                textAlign:
+                                                                    'left',
+                                                                fontSize:
+                                                                    '14px',
+                                                                fontWeight:
+                                                                    'bold', // Make text bold
+                                                                color: 'black', /// Adjust font size if needed
+                                                            }}
+                                                        >
+                                                            {progress > 0
+                                                                ? `${progress}% completed`
+                                                                : 'Start Course'}
+                                                        </div>
+                                                    </div>
                                                 </Link>
                                             )
                                         )

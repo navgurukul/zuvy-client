@@ -17,7 +17,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import VideoEmbed from './VideoEmbed'
-import { X } from 'lucide-react'
+import { Pencil, X } from 'lucide-react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 
@@ -101,6 +101,7 @@ const AddVideo = ({
     const heightClass = useResponsiveHeight()
     const fileInputRef = useRef<HTMLInputElement>(null)
     const [showVideoBox, setShowVideoBox] = useState<boolean>(true)
+    const [videoTitle, setVideoTitle] = useState('')
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -202,11 +203,27 @@ const AddVideo = ({
                             render={({ field }) => (
                                 <FormItem>
                                     <FormControl>
-                                        <Input
-                                            placeholder="Untitled Video"
-                                            {...field}
-                                            className="w-[450px] p-0 text-3xl text-left font-semibold outline-none border-none focus:ring-0"
-                                        />
+                                        <div className="w-2/15 flex justify-center items-center relative">
+                                            <Input
+                                                required
+                                                onChange={(e) => {
+                                                    setVideoTitle(
+                                                        e.target.value
+                                                    )
+                                                }}
+                                                placeholder="Untitled Video"
+                                                className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                                                autoFocus
+                                            />
+                                            {!videoTitle && (
+                                                <Pencil
+                                                    fill="true"
+                                                    fillOpacity={0.4}
+                                                    size={20}
+                                                    className="absolute text-gray-100 pointer-events-none mt-1 right-2" // Adjusted right positioning
+                                                />
+                                            )}
+                                        </div>
                                     </FormControl>
 
                                     <FormMessage />
