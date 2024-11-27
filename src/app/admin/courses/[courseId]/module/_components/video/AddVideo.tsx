@@ -19,7 +19,7 @@ import { toast } from '@/components/ui/use-toast'
 import VideoEmbed from './VideoEmbed'
 import { Pencil, X } from 'lucide-react'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import useResponsiveHeight from '@/hooks/useResponsiveHeight'
+// import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 
 // Helper function to convert links to embed-friendly format
 const getEmbedLink = (url: string) => {
@@ -98,7 +98,7 @@ const AddVideo = ({
     moduleId: string
     fetchChapterContent: (chapterId: number, topicId: number) => Promise<void>
 }) => {
-    const heightClass = useResponsiveHeight()
+    // const heightClass = useResponsiveHeight()
     const fileInputRef = useRef<HTMLInputElement>(null)
     const [showVideoBox, setShowVideoBox] = useState<boolean>(true)
     const [videoTitle, setVideoTitle] = useState('')
@@ -184,7 +184,7 @@ const AddVideo = ({
 
     return (
         <ScrollArea
-            className={`${heightClass} pr-4`}
+
             type="hover"
             style={{
                 scrollbarWidth: 'none', // Firefox

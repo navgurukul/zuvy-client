@@ -11,18 +11,16 @@ import { Tag } from '@/app/admin/resource/mcq/page'
 import { toast } from '@/components/ui/use-toast'
 import { getAllQuizQuestion } from '@/utils/admin'
 import { getAllQuizData } from '@/store/store'
-import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 import { Pencil } from 'lucide-react'
 
 function Quiz(props: any) {
     const [tags, setTags] = useState<Tag[]>([])
     const [isOpen, setIsOpen] = useState(false)
-
+    const [inputValue, setInputValue] = useState('')
     const [addQuestion, setAddQuestion] = useState<quizData[]>([])
     const [questionId, setQuestionId] = useState()
     const { quizData, setStoreQuizData } = getAllQuizData()
-    const heightClass = useResponsiveHeight()
-    const [inputValue, setInputValue] = useState('')
+
     const handleAddQuestion = (data: any) => {
         const uniqueData = data.filter((question: quizData) => {
             return !addQuestion.some(
@@ -136,7 +134,7 @@ function Quiz(props: any) {
                     orientation="vertical"
                     className="mx-4 w-[2px] h-screen rounded"
                 />
-                <ScrollArea className={`${heightClass} w-full rounded-md`}>
+                <ScrollArea className="h-screen w-full rounded-md">
                     <div>
                         {addQuestion.map(
                             (questions: quizData, index: number) => (

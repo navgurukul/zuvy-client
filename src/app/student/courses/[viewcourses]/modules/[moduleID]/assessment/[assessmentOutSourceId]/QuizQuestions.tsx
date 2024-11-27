@@ -35,8 +35,9 @@ const QuizQuestions = ({
     const router = useRouter()
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined) // Correct type
     // Define the Zod schema for form validation
-
+    
     useEffect(() => {
+
         return () => {
             if (timeoutRef.current) {
                 clearTimeout(timeoutRef.current)
@@ -106,6 +107,11 @@ const QuizQuestions = ({
             })
         }
     }
+
+    useEffect(()=>{
+        console.log('questions', questions)
+        console.log('hello')
+    },[questions])
 
     return (
         <div>

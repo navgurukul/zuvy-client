@@ -1,3 +1,4 @@
+'use client'
 import React, { useCallback, useEffect, useState, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import { Spinner } from '@/components/ui/spinner'
@@ -17,9 +18,6 @@ import {
     getTopicId,
     getScrollPosition,
 } from '@/store/store'
-import { Button } from '@/components/ui/button'
-import useResponsiveHeight from '@/hooks/useResponsiveHeight'
-import { ScrollArea } from '@/components/ui/scroll-area'
 
 interface Chapter {
     id: number
@@ -49,7 +47,6 @@ function ChapterContent() {
     const [submissionId, setSubmissionId] = useState<any>()
     const [typeId, setTypeId] = useState<any>(null)
     const [loading, setLoading] = useState(true)
-    const heightClass = useResponsiveHeight()
 
     const fetchChapterContent = useCallback(
         async (chapterId: number) => {
@@ -154,6 +151,8 @@ function ChapterContent() {
     }
 
     const renderChapterContent = () => {
+        // console.log('chapterContent', chapterContent)
+        // console.log('loading', loading)
         if (
             topicId &&
             chapterContent &&
@@ -163,37 +162,19 @@ function ChapterContent() {
             switch (topicId) {
                 case 1:
                     return (
-                        <ScrollArea
-                            className={`${heightClass} pr-4`}
-                            type="hover"
-                            style={{
-                                scrollbarWidth: 'none', // Firefox
-                                msOverflowStyle: 'none', // IE and Edge
-                            }}
-                        >
-                            <Video
-                                content={chapterContent}
-                                completeChapter={completeChapter}
-                            />
-                        </ScrollArea>
+                        <Video
+                            content={chapterContent}
+                            completeChapter={completeChapter}
+                        />
                     )
                 case 2:
                     return (
-                        <ScrollArea
-                            className={`${heightClass} pr-4`}
-                            type="hover"
-                            style={{
-                                scrollbarWidth: 'none', // Firefox
-                                msOverflowStyle: 'none', // IE and Edge
-                            }}
-                        >
-                            <Article
-                                content={chapterContent}
-                                completeChapter={completeChapter}
-                                key={chapterContent.id}
-                                status={chapterContent?.status}
-                            />
-                        </ScrollArea>
+                        <Article
+                            content={chapterContent}
+                            completeChapter={completeChapter}
+                            key={chapterContent.id}
+                            status={chapterContent?.status}
+                        />
                     )
                 case 3:
                     return (
@@ -216,22 +197,13 @@ function ChapterContent() {
                     )
                 case 5:
                     return (
-                        <ScrollArea
-                            className={`${heightClass} pr-4`}
-                            type="hover"
-                            style={{
-                                scrollbarWidth: 'none', // Firefox
-                                msOverflowStyle: 'none', // IE and Edge
-                            }}
-                        >
-                            <Assignment
-                                content={chapterContent}
-                                moduleId={+moduleID}
-                                projectId={projectId}
-                                bootcampId={+viewcourses}
-                                completeChapter={completeChapter}
-                            />
-                        </ScrollArea>
+                        <Assignment
+                            content={chapterContent}
+                            moduleId={+moduleID}
+                            projectId={projectId}
+                            bootcampId={+viewcourses}
+                            completeChapter={completeChapter}
+                        />
                     )
                 case 6:
                     return (
@@ -244,24 +216,15 @@ function ChapterContent() {
                     )
                 case 7:
                     return (
-                        <ScrollArea
-                            className={`${heightClass} pr-4`}
-                            type="hover"
-                            style={{
-                                scrollbarWidth: 'none', // Firefox
-                                msOverflowStyle: 'none', // IE and Edge
-                            }}
-                        >
-                            <FeedbackForm
-                                content={chapterContent}
-                                moduleId={moduleID.toString()}
-                                // moduleId={moduleIdString}
-                                chapterId={chapterId}
-                                bootcampId={+viewcourses}
-                                completeChapter={completeChapter}
-                                // bootcampId={viewcourses}
-                            />
-                        </ScrollArea>
+                        <FeedbackForm
+                            content={chapterContent}
+                            moduleId={moduleID.toString()}
+                            // moduleId={moduleIdString}
+                            chapterId={chapterId}
+                            bootcampId={+viewcourses}
+                            completeChapter={completeChapter}
+                            // bootcampId={viewcourses}
+                        />
                     )
                 default:
                     return <h1>No Chapters Available Right Now</h1>
@@ -269,6 +232,7 @@ function ChapterContent() {
         } else {
             return (
                 <>
+                    {/* <h1>Hello students...!!</h1> */}
                     {loading ? (
                         <div className="my-5 flex justify-center items-center">
                             <div className="absolute h-screen">

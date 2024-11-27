@@ -14,7 +14,6 @@ import useDebounce from '@/hooks/useDebounce'
 import { getCodingQuestionTags } from '@/store/store'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import QuestionDescriptionModal from '../Assessment/QuestionDescriptionModal'
-import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 
 interface Example {
     input: number[]
@@ -74,7 +73,6 @@ function CodingChallenge({
     activeChapterTitle: string
     moduleId: string
 }) {
-    const heightClass = useResponsiveHeight()
     const [searchTerm, setSearchTerm] = useState('')
     const debouncedSearch = useDebounce(searchTerm, 1000)
     const { tags, setTags } = getCodingQuestionTags()
@@ -228,7 +226,8 @@ function CodingChallenge({
                         // setSelectedLanguage={setSelectedLanguage}
                         tags={tags}
                     />
-                    <ScrollArea className={`${heightClass} pr-4`}>
+                    {/* <ScrollArea className="h-dvh pr-4"> */}
+                    <ScrollArea className="h-[500px] pr-4">
                         {filteredQuestions?.map((question: any) => (
                             <div
                                 key={question.id}
