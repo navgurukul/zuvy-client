@@ -15,8 +15,8 @@ import Assignments from './components/assignments'
 import AssesmentSubmissionComponent from './components/AssesmentSubmission'
 import PraticeProblemsComponent from './components/PraticeProblemsComponent'
 import useDebounce from '@/hooks/useDebounce'
-import jsPDF from 'jspdf'
-import autoTable from 'jspdf-autotable'
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const Page = ({ params }: { params: any }) => {
     const [activeTab, setActiveTab] = useState('practice')
@@ -29,6 +29,8 @@ const Page = ({ params }: { params: any }) => {
     const [searchAssessment, setsearchAssessment] = useState<string>('')
     const [search, setSearch] = useState('')
     const debouncedSearch = useDebounce(search, 1000)
+    
+
 
     const handleTabChange = (tab: string) => {
         setActiveTab(tab)
@@ -40,11 +42,14 @@ const Page = ({ params }: { params: any }) => {
         if (lastUpdatedTab) {
             setActiveTab(lastUpdatedTab)
         }
+        
     }, [])
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value)
     }
+
+
 
     const getProjectsData = useCallback(async () => {
         try {
@@ -61,10 +66,11 @@ const Page = ({ params }: { params: any }) => {
             const res = await api.get(baseUrl)
 
             setBootcampModules(res.data.data.bootcampModules)
-
+            
             setTotalStudents(res.data.totalStudents)
         } catch (error) {
             console.error('Error fetching assessments:', error)
+
         }
     }, [params.courseId, debouncedSearch])
 
@@ -87,10 +93,17 @@ const Page = ({ params }: { params: any }) => {
 
     useEffect(() => {
         if (params.courseId) {
+
             getProjectsData()
             getFormData()
         }
-    }, [params.courseId, getProjectsData, getFormData, debouncedSearch])
+    }, [
+
+        params.courseId,
+        getProjectsData,
+        getFormData,
+        debouncedSearch,
+    ])
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -114,51 +127,46 @@ const Page = ({ params }: { params: any }) => {
                 <div className="flex justify-start overflow-x-auto overflow-y-hidden items-start gap-x-3">
                     <Button
                         onClick={() => handleTabChange('practice')}
-                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
-                            activeTab === 'practice'
-                                ? 'bg-secondary  text-white'
-                                : 'bg-gray-200 text-gray-800'
-                        }`}
+                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${activeTab === 'practice'
+                            ? 'bg-secondary  text-white'
+                            : 'bg-gray-200 text-gray-800'
+                            }`}
                     >
                         Practice Problems
                     </Button>
                     <Button
                         onClick={() => handleTabChange('assessments')}
-                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
-                            activeTab === 'assessments'
-                                ? 'bg-secondary  text-white'
-                                : 'bg-gray-200 text-gray-800'
-                        }`}
+                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${activeTab === 'assessments'
+                            ? 'bg-secondary  text-white'
+                            : 'bg-gray-200 text-gray-800'
+                            }`}
                     >
                         Assessments
                     </Button>
                     <Button
                         onClick={() => handleTabChange('projects')}
-                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
-                            activeTab === 'projects'
-                                ? 'bg-secondary  text-white'
-                                : 'bg-gray-200 text-gray-800'
-                        }`}
+                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${activeTab === 'projects'
+                            ? 'bg-secondary  text-white'
+                            : 'bg-gray-200 text-gray-800'
+                            }`}
                     >
                         Projects
                     </Button>
                     <Button
                         onClick={() => handleTabChange('form')}
-                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
-                            activeTab === 'form'
-                                ? 'bg-secondary  text-white'
-                                : 'bg-gray-200 text-gray-800'
-                        }`}
+                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${activeTab === 'form'
+                            ? 'bg-secondary  text-white'
+                            : 'bg-gray-200 text-gray-800'
+                            }`}
                     >
                         Form
                     </Button>
                     <Button
                         onClick={() => handleTabChange('assignments')}
-                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
-                            activeTab === 'assignments'
-                                ? 'bg-secondary  text-white'
-                                : 'bg-gray-200 text-gray-800'
-                        }`}
+                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${activeTab === 'assignments'
+                            ? 'bg-secondary  text-white'
+                            : 'bg-gray-200 text-gray-800'
+                            }`}
                     >
                         Assignments
                     </Button>
@@ -167,13 +175,14 @@ const Page = ({ params }: { params: any }) => {
             <div className="flex flex-col lg:flex-row justify-between">
                 <div className="relative w-full mr-2">
                     <Input
-                        placeholder={`${
-                            activeTab === 'assessments'
-                                ? 'Search for Assessment By Name'
-                                : 'Search '
-                        }`}
+                        placeholder={`${activeTab === 'assessments'
+                            ? 'Search for Assessment By Name'
+                            : 'Search '
+                            }`}
                         className="lg:w-1/3 w-full my-6 input-with-icon pl-8"
+
                         value={search}
+
                         onChange={handleSearch}
                     />
                     <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
@@ -195,10 +204,10 @@ const Page = ({ params }: { params: any }) => {
             </div>
             <div className="w-full">
                 {activeTab === 'practice' && (
-                    <PraticeProblemsComponent
-                        courseId={params.courseId}
+                    <PraticeProblemsComponent courseId={params.courseId}
                         debouncedSearch={debouncedSearch}
                     />
+
                 )}
                 {activeTab === 'assessments' && (
                     <AssesmentSubmissionComponent
@@ -210,105 +219,69 @@ const Page = ({ params }: { params: any }) => {
                     (bootcampModules.length > 0 ? (
                         <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2 lg:grid-cols-3">
                             {bootcampModules.map((item: any) => {
-                                const submissions =
-                                    item.projectData[0].submitStudents
+
+                                const submissions = item.projectData[0].submitStudents;
 
                                 const handleDownloadPdf = async (id: any) => {
                                     const apiUrl = `/submission/projects/students?projectId=${item.projectData[0].id}&bootcampId=${params.courseId}`
                                     // console.log("fatch", apiUrl)
                                     async function fetchData() {
                                         try {
-                                            const response = await api.get(
-                                                apiUrl
-                                            )
-
-                                            console.log(
-                                                '9i',
-                                                response.data
-                                                    .projectSubmissionData
-                                                    .projectTrackingData
-                                            )
-                                            const assessments =
-                                                response.data
-                                                    .projectSubmissionData
-                                                    .projectTrackingData
-                                            const doc = new jsPDF()
+                                            const response = await api.get(apiUrl);
+                                
+                                                console.log("9i", response.data.projectSubmissionData.projectTrackingData)
+                                            const assessments = response.data.projectSubmissionData.projectTrackingData;
+                                            const doc = new jsPDF();
 
                                             // Title Styling
-                                            doc.setFontSize(18)
-                                            doc.setFont('Regular', 'normal')
+                                            doc.setFontSize(18);
+                                            doc.setFont('Regular', 'normal');
 
-                                            doc.setFontSize(15)
-                                            doc.setFont('Regular', 'normal')
-                                            doc.text(
-                                                'List of Students-:',
-                                                14,
-                                                23
-                                            ) // Closer to the table
+                                            doc.setFontSize(15);
+                                            doc.setFont('Regular', 'normal');
+                                            doc.text('List of Students-:', 14, 23); // Closer to the table
 
                                             // Define columns for the table
                                             const columns = [
-                                                {
-                                                    header: 'Name',
-                                                    dataKey: 'userName',
-                                                },
-                                                {
-                                                    header: 'Email',
-                                                    dataKey: 'userEmail',
-                                                },
+                                                { header: 'Name', dataKey: 'userName' },
+                                                { header: 'Email', dataKey: 'userEmail' },
                                                 // { header: 'Staatus', dataKey: 'status' },
-                                            ]
+
+                                            ];
 
                                             // Prepare rows for the table
-                                            const rows = assessments.map(
-                                                (assessment: {
-                                                    userName: string
-                                                    userEmail: string
-                                                    // status: string;
-                                                }) => ({
-                                                    name:
-                                                        assessment.userName ||
-                                                        'N/A',
-                                                    email:
-                                                        assessment.userEmail ||
-                                                        'N/A',
-                                                })
-                                            )
+                                            const rows = assessments.map((assessment: {
+                                                userName: string;
+                                                userEmail: string;
+                                                // status: string;
+                                            }) => ({
+                                                name: assessment.userName || 'N/A',
+                                                email: assessment.userEmail || 'N/A',
+                                                
+                                            }));
 
-                                            console.log('row', rows)
+                                            console.log("row", rows)
                                             autoTable(doc, {
-                                                head: [
-                                                    columns.map(
-                                                        (col) => col.header
-                                                    ),
-                                                ],
-                                                body: rows.map(
-                                                    (row: {
-                                                        name: string
-                                                        email: string
-                                                    }) => [row.name, row.email]
-                                                ), // Ensure status is used here
+                                                head: [columns.map(col => col.header)],
+                                                body: rows.map((row: { name: string; email: string; }) => [row.name, row.email]), // Ensure status is used here
                                                 startY: 25,
                                                 margin: { horizontal: 10 },
-                                                styles: {
-                                                    overflow: 'linebreak',
-                                                    halign: 'center',
-                                                },
-                                                headStyles: {
-                                                    fillColor: [22, 160, 133],
-                                                },
-                                                theme: 'grid',
-                                            })
+                                                styles: { overflow: 'linebreak', halign: 'center' },
+                                                headStyles: { fillColor: [22, 160, 133] },
+                                                theme: 'grid'
+                                            });
+
 
                                             // Save the document
-                                            doc.save(
-                                                `${item.projectData[0].title}.pdf`
-                                            )
-                                        } catch (error) {}
+                                            doc.save(`${item.projectData[0].title}.pdf`);
+                                        } catch (error) {
+
+
+                                        }
                                     }
 
-                                    fetchData()
-                                }
+                                    fetchData();
+                                };
 
                                 return (
                                     <div
@@ -317,23 +290,12 @@ const Page = ({ params }: { params: any }) => {
                                     >
                                         {/* Download Icon positioned at the top right corner of the card */}
                                         <button
-                                            onClick={
-                                                submissions > 0
-                                                    ? handleDownloadPdf
-                                                    : undefined
-                                            } // Disable click if submissions are 0
-                                            className={`absolute top-2 right-2 z-10 transform cursor-pointer ${
-                                                submissions > 0
-                                                    ? 'hover:text-gray-700'
-                                                    : 'text-gray-400'
-                                            }`}
+                                            onClick={submissions > 0 ? handleDownloadPdf : undefined} // Disable click if submissions are 0
+                                            className={`absolute top-2 right-2 z-10 transform cursor-pointer ${submissions > 0 ? 'hover:text-gray-700' : 'text-gray-400'}`}
                                             title=" No Download Report"
                                             disabled={submissions === 0} // Disable button if there are no submissions
                                         >
-                                            <ArrowDownToLine
-                                                size={20}
-                                                className="text-gray-500"
-                                            />
+                                            <ArrowDownToLine size={20} className="text-gray-500" />
                                         </button>
 
                                         <div className="flex flex-col w-full">
@@ -343,8 +305,7 @@ const Page = ({ params }: { params: any }) => {
                                             <div className="flex items-center gap-2">
                                                 <div className="bg-yellow h-2 w-2 rounded-full" />
                                                 <p className="text-start">
-                                                    {submissions}/
-                                                    {totalStudents} Submission
+                                                    {submissions}/{totalStudents} Submission
                                                 </p>
                                             </div>
                                         </div>
@@ -354,15 +315,9 @@ const Page = ({ params }: { params: any }) => {
                                                 <Link
                                                     href={`/admin/courses/${params.courseId}/submissionProjects/${item.projectData[0].id}`}
                                                 >
-                                                    <Button
-                                                        variant={'ghost'}
-                                                        className="text-secondary text-md"
-                                                    >
+                                                    <Button variant={'ghost'} className="text-secondary text-md">
                                                         View Submission{' '}
-                                                        <ChevronRight
-                                                            className="text-secondary"
-                                                            size={17}
-                                                        />
+                                                        <ChevronRight className="text-secondary" size={17} />
                                                     </Button>
                                                 </Link>
                                             ) : (
@@ -376,13 +331,11 @@ const Page = ({ params }: { params: any }) => {
                                             )}
                                         </div>
                                     </div>
-                                )
+                                );
                             })}
                         </div>
                     ) : (
-                        <div className="text-left font-semibold">
-                            No projects found
-                        </div>
+                        <div className="text-left font-semibold">No projects found</div>
                     ))}
                 {activeTab === 'form' && (
                     <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2 lg:grid-cols-3">

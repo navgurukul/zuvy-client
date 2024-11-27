@@ -21,10 +21,7 @@ const SelectCodingQuestions = ({
                 const tag = tags?.find((tag: any) => tag.id === question.tagId)
 
                 return (
-                    <div
-                        key={question.id}
-                        className="p-5 rounded-sm border-b border-gray-200 mb-4"
-                    >
+                    <div key={question.id} className="p-5 rounded-sm border-b border-gray-200 mb-4">
                         <div className="flex justify-between items-start">
                             <div className="flex-1">
                                 <div className="flex items-center justify-between w-full">
@@ -40,12 +37,8 @@ const SelectCodingQuestions = ({
                                         <span
                                             className={cn(
                                                 `text-sm rounded-full px-2`,
-                                                difficultyColor(
-                                                    question.difficulty
-                                                ),
-                                                difficultyBgColor(
-                                                    question.difficulty
-                                                )
+                                                difficultyColor(question.difficulty),
+                                                difficultyBgColor(question.difficulty)
                                             )}
                                         >
                                             {question.difficulty}
