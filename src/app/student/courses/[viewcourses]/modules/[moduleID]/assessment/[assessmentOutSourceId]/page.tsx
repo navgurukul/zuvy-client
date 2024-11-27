@@ -274,6 +274,7 @@ function Page({
             const res = await api.get(
                 `/Content/startAssessmentForStudent/assessmentOutsourseId=${decodedParams.assessmentOutSourceId}`
             )
+            console.log(res.data)
             setAssessmentData(res?.data)
             setStartedAt(new Date(res?.data?.submission?.startedAt).getTime())
             setIsTabProctorOn(res?.data.canTabChange)

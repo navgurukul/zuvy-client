@@ -3,14 +3,14 @@
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { useParams } from 'next/navigation'
 import Chapters from '@/app/student/courses/[viewcourses]/modules/_components/Chapters'
-import useResponsiveHeight from '@/hooks/useResponsiveHeight'
+// import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     const { projectID } = useParams()
-    const heightClass = useResponsiveHeight()
+    // const heightClass = useResponsiveHeight()
 
     return (
-        <div className={`${heightClass} overflow-hidden`}>
+        <div>
             {projectID ? (
                 <MaxWidthWrapper>{children}</MaxWidthWrapper>
             ) : (
