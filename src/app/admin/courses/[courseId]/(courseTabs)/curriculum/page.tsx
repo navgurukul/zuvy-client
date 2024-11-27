@@ -297,7 +297,7 @@ function Page() {
     }
     return (
         <div className="w-full ">
-            {curriculum.length > 0 && (
+           
                 <div className=" w-full flex justify-end pr-4 ">
                     <div>
                         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -322,7 +322,7 @@ function Page() {
                         </Dialog>
                     </div>
                 </div>
-            )}
+         
             {isEditOpen && (
                 <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
                     <EditModuleDialog
@@ -419,7 +419,7 @@ function Page() {
                             <Dialog>
                                 <DialogTrigger asChild>
                                     <Button className="text-white bg-secondary">
-                                        Add module
+                                        Add Module
                                     </Button>
                                 </DialogTrigger>
                                 <DialogOverlay />

@@ -68,7 +68,7 @@ enum Level {
     Level6 = 6,
 }
 
-const TiptapToolbar = ({ editor }: { editor: any }) => {
+const TiptapToolbar = ({ editor }: { editor: any; mcqSide?: boolean }) => {
     const [selectedHeading, setSelectedHeading] = useState('H1')
     const [isDropdownOpen, setDropdownOpen] = useState(false)
     const [isDialogOpen, setDialogOpen] = useState(false)
@@ -109,18 +109,23 @@ const TiptapToolbar = ({ editor }: { editor: any }) => {
         <div>
             <div className="toolbar-btns flex">
                 <Button
+                    type="button"
                     onClick={addImage}
                     className="mr-2 px-2 py-1 bg-white text-black hover:bg-secondary hover:text-white"
                 >
                     <ImageIcon />
                 </Button>
+
                 <Button
+                    type="button"
                     onClick={addYoutubeVideo}
                     className="mr-2 px-2 py-1 bg-white text-black hover:bg-secondary hover:text-white"
                 >
                     <Video />
                 </Button>
+
                 <Button
+                    type="button"
                     onClick={() => editor?.chain().focus().toggleBold().run()}
                     disabled={!editor?.can().chain().focus().toggleBold().run()}
                     className={`${
@@ -132,6 +137,7 @@ const TiptapToolbar = ({ editor }: { editor: any }) => {
                     <Bold />
                 </Button>
                 <Button
+                    type="button"
                     onClick={() => editor?.chain().focus().toggleItalic().run()}
                     disabled={
                         !editor?.can().chain().focus().toggleItalic().run()
@@ -145,6 +151,7 @@ const TiptapToolbar = ({ editor }: { editor: any }) => {
                     <Italic />
                 </Button>
                 <Button
+                    type="button"
                     onClick={() => editor?.chain().focus().toggleStrike().run()}
                     disabled={
                         !editor?.can().chain().focus().toggleStrike().run()
@@ -158,6 +165,7 @@ const TiptapToolbar = ({ editor }: { editor: any }) => {
                     <Strikethrough />
                 </Button>
                 <Button
+                    type="button"
                     onClick={() =>
                         editor?.chain().focus().toggleUnderline().run()
                     }
@@ -170,6 +178,7 @@ const TiptapToolbar = ({ editor }: { editor: any }) => {
                     <LucideUnderline />
                 </Button>
                 <Button
+                    type="button"
                     onClick={() =>
                         editor?.chain().focus().setTextAlign('left').run()
                     }
@@ -207,6 +216,7 @@ const TiptapToolbar = ({ editor }: { editor: any }) => {
                 </Button>
 
                 <Button
+                    type="button"
                     onClick={() => editor?.chain().focus().toggleCode().run()}
                     disabled={!editor?.can().chain().focus().toggleCode().run()}
                     className={
@@ -219,6 +229,7 @@ const TiptapToolbar = ({ editor }: { editor: any }) => {
                 </Button>
 
                 <Button
+                    type="button"
                     onClick={() =>
                         editor
                             ?.chain()
@@ -279,6 +290,7 @@ const TiptapToolbar = ({ editor }: { editor: any }) => {
                 </Select>
 
                 <Button
+                    type="button"
                     onClick={() =>
                         editor?.chain().focus().toggleBulletList().run()
                     }
@@ -291,6 +303,7 @@ const TiptapToolbar = ({ editor }: { editor: any }) => {
                     <List />
                 </Button>
                 <Button
+                    type="button"
                     onClick={() =>
                         editor?.chain().focus().toggleOrderedList().run()
                     }
@@ -304,6 +317,7 @@ const TiptapToolbar = ({ editor }: { editor: any }) => {
                 </Button>
 
                 <Button
+                    type="button"
                     onClick={() =>
                         editor?.chain().focus().setHorizontalRule().run()
                     }
@@ -313,6 +327,7 @@ const TiptapToolbar = ({ editor }: { editor: any }) => {
                 </Button>
 
                 <Button
+                    type="button"
                     onClick={() => editor?.chain().focus().undo().run()}
                     disabled={!editor?.can().chain().focus().undo().run()}
                     className="mr-2 px-2 py-1 bg-white text-black hover:bg-secondary hover:text-white"
@@ -320,6 +335,7 @@ const TiptapToolbar = ({ editor }: { editor: any }) => {
                     <Undo />
                 </Button>
                 <Button
+                    type="button"
                     onClick={() => editor?.chain().focus().redo().run()}
                     disabled={!editor?.can().chain().focus().redo().run()}
                     className="mr-2 px-2 py-1 bg-white text-black hover:bg-secondary hover:text-white"

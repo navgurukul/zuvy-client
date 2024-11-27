@@ -8,7 +8,7 @@ import {
     handleVisibilityChange,
     requestFullScreen,
     updateProctoringData,
-    getProctoringData
+    getProctoringData,
 } from '@/utils/students'
 import { Clock, Fullscreen, Timer } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
@@ -48,10 +48,8 @@ function Page({
         ),
     }
 
-    const {
-        setFullScreenExitInstance,
-        fullScreenExitInstance,
-    } = getAssessmentStore()
+    const { setFullScreenExitInstance, fullScreenExitInstance } =
+        getAssessmentStore()
 
     const [selectedQuesType, setSelectedQuesType] = useState<
         'quiz' | 'open-ended' | 'coding'
@@ -75,15 +73,21 @@ function Page({
     const [chapterId, setChapterId] = useState<any>()
 
     // Check if Proctoring is set on by admin for tab switching, copy paste, etc.
-    const [isTabProctorOn, setIsTabProctorOn] = useState(assessmentData.tabChange)
-    const [isFullScreenProctorOn, setIsFullScreenProctorOn] = useState(assessmentData.screenRecord)
-    const [isCopyPasteProctorOn, setIsCopyPasteProctorOn] = useState(assessmentData.copyPaste)
+    const [isTabProctorOn, setIsTabProctorOn] = useState(
+        assessmentData.tabChange
+    )
+    const [isFullScreenProctorOn, setIsFullScreenProctorOn] = useState(
+        assessmentData.screenRecord
+    )
+    const [isCopyPasteProctorOn, setIsCopyPasteProctorOn] = useState(
+        assessmentData.copyPaste
+    )
     const [isEyeTrackingProctorOn, setIsEyeTrackingProctorOn] = useState(null)
-    const [startedAt, setStartedAt] = useState(new Date(assessmentData?.submission?.startedAt).getTime())
-
+    const [startedAt, setStartedAt] = useState(
+        new Date(assessmentData?.submission?.startedAt).getTime()
+    )
 
     const pathname = usePathname()
-
 
     function isCurrentPageSubmitAssessment() {
         return (
@@ -120,7 +124,6 @@ function Page({
             if (newRemainingTime === 0 && newIntervalId) {
                 submitAssessment()
                 clearInterval(newIntervalId)
-                
             }
         }, 1000)
         setIntervalId(newIntervalId)
@@ -130,7 +133,7 @@ function Page({
         const endTime = startedAt + assessmentData.timeLimit * 1000
 
         // get all the proctoring violation counts data for tab switching, copy paste, etc.:-
-        if(assessmentSubmitId){
+        if (assessmentSubmitId) {
             getProctoringData(assessmentSubmitId)
         }
 
@@ -138,29 +141,31 @@ function Page({
             startTimer(endTime)
         }
 
-        isTabProctorOn && document.addEventListener('visibilitychange', () =>
-            handleVisibilityChange(
-                submitAssessment,
-                isCurrentPageSubmitAssessment,
-                assessmentSubmitId,
+        isTabProctorOn &&
+            document.addEventListener('visibilitychange', () =>
+                handleVisibilityChange(
+                    submitAssessment,
+                    isCurrentPageSubmitAssessment,
+                    assessmentSubmitId
+                )
             )
-        )
 
-       isFullScreenProctorOn && document.addEventListener('fullscreenchange', () =>
-            handleFullScreenChange(
-                submitAssessment,
-                isCurrentPageSubmitAssessment,
-                setIsFullScreen,
-                assessmentSubmitId
+        isFullScreenProctorOn &&
+            document.addEventListener('fullscreenchange', () =>
+                handleFullScreenChange(
+                    submitAssessment,
+                    isCurrentPageSubmitAssessment,
+                    setIsFullScreen,
+                    assessmentSubmitId
+                )
             )
-        )
 
         return () => {
             document.removeEventListener('visibilitychange', () =>
                 handleVisibilityChange(
                     submitAssessment,
                     isCurrentPageSubmitAssessment,
-                    assessmentSubmitId,
+                    assessmentSubmitId
                 )
             )
             document.removeEventListener('fullscreenchange', () =>
@@ -175,7 +180,13 @@ function Page({
                 clearInterval(intervalId)
             }
         }
-    }, [isTabProctorOn, isFullScreenProctorOn, isCopyPasteProctorOn, isEyeTrackingProctorOn, startedAt])
+    }, [
+        isTabProctorOn,
+        isFullScreenProctorOn,
+        isCopyPasteProctorOn,
+        isEyeTrackingProctorOn,
+        startedAt,
+    ])
 
     // useEffect(() => {
     //     // Add event listeners for right-click and key presses
@@ -193,8 +204,6 @@ function Page({
             submitAssessment()
         }
     }, [remainingTime])
-
-
 
     async function getCodingSubmissionsData(
         codingOutsourseId: any,
@@ -361,8 +370,9 @@ function Page({
 
     async function submitAssessment() {
         setDisableSubmit(true)
-        if(assessmentSubmitId){
-            const { tabChange, copyPaste, fullScreenExit, eyeMomentCount } = await getProctoringData(assessmentSubmitId);
+        if (assessmentSubmitId) {
+            const { tabChange, copyPaste, fullScreenExit, eyeMomentCount } =
+                await getProctoringData(assessmentSubmitId)
 
             try {
                 await api.patch(
@@ -376,12 +386,13 @@ function Page({
                 )
                 toast({
                     title: 'Assessment Submitted',
-                    description: 'Your assessment has been submitted successfully',
+                    description:
+                        'Your assessment has been submitted successfully',
                     className: 'text-left capitalize',
                 })
-    
+
                 completeChapter()
-                    
+
                 setTimeout(() => {
                     window.close()
                 }, 4000)
@@ -389,20 +400,24 @@ function Page({
                 console.error(e)
             }
         }
-
     }
 
     async function handleCopyPasteAttempt(event: any) {
-        if(assessmentSubmitId){
+        if (assessmentSubmitId) {
             if (isCopyPasteProctorOn) {
-                const { tabChange, copyPaste, fullScreenExit, eyeMomentCount } = await getProctoringData(assessmentSubmitId);
-                
-                updateProctoringData(assessmentSubmitId, tabChange, copyPaste + 1, fullScreenExit, eyeMomentCount);
+                const { tabChange, copyPaste, fullScreenExit, eyeMomentCount } =
+                    await getProctoringData(assessmentSubmitId)
+
+                updateProctoringData(
+                    assessmentSubmitId,
+                    tabChange,
+                    copyPaste + 1,
+                    fullScreenExit,
+                    eyeMomentCount
+                )
             }
         }
     }
-    
-    
 
     const handleFullScreenRequest = () => {
         const element = document.documentElement
@@ -410,141 +425,157 @@ function Page({
         setIsFullScreen(true)
     }
 
-
     return (
-       <AlertProvider>
-         <div onPaste={(e) => handleCopyPasteAttempt(e)}
-                    onCopy={(e) => handleCopyPasteAttempt(e)} className='h-auto mb-24'>
-            {!isFullScreen ? (
-                <>
-                    <div className="flex items-center justify-center gap-2">
-                        <div className="font-bold text-xl">
-                            <TimerDisplay remainingTime={remainingTime} />
+        <AlertProvider>
+            <div
+                onPaste={(e) => handleCopyPasteAttempt(e)}
+                onCopy={(e) => handleCopyPasteAttempt(e)}
+                className="h-auto mb-24"
+            >
+                {!isFullScreen ? (
+                    <>
+                        <div className="flex items-center justify-center gap-2">
+                            <div className="font-bold text-xl">
+                                <TimerDisplay remainingTime={remainingTime} />
+                            </div>
                         </div>
-                    </div>
-                    <Separator className="my-6" />
-                    <h1>
-                        Enter Full Screen to see the Questions. Warning: If you
-                        exit fullscreen, your test will get submitted
-                        automatically
-                    </h1>
-                    <div className="flex justify-center mt-10">
-                        <Button onClick={handleFullScreenRequest}>
-                            Enter Full Screen
-                        </Button>
-                    </div>
-                </>
-            ) : (
-                <div onPaste={(e) => handleCopyPasteAttempt(e)}
-                    onCopy={(e) => handleCopyPasteAttempt(e)}>
-                    <div className="flex items-center justify-center gap-2">
-                        <div className="font-bold text-xl">
-                            <TimerDisplay remainingTime={remainingTime} />
+                        <Separator className="my-6" />
+                        <h1>
+                            Enter Full Screen to see the Questions. Warning: If
+                            you exit fullscreen, your test will get submitted
+                            automatically
+                        </h1>
+                        <div className="flex justify-center mt-10">
+                            <Button onClick={handleFullScreenRequest}>
+                                Enter Full Screen
+                            </Button>
                         </div>
-                    </div>
-                    <Separator className="my-6" />
+                    </>
+                ) : (
                     <div
-                        className="flex justify-center"
+                        onPaste={(e) => handleCopyPasteAttempt(e)}
+                        onCopy={(e) => handleCopyPasteAttempt(e)}
                     >
-                        <div className="flex flex-col gap-5 w-1/2 text-left">
-                            <h2 className="font-bold">
-                                Testing Your Knowledge
-                            </h2>
-                            <p className="deadline flex items-center gap-2">
-                                <Clock size={18} />
-                                Deadline:{' '}
-                                {assessmentData.deadline ||
-                                    'No Deadline For This Assessment'}
-                            </p>
-                            <p className="testTime flex items-center gap-2">
-                                <Timer size={18} />
-                                Test Time:{' '}
-                                {Math.floor(
-                                    assessmentData.timeLimit / 3600
-                                )}{' '}
-                                Hours{' '}
-                                {Math.floor(
-                                    (assessmentData.timeLimit % 3600) / 60
-                                )}{' '}
-                                Minutes
-                            </p>
-                            <p className="description">
-                                Timer has started. Questions will disappear if you exit full screen. All the problems i.e. coding challenges, MCQs and open-ended questions have to be completed all at once
-                            </p>
-
-                            <h1 className='font-bold'>Proctoring Rules</h1>
-                            <p>To ensure fair assessments, the assessments are proctored are proctored for the following cases below. Please avoid violating the rules:</p>
-                            <ul>
-                                <li>Copy and pasting</li>
-                                <li>Tab switching</li>
-                                <li>Assessment screen exit</li>
-                                <li>Eye Tracking</li>
-                            </ul>
+                        <div className="flex items-center justify-center gap-2">
+                            <div className="font-bold text-xl">
+                                <TimerDisplay remainingTime={remainingTime} />
+                            </div>
                         </div>
-                    </div>
-                    <div className="flex justify-center">
-                        <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
-                            <h2 className="font-bold">Coding Challenges</h2>
-                            {assessmentData.CodingQuestions?.map(
-                                (question: any) => (
+                        <Separator className="my-6" />
+                        <div className="flex justify-center">
+                            <div className="flex flex-col gap-5 w-1/2 text-left">
+                                <h2 className="font-bold">
+                                    Testing Your Knowledge
+                                </h2>
+                                <p className="deadline flex items-center gap-2">
+                                    <Clock size={18} />
+                                    Deadline:{' '}
+                                    {assessmentData.deadline ||
+                                        'No Deadline For This Assessment'}
+                                </p>
+                                <p className="testTime flex items-center gap-2">
+                                    <Timer size={18} />
+                                    Test Time:{' '}
+                                    {Math.floor(
+                                        assessmentData.timeLimit / 3600
+                                    )}{' '}
+                                    Hours{' '}
+                                    {Math.floor(
+                                        (assessmentData.timeLimit % 3600) / 60
+                                    )}{' '}
+                                    Minutes
+                                </p>
+                                <p className="description">
+                                    Timer has started. Questions will disappear
+                                    if you exit full screen. All the problems
+                                    i.e. coding challenges, MCQs and open-ended
+                                    questions have to be completed all at once
+                                </p>
+
+                                <h1 className="font-bold">Proctoring Rules</h1>
+                                <p>
+                                    To ensure fair assessments, the assessments
+                                    are proctored are proctored for the
+                                    following cases below. Please avoid
+                                    violating the rules:
+                                </p>
+                                <ul>
+                                    <li>Copy and pasting</li>
+                                    <li>Tab switching</li>
+                                    <li>Assessment screen exit</li>
+                                    <li>Eye Tracking</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div className="flex justify-center">
+                            <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
+                                <h2 className="font-bold">Coding Challenges</h2>
+                                {assessmentData.CodingQuestions?.map(
+                                    (question: any) => (
+                                        <QuestionCard
+                                            key={question.id}
+                                            id={question.id}
+                                            title={question.title}
+                                            description={question.difficulty}
+                                            onSolveChallenge={() =>
+                                                handleSolveChallenge(
+                                                    'coding',
+                                                    question.id,
+                                                    question.codingOutsourseId
+                                                )
+                                            }
+                                        />
+                                    )
+                                )}
+                            </div>
+                        </div>
+                        {assessmentData.Quizzes > 0 && (
+                            <div className="flex justify-center">
+                                <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
+                                    <h2 className="font-bold">MCQs</h2>
                                     <QuestionCard
-                                        key={question.id}
-                                        id={question.id}
-                                        title={question.title}
-                                        description={question.difficulty}
+                                        id={1}
+                                        title="Quiz"
+                                        description={`${
+                                            assessmentData.Quizzes || 0
+                                        } questions`}
                                         onSolveChallenge={() =>
-                                            handleSolveChallenge(
-                                                'coding',
-                                                question.id,
-                                                question.codingOutsourseId
-                                            )
+                                            handleSolveChallenge('quiz')
                                         }
                                     />
-                                )
-                            )}
-                        </div>
+                                </div>
+                            </div>
+                        )}
+                        {assessmentData.OpenEndedQuestions > 0 && (
+                            <div className="flex justify-center">
+                                <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
+                                    <h2 className="font-bold">
+                                        Open-Ended Questions
+                                    </h2>
+                                    <QuestionCard
+                                        id={1}
+                                        title="Open-Ended Questions"
+                                        description={`${
+                                            assessmentData.OpenEndedQuestions ||
+                                            0
+                                        } questions`}
+                                        onSolveChallenge={() =>
+                                            handleSolveChallenge('open-ended')
+                                        }
+                                    />
+                                </div>
+                            </div>
+                        )}
+                        <Button
+                            onClick={submitAssessment}
+                            disabled={disableSubmit}
+                        >
+                            Submit Assessment
+                        </Button>
                     </div>
-                    {assessmentData.Quizzes > 0 && (
-                        <div className="flex justify-center">
-                            <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
-                                <h2 className="font-bold">MCQs</h2>
-                                <QuestionCard
-                                    id={1}
-                                    title="Quiz"
-                                    description={`${assessmentData.Quizzes || 0
-                                        } questions`}
-                                    onSolveChallenge={() =>
-                                        handleSolveChallenge('quiz')
-                                    }
-                                />
-                            </div>
-                        </div>
-                    )}
-                    {assessmentData.OpenEndedQuestions > 0 && (
-                        <div className="flex justify-center">
-                            <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
-                                <h2 className="font-bold">
-                                    Open-Ended Questions
-                                </h2>
-                                <QuestionCard
-                                    id={1}
-                                    title="Open-Ended Questions"
-                                    description={`${assessmentData.OpenEndedQuestions || 0
-                                        } questions`}
-                                    onSolveChallenge={() =>
-                                        handleSolveChallenge('open-ended')
-                                    }
-                                />
-                            </div>
-                        </div>
-                    )}
-                    <Button onClick={submitAssessment} disabled={disableSubmit}>
-                        Submit Assessment
-                    </Button>
-                </div>
-            )}
-        </div>
-       </AlertProvider>
+                )}
+            </div>
+        </AlertProvider>
     )
 }
 

@@ -66,13 +66,21 @@ const formSchema = z.object({
 export default function NewCodingProblemForm({
     tags,
     setIsDialogOpen,
-    getAllCodingQuestions,
+    filteredCodingQuestions,
     setCodingQuestions,
+    selectedOptions,
+    difficulty,
+    offset,
+    position,
 }: {
     tags: any
     setIsDialogOpen: any
-    getAllCodingQuestions: any
     setCodingQuestions: any
+    filteredCodingQuestions?: any
+    selectedOptions?: any
+    difficulty?: any
+    offset?: number
+    position?: String
 }) {
     const [testCases, setTestCases] = useState([
         { id: 1, input: '', output: '' },
@@ -284,7 +292,13 @@ export default function NewCodingProblemForm({
         }
 
         createCodingQuestion(formattedData)
-        getAllCodingQuestions(setCodingQuestions)
+        filteredCodingQuestions(
+            setCodingQuestions,
+            offset,
+            position,
+            difficulty,
+            selectedOptions
+        )
     }
 
     return (

@@ -1,8 +1,12 @@
+'use client'
+
 import { set } from 'date-fns'
 import { create } from 'zustand'
 import { useEffect } from 'react'
 import { api } from '@/utils/axios.config'
 import { string } from 'zod'
+import { OFFSET, POSITION } from '@/utils/constant'
+import { persist } from 'zustand/middleware'
 
 type CounterStore = {
     studentData: {
@@ -54,6 +58,7 @@ interface StoreBatchData {
 }
 
 export interface quiz {
+    title: any
     id: number
     question: string
     options: {
@@ -64,6 +69,7 @@ export interface quiz {
     difficulty: 'Easy' | 'Medium' | 'Hard'
     tagId: number
     usage: number
+    quizVariants: any[]
 }
 
 export const getCourseData = create<StoreCourseData>((set) => ({
@@ -150,7 +156,7 @@ type assessmentStore = {
 }
 
 export const getAssessmentStore = create<assessmentStore>((set) => ({
-     fullScreenExitInstance: 0,
+    fullScreenExitInstance: 0,
     setFullScreenExitInstance: (newValue: number) => {
         set({ fullScreenExitInstance: newValue })
     },
@@ -348,8 +354,75 @@ export const getcodingQuestionState = create<codingQuestions>((set) => ({
         set({ codingQuestions: newValue })
     },
 }))
+// type  option = {
+//     value: string;
+//     label: string;
+// };
+type selectedOptions = {
+    selectedOptions: any[]
+    setSelectedOptions: (newValue: any[]) => void
+}
+export const getSelectedOptions = create<selectedOptions>((set) => ({
+    selectedOptions: [{ value: '-1', label: 'All Topics' }],
+    setSelectedOptions: (newValue: any[]) => {
+        set({ selectedOptions: newValue })
+    },
+}))
 
-// ------------------------------
+export const getSelectedOpenEndedOptions = create<selectedOptions>((set) => ({
+    selectedOptions: [{ value: '-1', label: 'All Topics' }],
+    setSelectedOptions: (newValue: any[]) => {
+        set({ selectedOptions: newValue })
+    },
+}))
+export const getSelectedMCQOptions = create<selectedOptions>((set) => ({
+    selectedOptions: [{ value: '-1', label: 'All Topics' }],
+    setSelectedOptions: (newValue: any[]) => {
+        set({ selectedOptions: newValue })
+    },
+}))
+type difficulty = {
+    difficulty: any[]
+    setDifficulty: (newValue: any[]) => void
+}
+export const getDifficulty = create<difficulty>((set) => ({
+    difficulty: [{ value: 'None', label: 'All Difficulty' }],
+    setDifficulty: (newValue: any[]) => {
+        set({ difficulty: newValue })
+    },
+}))
+
+export const getOpenEndedDifficulty = create<difficulty>((set) => ({
+    difficulty: [{ value: 'None', label: 'All Difficulty' }],
+    setDifficulty: (newValue: any[]) => {
+        set({ difficulty: newValue })
+    },
+}))
+
+type offset = {
+    offset: number
+    setOffset: (newValue: number) => void
+}
+
+export const getOffset = create<offset>((set) => ({
+    offset: OFFSET,
+    setOffset: (newValue: number) => {
+        set({ offset: newValue })
+    },
+}))
+
+type position = {
+    position: string
+    setPosition: (newValue: string) => void
+}
+
+export const getPosition = create<position>((set) => ({
+    position: POSITION,
+    setPosition: (newValue: string) => {
+        set({ position: newValue })
+    },
+}))
+// --------------------------
 
 type deleteCodingQuestion = {
     isDeleteModalOpen: boolean
@@ -502,7 +575,7 @@ export const getEditCodingQuestionDialogs = create<editCodingQuestionDialogs>(
         isQuestionUsed: false,
         setIsQuestionUsed: (newValue: boolean) => {
             set({ isQuestionUsed: newValue })
-        }
+        },
     })
 )
 
@@ -686,3 +759,89 @@ export const getMcqSearch = create<mcqSearch>((set) => ({
         set({ mcqSearch: newValue })
     },
 }))
+
+type generatedQuestions = {
+    generatedQuestions: any[]
+    setGeneratedQuestions: (newValue: any[]) => void
+}
+
+export const getGeneratedQuestions = create<generatedQuestions>((set) => ({
+    generatedQuestions: [],
+    setGeneratedQuestions: (newValue: any[]) => {
+        set({ generatedQuestions: newValue })
+    },
+}))
+
+export type RequestBodyType = {
+    quizzes: {
+        tagId: number
+        difficulty: string
+        variantMCQs: {
+            question: string
+            options: { 1: string; 2: string; 3: string; 4: string }
+        }[]
+    }[]
+}
+
+type requestBody = {
+    requestBody: RequestBodyType
+    setRequestBody: (newValue: RequestBodyType) => void
+}
+
+export const getRequestBody = create<requestBody>((set) => ({
+    requestBody: {
+        quizzes: [],
+    },
+    setRequestBody: (newValue: RequestBodyType) => {
+        set({ requestBody: newValue })
+    },
+}))
+type isPreviewModalOpen = {
+    isPreviewModalOpen: boolean
+    setIsPreviewModalOpen: (newValue: boolean) => void
+}
+
+export const getisPreviewModalOpen = create<isPreviewModalOpen>((set) => ({
+    isPreviewModalOpen: false,
+    setIsPreviewModalOpen: (newValue: boolean) => {
+        set({ isPreviewModalOpen: newValue })
+    },
+}))
+
+// ------------------------- User ------------------------
+interface User {
+    rolesList: any[]
+    id: string
+    email: string
+    name: string
+    profile_picture?: string
+    [key: string]: any // Allow additional properties if the structure varies
+}
+
+type UserState = {
+    user: User
+    setUser: (newValue: User) => void
+}
+
+export const getUser = create<UserState>()(
+    persist(
+        (set) => ({
+            user: {
+                rolesList: [],
+                id: '',
+                email: '',
+                name: '',
+            },
+            setUser: (newValue: User) => {
+                set({ user: newValue })
+            },
+        }),
+        {
+            name: 'user-storage', // Key for localStorage or other storage
+            // Optional: Customize storage, serialize/deserialize logic, etc.
+            partialize: (state) => ({ user: state.user }), // Save only the user property
+        }
+    )
+)
+
+// ------------------------- User ------------------------

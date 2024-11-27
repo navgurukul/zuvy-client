@@ -18,6 +18,7 @@ import PreviewCodingChallenge from './PreviewCodingChallenge'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import { toast } from '@/components/ui/use-toast'
 import QuestionDescriptionModal from '../Assessment/QuestionDescriptionModal'
+import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 
 interface Example {
     input: number[]
@@ -77,6 +78,7 @@ function CodingChallenge({
     activeChapterTitle: string
     moduleId: string
 }) {
+    const heightClass = useResponsiveHeight()
     const [searchTerm, setSearchTerm] = useState('')
     const debouncedSearch = useDebounce(searchTerm, 1000)
     const { tags, setTags } = getCodingQuestionTags()
@@ -102,12 +104,14 @@ function CodingChallenge({
     const [chapterTitle, setChapterTitle] = useState<string>(activeChapterTitle)
     const [showPreview, setShowPreview] = useState<boolean>(false)
     const handlePreviewClick = () => {
-           if (selectedQuestions.length === 0){
+        if (selectedQuestions.length === 0) {
             // Show toast if no questions are added
             toast({
                 title: 'No Questions',
-                description: 'Please add at least one question to preview the codiing question',
-               className: 'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
+                description:
+                    'Please add at least one question to preview the codiing question',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
             })
         } else {
             setShowPreview(true)
@@ -209,7 +213,7 @@ function CodingChallenge({
             ) : (
                 <div>
                     {/* SearchBar component */}
-                    <div className="flex flex-col mb-5">
+                    <div className="flex items-center mb-5">
                         <Input
                             required
                             onChange={(e) => {
@@ -226,12 +230,11 @@ function CodingChallenge({
                             variant={'ghost'}
                             type="button"
                             className=" text-secondary w-[100px] h-[30px] gap-x-1 "
-                            onClick={handlePreviewClick}  
+                            onClick={handlePreviewClick}
                         >
                             <ArrowUpRightSquare />
                             <h1>Preview</h1>
                         </Button>
-
 
                         {/* <div className="text-secondary flex font-semibold items-center">
                     <h6 className="mr-2 text-sm">Preview</h6>
@@ -252,7 +255,7 @@ function CodingChallenge({
                                 tags={tags}
                             />
                             {/* <ScrollArea className="h-dvh pr-4"> */}
-                            <ScrollArea className="h-[500px] pr-4">
+                            <ScrollArea className={`${heightClass} pr-4`}>
                                 {filteredQuestions?.map((question: any) => (
                                     <div
                                         key={question.id}
@@ -356,6 +359,43 @@ function CodingChallenge({
                                                 type="coding"
                                             />
                                         </Dialog>
+                                        <div>
+                                            {selectedQuestions?.some(
+                                                (selectedQuestion) =>
+                                                    selectedQuestion?.id ===
+                                                    question.id
+                                            ) ? (
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width="20"
+                                                    height="20"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="2"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    className="lucide lucide-circle-check"
+                                                >
+                                                    <circle
+                                                        cx="12"
+                                                        cy="12"
+                                                        r="10"
+                                                    />
+                                                    <path d="m9 12 2 2 4-4" />
+                                                </svg>
+                                            ) : (
+                                                <PlusCircle
+                                                    onClick={() => {
+                                                        setSelectedQuestions([
+                                                            question,
+                                                        ])
+                                                    }}
+                                                    className="text-secondary cursor-pointer"
+                                                    size={20}
+                                                />
+                                            )}
+                                        </div>
                                     </div>
                                 ))}
                             </ScrollArea>

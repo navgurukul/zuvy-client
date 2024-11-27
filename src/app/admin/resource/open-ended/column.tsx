@@ -8,9 +8,14 @@ import {
     getdeleteOpenEndedQuestion,
     getopenEndedQuestionstate,
     getEditOpenEndedDialogs,
+    getSelectedOpenEndedOptions,
+    getOpenEndedDifficulty,
+    getOffset,
+    getPosition,
 } from '@/store/store'
 import {
     deleteOpenEndedQuestion,
+    filteredOpenEndedQuestions,
     getAllOpenEndedQuestions,
     handleConfirm,
     handleDeleteModal,
@@ -88,6 +93,10 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
             } = getEditOpenEndedDialogs()
             const { openEndedQuestions, setOpenEndedQuestions } =
                 getopenEndedQuestionstate()
+                const { selectedOptions, setSelectedOptions } =  getSelectedOpenEndedOptions()
+                const {difficulty, setDifficulty} =getOpenEndedDifficulty()
+                const { offset, setOffset} = getOffset()
+                const {position, setPosition} = getPosition()
 
             return (
                 <>
@@ -152,8 +161,13 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
                                     deleteOpenEndedQuestion,
                                     setDeleteModalOpen,
                                     deleteOpenEndedQuestionId,
-                                    getAllOpenEndedQuestions,
-                                    setOpenEndedQuestions
+                             
+                                    filteredOpenEndedQuestions,
+                                    setOpenEndedQuestions,
+                                    selectedOptions,
+                                    difficulty,
+                                    offset,
+                                    position,
                                 )
                             }}
                             modalText={DELETE_OPEN_ENDED_QUESTION_CONFIRMATION}

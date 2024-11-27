@@ -3,14 +3,31 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 import { CodingQuestion } from '@/utils/data/schema'
-import { Edit, Info, Pencil, Star, Trash2, ExternalLink } from 'lucide-react'
-import { Dialog, DialogContent, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
+import {
+    Edit,
+    Info,
+    Pencil,
+    Star,
+    Trash2,
+    ExternalLink,
+    Eye,
+} from 'lucide-react'
+import {
+    Dialog,
+    DialogContent,
+    DialogOverlay,
+    DialogTrigger,
+} from '@/components/ui/dialog'
 import { DELETE_CODING_QUESTION_CONFIRMATION } from '@/utils/constant'
 import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
 import {
     getDeleteCodingQuestion,
     getEditCodingQuestionDialogs,
     getcodingQuestionState,
+    getSelectedOptions,
+    getDifficulty,
+    getOffset,
+    getPosition,
 } from '@/store/store'
 import { cn, difficultyColor } from '@/lib/utils'
 
@@ -20,10 +37,9 @@ import {
     handleDeleteModal,
     getAllCodingQuestions,
     handleEditCodingQuestion,
+    filteredCodingQuestions,
 } from '@/utils/admin'
 import QuestionDescriptionModal from '../../courses/[courseId]/module/_components/Assessment/QuestionDescriptionModal'
-
-
 
 export const columns: ColumnDef<CodingQuestion>[] = [
     {
@@ -33,27 +49,11 @@ export const columns: ColumnDef<CodingQuestion>[] = [
         ),
         cell: ({ row }) => {
             const codingQuestion = row.original
-            
 
             return (
-                <Dialog>
-                    <div className="flex items-center gap-2 cursor-pointer">
-                        <span>{codingQuestion.title}</span>
-                <DialogTrigger asChild>
-                        <ExternalLink className="text-[#518672] hover:text-green-800 w-4 h-4" />
-                </DialogTrigger>
-                        </div>
-    
-                <DialogOverlay>
-                    <DialogContent>
-                        <QuestionDescriptionModal
-                            question={codingQuestion}
-                            type="coding"
-                            />
-                    </DialogContent>
-                </DialogOverlay>
-            </Dialog>
-            
+                <span className="text-start w-full flex ">
+                    {codingQuestion.title}
+                </span>
             )
         },
         enableSorting: false,
@@ -62,7 +62,11 @@ export const columns: ColumnDef<CodingQuestion>[] = [
     {
         accessorKey: 'difficulty',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Difficulty" />
+            <DataTableColumnHeader
+                className="flex justify-end ml-28"
+                column={column}
+                title="Difficulty"
+            />
         ),
         cell: ({ row }) => {
             const codingQuestion = row.original
@@ -70,11 +74,13 @@ export const columns: ColumnDef<CodingQuestion>[] = [
             return (
                 <div
                     className={cn(
-                        `flex items-center font-semibold text-secondary`,
+                        `flex items-center justify-end  ml-24 font-semibold text-secondary`,
                         difficultyColor(codingQuestion.difficulty)
                     )}
                 >
-                    {codingQuestion.difficulty}
+                    <span className="text-left mr-10 w-4">
+                        {codingQuestion.difficulty}
+                    </span>
                 </div>
             )
         },
@@ -84,19 +90,57 @@ export const columns: ColumnDef<CodingQuestion>[] = [
     {
         accessorKey: 'usage',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Usage" />
+            <DataTableColumnHeader
+                className="flex justify-end"
+                column={column}
+                title="Usage"
+            />
         ),
         cell: ({ row }) => {
             const codingQuestion = row.original
 
             return (
-                <div className="flex items-center">
-                    {codingQuestion?.usage ? codingQuestion?.usage + ' times' : 0 + ' times'}
+                <div className="flex items-center justify-end">
+                    {codingQuestion?.usage
+                        ? codingQuestion?.usage + ' times'
+                        : 0 + ' times'}
                 </div>
             )
         },
         enableSorting: true,
         enableHiding: true,
+    },
+    {
+        id: 'actions1',
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                className="text-[17px]  flex justify-end ml-4"
+                column={column}
+                title="Preview"
+            />
+        ),
+        cell: ({ row }) => {
+            const codingQuestion = row.original
+
+            return (
+                <div className="mr-5 flex justify-end">
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Eye className="cursor-pointer" />
+                        </DialogTrigger>
+
+                        <DialogOverlay>
+                            <DialogContent>
+                                <QuestionDescriptionModal
+                                    question={codingQuestion}
+                                    type="coding"
+                                />
+                            </DialogContent>
+                        </DialogOverlay>
+                    </Dialog>
+                </div>
+            )
+        },
     },
     {
         id: 'actions',
@@ -119,23 +163,27 @@ export const columns: ColumnDef<CodingQuestion>[] = [
 
             const { codingQuestions, setCodingQuestions } =
                 getcodingQuestionState()
+            const { selectedOptions, setSelectedOptions } = getSelectedOptions()
+            const { difficulty, setDifficulty } = getDifficulty()
+            const { offset, setOffset } = getOffset()
+            const { position, setPosition } = getPosition()
 
             return (
                 <>
                     <div className="flex">
-                                <Pencil
-                                    className="cursor-pointer mr-5"
-                                    size={20}
-                                    onClick={() => {
-                                        handleEditCodingQuestion(
-                                            codingQuestion,
-                                            setIsCodingEditDialogOpen,
-                                            setEditCodingQuestionId,
-                                            setIsQuestionUsed
-                                        )
-                                    }}
-                                />
-                    
+                        <Pencil
+                            className="cursor-pointer mr-5"
+                            size={20}
+                            onClick={() => {
+                                handleEditCodingQuestion(
+                                    codingQuestion,
+                                    setIsCodingEditDialogOpen,
+                                    setEditCodingQuestionId,
+                                    setIsQuestionUsed
+                                )
+                            }}
+                        />
+
                         <Trash2
                             onClick={(e) => {
                                 e.stopPropagation()
@@ -156,8 +204,12 @@ export const columns: ColumnDef<CodingQuestion>[] = [
                                     handleDelete,
                                     setDeleteModalOpen,
                                     deleteCodingQuestionId,
-                                    getAllCodingQuestions,
-                                    setCodingQuestions
+                                    filteredCodingQuestions,
+                                    setCodingQuestions,
+                                    selectedOptions,
+                                    difficulty,
+                                    offset,
+                                    position
                                 )
                             }}
                             modalText={DELETE_CODING_QUESTION_CONFIRMATION}

@@ -33,6 +33,10 @@ import {
     getCodingQuestionTags,
     getEditCodingQuestionDialogs,
     getcodingQuestionState,
+    getSelectedOptions,
+    getDifficulty,
+    getOffset,
+    getPosition,
 } from '@/store/store'
 import {
     getAllCodingQuestions,
@@ -45,7 +49,7 @@ import EditCodingQuestionForm from '../_components/EditCodingQuestionForm'
 import useDebounce from '@/hooks/useDebounce'
 import MultiSelector from '@/components/ui/multi-selector'
 import difficultyOptions from '@/app/utils'
-import CodingTopics from '../../courses/[courseId]/module/_components/codingChallenge/CodingTopics'
+// import CodingTopics from '../../courses/[courseId]/module/_components/codingChallenge/CodingTopics'
 // import { POSITION } from '@/utils/constant'
 
 export type Tag = {
@@ -61,7 +65,6 @@ interface Option {
     label: string
     value: string
 }
-
 const CodingProblems = () => {
     const { codingQuestions, setCodingQuestions } = getcodingQuestionState()
     const [allCodingQuestions, setAllCodingQuestions] = useState([])
@@ -84,29 +87,26 @@ const CodingProblems = () => {
         }
         return { tagName: 'All Topics', id: -1 }
     })
-    const [selectedOptions, setSelectedOptions] = useState<Option[]>([
-        // { id: -1, tagName: 'All Topics' },
-        { value: '-1', label: 'All Topics' },
-    ])
+    // const [selectedOptions, setSelectedOptions] = getSelectedOptions()
+    const { selectedOptions, setSelectedOptions } = getSelectedOptions()
     const [options, setOptions] = useState<Option[]>([
         { value: '-1', label: 'All Topics' },
     ])
     const [selectedDifficulty, setSelectedDifficulty] = useState(['None'])
-    const [difficulty, setDifficulty] = useState([
-        { value: 'None', label: 'All Difficulty' },
-    ])
+    const {difficulty, setDifficulty} = getDifficulty()
 
     const [loading, setLoading] = useState(true)
     const [openEditDialog, setOpenEditDialog] = useState(false)
-    const [position, setPosition] = useState(POSITION)
+    // const [position, setPosition] = useState(POSITION)
     const [currentPage, setCurrentPage] = useState(1)
     const [totalCodingQuestion, setTotalCodingQuestion] = useState(0)
     const [totalPages, setTotalPages] = useState(0)
     const [lastPage, setLastPage] = useState(0)
-    const [offset, setOffset] = useState<number>(OFFSET)
+    // const [offset, setOffset] = useState<number>(OFFSET)
+    const { offset, setOffset} = getOffset()
+    const {position, setPosition} = getPosition()
 
     const selectedLanguage = ''
-
     const handleTopicClick = (value: string) => {
         const tag = tags.find((t: Tag) => t.tagName === value) || {
             tagName: 'All Topics',
@@ -119,8 +119,14 @@ const CodingProblems = () => {
     const handleTagOption = (option: Option) => {
         if (option.value === '-1') {
             if (selectedOptions.some((item) => item.value === option.value)) {
-                setSelectedOptions((prev) =>
-                    prev.filter((selected) => selected.value !== option.value)
+                // setSelectedOptions((prev) =>
+                //     prev.filter((selected) => selected.value !== option.value)
+                // )
+                setSelectedOptions(
+                    selectedOptions.filter(
+                        (selected) => selected.value !== option.value
+                    )
+                    
                 )
             } else {
                 setSelectedOptions([option])
@@ -134,13 +140,19 @@ const CodingProblems = () => {
                         (selected) => selected.value === option.value
                     )
                 ) {
-                    setSelectedOptions((prev) =>
-                        prev.filter(
+                    // setSelectedOptions((prev) =>
+                    //     prev.filter(
+                    //         (selected) => selected.value !== option.value
+                    //     )
+                    // )
+                    setSelectedOptions(
+                        selectedOptions.filter(
                             (selected) => selected.value !== option.value
                         )
                     )
                 } else {
-                    setSelectedOptions((prev) => [...prev, option])
+                    // setSelectedOptions((prev) => [...prev, option])
+                    setSelectedOptions([...selectedOptions, option])
                 }
             }
         }
@@ -182,6 +194,7 @@ const CodingProblems = () => {
             }
         }
     }
+ 
 
     async function getAllTags() {
         const response = await api.get('Content/allTags')
@@ -215,16 +228,18 @@ const CodingProblems = () => {
     const fetchCodingQuestions = useCallback(
         async (offset: number) => {
             filteredCodingQuestions(
-                offset,
                 setCodingQuestions,
+                offset,
+                position,
+                difficulty,
+                selectedOptions,
                 setTotalCodingQuestion,
                 setLastPage,
                 setTotalPages,
-                difficulty,
-                selectedOptions,
                 debouncedSearch,
-                position,
-                selectedLanguage
+                selectedLanguage,
+              
+               
             )
         },
         [
@@ -239,6 +254,7 @@ const CodingProblems = () => {
             offset,
         ]
     )
+    console.log("Search Term:", searchTerm);
 
     useEffect(() => {
         getAllCodingQuestions(setAllCodingQuestions)
@@ -289,7 +305,7 @@ const CodingProblems = () => {
 
     const selectedTagCount = selectedOptions.length
     const difficultyCount = difficulty.length
-
+console.log("offset",offset)
     return (
         <>
             {loading ? (
@@ -424,8 +440,8 @@ const CodingProblems = () => {
                                                     setIsDialogOpen={
                                                         setIsCodingDialogOpen
                                                     }
-                                                    getAllCodingQuestions={
-                                                        getAllCodingQuestions
+                                                    filteredCodingQuestions={
+                                                        filteredCodingQuestions
                                                     }
                                                     setCodingQuestions={
                                                         setCodingQuestions

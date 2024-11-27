@@ -2,10 +2,17 @@
 
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
-
-import { getAllQuizData, getCodingQuestionTags, quiz } from '@/store/store'
+import { ellipsis } from '@/lib/utils'
+import {
+    getAllQuizData,
+    getCodingQuestionTags,
+    getmcqdifficulty,
+    getOffset,
+    getPosition,
+    getSelectedMCQOptions,
+    quiz,
+} from '@/store/store'
 import { Edit, Eye, Pencil, Trash2 } from 'lucide-react'
-// import { difficultyColor, difficultyColorNew } from '@/lib/utils'
 import { difficultyColor } from '@/lib/utils'
 
 import DeleteConfirmationModal from '../../courses/[courseId]/_components/deleteModal'
@@ -14,10 +21,15 @@ import {
     handleQuizConfirm,
     handleQuizDelete,
     handleDeleteQuizModal,
-    getAllQuizQuestion,
+    // getAllQuizQuestion,
     // handlerQuizQuestions,
+    filteredQuizQuestions,
 } from '@/utils/admin'
-import { DELETE_QUIZ_QUESTION_CONFIRMATION } from '@/utils/constant'
+import {
+    DELETE_QUIZ_QUESTION_CONFIRMATION,
+    OFFSET,
+    POSITION,
+} from '@/utils/constant'
 import {
     Dialog,
     DialogContent,
@@ -26,8 +38,56 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import EditQuizQuestion from '../_components/EditQuizQuestion'
+import CheckboxAndDeleteHandler from '../_components/CheckBoxAndDeleteCombo'
+import { Checkbox } from '@/components/ui/checkbox'
+import PreviewMCQ from '../_components/PreviewMcq'
+import { Button } from '@/components/ui/button'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { Alert } from '@/components/ui/alert'
+import { AlertDialogTrigger } from '@radix-ui/react-alert-dialog'
+import { AlertDialogContent } from '@/components/ui/alert-dialog'
+import DialogBox from '../_components/PreviewBox'
+import TipTapForForm from '../_components/TipTapForForm'
 
 export const columns: ColumnDef<quiz>[] = [
+    {
+        id: 'select',
+        header: ({ table }) => {
+            return (
+                <Checkbox
+                    checked={
+                        table.getIsAllPageRowsSelected() ||
+                        (table.getIsSomePageRowsSelected() && 'indeterminate')
+                    }
+                    onCheckedChange={(value) =>
+                        table.toggleAllPageRowsSelected(!!value)
+                    }
+                    aria-label="Select all"
+                />
+            )
+        },
+
+        cell: ({ table, row }) => {
+            return (
+                <CheckboxAndDeleteHandler
+                    checked={row.getIsSelected()}
+                    onCheckedChange={(value) => {
+                        // console.log(row)
+                        row.toggleSelected(!!value)
+                    }}
+                    aria-label="Select row"
+                />
+            )
+        },
+        enableSorting: false,
+        enableHiding: false,
+    },
+
     {
         accessorKey: 'question',
         header: ({ column }) => (
@@ -39,23 +99,48 @@ export const columns: ColumnDef<quiz>[] = [
         ),
 
         cell: ({ row }) => {
-            const question = row.original?.question
+            const question = row.original?.quizVariants[0]?.question
+            const truncatedQuestion = ellipsis(question, 70)
             return (
-                <pre
-                    className="text-left text-md p-2 w-[900px] font-[16px] hover:bg-slate-200 rounded-lg transition ease-in-out delay-150 overflow-hidden text-ellipsis"
+                <div
+                    className="text-left text-md p-1 w-[900px] font-[16px] hover:bg-slate-200 rounded-lg transition ease-in-out delay-150 overflow-hidden text-ellipsis"
                     style={{
                         display: '-webkit-box',
                         WebkitLineClamp: 3,
                         WebkitBoxOrient: 'vertical',
                     }}
                 >
-                    {question}
-                </pre>
+                    <span
+                        dangerouslySetInnerHTML={{ __html: truncatedQuestion }}
+                    />
+                    {/* {question} */}
+                </div>
             )
         },
         enableSorting: false,
         enableHiding: false,
     },
+    {
+        accessorKey: 'usage',
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                className="text-[17px]"
+                column={column}
+                title="Usage"
+            />
+        ),
+        cell: ({ row }) => {
+            const usage = row.original.usage
+            return (
+                <p className={` text-left ml-5 text-[15px] font-semibold `}>
+                    {usage}
+                </p>
+            )
+        },
+        enableSorting: false,
+        enableHiding: false,
+    },
+
     {
         accessorKey: 'difficulty',
         header: ({ column }) => (
@@ -65,31 +150,49 @@ export const columns: ColumnDef<quiz>[] = [
                 title="Difficulty"
             />
         ),
-        cell: ({ row }) => {
+        cell: ({ row, table }) => {
             const difficulty = row.original.difficulty
+
             return (
-                <div className="flex items-center gap-3">
-                    <div
-                        className={` h-2 w-2 rounded-full font-semibold  ${difficultyColor(
-                            difficulty
-                        )}`}
-                    />
-                    <h1>{difficulty}</h1>
-                </div>
+                <p
+                    className={` text-left ml-3 text-[15px] font-semibold  ${difficultyColor(
+                        difficulty
+                    )}`}
+                >
+                    {difficulty}
+                </p>
             )
         },
         enableSorting: false,
         enableHiding: false,
     },
+
     {
         id: 'actions1',
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                className="text-[17px]"
+                column={column}
+                title="Preview"
+            />
+        ),
         cell: ({ row }) => {
-            const quizQuestion = row.original
+            const quizQuestionId = row.original.id
+            const selectedRows = row.getIsSelected()
 
             return (
-                <>
-                    <Eye className="cursor-pointer" />
-                </>
+                <div className="mr-5">
+                    <Dialog>
+                        <DialogTrigger>
+                            {!selectedRows && (
+                                <Eye className="cursor-pointer" />
+                            )}
+                        </DialogTrigger>
+                        <DialogContent className="">
+                            <PreviewMCQ quizQuestionId={quizQuestionId} />
+                        </DialogContent>
+                    </Dialog>
+                </div>
             )
         },
     },
@@ -104,42 +207,25 @@ export const columns: ColumnDef<quiz>[] = [
             />
         ),
         cell: ({ row }) => {
-            const quizQuestion = row.original
-
-            const openDialog = () => {
-                const dialog = document.getElementById('editQuizDialog')
-                if (dialog) {
-                    dialog.setAttribute('data-state', 'open')
-                }
+            const quizQuestionid = row.original.id
+            const { setIsEditModalOpen, setIsQuizQuestionId } =
+                getEditQuizQuestion()
+            const editQuizHandler = (id: number) => {
+                setIsEditModalOpen(true)
+                setIsQuizQuestionId(id)
             }
-
-            const { setStoreQuizData } = getAllQuizData()
+            const selectedRows = row.getIsSelected()
 
             return (
                 <div className="flex">
-                    <div id="editQuizDialog" data-state="closed">
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Pencil
-                                    className="cursor-pointer mr-5"
-                                    size={20}
-                                    onClick={openDialog}
-                                />
-                            </DialogTrigger>
-
-                            <DialogContent
-                                className="sm:max-w-[518px] max-h-[90vh] overflow-y-auto overflow-x-hidden"
-                                data-state="closed"
-                            >
-                                <DialogHeader>
-                                    <DialogTitle>Edit MCQ</DialogTitle>
-                                </DialogHeader>
-                                <EditQuizQuestion
-                                    setStoreQuizData={setStoreQuizData}
-                                    quizId={quizQuestion.id}
-                                />
-                            </DialogContent>
-                        </Dialog>
+                    <div>
+                        {!selectedRows && (
+                            <Pencil
+                                onClick={() => editQuizHandler(quizQuestionid)}
+                                className="cursor-pointer mr-5"
+                                size={20}
+                            />
+                        )}
                     </div>
                 </div>
             )
@@ -157,21 +243,32 @@ export const columns: ColumnDef<quiz>[] = [
                 setDeleteQuizQuestionId,
             } = getDeleteQuizQuestion()
             const { setStoreQuizData } = getAllQuizData()
+            const { selectedOptions, setSelectedOptions } =
+                getSelectedMCQOptions()
+            const {
+                mcqDifficulty: difficulty,
+                setMcqDifficulty: setDifficulty,
+            } = getmcqdifficulty()
+            const { offset, setOffset } = getOffset()
+            const { position, setPosition } = getPosition()
+            const selectedRows = row.getIsSelected()
 
             return (
                 <div className="ml-[-30px]">
-                    <Trash2
-                        onClick={(e) => {
-                            e.stopPropagation()
-                            handleDeleteQuizModal(
-                                setDeleteModalOpen,
-                                setDeleteQuizQuestionId,
-                                quizQuestion
-                            )
-                        }}
-                        className="text-destructive cursor-pointer"
-                        size={20}
-                    />
+                    {!selectedRows && (
+                        <Trash2
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                handleDeleteQuizModal(
+                                    setDeleteModalOpen,
+                                    setDeleteQuizQuestionId,
+                                    quizQuestion
+                                )
+                            }}
+                            className="text-destructive cursor-pointer"
+                            size={20}
+                        />
+                    )}
                     <DeleteConfirmationModal
                         isOpen={isDeleteModalOpen}
                         onClose={() => setDeleteModalOpen(false)}
@@ -180,8 +277,13 @@ export const columns: ColumnDef<quiz>[] = [
                                 handleQuizDelete,
                                 setDeleteModalOpen,
                                 deleteQuizQuestionId,
-                                getAllQuizQuestion,
-                                setStoreQuizData
+                                // getAllQuizQuestion,
+                                filteredQuizQuestions,
+                                setStoreQuizData,
+                                selectedOptions,
+                                difficulty,
+                                offset,
+                                position
                             )
                         }}
                         modalText={DELETE_QUIZ_QUESTION_CONFIRMATION}

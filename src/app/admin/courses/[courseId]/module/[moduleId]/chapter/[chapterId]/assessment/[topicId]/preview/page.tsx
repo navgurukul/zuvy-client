@@ -5,9 +5,11 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { getAssessmentPreviewStore } from '@/store/store'
 import { fetchPreviewAssessmentData } from '@/utils/admin'
 import { api } from '@/utils/axios.config'
-import { AlertOctagon } from 'lucide-react'
+import { AlertOctagon, ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
+import Link from 'next/link'
+
 
 const PreviewAssessment = ({ params }: { params: any }) => {
 
@@ -35,7 +37,13 @@ const PreviewAssessment = ({ params }: { params: any }) => {
             </div>
             
             {/* Adjusted padding to align the content */}
-            <div className="flex flex-col items-center justify-center px-4 py-8 mt-20">
+            <div className="relative flex flex-col items-center justify-center px-4 py-8 mt-20">
+                {/* "Go Back" button placed at the far left */}
+                <Link href={`/admin/courses/${params.courseId}/module/${params.moduleId}/chapters/${params.chapterId}`} 
+                      className="absolute left-0 top-0 flex items-center space-x-2 p-4"> {/* Absolute positioning */}
+                    <ArrowLeft size={20} />
+                    <p className="ml-1 text-sm font-medium text-gray-800">Go back</p>
+                </Link>
                 <div className="flex flex-col gap-4 text-left w-full max-w-2xl">
                     <h1 className="text-2xl font-bold text-gray-800">
                         {assessmentPreviewContent?.ModuleAssessment?.title}

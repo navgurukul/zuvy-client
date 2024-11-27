@@ -190,7 +190,7 @@ function EditOpenEndedQuestionForm({
                                                     placeholder={
                                                         tags.find(
                                                             (tag) =>
-                                                                tag.id ===
+                                                                tag.value ==
                                                                 selectedQuestion[0]
                                                                     ?.tagId
                                                         )?.tagName ||

@@ -303,7 +303,7 @@ const EditQuizQuestion = ({
                                                             placeholder={
                                                                 tags.find(
                                                                     (tag) =>
-                                                                        tag.id ===
+                                                                        tag.id ==
                                                                         selectedQuizQuestion?.tagId
                                                                 )?.tagName ||
                                                                 'Choose Topic'

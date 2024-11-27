@@ -42,10 +42,12 @@ const CodingQuestions = ({
     tags: any
 }) => {
     return (
-        <ScrollArea className="h-dvh pr-4">
-            <ScrollBar orientation="vertical" />
+        <div className="h-dvh pr-4 mb-[-390px]">
+            <ScrollBar orientation="vertical" className="pb-96 h-dvh" />
             {questions.map((question: CodingQuestion) => {
-                const tag = tags?.find((tag: any) => tag?.id === question?.tagId)
+                const tag = tags?.find(
+                    (tag: any) => tag?.id === question?.tagId
+                )
                 return (
                     <div
                         key={question.id}
@@ -66,51 +68,65 @@ const CodingQuestions = ({
                                         <span
                                             className={cn(
                                                 `text-sm rounded-full px-2`,
-                                                difficultyColor(question.difficulty),
-                                                difficultyBgColor(question.difficulty)
+                                                difficultyColor(
+                                                    question.difficulty
+                                                ),
+                                                difficultyBgColor(
+                                                    question.difficulty
+                                                )
                                             )}
                                         >
                                             {question.difficulty}
                                         </span>
                                         <div className="flex">
-                                {selectedQuestions.some(
-                                    (q: CodingQuestion) => q.id === question.id
-                                ) ? (
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="20"
-                                        height="20"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        className="lucide lucide-circle-check"
-                                    >
-                                        <circle cx="12" cy="12" r="10" />
-                                        <path d="m9 12 2 2 4-4" />
-                                    </svg>
-                                ) : (
-                                    <PlusCircle
-                                        onClick={() => {
-                                            if (
-                                                !selectedQuestions.some(
-                                                    (q: CodingQuestion) =>
-                                                        q.id === question.id
-                                                )
-                                            ) {
-                                                setSelectedQuestions([
-                                                    ...selectedQuestions,
-                                                    question,
-                                                ])
-                                            }
-                                        }}
-                                        className="text-secondary cursor-pointer"
-                                        size={20}
-                                    />
-                                )}
-                            </div>
+                                            {selectedQuestions.some(
+                                                (q: CodingQuestion) =>
+                                                    q.id === question.id
+                                            ) ? (
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width="20"
+                                                    height="20"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="2"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    className="lucide lucide-circle-check"
+                                                >
+                                                    <circle
+                                                        cx="12"
+                                                        cy="12"
+                                                        r="10"
+                                                    />
+                                                    <path d="m9 12 2 2 4-4" />
+                                                </svg>
+                                            ) : (
+                                                <PlusCircle
+                                                    onClick={() => {
+                                                        if (
+                                                            !selectedQuestions.some(
+                                                                (
+                                                                    q: CodingQuestion
+                                                                ) =>
+                                                                    q.id ===
+                                                                    question.id
+                                                            )
+                                                        ) {
+                                                            setSelectedQuestions(
+                                                                [
+                                                                    ...selectedQuestions,
+                                                                    question,
+                                                                ]
+                                                            )
+                                                        }
+                                                    }}
+                                                    className="text-secondary cursor-pointer"
+                                                    size={20}
+                                                />
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                                 <p className="text-[#4A4A4A] mt-1 font-[14px]">
@@ -130,12 +146,11 @@ const CodingQuestions = ({
                                     />
                                 </Dialog>
                             </div>
-                        
                         </div>
                     </div>
                 )
             })}
-        </ScrollArea>
+        </div>
     )
 }
 

@@ -22,6 +22,8 @@ import TiptapToolbar from '@/app/_components/editor/TiptapToolbar'
 import extensions from '@/app/_components/editor/TiptapExtensions'
 import '@/app/_components/editor/Tiptap.css'
 import PreviewArticle from './PreviewArticle'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 
 interface ContentDetail {
     title: string
@@ -39,7 +41,16 @@ interface Content {
     contentDetails: ContentDetail[]
 }
 
-const AddArticle = ({ content ,articleUpdateOnPreview ,setArticleUpdateOnPreview}: { content: any , articleUpdateOnPreview:any,setArticleUpdateOnPreview:any}) => {
+const AddArticle = ({
+    content,
+    articleUpdateOnPreview,
+    setArticleUpdateOnPreview,
+}: {
+    content: any
+    articleUpdateOnPreview: any
+    setArticleUpdateOnPreview: any
+}) => {
+    const heightClass = useResponsiveHeight()
     // state
     const [title, setTitle] = useState('')
     const [showPreview, setShowPreview] = useState<boolean>(false)
@@ -62,20 +73,21 @@ const AddArticle = ({ content ,articleUpdateOnPreview ,setArticleUpdateOnPreview
         },
         mode: 'onChange',
     })
- // Handle Preview Button Click
-const handlePreviewClick = () => {
-    const editorContent = editor?.getText() 
-    if (!editorContent || editorContent.trim() === '') { 
-      
-        toast({
-            title: 'No Questions',
-            description: 'Please add at least one question to preview the quiz.',
-           className: 'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
-        })
-    } else {
-        setShowPreview(true) 
+    // Handle Preview Button Click
+    const handlePreviewClick = () => {
+        const editorContent = editor?.getText()
+        if (!editorContent || editorContent.trim() === '') {
+            toast({
+                title: 'No Questions',
+                description:
+                    'Please add at least one question to preview the quiz.',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
+            })
+        } else {
+            setShowPreview(true)
+        }
     }
-}
 
     // functions
     const getArticleContent = async () => {
@@ -127,67 +139,85 @@ const handlePreviewClick = () => {
     }, [content, editor])
 
     return (
-        <div>
-            <div className="w-full ">
-                {showPreview ? (
-                    <PreviewArticle
-                        content={content}
-                        setShowPreview={setShowPreview}
-                   
-                    />
-
-                ) : (
-                    <>
-                        <Form {...form}>
-                            <form
-                                id="myForm"
-                                onSubmit={form.handleSubmit(editArticleContent)}
-                                className="space-y-8 mb-24 "
-                            >
-                                <FormField
-                                    control={form.control}
-                                    name="title"
-                                    render={({ field }) => (
-                                        <FormItem className="flex flex-col  ">
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="Untitled Article"
-                                                    className="p-0 text-3xl w-2/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize"
-                                                    {...field}
-                                                    {...form.register('title')}
-                                                    onChange={(e) =>
-                                                        setTitle(e.target.value)
-                                                    }
-                                                />
-                                            </FormControl>
-                                            <Button
-                                                variant={'ghost'}
-                                                type="button"
-                                                className=" text-secondary w-[100px] h-[30px] gap-x-1 "
-                                                onClick={handlePreviewClick}  
-                                            >
-                                                <ArrowUpRightSquare />
-                                                <h1>Preview</h1>
-                                            </Button>
-                                            <FormMessage className="h-5" />
-                                        </FormItem>
-                                    )}
-                                />
-                            </form>
-                        </Form>
-                        <div className="text-left">
-                            <TiptapToolbar editor={editor} />
-                            <TiptapEditor editor={editor} />
+        <ScrollArea
+            className={`${heightClass} pr-4`}
+            type="hover"
+            style={{
+                scrollbarWidth: 'none', // Firefox
+                msOverflowStyle: 'none', // IE and Edge
+            }}
+        >
+            <div>
+                <div className="w-full ">
+                    {showPreview ? (
+                        <PreviewArticle
+                            content={content}
+                            setShowPreview={setShowPreview}
+                        />
+                    ) : (
+                        <div>
+                            <div className="w-full ">
+                                <Form {...form}>
+                                    <form
+                                        id="myForm"
+                                        onSubmit={form.handleSubmit(
+                                            editArticleContent
+                                        )}
+                                        className="space-y-8 mb-24 "
+                                    >
+                                        <FormField
+                                            control={form.control}
+                                            name="title"
+                                            render={({ field }) => (
+                                                <FormItem className="flex flex-col  ">
+                                                    <FormControl>
+                                                        <Input
+                                                            placeholder="Untitled Article"
+                                                            className="p-0 text-3xl w-2/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize"
+                                                            {...field}
+                                                            {...form.register(
+                                                                'title'
+                                                            )}
+                                                            onChange={(e) =>
+                                                                setTitle(
+                                                                    e.target
+                                                                        .value
+                                                                )
+                                                            }
+                                                        />
+                                                    </FormControl>
+                                                    <Button
+                                                        variant={'ghost'}
+                                                        type="button"
+                                                        className=" text-secondary w-[100px] h-[30px] gap-x-1 "
+                                                        onClick={
+                                                            handlePreviewClick
+                                                        }
+                                                    >
+                                                        <ArrowUpRightSquare />
+                                                        <h1>Preview</h1>
+                                                    </Button>
+                                                    <FormMessage className="h-5" />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </form>
+                                </Form>
+                            </div>
+                            <div className="text-left">
+                                <TiptapToolbar editor={editor} />
+                                <TiptapEditor editor={editor} />
+                            </div>
+                            <div className="flex justify-end mt-5">
+                                <Button type="submit" form="myForm">
+                                    Save
+                                </Button>
+                            </div>
                         </div>
-                        <div className="flex justify-end mt-5">
-                            <Button type="submit" form="myForm">
-                                Save
-                            </Button>
-                        </div>
-                    </>
-                )}
+                    )}
+                </div>
             </div>
-        </div>
+        </ScrollArea>
     )
 }
 

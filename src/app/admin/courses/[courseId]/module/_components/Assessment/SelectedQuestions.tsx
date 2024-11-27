@@ -4,7 +4,6 @@ import SelectOpenEndedQuestions from '@/app/admin/courses/[courseId]/module/_com
 import SelectQuizQuestions from '@/app/admin/courses/[courseId]/module/_components/Assessment/SelectQuizQuestions'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 
-
 const selectedQuestions = ({
     selectedCodingQuestions,
     selectedQuizQuestions,
@@ -13,7 +12,7 @@ const selectedQuestions = ({
     setSelectedQuizQuestions,
     setSelectedOpenEndedQuestions,
     questionType,
-    tags
+    tags,
 }: {
     selectedCodingQuestions: any
     selectedQuizQuestions: any
@@ -33,7 +32,7 @@ const selectedQuestions = ({
                         selectedQuestions={selectedCodingQuestions}
                         setSelectedQuestions={setSelectedCodingQuestions}
                         tags={tags}
-                        type={"coding"}
+                        type={'coding'}
                     />
                 )}
                 {questionType === 'mcq' && (
@@ -41,7 +40,7 @@ const selectedQuestions = ({
                         selectedQuestions={selectedQuizQuestions}
                         setSelectedQuestions={setSelectedQuizQuestions}
                         tags={tags}
-                        type={"mcq"}
+                        type={'mcq'}
                     />
                 )}
                 {questionType === 'open-ended' && (
@@ -49,7 +48,7 @@ const selectedQuestions = ({
                         selectedQuestions={selectedOpenEndedQuestions}
                         setSelectedQuestions={setSelectedOpenEndedQuestions}
                         tags={tags}
-                        type={"open-ended"}
+                        type={'open-ended'}
                     />
                 )}
             </ScrollArea>
