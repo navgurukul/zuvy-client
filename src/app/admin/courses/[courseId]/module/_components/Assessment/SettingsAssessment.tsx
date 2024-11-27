@@ -40,6 +40,7 @@ type SettingsAssessmentProps = {
     setQuestionType: (value: string) => void;
     selectCodingDifficultyCount: any;
     selectQuizDifficultyCount: any;
+    topicId: number;
 };
 
 const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
@@ -57,6 +58,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     setQuestionType,
     selectCodingDifficultyCount,
     selectQuizDifficultyCount,
+    topicId,
 }) => {
     const codingMax = selectedCodingQuesIds.length;
     const mcqMax = selectedQuizQuesIds.length;
@@ -113,7 +115,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                 }),
             codingProblemsWeightage: z.number().min(0),
             mcqsWeightage: z.number().min(0),
-            copyPaste: z.boolean(),
+            canCopyPaste: z.boolean(),
             tabSwitch: z.boolean(),
             screenExit: z.boolean(),
             eyeTracking: z.boolean(),
@@ -140,7 +142,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
             mcqsHard: 0,
             codingProblemsWeightage: 0,
             mcqsWeightage: 0,
-            copyPaste: false,
+            canCopyPaste: false,
             tabSwitch: false,
             screenExit: false,
             eyeTracking: false,
@@ -192,47 +194,6 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
         }
     }, [totalQuestions, content]);
 
-    useEffect(() => {
-        form.reset({
-            codingProblemsEasy: content?.easyCodingQuestions || 0,
-            codingProblemsMedium: content?.mediumCodingQuestions || 0,
-            codingProblemsHard: content?.hardCodingQuestions || 0,
-            mcqsEasy: content?.easyMcqQuestions || 0,
-            mcqsMedium: content?.mediumMcqQuestions || 0,
-            mcqsHard: content?.hardMcqQuestions || 0,
-            codingProblemsWeightage: content?.weightageCodingQuestions || 0,
-            mcqsWeightage: content?.weightageMcqQuestions || 0,
-            copyPaste: content?.CanCopyPaste || false,
-            tabSwitch: content?.canTabChange || false,
-            screenExit: content?.canScreenExit || false,
-            hour: content.timeLimit ? String(Math.floor(content.timeLimit / 3600)) : '2',
-            minute: content.timeLimit ? String(Math.floor((Number(content.timeLimit) % 3600) / 60)) : '15',
-            passPercentage: content?.passPercentage || 70,
-        });
-    }, [content]);
-
-    // useEffect to handle logic based on codingMax and mcqMax
-    useEffect(() => {
-        if (codingMax === 0 && mcqMax === 0) {
-            form.setValue('codingProblemsWeightage', 0);
-            form.setValue('mcqsWeightage', 0);
-            setCodingWeightageDisabled(true);
-            setMcqsWeightageDisabled(true);
-        } else if (codingMax === 0) {
-            form.setValue('codingProblemsWeightage', 0);
-            form.setValue('mcqsWeightage', 100);
-            setCodingWeightageDisabled(true);
-            setMcqsWeightageDisabled(true);
-        } else if (mcqMax === 0) {
-            form.setValue('codingProblemsWeightage', 100);
-            form.setValue('mcqsWeightage', 0);
-            setCodingWeightageDisabled(true);
-            setMcqsWeightageDisabled(true);
-        } else {
-            setCodingWeightageDisabled(false);
-            setMcqsWeightageDisabled(false);
-        }
-    }, [codingMax, mcqMax, form]);
 
     async function onSubmit(values: any) {
         const timeLimit = Number(values.hour) * 3600 + Number(values.minute) * 60;
@@ -247,7 +208,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
             canEyeTrack: values.eyeTracking,
             canTabChange: values.tabSwitch,
             canScreenExit: values.screenExit,
-            canCopyPaste: values.copyPaste,
+            canCopyPaste: values.canCopyPaste,
             codingQuestionTagId: selectedCodingQuesTagIds,
             mcqTagId: selectedQuizQuesTagIds,
             easyCodingQuestions: Number(values.codingProblemsEasy),
@@ -261,8 +222,8 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
         };
 
         try {
-            await api.put(`Content/editAssessment/${content.id}/${chapterData.chapterId}`, data);
-            fetchChapterContent(chapterData.chapterId, chapterData.topicId);
+            await api.put(`Content/editAssessment/${content.assessmentOutsourseId}/${chapterData.id}`, data);
+            fetchChapterContent(chapterData.id, topicId);
             toast({
                 title: 'Assessment Updated Successfully',
                 description: 'Assessment has been updated successfully',
@@ -272,6 +233,41 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
             console.error(error);
         }
     };
+
+    useEffect(() => {
+        console.log('content', content)
+        form.reset({
+            codingProblemsEasy: content?.easyCodingQuestions || 0,
+            codingProblemsMedium: content?.mediumCodingQuestions || 0,
+            codingProblemsHard: content?.hardCodingQuestions || 0,
+            mcqsEasy: content?.easyMcqQuestions || 0,
+            mcqsMedium: content?.mediumMcqQuestions || 0,
+            mcqsHard: content?.hardMcqQuestions || 0,
+            codingProblemsWeightage: codingMax > 0 && mcqMax > 0 ? 50 : codingMax > 0 ? 100 : 0,
+            mcqsWeightage: codingMax > 0 && mcqMax > 0 ? 50 : mcqMax > 0 ? 100 : 0,
+            canCopyPaste: content?.canCopyPaste || false,
+            tabSwitch: content?.canTabChange || false,
+            screenExit: content?.canScreenExit || false,
+            eyeTracking: content?.canEyeTrack || false,
+            hour: content.timeLimit ? String(Math.floor(content.timeLimit / 3600)) : '2',
+            minute: content.timeLimit ? String(Math.floor((Number(content.timeLimit) % 3600) / 60)) : '15',
+            passPercentage: content?.passPercentage || 70,
+        });
+        // Apply disabling logic
+        if (codingMax === 0 && mcqMax === 0) {
+            setCodingWeightageDisabled(true);
+            setMcqsWeightageDisabled(true);
+        } else if (codingMax === 0 && mcqMax > 0) {
+            setCodingWeightageDisabled(true);
+            setMcqsWeightageDisabled(true);
+        } else if (mcqMax === 0 && codingMax > 0) {
+            setCodingWeightageDisabled(true);
+            setMcqsWeightageDisabled(true);
+        } else if (codingMax > 0 && mcqMax > 0) {
+            setCodingWeightageDisabled(false);
+            setMcqsWeightageDisabled(false);
+        }
+    }, [content]);
 
     return (
         <main className="pb-6 bg-white text-left">
@@ -312,48 +308,49 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                 const isError = Boolean(form.formState.errors[field.name]);
                                                 return (
                                                     <FormItem className="flex items-center mb-2">
-                                                    <FormControl>
-                                                        <Input
-                                                            {...field}
-                                                            type="number"
-                                                            className={`w-16 mr-2 no-spinners ${form.formState.errors[field.name] ? 'border-red-500 outline-red-500 text-red-500' : 'border-gray-300'}`}
-                                                            onChange={(e) => {
-                                                                handleInputChange(field.name as keyof typeof totalQuestions, e.target.value);
-                                                            }}
-                                                            onFocus={() => {
-                                                                setEditingFields(prev => ({
-                                                                    ...prev,
-                                                                    [field.name]: true
-                                                                }));
-                                                            }}
-                                                            onBlur={() => {
-                                                                setEditingFields(prev => ({
-                                                                    ...prev,
-                                                                    [field.name]: false
-                                                                }));
-                                                            }}
-                                                            value={editingFields[field.name] ? (field.value === 0 ? "" : field.value) : field.value}
-                                                        />
-                                                    </FormControl>
-                                                    <div className="flex flex-col">
-                                                        {
-                                                            !isError && 
-                                                            <FormLabel className="text-sm m-0 p-0">
-                                                            {['Easy', 'Medium', 'Hard'][idx]} question(s) out of {category.title === 'Coding Problems'
-                                                                ? (category.counts && category.counts[`codingProblems${['Easy', 'Medium', 'Hard'][idx]}`]) || 0
-                                                                : (category.mcqCounts && category.mcqCounts[`${['mcqsEasy', 'mcqsMedium', 'mcqsHard'][idx]}`]) || 0}
-                                                        </FormLabel>
-                                                        }
-                                                        {form.formState.errors[field.name] && (
-                                                            <div className="flex items-center gap-1 mt-1 text-red-500">
-                                                                <AlertCircle color='#db3939' />
-                                                                <FormMessage className="text-sm">
-                                                                    {form.formState.errors[field.name]?.message}
-                                                                </FormMessage>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </FormItem>
+                                                        <FormControl>
+                                                            <Input
+                                                                {...field}
+
+                                                                type="number"
+                                                                className={`w-16 mr-2 no-spinners ${form.formState.errors[field.name] ? 'border-red-500 outline-red-500 text-red-500' : 'border-gray-300'}`}
+                                                                onChange={(e) => {
+                                                                    handleInputChange(field.name as keyof typeof totalQuestions, e.target.value);
+                                                                }}
+                                                                onFocus={() => {
+                                                                    setEditingFields(prev => ({
+                                                                        ...prev,
+                                                                        [field.name]: true
+                                                                    }));
+                                                                }}
+                                                                onBlur={() => {
+                                                                    setEditingFields(prev => ({
+                                                                        ...prev,
+                                                                        [field.name]: false
+                                                                    }));
+                                                                }}
+                                                                value={editingFields[field.name] ? (field.value === 0 ? "" : field.value) : field.value}
+                                                            />
+                                                        </FormControl>
+                                                        <div className="flex flex-col">
+                                                            {
+                                                                !isError &&
+                                                                <FormLabel className="text-sm m-0 p-0">
+                                                                    {['Easy', 'Medium', 'Hard'][idx]} question(s) out of {category.title === 'Coding Problems'
+                                                                        ? (category.counts && category.counts[`codingProblems${['Easy', 'Medium', 'Hard'][idx]}`]) || 0
+                                                                        : (category.mcqCounts && category.mcqCounts[`${['mcqsEasy', 'mcqsMedium', 'mcqsHard'][idx]}`]) || 0}
+                                                                </FormLabel>
+                                                            }
+                                                            {form.formState.errors[field.name] && (
+                                                                <div className="flex items-center gap-1 mt-1 text-red-500">
+                                                                    <AlertCircle color='#db3939' />
+                                                                    <FormMessage className="text-sm">
+                                                                        {form.formState.errors[field.name]?.message}
+                                                                    </FormMessage>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </FormItem>
                                                 )
                                             }}
                                         />
@@ -364,9 +361,16 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                             <div className="mb-4">
                                 <h3 className="font-semibold mb-2">Total Selected Questions</h3>
                                 <div className="mt-2">
-                                    <p className="text-sm ml-2 mb-2"><span className='text-sm font-bold ml-2'>Coding: </span> {`${totalSelectedCodingQues} out of ${codingMax}`}</p>
-                                    <p className="text-sm ml-2"> <span className='text-sm font-bold ml-2'>Quiz: </span>  {`${totalSelectedQuizQues} out of ${mcqMax}`}</p>
+                                    <p className="text-sm ml-2 mb-2">
+                                        <span className="text-sm font-bold">Coding: </span>
+                                        {`${Number.isNaN(totalSelectedCodingQues) ? 0 : totalSelectedCodingQues} out of ${codingMax}`}
+                                    </p>
+                                    <p className="text-sm ml-2">
+                                        <span className="text-sm font-bold ">Quiz: </span>
+                                        {`${Number.isNaN(totalSelectedQuizQues) ? 0 : totalSelectedQuizQues} out of ${mcqMax}`}
+                                    </p>
                                 </div>
+
                             </div>
                         </div>
 
@@ -422,10 +426,10 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                         </section>
 
                         {/* Section 3: Manage Proctoring Settings */}
-                        <section className='w-1/3 ml-24'>
+                        <section className='w-1/3 ml-32'>
                             <h2 className="font-semibold mb-4">Manage Proctoring Settings</h2>
                             {[
-                                { label: 'Copy Paste', name: 'copyPaste' as const },
+                                { label: 'Copy Paste', name: 'canCopyPaste' as const },
                                 { label: 'Tab Change', name: 'tabSwitch' as const },
                                 { label: 'Screen Exit', name: 'screenExit' as const },
                                 { label: 'Eye Tracking', name: 'eyeTracking' as const },
@@ -523,7 +527,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                         </section>
 
                         {/* Section 5: Set Pass Percentage */}
-                        <section className='ml-36'>
+                        <section className='ml-40'>
                             <h2 className="font-semibold mb-4">Pass Percentage (Out Of 100)</h2>
                             <FormField
                                 control={form.control}
