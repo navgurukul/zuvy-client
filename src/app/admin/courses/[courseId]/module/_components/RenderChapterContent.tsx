@@ -16,7 +16,7 @@ interface RenderChapterContentProps {
     moduleID: any
     activeChapterTitle: string
     loading: boolean
-    fetchChapterContent: (chapterId: number, topicId: number) => any // Accept fetchChapterContent function as a prop
+    fetchChapterContent: (chapterId: number, topicId: number) => any
 }
 
 export const renderChapterContent = ({
@@ -26,7 +26,7 @@ export const renderChapterContent = ({
     moduleID,
     activeChapterTitle,
     loading,
-    fetchChapterContent, // Destructure it here
+    fetchChapterContent,
 }: RenderChapterContentProps) => {
     if (
         topicId &&
@@ -41,7 +41,7 @@ export const renderChapterContent = ({
                         key={chapterId}
                         moduleId={moduleID}
                         content={chapterContent}
-                        fetchChapterContent={fetchChapterContent} // Pass it to AddVideo
+                        fetchChapterContent={fetchChapterContent}
                     />
                 )
             case 2:
@@ -72,7 +72,7 @@ export const renderChapterContent = ({
                         key={chapterId}
                         chapterData={chapterContent}
                         content={chapterContent}
-                        fetchChapterContent={fetchChapterContent} // Pass it to AddAssessment
+                        fetchChapterContent={fetchChapterContent}
                         moduleId={moduleID}
                         topicId={topicId}
                     />
@@ -101,7 +101,7 @@ export const renderChapterContent = ({
                         </div>
                     </div>
                 ) : (
-                    <h1>Create New Chapter</h1>
+                    <h1>Create New Chapter load</h1>
                 )}
             </>
         )

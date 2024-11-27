@@ -15,7 +15,7 @@ import CodingQuestions from '@/app/admin/courses/[courseId]/module/_components/A
 import { Button } from '@/components/ui/button'
 import SettingsAssessment from '@/app/admin/courses/[courseId]/module/_components/Assessment/SettingsAssessment'
 import SelectedQuestions from '@/app/admin/courses/[courseId]/module/_components/Assessment/SelectedQuestions'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import useDebounce from '@/hooks/useDebounce'
 import { getAssessmentPreviewStore } from '@/store/store'
 import { useRouter } from 'next/navigation'
@@ -59,9 +59,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
 
     const [filteredQuestions, setFilteredQuestions] = useState<any[]>([])
 
-    const [chapterTitle, setChapterTitle] = useState<string>(
-        content.ModuleAssessment?.title
-    )
+    const [chapterTitle, setChapterTitle] = useState<string>(content?.ModuleAssessment?.title)
 
     const [questionType, setQuestionType] = useState<string>('coding')
 
@@ -93,6 +91,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     >([])
 
     const debouncedSearch = useDebounce(searchQuestionsInAssessment, 500)
+    const [titleInputLength, setTitleInputLength] = useState(0)
 
     const [saveSettings, setSaveSettings] = useState(false)
 
@@ -218,8 +217,6 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     }, [selectedQuizQuestions])
 
     useEffect(() => {
-        setChapterTitle(content.ModuleAssessment?.title)
-
         // Ensure unique coding questions
         const uniqueCodingQuestions = Array.from(
             new Set(
@@ -290,33 +287,41 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     }, [selectedOpenEndedQuestions])
 
     useEffect(() => {
-        fetchChapterContent(chapterData.chapterId, topicId)
-    }, [])
+       if(chapterData.id && topicId > 0){
+        fetchChapterContent(chapterData.id, topicId)
+        setChapterTitle(content.ModuleAssessment?.title)   
+    }
+       
+    }, [chapterData.id, topicId])
 
     useEffect(() => {
         getAllTagsWithoutFilter(setTags)
     }, [])
 
+
     return (
         <div className="container p-4">
             {questionType !== 'settings' && (
                 <div className="flex items-center mb-5 w-full justify-between">
-                    <div className="w-1/4 flex justify-center align-middle items-center relative">
+                    <div className="w-2/6 flex justify-center align-middle items-center relative">
                         <Input
                             required
                             onChange={(e) => {
                                 setChapterTitle(e.target.value)
+                                setTitleInputLength(e.target.value.length)
                             }}
-                            placeholder="Untitled Assessment"
+                            placeholder={content?.ModuleAssessment?.title}
                             className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
                             autoFocus
                         />
-                        <Pencil
+                        {titleInputLength == 0  && (
+                            <Pencil
                             fill="true"
                             fillOpacity={0.4}
                             size={20}
                             className="absolute text-gray-100 pointer-events-none mt-1 right-5"
                         />
+                        )}
                     </div>
 
                     {/* preview & settings buttons */}
@@ -443,38 +448,45 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                 </div>
 
                 {questionType !== 'settings' && (
-                    <>
-                        <div>
+                    <div>
+                       <ScrollArea className='h-screen pb-28 w-full pr-5'>
+                       <ScrollBar orientation='vertical' className='h-screen'/>
                             <h1 className="text-left font-bold mb-5">
                                 Selected Questions
                             </h1>
+            
 
-                            {/* Display & remove the selected questions */}
-                            <SelectedQuestions
-                                selectedCodingQuestions={
-                                    selectedCodingQuestions
-                                }
-                                selectedQuizQuestions={selectedQuizQuestions}
-                                selectedOpenEndedQuestions={
-                                    selectedOpenEndedQuestions
-                                }
-                                setSelectedCodingQuestions={
-                                    setSelectedCodingQuestions
-                                }
-                                setSelectedQuizQuestions={
-                                    setSelectedQuizQuestions
-                                }
-                                setSelectedOpenEndedQuestions={
-                                    setSelectedOpenEndedQuestions
-                                }
-                                questionType={questionType}
-                                tags={tags}
-                            />
-                        </div>
-                    </>
+                           {selectedCodingQuesIds.length > 0 || selectedQuizQuesIds.length > 0 || selectedOpenEndedQuesIds.length > 0 ? (
+                   
+                             <SelectedQuestions
+                             selectedCodingQuestions={
+                                 selectedCodingQuestions
+                             }
+                             selectedQuizQuestions={selectedQuizQuestions}
+                             selectedOpenEndedQuestions={
+                                 selectedOpenEndedQuestions
+                             }
+                             setSelectedCodingQuestions={
+                                 setSelectedCodingQuestions
+                             }
+                             setSelectedQuizQuestions={
+                                 setSelectedQuizQuestions
+                             }
+                             setSelectedOpenEndedQuestions={
+                                 setSelectedOpenEndedQuestions
+                             }
+                             questionType={questionType}
+                             tags={tags}
+                         />
+                           ): (<h1 className='text-left italic'>No Selected questions</h1>)}
+                   
+                       </ScrollArea>
+                    </div>
                 )}
             </div>
-            {questionType === 'settings' && (
+       <ScrollArea className='h-screen pb-28 w-full pr-5'>
+        <ScrollBar orientation='vertical' className='h-auto'/>
+       {questionType === 'settings' && (
                 <SettingsAssessment
                     selectedCodingQuesIds={selectedCodingQuesIds}
                     selectedQuizQuesIds={selectedQuizQuesIds}
@@ -490,8 +502,10 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                     setQuestionType={setQuestionType}
                     selectCodingDifficultyCount={selectCodingDifficultyCount}
                     selectQuizDifficultyCount={selectQuizDifficultyCount}
+                    topicId = {topicId}
                 />
             )}
+       </ScrollArea>
         </div>
     )
 }

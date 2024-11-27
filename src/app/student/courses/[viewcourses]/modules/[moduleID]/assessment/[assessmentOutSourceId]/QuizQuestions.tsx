@@ -28,7 +28,7 @@ const QuizQuestions = ({
 }: {
     onBack: () => void
     remainingTime: number
-    questions: any[]
+    questions: any
     assessmentSubmitId: number
     getSeperateQuizQuestions: () => void
 }) => {
@@ -36,7 +36,15 @@ const QuizQuestions = ({
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined) // Correct type
     // Define the Zod schema for form validation
 
+    const addClassToCodeTags: any = (htmlString: string, additionalClass: string) => {
+        return htmlString.replace(
+            /<code([^>]*)>/g,
+            (match, attributes) => `<code${attributes} class="${additionalClass} ${attributes.match(/class="([^"]*)"/)?.[1] || ''}">`
+        );
+    };
+
     useEffect(() => {
+
         return () => {
             if (timeoutRef.current) {
                 clearTimeout(timeoutRef.current)
@@ -58,8 +66,9 @@ const QuizQuestions = ({
 
     // Set default values based on submissionsData when the component mounts or questions change
     useEffect(() => {
+        console.log('questions', questions)
         const defaultValues = {
-            answers: questions.map((question) =>
+            answers: questions?.data?.mcqs?.map((question: any) =>
                 question.submissionsData && question.submissionsData.length > 0
                     ? question.submissionsData[0].chosenOption.toString()
                     : ''
@@ -71,7 +80,7 @@ const QuizQuestions = ({
     // Handle form submission
     const onSubmit = async (data: z.infer<typeof formSchema>) => {
         const quizSubmissionDto = data.answers.map((chosenOption, index) => ({
-            questionId: questions[index].id,
+            questionId: questions.data.mcqs[index].quizId,
             attemptCount: 1,
             chosenOption: Number(chosenOption),
         }))
@@ -90,8 +99,8 @@ const QuizQuestions = ({
 
             getSeperateQuizQuestions()
 
-               // Set the timeout and store the timeout ID
-               timeoutRef.current = setTimeout(() => {
+            // Set the timeout and store the timeout ID
+            timeoutRef.current = setTimeout(() => {
                 onBack()
             }, 3000)
         } catch (error: any) {
@@ -106,6 +115,11 @@ const QuizQuestions = ({
             })
         }
     }
+
+    useEffect(() => {
+        console.log('questions', questions)
+
+    }, [questions])
 
     return (
         <div>
@@ -128,46 +142,57 @@ const QuizQuestions = ({
                     onSubmit={form.handleSubmit(onSubmit)}
                     className="flex flex-col items-center mt-10"
                 >
-                    {questions.map((question, index) => (
-                        <FormField
-                            key={question.id}
-                            control={form.control}
-                            name={`answers.${index}`}
-                            render={({ field }) => (
-                                <FormItem className="flex flex-col items-start mb-10 w-full max-w-md">
-                                    <FormLabel>
-                                        {index + 1}. {question.Quiz.question}
-                                    </FormLabel>
-                                    <FormControl>
-                                        <RadioGroup
-                                            value={field.value}
-                                            onValueChange={field.onChange}
-                                        >
-                                            {Object.keys(
-                                                question.Quiz.options
-                                            ).map((key) => (
-                                                <div
-                                                    key={key}
-                                                    className="flex items-center gap-2 mb-2"
+                    {questions?.data?.mcqs?.map((question: any, index: any) => {
+                        const additionalClass = 'bg-red-400';
+                        const processedHtml = addClassToCodeTags(question.question, additionalClass);
+                        return (
+                            <>
+                               <div className=''>
+                               <FormField
+                                    key={question.id}
+                                    control={form.control}
+                                    name={`answers.${index}`}
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col items-start mb-10 w-full max-w-md">
+                                            <FormLabel>
+                                                {index + 1}.
+                                                <div className=''
+                                                    dangerouslySetInnerHTML={{ __html: processedHtml}}
+                                                />
+                                            </FormLabel>
+                                            <FormControl>
+                                                <RadioGroup
+                                                    value={field.value}
+                                                    onValueChange={field.onChange}
                                                 >
-                                                    <RadioGroupItem
-                                                        value={key}
-                                                    />
-                                                    <p>
-                                                        {
-                                                            question.Quiz
-                                                                .options[key]
-                                                        }
-                                                    </p>
-                                                </div>
-                                            ))}
-                                        </RadioGroup>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    ))}
+                                                    {Object.keys(
+                                                        question.options
+                                                    ).map((key) => (
+                                                        <div
+                                                            key={key}
+                                                            className="flex items-center gap-2 mb-2"
+                                                        >
+                                                            <RadioGroupItem
+                                                                value={key}
+                                                            />
+                                                            <p>
+                                                                {
+                                                                    question.options[key]
+                                                                }
+                                                            </p>
+                                                        </div>
+                                                    ))}
+                                                </RadioGroup>
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                               </div>
+                            </>
+                        )
+
+                    })}
                     <Button type="submit" className="mt-10">
                         Submit Quiz
                     </Button>

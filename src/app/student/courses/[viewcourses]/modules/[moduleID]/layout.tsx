@@ -3,10 +3,10 @@
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { useParams, usePathname } from 'next/navigation'
 import Chapters from '../_components/Chapters'
-import useResponsiveHeight from '@/hooks/useResponsiveHeight'
+// import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-    const heightClass = useResponsiveHeight()
+    // const heightClass = useResponsiveHeight()
     const { projectID } = useParams()
     const pathname = usePathname()
     const assessmentRoute =
@@ -16,19 +16,19 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
     return (
         <>
-            <div className={`${heightClass} overflow-hidden`}>
+            {/* <div className={`${heightClass} overflow-hidden`}> */}
                 {projectID || assessmentRoute ? (
                     <MaxWidthWrapper>{children}</MaxWidthWrapper>
                 ) : (
                     // <MaxWidthWrapper><Project /></MaxWidthWrapper>
-                    <div className="flex h-full flex-col md:flex-row md:overflow-hidden">
+                    <div className="flex h-full flex-col md:flex-row md:overflow-scroll">
                         <div className="w-full flex-none md:w-[25%]">
                             <Chapters />
                         </div>
                         <div className="flex-grow pl-10">{children}</div>
                     </div>
                 )}
-            </div>
+            {/* </div> */}
         </>
     )
 }

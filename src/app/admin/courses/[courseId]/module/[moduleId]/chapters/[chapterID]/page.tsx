@@ -18,7 +18,6 @@ import {
     getTopicId,
 } from '@/store/store'
 import { Spinner } from '@/components/ui/spinner'
-import { renderChapterContent } from '../../../_components/RenderChapterContent'
 
 interface QuizOptions {
     option1: string
@@ -54,7 +53,7 @@ export default function Page({
     const [activeChapterTitle, setActiveChapterTitle] = useState('')
     const { currentChapter, setCurrentChapter } = getCurrentChapterState()
     const [activeChapter, setActiveChapter] = useState(chapter_id)
-    const [topicId, setTopicId] = useState(1)
+    const {topicId, setTopicId} = getTopicId()
     const [key, setKey] = useState(0)
     const [loading, setLoading] = useState(true)
 
@@ -88,11 +87,14 @@ export default function Page({
                     setChapterContent(response.data)
                 }
 
+                console.log('currentModule', currentModule)
+
+                // setTopicId(currentModule?.topicId)
+
                 setTimeout(() => {
                     setLoading(false) // Set loading to false after the delay
                 }, 100)
 
-                setTopicId(currentModule?.topicId)
                 setActiveChapter(chapterId)
                 setKey((prevKey: any) => prevKey + 1)
             } catch (error) {
@@ -112,24 +114,100 @@ export default function Page({
             setActiveChapter(0)
             setChapterContent([])
             setActiveChapterTitle('')
-            setTopicId(0)
+            // setTopicId(0)
             setTimeout(() => {
                 setLoading(false) // Set loading to false after the delay
             }, 100)
         }
     }, [chapterData, fetchChapterContent])
 
-    return (
-        <div className="">
-            {renderChapterContent({
-                topicId,
-                chapterId,
-                chapterContent,
-                moduleID,
-                activeChapterTitle,
-                loading,
-                fetchChapterContent,
-            })}
-        </div>
-    )
+    console.log(topicId)
+
+    const renderChapterContent = () => {
+        if (
+            topicId &&
+            chapterContent &&
+            (chapterContent?.id === chapter_id ||
+                chapterContent?.chapterId === chapter_id)
+        ) {
+            switch (topicId) {
+                case 1:
+                    return (
+                        <AddVideo
+                            key={chapterId}
+                            moduleId={moduleID}
+                            content={chapterContent}
+                            fetchChapterContent={fetchChapterContent}
+                        />
+                    )
+                case 2:
+                    return (
+                        <AddArticle key={chapterId} content={chapterContent} />
+                    )
+                case 3:
+                    return (
+                        <CodingChallenge
+                            key={chapterId}
+                            moduleId={moduleID}
+                            content={chapterContent}
+                            activeChapterTitle={activeChapterTitle}
+                        />
+                    )
+                case 4:
+                    return (
+                        <Quiz
+                            key={chapterId}
+                            chapterId={chapterId}
+                            moduleId={moduleID}
+                            content={chapterContent}
+                        />
+                    )
+                case 5:
+                    return (
+                        <Assignment key={chapterId} content={chapterContent} />
+                    )
+                case 6:
+                    return (
+                        <AddAssessment
+                            key={chapterId}
+                            chapterData={currentChapter}
+                            content={chapterContent}
+                            fetchChapterContent={fetchChapterContent}
+                            moduleId={moduleID}
+                            topicId={topicId}
+                        />
+                    )
+                case 7:
+                    return (
+                        <AddForm
+                            key={chapterId}
+                            chapterData={currentChapter}
+                            content={chapterContent}
+                            // fetchChapterContent={fetchChapterContent}
+                            moduleId={moduleID}
+                        />
+                    )
+                default:
+                    return <h1>Create New Chapter</h1>
+            }
+        } else {
+            return (
+                <>
+                    {loading ? (
+                        <div className="my-5 flex justify-center items-center">
+                            <div className="absolute h-screen">
+                                <div className="relative top-[70%]">
+                                    <Spinner className="text-secondary" />
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <h1>Create New Chapter</h1>
+                    )}
+                </>
+            )
+        }
+    }
+
+    return <div>{renderChapterContent()}</div>
 }

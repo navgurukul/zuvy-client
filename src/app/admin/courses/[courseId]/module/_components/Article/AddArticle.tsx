@@ -20,7 +20,7 @@ import TiptapToolbar from '@/app/_components/editor/TiptapToolbar'
 import extensions from '@/app/_components/editor/TiptapExtensions'
 import '@/app/_components/editor/Tiptap.css'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import useResponsiveHeight from '@/hooks/useResponsiveHeight'
+// import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 
 interface ContentDetail {
     title: string
@@ -39,7 +39,7 @@ interface Content {
 }
 
 const AddArticle = ({ content }: { content: any }) => {
-    const heightClass = useResponsiveHeight()
+    // const heightClass = useResponsiveHeight()
     // state
     const [title, setTitle] = useState('')
     // misc
@@ -112,7 +112,7 @@ const AddArticle = ({ content }: { content: any }) => {
 
     return (
         <ScrollArea
-            className={`${heightClass} pr-4`}
+            // className={`${heightClass} pr-4`}
             type="hover"
             style={{
                 scrollbarWidth: 'none', // Firefox
