@@ -147,8 +147,7 @@ const Page = ({ params }: any) => {
                                         {
                                             indiviDualStudentData
                                                 ?.projectSubmissionDetails
-                                                ?.projectTrackingData[0]
-                                                .userDetails.name
+                                                ?.projectTrackingData[0].userDetails.name
                                         }
                                     </h1>
                                     <h3 className="text-left font-semibold">
@@ -160,6 +159,7 @@ const Page = ({ params }: any) => {
                                 </div>
                             </div>
                         </div>
+
                     </div>
                     <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2">
                         <div className="p-4 bg-white rounded shadow">
@@ -196,6 +196,8 @@ const Page = ({ params }: any) => {
                                     }
                                 </h2>
                             </Link>
+
+
                         </div>
                     </div>
                 </MaxWidthWrapper>

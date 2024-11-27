@@ -1,11 +1,7 @@
 import React, { useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Check, ChevronDown } from 'lucide-react'
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
 
 interface CodingTopicsProps {
@@ -32,57 +28,49 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
     selectedTopics,
     setSelectedTopics,
     selectedDifficulties,
-    setSelectedDifficulties,
+    setSelectedDifficulties
 }) => {
     const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(event.target.value)
     }
 
     const handleTopicChange = (tag: Tag) => {
-        setSelectedTopics((prev) => {
+        setSelectedTopics(prev => {
             if (tag.tagName === 'All Topics') {
-                return prev.some((t) => t.tagName === 'All Topics') ? [] : [tag]
+                return prev.some(t => t.tagName === 'All Topics') ? [] : [tag]
             } else {
-                const newSelection = prev?.filter(
-                    (t) => t?.tagName !== 'All Topics'
-                )
-                const tagIndex = newSelection.findIndex(
-                    (t) => t?.id === tag?.id
-                )
+                const newSelection = prev?.filter(t => t?.tagName !== 'All Topics')
+                const tagIndex = newSelection.findIndex(t => t?.id === tag?.id)
                 if (tagIndex > -1) {
                     newSelection.splice(tagIndex, 1)
                 } else {
                     newSelection.push(tag)
                 }
-                return newSelection.length === 0
-                    ? [tags.find((t) => t.tagName === 'All Topics')!]
-                    : newSelection
+                return newSelection.length === 0 ? [tags.find(t => t.tagName === 'All Topics')!] : newSelection
             }
         })
     }
 
     const handleDifficultyChange = (difficulty: string) => {
-        setSelectedDifficulties((prev) => {
+        setSelectedDifficulties(prev => {
             if (difficulty === 'Any Difficulty') {
                 return prev.includes('Any Difficulty') ? [] : ['Any Difficulty']
             } else {
-                const newSelection = prev.filter((d) => d !== 'Any Difficulty')
+                const newSelection = prev.filter(d => d !== 'Any Difficulty')
                 const difficultyIndex = newSelection.indexOf(difficulty)
                 if (difficultyIndex > -1) {
                     newSelection.splice(difficultyIndex, 1)
                 } else {
                     newSelection.push(difficulty)
                 }
-                return newSelection.length === 0
-                    ? ['Any Difficulty']
-                    : newSelection
+                return newSelection.length === 0 ? ['Any Difficulty'] : newSelection
             }
         })
     }
 
     const getTopicsButtonText = () => {
         if (selectedTopics.length === 0) {
-            return 'All Topics'
+            return "All Topics"
         } else if (selectedTopics.length === 1) {
             return selectedTopics[0].tagName
         } else {
@@ -92,7 +80,7 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
 
     const getDifficultiesButtonText = () => {
         if (selectedDifficulties.length === 0) {
-            return 'Any Difficulty'
+            return "Any Difficulty"
         } else if (selectedDifficulties.length === 1) {
             return selectedDifficulties[0]
         } else {
@@ -112,10 +100,7 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
             <div className="dropDownsContainer flex gap-2">
                 <Popover>
                     <PopoverTrigger asChild>
-                        <Button
-                            variant="outline"
-                            className="w-48 sm:w-56 justify-between"
-                        >
+                        <Button variant="outline" className="w-48 sm:w-56 justify-between">
                             {getTopicsButtonText()}
                             <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
@@ -128,13 +113,9 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
                                     className="flex items-center px-3 py-2 hover:bg-secondary hover:text-[#FFFFFF]  cursor-pointer"
                                     onClick={() => handleTopicChange(tag)}
                                 >
-                                    <Check
+                                    <Check 
                                         className={`mr-2 h-4 w-4 ${
-                                            selectedTopics.some(
-                                                (t) => t?.id === tag?.id
-                                            )
-                                                ? 'opacity-100'
-                                                : 'opacity-0'
+                                            selectedTopics.some(t => t?.id === tag?.id) ? 'opacity-100' : 'opacity-0'
                                         }`}
                                     />
                                     {tag.tagName}
@@ -146,10 +127,7 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
 
                 <Popover>
                     <PopoverTrigger asChild>
-                        <Button
-                            variant="outline"
-                            className="w-48 sm:w-56 justify-between"
-                        >
+                        <Button variant="outline" className="w-48 sm:w-56 justify-between">
                             {getDifficultiesButtonText()}
                             <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
@@ -160,17 +138,11 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
                                 <div
                                     key={difficulty}
                                     className="flex items-center px-3 py-2 hover:bg-secondary hover:text-[#FFFFFF] cursor-pointer"
-                                    onClick={() =>
-                                        handleDifficultyChange(difficulty)
-                                    }
+                                    onClick={() => handleDifficultyChange(difficulty)}
                                 >
-                                    <Check
+                                    <Check 
                                         className={`mr-2 h-4 w-4 ${
-                                            selectedDifficulties.includes(
-                                                difficulty
-                                            )
-                                                ? 'opacity-100'
-                                                : 'opacity-0'
+                                            selectedDifficulties.includes(difficulty) ? 'opacity-100' : 'opacity-0'
                                         }`}
                                     />
                                     {difficulty}

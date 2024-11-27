@@ -29,9 +29,7 @@ const OpenEndedQuestions = ({
         <ScrollArea className="h-dvh pr-4">
             <ScrollBar orientation="vertical" />
             {questions.map((question: OpenEndedQuestion) => {
-                const tag = tags?.find(
-                    (tag: any) => tag?.id === question?.tagId
-                )
+                const tag = tags?.find((tag: any) => tag?.id === question?.tagId)
                 return (
                     <div
                         key={question.id}
@@ -52,12 +50,8 @@ const OpenEndedQuestions = ({
                                         <span
                                             className={cn(
                                                 `text-[12px] rounded-[100px] px-[8px]`,
-                                                difficultyColor(
-                                                    question?.difficulty
-                                                ),
-                                                difficultyBgColor(
-                                                    question?.difficulty
-                                                )
+                                                difficultyColor(question?.difficulty),
+                                                difficultyBgColor(question?.difficulty)
                                             )}
                                         >
                                             {question.difficulty}
@@ -73,8 +67,7 @@ const OpenEndedQuestions = ({
                             </div>
                             <div className="flex">
                                 {selectedQuestions.some(
-                                    (q: OpenEndedQuestion) =>
-                                        q.id === question.id
+                                    (q: OpenEndedQuestion) => q.id === question.id
                                 ) ? (
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
