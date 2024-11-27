@@ -47,10 +47,13 @@ const PreviewAssessment = ({ params }: { params: any }) => {
 
             {/* Adjusted padding to align the content */}
             <div className="relative flex flex-col items-center justify-center px-4 py-8 mt-20">
+                {/* "Go Back" button placed at the far left */}
                 <Link
                     href={`/admin/courses/${params.courseId}/module/${params.moduleId}/chapters/${params.chapterId}`}
                     className="absolute left-0 top-0 flex items-center space-x-2 p-4"
                 >
+                    {' '}
+                    {/* Absolute positioning */}
                     <ArrowLeft size={20} />
                     <p className="ml-1 text-sm font-medium text-gray-800">
                         Go back
