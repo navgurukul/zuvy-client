@@ -7,6 +7,7 @@ import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from '@/components/ui/use-toast'
+import { ellipsis } from '@/lib/utils'
 
 type Props = {
     moduleId: string
@@ -18,6 +19,7 @@ type Props = {
 
 function Quiz(props: Props) {
     const [questions, setQuestions] = useState<any[]>([])
+    const [data, setData] = useState()
     const [status, setStatus] = useState<boolean>(false)
     const [selectedAnswers, setSelectedAnswers] = useState<{
         [key: number]: string
@@ -49,7 +51,7 @@ function Quiz(props: Props) {
                 const updatedQuestions = res.data.data.quizDetails.map(
                     (item: any) => ({
                         ...item,
-                        status: item.quizTrackingData[0]?.status ?? 'pending',
+                        status: res?.data.data.status,
                     })
                 )
                 setQuestions(updatedQuestions)
@@ -113,6 +115,7 @@ function Quiz(props: Props) {
                 getAllQuizQuestionHandler()
             })
     }
+    console.log(questions)
 
     return (
         <div>
@@ -134,10 +137,21 @@ function Quiz(props: Props) {
                         )}
                         {questions?.map((question, index) => (
                             <div key={question.id}>
-                                <h1 className="font-semibold my-3">
-                                    {'Q'}
-                                    {index + 1} .{question.question}
-                                </h1>
+                                <div className="flex items-center space-x-2">
+                                    <h1 className="font-semibold my-3">
+                                        {'Q'}
+                                        {index + 1}
+                                    </h1>
+                                    <span
+                                        key={question}
+                                        dangerouslySetInnerHTML={{
+                                            __html: ellipsis(
+                                                question.question,
+                                                30
+                                            ),
+                                        }}
+                                    />
+                                </div>
                                 <div className="flex flex-col items-start">
                                     {Object.entries(question.options).map(
                                         ([optionId, optionText]) => (

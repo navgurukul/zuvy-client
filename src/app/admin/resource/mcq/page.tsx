@@ -51,7 +51,6 @@ import { Label } from '@/components/ui/label'
 import BulkUploadMcq from '../_components/BulkMcqForm'
 import NewMcqForm from '../_components/NewMcqForm'
 import EditMcqForm from '../_components/EditMcqForm'
-import { off } from 'process'
 type Props = {}
 export type Tag = {
     label: string
@@ -98,15 +97,15 @@ const Mcqs = (props: Props) => {
     const [options, setOptions] = useState<Option[]>([
         { value: '-1', label: 'All Topics' },
     ])
-    const [selectedTag, setSelectedTag] = useState<Tag>(() => {
-        if (typeof window !== 'undefined') {
-            const storedTag = localStorage.getItem('MCQCurrentTag')
-            return storedTag !== null
-                ? JSON.parse(storedTag)
-                : { id: -1, tagName: 'All Topics' }
-        }
-        return { id: -1, tagName: 'All Topics' }
-    })
+    // const [selectedTag, setSelectedTag] = useState<Tag>(() => {
+    //     if (typeof window !== 'undefined') {
+    //         const storedTag = localStorage.getItem('MCQCurrentTag')
+    //         return storedTag !== null
+    //             ? JSON.parse(storedTag)
+    //             : { id: -1, tagName: 'All Topics' }
+    //     }
+    //     return { id: -1, tagName: 'All Topics' }
+    // })
     const [loading, setLoading] = useState(true)
     const { isEditQuizModalOpen, setIsEditModalOpen } = getEditQuizQuestion()
 
@@ -280,17 +279,15 @@ const Mcqs = (props: Props) => {
     )
 
     useEffect(() => {
-        getAllTags()
+        // Ensure the code runs only on the client side
+        if (typeof window !== 'undefined') {
+            getAllTags()
+        }
     }, [])
 
     useEffect(() => {
-        getAllQuizQuestion(offset)
-    }, [getAllQuizQuestion, offset, position])
-
-    useEffect(() => {
-        if (offset < 0) {
-            setOffset(0)
-        } else {
+        // Ensure the code runs only on the client side
+        if (typeof window !== 'undefined') {
             getAllQuizQuestion(offset)
         }
     }, [getAllQuizQuestion, offset, position])
@@ -448,7 +445,6 @@ const Mcqs = (props: Props) => {
                                         closeModal={closeModal}
                                         setStoreQuizData={setStoreQuizData}
                                         getAllQuizQuesiton={getAllQuizQuestion}
-                                        setIsMcqModalOpen={setIsMcqModalOpen}
                                     />
                                 </div>
                             )} */}
