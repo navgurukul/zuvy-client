@@ -67,6 +67,7 @@ function Chapter() {
     const [isNewChapterCreated, setIsNewChapterCreated] = useState(false)
     const [isChapterClicked, setIsChapterClicked] = useState(false)
     const isChapterClickedRef = useRef(false)
+    const [currentChapter, setCurrentChapter] = useState<any>([])
 
     const crumbs = [
         {
@@ -91,12 +92,14 @@ function Chapter() {
             const response = await api.get(
                 `/Content/allChaptersOfModule/${moduleId}`
             )
-            const currentChapter = response.data.chapterWithTopic.find(
+            const clickedChapter = response.data.chapterWithTopic.find(
                 (item: any) => item.chapterId === chapter_id
             )
+            setCurrentChapter(clickedChapter)
             setChapterData(response.data.chapterWithTopic)
             setModuleName(response.data.moduleName)
             setModuleData(response.data.chapterWithTopic)
+            
         } catch (error) {
             console.error('Error fetching chapters:', error)
             // Handle error as needed
@@ -117,7 +120,7 @@ function Chapter() {
             setActiveChapter(0)
             setChapterContent([])
             setActiveChapterTitle('')
-            setTopicId(0)
+            // setTopicId(0)
         }
     }, [chapterData])
 
@@ -175,8 +178,15 @@ function Chapter() {
                 // behavior: 'smooth',
                 // block: 'center',
             })
+            
         }
     }, [activeChapter])
+
+useEffect(()=>{
+    if(currentChapter?.topicId){
+        setTopicId(currentChapter?.topicId)
+    }
+},[currentChapter])
 
     return (
         <div className="flex flex-col h-full">
