@@ -24,6 +24,7 @@ import { Button } from '@/components/ui/button';
 import ToggleSwitch from './ToggleSwitch';
 import { toast } from '@/components/ui/use-toast';
 import { api } from '@/utils/axios.config';
+import { useParams } from 'next/navigation';
 
 type SettingsAssessmentProps = {
     selectedCodingQuesIds: any;
@@ -60,6 +61,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     selectQuizDifficultyCount,
     topicId,
 }) => {
+    const {chapterID} = useParams();
     const codingMax = selectedCodingQuesIds.length;
     const mcqMax = selectedQuizQuesIds.length;
     const [codingWeightageDisabled, setCodingWeightageDisabled] = useState(false);
@@ -194,6 +196,14 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
         }
     }, [totalQuestions, content]);
 
+    // useEffect(()=>{
+    //     if(topicId && chapterID){
+    //         fetchChapterContent(chapterID, topicId);
+    //     }
+    // },[chapterID, topicId])
+
+    console.log('content', chapterData);
+
 
     async function onSubmit(values: any) {
         const timeLimit = Number(values.hour) * 3600 + Number(values.minute) * 60;
@@ -222,8 +232,8 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
         };
 
         try {
-            await api.put(`Content/editAssessment/${content.assessmentOutsourseId}/${chapterData.id}`, data);
-            fetchChapterContent(chapterData.id, topicId);
+            await api.put(`Content/editAssessment/${content.assessmentOutsourseId}/${chapterID}`, data);
+            fetchChapterContent(chapterID, topicId);
             toast({
                 title: 'Assessment Updated Successfully',
                 description: 'Assessment has been updated successfully',
@@ -235,7 +245,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     };
 
     useEffect(() => {
-        console.log('content', content)
+
         form.reset({
             codingProblemsEasy: content?.easyCodingQuestions || 0,
             codingProblemsMedium: content?.mediumCodingQuestions || 0,

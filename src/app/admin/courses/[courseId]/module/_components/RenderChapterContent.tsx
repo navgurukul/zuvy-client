@@ -101,7 +101,7 @@ export const renderChapterContent = ({
                         </div>
                     </div>
                 ) : (
-                    <h1>Create New Chapter</h1>
+                    <h1>Create New Chapter load</h1>
                 )}
             </>
         )
