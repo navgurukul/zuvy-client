@@ -49,7 +49,7 @@ import EditCodingQuestionForm from '../_components/EditCodingQuestionForm'
 import useDebounce from '@/hooks/useDebounce'
 import MultiSelector from '@/components/ui/multi-selector'
 import difficultyOptions from '@/app/utils'
-// import CodingTopics from '../../courses/[courseId]/module/_components/codingChallenge/CodingTopics'
+import CodingTopics from '../../courses/[courseId]/module/_components/codingChallenge/CodingTopics'
 // import { POSITION } from '@/utils/constant'
 
 export type Tag = {
