@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from '@/components/ui/use-toast'
 import { ellipsis } from '@/lib/utils'
-// import { addClassToCodeTags } from '@/utils/admin'
+import { addClassToCodeTags } from '@/utils/admin'
 
 type Props = {
     moduleId: string
@@ -137,10 +137,10 @@ function Quiz(props: Props) {
                         )}
                         {questions?.map((question, index) => {
                             const additionalClass = 'bg-gray-300 text-start '
-                            // const processedHtml = addClassToCodeTags(
-                            //     question.question,
-                            //     additionalClass
-                            // )
+                            const processedHtml = addClassToCodeTags(
+                                question.question,
+                                additionalClass
+                            )
                             return (
                                 <div key={question.id}>
                                     <div className="flex items-center space-x-2">
@@ -151,7 +151,7 @@ function Quiz(props: Props) {
                                         <span
                                             className=""
                                             dangerouslySetInnerHTML={{
-                                                __html: question.question,
+                                                __html: processedHtml,
                                             }}
                                         />
                                     </div>
