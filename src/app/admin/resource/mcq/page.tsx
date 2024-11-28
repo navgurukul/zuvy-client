@@ -96,15 +96,15 @@ const Mcqs = (props: Props) => {
     const [options, setOptions] = useState<Option[]>([
         { value: '-1', label: 'All Topics' },
     ])
-    // const [selectedTag, setSelectedTag] = useState<Tag>(() => {
-    //     if (typeof window !== 'undefined') {
-    //         const storedTag = localStorage.getItem('MCQCurrentTag')
-    //         return storedTag !== null
-    //             ? JSON.parse(storedTag)
-    //             : { id: -1, tagName: 'All Topics' }
-    //     }
-    //     return { id: -1, tagName: 'All Topics' }
-    // })
+    const [selectedTag, setSelectedTag] = useState<Tag>(() => {
+        if (typeof window !== 'undefined') {
+            const storedTag = localStorage.getItem('MCQCurrentTag')
+            return storedTag !== null
+                ? JSON.parse(storedTag)
+                : { id: -1, tagName: 'All Topics' }
+        }
+        return { id: -1, tagName: 'All Topics' }
+    })
     const [loading, setLoading] = useState(true)
     const { isEditQuizModalOpen, setIsEditModalOpen } = getEditQuizQuestion()
 
@@ -278,17 +278,11 @@ const Mcqs = (props: Props) => {
     )
 
     useEffect(() => {
-        // Ensure the code runs only on the client side
-        if (typeof window !== 'undefined') {
-            getAllTags()
-        }
+        getAllTags()
     }, [])
 
     useEffect(() => {
-        // Ensure the code runs only on the client side
-        if (typeof window !== 'undefined') {
-            getAllQuizQuestion(offset)
-        }
+        getAllQuizQuestion(offset)
     }, [getAllQuizQuestion, offset, position])
 
     const selectedTagCount = selectedOptions.length
@@ -371,13 +365,10 @@ const Mcqs = (props: Props) => {
                                 </div>
                             </RadioGroup>
                             {mcqType === 'bulk' ? (
-                                <BulkUploadMcq
-                                    setIsMcqModalOpen={setIsMcqModalOpen}
-                                />
+                                <BulkUploadMcq />
                             ) : (
                                 <div className="flex items-start justify-center w-screen ">
                                     <NewMcqForm
-                                        setIsMcqModalOpen={setIsMcqModalOpen}
                                         tags={tags}
                                         closeModal={closeModal}
                                         setStoreQuizData={setStoreQuizData}

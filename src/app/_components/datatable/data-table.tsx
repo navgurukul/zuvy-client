@@ -95,10 +95,7 @@ export function DataTable<TData, TValue>({
         <div className="space-y-4 relative">
             <div className="flex flex-col justify-end items-end absolute top-[-111px] right-[130px] ">
                 {mcqSide && (
-                    <McqDeleteVaiarntComp
-                        table={table}
-                        logSelectedRows={logSelectedRows}
-                    />
+                    <McqDeleteVaiarntComp logSelectedRows={logSelectedRows} />
                 )}
             </div>
             <DataTableToolbar table={table} />
