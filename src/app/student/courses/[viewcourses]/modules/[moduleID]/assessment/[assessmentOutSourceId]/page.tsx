@@ -242,7 +242,7 @@ function Page({
             }
         } else if (
             type === 'quiz' &&
-            seperateQuizQuestions[0]?.submissionsData.length > 0
+            assessmentData.IsQuizzSubmission
         ) {
             toast({
                 title: 'Quiz Already Submitted',
@@ -274,15 +274,14 @@ function Page({
             const res = await api.get(
                 `/Content/startAssessmentForStudent/assessmentOutsourseId=${decodedParams.assessmentOutSourceId}`
             )
-            console.log(res.data)
-            setAssessmentData(res?.data)
-            setStartedAt(new Date(res?.data?.submission?.startedAt).getTime())
-            setIsTabProctorOn(res?.data.canTabChange)
-            setIsFullScreenProctorOn(res?.data.canScreenExit)
-            setIsCopyPasteProctorOn(res?.data.CanCopyPaste)
-            setIsEyeTrackingProctorOn(res?.data.canEyeTrack)
-            setAssessmentSubmitId(res?.data.submission.id)
-            setChapterId(res?.data.chapterId)
+            setAssessmentData(res?.data?.data)
+            setStartedAt(new Date(res?.data?.data.submission?.startedAt).getTime())
+            setIsTabProctorOn(res?.data.data.canTabChange)
+            setIsFullScreenProctorOn(res?.data.data.canScreenExit)
+            setIsCopyPasteProctorOn(res?.data.data.CanCopyPaste)
+            setIsEyeTrackingProctorOn(res?.data.data.canEyeTrack)
+            setAssessmentSubmitId(res?.data.data.submission.id)
+            setChapterId(res?.data.data.chapterId)
         } catch (e) {
             console.error(e)
         }
@@ -318,7 +317,7 @@ function Page({
     if (isSolving && isFullScreen) {
         if (
             selectedQuesType === 'quiz' &&
-            seperateQuizQuestions[0]?.submissionsData.length == 0
+            assessmentData.hardMcqQuestions + assessmentData.easyMcqQuestions + assessmentData.mediumMcqQuestions > 0
         ) {
             return (
                 <QuizQuestions
@@ -371,7 +370,8 @@ function Page({
                     {
                         tabChange: tabChange,
                         copyPaste: copyPaste,
-                        embeddedGoogleSearch: 0,
+                        fullScreenExit: fullScreenExit,
+                        eyeMomentCount: eyeMomentCount,
                         typeOfsubmission: 'studentSubmit',
                     }
                 )
@@ -475,7 +475,7 @@ function Page({
 
                             <h1 className='font-bold'>Proctoring Rules</h1>
                             <p>To ensure fair assessments, the assessments are proctored are proctored for the following cases below. Please avoid violating the rules:</p>
-                            <ul>
+                            <ul className='list-disc ml-5'>
                                 <li>Copy and pasting</li>
                                 <li>Tab switching</li>
                                 <li>Assessment screen exit</li>
@@ -486,7 +486,7 @@ function Page({
                     <div className="flex justify-center">
                         <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
                             <h2 className="font-bold">Coding Challenges</h2>
-                            {assessmentData.CodingQuestions?.map(
+                            {assessmentData.codingQuestions?.map(
                                 (question: any) => (
                                     <QuestionCard
                                         key={question.id}
@@ -505,14 +505,14 @@ function Page({
                             )}
                         </div>
                     </div>
-                    {assessmentData.Quizzes > 0 && (
+                    {assessmentData.hardMcqQuestions + assessmentData.easyMcqQuestions + assessmentData.mediumMcqQuestions > 0 && (
                         <div className="flex justify-center">
                             <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
                                 <h2 className="font-bold">MCQs</h2>
                                 <QuestionCard
                                     id={1}
                                     title="Quiz"
-                                    description={`${assessmentData.Quizzes || 0
+                                    description={`${ assessmentData.hardMcqQuestions + assessmentData.easyMcqQuestions + assessmentData.mediumMcqQuestions || 0
                                         } questions`}
                                     onSolveChallenge={() =>
                                         handleSolveChallenge('quiz')

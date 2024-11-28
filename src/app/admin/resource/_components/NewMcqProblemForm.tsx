@@ -978,7 +978,7 @@ const NewMcqProblemForm = ({
                             Topic Name and No. of Questions
                         </p>
                         {fields.map((field, index) => (
-                            <div className="flex flex-row gap-6">
+                            <div key={field.id} className="flex flex-row gap-6">
                                 {/* Topics Field */}
                                 <FormField
                                     key={field.id}

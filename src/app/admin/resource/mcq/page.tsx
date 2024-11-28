@@ -96,15 +96,15 @@ const Mcqs = (props: Props) => {
     const [options, setOptions] = useState<Option[]>([
         { value: '-1', label: 'All Topics' },
     ])
-    const [selectedTag, setSelectedTag] = useState<Tag>(() => {
-        if (typeof window !== 'undefined') {
-            const storedTag = localStorage.getItem('MCQCurrentTag')
-            return storedTag !== null
-                ? JSON.parse(storedTag)
-                : { id: -1, tagName: 'All Topics' }
-        }
-        return { id: -1, tagName: 'All Topics' }
-    })
+    // const [selectedTag, setSelectedTag] = useState<Tag>(() => {
+    //     if (typeof window !== 'undefined') {
+    //         const storedTag = localStorage.getItem('MCQCurrentTag')
+    //         return storedTag !== null
+    //             ? JSON.parse(storedTag)
+    //             : { id: -1, tagName: 'All Topics' }
+    //     }
+    //     return { id: -1, tagName: 'All Topics' }
+    // })
     const [loading, setLoading] = useState(true)
     const { isEditQuizModalOpen, setIsEditModalOpen } = getEditQuizQuestion()
 
@@ -278,11 +278,17 @@ const Mcqs = (props: Props) => {
     )
 
     useEffect(() => {
-        getAllTags()
+        // Ensure the code runs only on the client side
+        if (typeof window !== 'undefined') {
+            getAllTags()
+        }
     }, [])
 
     useEffect(() => {
-        getAllQuizQuestion(offset)
+        // Ensure the code runs only on the client side
+        if (typeof window !== 'undefined') {
+            getAllQuizQuestion(offset)
+        }
     }, [getAllQuizQuestion, offset, position])
 
     const selectedTagCount = selectedOptions.length
@@ -291,11 +297,12 @@ const Mcqs = (props: Props) => {
     const renderComponent = () => {
         switch (mcqType) {
             case 'bulk':
-                return <BulkUploadMcq />
+                return <BulkUploadMcq setIsMcqModalOpen={setIsMcqModalOpen} />
             case 'oneatatime':
                 return (
                     <div className="flex items-start justify-center w-full">
                         <NewMcqForm
+                            setIsMcqModalOpen={setIsMcqModalOpen}
                             tags={tags}
                             closeModal={closeModal}
                             setStoreQuizData={setStoreQuizData}
@@ -320,6 +327,7 @@ const Mcqs = (props: Props) => {
                 return (
                     <div className="flex items-start justify-center w-full">
                         <NewMcqForm
+                            setIsMcqModalOpen={setIsMcqModalOpen}
                             tags={tags}
                             closeModal={closeModal}
                             setStoreQuizData={setStoreQuizData}
@@ -425,6 +433,7 @@ const Mcqs = (props: Props) => {
                             ) : (
                                 <div className="flex items-start justify-center w-screen ">
                                     <NewMcqForm
+                                        setIsMcqModalOpen={setIsMcqModalOpen}
                                         tags={tags}
                                         closeModal={closeModal}
                                         setStoreQuizData={setStoreQuizData}
