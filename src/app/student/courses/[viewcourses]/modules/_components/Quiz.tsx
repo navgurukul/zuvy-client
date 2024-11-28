@@ -7,6 +7,8 @@ import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from '@/components/ui/use-toast'
+import { ellipsis } from '@/lib/utils'
+// import { addClassToCodeTags } from '@/utils/admin'
 
 type Props = {
     moduleId: string
@@ -18,6 +20,7 @@ type Props = {
 
 function Quiz(props: Props) {
     const [questions, setQuestions] = useState<any[]>([])
+    const [data, setData] = useState()
     const [status, setStatus] = useState<boolean>(false)
     const [selectedAnswers, setSelectedAnswers] = useState<{
         [key: number]: string
@@ -49,7 +52,7 @@ function Quiz(props: Props) {
                 const updatedQuestions = res.data.data.quizDetails.map(
                     (item: any) => ({
                         ...item,
-                        status: item.quizTrackingData[0]?.status ?? 'pending',
+                        status: res?.data.data.status,
                     })
                 )
                 setQuestions(updatedQuestions)
@@ -132,101 +135,119 @@ function Quiz(props: Props) {
                                 You have already submitted this Quiz
                             </h1>
                         )}
-                        {questions?.map((question, index) => (
-                            <div key={question.id}>
-                                <h1 className="font-semibold my-3">
-                                    {'Q'}
-                                    {index + 1} .{question.question}
-                                </h1>
-                                <div className="flex flex-col items-start">
-                                    {Object.entries(question.options).map(
-                                        ([optionId, optionText]) => (
-                                            <div
-                                                key={optionId}
-                                                className="flex items-center gap-5"
-                                            >
-                                                <input
-                                                    type="radio"
-                                                    name={`question_${question.id}`}
-                                                    value={optionId}
-                                                    className="m-4 w-4 h-4 text-secondary focus:ring-secondary-500"
-                                                    checked={
-                                                        question.status ===
-                                                            'pass' ||
-                                                        question.status ===
-                                                            'fail' ||
-                                                        question.status ===
-                                                            'done'
-                                                            ? question.correctOption ===
-                                                              Number(optionId)
-                                                            : selectedAnswers[
-                                                                  question.id
-                                                              ] === optionId
-                                                    }
-                                                    onChange={() =>
-                                                        handleCorrectQuizQuestion(
-                                                            question.id,
-                                                            optionId
-                                                        )
-                                                    }
-                                                    disabled={
-                                                        question.status ===
-                                                            'pass' ||
-                                                        question.status ===
-                                                            'fail' ||
-                                                        question.status ===
-                                                            'done'
-                                                    }
-                                                />
-                                                {status ? (
-                                                    <label
-                                                        key={optionId}
-                                                        className={`m-4 flex  font-semibold items-center ${
-                                                            question
-                                                                .quizTrackingData[0]
-                                                                .chosenOption ===
-                                                            Number(optionId)
-                                                                ? question
-                                                                      .quizTrackingData[0]
-                                                                      .chosenOption ===
-                                                                  question.correctOption
-                                                                    ? 'text-green-600'
-                                                                    : 'text-red-600'
-                                                                : ''
-                                                        }`}
-                                                    >
-                                                        {String(optionText)}
-                                                    </label>
-                                                ) : (
-                                                    <label
-                                                        key={optionId}
-                                                        className="m-4 flex items-center"
-                                                    >
-                                                        {String(optionText)}
-                                                    </label>
-                                                )}
-                                            </div>
-                                        )
-                                    )}
+                        {questions?.map((question, index) => {
+                            const additionalClass = 'bg-gray-300 text-start '
+                            // const processedHtml = addClassToCodeTags(
+                            //     question.question,
+                            //     additionalClass
+                            // )
+                            return (
+                                <div key={question.id}>
+                                    <div className="flex items-center space-x-2">
+                                        <h1 className="font-semibold my-3">
+                                            {'Q'}
+                                            {index + 1}
+                                        </h1>
+                                        <span
+                                            className=""
+                                            dangerouslySetInnerHTML={{
+                                                __html: question.question,
+                                            }}
+                                        />
+                                    </div>
+                                    <div className="flex flex-col items-start">
+                                        {Object.entries(question.options).map(
+                                            ([optionId, optionText]) => (
+                                                <div
+                                                    key={optionId}
+                                                    className="flex items-center gap-5"
+                                                >
+                                                    <input
+                                                        type="radio"
+                                                        name={`question_${question.id}`}
+                                                        value={optionId}
+                                                        className="m-4 w-4 h-4 text-secondary focus:ring-secondary-500"
+                                                        checked={
+                                                            question.status ===
+                                                                'pass' ||
+                                                            question.status ===
+                                                                'fail' ||
+                                                            question.status ===
+                                                                'done'
+                                                                ? question.correctOption ===
+                                                                  Number(
+                                                                      optionId
+                                                                  )
+                                                                : selectedAnswers[
+                                                                      question
+                                                                          .id
+                                                                  ] === optionId
+                                                        }
+                                                        onChange={() =>
+                                                            handleCorrectQuizQuestion(
+                                                                question.id,
+                                                                optionId
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            question.status ===
+                                                                'pass' ||
+                                                            question.status ===
+                                                                'fail' ||
+                                                            question.status ===
+                                                                'done'
+                                                        }
+                                                    />
+                                                    {status ? (
+                                                        <label
+                                                            key={optionId}
+                                                            className={`m-4 flex  font-semibold items-center ${
+                                                                question
+                                                                    .quizTrackingData[0]
+                                                                    .chosenOption ===
+                                                                Number(optionId)
+                                                                    ? question
+                                                                          .quizTrackingData[0]
+                                                                          .chosenOption ===
+                                                                      question.correctOption
+                                                                        ? 'text-green-600'
+                                                                        : 'text-red-600'
+                                                                    : ''
+                                                            }`}
+                                                        >
+                                                            {String(optionText)}
+                                                        </label>
+                                                    ) : (
+                                                        <label
+                                                            key={optionId}
+                                                            className="m-4 flex items-center"
+                                                        >
+                                                            {String(optionText)}
+                                                        </label>
+                                                    )}
+                                                </div>
+                                            )
+                                        )}
 
-                                    {status && (
-                                        <p
-                                            className={`mt-2 font-semibold ${
-                                                question.status === 'fail'
-                                                    ? 'text-red-600'
-                                                    : 'text-green-600'
-                                            }`}
-                                        >
-                                            Status:{' '}
-                                            {
-                                                question.quizTrackingData[0]
-                                                    .status
-                                            }
-                                        </p>
-                                    )}
+                                        {status && (
+                                            <p
+                                                className={`mt-2 font-semibold ${
+                                                    question.status === 'fail'
+                                                        ? 'text-red-600'
+                                                        : 'text-green-600'
+                                                }`}
+                                            >
+                                                Status:{' '}
+                                                {
+                                                    question.quizTrackingData[0]
+                                                        .status
+                                                }
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            )
+                        })}
                     </div>
                 </div>
             </ScrollArea>
