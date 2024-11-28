@@ -769,7 +769,6 @@ export function transformQuizzes(data: any): { quizzes: any[] } {
             const options: any = {}
             let optionIndex = 1
 
-            // Collect options dynamically
             while (true) {
                 const optionKey = `quizzes/variantMCQs/${mcqIndex}/options/${optionIndex}`
                 const optionValue = item[optionKey]
