@@ -71,7 +71,7 @@ const EditMcqForm = ({
     getAllQuizQuesiton: any
 }) => {
     const { quizQuestionId } = getEditQuizQuestion()
-    const { quizData, noofExistingVariants } = useGetMCQs({
+    const { quizData, noofExistingVariants, refetch } = useGetMCQs({
         id: quizQuestionId,
     })
     const [isVariantAdded, setIsVariantAdded] = useState<boolean>(false)
@@ -124,6 +124,7 @@ const EditMcqForm = ({
         control: form.control,
         name: `variants.${activeVariantIndex}.options`,
     })
+
     const handleRemoveVariant = async (index: number) => {
         if (fields.length > 1) {
             remove(index)
@@ -156,6 +157,7 @@ const EditMcqForm = ({
                         'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
                 setDeleteModalOpen(false)
+                refetch()
             })
             .catch((error) => {
                 toast({
@@ -183,8 +185,6 @@ const EditMcqForm = ({
         return missingVariants
     }
 
-    console.log(isVariantAdded)
-
     const onSubmitHandler = async (values: z.infer<typeof formSchema>) => {
         if (isVariantAdded) {
             const transformedObj = {
@@ -206,8 +206,6 @@ const EditMcqForm = ({
                 })),
             }
 
-            // const additionalVariant = console.log(transformedObj, 'Varaints')
-            // console.log('ALL Variants', quizData)
             const missingVariants = findMissingVariants(
                 transformedObj,
                 quizData
@@ -239,6 +237,7 @@ const EditMcqForm = ({
                     })
 
                 setIsVariantAdded(false)
+                await refetch()
             } catch (error: any) {
                 toast({
                     title: 'Error',
@@ -268,13 +267,17 @@ const EditMcqForm = ({
             }
             // console.log(transformedObj)
             try {
-                await api.post(`/Content/editquiz`, transformedObj)
-                toast({
-                    title: 'Success',
-                    description: 'Question Created Successfully',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
-                })
+                await api
+                    .post(`/Content/editquiz`, transformedObj)
+                    .then((res) => {
+                        toast({
+                            title: 'Success',
+                            description: res?.data.message,
+                            className:
+                                'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+                        })
+                    })
+                await refetch()
             } catch (error: any) {
                 toast({
                     title: 'Error',
@@ -304,7 +307,7 @@ const EditMcqForm = ({
             })
             setIsVariantAdded(fields.length > noofExistingVariants)
         }
-    }, [quizData, form])
+    }, [quizData, form, refetch])
 
     const getCurrentVariantOptions = (index: number) => {
         const currentVariant = form.getValues(`variants.${index}`)
@@ -327,8 +330,10 @@ const EditMcqForm = ({
                             <FormItem className="space-y-3 text-start ">
                                 <FormControl>
                                     <RadioGroup
-                                        onValueChange={field.onChange}
-                                        value={quizData?.difficulty}
+                                        onValueChange={(value) =>
+                                            field.onChange(value)
+                                        } // Bind the onChange event
+                                        value={field.value} // Use field.value instead of quizData?.difficulty
                                     >
                                         <div className="flex gap-x-5 ml-[17px]">
                                             <FormLabel className="mt-5 font-semibold text-md ">
@@ -584,6 +589,7 @@ const EditMcqForm = ({
                                             onClick={() =>
                                                 setDeleteModalOpen(true)
                                             }
+                                            type="button"
                                             className="mt-3 ml-5 text-red-500 bg-white cursor-pointer"
                                         >
                                             Remove Variant
