@@ -148,6 +148,9 @@ function QuizLibrary({
 
     return (
         <div className="w-full flex flex-col gap-3">
+            <h2 className="text-left text-gray-700 font-semibold">
+                MCQ Library
+            </h2>
             <div className="flex">
                 <CodingTopics
                     setSearchTerm={setSearch}
@@ -159,12 +162,7 @@ function QuizLibrary({
                     setSelectedDifficulties={setSelectedDifficulty}
                 />
             </div>
-            <div className="w-full h-max-content ">
-                <h2 className="text-left text-gray-700 font-semibold">
-                    MCQ Library
-                </h2>
-                {renderQuizList}
-            </div>
+            <div className="w-full h-max-content my-6">{renderQuizList}</div>
         </div>
     )
 }

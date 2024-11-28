@@ -44,13 +44,7 @@ const useGetMCQs = ({ id, tags: tag, assesmentSide }: Props) => {
         }
     }, [id, fetchQuizHandler])
 
-    return {
-        quizData,
-        difficulty,
-        tagName,
-        noofExistingVariants,
-        refetch: fetchQuizHandler,
-    }
+    return { quizData, difficulty, tagName, noofExistingVariants }
 }
 
 export default useGetMCQs

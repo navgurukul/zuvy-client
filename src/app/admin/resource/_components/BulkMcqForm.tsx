@@ -12,14 +12,12 @@ import { useState } from 'react'
 import DropzoneforMcq from './DropzoneforMcq'
 import { api } from '@/utils/axios.config'
 
-type Props = {
-    setIsMcqModalOpen: any
-}
+type Props = {}
 const FormSchema = z.object({
     sheeturl: z.string().url(),
 })
 
-const BulkUploadMcq = ({ setIsMcqModalOpen }: Props) => {
+const BulkUploadMcq = (props: Props) => {
     const [mcqData, setMcqData] = useState(null)
 
     async function handleSubmit(e: any) {
@@ -32,7 +30,6 @@ const BulkUploadMcq = ({ setIsMcqModalOpen }: Props) => {
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
-            setIsMcqModalOpen(false)
         } catch (error: any) {
             toast({
                 title: 'Error',
