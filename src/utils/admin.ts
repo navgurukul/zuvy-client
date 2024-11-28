@@ -794,16 +794,3 @@ export function transformQuizzes(data: any): { quizzes: any[] } {
 
     return { quizzes: Object.values(quizzesMap) }
 }
-
-export const addClassToCodeTags: any = (
-    htmlString: string,
-    additionalClass: string
-) => {
-    return htmlString.replace(
-        /<code([^>]*)>/g,
-        (match, attributes) =>
-            `<code${attributes} class="${additionalClass} ${
-                attributes.match(/class="([^"]*)"/)?.[1] || ''
-            }">`
-    )
-}

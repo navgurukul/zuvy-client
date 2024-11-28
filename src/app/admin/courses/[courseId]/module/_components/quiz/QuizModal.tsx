@@ -17,21 +17,9 @@ import {
 import PreviewMCQ from '@/app/admin/resource/_components/PreviewMcq'
 type Props = {}
 
-const QuizModal = ({
-    data,
-    removeQuestionById,
-    tags,
-    addQuestion,
-    saveQuizQuestionHandler,
-}: any) => {
-    const handleClick = async () => {
+const QuizModal = ({ data, removeQuestionById, tags }: any) => {
+    const handleClick = () => {
         removeQuestionById(data.id)
-        if (addQuestion.length == 1) {
-            const requestBody = {
-                quizQuestions: [],
-            }
-            await saveQuizQuestionHandler(requestBody)
-        }
     }
     const filteredTag = tags?.filter((tag: any) => tag.id == data.tagId)
 

@@ -18,7 +18,6 @@ import {
 import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
 import { useRouter } from 'next/navigation'
-import { addClassToCodeTags } from '@/utils/admin'
 
 const QuizQuestions = ({
     onBack,
@@ -34,18 +33,25 @@ const QuizQuestions = ({
     getSeperateQuizQuestions: () => void
 }) => {
     const router = useRouter()
-    const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
-        undefined
-    ) // Correct type
+    const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined) // Correct type
     // Define the Zod schema for form validation
 
+    const addClassToCodeTags: any = (htmlString: string, additionalClass: string) => {
+        return htmlString.replace(
+            /<code([^>]*)>/g,
+            (match, attributes) => `<code${attributes} class="${additionalClass} ${attributes.match(/class="([^"]*)"/)?.[1] || ''}">`
+        );
+    };
+
     useEffect(() => {
+
         return () => {
             if (timeoutRef.current) {
                 clearTimeout(timeoutRef.current)
             }
         }
     }, [])
+
 
     const formSchema = z.object({
         answers: z.array(
@@ -112,6 +118,7 @@ const QuizQuestions = ({
 
     useEffect(() => {
         console.log('questions', questions)
+
     }, [questions])
 
     return (
@@ -136,65 +143,55 @@ const QuizQuestions = ({
                     className="flex flex-col items-center mt-10"
                 >
                     {questions?.data?.mcqs?.map((question: any, index: any) => {
-                        const additionalClass = 'bg-red-400'
-                        const processedHtml = addClassToCodeTags(
-                            question.question,
-                            additionalClass
-                        )
+                        const additionalClass = 'bg-red-400';
+                        const processedHtml = addClassToCodeTags(question.question, additionalClass);
                         return (
                             <>
-                                <div className="">
-                                    <FormField
-                                        key={question.id}
-                                        control={form.control}
-                                        name={`answers.${index}`}
-                                        render={({ field }) => (
-                                            <FormItem className="flex flex-col items-start mb-10 w-full max-w-md">
-                                                <FormLabel>
-                                                    {index + 1}.
-                                                    <div
-                                                        className=""
-                                                        dangerouslySetInnerHTML={{
-                                                            __html: processedHtml,
-                                                        }}
-                                                    />
-                                                </FormLabel>
-                                                <FormControl>
-                                                    <RadioGroup
-                                                        value={field.value}
-                                                        onValueChange={
-                                                            field.onChange
-                                                        }
-                                                    >
-                                                        {Object.keys(
-                                                            question.options
-                                                        ).map((key) => (
-                                                            <div
-                                                                key={key}
-                                                                className="flex items-center gap-2 mb-2"
-                                                            >
-                                                                <RadioGroupItem
-                                                                    value={key}
-                                                                />
-                                                                <p>
-                                                                    {
-                                                                        question
-                                                                            .options[
-                                                                            key
-                                                                        ]
-                                                                    }
-                                                                </p>
-                                                            </div>
-                                                        ))}
-                                                    </RadioGroup>
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
+                               <div className=''>
+                               <FormField
+                                    key={question.id}
+                                    control={form.control}
+                                    name={`answers.${index}`}
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col items-start mb-10 w-full max-w-md">
+                                            <FormLabel>
+                                                {index + 1}.
+                                                <div className=''
+                                                    dangerouslySetInnerHTML={{ __html: processedHtml}}
+                                                />
+                                            </FormLabel>
+                                            <FormControl>
+                                                <RadioGroup
+                                                    value={field.value}
+                                                    onValueChange={field.onChange}
+                                                >
+                                                    {Object.keys(
+                                                        question.options
+                                                    ).map((key) => (
+                                                        <div
+                                                            key={key}
+                                                            className="flex items-center gap-2 mb-2"
+                                                        >
+                                                            <RadioGroupItem
+                                                                value={key}
+                                                            />
+                                                            <p>
+                                                                {
+                                                                    question.options[key]
+                                                                }
+                                                            </p>
+                                                        </div>
+                                                    ))}
+                                                </RadioGroup>
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                               </div>
                             </>
                         )
+
                     })}
                     <Button type="submit" className="mt-10">
                         Submit Quiz
