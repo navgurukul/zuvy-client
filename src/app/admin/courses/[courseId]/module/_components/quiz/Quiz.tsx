@@ -57,35 +57,68 @@ function Quiz(props: any) {
             prevQuestions.filter((question: any) => question.id !== questionId)
         )
     }
-    const saveQuizQUestionHandler = async () => {
-        const selecedtedId = addQuestion?.map((item) => item.id)
-        const transformedObject = {
-            quizQuestions: selecedtedId,
+    // const saveQuizQUestionHandler = async () => {
+    //     const selecedtedId = addQuestion?.map((item) => item.id)
+    //     const transformedObject = {
+    //         quizQuestions: selecedtedId,
+    //     }
+
+    //     await api
+    //         .put(
+    //             `/Content/editChapterOfModule/${props.moduleId}?chapterId=${props.chapterId}`,
+    //             transformedObject
+    //         )
+    //         .then((res: any) => {
+    //             toast({
+    //                 title: 'Success',
+    //                 description: res.message,
+    //                 className:
+    //                     'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+    //             })
+    //         })
+    //         .catch((error: any) => {
+    //             toast({
+    //                 title: 'Error',
+    //                 description:
+    //                     'An error occurred while saving the chapter the chapter.',
+    //                 className:
+    //                     'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+    //             })
+    //         })
+    // }
+    const saveQuizQuestionHandler = async (
+        requestBody: Record<string, any>
+    ) => {
+        try {
+            const response = await api.put(
+                `/Content/editChapterOfModule/${props.moduleId}?chapterId=${props.chapterId}`,
+                requestBody
+            )
+            toast({
+                title: 'Success',
+                description: response?.data?.message || 'Saved successfully!',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+            })
+        } catch (error: any) {
+            toast({
+                title: 'Error',
+                description: 'An error occurred while saving the chapter.',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+            })
+        }
+    }
+
+    const handleSaveQuiz = () => {
+        const selectedIds = addQuestion.map((item) => item.id)
+        const requestBody = {
+            quizQuestions: selectedIds,
         }
 
-        await api
-            .put(
-                `/Content/editChapterOfModule/${props.moduleId}?chapterId=${props.chapterId}`,
-                transformedObject
-            )
-            .then((res: any) => {
-                toast({
-                    title: 'Success',
-                    description: res.message,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
-                })
-            })
-            .catch((error: any) => {
-                toast({
-                    title: 'Error',
-                    description:
-                        'An error occurred while saving the chapter the chapter.',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                })
-            })
+        saveQuizQuestionHandler(requestBody)
     }
+
     const getAllSavedQuizQuestion = useCallback(async () => {
         await api
             .get(`/Content/chapterDetailsById/${props.chapterId}`)
@@ -99,7 +132,6 @@ function Quiz(props: any) {
         getAllSavedQuizQuestion()
     }, [getAllSavedQuizQuestion])
 
-    console.log(props)
     return (
         <>
             <div className="flex flex-row items-center justify-start gap-x-6 mb-10">
@@ -132,27 +164,52 @@ function Quiz(props: any) {
                 />
                 <Separator
                     orientation="vertical"
-                    className="mx-4 w-[2px] h-screen rounded"
+                    className="mx-4 w-[2px] h-96 mt-36 rounded"
                 />
-                <ScrollArea className="h-screen w-full rounded-md">
-                    <div>
-                        {addQuestion.map(
-                            (questions: quizData, index: number) => (
-                                <QuizModal
-                                    key={index}
-                                    tags={tags}
-                                    data={questions}
-                                    removeQuestionById={removeQuestionById}
-                                />
-                            )
-                        )}
-                        {addQuestion.length > 0 && (
-                            <div className="text-end mt-2">
-                                <Button onClick={saveQuizQUestionHandler}>
-                                    Save
-                                </Button>
+                <ScrollArea className={` w-full rounded-md`}>
+                    <div className="">
+                        <div className="flex flex-col items-center justify-between ">
+                            <div className="flex justify-between w-full mt-36 ">
+                                <h2 className="text-left text-gray-700 w-full font-semibold">
+                                    Selected Question
+                                </h2>
+                                <div>
+                                    {addQuestion.length > 0 && (
+                                        <div className="text-end  mr-10">
+                                            <Button
+                                                onClick={handleSaveQuiz}
+                                                className="  h-8 "
+                                            >
+                                                Save
+                                            </Button>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        )}
+                            <div className="text-left w-full ">
+                                {addQuestion.length == 0 && (
+                                    <h1 className="text-left italic">
+                                        No Selected Questions
+                                    </h1>
+                                )}
+                            </div>
+                        </div>
+                        <div className="h-96 overflow-y-scroll ">
+                            {addQuestion.map(
+                                (questions: quizData, index: number) => (
+                                    <QuizModal
+                                        key={index}
+                                        tags={tags}
+                                        data={questions}
+                                        addQuestion={addQuestion}
+                                        removeQuestionById={removeQuestionById}
+                                        saveQuizQuestionHandler={
+                                            saveQuizQuestionHandler
+                                        }
+                                    />
+                                )
+                            )}
+                        </div>
                     </div>
                 </ScrollArea>
             </div>

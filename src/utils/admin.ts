@@ -769,7 +769,6 @@ export function transformQuizzes(data: any): { quizzes: any[] } {
             const options: any = {}
             let optionIndex = 1
 
-            // Collect options dynamically
             while (true) {
                 const optionKey = `quizzes/variantMCQs/${mcqIndex}/options/${optionIndex}`
                 const optionValue = item[optionKey]
@@ -793,4 +792,17 @@ export function transformQuizzes(data: any): { quizzes: any[] } {
     })
 
     return { quizzes: Object.values(quizzesMap) }
+}
+
+export const addClassToCodeTags: any = (
+    htmlString: string,
+    additionalClass: string
+) => {
+    return htmlString.replace(
+        /<code([^>]*)>/g,
+        (match, attributes) =>
+            `<code${attributes} class="${additionalClass} ${
+                attributes.match(/class="([^"]*)"/)?.[1] || ''
+            }">`
+    )
 }
