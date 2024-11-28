@@ -20,6 +20,7 @@ import { api } from '@/utils/axios.config'
 import { useRouter } from 'next/navigation'
 import { addClassToCodeTags } from '@/utils/admin'
 
+// component
 const QuizQuestions = ({
     onBack,
     remainingTime,
