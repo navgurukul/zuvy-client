@@ -58,35 +58,68 @@ function Quiz(props: any) {
             prevQuestions.filter((question: any) => question.id !== questionId)
         )
     }
-    const saveQuizQUestionHandler = async () => {
-        const selecedtedId = addQuestion?.map((item) => item.id)
-        const transformedObject = {
-            quizQuestions: selecedtedId,
+    // const saveQuizQUestionHandler = async () => {
+    //     const selecedtedId = addQuestion?.map((item) => item.id)
+    //     const transformedObject = {
+    //         quizQuestions: selecedtedId,
+    //     }
+
+    //     await api
+    //         .put(
+    //             `/Content/editChapterOfModule/${props.moduleId}?chapterId=${props.chapterId}`,
+    //             transformedObject
+    //         )
+    //         .then((res: any) => {
+    //             toast({
+    //                 title: 'Success',
+    //                 description: res.message,
+    //                 className:
+    //                     'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+    //             })
+    //         })
+    //         .catch((error: any) => {
+    //             toast({
+    //                 title: 'Error',
+    //                 description:
+    //                     'An error occurred while saving the chapter the chapter.',
+    //                 className:
+    //                     'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+    //             })
+    //         })
+    // }
+    const saveQuizQuestionHandler = async (
+        requestBody: Record<string, any>
+    ) => {
+        try {
+            const response = await api.put(
+                `/Content/editChapterOfModule/${props.moduleId}?chapterId=${props.chapterId}`,
+                requestBody
+            )
+            toast({
+                title: 'Success',
+                description: response?.data?.message || 'Saved successfully!',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+            })
+        } catch (error: any) {
+            toast({
+                title: 'Error',
+                description: 'An error occurred while saving the chapter.',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+            })
+        }
+    }
+
+    const handleSaveQuiz = () => {
+        const selectedIds = addQuestion.map((item) => item.id)
+        const requestBody = {
+            quizQuestions: selectedIds,
         }
 
-        await api
-            .put(
-                `/Content/editChapterOfModule/${props.moduleId}?chapterId=${props.chapterId}`,
-                transformedObject
-            )
-            .then((res: any) => {
-                toast({
-                    title: 'Success',
-                    description: res.message,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
-                })
-            })
-            .catch((error: any) => {
-                toast({
-                    title: 'Error',
-                    description:
-                        'An error occurred while saving the chapter the chapter.',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                })
-            })
+        saveQuizQuestionHandler(requestBody)
     }
+
     const getAllSavedQuizQuestion = useCallback(async () => {
         await api
             .get(`/Content/chapterDetailsById/${props.chapterId}`)
@@ -100,7 +133,6 @@ function Quiz(props: any) {
         getAllSavedQuizQuestion()
     }, [getAllSavedQuizQuestion])
 
-    console.log(props)
     return (
         <>
             {showPreview ? (
@@ -150,7 +182,7 @@ function Quiz(props: any) {
                                 {addQuestion.length > 0 && (
                                     <div className="text-end mt-2">
                                         <Button
-                                            onClick={saveQuizQUestionHandler}
+                                            onClick={saveQuizQuestionHandler}
                                         >
                                             Save
                                         </Button>

@@ -4,14 +4,20 @@ import React, { useState } from 'react'
 import DeleteConfirmationModal from '../../courses/[courseId]/_components/deleteModal'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
+import { getAllQuizData, getOffset, getPosition } from '@/store/store'
 
 type Props = {
     logSelectedRows: () => any[]
+    table: any
 }
 
-const McqDeleteVaiarntComp = ({ logSelectedRows }: Props) => {
+const McqDeleteVaiarntComp = ({ logSelectedRows, table }: Props) => {
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
+    const { setStoreQuizData } = getAllQuizData()
+
     const selectedRows = logSelectedRows()
+    const { offset } = getOffset()
+    const { position } = getPosition()
 
     const deleteMcqHalderinBulk = async () => {
         const selectedQuestionIds = selectedRows.map((selectedRow) => {
@@ -26,6 +32,17 @@ const McqDeleteVaiarntComp = ({ logSelectedRows }: Props) => {
             }),
         }
 
+        async function getAllUpdatedQuiz() {
+            const safeOffset = Math.max(0, offset)
+            await api
+                .get(
+                    `/Content/allQuizQuestions?limit=${position}&offset=${safeOffset}`
+                )
+                .then((res) => {
+                    setStoreQuizData(res.data.data)
+                })
+        }
+
         await api({
             method: 'delete',
             url: 'Content/deleteMainQuizOrVariant',
@@ -38,8 +55,10 @@ const McqDeleteVaiarntComp = ({ logSelectedRows }: Props) => {
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
+                table.toggleAllPageRowsSelected(false)
 
                 setDeleteModalOpen(false)
+                getAllUpdatedQuiz()
             })
             .catch((error) => {
                 toast({
@@ -49,6 +68,13 @@ const McqDeleteVaiarntComp = ({ logSelectedRows }: Props) => {
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
+                if (
+                    error.response?.data?.message.includes('Quizzes with IDs')
+                ) {
+                    getAllUpdatedQuiz()
+                    setDeleteModalOpen(false)
+                    table.toggleAllPageRowsSelected(false)
+                }
             })
     }
 

@@ -101,16 +101,21 @@ const Assessment = ({
         <React.Fragment>
             <div className="flex flex-col items-center justify-center px-4 py-8">
                 <div className="flex flex-col gap-4 text-left w-full max-w-2xl">
-                    <h1 className="text-2xl font-bold text-gray-800">
+                    <div className='flex items-center gap-4'>
+                    <h1 className="text-2xl font-bold text-gray-800 text-center">
                         {assessmentShortInfo?.ModuleAssessment?.title}
                     </h1>
+                    <h2 className='bg-[#DEDEDE] px-2 py-1 text-sm rounded-2xl font-semibold'>
+                        Total Marks: {assessmentShortInfo?.weightageMcqQuestions + assessmentShortInfo?.weightageCodingQuestions}
+                    </h2>
+                    </div>
                     {hasQuestions ? (
                         <div className="flex gap-6">
                             {assessmentShortInfo?.totalCodingQuestions > 0 && (
                                 <div>
                                     <h2 className="text-lg font-semibold text-secondary">
                                         {
-                                            assessmentShortInfo?.totalCodingQuestions
+                                            assessmentShortInfo?.easyCodingQuestions + assessmentShortInfo?.mediumCodingQuestions + assessmentShortInfo?.hardCodingQuestions 
                                         }
                                     </h2>
                                     <p className="text-sm text-gray-600">
@@ -121,7 +126,7 @@ const Assessment = ({
                             {assessmentShortInfo?.totalQuizzes > 0 && (
                                 <div>
                                     <h2 className="text-lg font-semibold text-secondary">
-                                        {assessmentShortInfo?.totalQuizzes}
+                                        {assessmentShortInfo?.easyMcqQuestions + assessmentShortInfo?.mediumMcqQuestions + assessmentShortInfo?.hardMcqQuestions}
                                     </h2>
                                     <p className="text-sm text-gray-600">
                                         MCQs
