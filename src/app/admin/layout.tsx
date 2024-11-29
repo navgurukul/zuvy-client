@@ -35,7 +35,10 @@ export default function RootLayout({
             ) : (
                 <div>
                     {!adminAssessmentPreviewRoute && <StudentNavbar />}
-                    <MaxWidthWrapper>{children}</MaxWidthWrapper>
+
+                    <div className="pt-[70px]">
+                        <MaxWidthWrapper>{children}</MaxWidthWrapper>
+                    </div>
                 </div>
             )}
         </div>

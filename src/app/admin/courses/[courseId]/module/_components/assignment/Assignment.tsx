@@ -30,7 +30,7 @@ import TiptapEditor from '@/app/_components/editor/TiptapEditor'
 import TiptapToolbar from '@/app/_components/editor/TiptapToolbar'
 import extensions from '@/app/_components/editor/TiptapExtensions'
 import '@/app/_components/editor/Tiptap.css'
-import { CalendarIcon } from 'lucide-react'
+import { CalendarIcon, Pencil } from 'lucide-react'
 import {
     Popover,
     PopoverContent,
@@ -76,6 +76,7 @@ const AddAssignent = ({ content }: AssignmentProps) => {
     })
 
     const [title, setTitle] = useState('')
+    const [titles, setTitles] = useState('')
 
     const form = useForm({
         resolver: zodResolver(formSchema),
@@ -169,15 +170,25 @@ const AddAssignent = ({ content }: AssignmentProps) => {
                                 <FormItem>
                                     <FormLabel></FormLabel>
                                     <FormControl>
-                                        <Input
-                                            placeholder="Untitled Article"
-                                            className="p-0 text-3xl w-2/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize"
-                                            {...field}
-                                            {...form.register('title')}
-                                            onChange={(e) =>
-                                                setTitle(e.target.value)
-                                            }
-                                        />
+                                        <div className="w-2/6 flex justify-center align-middle items-center relative">
+                                            <Input
+                                                required
+                                                onChange={(e) => {
+                                                    setTitles(e.target.value)
+                                                }}
+                                                placeholder="Untitled Article"
+                                                className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                                                autoFocus
+                                            />
+                                            {!titles && ( // Show pencil icon only when the title is empty
+                                                <Pencil
+                                                    fill="true"
+                                                    fillOpacity={0.4}
+                                                    size={20}
+                                                    className="absolute text-gray-100 pointer-events-none mt-1 right-5"
+                                                />
+                                            )}
+                                        </div>
                                     </FormControl>
                                     <FormMessage className="h-5" />
                                 </FormItem>

@@ -5,7 +5,7 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Plus } from 'lucide-react'
+import { Pencil, Plus } from 'lucide-react'
 
 // Internal imports
 import { Button } from '@/components/ui/button'
@@ -296,11 +296,21 @@ const AddForm: React.FC<AddFormProps> = ({
                             render={({ field }) => (
                                 <FormItem>
                                     <FormControl>
-                                        <Input
-                                            {...field}
-                                            placeholder="Untitled Form"
-                                            className="p-0 text-3xl w-full text-left font-semibold outline-none border-none focus:ring-0"
-                                        />
+                                        <div className="w-2/6 flex justify-center align-middle items-center relative">
+                                            <Input
+                                                required
+                                                onChange={(e) => {}}
+                                                placeholder="Untitled Article"
+                                                className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                                                autoFocus
+                                            />
+                                            <Pencil
+                                                fill="true"
+                                                fillOpacity={0.4}
+                                                size={20}
+                                                className="absolute text-gray-100 pointer-events-none mt-1 right-5"
+                                            />
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

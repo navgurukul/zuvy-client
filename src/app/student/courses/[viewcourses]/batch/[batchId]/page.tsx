@@ -20,6 +20,7 @@ import ClassCard from '@/app/admin/courses/[courseId]/_components/classCard'
 import CourseCard from '@/app/_components/courseCard'
 import BreadcrumbCmponent from '@/app/_components/breadcrumbCmponent'
 import SubmissionCard from '@/app/admin/courses/[courseId]/_components/SubmissionCard'
+import { progress } from 'framer-motion'
 interface CourseProgress {
     status: string
     progress: number
@@ -59,6 +60,7 @@ function Page({
     const [upcomingAssignments, setUpcomingAssignments] = useState([])
     const [lateAssignments, setLateAssignments] = useState([])
     const [isCourseStarted, setIsCourseStarted] = useState(false)
+    const [progres, setProgres] = useState<number>()
 
     const [attendenceData, setAttendenceData] = useState<any[]>([])
     // const [completedClasses, setCompletedClasses] = useState([])
@@ -152,6 +154,8 @@ function Page({
                     `/tracking/bootcampProgress/${params.viewcourses}`
                 )
                 setCourseProgress(response.data.data)
+                setProgres(response.data.data.progress)
+
                 setInstructorDetails(response.data.instructorDetails)
             } catch (error) {
                 console.error('Error getting course progress:', error)
@@ -179,7 +183,27 @@ function Page({
                             <p className="text-xl font-bold mb-2">
                                 {courseProgress?.bootcampTracking?.name}
                             </p>
-                            <Loader progress={courseProgress?.progress} />
+                            <div className="relative flex items-center justify-center group">
+                                {/* Percentage Text */}
+
+                                {/* Loader */}
+                                <Loader progress={courseProgress?.progress} />
+
+                                {/* Circular Progress */}
+                                <div className="absolute -top-16 invisible group-hover:visible">
+                                    <CircularProgress
+                                        classNames={{
+                                            svg: 'w-9 h-9',
+                                            indicator: 'text-gray-400',
+                                            track: 'stroke-green-500',
+                                            value: 'text-sm font-bold',
+                                        }}
+                                        value={progres}
+                                        strokeWidth={4}
+                                        showValueLabel={true}
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -433,7 +457,7 @@ function Page({
                 Deadline 5 Feb 2024
               </p>
             </div>
-          </div> */}
+        //   </div> */}
                 </div>
             </div>
         </MaxWidthWrapper>

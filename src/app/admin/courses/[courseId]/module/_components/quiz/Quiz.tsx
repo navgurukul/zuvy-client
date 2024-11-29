@@ -11,11 +11,12 @@ import { Tag } from '@/app/admin/resource/mcq/page'
 import { toast } from '@/components/ui/use-toast'
 import { getAllQuizQuestion } from '@/utils/admin'
 import { getAllQuizData } from '@/store/store'
+import { Pencil } from 'lucide-react'
 
 function Quiz(props: any) {
     const [tags, setTags] = useState<Tag[]>([])
     const [isOpen, setIsOpen] = useState(false)
-
+    const [inputValue, setInputValue] = useState('')
     const [addQuestion, setAddQuestion] = useState<quizData[]>([])
     const [questionId, setQuestionId] = useState()
     const { quizData, setStoreQuizData } = getAllQuizData()
@@ -134,17 +135,25 @@ function Quiz(props: any) {
     return (
         <>
             <div className="flex flex-row items-center justify-start gap-x-6 mb-10">
-                <Input
-                    placeholder="Untitled Quiz"
-                    className="p-0 text-3xl w-1/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize"
-                />
-                {/* <Link
-                    className="text-secondary font-semibold flex mt-2"
-                    href=""
-                >
-                    Preview
-                    <ExternalLink size={20} />
-                </Link> */}
+                <div className="w-2/6 flex justify-center align-middle items-center relative">
+                    <Input
+                        required
+                        onChange={(e) => {
+                            setInputValue(e.target.value)
+                        }}
+                        placeholder="Untitled Article"
+                        className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                        autoFocus
+                    />
+                    {!inputValue && (
+                        <Pencil
+                            fill="true"
+                            fillOpacity={0.4}
+                            size={20}
+                            className="absolute text-gray-100 pointer-events-none mt-1 right-5"
+                        />
+                    )}
+                </div>
             </div>
 
             <div className="flex ">

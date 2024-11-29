@@ -1,6 +1,6 @@
 'use client'
 
-import { PlusCircle, ExternalLink } from 'lucide-react'
+import { PlusCircle, ExternalLink, Pencil } from 'lucide-react'
 import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
 import { Separator } from '@/components/ui/separator'
@@ -96,6 +96,7 @@ function CodingChallenge({
         useState<string>('All Languages')
     const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([])
     const [chapterTitle, setChapterTitle] = useState<string>(activeChapterTitle)
+    const [chapterTitles, setChapterTitles] = useState('')
 
     useEffect(() => {
         async function getAllCodingQuestions() {
@@ -185,19 +186,29 @@ function CodingChallenge({
         <div>
             {/* SearchBar component */}
             <div className="flex items-center mb-15">
-                <Input
-                    required
-                    onChange={(e) => {
-                        setChapterTitle(e.target.value)
-                    }}
-                    placeholder={`${
-                        activeChapterTitle
-                            ? activeChapterTitle
-                            : 'Untitled Coding Problem'
-                    }`}
-                    className="p-0 text-3xl w-2/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize"
-                />
-
+                <div className="w-2/6 flex justify-center align-middle items-center relative">
+                    <Input
+                        required
+                        onChange={(e) => {
+                            setChapterTitles(e.target.value)
+                        }}
+                        placeholder={`${
+                            activeChapterTitle
+                                ? activeChapterTitle
+                                : 'Untitled Coding Problem'
+                        }`}
+                        className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                        autoFocus
+                    />
+                    {!chapterTitles && (
+                        <Pencil
+                            fill="true"
+                            fillOpacity={0.4}
+                            size={20}
+                            className="absolute text-gray-100 pointer-events-none mt-1 right-5"
+                        />
+                    )}
+                </div>
                 {/* <div className="text-secondary flex font-semibold items-center">
                     <h6 className="mr-2 text-sm">Preview</h6>
                     <ExternalLink size={15} />
