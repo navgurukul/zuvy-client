@@ -31,7 +31,7 @@ export default function RootLayout({
               (user.rolesList.length === 0 ||
                   (user.rolesList.length > 0 &&
                       user.rolesList[0] !== 'admin')) ? (
-                <UnauthorizedUser rolesList={rolesList} />
+                <UnauthorizedUser rolesList={rolesList} path={'Admin'} />
             ) : (
                 <div>
                     {!adminAssessmentPreviewRoute && <StudentNavbar />}

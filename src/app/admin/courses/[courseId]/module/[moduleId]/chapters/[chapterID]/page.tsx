@@ -18,6 +18,8 @@ import {
     getTopicId,
 } from '@/store/store'
 import { Spinner } from '@/components/ui/spinner'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 
 interface QuizOptions {
     option1: string
@@ -41,6 +43,7 @@ export default function Page({
 }: {
     params: { moduleId: any; courseId: any }
 }) {
+    const heightClass = useResponsiveHeight()
     const { courseId, moduleId, chapterID } = useParams()
     const moduleID = Array.isArray(moduleId) ? moduleId[0] : moduleId
     const chapter_id = Array.isArray(chapterID)
@@ -53,7 +56,7 @@ export default function Page({
     const [activeChapterTitle, setActiveChapterTitle] = useState('')
     const { currentChapter, setCurrentChapter } = getCurrentChapterState()
     const [activeChapter, setActiveChapter] = useState(chapter_id)
-    const {topicId, setTopicId} = getTopicId()
+    const { topicId, setTopicId } = getTopicId()
     const [key, setKey] = useState(0)
     const [loading, setLoading] = useState(true)
 
@@ -121,8 +124,6 @@ export default function Page({
         }
     }, [chapterData, fetchChapterContent])
 
-    console.log(topicId)
-
     const renderChapterContent = () => {
         if (
             topicId &&
@@ -133,16 +134,39 @@ export default function Page({
             switch (topicId) {
                 case 1:
                     return (
-                        <AddVideo
-                            key={chapterId}
-                            moduleId={moduleID}
-                            content={chapterContent}
-                            fetchChapterContent={fetchChapterContent}
-                        />
+                        <ScrollArea
+                            // className="h-[600px] lg:h-[600px] pr-4"
+                            className={`${heightClass} pr-4`}
+                            type="hover"
+                            style={{
+                                scrollbarWidth: 'none', // Firefox
+                                msOverflowStyle: 'none', // IE and Edge
+                            }}
+                        >
+                            <AddVideo
+                                key={chapterId}
+                                moduleId={moduleID}
+                                content={chapterContent}
+                                fetchChapterContent={fetchChapterContent}
+                            />
+                        </ScrollArea>
                     )
                 case 2:
                     return (
-                        <AddArticle key={chapterId} content={chapterContent} />
+                        <ScrollArea
+                            // className="h-[600px] lg:h-[600px] pr-4"
+                            className={`${heightClass} pr-4`}
+                            type="hover"
+                            style={{
+                                scrollbarWidth: 'none', // Firefox
+                                msOverflowStyle: 'none', // IE and Edge
+                            }}
+                        >
+                            <AddArticle
+                                key={chapterId}
+                                content={chapterContent}
+                            />
+                        </ScrollArea>
                     )
                 case 3:
                     return (
@@ -164,7 +188,20 @@ export default function Page({
                     )
                 case 5:
                     return (
-                        <Assignment key={chapterId} content={chapterContent} />
+                        <ScrollArea
+                            // className="h-[600px] lg:h-[600px] pr-4"
+                            className={`${heightClass} pr-4`}
+                            type="hover"
+                            style={{
+                                scrollbarWidth: 'none', // Firefox
+                                msOverflowStyle: 'none', // IE and Edge
+                            }}
+                        >
+                            <Assignment
+                                key={chapterId}
+                                content={chapterContent}
+                            />
+                        </ScrollArea>
                     )
                 case 6:
                     return (
@@ -179,13 +216,23 @@ export default function Page({
                     )
                 case 7:
                     return (
-                        <AddForm
-                            key={chapterId}
-                            chapterData={currentChapter}
-                            content={chapterContent}
-                            // fetchChapterContent={fetchChapterContent}
-                            moduleId={moduleID}
-                        />
+                        <ScrollArea
+                            // className="h-[600px] lg:h-[600px] pr-4"
+                            className={`${heightClass} pr-4`}
+                            type="hover"
+                            style={{
+                                scrollbarWidth: 'none', // Firefox
+                                msOverflowStyle: 'none', // IE and Edge
+                            }}
+                        >
+                            <AddForm
+                                key={chapterId}
+                                chapterData={currentChapter}
+                                content={chapterContent}
+                                // fetchChapterContent={fetchChapterContent}
+                                moduleId={moduleID}
+                            />
+                        </ScrollArea>
                     )
                 default:
                     return <h1>Create New Chapter</h1>
