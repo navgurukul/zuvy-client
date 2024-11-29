@@ -31,3 +31,6 @@ export const DELETE_CODING_QUESTION_CONFIRMATION =
     'This action cannot be undone. This will permanently delete the coding question'
 export const DELETE_OPEN_ENDED_QUESTION_CONFIRMATION =
     'This action cannot be undone. This will permanently delete the Open-Ended Question'
+
+export const DELETE_AI_QUESTION_CONFIRMATION =
+    'Please confirm the deletion of the question'

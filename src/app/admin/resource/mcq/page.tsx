@@ -294,6 +294,50 @@ const Mcqs = (props: Props) => {
     const selectedTagCount = selectedOptions.length
     const difficultyCount = difficulty.length
 
+    const renderComponent = () => {
+        switch (mcqType) {
+            case 'bulk':
+                return <BulkUploadMcq setIsMcqModalOpen={setIsMcqModalOpen} />
+            case 'oneatatime':
+                return (
+                    <div className="flex items-start justify-center w-full">
+                        <NewMcqForm
+                            setIsMcqModalOpen={setIsMcqModalOpen}
+                            tags={tags}
+                            closeModal={closeModal}
+                            setStoreQuizData={setStoreQuizData}
+                            getAllQuizQuesiton={getAllQuizQuestion}
+                        />
+                    </div>
+                )
+            case 'AI':
+                return (
+                    <div className="flex items-start justify-center w-full">
+                        <NewMcqProblemForm
+                            tags={tags}
+                            closeModal={closeModal}
+                            setStoreQuizData={setStoreQuizData}
+                            getAllQuizQuesiton={getAllQuizQuestion}
+                            setIsMcqModalOpen={setIsMcqModalOpen}
+                            setMcqType={setMcqType}
+                        />
+                    </div>
+                )
+            default:
+                return (
+                    <div className="flex items-start justify-center w-full">
+                        <NewMcqForm
+                            setIsMcqModalOpen={setIsMcqModalOpen}
+                            tags={tags}
+                            closeModal={closeModal}
+                            setStoreQuizData={setStoreQuizData}
+                            getAllQuizQuesiton={getAllQuizQuestion}
+                        />
+                    </div>
+                )
+        }
+    }
+
     return (
         <>
             {isEditQuizModalOpen && (
@@ -337,7 +381,7 @@ const Mcqs = (props: Props) => {
                                 onValueChange={(value) => setMcqType(value)}
                             >
                                 <div className="flex w-[630px] flex-col items-start justify-start ml-4 gap-3">
-                                    <h1 className="font-semibold text-xl mb-4 ">
+                                    <h1 className="font-semibold text-3xl mb-4 ">
                                         New MCQ
                                     </h1>
                                     <div className="flex gap-x-6 ">
@@ -367,13 +411,25 @@ const Mcqs = (props: Props) => {
                                                 One At A Time
                                             </Label>
                                         </div>
+                                        <div className="flex space-x-2 pr-2">
+                                            <RadioGroupItem
+                                                value="AI"
+                                                id="r2"
+                                                className="text-secondary mt-1"
+                                            />
+                                            <Label
+                                                className="font-semibold text-lg"
+                                                htmlFor="r2"
+                                            >
+                                                Generate with AI
+                                            </Label>
+                                        </div>
                                     </div>
                                 </div>
                             </RadioGroup>
-                            {mcqType === 'bulk' ? (
-                                <BulkUploadMcq
-                                    setIsMcqModalOpen={setIsMcqModalOpen}
-                                />
+                            {renderComponent()}
+                            {/* {mcqType === 'bulk' ? (
+                                <BulkUploadMcq />
                             ) : (
                                 <div className="flex items-start justify-center w-screen ">
                                     <NewMcqForm
@@ -383,14 +439,8 @@ const Mcqs = (props: Props) => {
                                         setStoreQuizData={setStoreQuizData}
                                         getAllQuizQuesiton={getAllQuizQuestion}
                                     />
-                                    {/* <NewMcqProblemFormNew
-                                    tags={tags}
-                                    closeModal={closeModal}
-                                    setStoreQuizData={setStoreQuizData}
-                                    getAllQuizQuesiton={getAllQuizQuestion}
-                                /> */}
                                 </div>
-                            )}
+                            )} */}
                         </div>
                     </div>
                 </div>
