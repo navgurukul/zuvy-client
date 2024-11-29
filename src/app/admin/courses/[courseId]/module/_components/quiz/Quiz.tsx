@@ -171,7 +171,7 @@ function Quiz(props: any) {
                                         <div className="text-end  mr-10">
                                             <Button
                                                 onClick={handleSaveQuiz}
-                                                className="h-8 "
+                                                className="h-8"
                                             >
                                                 Save
                                             </Button>
