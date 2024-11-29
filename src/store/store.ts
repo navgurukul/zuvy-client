@@ -760,6 +760,47 @@ export const getMcqSearch = create<mcqSearch>((set) => ({
     },
 }))
 
+// -----------------------AI Generate Questions ----------------------
+
+type generatedQuestions = {
+    generatedQuestions: any[]
+    setGeneratedQuestions: (newValue: any[]) => void
+}
+
+export const getGeneratedQuestions = create<generatedQuestions>((set) => ({
+    generatedQuestions: [],
+    setGeneratedQuestions: (newValue: any[]) => {
+        set({ generatedQuestions: newValue })
+    },
+}))
+
+export type RequestBodyType = {
+    quizzes: {
+        tagId: number
+        difficulty: string
+        variantMCQs: {
+            question: string
+            options: { 1: string; 2: string; 3: string; 4: string }
+        }[]
+    }[]
+}
+
+type requestBody = {
+    requestBody: RequestBodyType
+    setRequestBody: (newValue: RequestBodyType) => void
+}
+
+export const getRequestBody = create<requestBody>((set) => ({
+    requestBody: {
+        quizzes: [],
+    },
+    setRequestBody: (newValue: RequestBodyType) => {
+        set({ requestBody: newValue })
+    },
+}))
+
+// -----------------------AI Generate Questions ----------------------
+
 type isPreviewModalOpen = {
     isPreviewModalOpen: boolean
     setIsPreviewModalOpen: (newValue: boolean) => void
