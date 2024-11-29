@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 
-const UnauthorizedUser = ({ rolesList }: any) => {
+const UnauthorizedUser = ({ rolesList, path }: any) => {
     const router = useRouter()
     return (
         <div className="flex flex-col items-center pt-24">
@@ -22,8 +22,8 @@ const UnauthorizedUser = ({ rolesList }: any) => {
                         Unauthorized Access
                     </h1>
                     <p className="text-md mt-3 mb-5">
-                        The page is meant to be viewed by Zuvy Admins. You do
-                        not have admin access to access this page
+                        {`The page is meant to be viewed by Zuvy ${path}. You do
+                        not have ${path} access to access this page`}
                     </p>
                     <Button onClick={() => router.push(`/${rolesList}`)}>
                         Return to Dashboard
