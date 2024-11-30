@@ -4,7 +4,6 @@ import { cn, difficultyBgColor, difficultyColor, ellipsis } from '@/lib/utils'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import QuestionDescriptionModal from './QuestionDescriptionModal'
-import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 
 interface TestCase {
     id: number
@@ -42,13 +41,9 @@ const CodingQuestions = ({
     selectedQuestions: CodingQuestion[]
     tags: any
 }) => {
-    const heightClass = useResponsiveHeight()
     return (
-        <div className={`${heightClass} pr-4 mb-[-390px]`}>
-            <ScrollBar
-                orientation="vertical"
-                className={`${heightClass} pb-96`}
-            />
+        <div className="h-dvh pr-4 mb-[-390px]">
+            <ScrollBar orientation="vertical" className="pb-96 h-dvh" />
             {questions.map((question: CodingQuestion) => {
                 const tag = tags?.find(
                     (tag: any) => tag?.id === question?.tagId
