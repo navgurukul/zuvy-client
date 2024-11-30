@@ -11,10 +11,8 @@ import { Tag } from '@/app/admin/resource/mcq/page'
 import { toast } from '@/components/ui/use-toast'
 import { getAllQuizQuestion } from '@/utils/admin'
 import { getAllQuizData } from '@/store/store'
-import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 
 function Quiz(props: any) {
-    const heightClass = useResponsiveHeight()
     const [tags, setTags] = useState<Tag[]>([])
     const [isOpen, setIsOpen] = useState(false)
 
@@ -159,7 +157,7 @@ function Quiz(props: any) {
                     orientation="vertical"
                     className="mx-4 w-[2px] h-96 mt-36 rounded"
                 />
-                <ScrollArea className={`w-full rounded-md`}>
+                <ScrollArea className={` w-full rounded-md`}>
                     <div className="">
                         <div className="flex flex-col items-center justify-between ">
                             <div className="flex justify-between w-full mt-36 ">
@@ -171,7 +169,7 @@ function Quiz(props: any) {
                                         <div className="text-end  mr-10">
                                             <Button
                                                 onClick={handleSaveQuiz}
-                                                className="h-8"
+                                                className="  h-8 "
                                             >
                                                 Save
                                             </Button>
@@ -187,8 +185,7 @@ function Quiz(props: any) {
                                 )}
                             </div>
                         </div>
-                        {/* <div className="h-96 overflow-y-scroll "> */}
-                        <div className={`${heightClass} overflow-y-scroll`}>
+                        <div className="h-96 overflow-y-scroll ">
                             {addQuestion.map(
                                 (questions: quizData, index: number) => (
                                     <QuizModal
