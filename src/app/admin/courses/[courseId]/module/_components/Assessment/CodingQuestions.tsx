@@ -42,114 +42,116 @@ const CodingQuestions = ({
     tags: any
 }) => {
     return (
-        <ScrollArea className="h-[calc(100vh-200px)] pb-24  pr-4">
-            <ScrollBar orientation="vertical" className="h-dvh" />
-            {questions.map((question: CodingQuestion) => {
-                const tag = tags?.find(
-                    (tag: any) => tag?.id === question?.tagId
-                )
-                return (
-                    <div
-                        key={question.id}
-                        className="p-5 rounded-sm border-b border-gray-200 mb-4"
-                    >
-                        <div className="flex justify-between text-start items-center w-full">
-                            <div className="w-full">
-                                <div className="flex items-center justify-between w-full">
-                                    <h2 className="font-bold">
-                                        {ellipsis(question.title, 30)}
-                                    </h2>
-                                    <div className="flex gap-2 ml-auto">
-                                        {tag && (
-                                            <span className="text-sm text-[#518672] bg-[#DCE7E3] rounded-full px-2">
-                                                {tag?.tagName}
+        <ScrollArea className="h-3/5  w-full pr-5">
+            <ScrollBar orientation="vertical" className="h-3/4" />
+            <div className="h-screen">
+                {questions.map((question: CodingQuestion) => {
+                    const tag = tags?.find(
+                        (tag: any) => tag?.id === question?.tagId
+                    )
+                    return (
+                        <div
+                            key={question.id}
+                            className="p-5 rounded-sm border-b border-gray-200 mb-4"
+                        >
+                            <div className="flex justify-between text-start items-center w-full">
+                                <div className="w-full">
+                                    <div className="flex items-center justify-between w-full">
+                                        <h2 className="font-bold">
+                                            {ellipsis(question.title, 30)}
+                                        </h2>
+                                        <div className="flex gap-2 ml-auto">
+                                            {tag && (
+                                                <span className="text-sm text-[#518672] bg-[#DCE7E3] rounded-full px-2">
+                                                    {tag?.tagName}
+                                                </span>
+                                            )}
+                                            <span
+                                                className={cn(
+                                                    `text-sm rounded-full px-2`,
+                                                    difficultyColor(
+                                                        question.difficulty
+                                                    ),
+                                                    difficultyBgColor(
+                                                        question.difficulty
+                                                    )
+                                                )}
+                                            >
+                                                {question.difficulty}
                                             </span>
-                                        )}
-                                        <span
-                                            className={cn(
-                                                `text-sm rounded-full px-2`,
-                                                difficultyColor(
-                                                    question.difficulty
-                                                ),
-                                                difficultyBgColor(
-                                                    question.difficulty
-                                                )
-                                            )}
-                                        >
-                                            {question.difficulty}
-                                        </span>
-                                        <div className="flex">
-                                            {selectedQuestions.some(
-                                                (q: CodingQuestion) =>
-                                                    q.id === question.id
-                                            ) ? (
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    width="20"
-                                                    height="20"
-                                                    viewBox="0 0 24 24"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    strokeWidth="2"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    className="lucide lucide-circle-check"
-                                                >
-                                                    <circle
-                                                        cx="12"
-                                                        cy="12"
-                                                        r="10"
+                                            <div className="flex">
+                                                {selectedQuestions.some(
+                                                    (q: CodingQuestion) =>
+                                                        q.id === question.id
+                                                ) ? (
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        width="20"
+                                                        height="20"
+                                                        viewBox="0 0 24 24"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        strokeWidth="2"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        className="lucide lucide-circle-check"
+                                                    >
+                                                        <circle
+                                                            cx="12"
+                                                            cy="12"
+                                                            r="10"
+                                                        />
+                                                        <path d="m9 12 2 2 4-4" />
+                                                    </svg>
+                                                ) : (
+                                                    <PlusCircle
+                                                        onClick={() => {
+                                                            if (
+                                                                !selectedQuestions.some(
+                                                                    (
+                                                                        q: CodingQuestion
+                                                                    ) =>
+                                                                        q.id ===
+                                                                        question.id
+                                                                )
+                                                            ) {
+                                                                setSelectedQuestions(
+                                                                    [
+                                                                        ...selectedQuestions,
+                                                                        question,
+                                                                    ]
+                                                                )
+                                                            }
+                                                        }}
+                                                        className="text-secondary cursor-pointer"
+                                                        size={20}
                                                     />
-                                                    <path d="m9 12 2 2 4-4" />
-                                                </svg>
-                                            ) : (
-                                                <PlusCircle
-                                                    onClick={() => {
-                                                        if (
-                                                            !selectedQuestions.some(
-                                                                (
-                                                                    q: CodingQuestion
-                                                                ) =>
-                                                                    q.id ===
-                                                                    question.id
-                                                            )
-                                                        ) {
-                                                            setSelectedQuestions(
-                                                                [
-                                                                    ...selectedQuestions,
-                                                                    question,
-                                                                ]
-                                                            )
-                                                        }
-                                                    }}
-                                                    className="text-secondary cursor-pointer"
-                                                    size={20}
-                                                />
-                                            )}
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
+                                    <p className="text-[#4A4A4A] mt-1 font-[14px]">
+                                        {ellipsis(question.description, 45)}
+                                    </p>
+                                    <Dialog>
+                                        <DialogTrigger asChild>
+                                            <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer">
+                                                View Full Description
+                                            </p>
+                                        </DialogTrigger>
+                                        <DialogOverlay />
+                                        <QuestionDescriptionModal
+                                            question={question}
+                                            type="coding"
+                                            tagName={tag?.tagName}
+                                        />
+                                    </Dialog>
                                 </div>
-                                <p className="text-[#4A4A4A] mt-1 font-[14px]">
-                                    {ellipsis(question.description, 45)}
-                                </p>
-                                <Dialog>
-                                    <DialogTrigger asChild>
-                                        <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer">
-                                            View Full Description
-                                        </p>
-                                    </DialogTrigger>
-                                    <DialogOverlay />
-                                    <QuestionDescriptionModal
-                                        question={question}
-                                        type="coding"
-                                        tagName={tag?.tagName}
-                                    />
-                                </Dialog>
                             </div>
                         </div>
-                    </div>
-                )
-            })}
+                    )
+                })}
+            </div>
         </ScrollArea>
     )
 }

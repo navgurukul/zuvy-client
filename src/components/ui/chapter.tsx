@@ -187,7 +187,7 @@ function Chapter() {
     }, [currentChapter])
 
     return (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-screen">
             <div className="mb-5">
                 <BreadcrumbComponent crumbs={crumbs} />
             </div>
@@ -224,7 +224,10 @@ function Chapter() {
                         })} */}
                     </div>
                 </div>
-                <ScrollArea className="h-screen pr-4 mt-2" type="hover">
+                <ScrollArea
+                    className="h-screen pr-4 w-full mr-16 mt-2 "
+                    type="hover"
+                >
                     <Reorder.Group
                         values={chapterData}
                         onReorder={async (newOrderChapters: any) => {

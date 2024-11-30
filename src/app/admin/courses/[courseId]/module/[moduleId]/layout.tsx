@@ -13,18 +13,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     const heightClass = useResponsiveHeight()
 
     return (
-        <div className={`h-screen`}>
+        <div className="h-screen">
             {projectID || adminAssessmentPreviewRoute ? (
                 <div>{children}</div>
             ) : (
                 // <MaxWidthWrapper><Project /></MaxWidthWrapper>
-                <div className="">
+                <div className="flex w-screen sticky top-0 h-3/5">
                     {/* <div className="w-full flex-none md:w-[25%]"> */}
                     {/* <div className="w-full flex-none md:w-[25%] sticky top-0 h-screen overflow-y-auto"> */}
-                    <div className=" h-screen flex w-screen sticky top-0 ">
-                        <Chapter />
-                        <div className="w-full">{children}</div>
-                    </div>
+                    <Chapter />
+                    <div className="w-full">{children}</div>
+                    {/* <div className=" flex w-screen sticky top-0 ">
+                    </div> */}
                     {/* <div className="flex-grow "> */}
                     {/* <div className="flex-grow overflow-auto p-6 md:p-12"> */}
                     {/* </div> */}

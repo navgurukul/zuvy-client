@@ -256,5 +256,5 @@ export default function Page({
         }
     }
 
-    return <div>{renderChapterContent()}</div>
+    return <div className="w-full">{renderChapterContent()}</div>
 }
