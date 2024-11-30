@@ -71,11 +71,19 @@ const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide, tagId }: Props) => {
     }
 
     const generateCodePreview = (codeQuestion: string) => {
+        // Sanitize the input string
         const clean = DOMPurify.sanitize(codeQuestion)
-        const updatedHtml = clean.replace(
-            /<pre>/g,
-            '<pre class="text-gray-800 font-light bg-gray-300 p-0 rounded-lg text-left text-wrap w-2/2">'
-        )
+
+        // Add class to <pre> and <code> tags
+        const updatedHtml = clean
+            .replace(
+                /<pre>/g,
+                '<pre class="text-gray-800 font-light bg-gray-300 p-0 rounded-lg text-left text-wrap w-2/2">'
+            )
+            .replace(
+                /<code>/g,
+                '<code class="text-gray-800 bg-gray-300 text-wrap">'
+            )
 
         return updatedHtml
     }

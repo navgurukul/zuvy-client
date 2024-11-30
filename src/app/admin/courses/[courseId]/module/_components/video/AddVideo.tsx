@@ -171,7 +171,6 @@ const AddVideo = ({
             await api.put(
                 `/Content/editChapterOfModule/${moduleId}?chapterId=${content.id}`,
                 {
-                    title: '',
                     description: '',
                     links: [''],
                 }
@@ -183,7 +182,6 @@ const AddVideo = ({
 
     return (
         <ScrollArea
-
             type="hover"
             style={{
                 scrollbarWidth: 'none', // Firefox

@@ -132,7 +132,7 @@ function Quiz(props: any) {
     }, [getAllSavedQuizQuestion])
 
     return (
-        <>
+        <div className="ml-12">
             <div className="flex flex-row items-center justify-start gap-x-6 mb-10">
                 <Input
                     placeholder="Untitled Quiz"
@@ -204,7 +204,7 @@ function Quiz(props: any) {
                     </div>
                 </ScrollArea>
             </div>
-        </>
+        </div>
     )
 }
 

@@ -806,3 +806,22 @@ export const addClassToCodeTags: any = (
             }">`
     )
 }
+
+export async function handleSaveChapter(
+    moduleId: string,
+    contentId: number,
+    reqBody: any
+) {
+    const response = await api.put(
+        `/Content/editChapterOfModule/${moduleId}?chapterId=${contentId}`,
+        reqBody
+    )
+    if (response) {
+        toast({
+            title: 'Success',
+            description: 'Chapter edited successfully',
+            className:
+                'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+        })
+    }
+}
