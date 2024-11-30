@@ -154,7 +154,6 @@ export default function Page({
                 case 2:
                     return (
                         <ScrollArea
-                            // className="h-[600px] lg:h-[600px] pr-4"
                             className={`${heightClass} pr-4`}
                             type="hover"
                             style={{
@@ -189,7 +188,6 @@ export default function Page({
                 case 5:
                     return (
                         <ScrollArea
-                            // className="h-[600px] lg:h-[600px] pr-4"
                             className={`${heightClass} pr-4`}
                             type="hover"
                             style={{
@@ -217,7 +215,6 @@ export default function Page({
                 case 7:
                     return (
                         <ScrollArea
-                            // className="h-[600px] lg:h-[600px] pr-4"
                             className={`${heightClass} pr-4`}
                             type="hover"
                             style={{
