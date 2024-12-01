@@ -30,7 +30,7 @@ export default function RootLayout({
                     <Spinner className="text-secondary" />
                 </div>
             ) : user && user.rolesList.length !== 0 ? (
-                <UnauthorizedUser rolesList={rolesList} />
+                <UnauthorizedUser rolesList={rolesList} path={'Student'} />
             ) : (
                 <div
                 // className={cn(
