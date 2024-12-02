@@ -27,17 +27,22 @@ const PreviewVideo = ({ content, setShowPreview }: Props) => {
                 </div>
             </div>
             <div className="relative w-[70%] aspect-video flex justify-center items-center">
-                <ReactPlayer
-                    url={content?.contentDetails[0].links[0]}
-                    controls={true}
-                    width="100%"
-                    height="100%"
-                    style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                    }}
-                />
+                {content?.contentDetails?.length > 0 &&
+                content?.contentDetails[0]?.links?.length > 0 ? (
+                    <ReactPlayer
+                        url={content.contentDetails[0].links[0]}
+                        controls={true}
+                        width="100%"
+                        height="100%"
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                        }}
+                    />
+                ) : (
+                    <p>No video available</p> // Show a fallback message if the content is not available
+                )}
             </div>
         </div>
     )

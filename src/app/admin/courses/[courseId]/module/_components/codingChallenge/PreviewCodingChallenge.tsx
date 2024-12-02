@@ -38,8 +38,7 @@ const PreviewCodingChallenge = ({ content, tags, setShowPreview }: Props) => {
     return (
         <div className="flex justify-center">
             <div className="flex flex-col gap-5 text-left mt-10">
-                {/* <div className="flex  flex-col items-start w-1/2"> */}
-                <div className="flex  flex-col items-start w-full">
+                <div className="flex  flex-col items-start w-1/2">
                     <h2 className="text-2xl font-bold mb-3">{content.title}</h2>
                     <Button
                         onClick={() => setShowPreview(false)}

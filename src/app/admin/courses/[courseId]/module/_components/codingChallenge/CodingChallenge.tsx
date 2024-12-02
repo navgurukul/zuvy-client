@@ -17,6 +17,7 @@ import QuestionDescriptionModal from '../Assessment/QuestionDescriptionModal'
 import { ArrowUpRightSquare } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import PreviewCodingChallenge from './PreviewCodingChallenge'
+import { toast } from '@/components/ui/use-toast'
 
 interface Example {
     input: number[]
@@ -100,6 +101,20 @@ function CodingChallenge({
     const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([])
     const [chapterTitle, setChapterTitle] = useState<string>(activeChapterTitle)
     const [showPreview, setShowPreview] = useState<boolean>(false)
+    const handlePreviewClick = () => {
+        if (selectedQuestions.length === 0) {
+            // Show toast if no questions are added
+            toast({
+                title: 'No Questions',
+                description:
+                    'Please add at least one question to preview the codiing question',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
+            })
+        } else {
+            setShowPreview(true)
+        }
+    }
 
     useEffect(() => {
         async function getAllCodingQuestions() {
@@ -196,7 +211,7 @@ function CodingChallenge({
             ) : (
                 <div>
                     {/* SearchBar component */}
-                    <div className="flex items-center mb-15">
+                    <div className="flex flex-col items-start mb-15">
                         <Input
                             required
                             onChange={(e) => {
@@ -209,16 +224,19 @@ function CodingChallenge({
                             }`}
                             className="p-0 text-3xl w-2/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize"
                         />
-                        <Button
-                            variant={'ghost'}
-                            type="button"
-                            className="mt-2 text-secondary w-[100px] h-[30px] gap-x-1 "
-                            onClick={() => setShowPreview(true)}
-                        >
-                            <ArrowUpRightSquare />
-                            <h1>Preview</h1>
-                        </Button>
+                        <div className="mt-2">
+                            <Button
+                                variant={'ghost'}
+                                type="button"
+                                className="text-secondary w-[100px] h-[30px] flex items-center gap-x-1"
+                                onClick={handlePreviewClick}
+                            >
+                                <ArrowUpRightSquare />
+                                <h1>Preview</h1>
+                            </Button>
+                        </div>
                     </div>
+
                     <div className="grid grid-cols-2">
                         <div>
                             <CodingTopics

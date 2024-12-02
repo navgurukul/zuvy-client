@@ -183,6 +183,35 @@ const AddVideo = ({
             console.error('Error updating chapter:', error)
         }
     }
+    const handlePreviewClick = () => {
+        // Check if title is empty or invalid
+        if (
+            !form.watch('videoTitle') ||
+            form.watch('videoTitle').trim().length === 0
+        ) {
+            toast({
+                title: 'No Title',
+                description: 'Please provide a title for the video to preview.',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
+            })
+            return
+        }
+
+        // Check if links are empty or invalid
+        const links = form.watch('links').trim()
+        if (!links || !isLinkValid(links)) {
+            toast({
+                title: 'Invalid Link',
+                description: 'Please provide a valid video link to preview.',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
+            })
+            return
+        }
+
+        setShowPreview(true)
+    }
 
     return (
         <ScrollArea
@@ -221,9 +250,7 @@ const AddVideo = ({
                                                 variant={'ghost'}
                                                 type="button"
                                                 className="text-secondary w-[100px] h-[30px] gap-x-1 "
-                                                onClick={() =>
-                                                    setShowPreview(true)
-                                                }
+                                                onClick={handlePreviewClick}
                                             >
                                                 <ArrowUpRightSquare />
                                                 <h1>Preview</h1>

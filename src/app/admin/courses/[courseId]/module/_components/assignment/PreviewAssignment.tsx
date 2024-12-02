@@ -45,24 +45,6 @@ const PreviewAssignment = ({
         content.contentDetails[0].content.length > 0
     ) {
         editorContent = content.contentDetails[0].content[0]
-    } else {
-        editorContent = {
-            type: 'doc',
-            content: [
-                {
-                    type: 'paragraph',
-                    attrs: {
-                        textAlign: 'left',
-                    },
-                    content: [
-                        {
-                            text: 'No Assignment added yet. Please come back later for some interesting article to learn from...',
-                            type: 'text',
-                        },
-                    ],
-                },
-            ],
-        }
     }
 
     const editor = useEditor({

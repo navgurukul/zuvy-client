@@ -91,13 +91,6 @@ const QuizPreview = ({
                 </div>
             </div>
         )
-    } else {
-        return (
-            <div>
-                There is nothing to preview. You have not selected any quiz
-                questions.
-            </div>
-        )
     }
 }
 

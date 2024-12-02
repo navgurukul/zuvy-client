@@ -61,6 +61,8 @@ export default function Page({
     const [key, setKey] = useState(0)
     const [loading, setLoading] = useState(true)
     const [articleUpdateOnPreview, setArticleUpdateOnPreview] = useState(false)
+    const [assignmentUpdateOnPreview, setAssignmentUpdateOnPreview] =
+        useState(false)
 
     const fetchChapterContent = useCallback(
         async (chapterId: number, topicId: number) => {
@@ -124,7 +126,12 @@ export default function Page({
                 setLoading(false) // Set loading to false after the delay
             }, 100)
         }
-    }, [chapterData, fetchChapterContent])
+    }, [
+        chapterData,
+        fetchChapterContent,
+        articleUpdateOnPreview,
+        assignmentUpdateOnPreview,
+    ])
 
     const renderChapterContent = () => {
         if (
@@ -196,6 +203,12 @@ export default function Page({
                             <Assignment
                                 key={chapterId}
                                 content={chapterContent}
+                                assignmentUpdateOnPreview={
+                                    assignmentUpdateOnPreview
+                                }
+                                setAssignmentUpdateOnPreview={
+                                    setAssignmentUpdateOnPreview
+                                }
                             />
                         </ScrollArea>
                     )

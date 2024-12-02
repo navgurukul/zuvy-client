@@ -57,12 +57,32 @@ interface Content {
 
 interface AssignmentProps {
     content: Content
+    assignmentUpdateOnPreview: boolean
+    setAssignmentUpdateOnPreview: React.Dispatch<React.SetStateAction<boolean>> // Correct type for setter
 }
 
-const AddAssignent = ({ content }: AssignmentProps) => {
+const AddAssignent = ({
+    content,
+    assignmentUpdateOnPreview,
+    setAssignmentUpdateOnPreview,
+}: AssignmentProps) => {
     // misc
 
     const [showPreview, setShowPreview] = useState<boolean>(false)
+    const handlePreviewClick = () => {
+        const editorContent = editor?.getText()
+        if (!editorContent || editorContent.trim() === '') {
+            toast({
+                title: 'No Questions',
+                description:
+                    'Please add at least one question to preview the quiz.',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
+            })
+        } else {
+            setShowPreview(true)
+        }
+    }
 
     const formSchema = z.object({
         title: z.string().min(2, {
@@ -133,6 +153,7 @@ const AddAssignent = ({ content }: AssignmentProps) => {
                 `/Content/editChapterOfModule/${content.moduleId}?chapterId=${content.id}`,
                 requestBody
             )
+            setAssignmentUpdateOnPreview(!assignmentUpdateOnPreview)
             toast({
                 title: 'Success',
                 description: 'Assignment Chapter Edited Successfully',
@@ -158,14 +179,14 @@ const AddAssignent = ({ content }: AssignmentProps) => {
 
     return (
         <div>
-            <div className="w-full ">
-                {showPreview ? (
-                    <PreviewAssignment
-                        content={content}
-                        setShowPreview={setShowPreview}
-                    />
-                ) : (
-                    <>
+            {showPreview ? (
+                <PreviewAssignment
+                    content={content}
+                    setShowPreview={setShowPreview}
+                />
+            ) : (
+                <>
+                    <div className="w-full ">
                         <Form {...form}>
                             <form
                                 id="myForm"
@@ -178,8 +199,9 @@ const AddAssignent = ({ content }: AssignmentProps) => {
                                     control={form.control}
                                     name="title"
                                     render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel></FormLabel>
+                                        <FormItem className="flex flex-col gap-0">
+                                            {' '}
+                                            {/* Ensure proper spacing */}
                                             <FormControl>
                                                 <Input
                                                     placeholder="Untitled Article"
@@ -191,13 +213,12 @@ const AddAssignent = ({ content }: AssignmentProps) => {
                                                     }
                                                 />
                                             </FormControl>
+                                            {/* Button aligned below the input */}
                                             <Button
                                                 variant={'ghost'}
                                                 type="button"
-                                                className=" text-secondary w-[100px] h-[30px] gap-x-1 "
-                                                onClick={() =>
-                                                    setShowPreview(true)
-                                                }
+                                                className="text-secondary w-[100px] h-[30px] gap-x-1"
+                                                onClick={handlePreviewClick}
                                             >
                                                 <ArrowUpRightSquare />
                                                 <h1>Preview</h1>
@@ -206,6 +227,7 @@ const AddAssignent = ({ content }: AssignmentProps) => {
                                         </FormItem>
                                     )}
                                 />
+
                                 <FormField
                                     control={form.control}
                                     name="startDate"
@@ -266,18 +288,20 @@ const AddAssignent = ({ content }: AssignmentProps) => {
                                 />
                             </form>
                         </Form>
-                    </>
-                )}
-            </div>
-            <div className="text-left">
-                <TiptapToolbar editor={editor} />
-                <TiptapEditor editor={editor} />
-            </div>
-            <div className="flex justify-end mt-5">
-                <Button type="submit" form="myForm">
-                    Save
-                </Button>
-            </div>
+
+                        {/* )} */}
+                    </div>
+                    <div className="text-left">
+                        <TiptapToolbar editor={editor} />
+                        <TiptapEditor editor={editor} />
+                    </div>
+                    <div className="flex justify-end mt-5">
+                        <Button type="submit" form="myForm">
+                            Save
+                        </Button>
+                    </div>
+                </>
+            )}
         </div>
     )
 }
