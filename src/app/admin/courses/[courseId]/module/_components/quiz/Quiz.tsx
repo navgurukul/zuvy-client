@@ -54,7 +54,7 @@ function Quiz(props: any) {
     }
     const removeQuestionById = (questionId: number) => {
         setAddQuestion((prevQuestions: any) =>
-            prevQuestions.filter((question: any) => question.id !== questionId)
+            prevQuestions.filter((question: any) => question?.id !== questionId)
         )
     }
 
@@ -97,7 +97,7 @@ function Quiz(props: any) {
     }
 
     const handleSaveQuiz = () => {
-        const selectedIds = addQuestion.map((item) => item.id)
+        const selectedIds = addQuestion?.map((item) => item.id)
         const requestBody = {
             quizQuestions: selectedIds,
         }
@@ -119,11 +119,11 @@ function Quiz(props: any) {
     }, [getAllSavedQuizQuestion])
 
     return (
-        <>
+        <div>
             {showPreview ? (
                 <QuizPreview setShowPreview={setShowPreview} />
             ) : (
-                <>
+                <div className="ml-12">
                     <div className="flex flex-row items-center justify-start gap-x-6 mb-10">
                         <div className="w-2/6 flex flex-col items-start gap-3 relative">
                             {/* Input Field */}
@@ -189,7 +189,7 @@ function Quiz(props: any) {
                                             Selected Question
                                         </h2>
                                         <div>
-                                            {addQuestion.length > 0 && (
+                                            {addQuestion?.length > 0 && (
                                                 <div className="text-end mr-10">
                                                     <Button
                                                         onClick={handleSaveQuiz}
@@ -202,7 +202,7 @@ function Quiz(props: any) {
                                         </div>
                                     </div>
                                     <div className="text-left w-full">
-                                        {addQuestion.length === 0 && (
+                                        {addQuestion?.length === 0 && (
                                             <h1 className="text-left italic">
                                                 No Selected Questions
                                             </h1>
@@ -210,7 +210,7 @@ function Quiz(props: any) {
                                     </div>
                                 </div>
                                 <div className="h-96 overflow-y-scroll">
-                                    {addQuestion.map(
+                                    {addQuestion?.map(
                                         (
                                             questions: quizData,
                                             index: number
@@ -233,9 +233,9 @@ function Quiz(props: any) {
                             </div>
                         </ScrollArea>
                     </div>
-                </>
+                </div>
             )}
-        </>
+        </div>
     )
 }
 

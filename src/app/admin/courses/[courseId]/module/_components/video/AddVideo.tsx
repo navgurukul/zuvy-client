@@ -174,7 +174,6 @@ const AddVideo = ({
             await api.put(
                 `/Content/editChapterOfModule/${moduleId}?chapterId=${content.id}`,
                 {
-                    title: '',
                     description: '',
                     links: [''],
                 }

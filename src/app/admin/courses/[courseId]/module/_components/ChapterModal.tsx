@@ -18,6 +18,7 @@ import {
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { useRouter } from 'next/navigation'
+import { getTopicId } from '@/store/store'
 
 function ChapterModal({
     fetchChapters,
@@ -32,8 +33,10 @@ function ChapterModal({
     moduleId: any
     scrollToBottom: () => void
 }) {
+    const { setTopicId } = getTopicId()
     const router = useRouter()
     const createChapter = async (topicId: number) => {
+        setTopicId(topicId)
         await api
             .post(`Content/chapter`, {
                 moduleId: Number(moduleId),
