@@ -14,6 +14,10 @@ import useDebounce from '@/hooks/useDebounce'
 import { getCodingQuestionTags } from '@/store/store'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import QuestionDescriptionModal from '../Assessment/QuestionDescriptionModal'
+import { ArrowUpRightSquare } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import PreviewCodingChallenge from './PreviewCodingChallenge'
+import { toast } from '@/components/ui/use-toast'
 
 interface Example {
     input: number[]
@@ -96,6 +100,21 @@ function CodingChallenge({
         useState<string>('All Languages')
     const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([])
     const [chapterTitle, setChapterTitle] = useState<string>(activeChapterTitle)
+    const [showPreview, setShowPreview] = useState<boolean>(false)
+    const handlePreviewClick = () => {
+        if (selectedQuestions.length === 0) {
+            // Show toast if no questions are added
+            toast({
+                title: 'No Questions',
+                description:
+                    'Please add at least one question to preview the codiing question',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
+            })
+        } else {
+            setShowPreview(true)
+        }
+    }
     const [chapterTitles, setChapterTitles] = useState('')
 
     useEffect(() => {
@@ -183,157 +202,177 @@ function CodingChallenge({
     }, [content])
 
     return (
-        <div>
-            {/* SearchBar component */}
-            <div className="flex items-center mb-15">
-                <div className="w-2/6 flex justify-center align-middle items-center relative">
-                    <Input
-                        required
-                        onChange={(e) => {
-                            setChapterTitles(e.target.value)
-                        }}
-                        placeholder={`${
-                            activeChapterTitle
-                                ? activeChapterTitle
-                                : 'Untitled Coding Problem'
-                        }`}
-                        className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
-                        autoFocus
-                    />
-                    {!chapterTitles && (
-                        <Pencil
-                            fill="true"
-                            fillOpacity={0.4}
-                            size={20}
-                            className="absolute text-gray-100 pointer-events-none mt-1 right-5"
-                        />
-                    )}
-                </div>
-                {/* <div className="text-secondary flex font-semibold items-center">
-                    <h6 className="mr-2 text-sm">Preview</h6>
-                    <ExternalLink size={15} />
-                </div> */}
-            </div>
-            <div className="grid grid-cols-2">
-                <div>
-                    <CodingTopics
-                        setSearchTerm={setSearchTerm}
-                        searchTerm={searchTerm}
-                        selectedTopics={selectedOptions}
-                        setSelectedTopics={setSelectedOptions}
-                        selectedDifficulties={selectedDifficulty}
-                        setSelectedDifficulties={setSelectedDifficulty}
-                        // selectedLanguage={selectedLanguage}
-                        // setSelectedLanguage={setSelectedLanguage}
-                        tags={tags}
-                    />
-                    {/* <ScrollArea className="h-dvh pr-4"> */}
-                    <ScrollArea className="h-[500px] pr-4">
-                        {filteredQuestions?.map((question: any) => (
-                            <div
-                                key={question.id}
-                                className={`p-5 rounded-sm ${
-                                    selectedQuestions?.some(
-                                        (selectedQuestion) =>
-                                            selectedQuestion?.id === question.id
-                                    )
-                                        ? 'bg-gray-200'
-                                        : ''
-                                }`}
-                            >
-                                <div className="flex justify-between text-start items-center">
-                                    <div>
-                                        <div className="flex items-center gap-2">
-                                            <h2 className="font-bold text-lg">
-                                                {question.title}
-                                            </h2>
-                                            <span
-                                                className={cn(
-                                                    `font-semibold text-secondary`,
-                                                    difficultyColor(
-                                                        question.difficulty
-                                                    )
-                                                )}
-                                            >
-                                                {question.difficulty}
-                                            </span>
-                                        </div>
-                                        <div className="w-full">
-                                            <p className="text-gray-600 mt-1">
-                                                {ellipsis(
-                                                    question.description,
-                                                    60
-                                                )}
-                                            </p>
-                                        </div>
-                                        <Dialog>
-                                            <DialogTrigger asChild>
-                                                <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer">
-                                                    View Full Description
-                                                </p>
-                                            </DialogTrigger>
-                                            <DialogOverlay />
-                                            <QuestionDescriptionModal
-                                                question={question}
-                                                type="coding"
-                                            />
-                                        </Dialog>
-                                    </div>
-                                    <div>
-                                        {selectedQuestions?.some(
-                                            (selectedQuestion) =>
-                                                selectedQuestion?.id ===
-                                                question.id
-                                        ) ? (
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                width="20"
-                                                height="20"
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                strokeWidth="2"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                className="lucide lucide-circle-check"
-                                            >
-                                                <circle
-                                                    cx="12"
-                                                    cy="12"
-                                                    r="10"
-                                                />
-                                                <path d="m9 12 2 2 4-4" />
-                                            </svg>
-                                        ) : (
-                                            <PlusCircle
-                                                onClick={() => {
-                                                    setSelectedQuestions([
-                                                        question,
-                                                    ])
-                                                }}
-                                                className="text-secondary cursor-pointer"
-                                                size={20}
-                                            />
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </ScrollArea>
-                </div>
-                <SelectedProblems
-                    chapterTitle={chapterTitle}
-                    selectedQuestions={selectedQuestions as Question[]}
-                    setSelectedQuestions={
-                        setSelectedQuestions as React.Dispatch<
-                            React.SetStateAction<Question[]>
-                        >
-                    }
+        <>
+            {showPreview ? (
+                <PreviewCodingChallenge
                     content={content}
-                    moduleId={moduleId}
+                    setShowPreview={setShowPreview}
+                    tags={tags}
                 />
-            </div>
-        </div>
+            ) : (
+                <div>
+                    {/* SearchBar component */}
+                    <div className="flex flex-col items-start mb-15">
+                        <div className="w-2/6 flex justify-center align-middle items-center relative">
+                            <Input
+                                required
+                                onChange={(e) => {
+                                    setChapterTitles(e.target.value)
+                                }}
+                                placeholder={`${
+                                    activeChapterTitle
+                                        ? activeChapterTitle
+                                        : 'Untitled Coding Problem'
+                                }`}
+                                className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                                autoFocus
+                            />
+                            {!chapterTitles && (
+                                <Pencil
+                                    fill="true"
+                                    fillOpacity={0.4}
+                                    size={20}
+                                    className="absolute text-gray-100 pointer-events-none mt-1 right-5"
+                                />
+                            )}
+                        </div>
+                        <div className="mt-2">
+                            <Button
+                                variant={'ghost'}
+                                type="button"
+                                className="text-secondary w-[100px] h-[30px] flex items-center gap-x-1"
+                                onClick={handlePreviewClick}
+                            >
+                                <ArrowUpRightSquare />
+                                <h1>Preview</h1>
+                            </Button>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2">
+                        <div>
+                            <CodingTopics
+                                setSearchTerm={setSearchTerm}
+                                searchTerm={searchTerm}
+                                selectedTopics={selectedOptions}
+                                setSelectedTopics={setSelectedOptions}
+                                selectedDifficulties={selectedDifficulty}
+                                setSelectedDifficulties={setSelectedDifficulty}
+                                // selectedLanguage={selectedLanguage}
+                                // setSelectedLanguage={setSelectedLanguage}
+                                tags={tags}
+                            />
+                            {/* <ScrollArea className="h-dvh pr-4"> */}
+                            <ScrollArea className="h-[500px] pr-4">
+                                {filteredQuestions?.map((question: any) => (
+                                    <div
+                                        key={question.id}
+                                        className={`p-5 rounded-sm ${
+                                            selectedQuestions?.some(
+                                                (selectedQuestion) =>
+                                                    selectedQuestion?.id ===
+                                                    question.id
+                                            )
+                                                ? 'bg-gray-200'
+                                                : ''
+                                        }`}
+                                    >
+                                        <div className="flex justify-between text-start items-center">
+                                            <div>
+                                                <div className="flex items-center gap-2">
+                                                    <h2 className="font-bold text-lg">
+                                                        {question.title}
+                                                    </h2>
+                                                    <span
+                                                        className={cn(
+                                                            `font-semibold text-secondary`,
+                                                            difficultyColor(
+                                                                question.difficulty
+                                                            )
+                                                        )}
+                                                    >
+                                                        {question.difficulty}
+                                                    </span>
+                                                </div>
+                                                <div className="w-full">
+                                                    <p className="text-gray-600 mt-1">
+                                                        {ellipsis(
+                                                            question.description,
+                                                            60
+                                                        )}
+                                                    </p>
+                                                </div>
+                                                <Dialog>
+                                                    <DialogTrigger asChild>
+                                                        <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer">
+                                                            View Full
+                                                            Description
+                                                        </p>
+                                                    </DialogTrigger>
+                                                    <DialogOverlay />
+                                                    <QuestionDescriptionModal
+                                                        question={question}
+                                                        type="coding"
+                                                    />
+                                                </Dialog>
+                                            </div>
+                                            <div>
+                                                {selectedQuestions?.some(
+                                                    (selectedQuestion) =>
+                                                        selectedQuestion?.id ===
+                                                        question.id
+                                                ) ? (
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        width="20"
+                                                        height="20"
+                                                        viewBox="0 0 24 24"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        strokeWidth="2"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        className="lucide lucide-circle-check"
+                                                    >
+                                                        <circle
+                                                            cx="12"
+                                                            cy="12"
+                                                            r="10"
+                                                        />
+                                                        <path d="m9 12 2 2 4-4" />
+                                                    </svg>
+                                                ) : (
+                                                    <PlusCircle
+                                                        onClick={() => {
+                                                            setSelectedQuestions(
+                                                                [question]
+                                                            )
+                                                        }}
+                                                        className="text-secondary cursor-pointer"
+                                                        size={20}
+                                                    />
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </ScrollArea>
+                        </div>
+                        <SelectedProblems
+                            chapterTitle={chapterTitle}
+                            selectedQuestions={selectedQuestions as Question[]}
+                            setSelectedQuestions={
+                                setSelectedQuestions as React.Dispatch<
+                                    React.SetStateAction<Question[]>
+                                >
+                            }
+                            content={content}
+                            moduleId={moduleId}
+                        />
+                    </div>
+                </div>
+            )}
+        </>
     )
 }
 

@@ -139,31 +139,35 @@ function Page() {
             })
         }
     }, [selectedModuleData])
-     
+
     useEffect(() => {
         if (isEditOpen && moduleId) {
             // Fetch the module data when the dialog is opened
-                const res =api.get(`/content/allModules/${courseData?.id}`).then((res) => {
-                const data = res.data.find((module: any) => module.id === moduleId);
-                setSelectedModuleData(data) // Set the selected module's data
-    
-                // Update the form fields when module data is fetched
-                setModuleData({
-                    name: data?.name || '',
-                    description: data?.description || '',
+            const res = api
+                .get(`/content/allModules/${courseData?.id}`)
+                .then((res) => {
+                    const data = res.data.find(
+                        (module: any) => module.id === moduleId
+                    )
+                    setSelectedModuleData(data) // Set the selected module's data
+
+                    // Update the form fields when module data is fetched
+                    setModuleData({
+                        name: data?.name || '',
+                        description: data?.description || '',
+                    })
+                    setTypeId(data?.typeId || 1)
+
+                    // Convert seconds to time data and set it in state
+                    const result = convertSeconds(data?.timeAlloted)
+                    setTimeData({
+                        days: result.days,
+                        weeks: result.weeks,
+                        months: result.months,
+                    })
                 })
-                setTypeId(data?.typeId || 1)
-                
-                // Convert seconds to time data and set it in state
-                const result = convertSeconds(data?.timeAlloted)
-                setTimeData({
-                    days: result.days,
-                    weeks: result.weeks,
-                    months: result.months,
-                })
-            })
         }
-    }, [isEditOpen, moduleId]) 
+    }, [isEditOpen, moduleId])
     //  Edit Module Function:-
     const editModule = () => {
         const { days, weeks, months } = timeData
@@ -297,32 +301,29 @@ function Page() {
     }
     return (
         <div className="w-full ">
-           
-                <div className=" w-full flex justify-end pr-4 ">
-                    <div>
-                        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                            <DialogTrigger asChild>
-                                <Button className="text-white bg-secondary  ">
-                                    Add Module
-                                </Button>
-                            </DialogTrigger>
-                            <DialogOverlay />
-                            <NewModuleDialog
-                                moduleData={moduleData}
-                                timeData={timeData}
-                                createModule={createModule}
-                                handleModuleChange={handleModuleChange}
-                                handleTimeAllotedChange={
-                                    handleTimeAllotedChange
-                                }
-                                handleTypeChange={handleTypeChange}
-                                typeId={typeId}
-                                isOpen={isOpen}
-                            />
-                        </Dialog>
-                    </div>
+            <div className=" w-full flex justify-end pr-4 ">
+                <div>
+                    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                        <DialogTrigger asChild>
+                            <Button className="text-white bg-secondary  ">
+                                Add Module
+                            </Button>
+                        </DialogTrigger>
+                        <DialogOverlay />
+                        <NewModuleDialog
+                            moduleData={moduleData}
+                            timeData={timeData}
+                            createModule={createModule}
+                            handleModuleChange={handleModuleChange}
+                            handleTimeAllotedChange={handleTimeAllotedChange}
+                            handleTypeChange={handleTypeChange}
+                            typeId={typeId}
+                            isOpen={isOpen}
+                        />
+                    </Dialog>
                 </div>
-         
+            </div>
+
             {isEditOpen && (
                 <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
                     <EditModuleDialog

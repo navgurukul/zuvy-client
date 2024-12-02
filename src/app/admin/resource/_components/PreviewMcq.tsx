@@ -10,6 +10,7 @@ import useGetMCQs from '@/hooks/useGetMcq'
 import DOMPurify from 'dompurify'
 import { AlertDialogHeader } from '@/components/ui/alert-dialog'
 import { AlertDialogTitle } from '@radix-ui/react-alert-dialog'
+import { addClassToCodeTags } from '@/utils/admin'
 
 type Props = {
     quizQuestionId: number
@@ -26,6 +27,8 @@ const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide, tagId }: Props) => {
     })
     const [activeTab, setActiveTab] = useState<string | null>(null)
     const [codeSnippet, setCodeSnippet] = useState<any>()
+    const codeBlockClass =
+    'text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full';
 
     useEffect(() => {
         if (quizData?.quizVariants?.length) {
@@ -71,11 +74,19 @@ const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide, tagId }: Props) => {
     }
 
     const generateCodePreview = (codeQuestion: string) => {
+        // Sanitize the input string
         const clean = DOMPurify.sanitize(codeQuestion)
-        const updatedHtml = clean.replace(
-            /<pre>/g,
-            '<pre class="text-gray-800 font-light bg-gray-300 p-0 rounded-lg text-left text-wrap w-2/2">'
-        )
+
+        // Add class to <pre> and <code> tags
+        const updatedHtml = clean
+            .replace(
+                /<pre>/g,
+                '<pre class="text-gray-800 font-light bg-gray-300 p-0 rounded-lg text-left text-wrap w-2/2">'
+            )
+            .replace(
+                /<code>/g,
+                '<code class="text-gray-800 bg-gray-300 text-wrap">'
+            )
 
         return updatedHtml
     }
@@ -147,8 +158,9 @@ const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide, tagId }: Props) => {
                                                 ) && 'overflow-scroll'
                                             } `}
                                             dangerouslySetInnerHTML={{
-                                                __html: generateCodePreview(
-                                                    variant.question
+                                                __html: addClassToCodeTags(
+                                                    variant.question,
+                                                    codeBlockClass
                                                 ),
                                             }}
                                         />

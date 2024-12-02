@@ -56,9 +56,12 @@ export default function Page({
     const [activeChapterTitle, setActiveChapterTitle] = useState('')
     const { currentChapter, setCurrentChapter } = getCurrentChapterState()
     const [activeChapter, setActiveChapter] = useState(chapter_id)
-    const { topicId, setTopicId } = getTopicId()
+    const { topicId } = getTopicId()
     const [key, setKey] = useState(0)
     const [loading, setLoading] = useState(true)
+    const [articleUpdateOnPreview, setArticleUpdateOnPreview] = useState(false)
+    const [assignmentUpdateOnPreview, setAssignmentUpdateOnPreview] =
+        useState(false)
 
     const fetchChapterContent = useCallback(
         async (chapterId: number, topicId: number) => {
@@ -77,22 +80,7 @@ export default function Page({
                     setCurrentChapter(currentModule)
                 }
 
-                if (currentModule?.topicName === 'Quiz') {
-                    setChapterContent(
-                        response.data
-                        // .quizQuestionDetails as QuizQuestionDetails[]
-                    )
-                } else if (currentModule?.topicName === 'Coding Question') {
-                    setChapterContent(response.data)
-                } else if (currentModule?.topicName === 'Form') {
-                    setChapterContent(response.data)
-                } else {
-                    setChapterContent(response.data)
-                }
-
-                console.log('currentModule', currentModule)
-
-                // setTopicId(currentModule?.topicId)
+                setChapterContent(response.data)
 
                 setTimeout(() => {
                     setLoading(false) // Set loading to false after the delay
@@ -117,12 +105,18 @@ export default function Page({
             setActiveChapter(0)
             setChapterContent([])
             setActiveChapterTitle('')
-            // setTopicId(0)
             setTimeout(() => {
                 setLoading(false) // Set loading to false after the delay
             }, 100)
         }
-    }, [chapterData, fetchChapterContent])
+    }, [
+        chapterData,
+        fetchChapterContent,
+        articleUpdateOnPreview,
+        assignmentUpdateOnPreview,
+        ,
+        topicId,
+    ])
 
     const renderChapterContent = () => {
         if (
@@ -153,20 +147,14 @@ export default function Page({
                     )
                 case 2:
                     return (
-                        <ScrollArea
-                            // className="h-[600px] lg:h-[600px] pr-4"
-                            className={`${heightClass} pr-4`}
-                            type="hover"
-                            style={{
-                                scrollbarWidth: 'none', // Firefox
-                                msOverflowStyle: 'none', // IE and Edge
-                            }}
-                        >
-                            <AddArticle
-                                key={chapterId}
-                                content={chapterContent}
-                            />
-                        </ScrollArea>
+                        <AddArticle
+                            key={chapterId}
+                            content={chapterContent}
+                            articleUpdateOnPreview={articleUpdateOnPreview}
+                            setArticleUpdateOnPreview={
+                                setArticleUpdateOnPreview
+                            }
+                        />
                     )
                 case 3:
                     return (
@@ -200,6 +188,12 @@ export default function Page({
                             <Assignment
                                 key={chapterId}
                                 content={chapterContent}
+                                assignmentUpdateOnPreview={
+                                    assignmentUpdateOnPreview
+                                }
+                                setAssignmentUpdateOnPreview={
+                                    setAssignmentUpdateOnPreview
+                                }
                             />
                         </ScrollArea>
                     )
@@ -256,5 +250,5 @@ export default function Page({
         }
     }
 
-    return <div>{renderChapterContent()}</div>
+    return <div className="w-full">{renderChapterContent()}</div>
 }

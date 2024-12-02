@@ -16,9 +16,11 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
-import VideoEmbed from './VideoEmbed'
-import { Pencil, X } from 'lucide-react'
+import VideoEmbed from '@/app/admin/courses/[courseId]/module/_components/video/VideoEmbed'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { ArrowUpRightSquare, X, Pencil } from 'lucide-react'
+import PreviewVideo from '@/app/admin/courses/[courseId]/module/_components/video/PreviewVideo'
+
 // import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 
 // Helper function to convert links to embed-friendly format
@@ -100,6 +102,7 @@ const AddVideo = ({
 }) => {
     // const heightClass = useResponsiveHeight()
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const [showPreview, setShowPreview] = useState<boolean>(false)
     const [showVideoBox, setShowVideoBox] = useState<boolean>(true)
     const [videoTitle, setVideoTitle] = useState('')
     const form = useForm<z.infer<typeof formSchema>>({
@@ -172,7 +175,6 @@ const AddVideo = ({
             await api.put(
                 `/Content/editChapterOfModule/${moduleId}?chapterId=${content.id}`,
                 {
-                    title: '',
                     description: '',
                     links: [''],
                 }
@@ -180,6 +182,35 @@ const AddVideo = ({
         } catch (error) {
             console.error('Error updating chapter:', error)
         }
+    }
+    const handlePreviewClick = () => {
+        // Check if title is empty or invalid
+        if (
+            !form.watch('videoTitle') ||
+            form.watch('videoTitle').trim().length === 0
+        ) {
+            toast({
+                title: 'No Title',
+                description: 'Please provide a title for the video to preview.',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
+            })
+            return
+        }
+
+        // Check if links are empty or invalid
+        const links = form.watch('links').trim()
+        if (!links || !isLinkValid(links)) {
+            toast({
+                title: 'Invalid Link',
+                description: 'Please provide a valid video link to preview.',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
+            })
+            return
+        }
+
+        setShowPreview(true)
     }
 
     return (
@@ -191,113 +222,131 @@ const AddVideo = ({
             }}
         >
             <div className="flex flex-col gap-y-8 mx-auto items-center justify-center w-full">
-                <Form {...form}>
-                    <form
-                        onSubmit={form.handleSubmit(onSubmit)}
-                        className=" w-full items-center justify-center flex flex-col space-y-8"
-                    >
-                        <FormField
-                            control={form.control}
-                            name="videoTitle"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormControl>
-                                        <div className="w-[450px] flex justify-center items-center relative">
-                                            <Input
-                                                required
-                                                onChange={(e) => {
-                                                    setVideoTitle(
-                                                        e.target.value
-                                                    )
-                                                }}
-                                                placeholder="Untitled Video"
-                                                className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
-                                                autoFocus
+                {showPreview ? (
+                    <PreviewVideo
+                        content={content}
+                        setShowPreview={setShowPreview}
+                    />
+                ) : (
+                    <>
+                        <Form {...form}>
+                            <form
+                                onSubmit={form.handleSubmit(onSubmit)}
+                                className=" w-full items-center justify-center flex flex-col space-y-8"
+                            >
+                                <FormField
+                                    control={form.control}
+                                    name="videoTitle"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col">
+                                            <FormControl>
+                                                <div className="w-[450px] flex justify-center items-center relative">
+                                                    <Input
+                                                        required
+                                                        onChange={(e) => {
+                                                            setVideoTitle(
+                                                                e.target.value
+                                                            )
+                                                        }}
+                                                        placeholder="Untitled Video"
+                                                        className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                                                        autoFocus
+                                                    />
+                                                    {!videoTitle && (
+                                                        <Pencil
+                                                            fill="true"
+                                                            fillOpacity={0.4}
+                                                            size={20}
+                                                            className="absolute text-gray-100 pointer-events-none top-1/2 right-3 -translate-y-1/2"
+                                                            // Adjusted right positioning
+                                                        />
+                                                    )}
+                                                </div>
+                                            </FormControl>
+
+                                            <Button
+                                                variant={'ghost'}
+                                                type="button"
+                                                className="text-secondary w-[100px] h-[30px] gap-x-1 "
+                                                onClick={handlePreviewClick}
+                                            >
+                                                <ArrowUpRightSquare />
+                                                <h1>Preview</h1>
+                                            </Button>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <div className=" flex justify-between items-start relative text-red">
+                                    {showVideoBox && (
+                                        <div className="flex items-start justify-center ">
+                                            <VideoEmbed
+                                                title={
+                                                    content?.contentDetails?.[0]
+                                                        ?.title || ''
+                                                }
+                                                src={getEmbedLink(
+                                                    content?.contentDetails?.[0]
+                                                        ?.links?.[0] || ''
+                                                )}
                                             />
-                                            {!videoTitle && (
-                                                <Pencil
-                                                    fill="true"
-                                                    fillOpacity={0.4}
-                                                    size={20}
-                                                    className="absolute text-gray-100 pointer-events-none top-1/2 right-3 -translate-y-1/2"
-                                                    // Adjusted right positioning
-                                                />
-                                            )}
+                                            <X
+                                                className="text-destructive ml-2 cursor-pointer"
+                                                size={17}
+                                                onClick={handleClose}
+                                            />
                                         </div>
-                                    </FormControl>
-
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <div className=" flex justify-between items-start relative text-red">
-                            {showVideoBox && (
-                                <div className="flex items-start justify-center ">
-                                    <VideoEmbed
-                                        title={
-                                            content?.contentDetails?.[0]
-                                                ?.title || ''
-                                        }
-                                        src={getEmbedLink(
-                                            content?.contentDetails?.[0]
-                                                ?.links?.[0] || ''
-                                        )}
-                                    />
-                                    <X
-                                        className="text-destructive ml-2 cursor-pointer"
-                                        size={17}
-                                        onClick={handleClose}
-                                    />
+                                    )}
                                 </div>
-                            )}
-                        </div>
 
-                        <FormField
-                            control={form.control}
-                            name="description"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel className=" flex text-left text-xl font-semibold">
-                                        Description
-                                    </FormLabel>
-                                    <FormControl>
-                                        <Textarea
-                                            {...field}
-                                            className="w-[450px] px-3 py-2 border rounded-md "
-                                            placeholder="Type your Description here."
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="links"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel className=" flex text-left text-xl font-semibold">
-                                        Embed Link
-                                    </FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            {...field}
-                                            className="w-[450px] px-3 py-2 border rounded-md "
-                                            placeholder="Paste your link here "
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <Button
-                            type="submit"
-                            className=" flex flex-start  w-[450px]  text-white font-bold py-2 px-4 rounded"
-                        >
-                            Embed Video
-                        </Button>
-                    </form>
-                </Form>
+                                <FormField
+                                    control={form.control}
+                                    name="description"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className=" flex text-left text-xl font-semibold">
+                                                Description
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Textarea
+                                                    {...field}
+                                                    className="w-[450px] px-3 py-2 border rounded-md "
+                                                    placeholder="Type your Description here."
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="links"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className=" flex text-left text-xl font-semibold">
+                                                Embed Link
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    {...field}
+                                                    className="w-[450px] px-3 py-2 border rounded-md "
+                                                    placeholder="Paste your link here "
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <Button
+                                    type="submit"
+                                    className=" flex flex-start  w-[450px]  text-white font-bold py-2 px-4 rounded"
+                                >
+                                    Embed Video
+                                </Button>
+                            </form>
+                        </Form>
+                    </>
+                )}
             </div>
         </ScrollArea>
     )

@@ -40,6 +40,10 @@ const QuizQuestions = ({
     ) // Correct type
     // Define the Zod schema for form validation
 
+    const codeBlockClass =
+        'text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full';
+
+
     useEffect(() => {
         return () => {
             if (timeoutRef.current) {
@@ -76,6 +80,7 @@ const QuizQuestions = ({
     const onSubmit = async (data: z.infer<typeof formSchema>) => {
         const quizSubmissionDto = data.answers.map((chosenOption, index) => ({
             questionId: questions.data.mcqs[index].quizId,
+            variantId: questions.data.mcqs[index].variantId,
             attemptCount: 1,
             chosenOption: Number(chosenOption),
         }))
@@ -116,93 +121,94 @@ const QuizQuestions = ({
     }, [questions])
 
     return (
-        <div>
+        <div className="p-6 space-y-6">
+            {/* Header with back button and timer */}
             <div className="flex items-center justify-between gap-2">
                 <div
                     className="flex items-center cursor-pointer"
                     onClick={onBack}
                 >
                     <ChevronLeft strokeWidth={2} size={24} />
-                    <h1 className="font-extrabold"></h1>
+                    <h1 className="font-extrabold text-lg ml-2">Back</h1>
                 </div>
                 <div className="font-bold text-xl">
                     <TimerDisplay remainingTime={remainingTime} />
                 </div>
-                <div></div>
             </div>
             <Separator />
+
+            {/* Quiz Form */}
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
-                    className="flex flex-col items-center mt-10"
+                    className="flex flex-col items-center gap-6 mt-10"
                 >
-                    {questions?.data?.mcqs?.map((question: any, index: any) => {
-                        const additionalClass = 'bg-red-400'
+                    {/* Render Questions */}
+                    {questions?.data?.mcqs?.map((question: any, index: number) => {
+                        const additionalClass = 'bg-red-400';
                         const processedHtml = addClassToCodeTags(
                             question.question,
                             additionalClass
-                        )
+                        );
+
                         return (
-                            <>
-                                <div className="">
-                                    <FormField
-                                        key={question.id}
-                                        control={form.control}
-                                        name={`answers.${index}`}
-                                        render={({ field }) => (
-                                            <FormItem className="flex flex-col items-start mb-10 w-full max-w-md">
-                                                <FormLabel>
-                                                    {index + 1}.
-                                                    <div
-                                                        className=""
-                                                        dangerouslySetInnerHTML={{
-                                                            __html: processedHtml,
-                                                        }}
-                                                    />
-                                                </FormLabel>
-                                                <FormControl>
-                                                    <RadioGroup
-                                                        value={field.value}
-                                                        onValueChange={
-                                                            field.onChange
-                                                        }
-                                                    >
-                                                        {Object.keys(
-                                                            question.options
-                                                        ).map((key) => (
-                                                            <div
-                                                                key={key}
-                                                                className="flex items-center gap-2 mb-2"
-                                                            >
-                                                                <RadioGroupItem
-                                                                    value={key}
-                                                                />
-                                                                <p>
-                                                                    {
-                                                                        question
-                                                                            .options[
-                                                                            key
-                                                                        ]
-                                                                    }
-                                                                </p>
-                                                            </div>
-                                                        ))}
-                                                    </RadioGroup>
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
-                            </>
-                        )
+                            <div
+                                key={question.id}
+                                className="w-full max-w-2xl border text-left border-gray-200 rounded-lg p-4 shadow-sm"
+                            >
+                                <FormField
+                                    control={form.control}
+                                    name={`answers.${index}`}
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col items-start mb-10 w-full max-w-2xl">
+                                            <FormLabel className="text-lg font-semibold text-left">
+                                                {index + 1}.{' '}
+                                                <span
+                                                    className="text-gray-800"
+                                                    dangerouslySetInnerHTML={{
+                                                        __html: addClassToCodeTags(
+                                                            question.question,
+                                                            codeBlockClass
+                                                        ),
+                                                    }}
+                                                />
+                                            </FormLabel>
+
+
+                                            <FormControl>
+                                                <RadioGroup
+                                                    value={field.value}
+                                                    onValueChange={field.onChange}
+                                                    className="flex flex-col gap-3"
+                                                >
+                                                    {Object.keys(question.options).map((key) => (
+                                                        <div
+                                                            key={key}
+                                                            className="flex items-center gap-2"
+                                                        >
+                                                            <RadioGroupItem value={key} />
+                                                            <p className="text-gray-700">{question.options[key]}</p>
+                                                        </div>
+                                                    ))}
+                                                </RadioGroup>
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+
+                                    )}
+                                />
+                            </div>
+                        );
                     })}
-                    <Button type="submit" className="mt-10">
+
+                    {/* Submit Button */}
+                    <Button type="submit" className="mt-4">
                         Submit Quiz
                     </Button>
                 </form>
             </Form>
         </div>
+
     )
 }
 

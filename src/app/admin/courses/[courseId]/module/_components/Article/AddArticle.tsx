@@ -22,6 +22,9 @@ import '@/app/_components/editor/Tiptap.css'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Pencil } from 'lucide-react'
 // import useResponsiveHeight from '@/hooks/useResponsiveHeight'
+import useResponsiveHeight from '@/hooks/useResponsiveHeight'
+import PreviewArticle from './PreviewArticle'
+import { ArrowUpRightSquare } from 'lucide-react'
 
 interface ContentDetail {
     title: string
@@ -39,11 +42,20 @@ interface Content {
     contentDetails: ContentDetail[]
 }
 
-const AddArticle = ({ content }: { content: any }) => {
-    // const heightClass = useResponsiveHeight()
+const AddArticle = ({
+    content,
+    articleUpdateOnPreview,
+    setArticleUpdateOnPreview,
+}: {
+    content: any
+    articleUpdateOnPreview: any
+    setArticleUpdateOnPreview: any
+}) => {
+    const heightClass = useResponsiveHeight()
     // state
     const [title, setTitle] = useState('')
     const [titles, setTitles] = useState('')
+    const [showPreview, setShowPreview] = useState<boolean>(false)
     // misc
     const formSchema = z.object({
         title: z.string().min(2, {
@@ -65,11 +77,26 @@ const AddArticle = ({ content }: { content: any }) => {
     })
 
     // functions
+    const handlePreviewClick = () => {
+        const editorContent = editor?.getText()
+        if (!editorContent || editorContent.trim() === '') {
+            toast({
+                title: 'No Questions',
+                description:
+                    'Please add at least one question to preview the quiz.',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
+            })
+        } else {
+            setShowPreview(true)
+        }
+    }
     const getArticleContent = async () => {
         try {
             const response = await api.get(
                 `/Content/chapterDetailsById/${content.id}`
             )
+            // setArticleUpdateOnPreview(!articleUpdateOnPreview)
             setTitle(response.data.title)
             editor?.commands.setContent(response.data.contentDetails[0].content)
         } catch (error) {
@@ -89,6 +116,7 @@ const AddArticle = ({ content }: { content: any }) => {
                 `/Content/editChapterOfModule/${content.moduleId}?chapterId=${content.id}`,
                 data
             )
+            setArticleUpdateOnPreview(!articleUpdateOnPreview)
             toast({
                 title: 'Success',
                 description: 'Article Chapter Edited Successfully',
@@ -122,57 +150,71 @@ const AddArticle = ({ content }: { content: any }) => {
             }}
         >
             <div>
-                <div className="w-full ">
-                    <Form {...form}>
-                        <form
-                            id="myForm"
-                            onSubmit={form.handleSubmit(editArticleContent)}
-                            className="space-y-8 mb-10"
-                        >
-                            <FormField
-                                control={form.control}
-                                name="title"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel></FormLabel>
-                                        <FormControl>
-                                            <div className="w-2/6 flex justify-center align-middle items-center relative">
-                                                <Input
-                                                    required
-                                                    onChange={(e) => {
-                                                        setTitles(
-                                                            e.target.value
-                                                        )
-                                                    }}
-                                                    placeholder="Untitled Video"
-                                                    className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
-                                                    autoFocus
-                                                />
-                                                {!titles && (
-                                                    <Pencil
-                                                        fill="true"
-                                                        fillOpacity={0.4}
-                                                        size={20}
-                                                        className="absolute text-gray-100 pointer-events-none mt-1 right-5"
+                <div className="w-full">
+                    {showPreview ? (
+                        <PreviewArticle
+                            content={content}
+                            setShowPreview={setShowPreview}
+                        />
+                    ) : (
+                        <>
+                            <Form {...form}>
+                                <form
+                                    id="myForm"
+                                    onSubmit={form.handleSubmit(
+                                        editArticleContent
+                                    )}
+                                    className="space-y-8 mb-10"
+                                >
+                                    <FormField
+                                        control={form.control}
+                                        name="title"
+                                        render={({ field }) => (
+                                            <FormItem className="flex flex-col">
+                                                <FormLabel></FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        placeholder="Untitled Article"
+                                                        className="p-0 text-3xl w-2/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize"
+                                                        {...field}
+                                                        {...form.register(
+                                                            'title'
+                                                        )}
+                                                        onChange={(e) =>
+                                                            setTitle(
+                                                                e.target.value
+                                                            )
+                                                        }
                                                     />
-                                                )}
-                                            </div>
-                                        </FormControl>
-                                        <FormMessage className="h-5" />
-                                    </FormItem>
-                                )}
-                            />
-                        </form>
-                    </Form>
-                </div>
-                <div className="text-left">
-                    <TiptapToolbar editor={editor} />
-                    <TiptapEditor editor={editor} />
-                </div>
-                <div className="flex justify-end mt-5">
-                    <Button type="submit" form="myForm">
-                        Save
-                    </Button>
+                                                </FormControl>
+                                                <Button
+                                                    variant={'ghost'}
+                                                    type="button"
+                                                    className="text-secondary w-[100px] h-[30px] gap-x-1"
+                                                    onClick={handlePreviewClick}
+                                                >
+                                                    <ArrowUpRightSquare />
+                                                    <h1>Preview</h1>
+                                                </Button>
+
+                                                <FormMessage className="h-5" />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </form>
+                            </Form>
+
+                            <div className="text-left">
+                                <TiptapToolbar editor={editor} />
+                                <TiptapEditor editor={editor} />
+                            </div>
+                            <div className="flex justify-end mt-5">
+                                <Button type="submit" form="myForm">
+                                    Save
+                                </Button>
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
         </ScrollArea>
