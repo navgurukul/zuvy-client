@@ -7,7 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Reorder } from 'framer-motion'
 import ChapterItem from '@/app/admin/courses/[courseId]/module/_components/ChapterItem'
 import { toast } from '@/components/ui/use-toast'
-import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import ChapterModal from '@/app/admin/courses/[courseId]/module/_components/ChapterModal'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
@@ -99,7 +99,6 @@ function Chapter() {
             setChapterData(response.data.chapterWithTopic)
             setModuleName(response.data.moduleName)
             setModuleData(response.data.chapterWithTopic)
-            
         } catch (error) {
             console.error('Error fetching chapters:', error)
             // Handle error as needed
@@ -178,41 +177,42 @@ function Chapter() {
                 // behavior: 'smooth',
                 // block: 'center',
             })
-            
         }
     }, [activeChapter])
 
-useEffect(()=>{
-    if(currentChapter?.topicId){
-        setTopicId(currentChapter?.topicId)
-    }
-},[currentChapter])
+    useEffect(() => {
+        if (currentChapter?.topicId) {
+            setTopicId(currentChapter?.topicId)
+        }
+    }, [currentChapter])
 
     return (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-screen">
             <div className="mb-5">
                 <BreadcrumbComponent crumbs={crumbs} />
             </div>
-            <div className="flex flex-col flex-grow overflow-hidden">
-                <div className="mb-5 flex">
+            <div className="flex flex-col  overflow-hidden">
+                <div className=" flex">
                     <Dialog>
                         <DialogTrigger asChild>
                             <Button
                                 variant="secondary"
-                                className="py-2 px-2 h-full w-full mr-4"
+                                className="py-2 px-2 h-full w-full mr-4 "
                                 onClick={handleAddChapter}
                             >
                                 Add Chapter
                             </Button>
                         </DialogTrigger>
                         <DialogOverlay />
-                        <ChapterModal
+                       <DialogContent>
+                       <ChapterModal
                             courseId={courseId}
                             moduleId={moduleId}
                             fetchChapters={fetchChapters}
                             newChapterOrder={chapterData.length}
                             scrollToBottom={scrollToBottom}
                         />
+                       </DialogContent>
                     </Dialog>
                     <div>
                         {/* {renderChapterContent({
@@ -227,7 +227,7 @@ useEffect(()=>{
                     </div>
                 </div>
                 <ScrollArea
-                    className="h-[500px] lg:h-[670px] pr-4"
+                    className="h-screen pr-4 w-full mr-16 mt-2 "
                     type="hover"
                 >
                     <Reorder.Group

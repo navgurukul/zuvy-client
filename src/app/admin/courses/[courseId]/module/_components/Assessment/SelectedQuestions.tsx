@@ -4,7 +4,6 @@ import SelectOpenEndedQuestions from '@/app/admin/courses/[courseId]/module/_com
 import SelectQuizQuestions from '@/app/admin/courses/[courseId]/module/_components/Assessment/SelectQuizQuestions'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 
-
 const selectedQuestions = ({
     selectedCodingQuestions,
     selectedQuizQuestions,
@@ -13,7 +12,7 @@ const selectedQuestions = ({
     setSelectedQuizQuestions,
     setSelectedOpenEndedQuestions,
     questionType,
-    tags
+    tags,
 }: {
     selectedCodingQuestions: any
     selectedQuizQuestions: any
@@ -25,15 +24,16 @@ const selectedQuestions = ({
     tags: any
 }) => {
     return (
-        <>
-            <ScrollArea className="h-dvh pr-4 overflow-auto">
+        <div className="mt-5">
+            <ScrollArea className="h-full pr-4">
+                <ScrollBar orientation="vertical" className="h-dvh" />
                 {/* <ScrollBar orientation="vertical" className='text-red-500' /> */}
                 {questionType === 'coding' && (
                     <SelectCodingQuestions
                         selectedQuestions={selectedCodingQuestions}
                         setSelectedQuestions={setSelectedCodingQuestions}
                         tags={tags}
-                        type={"coding"}
+                        type={'coding'}
                     />
                 )}
                 {questionType === 'mcq' && (
@@ -41,7 +41,7 @@ const selectedQuestions = ({
                         selectedQuestions={selectedQuizQuestions}
                         setSelectedQuestions={setSelectedQuizQuestions}
                         tags={tags}
-                        type={"mcq"}
+                        type={'mcq'}
                     />
                 )}
                 {questionType === 'open-ended' && (
@@ -49,11 +49,11 @@ const selectedQuestions = ({
                         selectedQuestions={selectedOpenEndedQuestions}
                         setSelectedQuestions={setSelectedOpenEndedQuestions}
                         tags={tags}
-                        type={"open-ended"}
+                        type={'open-ended'}
                     />
                 )}
             </ScrollArea>
-        </>
+        </div>
     )
 }
 

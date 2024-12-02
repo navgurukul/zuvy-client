@@ -7,23 +7,8 @@ import { ChevronLeft, Search } from 'lucide-react'
 // Internal imports
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from '@/components/ui/dialog'
+
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
-import { Separator } from '@/components/ui/separator'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { columns } from './column'
 import NewMcqProblemForm from '../_components/NewMcqProblemForm'
@@ -279,16 +264,12 @@ const Mcqs = (props: Props) => {
 
     useEffect(() => {
         // Ensure the code runs only on the client side
-        if (typeof window !== 'undefined') {
-            getAllTags()
-        }
+        getAllTags()
     }, [])
 
     useEffect(() => {
         // Ensure the code runs only on the client side
-        if (typeof window !== 'undefined') {
-            getAllQuizQuestion(offset)
-        }
+        getAllQuizQuestion(offset)
     }, [getAllQuizQuestion, offset, position])
 
     const selectedTagCount = selectedOptions.length

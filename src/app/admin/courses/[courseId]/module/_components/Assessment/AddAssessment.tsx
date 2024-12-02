@@ -59,7 +59,9 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
 
     const [filteredQuestions, setFilteredQuestions] = useState<any[]>([])
 
-    const [chapterTitle, setChapterTitle] = useState<string>(content?.ModuleAssessment?.title)
+    const [chapterTitle, setChapterTitle] = useState<string>(
+        content?.ModuleAssessment?.title
+    )
 
     const [questionType, setQuestionType] = useState<string>('coding')
 
@@ -287,20 +289,18 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     }, [selectedOpenEndedQuestions])
 
     useEffect(() => {
-       if(chapterData.id && topicId > 0){
-        fetchChapterContent(chapterData.id, topicId)
-        setChapterTitle(content.ModuleAssessment?.title)   
-    }
-       
+        if (chapterData.id && topicId > 0) {
+            fetchChapterContent(chapterData.id, topicId)
+            setChapterTitle(content.ModuleAssessment?.title)
+        }
     }, [chapterData.id, topicId])
 
     useEffect(() => {
         getAllTagsWithoutFilter(setTags)
     }, [])
 
-
     return (
-        <div className="container p-4">
+        <div className="w-full">
             {questionType !== 'settings' && (
                 <div className="flex items-center mb-5 w-full justify-between">
                     <div className="w-2/6 flex justify-center align-middle items-center relative">
@@ -314,18 +314,18 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                             className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
                             autoFocus
                         />
-                        {titleInputLength == 0  && (
+                        {titleInputLength == 0 && (
                             <Pencil
-                            fill="true"
-                            fillOpacity={0.4}
-                            size={20}
-                            className="absolute text-gray-100 pointer-events-none mt-1 right-5"
-                        />
+                                fill="true"
+                                fillOpacity={0.4}
+                                size={20}
+                                className="absolute text-gray-100 pointer-events-none mt-1 right-5"
+                            />
                         )}
                     </div>
 
                     {/* preview & settings buttons */}
-                    <div className="text-[#4A4A4A] flex font-semibold items-center cursor-pointer">
+                    <div className="text-[#4A4A4A] flex font-semibold items-center cursor-pointer mr-14">
                         <div
                             id="previewAssessment"
                             onClick={previewAssessment}
@@ -397,23 +397,35 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                             setSelectedDifficulties={setSelectedDifficulties}
                         />
                     </div>
+                    <div className="flex justify-between w-2/3">
+                        <h3 className="text-left font-bold mb-5">
+                            {questionType === 'coding'
+                                ? 'Coding Problem Library'
+                                : questionType === 'mcq'
+                                ? 'MCQ Library'
+                                : questionType === 'open-ended'
+                                ? 'Open-Ended Question Library'
+                                : ''}
+                        </h3>
+                        <h1 className="text-left font-bold mb-5 mr-28">
+                            Selected Questions
+                        </h1>
+                    </div>
                 </>
             )}
-            {/* Display & select questions*/}
-            <div className="grid grid-cols-2">
-                <div>
-                    <h3 className="text-left font-bold mb-5">
-                        {questionType === 'coding'
-                            ? 'Coding Problem Library'
-                            : questionType === 'mcq'
-                            ? 'MCQ Library'
-                            : questionType === 'open-ended'
-                            ? 'Open-Ended Question Library'
-                            : ''}
-                    </h3>
-                    <ScrollArea className="h-auto">
-                        {questionType === 'coding' ? (
-                            <div className="">
+
+            <div className="h-full  pr-4">
+                {/* <ScrollBar orientation="vertical" className="h-dvh" /> */}
+                <div
+                    className={`${
+                        questionType == 'settings'
+                            ? 'grid grid-cols-1'
+                            : 'grid grid-cols-2'
+                    } h-screen `}
+                >
+                    <>
+                        <div className="h-full">
+                            {questionType === 'coding' && (
                                 <CodingQuestions
                                     questions={filteredQuestions}
                                     setSelectedQuestions={
@@ -422,16 +434,18 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                     selectedQuestions={selectedCodingQuestions}
                                     tags={tags}
                                 />
-                            </div>
-                        ) : questionType === 'mcq' ? (
-                            <QuizQuestions
-                                questions={filteredQuestions}
-                                setSelectedQuestions={setSelectedQuizQuestions}
-                                selectedQuestions={selectedQuizQuestions}
-                                tags={tags}
-                            />
-                        ) : (
-                            questionType === 'open-ended' && (
+                            )}
+                            {questionType === 'mcq' && (
+                                <QuizQuestions
+                                    questions={filteredQuestions}
+                                    setSelectedQuestions={
+                                        setSelectedQuizQuestions
+                                    }
+                                    selectedQuestions={selectedQuizQuestions}
+                                    tags={tags}
+                                />
+                            )}
+                            {questionType === 'open-ended' && (
                                 <OpenEndedQuestions
                                     questions={filteredQuestions}
                                     setSelectedQuestions={
@@ -442,70 +456,115 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                     }
                                     tags={tags}
                                 />
-                            )
-                        )}
-                    </ScrollArea>
+                            )}
+                            {questionType === 'settings' && (
+                                <div className="">
+                                    <SettingsAssessment
+                                        selectedCodingQuesIds={
+                                            selectedCodingQuesIds
+                                        }
+                                        selectedQuizQuesIds={
+                                            selectedQuizQuesIds
+                                        }
+                                        selectedOpenEndedQuesIds={
+                                            selectedOpenEndedQuesIds
+                                        }
+                                        selectedCodingQuesTagIds={
+                                            selectedCodingQuesTagIds
+                                        }
+                                        selectedQuizQuesTagIds={
+                                            selectedQuizQuesTagIds
+                                        }
+                                        content={content}
+                                        fetchChapterContent={
+                                            fetchChapterContent
+                                        }
+                                        chapterData={chapterData}
+                                        chapterTitle={chapterTitle}
+                                        saveSettings={saveSettings}
+                                        setSaveSettings={setSaveSettings}
+                                        setQuestionType={setQuestionType}
+                                        selectCodingDifficultyCount={
+                                            selectCodingDifficultyCount
+                                        }
+                                        selectQuizDifficultyCount={
+                                            selectQuizDifficultyCount
+                                        }
+                                        topicId={topicId}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    </>
+
+                    {questionType !== 'settings' && (
+                        <div>
+                            <ScrollArea className="h-3/5  w-full pr-5">
+                                <ScrollBar
+                                    orientation="vertical"
+                                    className="h-screen"
+                                />
+
+                                {selectedCodingQuesIds.length > 0 ||
+                                selectedQuizQuesIds.length > 0 ||
+                                selectedOpenEndedQuesIds.length > 0 ? (
+                                    <SelectedQuestions
+                                        selectedCodingQuestions={
+                                            selectedCodingQuestions
+                                        }
+                                        selectedQuizQuestions={
+                                            selectedQuizQuestions
+                                        }
+                                        selectedOpenEndedQuestions={
+                                            selectedOpenEndedQuestions
+                                        }
+                                        setSelectedCodingQuestions={
+                                            setSelectedCodingQuestions
+                                        }
+                                        setSelectedQuizQuestions={
+                                            setSelectedQuizQuestions
+                                        }
+                                        setSelectedOpenEndedQuestions={
+                                            setSelectedOpenEndedQuestions
+                                        }
+                                        questionType={questionType}
+                                        tags={tags}
+                                    />
+                                ) : (
+                                    <h1 className="text-left italic">
+                                        No Selected questions
+                                    </h1>
+                                )}
+                            </ScrollArea>
+                        </div>
+                    )}
                 </div>
 
-                {questionType !== 'settings' && (
-                    <div>
-                       <ScrollArea className='h-screen pb-28 w-full pr-5'>
-                       <ScrollBar orientation='vertical' className='h-screen'/>
-                            <h1 className="text-left font-bold mb-5">
-                                Selected Questions
-                            </h1>
-            
-
-                           {selectedCodingQuesIds.length > 0 || selectedQuizQuesIds.length > 0 || selectedOpenEndedQuesIds.length > 0 ? (
-                   
-                             <SelectedQuestions
-                             selectedCodingQuestions={
-                                 selectedCodingQuestions
-                             }
-                             selectedQuizQuestions={selectedQuizQuestions}
-                             selectedOpenEndedQuestions={
-                                 selectedOpenEndedQuestions
-                             }
-                             setSelectedCodingQuestions={
-                                 setSelectedCodingQuestions
-                             }
-                             setSelectedQuizQuestions={
-                                 setSelectedQuizQuestions
-                             }
-                             setSelectedOpenEndedQuestions={
-                                 setSelectedOpenEndedQuestions
-                             }
-                             questionType={questionType}
-                             tags={tags}
-                         />
-                           ): (<h1 className='text-left italic'>No Selected questions</h1>)}
-                   
-                       </ScrollArea>
-                    </div>
+                {/* <ScrollArea className="h-screen pb-28 w-full pr-5">
+                <ScrollBar orientation="vertical" className="h-auto" />
+                {questionType === 'settings' && (
+                    <SettingsAssessment
+                        selectedCodingQuesIds={selectedCodingQuesIds}
+                        selectedQuizQuesIds={selectedQuizQuesIds}
+                        selectedOpenEndedQuesIds={selectedOpenEndedQuesIds}
+                        selectedCodingQuesTagIds={selectedCodingQuesTagIds}
+                        selectedQuizQuesTagIds={selectedQuizQuesTagIds}
+                        content={content}
+                        fetchChapterContent={fetchChapterContent}
+                        chapterData={chapterData}
+                        chapterTitle={chapterTitle}
+                        saveSettings={saveSettings}
+                        setSaveSettings={setSaveSettings}
+                        setQuestionType={setQuestionType}
+                        selectCodingDifficultyCount={
+                            selectCodingDifficultyCount
+                        }
+                        selectQuizDifficultyCount={selectQuizDifficultyCount}
+                        topicId={topicId}
+                    />
                 )}
+            </ScrollArea> */}
             </div>
-       <ScrollArea className='h-screen pb-28 w-full pr-5'>
-        <ScrollBar orientation='vertical' className='h-auto'/>
-       {questionType === 'settings' && (
-                <SettingsAssessment
-                    selectedCodingQuesIds={selectedCodingQuesIds}
-                    selectedQuizQuesIds={selectedQuizQuesIds}
-                    selectedOpenEndedQuesIds={selectedOpenEndedQuesIds}
-                    selectedCodingQuesTagIds={selectedCodingQuesTagIds}
-                    selectedQuizQuesTagIds={selectedQuizQuesTagIds}
-                    content={content}
-                    fetchChapterContent={fetchChapterContent}
-                    chapterData={chapterData}
-                    chapterTitle={chapterTitle}
-                    saveSettings={saveSettings}
-                    setSaveSettings={setSaveSettings}
-                    setQuestionType={setQuestionType}
-                    selectCodingDifficultyCount={selectCodingDifficultyCount}
-                    selectQuizDifficultyCount={selectQuizDifficultyCount}
-                    topicId = {topicId}
-                />
-            )}
-       </ScrollArea>
         </div>
     )
 }

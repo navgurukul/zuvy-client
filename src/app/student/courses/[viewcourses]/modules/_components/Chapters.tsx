@@ -36,7 +36,7 @@ function Chapters({ params }: any) {
         : Number(chapterID)
     const { chapters, setChapters } = getStudentChaptersState()
     const [activeChapter, setActiveChapter] = useState(chapter_id)
-    const { topicId, setTopicId } = getTopicId()
+    const { topicId } = getTopicId()
     const { chapterContent, setChapterContent } =
         getStudentChapterContentState()
     const [chapterId, setChapterId] = useState<number>(0)
