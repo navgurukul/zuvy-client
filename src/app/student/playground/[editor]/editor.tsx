@@ -75,6 +75,7 @@ const IDE: React.FC<IDEProps> = ({
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
     const codePanel = pathname?.includes('/codepanel')
+    const admin = pathname?.includes('/admin')
 
     const editorLanguages = [
         { lang: 'java', id: 91 },
@@ -110,6 +111,8 @@ const IDE: React.FC<IDEProps> = ({
         action: string
     ) => {
         e.preventDefault()
+
+        if (admin) return
 
         try {
             const response = await api.post(

@@ -9,7 +9,7 @@ interface QuestionCardProps {
     status: string
     tagName: any
     tagId?: number
-    isSuccess: boolean
+    isSuccess?: boolean
     onSolveChallenge: (id: number) => void
 }
 
