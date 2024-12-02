@@ -53,7 +53,7 @@ function Quiz(props: any) {
     }
     const removeQuestionById = (questionId: number) => {
         setAddQuestion((prevQuestions: any) =>
-            prevQuestions.filter((question: any) => question.id !== questionId)
+            prevQuestions.filter((question: any) => question?.id !== questionId)
         )
     }
     // const saveQuizQUestionHandler = async () => {
@@ -110,7 +110,7 @@ function Quiz(props: any) {
     }
 
     const handleSaveQuiz = () => {
-        const selectedIds = addQuestion.map((item) => item.id)
+        const selectedIds = addQuestion?.map((item) => item.id)
         const requestBody = {
             quizQuestions: selectedIds,
         }
@@ -165,7 +165,7 @@ function Quiz(props: any) {
                                     Selected Question
                                 </h2>
                                 <div>
-                                    {addQuestion.length > 0 && (
+                                    {addQuestion?.length > 0 && (
                                         <div className="text-end  mr-10">
                                             <Button
                                                 onClick={handleSaveQuiz}
@@ -178,7 +178,7 @@ function Quiz(props: any) {
                                 </div>
                             </div>
                             <div className="text-left w-full ">
-                                {addQuestion.length == 0 && (
+                                {addQuestion?.length == 0 && (
                                     <h1 className="text-left italic">
                                         No Selected Questions
                                     </h1>
@@ -186,7 +186,7 @@ function Quiz(props: any) {
                             </div>
                         </div>
                         <div className="h-96 overflow-y-scroll ">
-                            {addQuestion.map(
+                            {addQuestion?.map(
                                 (questions: quizData, index: number) => (
                                     <QuizModal
                                         key={index}
