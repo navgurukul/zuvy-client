@@ -7,7 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Reorder } from 'framer-motion'
 import ChapterItem from '@/app/admin/courses/[courseId]/module/_components/ChapterItem'
 import { toast } from '@/components/ui/use-toast'
-import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import ChapterModal from '@/app/admin/courses/[courseId]/module/_components/ChapterModal'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
@@ -204,13 +204,15 @@ function Chapter() {
                             </Button>
                         </DialogTrigger>
                         <DialogOverlay />
-                        <ChapterModal
+                       <DialogContent>
+                       <ChapterModal
                             courseId={courseId}
                             moduleId={moduleId}
                             fetchChapters={fetchChapters}
                             newChapterOrder={chapterData.length}
                             scrollToBottom={scrollToBottom}
                         />
+                       </DialogContent>
                     </Dialog>
                     <div>
                         {/* {renderChapterContent({

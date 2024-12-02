@@ -796,16 +796,32 @@ export function transformQuizzes(data: any): { quizzes: any[] } {
 
 export const addClassToCodeTags: any = (
     htmlString: string,
-    additionalClass: string
+    codeBlockClass: string
 ) => {
-    return htmlString.replace(
-        /<code([^>]*)>/g,
-        (match, attributes) =>
-            `<code${attributes} class="${additionalClass} ${
-                attributes.match(/class="([^"]*)"/)?.[1] || ''
-            }">`
-    )
-}
+    // Find the positions of the first <code> and the last </code>
+    const firstCodeIndex = htmlString.indexOf('<code');
+    const lastCodeIndex = htmlString.lastIndexOf('</code>');
+
+    if (firstCodeIndex === -1 || lastCodeIndex === -1 || lastCodeIndex < firstCodeIndex) {
+        // If no valid code blocks are found, return the string unchanged
+        return htmlString;
+    }
+
+    // Split the content into three parts
+    const beforeCode = htmlString.substring(0, firstCodeIndex); // Everything before the first <code>
+    const codeContent = htmlString.substring(firstCodeIndex, lastCodeIndex + 7); // From the first <code> to the last </code>
+    const afterCode = htmlString.substring(lastCodeIndex + 7); // Everything after the last </code>
+
+    // Wrap the codeContent with <pre> and the given class
+    const styledCodeBlock = `
+        <pre class="${codeBlockClass}">
+            ${codeContent}
+        </pre>
+    `;
+
+    // Combine the parts back together
+    return `${beforeCode}${styledCodeBlock}${afterCode}`;
+};
 
 export async function handleSaveChapter(
     moduleId: string,

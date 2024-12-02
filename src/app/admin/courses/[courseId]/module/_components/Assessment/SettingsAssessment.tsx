@@ -275,11 +275,10 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
         }
 
         try {
-            await api.put(
-                `Content/editAssessment/${content.assessmentOutsourseId}/${chapterID}`,
-                data
-            )
-            fetchChapterContent(chapterID, topicId)
+            await api.put(`Content/editAssessment/${content.assessmentOutsourseId}/${chapterID}`, data)
+            .then((res:any)=>{
+                fetchChapterContent(chapterID, topicId);
+            })
             toast({
                 title: 'Assessment Updated Successfully',
                 description: 'Assessment has been updated successfully',
@@ -571,7 +570,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                     </section>
 
                     {/* Section 2: Individual Section Weightage */}
-                    <div className="flex gap-x-48 my-8">
+                    <div className="flex space-x-60 my-8 ">
                         <section>
                             <h2 className="font-semibold mb-2">
                                 Individual Section Weightage
@@ -665,7 +664,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                         </section>
 
                         {/* Section 3: Manage Proctoring Settings */}
-                        <section className="w-1/3 ml-32">
+                        <section className="w-1/3 ">
                             <h2 className="font-semibold mb-4">
                                 Manage Proctoring Settings
                             </h2>
@@ -720,7 +719,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                     </div>
 
                     {/* Section 4: Time limit */}
-                    <div className="flex">
+                    <div className="flex space-x-48">
                         {/* Section 1: Time Limit */}
                         <section className="w-1/4 mr-5">
                             <h2 className="font-semibold mb-4">Time limit</h2>
@@ -815,7 +814,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                         </section>
 
                         {/* Section 5: Set Pass Percentage */}
-                        <section className="ml-56">
+                        <section className="">
                             <h2 className="font-semibold mb-4">
                                 Pass Percentage (Out Of 100)
                             </h2>

@@ -42,7 +42,6 @@ function ChapterItem({
     isChapterClickedRef: any
 }) {
     // states and variables
-    const {setTopicId} = getTopicId()
     const { courseId } = useParams()
     const router = useRouter()
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
@@ -74,7 +73,6 @@ function ChapterItem({
     }
 
     const handleClick = () => {
-        setTopicId(topicId)
         setActiveChapter(chapterId) // Set the active chapter in the parent component
         router.push(
             `/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterId}`
