@@ -105,12 +105,14 @@ const Page: React.FC<pageProps> = () => {
                                                     <div className="flex flex-row gap-3">
                                                         {resumeCourse.newChapter
                                                             ?.title &&
-                                                                resumeCourse.typeId === 1 && (
+                                                            resumeCourse.typeId ===
+                                                                1 && (
                                                                 <BookOpenText className="mt-2" />
                                                             )}
                                                         {resumeCourse.newChapter
                                                             ?.title &&
-                                                                resumeCourse.typeId === 2 && (
+                                                            resumeCourse.typeId ===
+                                                                2 && (
                                                                 <h1 className="text-md mt-2 text-start font-bold">
                                                                     Project:
                                                                 </h1>
@@ -153,10 +155,12 @@ const Page: React.FC<pageProps> = () => {
                                                         <Link
                                                             className="gap-3 flex items-center text-secondary"
                                                             href={
-                                                                resumeCourse.typeId === 1
+                                                                resumeCourse.typeId ===
+                                                                1
                                                                     ? `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}/chapters/${resumeCourse.newChapter?.id}`
                                                                     : `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}/project/${resumeCourse.newChapter?.id}`
-                                                            }                                                        >
+                                                            }
+                                                        >
                                                             <p>
                                                                 Resume Learning
                                                             </p>
@@ -172,12 +176,14 @@ const Page: React.FC<pageProps> = () => {
                                                 <div className="flex flex-row gap-4">
                                                     {resumeCourse.newChapter
                                                         ?.title &&
-                                                            resumeCourse.typeId === 1 && (
+                                                        resumeCourse.typeId ===
+                                                            1 && (
                                                             <BookOpenText className="mt-2" />
                                                         )}
                                                     {resumeCourse.newChapter
                                                         ?.title &&
-                                                        resumeCourse.typeId === 2 && (
+                                                        resumeCourse.typeId ===
+                                                            2 && (
                                                             <h1 className="text-md mt-2 text-start font-bold">
                                                                 Project:
                                                             </h1>
@@ -216,10 +222,12 @@ const Page: React.FC<pageProps> = () => {
                                                         <Link
                                                             className="gap-3 flex items-center text-secondary"
                                                             href={
-                                                                resumeCourse.typeId === 1
+                                                                resumeCourse.typeId ===
+                                                                1
                                                                     ? `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}/chapters/${resumeCourse.newChapter?.id}`
                                                                     : `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}/project/${resumeCourse.newChapter?.id}`
-                                                            }                                                        >
+                                                            }
+                                                        >
                                                             <p>
                                                                 Resume Learning
                                                             </p>
@@ -295,7 +303,36 @@ const Page: React.FC<pageProps> = () => {
                                                     <div className="px-1 py-4">
                                                         {name}
                                                     </div>
-                                                    <Loader progress={progress} />
+                                                    <div
+                                                        style={{
+                                                            position:
+                                                                'relative',
+                                                            width: '100%',
+                                                        }}
+                                                    >
+                                                        <Loader
+                                                            progress={progress}
+                                                        />
+                                                        <div
+                                                            style={{
+                                                                position:
+                                                                    'absolute',
+                                                                bottom: '-30px', // Adjust position as needed
+                                                                width: '100%',
+                                                                textAlign:
+                                                                    'left',
+                                                                fontSize:
+                                                                    '14px',
+                                                                fontWeight:
+                                                                    'bold', // Make text bold
+                                                                color: 'black', /// Adjust font size if needed
+                                                            }}
+                                                        >
+                                                            {progress > 0
+                                                                ? `${progress}% completed`
+                                                                : 'Start Course'}
+                                                        </div>
+                                                    </div>
                                                 </Link>
                                             )
                                         )

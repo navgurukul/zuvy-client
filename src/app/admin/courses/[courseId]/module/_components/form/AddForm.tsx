@@ -5,7 +5,7 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Plus } from 'lucide-react'
+import { Pencil, Plus } from 'lucide-react'
 
 // Internal imports
 import { Button } from '@/components/ui/button'
@@ -275,87 +275,97 @@ const AddForm: React.FC<AddFormProps> = ({
     }
 
     return (
-        // <ScrollArea
-        //     // className="h-[600px] lg:h-[600px] pr-4"
-        //     // className={`${heightClass} pr-4`}
-        //     type="hover"
-        //     style={{
-        //         scrollbarWidth: 'none', // Firefox
-        //         msOverflowStyle: 'none', // IE and Edge
-        //     }}
-        // >
-        <div className="flex flex-col gap-y-8 mx-auto px-5 items-center justify-center w-1/2">
-            <Form {...form}>
-                <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="w-full items-left justify-left flex flex-col space-y-8"
-                >
-                    <FormField
-                        control={form.control}
-                        name="title"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormControl>
-                                    <Input
-                                        {...field}
-                                        placeholder="Untitled Form"
-                                        className="p-0 text-3xl w-full text-left font-semibold outline-none border-none focus:ring-0"
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="description"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel className="flex text-left text-md font-semibold mb-1">
-                                    Description
-                                </FormLabel>
-                                <FormControl>
-                                    <Input
-                                        {...field}
-                                        className="w-[450px] px-3 py-2 border rounded-md"
-                                        placeholder="Placeholder"
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    {questions.map((item, index) => (
-                        <FormSection
-                            key={item.id || `form-section-${index}`}
-                            item={item}
-                            index={index}
-                            form={form}
-                            deleteQuestion={deleteQuestion}
-                            formData={questions}
+        <ScrollArea
+            // className="h-[600px] lg:h-[600px] pr-4"
+            // className={`${heightClass} pr-4`}
+            type="hover"
+            style={{
+                scrollbarWidth: 'none', // Firefox
+                msOverflowStyle: 'none', // IE and Edge
+            }}
+        >
+            <div className="flex flex-col gap-y-8 mx-auto px-5 items-center justify-center w-1/2">
+                <Form {...form}>
+                    <form
+                        onSubmit={form.handleSubmit(onSubmit)}
+                        className="w-full items-left justify-left flex flex-col space-y-8"
+                    >
+                        <FormField
+                            control={form.control}
+                            name="title"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormControl>
+                                        <div className="w-2/6 flex justify-center align-middle items-center relative">
+                                            <Input
+                                                required
+                                                onChange={(e) => {}}
+                                                placeholder="Untitled Article"
+                                                className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                                                autoFocus
+                                            />
+                                            <Pencil
+                                                fill="true"
+                                                fillOpacity={0.4}
+                                                size={20}
+                                                className="absolute text-gray-100 pointer-events-none mt-1 right-5"
+                                            />
+                                        </div>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
                         />
-                    ))}
+                        <FormField
+                            control={form.control}
+                            name="description"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="flex text-left text-md font-semibold mb-1">
+                                        Description
+                                    </FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            {...field}
+                                            className="w-[450px] px-3 py-2 border rounded-md"
+                                            placeholder="Placeholder"
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
 
-                    <div className="flex justify-start">
-                        <Button
-                            variant={'secondary'}
-                            type="button"
-                            onClick={addQuestion}
-                            className="gap-x-2 border-none hover:text-secondary hover:bg-popover"
-                        >
-                            <Plus /> Add Question
-                        </Button>
-                    </div>
-                    <div className="flex justify-start">
-                        <Button type="submit" className="w-1/3">
-                            Save
-                        </Button>
-                    </div>
-                </form>
-            </Form>
-        </div>
-        // </ScrollArea>
+                        {questions.map((item, index) => (
+                            <FormSection
+                                key={item.id || `form-section-${index}`}
+                                item={item}
+                                index={index}
+                                form={form}
+                                deleteQuestion={deleteQuestion}
+                                formData={questions}
+                            />
+                        ))}
+
+                        <div className="flex justify-start">
+                            <Button
+                                variant={'secondary'}
+                                type="button"
+                                onClick={addQuestion}
+                                className="gap-x-2 border-none hover:text-secondary hover:bg-popover"
+                            >
+                                <Plus /> Add Question
+                            </Button>
+                        </div>
+                        <div className="flex justify-start">
+                            <Button type="submit" className="w-1/3">
+                                Save
+                            </Button>
+                        </div>
+                    </form>
+                </Form>
+            </div>
+        </ScrollArea>
     )
 }
 

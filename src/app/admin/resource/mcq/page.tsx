@@ -201,6 +201,14 @@ const Mcqs = (props: Props) => {
             setOptions(transformedData)
         }
     }
+    console.log(
+        'Offset:',
+        offset,
+        'Current Page:',
+        currentPage,
+        'Position:',
+        position
+    )
 
     const getAllQuizQuestion = useCallback(
         async (offset: number) => {
