@@ -65,9 +65,7 @@ function ChapterModal({
                 })
             })
         fetchChapters()
-        setTimeout(() => {
-            scrollToBottom()
-        }, 500)
+      
     }
 
     // const createAssessment = async () => {
