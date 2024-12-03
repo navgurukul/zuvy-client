@@ -25,6 +25,7 @@ import ToggleSwitch from './ToggleSwitch'
 import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
 import { useParams } from 'next/navigation'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 
 type SettingsAssessmentProps = {
     selectedCodingQuesIds: any
@@ -331,6 +332,8 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     }, [content])
 
     return (
+        <ScrollArea className='h-screen'>
+        <ScrollBar orientation='vertical' className=''/>
         <main className="pb-6 w-full  bg-white text-left">
             <div
                 onClick={() => setQuestionType('coding')}
@@ -348,7 +351,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                     <div className="flex justify-between w-full">
                         <h1 className="text-lg font-bold">Manage Settings</h1>
                         {/* Section 6: Submit button */}
-                        <Button type="submit" className="w-1/5">
+                        <Button type="submit" className="w-1/5 mr-3">
                             Save Settings
                         </Button>
                     </div>
@@ -538,7 +541,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                             ))}
 
                             <div className="mb-4">
-                                <h3 className="font-semibold mb-2">
+                                <h3 className="font-semibold mb-2 mr-3">
                                     Total Selected Questions
                                 </h3>
                                 <div className="mt-2">
@@ -570,7 +573,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                     </section>
 
                     {/* Section 2: Individual Section Weightage */}
-                    <div className="flex space-x-60 my-8 ">
+                    <div className="flex space-x-48 my-8 ">
                         <section>
                             <h2 className="font-semibold mb-2">
                                 Individual Section Weightage
@@ -664,7 +667,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                         </section>
 
                         {/* Section 3: Manage Proctoring Settings */}
-                        <section className="w-1/3 ">
+                        <section className="w-1/3">
                             <h2 className="font-semibold mb-4">
                                 Manage Proctoring Settings
                             </h2>
@@ -719,7 +722,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                     </div>
 
                     {/* Section 4: Time limit */}
-                    <div className="flex space-x-48">
+                    <div className="flex space-x-44">
                         {/* Section 1: Time Limit */}
                         <section className="w-1/4 mr-5">
                             <h2 className="font-semibold mb-4">Time limit</h2>
@@ -877,6 +880,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                 </form>
             </Form>
         </main>
+        </ScrollArea>
     )
 }
 
