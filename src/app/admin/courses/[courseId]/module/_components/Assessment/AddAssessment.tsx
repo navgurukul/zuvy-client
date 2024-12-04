@@ -499,10 +499,10 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
 
                     {questionType !== 'settings' && (
                         <div>
-                            <ScrollArea className="h-3/5  w-full pr-5">
+                            <ScrollArea className="h-96  w-full pr-5">
                                 <ScrollBar
                                     orientation="vertical"
-                                    className="h-screen"
+                                    className="h-96"
                                 />
 
                                 {selectedCodingQuesIds.length > 0 ||
