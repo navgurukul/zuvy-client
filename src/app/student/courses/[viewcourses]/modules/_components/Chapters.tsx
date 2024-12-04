@@ -95,17 +95,37 @@ function Chapters({ params }: any) {
         }
     }, [])
 
+    // useEffect(() => {
+    //     if (activeChapterRef.current) {
+    //         // Only scroll if it's not triggered by a chapter click
+    //         setTimeout(() => {
+    //             activeChapterRef.current?.scrollIntoView({
+    //                 // block: 'center',
+    //                 // behavior: 'smooth',
+    //             })
+    //         }, 100)
+    //     }
+    // }, [activeChapter, chapters])
+
     useEffect(() => {
-        if (activeChapterRef.current) {
-            // Only scroll if it's not triggered by a chapter click
-            setTimeout(() => {
-                activeChapterRef.current?.scrollIntoView({
-                    // block: 'center',
-                    // behavior: 'smooth',
-                })
-            }, 100)
+        if (activeChapterRef.current && scrollAreaRef.current) {
+            // Get the current scroll area
+            const scrollArea = scrollAreaRef.current.querySelector(
+                '[data-radix-scroll-area-viewport]'
+            )
+
+            if (scrollArea) {
+                // Calculate the position of the active chapter
+                const activeChapterElement = activeChapterRef.current
+
+                // Get the offset of the active chapter within the scroll area
+                const elementOffset = activeChapterElement.offsetTop
+
+                // Set the scroll position to this offset
+                scrollArea.scrollTop = elementOffset - 100 // Optional: slight offset from the top
+            }
         }
-    }, [activeChapter, chapters])
+    }, [activeChapter])
 
     // async
     useEffect(() => {
@@ -162,7 +182,8 @@ function Chapters({ params }: any) {
             </div>
             <div className="flex flex-col flex-grow overflow-hidden">
                 <ScrollArea
-                    className="h-[500px] lg:h-[670px] pr-4"
+                    // className="h-[500px] lg:h-[670px] pr-4"
+                    className="h-screen pr-4 w-full mr-16 mt-2"
                     type="hover"
                     ref={scrollAreaRef}
                 >
