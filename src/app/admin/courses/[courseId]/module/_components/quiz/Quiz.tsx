@@ -1,18 +1,19 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
-import QuizLibrary from './QuizLibrary'
-import { quizData, Options } from './QuizLibrary'
+import QuizLibrary from '@/app/admin/courses/[courseId]/module/_components/quiz/QuizLibrary'
+import { quizData, Options } from '@/app/admin/courses/[courseId]/module/_components/quiz/QuizLibrary'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
-import QuizModal from './QuizModal'
+import QuizModal from '@/app/admin/courses/[courseId]/module/_components/quiz/QuizModal'
 import { api } from '@/utils/axios.config'
 import { Tag } from '@/app/admin/resource/mcq/page'
 import { toast } from '@/components/ui/use-toast'
 import { getAllQuizQuestion } from '@/utils/admin'
 import { getAllQuizData } from '@/store/store'
 import { ArrowUpRightSquare, Pencil } from 'lucide-react'
-import QuizPreview from './QuizPreview'
+import QuizPreview from '@/app/admin/courses/[courseId]/module/_components/quiz/QuizPreview'
+
 function Quiz(props: any) {
     const [tags, setTags] = useState<Tag[]>([])
     const [isOpen, setIsOpen] = useState(false)
@@ -21,6 +22,7 @@ function Quiz(props: any) {
     const [questionId, setQuestionId] = useState()
     const { quizData, setStoreQuizData } = getAllQuizData()
     const [showPreview, setShowPreview] = useState(false)
+    const [quizTitle, setQuizTitle] = useState('')
 
     const handleAddQuestion = (data: any) => {
         const uniqueData = data.filter((question: quizData) => {
@@ -110,6 +112,7 @@ function Quiz(props: any) {
             .get(`/Content/chapterDetailsById/${props.chapterId}`)
             .then((res) => {
                 setAddQuestion(res.data.quizQuestionDetails)
+                setQuizTitle(res.data.title)
             })
     }, [props.chapterId])
 
@@ -133,7 +136,7 @@ function Quiz(props: any) {
                                     onChange={(e) => {
                                         setInputValue(e.target.value)
                                     }}
-                                    placeholder="Untitled Article"
+                                    placeholder={quizTitle}
                                     className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
                                     autoFocus
                                 />
@@ -158,17 +161,6 @@ function Quiz(props: any) {
                                 <h1>Preview</h1>
                             </Button>
                         </div>
-                    </div>
-                    <div className="flex flex col ">
-                        <Button
-                            variant={'ghost'}
-                            type="button"
-                            className="text-secondary w-[100px] h-[30px] gap-x-1"
-                            onClick={handlePreviewClick}
-                        >
-                            <ArrowUpRightSquare />
-                            <h1>Preview</h1>
-                        </Button>
                     </div>
 
                     <div className="flex">

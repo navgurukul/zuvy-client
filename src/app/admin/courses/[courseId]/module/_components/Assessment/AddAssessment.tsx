@@ -300,7 +300,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     }, [])
 
     return (
-        <div className="w-full">
+        <div className="w-full p-2">
             {questionType !== 'settings' && (
                 <div className="flex items-center mb-5 w-full justify-between">
                     <div className="w-2/6 flex justify-center align-middle items-center relative">
@@ -414,7 +414,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                 </>
             )}
 
-            <div className="h-full  pr-4">
+            <div className="h-full">
                 {/* <ScrollBar orientation="vertical" className="h-dvh" /> */}
                 <div
                     className={`${
@@ -499,10 +499,10 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
 
                     {questionType !== 'settings' && (
                         <div>
-                            <ScrollArea className="h-3/5  w-full pr-5">
+                            <ScrollArea className="h-96  w-full pr-5">
                                 <ScrollBar
                                     orientation="vertical"
-                                    className="h-screen"
+                                    className="h-96"
                                 />
 
                                 {selectedCodingQuesIds.length > 0 ||

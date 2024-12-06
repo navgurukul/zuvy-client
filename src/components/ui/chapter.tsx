@@ -86,7 +86,6 @@ function Chapter() {
         },
         {
             crumb: moduleName,
-            // href: `/admin/courses/${courseId}/curriculum`,
             isLast: true,
         },
     ]
@@ -105,7 +104,6 @@ function Chapter() {
             setModuleData(response.data.chapterWithTopic)
         } catch (error) {
             console.error('Error fetching chapters:', error)
-            // Handle error as needed
         }
     }, [moduleId, chapter_id])
 
@@ -123,9 +121,26 @@ function Chapter() {
             setActiveChapter(0)
             setChapterContent([])
             setActiveChapterTitle('')
-            // setTopicId(0)
         }
     }, [chapterData])
+
+    useEffect(() => {
+        if (activeChapterRef.current && scrollAreaRef.current) {
+            // Get the current scroll area
+            const scrollArea = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]')
+            
+            if (scrollArea) {
+                // Calculate the position of the active chapter
+                const activeChapterElement = activeChapterRef.current
+                
+                // Get the offset of the active chapter within the scroll area
+                const elementOffset = activeChapterElement.offsetTop
+                
+                // Set the scroll position to this offset
+                scrollArea.scrollTop = elementOffset - 100 // Optional: slight offset from the top
+            }
+        }
+    }, [activeChapter])
 
     async function handleReorder(newOrderChapters: any) {
         newOrderChapters = newOrderChapters.map((item: any, index: any) => ({
@@ -175,16 +190,6 @@ function Chapter() {
     }
 
     useEffect(() => {
-        if (activeChapterRef.current) {
-            // Only scroll if it's not triggered by a chapter click
-            activeChapterRef.current.scrollIntoView({
-                // behavior: 'smooth',
-                // block: 'center',
-            })
-        }
-    }, [activeChapter])
-
-    useEffect(() => {
         if (currentChapter?.topicId) {
             setTopicId(currentChapter?.topicId)
         }
@@ -195,13 +200,13 @@ function Chapter() {
             <div className="mb-5">
                 <BreadcrumbComponent crumbs={crumbs} />
             </div>
-            <div className="flex flex-col  overflow-hidden">
-                <div className=" flex">
+            <div className="flex flex-col overflow-hidden">
+                <div className="flex">
                     <Dialog>
                         <DialogTrigger asChild>
                             <Button
                                 variant="secondary"
-                                className="py-2 px-2 h-full w-full mr-4 "
+                                className="py-2 px-2 h-full w-full mr-4"
                                 onClick={handleAddChapter}
                             >
                                 Add Chapter
@@ -218,20 +223,10 @@ function Chapter() {
                             />
                         </DialogContent>
                     </Dialog>
-                    <div>
-                        {/* {renderChapterContent({
-                            topicId,
-                            chapterId,
-                            chapterContent,
-                            moduleID,
-                            activeChapterTitle,
-                            loading,
-                            fetchChapterContent,
-                        })} */}
-                    </div>
                 </div>
                 <ScrollArea
-                    className="h-screen pr-4 w-full mr-16 mt-2 "
+                    ref={scrollAreaRef}
+                    className="h-screen pr-4 w-full mr-16 mt-2"
                     type="hover"
                 >
                     <Reorder.Group

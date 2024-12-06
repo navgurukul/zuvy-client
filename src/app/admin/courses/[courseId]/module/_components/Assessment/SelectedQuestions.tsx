@@ -24,9 +24,7 @@ const selectedQuestions = ({
     tags: any
 }) => {
     return (
-        <div className="mt-5">
-            <ScrollArea className="h-full pr-4">
-                <ScrollBar orientation="vertical" className="h-dvh" />
+        <div className="">
                 {/* <ScrollBar orientation="vertical" className='text-red-500' /> */}
                 {questionType === 'coding' && (
                     <SelectCodingQuestions
@@ -52,7 +50,7 @@ const selectedQuestions = ({
                         type={'open-ended'}
                     />
                 )}
-            </ScrollArea>
+           
         </div>
     )
 }
