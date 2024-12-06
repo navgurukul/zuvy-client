@@ -49,6 +49,11 @@ const PreviewArticle = ({
 
     return (
         <div>
+            <div className='text-red-1400"'>
+                {' '}
+                You are in the Admin Preview Mode. The questions cannot be
+                interacted with.
+            </div>
             <div className="flex  flex-col items-start">
                 <h1 className="text-2xl font-semibold text-left">
                     {content?.title ? content.title : 'No Title yet'}

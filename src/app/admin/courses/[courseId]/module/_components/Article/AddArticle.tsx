@@ -20,7 +20,7 @@ import TiptapToolbar from '@/app/_components/editor/TiptapToolbar'
 import extensions from '@/app/_components/editor/TiptapExtensions'
 import '@/app/_components/editor/Tiptap.css'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Pencil } from 'lucide-react'
+import { Eye, Pencil } from 'lucide-react'
 // import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 import PreviewArticle from './PreviewArticle'
@@ -187,15 +187,20 @@ const AddArticle = ({
                                                         }
                                                     />
                                                 </FormControl>
-                                                <Button
-                                                    variant={'ghost'}
-                                                    type="button"
-                                                    className="text-secondary w-[100px] h-[30px] gap-x-1"
-                                                    onClick={handlePreviewClick}
-                                                >
-                                                    <ArrowUpRightSquare />
-                                                    <h1>Preview</h1>
-                                                </Button>
+                                                <div className="text-[#4A4A4A] flex font-semibold items-center cursor-pointer justify-end mr-14">
+                                                    <div
+                                                        id="previewAssessment"
+                                                        onClick={
+                                                            handlePreviewClick
+                                                        }
+                                                        className="flex"
+                                                    >
+                                                        <Eye size={18} />
+                                                        <h6 className="mr-5 ml-1 text-sm">
+                                                            Preview
+                                                        </h6>
+                                                    </div>
+                                                </div>
 
                                                 <FormMessage className="h-5" />
                                             </FormItem>

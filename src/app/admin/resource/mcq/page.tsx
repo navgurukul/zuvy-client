@@ -279,6 +279,13 @@ const Mcqs = (props: Props) => {
         // Ensure the code runs only on the client side
         getAllQuizQuestion(offset)
     }, [getAllQuizQuestion, offset, position])
+    useEffect(() => {
+        if (offset < 0) {
+            setOffset(0)
+            setCurrentPage(1)
+            setPosition('10')
+        }
+    }, [offset])
 
     const selectedTagCount = selectedOptions.length
     const difficultyCount = difficulty.length
