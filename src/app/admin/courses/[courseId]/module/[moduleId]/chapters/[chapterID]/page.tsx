@@ -176,26 +176,16 @@ export default function Page({
                     )
                 case 5:
                     return (
-                        <ScrollArea
-                            // className="h-[600px] lg:h-[600px] pr-4"
-                            className={`${heightClass} pr-4`}
-                            type="hover"
-                            style={{
-                                scrollbarWidth: 'none', // Firefox
-                                msOverflowStyle: 'none', // IE and Edge
-                            }}
-                        >
-                            <Assignment
-                                key={chapterId}
-                                content={chapterContent}
-                                assignmentUpdateOnPreview={
-                                    assignmentUpdateOnPreview
-                                }
-                                setAssignmentUpdateOnPreview={
-                                    setAssignmentUpdateOnPreview
-                                }
-                            />
-                        </ScrollArea>
+                        <Assignment
+                            key={chapterId}
+                            content={chapterContent}
+                            assignmentUpdateOnPreview={
+                                assignmentUpdateOnPreview
+                            }
+                            setAssignmentUpdateOnPreview={
+                                setAssignmentUpdateOnPreview
+                            }
+                        />
                     )
                 case 6:
                     return (
