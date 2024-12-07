@@ -143,7 +143,7 @@ const QuizQuestions = ({
     }
 
     return (
-        <div className="p-6 space-y-6">
+        <div className="space-y-6">
             {/* Header with back button and timer */}
             <div className="flex items-center justify-between gap-2">
                 <div
