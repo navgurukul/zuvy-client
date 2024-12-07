@@ -299,8 +299,8 @@ const AddForm: React.FC<AddFormProps> = ({
                                         <div className="w-2/6 flex justify-center align-middle items-center relative">
                                             <Input
                                                 required
-                                                onChange={(e) => {}}
-                                                placeholder="Untitled Article"
+                                                {...field}
+                                                placeholder="Untitled Form"
                                                 className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
                                                 autoFocus
                                             />
