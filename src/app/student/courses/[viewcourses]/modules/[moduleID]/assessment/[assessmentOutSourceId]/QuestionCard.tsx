@@ -7,6 +7,7 @@ import { api } from '@/utils/axios.config'
 interface QuestionCardProps {
     id: number
     title: string
+    weightage?: any
     description: string
     tagId?: number
     onSolveChallenge: (id: number) => void
@@ -20,6 +21,7 @@ export type Tag = {
 const QuestionCard = ({
     id,
     title,
+    weightage,
     description,
     tagId,
     onSolveChallenge,
@@ -44,14 +46,19 @@ const QuestionCard = ({
         <div className="my-5 p-6 bg-white rounded-xl shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F]">
             <div className="flex justify-between">
                 <h2 className="capitalize">{title}</h2>
-                <h2
-                    className={cn(
-                        `font-semibold text-secondary`,
-                        difficultyColor(description)
-                    )}
-                >
-                    {description}
-                </h2>
+                <div>
+                    <h2 className="bg-[#DEDEDE] px-2 py-1 mb-2 text-sm rounded-2xl font-semibold">
+                        {`${weightage} Marks`}
+                    </h2>
+                    <h2
+                        className={cn(
+                            `font-semibold text-secondary mb-1`,
+                            difficultyColor(description)
+                        )}
+                    >
+                        {description}
+                    </h2>
+                </div>
                 {tag && <h2>Topic: {tag?.tagName}</h2>}
             </div>
             <div></div>

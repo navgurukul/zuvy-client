@@ -15,7 +15,7 @@ const Assessment = ({
     assessmentShortInfo,
     assessmentOutSourceId,
     submissionId,
-    chapterContent
+    chapterContent,
 }: {
     assessmentShortInfo: any
     assessmentOutSourceId: any
@@ -26,30 +26,31 @@ const Assessment = ({
     const testDuration = assessmentShortInfo.timeLimit
     const { viewcourses, moduleID } = useParams()
 
-    const [assessmentEndTime, setAssessmentEndTime] = useState<number | null>(null)
+    const [assessmentEndTime, setAssessmentEndTime] = useState<number | null>(
+        null
+    )
     const [isTimeOver, setIsTimeOver] = useState(false)
 
     useEffect(() => {
         // Calculate end time based on start time and duration
-        const startedAt = assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.startedAt
+        const startedAt =
+            assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.startedAt
         if (startedAt) {
             const startTime = new Date(startedAt).getTime()
             const endTime = startTime + testDuration * 1000
 
-            
             // Check if the time is over
             const interval = setInterval(() => {
                 const currentTime = Date.now()
                 if (currentTime > endTime) {
                     setIsTimeOver(true)
-                }else{
+                } else {
                     setIsTimeOver(false)
                 }
             }, 1000)
 
             return () => clearInterval(interval)
         }
-        ;
     }, [assessmentShortInfo, testDuration])
 
     const handleStartAssessment = () => {
@@ -101,22 +102,24 @@ const Assessment = ({
         <React.Fragment>
             <div className="flex flex-col items-center justify-center px-4 py-8">
                 <div className="flex flex-col gap-4 text-left w-full max-w-2xl">
-                    <div className='flex items-center gap-4'>
-                    <h1 className="text-2xl font-bold text-gray-800 text-center">
-                        {assessmentShortInfo?.ModuleAssessment?.title}
-                    </h1>
-                    <h2 className='bg-[#DEDEDE] px-2 py-1 text-sm rounded-2xl font-semibold'>
-                        Total Marks: {assessmentShortInfo?.weightageMcqQuestions + assessmentShortInfo?.weightageCodingQuestions}
-                    </h2>
+                    <div className="flex items-center gap-4">
+                        <h1 className="text-2xl font-bold text-gray-800 text-center">
+                            {assessmentShortInfo?.ModuleAssessment?.title}
+                        </h1>
+                        <h2 className="bg-[#DEDEDE] px-2 py-1 text-sm rounded-2xl font-semibold">
+                            Total Marks:{' '}
+                            {assessmentShortInfo?.weightageMcqQuestions +
+                                assessmentShortInfo?.weightageCodingQuestions}
+                        </h2>
                     </div>
                     {hasQuestions ? (
                         <div className="flex gap-6">
                             {assessmentShortInfo?.totalCodingQuestions > 0 && (
                                 <div>
                                     <h2 className="text-lg font-semibold text-secondary">
-                                        {
-                                            assessmentShortInfo?.easyCodingQuestions + assessmentShortInfo?.mediumCodingQuestions + assessmentShortInfo?.hardCodingQuestions 
-                                        }
+                                        {assessmentShortInfo?.easyCodingQuestions +
+                                            assessmentShortInfo?.mediumCodingQuestions +
+                                            assessmentShortInfo?.hardCodingQuestions}
                                     </h2>
                                     <p className="text-sm text-gray-600">
                                         Coding Challenges
@@ -126,7 +129,9 @@ const Assessment = ({
                             {assessmentShortInfo?.totalQuizzes > 0 && (
                                 <div>
                                     <h2 className="text-lg font-semibold text-secondary">
-                                        {assessmentShortInfo?.easyMcqQuestions + assessmentShortInfo?.mediumMcqQuestions + assessmentShortInfo?.hardMcqQuestions}
+                                        {assessmentShortInfo?.easyMcqQuestions +
+                                            assessmentShortInfo?.mediumMcqQuestions +
+                                            assessmentShortInfo?.hardMcqQuestions}
                                     </h2>
                                     <p className="text-sm text-gray-600">
                                         MCQs
@@ -215,7 +220,10 @@ const Assessment = ({
             <div className="mt-8 flex flex-col items-center justify-center">
                 {isAssessmentStarted ? (
                     <>
-                        <Button onClick={handleViewResults} disabled={chapterContent.status === 'Pending'}>
+                        <Button
+                            onClick={handleViewResults}
+                            disabled={chapterContent.status === 'Pending'}
+                        >
                             View Results
                         </Button>
                         {isTimeOver && chapterContent.status === 'Pending' && (

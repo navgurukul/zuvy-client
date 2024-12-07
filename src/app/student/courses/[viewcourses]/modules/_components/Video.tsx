@@ -22,6 +22,9 @@ function Video({
                     status={content?.status}
                 />
             ))}
+            {!content.links && (
+                <h1>There is no Video content has been created yet!</h1>
+            )}
         </div>
     )
 }
