@@ -45,6 +45,7 @@ import { columns } from './columns'
 // import { DataTable } from './dataTable'
 
 export type StudentData = {
+    id: any
     userId: any
     email: string
     name: string
@@ -52,20 +53,7 @@ export type StudentData = {
 }
 
 const Page = ({ params }: { params: any }) => {
-    const {
-        students,
-        totalPages,
-        currentPage,
-        limit,
-        offset,
-        setStudents,
-        nextPageHandler,
-        previousPageHandler,
-        firstPageHandler,
-        lastPageHandler,
-        onLimitChange,
-        // handleSetSearch,
-    } = useStudentData(params.courseId)
+    const { students } = useStudentData(params.courseId)
     const { courseData, fetchCourseDetails } = getCourseData()
     const { fetchBatches, batchData, setBatchData } = getBatchData()
     const { setStoreStudentData } = getStoreStudentData()
@@ -119,13 +107,9 @@ const Page = ({ params }: { params: any }) => {
     })
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try {
-            console.log('Yesss!!!', selectedRows)
+            const studentIds = selectedRows.map((student) => student.id)
 
-            const studentIds = selectedRows.map((student) => student.userId)
-
-            console.log('studentIds', studentIds)
             const convertedData = {
-                // ...values,
                 name: values.name,
                 instructorEmail: values.instructorEmail,
                 bootcampId: +values.bootcampId,
@@ -140,8 +124,6 @@ const Page = ({ params }: { params: any }) => {
                 (batchDataItem) =>
                     convertedName === batchDataItem.name.toLowerCase()
             )
-
-            console.log(convertedData)
 
             if (matchedBatchData) {
                 toast({
@@ -189,35 +171,19 @@ const Page = ({ params }: { params: any }) => {
         fetchCourseDetails(params.courseId)
     }, [fetchCourseDetails, params.courseId])
 
-    // const getUnAssignedStudents = useCallback(async () => {
-    //     let url = `/batch/allUnassignStudent/${params.courseId}`
-    //     if (debouncedSearchStudent) {
-    //         url += `?searchTerm=${debouncedSearchStudent}`
-    //     }
-    //     await api
-    //         .get(
-    //             url
-    //             // `/batch/allUnassignStudent/${params.courseId}?searchTerm=${debouncedSearchStudent}`
-    //         )
-    //         .then((res) => {
-    //             setTotalStudents(res.data)
-    //         })
-    // }, [])
-
-    // useEffect(() => {
-    //     getUnAssignedStudents()
-    // }, [getUnAssignedStudents, debouncedSearchStudent, params.courseId])
+    const getUnAssignedStudents = useCallback(async () => {
+        await api
+            .get(
+                `/batch/allUnassignStudent/${params.courseId}?searchTerm=${debouncedSearchStudent}`
+            )
+            .then((res) => {
+                setTotalStudents(res.data.data)
+            })
+    }, [debouncedSearchStudent, params.courseId])
 
     useEffect(() => {
-        console.log('students', students)
-        const filteredStudents = students.filter((student: any) =>
-            student.name.toLowerCase().includes(searchStudent.toLowerCase())
-        )
-        console.log('filteredStudents', filteredStudents)
-        setTotalStudents(filteredStudents)
-    }, [searchStudent])
-
-    console.log('totalStudents', totalStudents)
+        getUnAssignedStudents()
+    }, [getUnAssignedStudents, debouncedSearchStudent, params.courseId])
 
     useEffect(() => {
         const searchBatchHandler = async () => {
@@ -233,10 +199,8 @@ const Page = ({ params }: { params: any }) => {
         if (debouncedSearch.trim()?.length === 0) fetchBatches(params.courseId)
     }, [params.courseId, debouncedSearch, fetchBatches, setBatchData])
 
-    console.log('searchStudent', searchStudent)
     const handleSearchStudents = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchStudent(e.target.value)
-        console.log('e.target.value', e.target.value)
     }
 
     const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -245,7 +209,6 @@ const Page = ({ params }: { params: any }) => {
 
     const assignLearners = form.watch('assignLearners')
 
-    // console.log('selectedRows', selectedRows)
     const renderModal = (emptyState: boolean) => {
         if (courseData?.unassigned_students === 0) {
             return (
@@ -272,8 +235,6 @@ const Page = ({ params }: { params: any }) => {
                             {emptyState ? '+ Create Batch' : 'New Batch'}
                         </Button>
                     </DialogTrigger>
-                    {/* <DialogContent className="max-h-[90vh] overflow-y-auto"> */}
-                    {/* <DialogContent> */}
                     <DialogContent className="max-w-[600px] max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                             <DialogTitle>New Batch</DialogTitle>
@@ -302,57 +263,45 @@ const Page = ({ params }: { params: any }) => {
                                                 value={searchStudent}
                                                 onChange={handleSearchStudents}
                                             />
-                                            {/* <div className="pt-5"> */}
                                             <DataTable
-                                                data={
-                                                    totalStudents.length > 0
-                                                        ? totalStudents
-                                                        : students
-                                                }
+                                                data={totalStudents}
                                                 columns={columns}
                                                 setSelectedRows={
                                                     setSelectedRows
                                                 }
                                                 assignStudents={assignStudents}
                                             />
-                                            {/* </div> */}
                                             <h1 className="pt-2">
                                                 Total Learners Selected:{' '}
                                                 {selectedRows.length}
                                             </h1>
                                             <div className="flex justify-between w-full pt-2">
-                                                <Button
-                                                    className="w-3/2 bg-muted text-muted-foreground"
-                                                    // type="submit"
-                                                    // disabled={!form.formState.isValid}
-                                                >
-                                                    Back
-                                                </Button>
-                                                <Button
-                                                    className="w-3/2"
-                                                    type="submit"
-                                                    // disabled={!form.formState.isValid}
-                                                >
-                                                    Create batch
-                                                </Button>
+                                                <DialogClose asChild>
+                                                    <Button
+                                                        className="w-3/2 bg-muted text-muted-foreground"
+                                                        // type="submit"
+                                                        // disabled={!form.formState.isValid}
+                                                        onClick={() => setAssignStudents('')}
+                                                    >
+                                                        Back
+                                                    </Button>
+                                                </DialogClose>
+                                                <DialogClose asChild>
+                                                    <Button
+                                                        className="w-3/2"
+                                                        type="submit"
+                                                        disabled={
+                                                            !form.formState
+                                                                .isValid
+                                                        }
+                                                    >
+                                                        Create batch
+                                                    </Button>
+                                                </DialogClose>
                                             </div>
                                         </>
                                     ) : (
                                         <>
-                                            {/* <Form {...form}>
-                                    <form
-                                        onSubmit={form.handleSubmit(onSubmit)}
-                                        onError={(e) =>
-                                            toast({
-                                                title: 'Failed',
-                                                description:
-                                                    'Entered Corect values',
-                                                className:
-                                                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                                            })
-                                        }
-                                        className="space-y-8"
-                                    > */}
                                             <FormField
                                                 control={form.control}
                                                 name="name"
@@ -528,12 +477,6 @@ const Page = ({ params }: { params: any }) => {
                 </div>
 
                 {loading ? (
-                    // <div
-                    //     className="flex justify-center"
-                    //     style={{ marginTop: '10%' }}
-                    // >
-                    //     <Spinner className="text-secondary" />
-                    // </div>
                     <div className="my-5 flex justify-center items-center">
                         <div className="absolute h-screen">
                             <div className="relative top-[70%]">
