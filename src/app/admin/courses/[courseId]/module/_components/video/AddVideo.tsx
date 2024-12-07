@@ -127,7 +127,7 @@ const AddVideo = ({
             links: [values.links],
         }
 
-        console.log(convertedObj)
+        console.log('convertedObj', convertedObj)
 
         try {
             await api
@@ -244,13 +244,17 @@ const AddVideo = ({
                                                 <div className="w-[450px] flex justify-center items-center relative">
                                                     <Input
                                                         required
+                                                        {...field} // Spread the field props (e.g., value, name, etc.)
                                                         onChange={(e) => {
                                                             setVideoTitle(
                                                                 e.target.value
-                                                            )
+                                                            ) // Update the local state
+                                                            field.onChange(e) // Update the react-hook-form state
                                                         }}
-                                                        placeholder={content?.title}
-                                                        className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                                                        placeholder={
+                                                            content?.title
+                                                        }
+                                                        className="pl-1 pr-8 text-xl text-left font-semibold capitalize text-gray-400 placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
                                                         autoFocus
                                                     />
                                                     {!videoTitle && (
