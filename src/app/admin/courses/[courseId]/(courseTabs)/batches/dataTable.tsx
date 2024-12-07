@@ -16,8 +16,6 @@ import {
     useReactTable,
 } from '@tanstack/react-table'
 
-import { DataTablePagination } from './data-table-pagination'
-import { DataTableToolbar } from './data-table-toolbar'
 import {
     Table,
     TableBody,
@@ -34,7 +32,6 @@ interface DataTableProps<TData, TValue> {
     data: TData[]
     setSelectedRows?: any
     mcqSide?: boolean
-    assignStudents?: string
 }
 
 type StudentData = {
@@ -53,7 +50,6 @@ export function DataTable<TData, TValue>({
     data,
     setSelectedRows,
     mcqSide,
-    assignStudents,
 }: DataTableProps<TData, TValue>) {
     const [rowSelection, setRowSelection] = React.useState({})
 
@@ -95,20 +91,18 @@ export function DataTable<TData, TValue>({
 
     return (
         <div className="space-y-4 relative">
-            {!assignStudents && (
-                <div className="flex flex-col justify-end items-end absolute top-[-111px] right-[130px] ">
-                    {mcqSide && (
-                        <McqDeleteVaiarntComp
-                            table={table}
-                            logSelectedRows={logSelectedRows}
-                        />
-                    )}
-                </div>
-            )}
-            {!assignStudents && <DataTableToolbar table={table} />}
+            {/* <div className="flex flex-col justify-end items-end absolute top-[-111px] right-[130px] ">
+                {mcqSide && (
+                    <McqDeleteVaiarntComp
+                        table={table}
+                        logSelectedRows={logSelectedRows}
+                    />
+                )}
+            </div> */}
+            {/* <DataTableToolbar table={table} /> */}
             <div className="rounded-md border">
                 <Table>
-                    <TableHeader className={assignStudents && 'hidden'}>
+                    <TableHeader className="hidden">
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => {
