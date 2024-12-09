@@ -140,63 +140,53 @@ const AddArticle = ({
     }, [content, editor])
 
     return (
-        <ScrollArea
-            // className={`${heightClass} pr-4`}
-            type="hover"
-            style={{
-                scrollbarWidth: 'none', // Firefox
-                msOverflowStyle: 'none', // IE and Edge
-            }}
-        >
-            <div>
-                <div className="w-full">
-                    {showPreview ? (
-                        <PreviewArticle
-                            content={content}
-                            setShowPreview={setShowPreview}
-                        />
-                    ) : (
-                        <>
-                            <Form {...form}>
-                                <form
-                                    id="myForm"
-                                    onSubmit={form.handleSubmit(
-                                        editArticleContent
-                                    )}
-                                    className="space-y-8 mb-10"
-                                >
-                                    <FormField
-                                        control={form.control}
-                                        name="title"
-                                        render={({ field }) => (
-                                            <FormItem className="flex flex-col">
-                                                <FormLabel></FormLabel>
-                                                <FormControl>
+        <div className="">
+            <div className="w-full ">
+                {showPreview ? (
+                    <PreviewArticle
+                        content={content}
+                        setShowPreview={setShowPreview}
+                    />
+                ) : (
+                    <>
+                        <Form {...form}>
+                            <form
+                                id="myForm"
+                                onSubmit={form.handleSubmit(editArticleContent)}
+                                className="space-y-8 mb-10"
+                            >
+                                <FormField
+                                    control={form.control}
+                                    name="title"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col">
+                                            <FormLabel></FormLabel>
+                                            <FormControl>
                                                 <div className="w-2/6 flex justify-center align-middle items-center relative">
-                                                        <Input
-                                                            required
-                                                            onChange={(e) => {
-                                                                setTitle(
-                                                                    e.target
-                                                                        .value
-                                                                )
-                                                            }}
-                                                            placeholder={content?.title}
-                                                            className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
-                                                            autoFocus
+                                                    <Input
+                                                        required
+                                                        onChange={(e) => {
+                                                            setTitle(
+                                                                e.target.value
+                                                            )
+                                                        }}
+                                                        placeholder={
+                                                            content?.title
+                                                        }
+                                                        className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                                                        autoFocus
+                                                    />
+                                                    {!title && ( // Show pencil icon only when the title is empty
+                                                        <Pencil
+                                                            fill="true"
+                                                            fillOpacity={0.4}
+                                                            size={20}
+                                                            className="absolute text-gray-100 pointer-events-none mt-1 right-5"
                                                         />
-                                                        {!title && ( // Show pencil icon only when the title is empty
-                                                            <Pencil
-                                                                fill="true"
-                                                                fillOpacity={
-                                                                    0.4
-                                                                }
-                                                                size={20}
-                                                                className="absolute text-gray-100 pointer-events-none mt-1 right-5"
-                                                            />
-                                                        )}
-                                                    </div>
-                                                </FormControl>
+                                                    )}
+                                                </div>
+                                            </FormControl>
+                                            <div className="flex items-center justify-between ">
                                                 <Button
                                                     variant={'ghost'}
                                                     type="button"
@@ -206,28 +196,31 @@ const AddArticle = ({
                                                     <ArrowUpRightSquare />
                                                     <h1>Preview</h1>
                                                 </Button>
+                                                <div className="flex justify-end mt-5  ">
+                                                    <Button
+                                                        type="submit"
+                                                        form="myForm"
+                                                    >
+                                                        Save
+                                                    </Button>
+                                                </div>
+                                            </div>
 
-                                                <FormMessage className="h-5" />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </form>
-                            </Form>
+                                            <FormMessage className="h-5" />
+                                        </FormItem>
+                                    )}
+                                />
+                            </form>
+                        </Form>
 
-                            <div className="text-left">
-                                <TiptapToolbar editor={editor} />
-                                <TiptapEditor editor={editor} />
-                            </div>
-                            <div className="flex justify-end mt-5">
-                                <Button type="submit" form="myForm">
-                                    Save
-                                </Button>
-                            </div>
-                        </>
-                    )}
-                </div>
+                        <div className="text-left">
+                            <TiptapToolbar editor={editor} />
+                            <TiptapEditor editor={editor} />
+                        </div>
+                    </>
+                )}
             </div>
-        </ScrollArea>
+        </div>
     )
 }
 

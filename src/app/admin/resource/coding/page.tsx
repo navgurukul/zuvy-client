@@ -225,6 +225,8 @@ const CodingProblems = () => {
 
     useEffect(() => {
         getAllTags()
+        setIsCodingDialogOpen(false)
+        setIsCodingEditDialogOpen(false)
     }, [])
 
     const fetchCodingQuestions = useCallback(

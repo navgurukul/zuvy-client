@@ -7,6 +7,8 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { requestFullScreen } from '@/utils/students'
 import CodingQuestionCard from './CodingQuestionCard'
+import MaxWidthWrapper from '@/components/MaxWidthWrapper'
+import Image from 'next/image'
 
 export type Tag = {
     id: number
@@ -46,13 +48,22 @@ function CodingChallenge({
             setCodingQuestionId(res.data.data.codingProblem[0].id)
             setTagId(res.data.data.codingProblem[0].tagId)
         } catch (error) {
-            toast({
-                title: 'Error',
-                description:
-                    'An error occured while fetching the coding questions',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-            })
+            if (codingQuestions.length == 0) {
+                toast({
+                    title: 'Error',
+                    description: 'No Questions Added By the Instructor',
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                })
+            } else {
+                toast({
+                    title: 'Error',
+                    description:
+                        'An error occured while fetching the coding questions',
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                })
+            }
             console.error('Error fetching quiz questions:', error)
         }
     }, [content.id])
@@ -117,57 +128,91 @@ function CodingChallenge({
         )
     }
 
+    console.log(codingQuestions)
+
     return (
-        <div className="flex justify-center">
-            <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
-                <h2 className="text-2xl font-bold mb-3">{content.title}</h2>
-                <h2 className="font-bold">Coding Challenges</h2>
-                {isSuccess ? (
-                    <CodingQuestionCard
-                        key={codingQuestionResult?.questionDetail.id}
-                        id={codingQuestionResult?.questionDetail.id}
-                        title={codingQuestionResult?.questionDetail.title}
-                        difficulty={
-                            codingQuestionResult?.questionDetail.difficulty
-                        }
-                        tagName={tag?.tagName}
-                        description={
-                            codingQuestionResult?.questionDetail.description
-                        }
-                        status={codingQuestionResult?.status}
-                        onSolveChallenge={viewCodingSubmission}
-                        isSuccess={isSuccess}
-                    />
-                ) : (
-                    <>
-                        {codingQuestions?.map((question: any) => (
+        <>
+            {codingQuestions.length > 0 ? (
+                <div className="flex justify-center">
+                    <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
+                        <h2 className="text-2xl font-bold mb-3">
+                            {content.title}
+                        </h2>
+                        <h2 className="font-bold">Coding Challenges</h2>
+                        {isSuccess ? (
                             <CodingQuestionCard
-                                key={question.id}
-                                id={question.id}
-                                title={question.title}
-                                difficulty={question.difficulty}
-                                tagName={tag?.tagName}
-                                description={question.description}
-                                status={'Pending'}
-                                isSuccess={isSuccess}
-                                onSolveChallenge={() =>
-                                    handleSolveChallenge(
-                                        'coding',
-                                        question.id,
-                                        question.codingOutsourseId
-                                    )
+                                key={codingQuestionResult?.questionDetail.id}
+                                id={codingQuestionResult?.questionDetail.id}
+                                title={
+                                    codingQuestionResult?.questionDetail.title
                                 }
+                                difficulty={
+                                    codingQuestionResult?.questionDetail
+                                        .difficulty
+                                }
+                                tagName={tag?.tagName}
+                                description={
+                                    codingQuestionResult?.questionDetail
+                                        .description
+                                }
+                                status={codingQuestionResult?.status}
+                                onSolveChallenge={viewCodingSubmission}
+                                isSuccess={isSuccess}
                             />
-                        ))}
-                    </>
-                )}
-            </div>
-            {/* {!isSuccess && chapterStatus !== 'Completed' && (
+                        ) : (
+                            <>
+                                {codingQuestions?.map((question: any) => (
+                                    <CodingQuestionCard
+                                        key={question.id}
+                                        id={question.id}
+                                        title={question.title}
+                                        difficulty={question.difficulty}
+                                        tagName={tag?.tagName}
+                                        description={question.description}
+                                        status={'Pending'}
+                                        isSuccess={isSuccess}
+                                        onSolveChallenge={() =>
+                                            handleSolveChallenge(
+                                                'coding',
+                                                question.id,
+                                                question.codingOutsourseId
+                                            )
+                                        }
+                                    />
+                                ))}
+                            </>
+                        )}
+                    </div>
+                    {/* {!isSuccess && chapterStatus !== 'Completed' && (
                 <Button onClick={submitAssessment} disabled={disableSubmit}>
                     Submit Coding Problem
                 </Button>
             )} */}
-        </div>
+                </div>
+            ) : (
+                <div>
+                    <div>
+                        <h1 className="text-center font-semibold text-2xl">
+                            There are no question added yet
+                        </h1>
+                        <MaxWidthWrapper className="flex flex-col justify-center items-center gap-5">
+                            <div>
+                                <Image
+                                    src="/resource_library_empty_state.svg"
+                                    alt="Empty State"
+                                    width={500}
+                                    height={500}
+                                />
+                            </div>
+                            <h2>
+                                No Coding questions have been added by the
+                                Intructor
+                            </h2>
+                        </MaxWidthWrapper>
+                    </div>
+                </div>
+            )}
+        </>
     )
 }
 
