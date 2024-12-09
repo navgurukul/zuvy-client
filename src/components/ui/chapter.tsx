@@ -127,15 +127,17 @@ function Chapter() {
     useEffect(() => {
         if (activeChapterRef.current && scrollAreaRef.current) {
             // Get the current scroll area
-            const scrollArea = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]')
-            
+            const scrollArea = scrollAreaRef.current.querySelector(
+                '[data-radix-scroll-area-viewport]'
+            )
+
             if (scrollArea) {
                 // Calculate the position of the active chapter
                 const activeChapterElement = activeChapterRef.current
-                
+
                 // Get the offset of the active chapter within the scroll area
                 const elementOffset = activeChapterElement.offsetTop
-                
+
                 // Set the scroll position to this offset
                 scrollArea.scrollTop = elementOffset - 100 // Optional: slight offset from the top
             }
@@ -196,7 +198,7 @@ function Chapter() {
     }, [currentChapter])
 
     return (
-        <div className="flex flex-col h-screen">
+        <div className="flex flex-col h-screen pb-20">
             <div className="mb-5">
                 <BreadcrumbComponent crumbs={crumbs} />
             </div>

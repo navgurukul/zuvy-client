@@ -76,6 +76,11 @@ export function middleware(request: NextRequest) {
                     path: '/',
                     maxAge: 60, // Optional: expire after 1 minute
                 })
+                if (user === 'admin') {
+                    return NextResponse.redirect(
+                        new URL('/admin/courses', request.url)
+                    )
+                }
                 return response
             } else {
                 return NextResponse.redirect(new URL('/', request.url))
@@ -117,6 +122,11 @@ export function middleware(request: NextRequest) {
                     path: '/',
                     maxAge: 60, // Optional: expire after 1 minute
                 })
+                if (user === 'admin') {
+                    return NextResponse.redirect(
+                        new URL('/admin/courses', request.url)
+                    )
+                }
                 return response
             } else {
                 return NextResponse.redirect(new URL('/', request.url))
@@ -132,12 +142,10 @@ export function middleware(request: NextRequest) {
             if (request.nextUrl.pathname.startsWith('/admin')) {
                 return NextResponse.redirect(new URL('/', request.url))
             }
-            // } else if (decodedUrl && request.url.includes('route')) {
-        } else if (decodedUrl) {
+        } else if (decodedUrl && user !== 'admin') {
             console.log('redirect Condition 2')
             const absoluteUrl = new URL(decodedUrl, request.url) // Construct the full URL
             const response = NextResponse.redirect(absoluteUrl)
-            // const response = NextResponse.redirect(decodedUrl)
             // Set a cookie to track the redirect
             response.cookies.set('redirectedUrl', '', {
                 path: '/',

@@ -35,6 +35,10 @@ import { Label } from '@/components/ui/label'
 import BulkUploadMcq from '../_components/BulkMcqForm'
 import NewMcqForm from '../_components/NewMcqForm'
 import EditMcqForm from '../_components/EditMcqForm'
+import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
+import CreatTag from '../_components/creatTag'
+import { toast } from '@/components/ui/use-toast'
+
 type Props = {}
 export type Tag = {
     label: string
@@ -70,6 +74,7 @@ const Mcqs = (props: Props) => {
         getmcqdifficulty()
     const { setmcqSearch } = getMcqSearch()
     const [mcqType, setMcqType] = useState<string>('')
+    const [newTopic, setNewTopic] = useState<string>('')
 
     // const [selectedOptions, setSelectedOptions] = useState<Option[]>([
     //     { value: '-1', label: 'All Topics' },
@@ -201,14 +206,6 @@ const Mcqs = (props: Props) => {
             setOptions(transformedData)
         }
     }
-    console.log(
-        'Offset:',
-        offset,
-        'Current Page:',
-        currentPage,
-        'Position:',
-        position
-    )
 
     const getAllQuizQuestion = useCallback(
         async (offset: number) => {
@@ -273,12 +270,46 @@ const Mcqs = (props: Props) => {
     useEffect(() => {
         // Ensure the code runs only on the client side
         getAllTags()
+        setIsEditModalOpen(false)
     }, [])
 
     useEffect(() => {
         // Ensure the code runs only on the client side
         getAllQuizQuestion(offset)
     }, [getAllQuizQuestion, offset, position])
+
+    const handleNewTopicChange = (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        setNewTopic(event.target.value)
+    }
+
+    const handleCreateTopic = async () => {
+        try {
+            await api
+                .post(`/Content/createTag`, { tagName: newTopic })
+                .then((res) => {
+                    toast({
+                        title: `${newTopic} Topic has created`,
+                        description: res.data.message,
+                        variant: 'default',
+                        className:
+                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+                    })
+                    getAllTags()
+                    setNewTopic('')
+                })
+        } catch (error) {
+            toast({
+                title: 'Network error',
+                description:
+                    'Unable to create session. Please try again later.',
+                variant: 'destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+            })
+        }
+    }
 
     const selectedTagCount = selectedOptions.length
     const difficultyCount = difficulty.length
@@ -435,7 +466,7 @@ const Mcqs = (props: Props) => {
                 </div>
             )}
             {!isMcqModalOpen && !isEditQuizModalOpen && (
-                <MaxWidthWrapper>
+                <MaxWidthWrapper className="h-screen">
                     <h1 className="text-left font-semibold text-2xl">
                         Resource Library - MCQs
                     </h1>
@@ -452,6 +483,19 @@ const Mcqs = (props: Props) => {
                             </div>
                         </div>
                         <div className="flex flex-row items-center gap-2">
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button className="text-white bg-secondary lg:max-w-[150px] w-full mt-5">
+                                        <p>Create Topic</p>
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogOverlay />
+                                <CreatTag
+                                    newTopic={newTopic}
+                                    handleNewTopicChange={handleNewTopicChange}
+                                    handleCreateTopic={handleCreateTopic}
+                                />
+                            </Dialog>
                             <Button
                                 onClick={() =>
                                     setIsMcqModalOpen((prevState) => !prevState)

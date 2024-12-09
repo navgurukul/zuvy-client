@@ -4,6 +4,7 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover'
 import { Check, ChevronDown } from 'lucide-react'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 export default function MultiSelector({
     selectedCount,
@@ -31,33 +32,45 @@ export default function MultiSelector({
                                 : selectedCount > 0
                                 ? `${selectedCount} ${type} Selected`
                                 : 'Select options'} */}
-                                 {selectedCount > 0
-                                        ? selectedCount === 1
-                                            ? selectedOptions[0].label
-                                            : `${selectedCount} selected`
-                                        : 'Select options'}
+                            {selectedCount > 0
+                                ? selectedCount === 1
+                                    ? selectedOptions[0].label
+                                    : `${selectedCount} selected`
+                                : 'Select options'}
                         </span>
                         <ChevronDown className="ml-2 h-5 w-5 text-secondary" />
                     </button>
                 </PopoverTrigger>
                 <PopoverContent className="w-full lg:w-[250px] p-4 border border-secondary text-secondary">
-                    <div className="space-y-2">
-                        {options.map((option: any) => (
-                            <div
-                                key={option.value}
-                                className="flex items-center justify-between p-2 hover:bg-gray-100 cursor-pointer rounded-md"
-                                onClick={() => handleOptionClick(option)}
-                            >
-                                <span>{option.label}</span>
-                                {selectedOptions.some(
-                                    (selected: any) =>
-                                        selected.value === option.value
-                                ) && (
-                                    <Check className="h-5 w-5 text-secondary" />
-                                )}
-                            </div>
-                        ))}
-                    </div>
+                    <ScrollArea
+                        className={`${
+                            (type === 'Topic' || type === 'Topics') &&
+                            'h-[300px]'
+                        } pr-4`}
+                        type="hover"
+                        style={{
+                            scrollbarWidth: 'none', // Firefox
+                            msOverflowStyle: 'none', // IE and Edge
+                        }}
+                    >
+                        <div className="space-y-2">
+                            {options.map((option: any) => (
+                                <div
+                                    key={option.value}
+                                    className="flex items-center justify-between p-2 hover:bg-gray-100 cursor-pointer rounded-md"
+                                    onClick={() => handleOptionClick(option)}
+                                >
+                                    <span>{option.label}</span>
+                                    {selectedOptions.some(
+                                        (selected: any) =>
+                                            selected.value === option.value
+                                    ) && (
+                                        <Check className="h-5 w-5 text-secondary" />
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </ScrollArea>
                 </PopoverContent>
             </Popover>
         </>

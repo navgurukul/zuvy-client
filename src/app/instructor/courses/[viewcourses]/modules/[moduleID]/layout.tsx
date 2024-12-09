@@ -11,7 +11,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     const heightClass = useResponsiveHeight()
 
     return (
-        <div className={`${heightClass}`}>
+        <div className="h-screen">
             {projectID ? (
                 <MaxWidthWrapper>{children}</MaxWidthWrapper>
             ) : (
@@ -20,18 +20,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     <div className="w-full flex-none md:w-[25%]">
                         <Chapters />
                     </div>
-                    <div className="flex-grow pl-10">
-                        <ScrollArea
-                            className={`${heightClass} pr-4`}
-                            type="hover"
-                            style={{
-                                scrollbarWidth: 'none', // Firefox
-                                msOverflowStyle: 'none', // IE and Edge
-                            }}
-                        >
-                            {children}
-                        </ScrollArea>
-                    </div>
+                    <div className="flex-grow pl-10">{children}</div>
                 </div>
             )}
         </div>

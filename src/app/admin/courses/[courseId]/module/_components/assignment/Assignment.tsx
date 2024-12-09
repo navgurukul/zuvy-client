@@ -194,7 +194,7 @@ const AddAssignent = ({
                                 onSubmit={form.handleSubmit(
                                     editAssignmentContent
                                 )}
-                                className="space-y-8 mb-10"
+                                className=" "
                             >
                                 <FormField
                                     control={form.control}
@@ -207,13 +207,11 @@ const AddAssignent = ({
                                                     <Input
                                                         required
                                                         {...field}
-                                                        {...form.register(
-                                                            'title'
-                                                        )}
                                                         onChange={(e) => {
                                                             setTitles(
                                                                 e.target.value
                                                             )
+                                                            field.onChange(e)
                                                         }}
                                                         placeholder="Untitled Article"
                                                         className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
@@ -230,15 +228,25 @@ const AddAssignent = ({
                                                 </div>
                                             </FormControl>
                                             {/* Button aligned below the input */}
-                                            <Button
-                                                variant={'ghost'}
-                                                type="button"
-                                                className="text-secondary w-[100px] h-[30px] gap-x-1"
-                                                onClick={handlePreviewClick}
-                                            >
-                                                <ArrowUpRightSquare />
-                                                <h1>Preview</h1>
-                                            </Button>
+                                            <div className="flex items-center justify-between">
+                                                <Button
+                                                    variant={'ghost'}
+                                                    type="button"
+                                                    className="text-secondary w-[100px] h-[30px] gap-x-1"
+                                                    onClick={handlePreviewClick}
+                                                >
+                                                    <ArrowUpRightSquare />
+                                                    <h1>Preview</h1>
+                                                </Button>
+                                                <div className="flex justify-end ">
+                                                    <Button
+                                                        type="submit"
+                                                        form="myForm"
+                                                    >
+                                                        Save
+                                                    </Button>
+                                                </div>
+                                            </div>
                                             <FormMessage className="h-5" />
                                         </FormItem>
                                     )}
@@ -248,7 +256,7 @@ const AddAssignent = ({
                                     control={form.control}
                                     name="startDate"
                                     render={({ field }) => (
-                                        <FormItem className="flex flex-col justify-start gap-x-2 text-left">
+                                        <FormItem className="flex flex-col justify-start gap-x-2 gap-y-4 text-left">
                                             <FormLabel className="m-0">
                                                 <span className="text-xl">
                                                     Choose Deadline Date
@@ -262,7 +270,7 @@ const AddAssignent = ({
                                                     <FormControl>
                                                         <Button
                                                             variant={'outline'}
-                                                            className={`w-[230px]  text-left font-normal ${
+                                                            className={`w-1/6  text-left font-normal ${
                                                                 !field.value &&
                                                                 'text-muted-foreground'
                                                             }`}
@@ -307,14 +315,9 @@ const AddAssignent = ({
 
                         {/* )} */}
                     </div>
-                    <div className="text-left">
+                    <div className="text-left mt-6">
                         <TiptapToolbar editor={editor} />
                         <TiptapEditor editor={editor} />
-                    </div>
-                    <div className="flex justify-end mt-5">
-                        <Button type="submit" form="myForm">
-                            Save
-                        </Button>
                     </div>
                 </>
             )}

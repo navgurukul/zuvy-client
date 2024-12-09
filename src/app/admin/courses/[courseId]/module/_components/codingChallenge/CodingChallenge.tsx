@@ -115,7 +115,6 @@ function CodingChallenge({
             setShowPreview(true)
         }
     }
-    const [chapterTitles, setChapterTitles] = useState('')
 
     useEffect(() => {
         async function getAllCodingQuestions() {
@@ -217,7 +216,7 @@ function CodingChallenge({
                             <Input
                                 required
                                 onChange={(e) => {
-                                    setChapterTitles(e.target.value)
+                                    setChapterTitle(e.target.value)
                                 }}
                                 placeholder={`${
                                     activeChapterTitle
@@ -227,7 +226,7 @@ function CodingChallenge({
                                 className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
                                 autoFocus
                             />
-                            {!chapterTitles && (
+                            {!chapterTitle && (
                                 <Pencil
                                     fill="true"
                                     fillOpacity={0.4}
