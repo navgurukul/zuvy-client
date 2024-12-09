@@ -18,6 +18,7 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
+    DialogOverlay,
     DialogTrigger,
 } from '@/components/ui/dialog'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
@@ -51,6 +52,8 @@ import MultiSelector from '@/components/ui/multi-selector'
 import difficultyOptions from '@/app/utils'
 import CodingTopics from '../../courses/[courseId]/module/_components/codingChallenge/CodingTopics'
 // import { POSITION } from '@/utils/constant'
+import CreatTag from '../_components/creatTag'
+import { toast } from '@/components/ui/use-toast'
 
 export type Tag = {
     id: number
@@ -105,6 +108,7 @@ const CodingProblems = () => {
     // const [offset, setOffset] = useState<number>(OFFSET)
     const { offset, setOffset } = getOffset()
     const { position, setPosition } = getPosition()
+    const [newTopic, setNewTopic] = useState<string>('')
 
     const selectedLanguage = ''
     const handleTopicClick = (value: string) => {
@@ -301,9 +305,42 @@ const CodingProblems = () => {
         setOpenEditDialog(isCodingEditDialogOpen)
     }, [isCodingEditDialogOpen])
 
+    const handleNewTopicChange = (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        setNewTopic(event.target.value)
+    }
+
+    const handleCreateTopic = async () => {
+        try {
+            await api
+                .post(`/Content/createTag`, { tagName: newTopic })
+                .then((res) => {
+                    toast({
+                        title: `${newTopic} Topic has created`,
+                        description: res.data.message,
+                        variant: 'default',
+                        className:
+                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+                    })
+                    getAllTags()
+                    setNewTopic('')
+                })
+        } catch (error) {
+            toast({
+                title: 'Network error',
+                description:
+                    'Unable to create session. Please try again later.',
+                variant: 'destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+            })
+        }
+    }
+
     const selectedTagCount = selectedOptions.length
     const difficultyCount = difficulty.length
-    console.log('offset', offset)
+
     return (
         <>
             {loading ? (
@@ -336,12 +373,33 @@ const CodingProblems = () => {
                                         />
                                     </div>
                                 </div>
+                                <div className="flex flex-row items-center gap-2">
+                                    <Dialog>
+                                        <DialogTrigger asChild>
+                                            <Button className="text-white bg-secondary lg:max-w-[150px] w-full">
+                                                <p>Create Topic</p>
+                                            </Button>
+                                        </DialogTrigger>
+                                        <DialogOverlay />
+                                        <CreatTag
+                                            newTopic={newTopic}
+                                            handleNewTopicChange={
+                                                handleNewTopicChange
+                                            }
+                                            handleCreateTopic={
+                                                handleCreateTopic
+                                            }
+                                        />
+                                    </Dialog>
 
-                                <Button
-                                    onClick={() => setIsCodingDialogOpen(true)}
-                                >
-                                    + Create Problems
-                                </Button>
+                                    <Button
+                                        onClick={() =>
+                                            setIsCodingDialogOpen(true)
+                                        }
+                                    >
+                                        + Create Problems
+                                    </Button>
+                                </div>
                             </div>
                             {/* <CodingTopics
                                 setSearchTerm={setSearchTerm}
