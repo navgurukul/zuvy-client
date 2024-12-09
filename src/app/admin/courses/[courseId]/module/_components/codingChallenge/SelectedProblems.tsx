@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { handleSaveChapter } from '@/utils/admin'
+import { getChapterUpdateStatus } from '@/store/store'
 
 const SelectedProblems = ({
     selectedQuestions,
@@ -20,6 +21,9 @@ const SelectedProblems = ({
     moduleId: string
     chapterTitle: string
 }) => {
+
+    const {isChapterUpdated, setIsChapterUpdated} = getChapterUpdateStatus()
+
     const handleClick = () => {
         handleSaveChapter(
             moduleId,
@@ -33,6 +37,7 @@ const SelectedProblems = ({
                       codingQuestions: selectedQuestions[0]?.id,
                   }
         )
+        setIsChapterUpdated(!isChapterUpdated)
     }
 
     const handleRemoveLastQuestion = () => {

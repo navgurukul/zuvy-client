@@ -200,15 +200,7 @@ export default function Page({
                     )
                 case 7:
                     return (
-                        <ScrollArea
-                            // className="h-[600px] lg:h-[600px] pr-4"
-                            className={`${heightClass} pr-4`}
-                            type="hover"
-                            style={{
-                                scrollbarWidth: 'none', // Firefox
-                                msOverflowStyle: 'none', // IE and Edge
-                            }}
-                        >
+               
                             <AddForm
                                 key={chapterId}
                                 chapterData={currentChapter}
@@ -216,7 +208,7 @@ export default function Page({
                                 // fetchChapterContent={fetchChapterContent}
                                 moduleId={moduleID}
                             />
-                        </ScrollArea>
+               
                     )
                 default:
                     return <h1>Create New Chapter</h1>

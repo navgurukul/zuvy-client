@@ -325,20 +325,20 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                     </div>
 
                     {/* preview & settings buttons */}
-                    <div className="text-[#4A4A4A] flex font-semibold items-center cursor-pointer mr-14">
+                    <div className="text-[#4A4A4A] flex font-semibold items-center cursor-pointer mr-14 gap-2">
                         <div
                             id="previewAssessment"
                             onClick={previewAssessment}
-                            className="flex"
+                            className="flex hover:bg-gray-300 rounded-md p-1"
                         >
                             <Eye size={18} />
-                            <h6 className="mr-5 ml-1 text-sm">Preview</h6>
+                            <h6 className="ml-1 text-sm">Preview</h6>
                         </div>
 
                         <div
                             onClick={handleSettingsButtonClick}
                             id="settingsAssessment"
-                            className="flex"
+                            className="flex hover:bg-gray-300 rounded-md p-1"
                         >
                             <Settings size={18} />
                             <h6 className="mx-1 text-sm">Settings</h6>

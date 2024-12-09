@@ -38,6 +38,7 @@ import {
 } from '@/components/ui/popover'
 import { Calendar } from '@/components/ui/calendar'
 import PreviewAssignment from './PreviewAssignment'
+import { getChapterUpdateStatus } from '@/store/store'
 
 interface ContentDetail {
     title: string
@@ -100,6 +101,7 @@ const AddAssignent = ({
 
     const [title, setTitle] = useState('')
     const [titles, setTitles] = useState('')
+    const {isChapterUpdated, setIsChapterUpdated} = getChapterUpdateStatus()
 
     const form = useForm({
         resolver: zodResolver(formSchema),
@@ -155,6 +157,7 @@ const AddAssignent = ({
                 requestBody
             )
             setAssignmentUpdateOnPreview(!assignmentUpdateOnPreview)
+            setIsChapterUpdated(!isChapterUpdated)
             toast({
                 title: 'Success',
                 description: 'Assignment Chapter Edited Successfully',

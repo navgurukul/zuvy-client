@@ -20,6 +20,7 @@ import VideoEmbed from '@/app/admin/courses/[courseId]/module/_components/video/
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { ArrowUpRightSquare, X, Pencil } from 'lucide-react'
 import PreviewVideo from '@/app/admin/courses/[courseId]/module/_components/video/PreviewVideo'
+import { getChapterUpdateStatus } from '@/store/store'
 
 // import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 
@@ -106,6 +107,7 @@ const AddVideo = ({
     const [showPreview, setShowPreview] = useState<boolean>(false)
     const [showVideoBox, setShowVideoBox] = useState<boolean>(true)
     const [videoTitle, setVideoTitle] = useState('')
+    const {isChapterUpdated, setIsChapterUpdated} = getChapterUpdateStatus()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -127,8 +129,6 @@ const AddVideo = ({
             links: [values.links],
         }
 
-        console.log('convertedObj', convertedObj)
-
         try {
             await api
                 .put(
@@ -144,6 +144,7 @@ const AddVideo = ({
                     })
                     setShowVideoBox(true)
                     fetchChapterContent(content.id, content.topicId)
+                    setIsChapterUpdated(!isChapterUpdated)
                 })
         } catch (error) {
             toast({

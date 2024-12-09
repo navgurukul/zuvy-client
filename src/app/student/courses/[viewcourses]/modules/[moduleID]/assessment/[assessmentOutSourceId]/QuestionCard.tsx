@@ -7,9 +7,13 @@ import { api } from '@/utils/axios.config'
 interface QuestionCardProps {
     id: number
     title: string
-    weightage?: any
+    weightage?: number
+    easyCodingMark?: number
+    mediumCodingMark?: number
+    hardCodingMark?: number
     description: string
     tagId?: number
+    codingQuestions?: boolean
     onSolveChallenge: (id: number) => void
 }
 
@@ -22,8 +26,12 @@ const QuestionCard = ({
     id,
     title,
     weightage,
+    easyCodingMark,
+    mediumCodingMark,
+    hardCodingMark,
     description,
     tagId,
+    codingQuestions,
     onSolveChallenge,
 }: QuestionCardProps) => {
     const [tag, setTag] = useState<Tag>()
@@ -42,13 +50,23 @@ const QuestionCard = ({
         getAllTags()
     }, [])
 
+    function codingQuestionMarks(difficulty:string){
+        if(difficulty === 'Easy'){
+            return easyCodingMark
+        }else if(difficulty === 'Medium'){
+            return mediumCodingMark
+        }else if(difficulty === 'Hard'){
+            return hardCodingMark
+        }
+    }
+
     return (
         <div className="my-5 p-6 bg-white rounded-xl shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F]">
             <div className="flex justify-between">
                 <h2 className="capitalize">{title}</h2>
                 <div>
                     <h2 className="bg-[#DEDEDE] px-2 py-1 mb-2 text-sm rounded-2xl font-semibold">
-                        {`${weightage} Marks`}
+                        {`${codingQuestions ? codingQuestionMarks(description) : weightage} Marks`}
                     </h2>
                     <h2
                         className={cn(

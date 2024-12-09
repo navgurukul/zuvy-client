@@ -849,4 +849,17 @@ export const getUser = create<UserState>()(
     )
 )
 
+// ---------------------------------------------
+type updateChapterList = {
+    isChapterUpdated: boolean
+    setIsChapterUpdated: (newValue: boolean) => void
+}
+
+export const getChapterUpdateStatus = create<updateChapterList>((set) => ({
+    isChapterUpdated: false,
+    setIsChapterUpdated: (newValue: boolean) => {
+        set({ isChapterUpdated: newValue })
+    }
+}))
+
 // ------------------------- User ------------------------

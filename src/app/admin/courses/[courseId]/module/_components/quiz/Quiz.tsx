@@ -10,7 +10,7 @@ import { api } from '@/utils/axios.config'
 import { Tag } from '@/app/admin/resource/mcq/page'
 import { toast } from '@/components/ui/use-toast'
 import { getAllQuizQuestion } from '@/utils/admin'
-import { getAllQuizData } from '@/store/store'
+import { getAllQuizData, getChapterUpdateStatus } from '@/store/store'
 import { ArrowUpRightSquare, Pencil } from 'lucide-react'
 import QuizPreview from '@/app/admin/courses/[courseId]/module/_components/quiz/QuizPreview'
 
@@ -23,6 +23,7 @@ function Quiz(props: any) {
     const { quizData, setStoreQuizData } = getAllQuizData()
     const [showPreview, setShowPreview] = useState(false)
     const [quizTitle, setQuizTitle] = useState('')
+    const {isChapterUpdated, setIsChapterUpdated} = getChapterUpdateStatus()
 
     const handleAddQuestion = (data: any) => {
         const uniqueData = data.filter((question: quizData) => {
@@ -101,10 +102,11 @@ function Quiz(props: any) {
     const handleSaveQuiz = () => {
         const selectedIds = addQuestion?.map((item) => item.id)
         const requestBody = {
+            title: inputValue,
             quizQuestions: selectedIds,
         }
-
         saveQuizQuestionHandler(requestBody)
+        setIsChapterUpdated(!isChapterUpdated)
     }
 
     const getAllSavedQuizQuestion = useCallback(async () => {
