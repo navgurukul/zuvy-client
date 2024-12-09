@@ -68,6 +68,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     const [codingWeightageDisabled, setCodingWeightageDisabled] =
         useState(false)
     const [mcqsWeightageDisabled, setMcqsWeightageDisabled] = useState(false)
+
     const [totalQuestions, setTotalQuestions] = useState({
         codingProblemsEasy: content?.easyCodingQuestions || 0,
         codingProblemsMedium: content?.mediumCodingQuestions || 0,
@@ -76,64 +77,33 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
         mcqsMedium: content?.mediumMcqQuestions || 0,
         mcqsHard: content?.hardMcqQuestions || 0,
     })
+
     const [totalSelectedCodingQues, setTotalSelectedCodingQues] = useState(0)
     const [totalSelectedQuizQues, setTotalSelectedQuizQues] = useState(0)
-    const [editingFields, setEditingFields] = useState<Record<string, boolean>>(
-        {}
-    )
+    const [editingFields, setEditingFields] = useState<any>({})
     const hours = Array.from({ length: 6 }, (_, i) => i)
     const minutes = [15, 30, 45]
 
     const formSchema = z
         .object({
-            codingProblemsEasy: z
-                .number()
-                .min(0)
-                .max(selectCodingDifficultyCount.codingProblemsEasy || 0, {
-                    message: `Cannot exceed ${
-                        selectCodingDifficultyCount.codingProblemsEasy || 0
-                    }`,
-                }),
-            codingProblemsMedium: z
-                .number()
-                .min(0)
-                .max(selectCodingDifficultyCount.codingProblemsMedium || 0, {
-                    message: `Cannot exceed ${
-                        selectCodingDifficultyCount.codingProblemsMedium || 0
-                    }`,
-                }),
-            codingProblemsHard: z
-                .number()
-                .min(0)
-                .max(selectCodingDifficultyCount.codingProblemsHard || 0, {
-                    message: `Cannot exceed ${
-                        selectCodingDifficultyCount.codingProblemsHard || 0
-                    }`,
-                }),
-            mcqsEasy: z
-                .number()
-                .min(0)
-                .max(selectQuizDifficultyCount.mcqsEasy || 0, {
-                    message: `Cannot exceed ${
-                        selectQuizDifficultyCount.mcqsEasy || 0
-                    }`,
-                }),
-            mcqsMedium: z
-                .number()
-                .min(0)
-                .max(selectQuizDifficultyCount.mcqsMedium || 0, {
-                    message: `Cannot exceed ${
-                        selectQuizDifficultyCount.mcqsMedium || 0
-                    }`,
-                }),
-            mcqsHard: z
-                .number()
-                .min(0)
-                .max(selectQuizDifficultyCount.mcqsHard || 0, {
-                    message: `Cannot exceed ${
-                        selectQuizDifficultyCount.mcqsHard || 0
-                    }`,
-                }),
+            codingProblemsEasy: z.number().min(0).max(selectCodingDifficultyCount.codingProblemsEasy || 0, {
+                message: `Cannot exceed ${selectCodingDifficultyCount.codingProblemsEasy || 0}`
+            }),
+            codingProblemsMedium: z.number().min(0).max(selectCodingDifficultyCount.codingProblemsMedium || 0, {
+                message: `Cannot exceed ${selectCodingDifficultyCount.codingProblemsMedium || 0}`
+            }),
+            codingProblemsHard: z.number().min(0).max(selectCodingDifficultyCount.codingProblemsHard || 0, {
+                message: `Cannot exceed ${selectCodingDifficultyCount.codingProblemsHard || 0}`
+            }),
+            mcqsEasy: z.number().min(0).max(selectQuizDifficultyCount.mcqsEasy || 0, {
+                message: `Cannot exceed ${selectQuizDifficultyCount.mcqsEasy || 0}`
+            }),
+            mcqsMedium: z.number().min(0).max(selectQuizDifficultyCount.mcqsMedium || 0, {
+                message: `Cannot exceed ${selectQuizDifficultyCount.mcqsMedium || 0}`
+            }),
+            mcqsHard: z.number().min(0).max(selectQuizDifficultyCount.mcqsHard || 0, {
+                message: `Cannot exceed ${selectQuizDifficultyCount.mcqsHard || 0}`
+            }),
             codingProblemsWeightage: z.number().min(0),
             mcqsWeightage: z.number().min(0),
             canCopyPaste: z.boolean(),
@@ -148,9 +118,44 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
             (data) => data.codingProblemsWeightage + data.mcqsWeightage === 100,
             {
                 message: 'Total weightage should be 100%',
-                path: ['codingProblemsWeightage'], // You can add path to indicate which field to highlight in case of an error
+                path: ['codingProblemsWeightage'],
             }
         )
+        .superRefine((data, ctx) => {
+            // Custom validation for coding problems
+            const codingCounts = [
+                { name: 'codingProblemsEasy', count: selectCodingDifficultyCount.codingProblemsEasy },
+                { name: 'codingProblemsMedium', count: selectCodingDifficultyCount.codingProblemsMedium },
+                { name: 'codingProblemsHard', count: selectCodingDifficultyCount.codingProblemsHard }
+            ]
+
+            codingCounts.forEach(({ name, count }) => {
+                if (count > 0 && data[name as keyof typeof data] === 0) {
+                    ctx.addIssue({
+                        code: z.ZodIssueCode.custom,
+                        message: `At least 1 question is required for ${name.replace('codingProblems', '')} difficulty`,
+                        path: [name]
+                    })
+                }
+            })
+
+            // Custom validation for MCQs
+            const mcqCounts = [
+                { name: 'mcqsEasy', count: selectQuizDifficultyCount.mcqsEasy },
+                { name: 'mcqsMedium', count: selectQuizDifficultyCount.mcqsMedium },
+                { name: 'mcqsHard', count: selectQuizDifficultyCount.mcqsHard }
+            ]
+
+            mcqCounts.forEach(({ name, count }) => {
+                if (count > 0 && data[name as keyof typeof data] === 0) {
+                    ctx.addIssue({
+                        code: z.ZodIssueCode.custom,
+                        message: `At least 1 question is required for ${name.replace('mcqs', '')} difficulty`,
+                        path: [name]
+                    })
+                }
+            })
+        })
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -181,13 +186,15 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
         field: keyof typeof totalQuestions,
         value: string
     ) => {
-        // For form state and calculations, use 0 for empty value
-        const numericValue = value === '' ? 0 : Number(value)
-        // Update total questions state with numeric value
+        // Allow empty string, which will be handled by validation
+        const numericValue: any = value === '' ? null : Number(value)
+        
+        // Update total questions state 
         setTotalQuestions((prevValues) => ({
             ...prevValues,
             [field]: numericValue,
         }))
+        
         // Update form value
         form.setValue(field, numericValue, {
             shouldValidate: true,
@@ -435,9 +442,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                                 }}
                                                                 onFocus={() => {
                                                                     setEditingFields(
-                                                                        (
-                                                                            prev
-                                                                        ) => ({
+                                                                        (prev:any) => ({
                                                                             ...prev,
                                                                             [field.name]:
                                                                                 true,
@@ -446,9 +451,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                                 }}
                                                                 onBlur={() => {
                                                                     setEditingFields(
-                                                                        (
-                                                                            prev
-                                                                        ) => ({
+                                                                        (prev:any) => ({
                                                                             ...prev,
                                                                             [field.name]:
                                                                                 false,
@@ -456,15 +459,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                                     )
                                                                 }}
                                                                 value={
-                                                                    editingFields[
-                                                                        field
-                                                                            .name
-                                                                    ]
-                                                                        ? field.value ===
-                                                                          0
-                                                                            ? ''
-                                                                            : field.value
-                                                                        : field.value
+                                                                     field.value
                                                                 }
                                                             />
                                                         </FormControl>
