@@ -38,14 +38,33 @@ import { api } from '@/utils/axios.config'
 import { getBatchData, getCourseData, getStoreStudentData } from '@/store/store'
 import useDebounce from '@/hooks/useDebounce'
 import { fetchStudentData } from '@/utils/students'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { DataTable } from '@/app/_components/datatable/data-table'
+import { useStudentData } from '@/app/admin/courses/[courseId]/(courseTabs)/students/components/useStudentData'
+import { columns } from './columns'
+// import { DataTable } from './dataTable'
+
+export type StudentData = {
+    id: any
+    userId: any
+    email: string
+    name: string
+    profilePicture: string
+}
 
 const Page = ({ params }: { params: any }) => {
+    const { students } = useStudentData(params.courseId)
     const { courseData, fetchCourseDetails } = getCourseData()
     const { fetchBatches, batchData, setBatchData } = getBatchData()
     const { setStoreStudentData } = getStoreStudentData()
     const [loading, setLoading] = useState(true)
+    const [assignStudents, setAssignStudents] = useState('')
+    const [selectedRows, setSelectedRows] = useState<StudentData[]>([])
+    const [totalStudents, setTotalStudents] = useState([...students])
+    const [searchStudent, setSearchStudent] = useState('')
     const [search, setSearch] = useState<string>('')
     const debouncedSearch = useDebounce(search, 1000)
+    const debouncedSearchStudent = useDebounce(searchStudent, 1000)
 
     const formSchema = z.object({
         name: z.string().min(2, {
@@ -65,6 +84,7 @@ const Page = ({ params }: { params: any }) => {
                     'Cap Enrollment must be a POSITIVE INTEGER (or a POSITIVE WHOLE NUMBER or should be greater than 0)',
             }
         ),
+        assignLearners: z.string(),
     })
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -74,22 +94,28 @@ const Page = ({ params }: { params: any }) => {
             instructorEmail: '',
             bootcampId: courseData?.id.toString() ?? '',
             capEnrollment: '',
+            assignLearners: 'all',
         },
         values: {
             name: '',
             instructorEmail: '',
             bootcampId: courseData?.id.toString() ?? '',
             capEnrollment: '',
+            assignLearners: 'all',
         },
         mode: 'onChange',
     })
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try {
+            const studentIds = selectedRows.map((student) => student.id)
+
             const convertedData = {
-                ...values,
+                name: values.name,
                 instructorEmail: values.instructorEmail,
                 bootcampId: +values.bootcampId,
                 capEnrollment: +values.capEnrollment,
+                assignAll: studentIds.length > 0 ? false : true,
+                studentIds: studentIds,
             }
             const convertedName: string = convertedData.name
                 .replace(/\s+/g, '') // Remove all whitespace characters
@@ -98,8 +124,6 @@ const Page = ({ params }: { params: any }) => {
                 (batchDataItem) =>
                     convertedName === batchDataItem.name.toLowerCase()
             )
-
-            // console.log(convertedData)
 
             if (matchedBatchData) {
                 toast({
@@ -147,6 +171,20 @@ const Page = ({ params }: { params: any }) => {
         fetchCourseDetails(params.courseId)
     }, [fetchCourseDetails, params.courseId])
 
+    const getUnAssignedStudents = useCallback(async () => {
+        await api
+            .get(
+                `/batch/allUnassignStudent/${params.courseId}?searchTerm=${debouncedSearchStudent}`
+            )
+            .then((res) => {
+                setTotalStudents(res.data.data)
+            })
+    }, [debouncedSearchStudent, params.courseId])
+
+    useEffect(() => {
+        getUnAssignedStudents()
+    }, [getUnAssignedStudents, debouncedSearchStudent, params.courseId])
+
     useEffect(() => {
         const searchBatchHandler = async () => {
             await api
@@ -161,11 +199,16 @@ const Page = ({ params }: { params: any }) => {
         if (debouncedSearch.trim()?.length === 0) fetchBatches(params.courseId)
     }, [params.courseId, debouncedSearch, fetchBatches, setBatchData])
 
+    const handleSearchStudents = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchStudent(e.target.value)
+    }
+
     const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value)
     }
 
-    // console.log(search)
+    const assignLearners = form.watch('assignLearners')
+
     const renderModal = (emptyState: boolean) => {
         if (courseData?.unassigned_students === 0) {
             return (
@@ -192,7 +235,7 @@ const Page = ({ params }: { params: any }) => {
                             {emptyState ? '+ Create Batch' : 'New Batch'}
                         </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="max-w-[600px] max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                             <DialogTitle>New Batch</DialogTitle>
                             Unassigned Students in Records:{' '}
@@ -211,78 +254,204 @@ const Page = ({ params }: { params: any }) => {
                                     }
                                     className="space-y-8"
                                 >
-                                    <FormField
-                                        control={form.control}
-                                        name="name"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>
-                                                    Batch Name
-                                                </FormLabel>
-                                                <FormControl>
-                                                    <Input
-                                                        placeholder="Batch Name"
-                                                        {...field}
-                                                    />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="instructorEmail"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>
-                                                    Instructor Email
-                                                </FormLabel>
-                                                <FormControl>
-                                                    <Input
-                                                        placeholder="instructor@navgurukul.org"
-                                                        type="name"
-                                                        {...field}
-                                                    />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="capEnrollment"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>
-                                                    Cap Enrollment
-                                                </FormLabel>
-                                                <FormControl>
-                                                    <Input
-                                                        placeholder="Cap Enrollment"
-                                                        type="name"
-                                                        {...field}
-                                                    />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormDescription>
-                                        {courseData?.unassigned_students}{' '}
-                                        students will be added to this batch
-                                        (Maximum current availability)
-                                    </FormDescription>
-                                    <div className="w-full flex flex-col items-end gap-y-5 ">
-                                        <DialogClose asChild>
-                                            <Button
-                                                className="w-1/2"
-                                                type="submit"
-                                                disabled={!form.formState.isValid}
-                                            >
-                                                Create batch
-                                            </Button>
-                                        </DialogClose>
-                                    </div>
+                                    {assignStudents === 'manually' ? (
+                                        <>
+                                            <Input
+                                                type="search"
+                                                placeholder="Search"
+                                                className="w-full"
+                                                value={searchStudent}
+                                                onChange={handleSearchStudents}
+                                            />
+                                            <DataTable
+                                                data={totalStudents}
+                                                columns={columns}
+                                                setSelectedRows={
+                                                    setSelectedRows
+                                                }
+                                                assignStudents={assignStudents}
+                                            />
+                                            <h1 className="pt-2">
+                                                Total Learners Selected:{' '}
+                                                {selectedRows.length}
+                                            </h1>
+                                            <div className="flex justify-between w-full pt-2">
+                                                <DialogClose asChild>
+                                                    <Button
+                                                        className="w-3/2 bg-muted text-muted-foreground"
+                                                        // type="submit"
+                                                        // disabled={!form.formState.isValid}
+                                                        onClick={() => setAssignStudents('')}
+                                                    >
+                                                        Back
+                                                    </Button>
+                                                </DialogClose>
+                                                <DialogClose asChild>
+                                                    <Button
+                                                        className="w-3/2"
+                                                        type="submit"
+                                                        disabled={
+                                                            !form.formState
+                                                                .isValid
+                                                        }
+                                                    >
+                                                        Create batch
+                                                    </Button>
+                                                </DialogClose>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <FormField
+                                                control={form.control}
+                                                name="name"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>
+                                                            Batch Name
+                                                        </FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                placeholder="Batch Name"
+                                                                {...field}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="instructorEmail"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>
+                                                            Instructor Email
+                                                        </FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                placeholder="instructor@navgurukul.org"
+                                                                type="name"
+                                                                {...field}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name="capEnrollment"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>
+                                                            Cap Enrollment
+                                                        </FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                placeholder="Cap Enrollment"
+                                                                type="name"
+                                                                {...field}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                // name="capEnrollment"
+                                                name="assignLearners" // Changed name to make it unique
+                                                render={({ field }) => (
+                                                    <FormItem className="text-start">
+                                                        <FormLabel>
+                                                            Assign Learners to
+                                                            Batch
+                                                        </FormLabel>
+                                                        <FormControl>
+                                                            <RadioGroup
+                                                                onValueChange={
+                                                                    field.onChange
+                                                                }
+                                                                value={
+                                                                    field.value ||
+                                                                    ''
+                                                                } // Correct use of value
+                                                                className="flex gap-4"
+                                                            >
+                                                                {/* Option: All learners */}
+                                                                <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                                                                    <FormControl>
+                                                                        <RadioGroupItem value="all" />
+                                                                    </FormControl>
+                                                                    <FormLabel className="font-normal">
+                                                                        All
+                                                                        learners
+                                                                    </FormLabel>
+                                                                </FormItem>
+
+                                                                {/* Option: Assign manually */}
+                                                                <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                                                                    <FormControl>
+                                                                        <RadioGroupItem value="manually" />
+                                                                    </FormControl>
+                                                                    <FormLabel className="font-normal">
+                                                                        Assign
+                                                                        manually
+                                                                    </FormLabel>
+                                                                </FormItem>
+                                                            </RadioGroup>
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+
+                                            {assignLearners === 'all' && (
+                                                <FormDescription>
+                                                    {
+                                                        courseData?.unassigned_students
+                                                    }{' '}
+                                                    students will be added to
+                                                    this batch (Maximum current
+                                                    availability)
+                                                </FormDescription>
+                                            )}
+                                            <div className="w-full flex flex-col items-end gap-y-5 ">
+                                                {assignLearners === 'all' ? (
+                                                    <DialogClose asChild>
+                                                        <Button
+                                                            className="w-1/2"
+                                                            type="submit"
+                                                            disabled={
+                                                                !form.formState
+                                                                    .isValid
+                                                            }
+                                                        >
+                                                            Create batch
+                                                        </Button>
+                                                    </DialogClose>
+                                                ) : (
+                                                    <Button
+                                                        className="w-1/2"
+                                                        onClick={() =>
+                                                            setAssignStudents(
+                                                                'manually'
+                                                            )
+                                                        }
+                                                        // type="submit"
+                                                        disabled={
+                                                            !form.formState
+                                                                .isValid
+                                                        }
+                                                    >
+                                                        Next: Assign Learners to
+                                                        Batch
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        </>
+                                    )}
                                 </form>
                             </Form>
                         </DialogHeader>
@@ -295,7 +464,7 @@ const Page = ({ params }: { params: any }) => {
         return (
             <div>
                 <div className="relative flex flex-col lg:flex-row items-center justify-between mb-6">
-                    {batchData? (
+                    {batchData ? (
                         <Input
                             type="search"
                             placeholder="Search"
@@ -308,12 +477,6 @@ const Page = ({ params }: { params: any }) => {
                 </div>
 
                 {loading ? (
-                    // <div
-                    //     className="flex justify-center"
-                    //     style={{ marginTop: '10%' }}
-                    // >
-                    //     <Spinner className="text-secondary" />
-                    // </div>
                     <div className="my-5 flex justify-center items-center">
                         <div className="absolute h-screen">
                             <div className="relative top-[70%]">
