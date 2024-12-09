@@ -63,7 +63,8 @@ export default function EditCodingQuestionForm() {
     const [testCases, setTestCases] = useState<any>([])
 
     const { tags } = getCodingQuestionTags()
-    const { editCodingQuestionId, isQuestionUsed } = getEditCodingQuestionDialogs()
+    const { editCodingQuestionId, isQuestionUsed } =
+        getEditCodingQuestionDialogs()
 
     const {
         setEditCodingQuestionId,
@@ -90,21 +91,25 @@ export default function EditCodingQuestionForm() {
         if (isQuestionUsed && testCase?.isExisting) {
             toast({
                 title: 'Cannot remove existing test case',
-                description: 'This question is in use. You can only remove newly added test cases.',
-                className: 'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                description:
+                    'This question is in use. You can only remove newly added test cases.',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
             return
         }
 
-        const updatedTestCases = testCases.filter((testCase: any) => testCase.id !== id);
-        setTestCases(updatedTestCases);
+        const updatedTestCases = testCases.filter(
+            (testCase: any) => testCase.id !== id
+        )
+        setTestCases(updatedTestCases)
 
         // Sync the form state with updated test cases
         form.reset({
             ...form.getValues(),
-            testCases: updatedTestCases
-        });
-    };
+            testCases: updatedTestCases,
+        })
+    }
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -160,26 +165,32 @@ export default function EditCodingQuestionForm() {
         }
     }
 
- 
-
     useEffect(() => {
         if (selectCodingQuestion) {
-            const existingTestCases = selectCodingQuestion[0]?.testCases?.map((testCase: any) => ({
-                id: testCase.id,
-                input: testCase.inputs
-                    .map((input: any) => {
-                        let value = input.parameterValue;
-                        if (Array.isArray(value)) {
-                            value = value.join(', ');
-                        }
-                        return value !== null && value !== undefined ? cleanUpValues(value.toString()) : value;
-                    })
-                    .join(' '),
-                output: testCase.expectedOutput.parameterValue !== null && testCase.expectedOutput.parameterValue !== undefined
-                    ? cleanUpValues(testCase.expectedOutput.parameterValue.toString())
-                    : testCase.expectedOutput.parameterValue,
-                isExisting: true // Mark as existing test case
-            }))
+            const existingTestCases = selectCodingQuestion[0]?.testCases?.map(
+                (testCase: any) => ({
+                    id: testCase.id,
+                    input: testCase.inputs
+                        .map((input: any) => {
+                            let value = input.parameterValue
+                            if (Array.isArray(value)) {
+                                value = value.join(', ')
+                            }
+                            return value !== null && value !== undefined
+                                ? cleanUpValues(value.toString())
+                                : value
+                        })
+                        .join(' '),
+                    output:
+                        testCase.expectedOutput.parameterValue !== null &&
+                        testCase.expectedOutput.parameterValue !== undefined
+                            ? cleanUpValues(
+                                  testCase.expectedOutput.parameterValue.toString()
+                              )
+                            : testCase.expectedOutput.parameterValue,
+                    isExisting: true, // Mark as existing test case
+                })
+            )
 
             setTestCases(existingTestCases)
             form.reset({
@@ -353,8 +364,6 @@ export default function EditCodingQuestionForm() {
         getAllCodingQuestions(setCodingQuestions)
     }
 
-
-
     return (
         <main className="flex flex-col p-3 w-full items-center ">
             <div
@@ -374,6 +383,7 @@ export default function EditCodingQuestionForm() {
                 >
                     <FormField
                         control={form.control}
+                        disabled={isQuestionUsed}
                         name="title"
                         render={({ field }) => (
                             <FormItem className="text-left">
@@ -388,6 +398,7 @@ export default function EditCodingQuestionForm() {
 
                     <FormField
                         control={form.control}
+                        disabled={isQuestionUsed}
                         name="problemStatement"
                         render={({ field }) => (
                             <FormItem className="text-left">
@@ -406,6 +417,7 @@ export default function EditCodingQuestionForm() {
                     <FormField
                         control={form.control}
                         name="constraints"
+                        disabled={isQuestionUsed}
                         render={({ field }) => (
                             <FormItem className="text-left">
                                 <FormLabel>Constraints</FormLabel>
@@ -425,12 +437,15 @@ export default function EditCodingQuestionForm() {
                         name="difficulty"
                         render={({ field }) => (
                             <FormItem className="space-y-3">
-                                <FormLabel>Difficulty</FormLabel>
+                                <div className="text-left w-full mb-2 ">
+                                    <FormLabel>Difficulty</FormLabel>
+                                </div>
                                 <FormControl>
                                     <RadioGroup
                                         onValueChange={field.onChange}
                                         defaultValue={field.value}
                                         className="flex space-y-1"
+                                        disabled={isQuestionUsed}
                                     >
                                         <FormItem className="flex items-center space-x-3 space-y-0">
                                             <FormControl>
@@ -489,7 +504,6 @@ export default function EditCodingQuestionForm() {
                                             field.onChange(selectedTag.id)
                                         }
                                     }}
-
                                     disabled={isQuestionUsed}
                                 >
                                     <FormControl>
@@ -606,64 +620,77 @@ export default function EditCodingQuestionForm() {
                         />
                     </div>
                     <div className="text-left">
-                <FormLabel>Test Cases</FormLabel>
-                {testCases.map((testCase: any, index: number) => (
-                    <div
-                        key={testCase.id}
-                        className="flex items-center gap-2 mt-2"
-                    >
-                        <FormField
-                            control={form.control}
-                            name={`testCases.${index}.input`}
-                            render={({ field }) => (
-                                <FormItem className="text-left w-full">
-                                    <Input
-                                        placeholder="Input"
-                                        value={field.value}
-                                        onChange={field.onChange}
-                                        disabled={isQuestionUsed && testCase.isExisting}
-                                    />
-                                    <p className="text-sm text-gray-500 mt-1">
-                                        {form.watch('inputFormat') === 'arrayOfnum' || form.watch('inputFormat') === 'arrayOfStr'
-                                            ? 'Max 1 array accepted (e.g., 1,2,3,4)'
-                                            : 'Enter values separated by spaces (e.g., 2 3 4)'}
-                                    </p>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                        <FormLabel>Test Cases</FormLabel>
+                        {testCases.map((testCase: any, index: number) => (
+                            <div
+                                key={testCase.id}
+                                className="flex items-center gap-2 mt-2"
+                            >
+                                <FormField
+                                    control={form.control}
+                                    name={`testCases.${index}.input`}
+                                    render={({ field }) => (
+                                        <FormItem className="text-left w-full">
+                                            <Input
+                                                placeholder="Input"
+                                                value={field.value}
+                                                onChange={field.onChange}
+                                                disabled={
+                                                    isQuestionUsed &&
+                                                    testCase.isExisting
+                                                }
+                                            />
+                                            <p className="text-sm text-gray-500 mt-1">
+                                                {form.watch('inputFormat') ===
+                                                    'arrayOfnum' ||
+                                                form.watch('inputFormat') ===
+                                                    'arrayOfStr'
+                                                    ? 'Max 1 array accepted (e.g., 1,2,3,4)'
+                                                    : 'Enter values separated by spaces (e.g., 2 3 4)'}
+                                            </p>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
 
-                        <FormField
-                            control={form.control}
-                            name={`testCases.${index}.output`}
-                            render={({ field }) => (
-                                <FormItem className="text-left w-full">
-                                    <Input
-                                        placeholder="Output"
-                                        value={field.value}
-                                        onChange={field.onChange}
-                                        disabled={isQuestionUsed && testCase.isExisting}
-                                    />
-                                    <p className="text-sm text-gray-500 mt-1">
-                                        {form.watch('outputFormat') === 'arrayOfnum' || form.watch('outputFormat') === 'arrayOfStr'
-                                            ? 'Max 1 array accepted (e.g., 1,2,3,4)'
-                                            : 'Only one value accepted (e.g., 55)'}
-                                    </p>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                                <FormField
+                                    control={form.control}
+                                    name={`testCases.${index}.output`}
+                                    render={({ field }) => (
+                                        <FormItem className="text-left w-full">
+                                            <Input
+                                                placeholder="Output"
+                                                value={field.value}
+                                                onChange={field.onChange}
+                                                disabled={
+                                                    isQuestionUsed &&
+                                                    testCase.isExisting
+                                                }
+                                            />
+                                            <p className="text-sm text-gray-500 mt-1">
+                                                {form.watch('outputFormat') ===
+                                                    'arrayOfnum' ||
+                                                form.watch('outputFormat') ===
+                                                    'arrayOfStr'
+                                                    ? 'Max 1 array accepted (e.g., 1,2,3,4)'
+                                                    : 'Only one value accepted (e.g., 55)'}
+                                            </p>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
 
-                        {(
-                            <X
-                                className="cursor-pointer"
-                                onClick={() => handleRemoveTestCase(testCase.id)}
-                            />
-                        )}
+                                {
+                                    <X
+                                        className="cursor-pointer"
+                                        onClick={() =>
+                                            handleRemoveTestCase(testCase.id)
+                                        }
+                                    />
+                                }
+                            </div>
+                        ))}
                     </div>
-                ))}
-            </div>
-
 
                     <div className="flex justify-end gap-3">
                         <Button

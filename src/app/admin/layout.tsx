@@ -9,6 +9,7 @@ import { getUser } from '@/store/store'
 import { Spinner } from '@/components/ui/spinner'
 
 import '../globals.css'
+import { useEffect } from 'react'
 
 export default function RootLayout({
     children,
@@ -20,6 +21,15 @@ export default function RootLayout({
     const { user, setUser } = getUser()
     const rolesList =
         user && (user.rolesList.length === 0 ? 'student' : user.rolesList[0])
+
+    const isAssessmentRouteClasses = (route: string) => {
+        const regex = /admin.*courses.*module.*chapters/
+
+        if (regex.test(pathname || '')) {
+            return 'overflow-hidden'
+        }
+        return ''
+    }
 
     return (
         <div>
@@ -33,10 +43,10 @@ export default function RootLayout({
                       user.rolesList[0] !== 'admin')) ? (
                 <UnauthorizedUser rolesList={rolesList} path={'Admin'} />
             ) : (
-                <div>
+                <div className={`${isAssessmentRouteClasses(pathname)}`}>
                     {!adminAssessmentPreviewRoute && <StudentNavbar />}
 
-                    <div className="pt-[70px]">
+                    <div className="pt-16 h-screen ">
                         <MaxWidthWrapper>{children}</MaxWidthWrapper>
                     </div>
                 </div>

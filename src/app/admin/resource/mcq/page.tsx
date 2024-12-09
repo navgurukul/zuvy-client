@@ -273,6 +273,7 @@ const Mcqs = (props: Props) => {
     useEffect(() => {
         // Ensure the code runs only on the client side
         getAllTags()
+        setIsEditModalOpen(false)
     }, [])
 
     useEffect(() => {
@@ -435,7 +436,7 @@ const Mcqs = (props: Props) => {
                 </div>
             )}
             {!isMcqModalOpen && !isEditQuizModalOpen && (
-                <MaxWidthWrapper>
+                <MaxWidthWrapper className="h-screen">
                     <h1 className="text-left font-semibold text-2xl">
                         Resource Library - MCQs
                     </h1>

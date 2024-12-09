@@ -283,10 +283,14 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
         }
 
         try {
-            await api.put(`Content/editAssessment/${content.assessmentOutsourseId}/${chapterID}`, data)
-            .then((res:any)=>{
-                fetchChapterContent(chapterID, topicId);
-            })
+            await api
+                .put(
+                    `Content/editAssessment/${content.assessmentOutsourseId}/${chapterID}`,
+                    data
+                )
+                .then((res: any) => {
+                    fetchChapterContent(chapterID, topicId)
+                })
             toast({
                 title: 'Assessment Updated Successfully',
                 description: 'Assessment has been updated successfully',
@@ -339,41 +343,47 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     }, [content])
 
     return (
-        <ScrollArea className='h-screen'>
-        <ScrollBar orientation='vertical' className=''/>
-        <main className="pb-6 w-full  bg-white text-left">
-            <div
-                onClick={() => setQuestionType('coding')}
-                className="flex items-center mb-6 cursor-pointer box-border"
-            >
-                <ChevronLeft className="w-4 h-4 mr-2 box-border" />
-                <span className="font-semibold">
-                    Back to {content?.ModuleAssessment?.title || 'Assessment'}
-                </span>
-            </div>
+        <ScrollArea className="h-screen pb-24">
+            <ScrollBar orientation="vertical" className="" />
+            <main className="pb-6 w-full  bg-white text-left">
+                <div
+                    onClick={() => setQuestionType('coding')}
+                    className="flex items-center mb-6 cursor-pointer box-border"
+                >
+                    <ChevronLeft className="w-4 h-4 mr-2 box-border" />
+                    <span className="font-semibold">
+                        Back to{' '}
+                        {content?.ModuleAssessment?.title || 'Assessment'}
+                    </span>
+                </div>
 
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="mt-4">
-                    {/* Submit Button */}
-                    <div className="flex justify-between w-full">
-                        <h1 className="text-lg font-bold">Manage Settings</h1>
-                        {/* Section 6: Submit button */}
-                        <Button type="submit" className="w-1/5 mr-3">
-                            Save Settings
-                        </Button>
-                    </div>
+                <Form {...form}>
+                    <form
+                        onSubmit={form.handleSubmit(onSubmit)}
+                        className="mt-4"
+                    >
+                        {/* Submit Button */}
+                        <div className="flex justify-between w-full">
+                            <h1 className="text-lg font-bold">
+                                Manage Settings
+                            </h1>
+                            {/* Section 6: Submit button */}
+                            <Button type="submit" className="w-1/5 mr-3">
+                                Save Settings
+                            </Button>
+                        </div>
 
-                    {/* Section 1: Choose number of questions */}
-                    <section>
-                        <h2 className="font-semibold mb-2">
-                            Choose number of questions shown to students
-                        </h2>
-                        <p className="text-sm text-gray-600 mb-4">
-                            Students will receive at least 1 question from each
-                            difficulty level of each question type.
-                            Additionally, the questions will be randomized for
-                            each question type.
-                        </p>
+                        {/* Section 1: Choose number of questions */}
+                        <section>
+                            <h2 className="font-semibold mb-2">
+                                Choose number of questions shown to students
+                            </h2>
+                            <p className="text-sm text-gray-600 mb-4">
+                                Students will receive at least 1 question from
+                                each difficulty level of each question type.
+                                Additionally, the questions will be randomized
+                                for each question type.
+                            </p>
 
                         <div className="flex justify-between items-start">
                             {[
@@ -535,346 +545,362 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                 </div>
                             ))}
 
-                            <div className="mb-4">
-                                <h3 className="font-semibold mb-2 mr-3">
-                                    Total Selected Questions
-                                </h3>
-                                <div className="mt-2">
-                                    <p className="text-sm ml-2 mb-2">
-                                        <span className="text-sm font-bold">
-                                            Coding:{' '}
-                                        </span>
-                                        {`${
-                                            Number.isNaN(
-                                                totalSelectedCodingQues
-                                            )
-                                                ? 0
-                                                : totalSelectedCodingQues
-                                        } out of ${codingMax}`}
-                                    </p>
-                                    <p className="text-sm ml-2">
-                                        <span className="text-sm font-bold ">
-                                            Quiz:{' '}
-                                        </span>
-                                        {`${
-                                            Number.isNaN(totalSelectedQuizQues)
-                                                ? 0
-                                                : totalSelectedQuizQues
-                                        } out of ${mcqMax}`}
-                                    </p>
+                                <div className="mb-4">
+                                    <h3 className="font-semibold mb-2 mr-3">
+                                        Total Selected Questions
+                                    </h3>
+                                    <div className="mt-2">
+                                        <p className="text-sm ml-2 mb-2">
+                                            <span className="text-sm font-bold">
+                                                Coding:{' '}
+                                            </span>
+                                            {`${
+                                                Number.isNaN(
+                                                    totalSelectedCodingQues
+                                                )
+                                                    ? 0
+                                                    : totalSelectedCodingQues
+                                            } out of ${codingMax}`}
+                                        </p>
+                                        <p className="text-sm ml-2">
+                                            <span className="text-sm font-bold ">
+                                                Quiz:{' '}
+                                            </span>
+                                            {`${
+                                                Number.isNaN(
+                                                    totalSelectedQuizQues
+                                                )
+                                                    ? 0
+                                                    : totalSelectedQuizQues
+                                            } out of ${mcqMax}`}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </section>
+                        </section>
 
-                    {/* Section 2: Individual Section Weightage */}
-                    <div className="flex space-x-48 my-8 ">
-                        <section>
-                            <h2 className="font-semibold mb-2">
-                                Individual Section Weightage
-                            </h2>
-                            <p className="text-sm text-gray-600 mb-4">
-                                Total from both categories should be 100%
-                            </p>
-                            {[
-                                {
-                                    title: 'Coding Problems',
-                                    field: 'codingProblemsWeightage',
-                                    disabled: codingWeightageDisabled,
-                                    max: codingMax,
-                                },
-                                {
-                                    title: 'MCQs',
-                                    field: 'mcqsWeightage',
-                                    disabled: mcqsWeightageDisabled,
-                                    max: mcqMax,
-                                },
-                            ].map((category: any, index: any) => {
-                                // Check if there's an error for either codingProblemsWeightage or mcqsWeightage
-                                const isError =
-                                    form.formState.errors
-                                        .codingProblemsWeightage ||
-                                    form.formState.errors.mcqsWeightage
-                                return (
+                        {/* Section 2: Individual Section Weightage */}
+                        <div className="flex space-x-48 my-8 ">
+                            <section>
+                                <h2 className="font-semibold mb-2">
+                                    Individual Section Weightage
+                                </h2>
+                                <p className="text-sm text-gray-600 mb-4">
+                                    Total from both categories should be 100%
+                                </p>
+                                {[
+                                    {
+                                        title: 'Coding Problems',
+                                        field: 'codingProblemsWeightage',
+                                        disabled: codingWeightageDisabled,
+                                        max: codingMax,
+                                    },
+                                    {
+                                        title: 'MCQs',
+                                        field: 'mcqsWeightage',
+                                        disabled: mcqsWeightageDisabled,
+                                        max: mcqMax,
+                                    },
+                                ].map((category: any, index: any) => {
+                                    // Check if there's an error for either codingProblemsWeightage or mcqsWeightage
+                                    const isError =
+                                        form.formState.errors
+                                            .codingProblemsWeightage ||
+                                        form.formState.errors.mcqsWeightage
+                                    return (
+                                        <FormField
+                                            key={index}
+                                            control={form.control}
+                                            name={category.field}
+                                            render={({ field }) => (
+                                                <FormItem className="flex items-center mb-2">
+                                                    <FormControl>
+                                                        <Input
+                                                            {...field}
+                                                            type="number"
+                                                            className={`w-16 mr-2 no-spinners ${
+                                                                isError
+                                                                    ? 'border-red-500 outline-red-500 text-red-500'
+                                                                    : 'border-gray-300'
+                                                            }`}
+                                                            disabled={
+                                                                category.disabled
+                                                            }
+                                                            onChange={(
+                                                                e: any
+                                                            ) =>
+                                                                handleWeightageChange(
+                                                                    e,
+                                                                    field
+                                                                )
+                                                            }
+                                                        />
+                                                    </FormControl>
+                                                    <FormLabel
+                                                        className={`text-sm ${
+                                                            isError
+                                                                ? 'text-red-500'
+                                                                : 'text-gray-700'
+                                                        }`}
+                                                    >
+                                                        {category.title}
+                                                    </FormLabel>
+                                                </FormItem>
+                                            )}
+                                        />
+                                    )
+                                })}
+                                {/* Display error messages if any */}
+                                {form.formState.errors
+                                    .codingProblemsWeightage && (
+                                    <div className="flex gap-2">
+                                        <AlertCircle color="#db3939" />
+                                        <FormMessage className="text-red-500 text-sm mt-1">
+                                            {
+                                                form.formState.errors
+                                                    .codingProblemsWeightage
+                                                    .message
+                                            }
+                                        </FormMessage>
+                                    </div>
+                                )}
+                                {form.formState.errors.mcqsWeightage && (
+                                    <div className="flex gap-2">
+                                        <AlertCircle color="#db3939" />
+                                        <FormMessage className="text-red-500 text-sm mt-1">
+                                            {
+                                                form.formState.errors
+                                                    .mcqsWeightage.message
+                                            }
+                                        </FormMessage>
+                                    </div>
+                                )}
+                            </section>
+
+                            {/* Section 3: Manage Proctoring Settings */}
+                            <section className="w-1/3">
+                                <h2 className="font-semibold mb-4">
+                                    Manage Proctoring Settings
+                                </h2>
+                                {[
+                                    {
+                                        label: 'Copy Paste',
+                                        name: 'canCopyPaste' as const,
+                                    },
+                                    {
+                                        label: 'Tab Change',
+                                        name: 'tabSwitch' as const,
+                                    },
+                                    {
+                                        label: 'Screen Exit',
+                                        name: 'screenExit' as const,
+                                    },
+                                    {
+                                        label: 'Eye Tracking',
+                                        name: 'eyeTracking' as const,
+                                    },
+                                ].map((option, index) => (
                                     <FormField
                                         key={index}
                                         control={form.control}
-                                        name={category.field}
+                                        name={option.name}
                                         render={({ field }) => (
-                                            <FormItem className="flex items-center mb-2">
+                                            <FormItem className="">
+                                                <div className="flex items-center justify-between mb-4">
+                                                    <div>
+                                                        <FormLabel className="text-sm text-center font-normal text-gray-600">
+                                                            {option.label}
+                                                        </FormLabel>
+                                                    </div>
+                                                    <div>
+                                                        <FormControl>
+                                                            <ToggleSwitch
+                                                                initialChecked={
+                                                                    field.value as boolean
+                                                                }
+                                                                onToggle={
+                                                                    field.onChange
+                                                                }
+                                                            />
+                                                        </FormControl>
+                                                    </div>
+                                                </div>
+                                            </FormItem>
+                                        )}
+                                    />
+                                ))}
+                            </section>
+                        </div>
+
+                        {/* Section 4: Time limit */}
+                        <div className="flex space-x-44">
+                            {/* Section 1: Time Limit */}
+                            <section className="w-1/4 mr-5">
+                                <h2 className="font-semibold mb-4">
+                                    Time limit
+                                </h2>
+                                <div className="flex flex-col space-y-4 ">
+                                    {' '}
+                                    {/* Stack inputs vertically with space-y-4 */}
+                                    {/* Hour Selector */}
+                                    <div>
+                                        <FormField
+                                            control={form.control}
+                                            name="hour"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <Select
+                                                        onValueChange={
+                                                            field.onChange
+                                                        }
+                                                        defaultValue={field.value.toString()}
+                                                    >
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Select hour" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            <SelectGroup>
+                                                                {hours.map(
+                                                                    (hour) => (
+                                                                        <SelectItem
+                                                                            key={
+                                                                                hour
+                                                                            }
+                                                                            value={hour.toString()}
+                                                                        >
+                                                                            {hour >
+                                                                            1
+                                                                                ? `${hour} Hours`
+                                                                                : `${hour} Hour`}
+                                                                        </SelectItem>
+                                                                    )
+                                                                )}
+                                                            </SelectGroup>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                    {/* Minute Selector */}
+                                    <div>
+                                        <FormField
+                                            control={form.control}
+                                            name="minute"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <Select
+                                                        onValueChange={
+                                                            field.onChange
+                                                        }
+                                                        defaultValue={field.value.toString()}
+                                                    >
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Select minute" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            <SelectGroup>
+                                                                {minutes.map(
+                                                                    (
+                                                                        minute
+                                                                    ) => (
+                                                                        <SelectItem
+                                                                            key={
+                                                                                minute
+                                                                            }
+                                                                            value={minute.toString()}
+                                                                        >
+                                                                            {
+                                                                                minute
+                                                                            }{' '}
+                                                                            Min
+                                                                        </SelectItem>
+                                                                    )
+                                                                )}
+                                                            </SelectGroup>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* Section 5: Set Pass Percentage */}
+                            <section className="">
+                                <h2 className="font-semibold mb-4">
+                                    Pass Percentage (Out Of 100)
+                                </h2>
+                                <FormField
+                                    control={form.control}
+                                    name="passPercentage"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col items-start">
+                                            <div className="flex items-center">
                                                 <FormControl>
                                                     <Input
                                                         {...field}
                                                         type="number"
                                                         className={`w-16 mr-2 no-spinners ${
-                                                            isError
+                                                            form.formState
+                                                                .errors
+                                                                .passPercentage
                                                                 ? 'border-red-500 outline-red-500 text-red-500'
                                                                 : 'border-gray-300'
                                                         }`}
-                                                        disabled={
-                                                            category.disabled
-                                                        }
-                                                        onChange={(e: any) =>
-                                                            handleWeightageChange(
-                                                                e,
-                                                                field
+                                                        onChange={(e) => {
+                                                            const value =
+                                                                e.target.value
+                                                            field.onChange(
+                                                                value === ''
+                                                                    ? null
+                                                                    : Number(
+                                                                          value
+                                                                      )
                                                             )
-                                                        }
+                                                        }}
                                                     />
                                                 </FormControl>
-                                                <FormLabel
-                                                    className={`text-sm ${
-                                                        isError
-                                                            ? 'text-red-500'
-                                                            : 'text-gray-700'
-                                                    }`}
-                                                >
-                                                    {category.title}
-                                                </FormLabel>
-                                            </FormItem>
-                                        )}
-                                    />
-                                )
-                            })}
-                            {/* Display error messages if any */}
-                            {form.formState.errors.codingProblemsWeightage && (
-                                <div className="flex gap-2">
-                                    <AlertCircle color="#db3939" />
-                                    <FormMessage className="text-red-500 text-sm mt-1">
-                                        {
-                                            form.formState.errors
-                                                .codingProblemsWeightage.message
-                                        }
-                                    </FormMessage>
-                                </div>
-                            )}
-                            {form.formState.errors.mcqsWeightage && (
-                                <div className="flex gap-2">
-                                    <AlertCircle color="#db3939" />
-                                    <FormMessage className="text-red-500 text-sm mt-1">
-                                        {
-                                            form.formState.errors.mcqsWeightage
-                                                .message
-                                        }
-                                    </FormMessage>
-                                </div>
-                            )}
-                        </section>
-
-                        {/* Section 3: Manage Proctoring Settings */}
-                        <section className="w-1/3">
-                            <h2 className="font-semibold mb-4">
-                                Manage Proctoring Settings
-                            </h2>
-                            {[
-                                {
-                                    label: 'Copy Paste',
-                                    name: 'canCopyPaste' as const,
-                                },
-                                {
-                                    label: 'Tab Change',
-                                    name: 'tabSwitch' as const,
-                                },
-                                {
-                                    label: 'Screen Exit',
-                                    name: 'screenExit' as const,
-                                },
-                                {
-                                    label: 'Eye Tracking',
-                                    name: 'eyeTracking' as const,
-                                },
-                            ].map((option, index) => (
-                                <FormField
-                                    key={index}
-                                    control={form.control}
-                                    name={option.name}
-                                    render={({ field }) => (
-                                        <FormItem className="">
-                                            <div className="flex items-center justify-between mb-4">
-                                                <div>
-                                                    <FormLabel className="text-sm text-center font-normal text-gray-600">
-                                                        {option.label}
-                                                    </FormLabel>
-                                                </div>
-                                                <div>
-                                                    <FormControl>
-                                                        <ToggleSwitch
-                                                            initialChecked={
-                                                                field.value as boolean
-                                                            }
-                                                            onToggle={
-                                                                field.onChange
-                                                            }
-                                                        />
-                                                    </FormControl>
-                                                </div>
-                                            </div>
-                                        </FormItem>
-                                    )}
-                                />
-                            ))}
-                        </section>
-                    </div>
-
-                    {/* Section 4: Time limit */}
-                    <div className="flex space-x-44">
-                        {/* Section 1: Time Limit */}
-                        <section className="w-1/4 mr-5">
-                            <h2 className="font-semibold mb-4">Time limit</h2>
-                            <div className="flex flex-col space-y-4 ">
-                                {' '}
-                                {/* Stack inputs vertically with space-y-4 */}
-                                {/* Hour Selector */}
-                                <div>
-                                    <FormField
-                                        control={form.control}
-                                        name="hour"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <Select
-                                                    onValueChange={
-                                                        field.onChange
-                                                    }
-                                                    defaultValue={field.value.toString()}
-                                                >
-                                                    <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select hour" />
-                                                        </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                        <SelectGroup>
-                                                            {hours.map(
-                                                                (hour) => (
-                                                                    <SelectItem
-                                                                        key={
-                                                                            hour
-                                                                        }
-                                                                        value={hour.toString()}
-                                                                    >
-                                                                        {hour >
-                                                                        1
-                                                                            ? `${hour} Hours`
-                                                                            : `${hour} Hour`}
-                                                                    </SelectItem>
-                                                                )
-                                                            )}
-                                                        </SelectGroup>
-                                                    </SelectContent>
-                                                </Select>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
-                                {/* Minute Selector */}
-                                <div>
-                                    <FormField
-                                        control={form.control}
-                                        name="minute"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <Select
-                                                    onValueChange={
-                                                        field.onChange
-                                                    }
-                                                    defaultValue={field.value.toString()}
-                                                >
-                                                    <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select minute" />
-                                                        </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                        <SelectGroup>
-                                                            {minutes.map(
-                                                                (minute) => (
-                                                                    <SelectItem
-                                                                        key={
-                                                                            minute
-                                                                        }
-                                                                        value={minute.toString()}
-                                                                    >
-                                                                        {minute}{' '}
-                                                                        Min
-                                                                    </SelectItem>
-                                                                )
-                                                            )}
-                                                        </SelectGroup>
-                                                    </SelectContent>
-                                                </Select>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
-                            </div>
-                        </section>
-
-                        {/* Section 5: Set Pass Percentage */}
-                        <section className="">
-                            <h2 className="font-semibold mb-4">
-                                Pass Percentage (Out Of 100)
-                            </h2>
-                            <FormField
-                                control={form.control}
-                                name="passPercentage"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-col items-start">
-                                        <div className="flex items-center">
-                                            <FormControl>
-                                                <Input
-                                                    {...field}
-                                                    type="number"
-                                                    className={`w-16 mr-2 no-spinners ${
+                                                <div
+                                                    className={`text-md ${
                                                         form.formState.errors
                                                             .passPercentage
                                                             ? 'border-red-500 outline-red-500 text-red-500'
                                                             : 'border-gray-300'
                                                     }`}
-                                                    onChange={(e) => {
-                                                        const value =
-                                                            e.target.value
-                                                        field.onChange(
-                                                            value === ''
-                                                                ? null
-                                                                : Number(value)
-                                                        )
-                                                    }}
-                                                />
-                                            </FormControl>
-                                            <div
-                                                className={`text-md ${
-                                                    form.formState.errors
-                                                        .passPercentage
-                                                        ? 'border-red-500 outline-red-500 text-red-500'
-                                                        : 'border-gray-300'
-                                                }`}
-                                            >
-                                                %
+                                                >
+                                                    %
+                                                </div>
                                             </div>
-                                        </div>
-                                        {form.formState.errors
-                                            .passPercentage && (
-                                            <div className="flex items-center gap-2 mt-1 text-red-500">
-                                                <AlertCircle color="#db3939" />
-                                                <FormMessage className="text-sm">
-                                                    {
-                                                        form.formState.errors
-                                                            .passPercentage
-                                                            .message
-                                                    }
-                                                </FormMessage>
-                                            </div>
-                                        )}
-                                    </FormItem>
-                                )}
-                            />
-                        </section>
-                    </div>
-                </form>
-            </Form>
-        </main>
+                                            {form.formState.errors
+                                                .passPercentage && (
+                                                <div className="flex items-center gap-2 mt-1 text-red-500">
+                                                    <AlertCircle color="#db3939" />
+                                                    <FormMessage className="text-sm">
+                                                        {
+                                                            form.formState
+                                                                .errors
+                                                                .passPercentage
+                                                                .message
+                                                        }
+                                                    </FormMessage>
+                                                </div>
+                                            )}
+                                        </FormItem>
+                                    )}
+                                />
+                            </section>
+                        </div>
+                    </form>
+                </Form>
+            </main>
         </ScrollArea>
     )
 }

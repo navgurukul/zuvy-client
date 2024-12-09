@@ -180,10 +180,9 @@ function Chapters({ params }: any) {
                     crumbs={isInstructor ? InstructorCrumbs : studentCrumbs}
                 />
             </div>
-            <div className="flex flex-col flex-grow overflow-hidden">
+            <div className="flex flex-col flex-grow overflow-hidden ">
                 <ScrollArea
-                    // className="h-[500px] lg:h-[670px] pr-4"
-                    className="h-screen pr-4 w-full mr-16 mt-2"
+                    className="h-screem pr-4"
                     type="hover"
                     ref={scrollAreaRef}
                 >

@@ -93,7 +93,7 @@ const CodingProblems = () => {
         { value: '-1', label: 'All Topics' },
     ])
     const [selectedDifficulty, setSelectedDifficulty] = useState(['None'])
-    const {difficulty, setDifficulty} = getDifficulty()
+    const { difficulty, setDifficulty } = getDifficulty()
 
     const [loading, setLoading] = useState(true)
     const [openEditDialog, setOpenEditDialog] = useState(false)
@@ -103,8 +103,8 @@ const CodingProblems = () => {
     const [totalPages, setTotalPages] = useState(0)
     const [lastPage, setLastPage] = useState(0)
     // const [offset, setOffset] = useState<number>(OFFSET)
-    const { offset, setOffset} = getOffset()
-    const {position, setPosition} = getPosition()
+    const { offset, setOffset } = getOffset()
+    const { position, setPosition } = getPosition()
 
     const selectedLanguage = ''
     const handleTopicClick = (value: string) => {
@@ -126,7 +126,6 @@ const CodingProblems = () => {
                     selectedOptions.filter(
                         (selected) => selected.value !== option.value
                     )
-                    
                 )
             } else {
                 setSelectedOptions([option])
@@ -194,7 +193,6 @@ const CodingProblems = () => {
             }
         }
     }
- 
 
     async function getAllTags() {
         const response = await api.get('Content/allTags')
@@ -223,6 +221,8 @@ const CodingProblems = () => {
 
     useEffect(() => {
         getAllTags()
+        setIsCodingDialogOpen(false)
+        setIsCodingEditDialogOpen(false)
     }, [])
 
     const fetchCodingQuestions = useCallback(
@@ -237,9 +237,7 @@ const CodingProblems = () => {
                 setLastPage,
                 setTotalPages,
                 debouncedSearch,
-                selectedLanguage,
-              
-               
+                selectedLanguage
             )
         },
         [
@@ -254,7 +252,7 @@ const CodingProblems = () => {
             offset,
         ]
     )
-    console.log("Search Term:", searchTerm);
+    console.log('Search Term:', searchTerm)
 
     useEffect(() => {
         getAllCodingQuestions(setAllCodingQuestions)
@@ -305,7 +303,7 @@ const CodingProblems = () => {
 
     const selectedTagCount = selectedOptions.length
     const difficultyCount = difficulty.length
-console.log("offset",offset)
+    console.log('offset', offset)
     return (
         <>
             {loading ? (
