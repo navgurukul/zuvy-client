@@ -42,8 +42,6 @@ const FormComponent = (props: Props) => {
                 </div>
                 <div className="flex items-center ml-auto">
                     <Link
-                        // href={`/admin/courses/117/submissionForm/15`}
-                        // href={`/admin/courses/${props.bootcampId}/submissionForm/${props.data.id}`}
                         href={{
                             pathname: `/admin/courses/${props.bootcampId}/submissionForm/${props.data.id}`,
                             query: {
@@ -54,6 +52,9 @@ const FormComponent = (props: Props) => {
                         <Button
                             variant={'secondary'}
                             className="flex items-center border-none hover:text-secondary hover:bg-popover"
+                            disabled={
+                                props.data.submitStudents > 0 ? false : true
+                            }
                         >
                             View Submissions
                             <ChevronRight size={20} />

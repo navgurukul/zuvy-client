@@ -295,6 +295,7 @@ const Mcqs = (props: Props) => {
                         className:
                             'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
+                    getAllTags()
                 })
         } catch (error) {
             toast({
