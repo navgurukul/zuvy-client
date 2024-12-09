@@ -49,7 +49,7 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
             )
         },
         enableSorting: false,
-        enableHiding: false,
+        enableHiding: true,
     },
     {
         accessorKey: 'difficulty',
@@ -71,7 +71,7 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
             )
         },
         enableSorting: false,
-        enableHiding: false,
+        enableHiding: true,
     },
     {
         accessorKey: 'usage',
@@ -88,7 +88,7 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
             return <div className="mr-7 font-semibold">{usage}</div>
         },
         enableSorting: false,
-        enableHiding: false,
+        enableHiding: true,
     },
 
     {
@@ -204,6 +204,6 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
             )
         },
         enableSorting: false,
-        enableHiding: false,
+        enableHiding: true,
     },
 ]
