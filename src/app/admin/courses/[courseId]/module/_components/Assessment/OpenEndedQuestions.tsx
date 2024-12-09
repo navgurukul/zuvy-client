@@ -26,7 +26,7 @@ const OpenEndedQuestions = ({
     tags: any
 }) => {
     return (
-        <ScrollArea className="h-[calc(100vh-200px)] pb-24  pr-4">
+        <ScrollArea className="h-[calc(100vh-200px)] pb-44  pr-4">
             <ScrollBar orientation="vertical" className="h-dvh" />
             {questions.map((question: OpenEndedQuestion) => {
                 const tag = tags?.find(

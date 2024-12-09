@@ -16,7 +16,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         pathname?.includes('/codingresult')
 
     return (
-        <div className="h-screen">
+        <div className={`h-screen`}>
             {projectID || assessmentRoute ? (
                 <MaxWidthWrapper>{children}</MaxWidthWrapper>
             ) : (
@@ -27,6 +27,19 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                         <Chapters />
                     </div>
                     <div className="flex-grow pl-10">{children}</div>
+
+                    {/* <div className="flex-grow pl-10">
+                        <ScrollArea
+                            className={`${heightClass} pr-4`}
+                            type="hover"
+                            style={{
+                                scrollbarWidth: 'none', // Firefox
+                                msOverflowStyle: 'none', // IE and Edge
+                            }}
+                        >
+                            {children}
+                        </ScrollArea>
+                    </div> */}
                 </div>
             )}
         </div>

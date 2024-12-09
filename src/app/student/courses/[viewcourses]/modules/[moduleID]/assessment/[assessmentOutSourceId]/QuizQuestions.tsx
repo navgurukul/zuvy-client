@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/form'
 import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
-import { useRouter } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { addClassToCodeTags } from '@/utils/admin'
 
 // component
@@ -37,12 +37,14 @@ const QuizQuestions = ({
     getSeperateQuizQuestions: () => void
 }) => {
     const router = useRouter()
+    const params = useParams()
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
         undefined
     ) // Correct type
     // Define the Zod schema for form validation
 
     const codeBlockClass =
+        'text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full'
         'text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full'
 
     useEffect(() => {
@@ -88,7 +90,7 @@ const QuizQuestions = ({
 
         try {
             const response = await api.patch(
-                `/submission/quiz/assessmentSubmissionId=${assessmentSubmitId}`,
+                `/submission/quiz/assessmentSubmissionId=${assessmentSubmitId}?assessmentOutsourseId=${params.assessmentOutSourceId}`,
                 { quizSubmissionDto }
             )
             toast({
@@ -173,6 +175,7 @@ const QuizQuestions = ({
                                 question.question,
                                 additionalClass
                             )
+
                             return (
                                 <div
                                     key={question.id}
@@ -183,27 +186,18 @@ const QuizQuestions = ({
                                         name={`answers.${index}`}
                                         render={({ field }) => (
                                             <FormItem className="flex flex-col items-start mb-10 w-full max-w-2xl">
-                                                <div className="flex justify-between items-start gap-4">
-                                                    <div className="w-[85%]">
-                                                        <FormLabel className="text-lg font-semibold text-left">
-                                                            {index + 1}.{' '}
-                                                            <span
-                                                                className="text-gray-800"
-                                                                dangerouslySetInnerHTML={{
-                                                                    __html: addClassToCodeTags(
-                                                                        question.question,
-                                                                        codeBlockClass
-                                                                    ),
-                                                                }}
-                                                            />
-                                                        </FormLabel>
-                                                    </div>
-                                                    <h1 className="bg-[#DEDEDE] px-2 py-1 text-sm rounded-2xl font-semibold">
-                                                        {`${getDifficultyWeightage(
-                                                            question.difficulty
-                                                        )} Marks`}
-                                                    </h1>
-                                                </div>
+                                                <FormLabel className="text-lg font-semibold text-left">
+                                                    {index + 1}.{' '}
+                                                    <span
+                                                        className="text-gray-800"
+                                                        dangerouslySetInnerHTML={{
+                                                            __html: addClassToCodeTags(
+                                                                question.question,
+                                                                codeBlockClass
+                                                            ),
+                                                        }}
+                                                    />
+                                                </FormLabel>
 
                                                 <FormControl>
                                                     <RadioGroup

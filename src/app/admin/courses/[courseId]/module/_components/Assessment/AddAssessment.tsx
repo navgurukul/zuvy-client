@@ -424,7 +424,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                     } h-screen `}
                 >
                     <>
-                        <div className="h-full">
+                        <div className="h-full ">
                             {questionType === 'coding' && (
                                 <CodingQuestions
                                     questions={filteredQuestions}
