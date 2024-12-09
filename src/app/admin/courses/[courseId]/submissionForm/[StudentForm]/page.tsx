@@ -63,7 +63,7 @@ const Page = ({ params }: any) => {
     const getStudentFormDataHandler = useCallback(async () => {
         await api
             .get(
-                `submission/formsStatus/${params.courseId}/${moduleId}?chapterId=${params.StudentForm}&limit=3&offset=0`
+                `submission/formsStatus/${params.courseId}/${moduleId}?chapterId=${params.StudentForm}`
             )
             .then((res) => {
                 const data = res.data.combinedData.map((student: any) => {
@@ -87,12 +87,12 @@ const Page = ({ params }: any) => {
                 setNotSubmitted(notSubmitted)
             })
             .catch((err) => {
-                toast({
-                    title: 'Error',
-                    description: 'Error fetching Submissions:',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                })
+                // toast({
+                //     title: 'Error',
+                //     description: 'Error fetching Submissions:',
+                //     className:
+                //         'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                // })
             })
 
         await api
