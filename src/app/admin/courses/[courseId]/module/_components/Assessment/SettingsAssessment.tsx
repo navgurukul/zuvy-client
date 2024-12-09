@@ -26,6 +26,7 @@ import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
 import { useParams } from 'next/navigation'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
+import { getChapterUpdateStatus } from '@/store/store'
 
 type SettingsAssessmentProps = {
     selectedCodingQuesIds: any
@@ -83,6 +84,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     const [editingFields, setEditingFields] = useState<any>({})
     const hours = Array.from({ length: 6 }, (_, i) => i)
     const minutes = [15, 30, 45]
+    const {isChapterUpdated, setIsChapterUpdated} = getChapterUpdateStatus()
 
     const formSchema = z
         .object({
@@ -290,6 +292,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                 )
                 .then((res: any) => {
                     fetchChapterContent(chapterID, topicId)
+                    setIsChapterUpdated(!isChapterUpdated)
                 })
             toast({
                 title: 'Assessment Updated Successfully',
@@ -695,10 +698,10 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                         label: 'Screen Exit',
                                         name: 'screenExit' as const,
                                     },
-                                    {
-                                        label: 'Eye Tracking',
-                                        name: 'eyeTracking' as const,
-                                    },
+                                    // {
+                                    //     label: 'Eye Tracking',
+                                    //     name: 'eyeTracking' as const,
+                                    // },
                                 ].map((option, index) => (
                                     <FormField
                                         key={index}

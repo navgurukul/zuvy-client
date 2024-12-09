@@ -25,6 +25,7 @@ import { Pencil } from 'lucide-react'
 import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 import PreviewArticle from './PreviewArticle'
 import { ArrowUpRightSquare } from 'lucide-react'
+import { getChapterUpdateStatus } from '@/store/store'
 
 interface ContentDetail {
     title: string
@@ -55,6 +56,7 @@ const AddArticle = ({
     // state
     const [title, setTitle] = useState('')
     const [showPreview, setShowPreview] = useState<boolean>(false)
+    const {isChapterUpdated, setIsChapterUpdated} = getChapterUpdateStatus()
     // misc
     const formSchema = z.object({
         title: z.string().min(2, {
@@ -116,6 +118,7 @@ const AddArticle = ({
                 data
             )
             setArticleUpdateOnPreview(!articleUpdateOnPreview)
+            setIsChapterUpdated(!isChapterUpdated)
             toast({
                 title: 'Success',
                 description: 'Article Chapter Edited Successfully',

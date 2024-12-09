@@ -341,8 +341,7 @@ function Page({
                 />
             )
         } else if (
-            selectedQuesType === 'open-ended' &&
-            seperateOpenEndedQuestions[0]?.submissionsData.length == 0
+            selectedQuesType === 'open-ended'
         ) {
             return (
                 <OpenEndedQuestions
@@ -507,7 +506,6 @@ function Page({
                                     <li>Copy and pasting</li>
                                     <li>Tab switching</li>
                                     <li>Assessment screen exit</li>
-                                    <li>Eye Tracking</li>
                                 </ul>
                             </div>
                         </div>
@@ -522,13 +520,14 @@ function Page({
                                             <QuestionCard
                                                 key={question.id}
                                                 id={question.id}
-                                                weightage={
-                                                    assessmentData.weightageCodingQuestions
-                                                }
+                                                easyCodingMark = {assessmentData.easyCodingMark}
+                                                mediumCodingMark = {assessmentData.mediumCodingMark}
+                                                hardCodingMark = {assessmentData.hardCodingMark}
                                                 title={question.title}
                                                 description={
                                                     question.difficulty
                                                 }
+                                                codingQuestions={true}
                                                 onSolveChallenge={() =>
                                                     handleSolveChallenge(
                                                         'coding',

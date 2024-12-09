@@ -11,7 +11,7 @@ import SelectedProblems from '@/app/admin/courses/[courseId]/module/_components/
 import { Input } from '@/components/ui/input'
 import { api } from '@/utils/axios.config'
 import useDebounce from '@/hooks/useDebounce'
-import { getCodingQuestionTags } from '@/store/store'
+import { getChapterUpdateStatus, getCodingQuestionTags } from '@/store/store'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import QuestionDescriptionModal from '../Assessment/QuestionDescriptionModal'
 import { ArrowUpRightSquare } from 'lucide-react'
@@ -101,6 +101,8 @@ function CodingChallenge({
     const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([])
     const [chapterTitle, setChapterTitle] = useState<string>(activeChapterTitle)
     const [showPreview, setShowPreview] = useState<boolean>(false)
+   
+
     const handlePreviewClick = () => {
         if (selectedQuestions.length === 0) {
             // Show toast if no questions are added
@@ -357,6 +359,7 @@ function CodingChallenge({
                                 ))}
                             </ScrollArea>
                         </div>
+                        <div className='mt-36'>
                         <SelectedProblems
                             chapterTitle={chapterTitle}
                             selectedQuestions={selectedQuestions as Question[]}
@@ -368,6 +371,7 @@ function CodingChallenge({
                             content={content}
                             moduleId={moduleId}
                         />
+                        </div>
                     </div>
                 </div>
             )}
