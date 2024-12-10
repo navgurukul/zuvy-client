@@ -448,19 +448,6 @@ const Mcqs = (props: Props) => {
                                 </div>
                             </RadioGroup>
                             {renderComponent()}
-                            {/* {mcqType === 'bulk' ? (
-                                <BulkUploadMcq />
-                            ) : (
-                                <div className="flex items-start justify-center w-screen ">
-                                    <NewMcqForm
-                                        setIsMcqModalOpen={setIsMcqModalOpen}
-                                        tags={tags}
-                                        closeModal={closeModal}
-                                        setStoreQuizData={setStoreQuizData}
-                                        getAllQuizQuesiton={getAllQuizQuestion}
-                                    />
-                                </div>
-                            )} */}
                         </div>
                     </div>
                 </div>
