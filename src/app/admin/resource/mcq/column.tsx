@@ -105,7 +105,7 @@ export const columns: ColumnDef<quiz>[] = [
             )
         },
         enableSorting: false,
-        enableHiding: false,
+        enableHiding: true,
     },
     {
         accessorKey: 'usage',
@@ -125,7 +125,7 @@ export const columns: ColumnDef<quiz>[] = [
             )
         },
         enableSorting: false,
-        enableHiding: false,
+        enableHiding: true,
     },
 
     {
@@ -151,7 +151,7 @@ export const columns: ColumnDef<quiz>[] = [
             )
         },
         enableSorting: false,
-        enableHiding: false,
+        enableHiding: true,
     },
 
     {
@@ -187,6 +187,7 @@ export const columns: ColumnDef<quiz>[] = [
                 </div>
             )
         },
+        enableHiding: true,
     },
 
     {
@@ -222,6 +223,7 @@ export const columns: ColumnDef<quiz>[] = [
                 </div>
             )
         },
+        enableHiding: true,
     },
     {
         id: 'actions3',
@@ -285,5 +287,6 @@ export const columns: ColumnDef<quiz>[] = [
                 </div>
             )
         },
+        enableHiding: true,
     },
 ]
