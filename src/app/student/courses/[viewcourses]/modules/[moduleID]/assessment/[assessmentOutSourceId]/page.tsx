@@ -341,7 +341,7 @@ function Page({
                 />
             )
         } else if (
-            selectedQuesType === 'open-ended'
+            selectedQuesType === 'open-ended' && assessmentData.OpenEndedQuestions > 0
         ) {
             return (
                 <OpenEndedQuestions
