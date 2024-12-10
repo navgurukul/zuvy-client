@@ -4,46 +4,20 @@ import { api } from '@/utils/axios.config'
 import React, { useEffect, useState } from 'react'
 import { ChevronLeft, Check, X, Circle } from 'lucide-react' // Import Circle icon
 import { useRouter } from 'next/navigation'
+import { addClassToCodeTags } from '@/utils/admin'
 
 // Define the type for the quiz result
-interface QuizOption {
-    [key: string]: string
-}
 
-interface Quiz {
-    id: number
-    question: string
-    options: QuizOption
-    difficulty: string
-    correctOption: number
-    marks: number | null
-}
 
-interface SubmissionData {
-    id: number
-    userId: number
-    chosenOption: number
-    questionId: number
-    attemptCount: number
-}
-
-interface QuizResult {
-    id: number
-    quiz_id: number
-    assessmentOutsourseId: number
-    bootcampId: number
-    chapterId: number
-    createdAt: string
-    submissionsData: SubmissionData[]
-    Quiz: Quiz
-}
 
 const QuizResults = ({
     params,
 }: {
     params: { assessmentOutSourceId: string }
 }) => {
-    const [quizResults, setQuizResults] = useState<QuizResult[]>([])
+    const [quizResults, setQuizResults] = useState<any>()
+    const codeBlockClass =
+    'text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full';
 
     const router = useRouter()
 
@@ -52,7 +26,7 @@ const QuizResults = ({
             const response = await api.get(
                 `Content/assessmentDetailsOfQuiz/${params.assessmentOutSourceId}`
             )
-            setQuizResults(response.data)
+            setQuizResults(response?.data?.data)
         } catch (error) {
             console.error(error)
         }
@@ -62,7 +36,7 @@ const QuizResults = ({
         getQuizResults()
     }, [params.assessmentOutSourceId])
 
-    if (!quizResults?.length) {
+    if (!quizResults?.mcqs.length) {
         return (
             <div>
                 <div onClick={() => router.back()} className="cursor-pointer flex justify-start">
@@ -85,23 +59,28 @@ const QuizResults = ({
                         <h1 className="font-extrabold">Quiz Results</h1>
                     </div>
                 </div>
-                {quizResults.map((result) => (
+                {quizResults?.mcqs.map((result:any) => (
                     <div
-                        key={result.id}
+                        key={result.quizId}
                         className="mb-10 p-6 bg-white rounded-xl w-full max-w-lg mx-auto"
                     >
-                        <div className="mb-4 font-bold text-xl">
-                            {result.Quiz.question}
-                        </div>
+                        <div className="mb-4 font-bold text-xl"   dangerouslySetInnerHTML={{
+                                                __html: addClassToCodeTags(
+                                                    result.question,
+                                                    codeBlockClass
+                                                ),
+                                            }} />
+                       
+                
                         <div className="space-y-4">
-                            {Object.entries(result.Quiz.options).map(
+                            {Object.entries(result.options).map(
                                 ([key, value]) => {
                                     const isCorrect =
                                         key ===
-                                        result.Quiz.correctOption.toString()
+                                        result.correctOption.toString()
                                     const isChosen =
                                         key ===
-                                        result?.submissionsData[0]?.chosenOption?.toString()
+                                        result?.submissionsData?.chosenOption?.toString()
 
                                     // Only highlight the user's selected answer and replace the circle with correct/incorrect icons
                                     const bgColor = isChosen
@@ -132,7 +111,7 @@ const QuizResults = ({
                                         >
                                             <div className="flex items-center gap-2">
                                                 {icon}
-                                                <span>{value}</span>
+                                                <span>{value as any}</span>
                                             </div>
                                         </div>
                                     )
@@ -141,11 +120,11 @@ const QuizResults = ({
                         </div>
                         <div className="mt-2 text-sm text-green-600 font-bold">
                             {/* if chosen incorrect answer show correct */}
-                            {result.Quiz.correctOption !==
-                            result?.submissionsData[0]?.chosenOption && (
+                            {result.correctOption !==
+                            result?.submissionsData?.chosenOption && (
                                 `Correct Answer: ${Object.values(
-                                    result.Quiz.options
-                                )[result.Quiz.correctOption - 1]}`
+                                    result.options
+                                )[result.correctOption - 1]}`
                             )}
                         </div>
                     </div>
