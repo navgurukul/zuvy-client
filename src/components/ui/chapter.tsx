@@ -22,6 +22,7 @@ import {
     getModuleData,
     getTopicId,
     getCurrentModuleName,
+    getChapterUpdateStatus,
 } from '@/store/store'
 
 type Chapter = {
@@ -72,6 +73,7 @@ function Chapter() {
     const [isChapterClicked, setIsChapterClicked] = useState(false)
     const isChapterClickedRef = useRef(false)
     const [currentChapter, setCurrentChapter] = useState<any>([])
+    const {isChapterUpdated, setIsChapterUpdated} = getChapterUpdateStatus()
 
     const crumbs = [
         {
@@ -105,7 +107,7 @@ function Chapter() {
         } catch (error) {
             console.error('Error fetching chapters:', error)
         }
-    }, [moduleId, chapter_id])
+    }, [moduleId, chapter_id, isChapterUpdated])
 
     useEffect(() => {
         if (moduleId) {

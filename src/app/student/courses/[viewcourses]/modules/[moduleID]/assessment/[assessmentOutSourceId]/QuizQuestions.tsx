@@ -82,7 +82,7 @@ const QuizQuestions = ({
     // Handle form submission
     const onSubmit = async (data: z.infer<typeof formSchema>) => {
         const quizSubmissionDto = data.answers.map((chosenOption, index) => ({
-            questionId: questions.data.mcqs[index].quizId,
+            questionId: questions.data.mcqs[index].outsourseQuizzesId,
             variantId: questions.data.mcqs[index].variantId,
             attemptCount: 1,
             chosenOption: Number(chosenOption),

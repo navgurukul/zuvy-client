@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input'
 import FormSection from './FormSection'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import {
     Form,
     FormControl,
@@ -22,6 +22,7 @@ import {
     FormLabel,
     FormMessage,
 } from '@/components/ui/form'
+import { getChapterUpdateStatus } from '@/store/store'
 // import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 
 type AddFormProps = {
@@ -63,6 +64,7 @@ const AddForm: React.FC<AddFormProps> = ({
     // fetchChapterContent,
     moduleId,
 }) => {
+    const {isChapterUpdated, setIsChapterUpdated} = getChapterUpdateStatus()
     // const heightClass = useResponsiveHeight()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -263,6 +265,7 @@ const AddForm: React.FC<AddFormProps> = ({
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
+            setIsChapterUpdated(!isChapterUpdated)
         } catch (error: any) {
             toast({
                 title: 'Failed',
@@ -275,15 +278,8 @@ const AddForm: React.FC<AddFormProps> = ({
     }
 
     return (
-        <ScrollArea
-            // className="h-[600px] lg:h-[600px] pr-4"
-            // className={`${heightClass} pr-4`}
-            type="hover"
-            style={{
-                scrollbarWidth: 'none', // Firefox
-                msOverflowStyle: 'none', // IE and Edge
-            }}
-        >
+        <ScrollArea className="h-dvh pr-4 pb-24" type="hover">
+            <ScrollBar className="h-dvh " orientation="vertical" />
             <div className="flex flex-col gap-y-8 mx-auto px-5 items-center justify-center w-1/2">
                 <Form {...form}>
                     <form
