@@ -107,6 +107,14 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
         )
     }
 
+
+    // console.log(viewResultsData?.submitedOutsourseAssessment.easyCodingQuestions)
+    // console.log(viewResultsData?.submitedOutsourseAssessment.mediumCodingQuestions)
+    // console.log(viewResultsData?.submitedOutsourseAssessment.hardCodingQuestions)
+    console.log(viewResultsData?.PracticeCode.length)
+
+
+
     return (
         <React.Fragment>
             <div
@@ -121,67 +129,45 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
             </div>
 
             {/* Render Coding Challenges if they exist */}
-            {viewResultsData?.codingQuestionCount > 0 && (
-                <>
-                    <div className="headings mx-auto my-5 max-w-2xl">
-                        {viewResultsData.PracticeCode.length > 0 ? (
+            {(viewResultsData?.submitedOutsourseAssessment.easyCodingQuestions > 0 ||
+                viewResultsData?.submitedOutsourseAssessment.mediumCodingQuestions > 0 ||
+                viewResultsData?.submitedOutsourseAssessment.hardCodingQuestions > 0) && (
+                    <>
+                        <div className="headings mx-auto my-5 max-w-2xl">
                             <h1 className="text-start text-xl">
-                                Coding Challenges
+                                {Array.isArray(viewResultsData?.PracticeCode) && viewResultsData.PracticeCode.length > 0
+                                    ? "Coding Challenges"
+                                    : "No Coding Submissions Found"}
                             </h1>
-                        ) : (
-                            <h1 className="text-center text-xl">
-                                No Coding Submissions Found
-                            </h1>
-                        )}
-                    </div>
-                    {viewResultsData.PracticeCode.map((codingQuestion: any) => (
-                        <div
-                            key={codingQuestion.id}
-                            className={`container mx-auto rounded-xl shadow-lg overflow-hidden max-w-2xl min-h-52 mt-4 py-5`}
-                        >
-                            <div className="flex justify-between">
-                                <div className="font-bold text-xl my-2">
-                                    {codingQuestion.questionDetail.title}
+                        </div>
+                        {viewResultsData?.PracticeCode?.map((codingQuestion: any) => (
+                            <div key={codingQuestion.id} className="container mx-auto rounded-xl shadow-lg overflow-hidden max-w-2xl min-h-52 mt-4 py-5">
+                                <div className="flex justify-between">
+                                    <div className="font-bold text-xl my-2">{codingQuestion.questionDetail.title}</div>
+                                    <div className={cn(`font-semibold text-secondary my-2`, difficultyColor(codingQuestion.questionDetail.difficulty))}>
+                                        {codingQuestion.questionDetail.difficulty}
+                                    </div>
+                                </div>
+                                <div className="text-xl mt-2 text-start">
+                                    Description: {codingQuestion.questionDetail.description}
+                                </div>
+                                <div className={`text-xl mt-2 text-start`}>
+                                    Status:{" "}
+                                    <span className={`ml-2 ${codingQuestion.status === "Accepted" ? "text-green-400" : "text-destructive"}`}>
+                                        {codingQuestion.status}
+                                    </span>
                                 </div>
                                 <div
-                                    className={cn(
-                                        `font-semibold text-secondary my-2`,
-                                        difficultyColor(
-                                            codingQuestion.questionDetail
-                                                .difficulty
-                                        )
-                                    )}
+                                    onClick={() => viewCodingSubmission(codingQuestion.codingOutsourseId, codingQuestion.questionId)}
+                                    className="cursor-pointer mt-4 flex justify-end text-secondary font-bold"
                                 >
-                                    {codingQuestion.questionDetail.difficulty}
+                                    View Submission <ChevronRight />
                                 </div>
                             </div>
-                            <div className="text-xl mt-2 text-start">
-                                Description:{' '}
-                                {codingQuestion.questionDetail.description}
-                            </div>
-                            <div className={`text-xl mt-2 text-start `}>
-                                Status:{' '}
-                                <span
-                                    className={`ml-2 ${codingQuestion.status === 'Accepted' ? 'text-green-400' : 'text-destructive'}`}
-                                >
-                                    {codingQuestion.status}
-                                </span>
-                            </div>
-                            <div
-                                onClick={() =>
-                                    viewCodingSubmission(
-                                        codingQuestion.codingOutsourseId,
-                                        codingQuestion.questionId
-                                    )
-                                }
-                                className="cursor-pointer mt-4 flex justify-end text-secondary font-bold"
-                            >
-                                View Submission <ChevronRight />
-                            </div>
-                        </div>
-                    ))}
-                </>
-            )}
+                        ))}
+                    </>
+                )}
+
 
             {/* Render Quiz Questions if they exist */}
             {viewResultsData?.mcqQuestionCount > 0 && (
