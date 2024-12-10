@@ -88,7 +88,7 @@ const AddForm: React.FC<AddFormProps> = ({
                               question: 'Question 1',
                               typeId: 1,
                               isRequired: true,
-                              options: ['Op1'],
+                              options: ['', ''],
                           },
                       ],
         },
@@ -112,7 +112,7 @@ const AddForm: React.FC<AddFormProps> = ({
                               question: 'Question 1',
                               typeId: 1,
                               isRequired: true,
-                              options: ['Op1'],
+                              options: ['', ''],
                           },
                       ],
         },
@@ -125,7 +125,7 @@ const AddForm: React.FC<AddFormProps> = ({
             questionType: 'Multiple Choice',
             typeId: 1,
             question: '',
-            options: [''],
+            options: ['', ''],
             isRequired: false,
             id: `new-${Date.now()}`,
         }
@@ -324,7 +324,7 @@ const AddForm: React.FC<AddFormProps> = ({
                                         <Input
                                             {...field}
                                             className="w-[450px] px-3 py-2 border rounded-md"
-                                            placeholder="Placeholder"
+                                            placeholder="Add Description"
                                         />
                                     </FormControl>
                                     <FormMessage />

@@ -57,7 +57,7 @@ export const columns: ColumnDef<CodingQuestion>[] = [
             )
         },
         enableSorting: false,
-        enableHiding: false,
+        enableHiding: true,
     },
     {
         accessorKey: 'difficulty',
@@ -85,7 +85,7 @@ export const columns: ColumnDef<CodingQuestion>[] = [
             )
         },
         enableSorting: false,
-        enableHiding: false,
+        enableHiding: true,
     },
     {
         accessorKey: 'usage',

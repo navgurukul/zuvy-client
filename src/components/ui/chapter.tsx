@@ -267,6 +267,7 @@ function Chapter() {
                                                 isChapterClickedRef
                                             }
                                             activeChapterRef={activeChapterRef}
+                                            chapterData={chapterData}
                                         />
                                     </Reorder.Item>
                                 )

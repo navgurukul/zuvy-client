@@ -29,6 +29,7 @@ function ChapterItem({
     moduleId,
     activeChapterRef,
     isChapterClickedRef,
+    chapterData,
 }: {
     title: string
     topicId: number
@@ -40,6 +41,7 @@ function ChapterItem({
     moduleId: string
     activeChapterRef: any
     isChapterClickedRef: any
+    chapterData: any
 }) {
     // states and variables
     const { courseId } = useParams()
@@ -93,6 +95,11 @@ function ChapterItem({
                             'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     fetchChapters()
+                    if (chapterId === activeChapter) {
+                        router.push(
+                            `/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterData[0].chapterId}`
+                        )
+                    }
                 })
                 .catch((error) => {
                     toast({
