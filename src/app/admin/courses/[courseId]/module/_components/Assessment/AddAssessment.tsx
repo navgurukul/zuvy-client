@@ -479,7 +479,6 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                         fetchChapterContent={
                                             fetchChapterContent
                                         }
-                                        chapterData={chapterData}
                                         chapterTitle={chapterTitle}
                                         saveSettings={saveSettings}
                                         setSaveSettings={setSaveSettings}

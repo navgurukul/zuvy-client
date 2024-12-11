@@ -98,8 +98,10 @@ export default function Page({
         [moduleData, courseId, moduleId]
     )
 
+    
+
     useEffect(() => {
-        if (chapterData.length > 0) {
+        if (chapterData.length > 0 && topicId != null) {
             fetchChapterContent(chapter_id, topicId)
         } else {
             setActiveChapter(0)
@@ -114,8 +116,8 @@ export default function Page({
         fetchChapterContent,
         articleUpdateOnPreview,
         assignmentUpdateOnPreview,
-        ,
         topicId,
+        chapter_id
     ])
 
     const renderChapterContent = () => {
@@ -190,7 +192,7 @@ export default function Page({
                 case 6:
                     return (
                         <AddAssessment
-                            key={chapterId}
+                            key={Number(chapterID)}
                             chapterData={currentChapter}
                             content={chapterContent}
                             fetchChapterContent={fetchChapterContent}

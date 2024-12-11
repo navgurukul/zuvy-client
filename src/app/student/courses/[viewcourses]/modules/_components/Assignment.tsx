@@ -19,6 +19,7 @@ import { Check, Link, Github } from 'lucide-react'
 import googleDriveLogo from '../../../../../../../public/google-drive.png'
 import Image from 'next/image'
 import { toast } from '@/components/ui/use-toast'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 type Props = {
     projectId: number
@@ -190,7 +191,8 @@ const Assignments = ({
     const AssignmentStatus = getSubmissionStatus(submittedDate, deadlineDate)
 
     return (
-        <div className="flex flex-col gap-y-3 ">
+       <ScrollArea className='h-screen'>
+         <div className="flex flex-col mt-20">
             <h1 className="text-left text-xl font-semibold flex flex-col ">
                 <span className="flex items-center gap-x-2 ">
                     {content?.title}{' '}
@@ -261,15 +263,15 @@ const Assignments = ({
                         )}
                     />
                     <div className="flex justify-end">
-                        <Button className="w-1/6" type="submit">
+                        <Button className="w-1/6 mr-3" type="submit">
                             Submit
                         </Button>
                     </div>
                 </form>
             </Form>
 
-            <div></div>
         </div>
+       </ScrollArea>
     )
 }
 

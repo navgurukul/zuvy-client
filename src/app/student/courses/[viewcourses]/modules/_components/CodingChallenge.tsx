@@ -131,7 +131,7 @@ function CodingChallenge({
     console.log(codingQuestions)
 
     return (
-        <>
+        <div className='mt-20'>
             {codingQuestions.length > 0 ? (
                 <div className="flex justify-center">
                     <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
@@ -212,7 +212,7 @@ function CodingChallenge({
                     </div>
                 </div>
             )}
-        </>
+        </div>
     )
 }
 

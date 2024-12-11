@@ -36,7 +36,6 @@ type SettingsAssessmentProps = {
     selectedQuizQuesTagIds: any
     content: any
     fetchChapterContent: any
-    chapterData: any
     chapterTitle: string
     saveSettings: boolean
     setSaveSettings: (value: boolean) => void
@@ -54,7 +53,6 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     selectedQuizQuesTagIds,
     content,
     fetchChapterContent,
-    chapterData,
     chapterTitle,
     saveSettings,
     setSaveSettings,
