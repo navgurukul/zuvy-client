@@ -200,15 +200,13 @@ export default function Page({
                     )
                 case 7:
                     return (
-               
-                            <AddForm
-                                key={chapterId}
-                                chapterData={currentChapter}
-                                content={chapterContent}
-                                // fetchChapterContent={fetchChapterContent}
-                                moduleId={moduleID}
-                            />
-               
+                        <AddForm
+                            key={chapterId}
+                            chapterData={currentChapter}
+                            content={chapterContent}
+                            // fetchChapterContent={fetchChapterContent}
+                            moduleId={moduleID}
+                        />
                     )
                 default:
                     return <h1>Create New Chapter</h1>
