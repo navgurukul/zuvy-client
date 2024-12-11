@@ -65,9 +65,10 @@ const QuestionCard = ({
             <div className="flex justify-between">
                 <h2 className="capitalize">{title}</h2>
                 <div>
+                {title !== 'Open-Ended Questions' && 
                     <h2 className="bg-[#DEDEDE] px-2 py-1 mb-2 text-sm rounded-2xl font-semibold">
                         {`${codingQuestions ? codingQuestionMarks(description) : weightage} Marks`}
-                    </h2>
+                    </h2>}
                     <h2
                         className={cn(
                             `font-semibold text-secondary mb-1`,

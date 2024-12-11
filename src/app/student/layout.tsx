@@ -24,7 +24,7 @@ export default function RootLayout({
         user && (user.rolesList.length === 0 ? 'student' : user.rolesList[0])
 
     return (
-        <>
+        <div className='h-screen'>
             {user.email.length == 0 ? (
                 <div className="flex items-center justify-center h-[680px]">
                     <Spinner className="text-secondary" />
@@ -32,18 +32,13 @@ export default function RootLayout({
             ) : user && user.rolesList.length !== 0 ? (
                 <UnauthorizedUser rolesList={rolesList} path={'Student'} />
             ) : (
-                <div
-                // className={cn(
-                //   "min-h-screen text-center antialiased",
-                //   karla.className
-                // )}
-                >
-                    {!isAssessmentRoute && <StudentNavbar />}
-                    <div className="pt-[70px]">
-                        <MaxWidthWrapper>{children}</MaxWidthWrapper>
+                <div className="h-screen">
+                    <div>{!isAssessmentRoute && <StudentNavbar/>}</div>
+                    <div className="">
+                        {children}
                     </div>
                 </div>
             )}
-        </>
+        </div>
     )
 }

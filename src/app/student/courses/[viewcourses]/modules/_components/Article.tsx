@@ -54,14 +54,14 @@ function Article({
     }, [status])
 
     return (
-        <>
+        <div className='mt-24'>
             <TiptapEditor editor={editor} />
             {!isCompleted && (
                 <div className="mt-2 text-end">
                     <Button onClick={completeChapter}>Mark as Done</Button>
                 </div>
             )}
-        </>
+        </div>
     )
 }
 

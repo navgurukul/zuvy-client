@@ -1,6 +1,6 @@
 'use client'
 
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { useLazyLoadedStudentData, getParamBatchId } from '@/store/store'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import { api } from '@/utils/axios.config'
@@ -175,17 +175,18 @@ function Chapters({ params }: any) {
 
     return (
         <div className="flex flex-col h-full">
-            <div className="mb-5">
-                <BreadcrumbComponent
+
+            <div className="flex flex-col h-screen">
+                <div className='mt-20 pb-2'><BreadcrumbComponent
                     crumbs={isInstructor ? InstructorCrumbs : studentCrumbs}
-                />
-            </div>
-            <div className="flex flex-col flex-grow overflow-hidden ">
+                /></div>
                 <ScrollArea
-                    className="h-screem pr-4"
+                    className="h-full pr-4"
                     type="hover"
                     ref={scrollAreaRef}
+                    
                 >
+                    {/* <ScrollBar className='h-dvh'/> */}
                     {chapters?.map((item: any, index: any) => {
                         const isLastItem = index === chapters.length - 1
 

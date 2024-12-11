@@ -286,12 +286,12 @@ export const getCurrentChapterState = create<currentChapter>((set) => ({
 }))
 
 type topicId = {
-    topicId: number
+    topicId: number | null
     setTopicId: (newValue: number) => void
 }
 
 export const getTopicId = create<topicId>((set) => ({
-    topicId: 1,
+    topicId: null,
     setTopicId: (newValue: number) => {
         set({ topicId: newValue })
     },

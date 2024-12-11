@@ -229,6 +229,7 @@ function Page({
     ) => {
         setSelectedQuesType(type)
         setIsSolving(true)
+        console.log('id', id)
 
         if (type === 'coding' && id) {
             const action = await getCodingSubmissionsData(
@@ -259,6 +260,7 @@ function Page({
             type === 'open-ended' &&
             seperateOpenEndedQuestions[0]?.submissionsData.length > 0
         ) {
+            
             toast({
                 title: 'Open Ended Questions Already Submitted',
                 description:
@@ -324,7 +326,7 @@ function Page({
 
     if (isSolving && isFullScreen) {
         if (
-            selectedQuesType === 'quiz' &&
+            selectedQuesType === 'quiz' && !assessmentData.IsQuizzSubmission &&
             assessmentData.hardMcqQuestions +
                 assessmentData.easyMcqQuestions +
                 assessmentData.mediumMcqQuestions >
@@ -341,7 +343,7 @@ function Page({
                 />
             )
         } else if (
-            selectedQuesType === 'open-ended' && assessmentData.OpenEndedQuestions > 0
+            selectedQuesType === 'open-ended' && !seperateOpenEndedQuestions[0]?.submissionsData
         ) {
             return (
                 <OpenEndedQuestions
@@ -567,7 +569,7 @@ function Page({
                                 </div>
                             </div>
                         )}
-                        {assessmentData.OpenEndedQuestions > 0 && (
+                        {seperateOpenEndedQuestions.length > 0 && (
                             <div className="flex justify-center">
                                 <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
                                     <h2 className="font-bold">
@@ -577,7 +579,7 @@ function Page({
                                         id={1}
                                         title="Open-Ended Questions"
                                         description={`${
-                                            assessmentData.OpenEndedQuestions ||
+                                            seperateOpenEndedQuestions.length ||
                                             0
                                         } questions`}
                                         onSolveChallenge={() =>
