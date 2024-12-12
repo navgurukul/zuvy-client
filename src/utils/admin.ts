@@ -707,7 +707,8 @@ export const convertSeconds = (seconds: number) => {
 
 export async function fetchPreviewAssessmentData(
     params: any,
-    setAssessmentPreviewContent: any
+    setAssessmentPreviewContent: any,
+    setAssessmentPreviewCodingContent: any
 ) {
     try {
         const response = await api.get(
@@ -715,6 +716,7 @@ export async function fetchPreviewAssessmentData(
         )
 
         setAssessmentPreviewContent(response.data)
+        setAssessmentPreviewCodingContent(response.data.CodingQuestions)
     } catch (error) {
         console.error('Error fetching chapter content:', error)
     }
@@ -799,29 +801,33 @@ export const addClassToCodeTags: any = (
     codeBlockClass: string
 ) => {
     // Find the positions of the first <code> and the last </code>
-    const firstCodeIndex = htmlString.indexOf('<code');
-    const lastCodeIndex = htmlString.lastIndexOf('</code>');
+    const firstCodeIndex = htmlString.indexOf('<code')
+    const lastCodeIndex = htmlString.lastIndexOf('</code>')
 
-    if (firstCodeIndex === -1 || lastCodeIndex === -1 || lastCodeIndex < firstCodeIndex) {
+    if (
+        firstCodeIndex === -1 ||
+        lastCodeIndex === -1 ||
+        lastCodeIndex < firstCodeIndex
+    ) {
         // If no valid code blocks are found, return the string unchanged
-        return htmlString;
+        return htmlString
     }
 
     // Split the content into three parts
-    const beforeCode = htmlString.substring(0, firstCodeIndex); // Everything before the first <code>
-    const codeContent = htmlString.substring(firstCodeIndex, lastCodeIndex + 7); // From the first <code> to the last </code>
-    const afterCode = htmlString.substring(lastCodeIndex + 7); // Everything after the last </code>
+    const beforeCode = htmlString.substring(0, firstCodeIndex) // Everything before the first <code>
+    const codeContent = htmlString.substring(firstCodeIndex, lastCodeIndex + 7) // From the first <code> to the last </code>
+    const afterCode = htmlString.substring(lastCodeIndex + 7) // Everything after the last </code>
 
     // Wrap the codeContent with <pre> and the given class
     const styledCodeBlock = `
         <pre class="${codeBlockClass}">
             ${codeContent}
         </pre>
-    `;
+    `
 
     // Combine the parts back together
-    return `${beforeCode}${styledCodeBlock}${afterCode}`;
-};
+    return `${beforeCode}${styledCodeBlock}${afterCode}`
+}
 
 export async function handleSaveChapter(
     moduleId: string,

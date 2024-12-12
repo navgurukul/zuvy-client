@@ -18,11 +18,17 @@ export type Tag = {
 function AllQuestions({ params }: { params: any }) {
     const [assessmentPreviewContent, setAssessmentPreviewContent] =
         useState<any>([])
+    const [assessmentPreviewCodingContent, setAssessmentPreviewCodingContent] =
+        useState<any>([])
     const [allTags, setAllTags] = useState<Tag[]>([])
     const router = useRouter()
 
     useEffect(() => {
-        fetchPreviewAssessmentData(params, setAssessmentPreviewContent)
+        fetchPreviewAssessmentData(
+            params,
+            setAssessmentPreviewContent,
+            setAssessmentPreviewCodingContent
+        )
         fetchAllTags() // Fetch all tags when the component mounts
     }, [params.chapterId, fetchPreviewAssessmentData])
 
@@ -58,6 +64,21 @@ function AllQuestions({ params }: { params: any }) {
         )
     }
 
+    const shuffleQuestions = async () => {
+        const assessmentOutsourseId =
+            assessmentPreviewContent.CodingQuestions[0].assessmentOutsourseId
+        try {
+            const response = await api.get(
+                `Content/startAssessmentForStudent/assessmentOutsourseId=${assessmentOutsourseId}`
+            )
+            setAssessmentPreviewCodingContent(
+                response.data.data.codingQuestions
+            )
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     return (
         <div className="h-auto mb-24">
             <>
@@ -79,7 +100,9 @@ function AllQuestions({ params }: { params: any }) {
                 <div className="flex flex-col gap-5 w-1/2 text-left">
                     <div className="flex justify-between">
                         <h2 className="font-bold">Testing Your Knowledge</h2>
-                        <Button>Shuffle Coding Qs</Button>
+                        <Button onClick={shuffleQuestions}>
+                            Shuffle Coding Qs
+                        </Button>
                     </div>
                     <p className="deadline flex items-center gap-2">
                         <Clock size={18} />
@@ -107,11 +130,11 @@ function AllQuestions({ params }: { params: any }) {
             </div>
 
             {/* Coding Challenges Section */}
-            {assessmentPreviewContent.CodingQuestions?.length > 0 && (
+            {assessmentPreviewCodingContent?.length > 0 && (
                 <div className="flex justify-center">
                     <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
                         <h2 className="font-bold">Coding Challenges</h2>
-                        {assessmentPreviewContent.CodingQuestions?.map(
+                        {assessmentPreviewCodingContent?.map(
                             (codingQuestion: any, index: number) => (
                                 <div
                                     key={index}
