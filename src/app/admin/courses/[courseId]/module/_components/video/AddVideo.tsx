@@ -107,7 +107,7 @@ const AddVideo = ({
     const [showPreview, setShowPreview] = useState<boolean>(false)
     const [showVideoBox, setShowVideoBox] = useState<boolean>(true)
     const [videoTitle, setVideoTitle] = useState('')
-    const {isChapterUpdated, setIsChapterUpdated} = getChapterUpdateStatus()
+    const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {

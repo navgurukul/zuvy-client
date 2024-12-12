@@ -56,12 +56,10 @@ const AddArticle = ({
     // state
     const [title, setTitle] = useState('')
     const [showPreview, setShowPreview] = useState<boolean>(false)
-    const {isChapterUpdated, setIsChapterUpdated} = getChapterUpdateStatus()
+    const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     // misc
     const formSchema = z.object({
-        title: z.string().min(2, {
-            message: 'Title must be at least 2 characters.',
-        }),
+        title: z.string(),
     })
 
     const editor = useEditor({
@@ -167,15 +165,14 @@ const AddArticle = ({
                                             <FormControl>
                                                 <div className="w-2/6 flex justify-center align-middle items-center relative">
                                                     <Input
-                                                        required
+                                                        {...field}
                                                         onChange={(e) => {
                                                             setTitle(
                                                                 e.target.value
                                                             )
+                                                            field.onChange(e)
                                                         }}
-                                                        placeholder={
-                                                            content?.title
-                                                        }
+                                                        placeholder="Untitled Article"
                                                         className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
                                                         autoFocus
                                                     />

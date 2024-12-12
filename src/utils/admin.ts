@@ -708,7 +708,7 @@ export const convertSeconds = (seconds: number) => {
 export async function fetchPreviewAssessmentData(
     params: any,
     setAssessmentPreviewContent: any,
-    setAssessmentPreviewCodingContent: any
+    setAssessmentPreviewCodingContent?: any
 ) {
     try {
         const response = await api.get(
@@ -716,7 +716,8 @@ export async function fetchPreviewAssessmentData(
         )
 
         setAssessmentPreviewContent(response.data)
-        setAssessmentPreviewCodingContent(response.data.CodingQuestions)
+        setAssessmentPreviewCodingContent &&
+            setAssessmentPreviewCodingContent(response.data.CodingQuestions)
     } catch (error) {
         console.error('Error fetching chapter content:', error)
     }
