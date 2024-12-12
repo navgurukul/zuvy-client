@@ -16,7 +16,8 @@ export type Tag = {
 }
 
 function AllQuestions({ params }: { params: any }) {
-    const [assessmentPreviewContent, setAssessmentPreviewContent] = useState<any>([])
+    const [assessmentPreviewContent, setAssessmentPreviewContent] =
+        useState<any>([])
     const [allTags, setAllTags] = useState<Tag[]>([])
     const router = useRouter()
 
@@ -35,27 +36,36 @@ function AllQuestions({ params }: { params: any }) {
 
     // Get the tag name by tag ID
     function getTagNameById(tagId: number | undefined) {
-        const tag = allTags.find(tag => tag.id === tagId)
+        const tag = allTags.find((tag) => tag.id === tagId)
         return tag ? tag.tagName : 'No Tag'
     }
 
-    function solveCodingQuestion(codingQuestionId:any){
-        router.push(`/admin/courses/${params.courseId}/module/${params.moduleId}/chapter/${params.chapterId}/assessment/${params.topicId}/preview/allquestions/coding/${codingQuestionId}`)
+    function solveCodingQuestion(codingQuestionId: any) {
+        router.push(
+            `/admin/courses/${params.courseId}/module/${params.moduleId}/chapter/${params.chapterId}/assessment/${params.topicId}/preview/allquestions/coding/${codingQuestionId}`
+        )
     }
 
-    function attemptQuizPreview(){
-        router.push(`/admin/courses/${params.courseId}/module/${params.moduleId}/chapter/${params.chapterId}/assessment/${params.topicId}/preview/allquestions/mcq`)
+    function attemptQuizPreview() {
+        router.push(
+            `/admin/courses/${params.courseId}/module/${params.moduleId}/chapter/${params.chapterId}/assessment/${params.topicId}/preview/allquestions/mcq`
+        )
     }
 
-    function attemptOpenEndedPreview(){
-        router.push(`/admin/courses/${params.courseId}/module/${params.moduleId}/chapter/${params.chapterId}/assessment/${params.topicId}/preview/allquestions/openended`)
+    function attemptOpenEndedPreview() {
+        router.push(
+            `/admin/courses/${params.courseId}/module/${params.moduleId}/chapter/${params.chapterId}/assessment/${params.topicId}/preview/allquestions/openended`
+        )
     }
 
     return (
-        <div className='h-auto mb-24'>
+        <div className="h-auto mb-24">
             <>
                 <div className="flex items-center justify-between gap-2">
-                    <div onClick={router.back} className="font-bold text-sm cursor-pointer">
+                    <div
+                        onClick={router.back}
+                        className="font-bold text-sm cursor-pointer"
+                    >
                         <X />
                     </div>
                     <div className="font-bold text-sm flex items-center gap-2">
@@ -64,60 +74,96 @@ function AllQuestions({ params }: { params: any }) {
                 </div>
                 <Separator className="my-6" />
             </>
-         
 
             <div className="flex justify-center">
                 <div className="flex flex-col gap-5 w-1/2 text-left">
-                    <div className='flex justify-between'>
-                    <h2 className="font-bold">Testing Your Knowledge</h2>
-                <Button>Shuffle Coding Qs</Button>
-            </div>
+                    <div className="flex justify-between">
+                        <h2 className="font-bold">Testing Your Knowledge</h2>
+                        <Button>Shuffle Coding Qs</Button>
+                    </div>
                     <p className="deadline flex items-center gap-2">
                         <Clock size={18} />
-                        Deadline: {assessmentPreviewContent.deadline || 'No Deadline For This Assessment'}
+                        Deadline:{' '}
+                        {assessmentPreviewContent.deadline ||
+                            'No Deadline For This Assessment'}
                     </p>
                     <p className="testTime flex items-center gap-2">
                         <Timer size={18} />
-                        Test Time: {Math.floor(assessmentPreviewContent.timeLimit / 3600)} Hours {Math.floor((assessmentPreviewContent.timeLimit % 3600) / 60)} Minutes
+                        Test Time:{' '}
+                        {Math.floor(
+                            assessmentPreviewContent.timeLimit / 3600
+                        )}{' '}
+                        Hours{' '}
+                        {Math.floor(
+                            (assessmentPreviewContent.timeLimit % 3600) / 60
+                        )}{' '}
+                        Minutes
                     </p>
                     <p className="description">
-                        All the problems i.e. coding challenges, MCQs, and open-ended questions can be submitted only once.
+                        All the problems i.e. coding challenges, MCQs, and
+                        open-ended questions can be submitted only once.
                     </p>
                 </div>
             </div>
 
             {/* Coding Challenges Section */}
-           {assessmentPreviewContent.CodingQuestions?.length > 0 && ( <div className="flex justify-center">
-                <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
-                    <h2 className="font-bold">Coding Challenges</h2>
-                    {assessmentPreviewContent.CodingQuestions?.map((codingQuestion: any, index: number) => (
-                        <div key={index} className="p-6 bg-white rounded-xl shadow-md">
-                            <div className="flex justify-between">
-                                <h3 className="font-bold capitalize">{codingQuestion.title}</h3>
-                                <span
-                                    className={cn(
-                                        `font-semibold text-secondary text-sm p-2 rounded-full`,
-                                        difficultyColor(codingQuestion.difficulty),
-                                        difficultyBgColor(codingQuestion.difficulty)
-                                    )}
+            {assessmentPreviewContent.CodingQuestions?.length > 0 && (
+                <div className="flex justify-center">
+                    <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
+                        <h2 className="font-bold">Coding Challenges</h2>
+                        {assessmentPreviewContent.CodingQuestions?.map(
+                            (codingQuestion: any, index: number) => (
+                                <div
+                                    key={index}
+                                    className="p-6 bg-white rounded-xl shadow-md"
                                 >
-                                    {codingQuestion.difficulty}
-                                </span>
-                            </div>
-                            <p className="mt-2">{codingQuestion.description}</p>
-                            <p className="text-sm text-gray-500 mt-1">Tag: {getTagNameById(codingQuestion.tagId)}</p>
-                            <div onClick={()=>solveCodingQuestion(codingQuestion.id)} className="text-secondary justify-end flex items-center">
-                            <p
-                                className="cursor-pointer">
-                                Solve Challenge
-                            </p>
-                            <ChevronRight className="cursor-pointer" size={18} />
-                        </div>
-                        </div>
-                        
-                    ))}
+                                    <div className="flex justify-between">
+                                        <h3 className="font-bold capitalize">
+                                            {codingQuestion.title}
+                                        </h3>
+                                        <span
+                                            className={cn(
+                                                `font-semibold text-secondary text-sm p-2 rounded-full`,
+                                                difficultyColor(
+                                                    codingQuestion.difficulty
+                                                ),
+                                                difficultyBgColor(
+                                                    codingQuestion.difficulty
+                                                )
+                                            )}
+                                        >
+                                            {codingQuestion.difficulty}
+                                        </span>
+                                    </div>
+                                    <p className="mt-2">
+                                        {codingQuestion.description}
+                                    </p>
+                                    <p className="text-sm text-gray-500 mt-1">
+                                        Tag:{' '}
+                                        {getTagNameById(codingQuestion.tagId)}
+                                    </p>
+                                    <div
+                                        onClick={() =>
+                                            solveCodingQuestion(
+                                                codingQuestion.id
+                                            )
+                                        }
+                                        className="text-secondary justify-end flex items-center"
+                                    >
+                                        <p className="cursor-pointer">
+                                            Solve Challenge
+                                        </p>
+                                        <ChevronRight
+                                            className="cursor-pointer"
+                                            size={18}
+                                        />
+                                    </div>
+                                </div>
+                            )
+                        )}
+                    </div>
                 </div>
-            </div>)}
+            )}
 
             {/* Quizzes Section */}
             {assessmentPreviewContent.Quizzes?.length > 0 && (
@@ -125,18 +171,26 @@ function AllQuestions({ params }: { params: any }) {
                     <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
                         <h2 className="font-bold">MCQs</h2>
                         <div className="p-6 bg-white rounded-xl shadow-md">
-                           <div className='flex justify-between items-center mb-5'>
-                           <h3 className="font-bold capitalize">
-                                Multiple-Choice Questions (MCQs).
-                            </h3>
-                            <span className='bg-[#FFC374] text-sm p-2 rounded-full'> {assessmentPreviewContent?.Quizzes?.length} Questions</span>
-                           </div>
-                            <div onClick={attemptQuizPreview} className="text-secondary justify-end flex items-center cursor-pointer">
-                            <p>
-                                Attempt Quiz
-                            </p>
-                            <ChevronRight size={18} />
-                        </div>
+                            <div className="flex justify-between items-center mb-5">
+                                <h3 className="font-bold capitalize">
+                                    Multiple-Choice Questions (MCQs).
+                                </h3>
+                                <span className="bg-[#FFC374] text-sm p-2 rounded-full">
+                                    {' '}
+                                    {
+                                        assessmentPreviewContent?.Quizzes
+                                            ?.length
+                                    }{' '}
+                                    Questions
+                                </span>
+                            </div>
+                            <div
+                                onClick={attemptQuizPreview}
+                                className="text-secondary justify-end flex items-center cursor-pointer"
+                            >
+                                <p>Attempt Quiz</p>
+                                <ChevronRight size={18} />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -148,27 +202,30 @@ function AllQuestions({ params }: { params: any }) {
                     <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
                         <h2 className="font-bold">Open-Ended Questions</h2>
                         <div className="p-6 bg-white rounded-xl shadow-md">
-                            <div className='flex justify-between items-center mb-5'>
-                            <h3 className="font-bold capitalize">
-                                Open-Ended Questions.
-                            </h3>
-                            <span className='bg-[#FFC374] text-sm p-2 rounded-full'>{assessmentPreviewContent.OpenEndedQuestions.length} Questions</span>
+                            <div className="flex justify-between items-center mb-5">
+                                <h3 className="font-bold capitalize">
+                                    Open-Ended Questions.
+                                </h3>
+                                <span className="bg-[#FFC374] text-sm p-2 rounded-full">
+                                    {
+                                        assessmentPreviewContent
+                                            .OpenEndedQuestions.length
+                                    }{' '}
+                                    Questions
+                                </span>
                             </div>
 
-                            <div onClick={attemptOpenEndedPreview} className="text-secondary justify-end flex items-center cursor-pointer">
-                            <p>
-                                Attempt Questions
-                            </p>
-                            <ChevronRight size={18} />
+                            <div
+                                onClick={attemptOpenEndedPreview}
+                                className="text-secondary justify-end flex items-center cursor-pointer"
+                            >
+                                <p>Attempt Questions</p>
+                                <ChevronRight size={18} />
+                            </div>
                         </div>
-
-                        </div>
-
-                       
                     </div>
                 </div>
             )}
-
         </div>
     )
 }

@@ -407,7 +407,8 @@ type offset = {
 export const getOffset = create<offset>((set) => ({
     offset: OFFSET,
     setOffset: (newValue: number) => {
-        set({ offset: newValue })
+        const safeOffset = Math.max(0, newValue)
+        set({ offset: safeOffset })
     },
 }))
 
@@ -859,7 +860,7 @@ export const getChapterUpdateStatus = create<updateChapterList>((set) => ({
     isChapterUpdated: false,
     setIsChapterUpdated: (newValue: boolean) => {
         set({ isChapterUpdated: newValue })
-    }
+    },
 }))
 
 // ------------------------- User ------------------------

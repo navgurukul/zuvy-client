@@ -98,6 +98,8 @@ const Mcqs = (props: Props) => {
     const [loading, setLoading] = useState(true)
     const { isEditQuizModalOpen, setIsEditModalOpen } = getEditQuizQuestion()
 
+    console.log('Initial Offset:', offset)
+
     const handleTagOption = (option: Option) => {
         if (option.value === '-1') {
             if (selectedOptions.some((item) => item.value === option.value)) {
@@ -211,8 +213,10 @@ const Mcqs = (props: Props) => {
         async (offset: number) => {
             try {
                 const safeOffset = Math.max(0, offset)
-                let url = `/Content/allQuizQuestions?limit=${position}&offset=${safeOffset}`
+                console.log('offset inside', offset)
+                let url = `/Content/allQuizQuestions?limit=${position}&offset=${offset}`
                 setmcqSearch(debouncedSearch)
+                console.log('offset after', offset)
 
                 let selectedTagIds = ''
                 selectedOptions.forEach(
@@ -275,6 +279,8 @@ const Mcqs = (props: Props) => {
 
     useEffect(() => {
         // Ensure the code runs only on the client side
+        console.log('Current Offset in Effect:', offset)
+
         getAllQuizQuestion(offset)
     }, [getAllQuizQuestion, offset, position])
 
