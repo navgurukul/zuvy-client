@@ -46,7 +46,7 @@ export default function RootLayout({
                 <div className={`${isAssessmentRouteClasses(pathname)}`}>
                     {!adminAssessmentPreviewRoute && <StudentNavbar />}
 
-                    <div className="pt-16 h-screen ">
+                    <div className={`${adminAssessmentPreviewRoute ? '' : 'pt-16'} h-screen`}>
                         <MaxWidthWrapper>{children}</MaxWidthWrapper>
                     </div>
                 </div>
