@@ -398,7 +398,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                         />
                     </div>
                     <div className="flex justify-between w-2/3">
-                        <h3 className="text-left font-bold mb-5">
+                        <h3 className="text-left font-bold mb-5 ml-2">
                             {questionType === 'coding'
                                 ? 'Coding Problem Library'
                                 : questionType === 'mcq'
@@ -407,7 +407,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                 ? 'Open-Ended Question Library'
                                 : ''}
                         </h3>
-                        <h1 className="text-left font-bold mb-5 mr-28">
+                        <h1 className="text-left font-bold mb-5 mr-10">
                             Selected Questions
                         </h1>
                     </div>
