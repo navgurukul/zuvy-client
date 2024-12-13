@@ -23,7 +23,7 @@ export default function RootLayout({
     const rolesList =
         user && (user.rolesList.length === 0 ? 'student' : user.rolesList[0])
 
-        const isChapterRoute = /\/(chapters|viewresults|quizresults|codingresults|openendedresults)/.test(pathname);
+        const isChapterRoute = /\/(chapters|viewresults|quizresults|codingresults|openendedresults|assessment)/.test(pathname);
 
 
         return (
