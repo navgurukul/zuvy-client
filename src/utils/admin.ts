@@ -707,14 +707,18 @@ export const convertSeconds = (seconds: number) => {
 
 export async function fetchPreviewAssessmentData(
     params: any,
-    setAssessmentPreviewContent: any
+    setAssessmentPreviewContent: any,
+    setAssessmentPreviewCodingContent?: any
 ) {
     try {
         const response = await api.get(
             `Content/chapterDetailsById/${params?.chapterId}?bootcampId=${params?.courseId}&moduleId=${params?.moduleId}&topicId=${params?.topicId}`
         )
 
+        setAssessmentPreviewCodingContent &&
+            setAssessmentPreviewCodingContent(response.data.CodingQuestions)
         setAssessmentPreviewContent(response.data)
+        
     } catch (error) {
         console.error('Error fetching chapter content:', error)
     }
