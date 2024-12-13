@@ -303,6 +303,7 @@ function Page({
                 `/Content/assessmentDetailsOfQuiz/${decodedParams.assessmentOutSourceId}`
             )
             setSeperateQuizQuestions(res.data)
+            console.log('res.data', res.data )
         } catch (e) {
             console.error(e)
         }
