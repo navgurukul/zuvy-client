@@ -23,22 +23,25 @@ export default function RootLayout({
     const rolesList =
         user && (user.rolesList.length === 0 ? 'student' : user.rolesList[0])
 
-    return (
-        <div className='h-screen'>
-            {user.email.length == 0 ? (
-                <div className="flex items-center justify-center h-[680px]">
-                    <Spinner className="text-secondary" />
-                </div>
-            ) : user && user.rolesList.length !== 0 ? (
-                <UnauthorizedUser rolesList={rolesList} path={'Student'} />
-            ) : (
-                <div className="h-screen">
-                    <div>{!isAssessmentRoute && <StudentNavbar/>}</div>
-                    <div className="">
-                        {children}
+        const isChapterRoute = /\/(chapters|viewresults|quizresults|codingresults|openendedresults)/.test(pathname);
+
+
+        return (
+            <div className="h-screen">
+                {user.email.length == 0 ? (
+                    <div className="flex items-center justify-center h-[680px]">
+                        <Spinner className="text-secondary" />
                     </div>
-                </div>
-            )}
-        </div>
-    )
-}
+                ) : user && user.rolesList.length !== 0 ? (
+                    <UnauthorizedUser rolesList={rolesList} path={'Student'} />
+                ) : (
+                    <div className="h-screen">
+                        <div>{!isAssessmentRoute && <StudentNavbar />}</div>
+                        <div className={`${isChapterRoute ? 'px-2' : 'pt-20'}`}>
+                            {children}
+                        </div>
+                    </div>
+                )}
+            </div>
+        )
+    }

@@ -91,7 +91,7 @@ const Page = ({ params }: { params: any }) => {
                             <ComboboxStudent
                                 batchData={newBatchData}
                                 bootcampId={
-                                    batchData && batchData[0].bootcampId
+                                    batchData && params.courseId
                                 }
                                 selectedRows={selectedRows}
                                 fetchStudentData={fetchStudentData}

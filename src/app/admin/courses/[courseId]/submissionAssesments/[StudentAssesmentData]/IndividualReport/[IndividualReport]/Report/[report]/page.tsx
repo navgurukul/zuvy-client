@@ -352,7 +352,7 @@ const Page = ({ params }: { params: any }) => {
                             )}
 
                             {/* Quiz Submission */}
-                            {assesmentData?.mcqQuestionCount > 0 && (
+                            {(assesmentData?.submitedOutsourseAssessment?.easyMcqQuestions || assesmentData?.submitedOutsourseAssessment?.mediumMcqQuestions || assesmentData?.submitedOutsourseAssessment?.hardMcqQuestions > 0) && (
                                 <div className="w-full">
                                     <h1 className="text-left font-semibold">
                                         MCQs
