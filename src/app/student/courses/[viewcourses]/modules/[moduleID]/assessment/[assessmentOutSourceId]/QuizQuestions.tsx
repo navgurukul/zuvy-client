@@ -28,6 +28,7 @@ const QuizQuestions = ({
     questions,
     assessmentSubmitId,
     getSeperateQuizQuestions,
+    getAssessmentData
 }: {
     onBack: () => void
     weightage?: any
@@ -35,6 +36,7 @@ const QuizQuestions = ({
     questions: any
     assessmentSubmitId: number
     getSeperateQuizQuestions: () => void
+    getAssessmentData: () => void
 }) => {
     const router = useRouter()
     const params = useParams()
@@ -93,6 +95,9 @@ const QuizQuestions = ({
                 `/submission/quiz/assessmentSubmissionId=${assessmentSubmitId}?assessmentOutsourseId=${params.assessmentOutSourceId}`,
                 { quizSubmissionDto }
             )
+
+            getAssessmentData()
+
             toast({
                 title: 'Success',
                 description: 'Quiz Submitted Successfully',

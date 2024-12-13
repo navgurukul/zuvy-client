@@ -7,6 +7,7 @@ import { paramsType } from '../ViewSolutionOpenEnded/page'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
+import { addClassToCodeTags } from '@/utils/admin'
 
 type SubmissionData = {
     id: number
@@ -39,16 +40,17 @@ type QuizDetails = {
     submissionsData: SubmissionData[]
     Quiz: Quiz
 }
+
+
 const Page = ({ params }: { params: paramsType }) => {
     const { proctoringData, fetchProctoringData } = getProctoringDataStore()
-    // const [individualAssesmentData, setIndividualAssesmentData] =
-    //     useState<any>()
     const [bootcampData, setBootcampData] = useState<any>()
     const [assesmentData, setAssesmentData] = useState<any>()
-    const [quizQuestionDetails, setQuizQuiestionDetails] = useState<
-        QuizDetails[]
-    >([])
+    const [quizQuestionDetails, setQuizQuiestionDetails] = useState<any>()
     const [loading, setLoading] = useState<boolean>(true)
+    const codeBlockClass =
+        'text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full';
+
     const crumbs = [
         {
             crumb: 'My Courses',
@@ -89,15 +91,7 @@ const Page = ({ params }: { params: paramsType }) => {
             console.error('API Error:', error)
         }
     }, [params.courseId])
-    // const getIndividualStudentAssesmentDataHandler = useCallback(async () => {
-    //     await api
-    //         .get(
-    //             `/admin/assessment/submission/user_id${params.IndividualReport}?submission_id=${params.report}`
-    //         )
-    //         .then((res) => {
-    //             setIndividualAssesmentData(res.data)
-    //         })
-    // }, [params.IndividualReport, params.report])
+
     const getStudentAssesmentDataHandler = useCallback(async () => {
         await api
             .get(
@@ -114,7 +108,7 @@ const Page = ({ params }: { params: paramsType }) => {
                     `/Content/assessmentDetailsOfQuiz/${params.StudentAssesmentData}?studentId=${params.IndividualReport}`
                 )
                 .then((res) => {
-                    setQuizQuiestionDetails(res.data)
+                    setQuizQuiestionDetails(res.data.data)
                 })
         } catch (error: any) {
             toast({
@@ -172,58 +166,12 @@ const Page = ({ params }: { params: paramsType }) => {
                 <h1 className="text-left font-semibold text-[20px]">
                     Overview
                 </h1>
-                {/* <div className="lg:flex h-[150px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md w-2/5 ">
-                    <div className="flex flex-col w-full justify-between   ">
-                        <div
-                            className={`flex items-center justify-between p-4 rounded-md ${cheatingClass} `}
-                        >
-                            <h1
-                                className={`text-xl text-start font-semibold  ${
-                                    cheatingClass ? 'text-white' : 'text-black'
-                                } `}
-                            >
-                                Total Score:
-                            </h1>
-                            <p
-                                className={`font-semibold ${
-                                    cheatingClass ? 'text-white' : 'text-black'
-                                }`}
-                            >
-                                {quizSubmission?.quizScore}/
-                                {quizSubmission?.totalQuizScore}
-                            </p>
-                        </div>
-                        <div className="flex flex-start p-4 gap-x-4">
-                            <div>
-                                <h1 className="text-start font-bold">
-                                    {copyPaste}
-                                </h1>
-                                <p className="text-gray-500 text-start">
-                                    Copy Paste
-                                </p>
-                            </div>
-                            <div>
-                                <h1 className="text-start font-bold">
-                                    {tabChange}
-                                </h1>
-                                <p className="text-gray-500">Tab Changes</p>
-                            </div>
-                            <div>
-                                <h1 className="text-start font-bold">
-                                    {cheatingClass ? 'Yes' : 'No'}
-                                </h1>
-                                <p className="text-gray-500">
-                                    Cheating Detected
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div> */}
+             
                 <div>
-                    {quizQuestionDetails.map((quizDetail, index) => {
-                        const { Quiz, submissionsData } = quizDetail
-                        const chosenOption = submissionsData[0]?.chosenOption
-                        const correctOption = Quiz?.correctOption
+                    {quizQuestionDetails?.mcqs?.map((quizDetail: any, index: any) => {
+                        const { submissionsData } = quizDetail
+                        const chosenOption = submissionsData?.chosenOption
+
 
                         return (
                             <div
@@ -234,14 +182,19 @@ const Page = ({ params }: { params: paramsType }) => {
                                     <p className="font-semibold">
                                         Q{index + 1}.
                                     </p>
-                                    <p className="capitalize font-semibold ">
-                                        {Quiz.question}
-                                    </p>
+                                    <div
+                                        className='font-semibold'
+                                        dangerouslySetInnerHTML={{
+                                            __html: addClassToCodeTags(
+                                                quizDetail.question,
+                                                codeBlockClass
+                                            ),
+                                        }} />
                                 </div>
-                                {Object.entries(Quiz.options).map(
+                                {Object.entries(quizDetail.options).map(
                                     ([key, option], index) => {
                                         const isCorrect =
-                                            parseInt(key) === correctOption
+                                            parseInt(key) === quizDetail.correctOption
                                         const isChosen =
                                             parseInt(key) === chosenOption
                                         const textColor = isChosen
@@ -276,9 +229,7 @@ const Page = ({ params }: { params: paramsType }) => {
                                                                 }
                                                                 className=""
                                                             />
-                                                            <p className="font-semibold">
-                                                                {option}
-                                                            </p>
+                                                            {option as any}
                                                         </div>
                                                     </div>
                                                 </div>

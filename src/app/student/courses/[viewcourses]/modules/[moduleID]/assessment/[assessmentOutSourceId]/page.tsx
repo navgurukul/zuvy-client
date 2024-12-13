@@ -340,10 +340,11 @@ function Page({
                     questions={seperateQuizQuestions}
                     assessmentSubmitId={assessmentSubmitId}
                     getSeperateQuizQuestions={getSeperateQuizQuestions}
+                    getAssessmentData={getAssessmentData}
                 />
             )
         } else if (
-            selectedQuesType === 'open-ended' && !seperateOpenEndedQuestions[0]?.submissionsData
+            selectedQuesType === 'open-ended' && !(seperateOpenEndedQuestions[0]?.submissionsData.length > 0)
         ) {
             return (
                 <OpenEndedQuestions
@@ -354,6 +355,7 @@ function Page({
                     getSeperateOpenEndedQuestions={
                         getSeperateOpenEndedQuestions
                     }
+                    getAssessmentData={getAssessmentData}
                 />
             )
         } else if (
@@ -367,6 +369,7 @@ function Page({
                     remainingTime={remainingTime}
                     assessmentSubmitId={assessmentSubmitId}
                     selectedCodingOutsourseId={selectedCodingOutsourseId}
+                    getAssessmentData={getAssessmentData}
                 />
             )
         }

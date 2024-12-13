@@ -40,6 +40,7 @@ interface IDEProps {
     remainingTime?: any
     assessmentSubmitId?: number
     selectedCodingOutsourseId?: number
+    getAssessmentData?: any
 }
 
 const IDE: React.FC<IDEProps> = ({
@@ -48,6 +49,7 @@ const IDE: React.FC<IDEProps> = ({
     remainingTime,
     assessmentSubmitId,
     selectedCodingOutsourseId,
+    getAssessmentData
 }) => {
     const pathname = usePathname()
     const { viewcourses, moduleID, chapterID } = useParams()
@@ -140,7 +142,8 @@ const IDE: React.FC<IDEProps> = ({
                     title: `Test Cases Passed Solution submitted`,
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
-                })
+                    })
+                    getAssessmentData()
 
                 if (onBack) {
                     onBack()

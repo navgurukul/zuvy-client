@@ -59,9 +59,7 @@ const AddArticle = ({
     const {isChapterUpdated, setIsChapterUpdated} = getChapterUpdateStatus()
     // misc
     const formSchema = z.object({
-        title: z.string().min(2, {
-            message: 'Title must be at least 2 characters.',
-        }),
+        title: z.string(),
     })
 
     const editor = useEditor({
@@ -167,7 +165,6 @@ const AddArticle = ({
                                             <FormControl>
                                                 <div className="w-2/6 flex justify-center align-middle items-center relative">
                                                     <Input
-                                                        required
                                                         onChange={(e) => {
                                                             setTitle(
                                                                 e.target.value

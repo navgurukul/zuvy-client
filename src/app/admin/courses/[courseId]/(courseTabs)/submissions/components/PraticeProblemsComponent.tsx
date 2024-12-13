@@ -45,7 +45,7 @@ const PraticeProblemsComponent = ({ courseId, debouncedSearch }: Props) => {
 
     
 
-    const allEmpty = submissions.every(
+    const allEmpty = submissions?.every(
         ({ moduleChapterData }) => moduleChapterData.length === 0
     )
 
@@ -67,7 +67,7 @@ const PraticeProblemsComponent = ({ courseId, debouncedSearch }: Props) => {
 
     return (
         <>
-            {submissions.map(({ id, name, moduleChapterData }) =>
+            {submissions?.map(({ id, name, moduleChapterData }) =>
                 moduleChapterData.length > 0 ? (
                     <PracticeProblems
                         key={id}
