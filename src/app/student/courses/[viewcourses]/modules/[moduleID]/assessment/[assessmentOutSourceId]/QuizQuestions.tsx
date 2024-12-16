@@ -28,6 +28,7 @@ const QuizQuestions = ({
     questions,
     assessmentSubmitId,
     getSeperateQuizQuestions,
+    getAssessmentData
 }: {
     onBack: () => void
     weightage?: any
@@ -35,6 +36,7 @@ const QuizQuestions = ({
     questions: any
     assessmentSubmitId: number
     getSeperateQuizQuestions: () => void
+    getAssessmentData: () => void
 }) => {
     const router = useRouter()
     const params = useParams()
@@ -81,18 +83,35 @@ const QuizQuestions = ({
 
     // Handle form submission
     const onSubmit = async (data: z.infer<typeof formSchema>) => {
-        const quizSubmissionDto = data.answers.map((chosenOption, index) => ({
-            questionId: questions.data.mcqs[index].outsourseQuizzesId,
-            variantId: questions.data.mcqs[index].variantId,
-            attemptCount: 1,
-            chosenOption: Number(chosenOption),
-        }))
+        // const quizSubmissionDto = data.answers.map((chosenOption, index) => ({
+        //     questionId: questions.data.mcqs[index].outsourseQuizzesId,
+        //     variantId: questions.data.mcqs[index].variantId,
+        //     attemptCount: 1,
+        //     chosenOption: Number(chosenOption),
+        // }))
 
-        try {
+        const quizSubmissionDto = data.answers.map((chosenOption, index) => {
+            const questionId = questions.data.mcqs[index].outsourseQuizzesId;
+        
+            // If questionId is true, call the API
+            if (questionId) {
+                return {
+                    questionId,
+                    variantId: questions.data.mcqs[index].variantId,
+                    attemptCount: 1,
+                    chosenOption: Number(chosenOption),
+                };
+            }
+        });
+
+         try {
             const response = await api.patch(
                 `/submission/quiz/assessmentSubmissionId=${assessmentSubmitId}?assessmentOutsourseId=${params.assessmentOutSourceId}`,
                 { quizSubmissionDto }
             )
+
+            getAssessmentData()
+
             toast({
                 title: 'Success',
                 description: 'Quiz Submitted Successfully',

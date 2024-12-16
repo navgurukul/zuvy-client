@@ -51,9 +51,9 @@ const McqPreview = ({ params }: { params: any[] }) => {
                     <ChevronLeft strokeWidth={2} size={24} />
                     <h1 className="font-extrabold">All Questions</h1>
                 </div>
-                <div>
+                {/* <div>
                     <Button>Shuffle Quiz Qs</Button>
-                </div>
+                </div> */}
             </div>
             <Separator />
             <Form {...form}>

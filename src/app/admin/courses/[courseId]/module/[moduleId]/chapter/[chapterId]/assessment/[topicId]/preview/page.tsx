@@ -18,6 +18,7 @@ import Link from 'next/link'
 const PreviewAssessment = ({ params }: { params: any }) => {
     const { assessmentPreviewContent, setAssessmentPreviewContent } =
         getAssessmentPreviewStore()
+
     const router = useRouter()
 
     useEffect(() => {

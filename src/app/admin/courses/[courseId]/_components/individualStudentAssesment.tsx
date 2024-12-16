@@ -97,8 +97,7 @@ const IndividualStudentAssesment = ({
                             : questionInfo.title}
                     </h1>
 
-                    <div className="flex flex-col gap-y-2 md:flex-row md:gap-x-12 ">
-                        {/* <h1>Time Taken: 10mins</h1> */}
+                    {/* <div className="flex flex-col gap-y-2 md:flex-row md:gap-x-12 ">
                         {type !== 'quizSubmission' && (
                             <h1>
                                 Copy Paste:{' '}
@@ -108,7 +107,7 @@ const IndividualStudentAssesment = ({
                         <h1>
                             Tab Change: {tabchanges == 0 ? 'None' : tabchanges}
                         </h1>
-                    </div>
+                    </div> */}
                     <div className="flex items-center gap-x-2">
                         <div
                             className={`h-2 w-2 ${

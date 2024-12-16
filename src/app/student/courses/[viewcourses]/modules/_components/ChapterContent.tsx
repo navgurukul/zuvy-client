@@ -197,13 +197,15 @@ function ChapterContent() {
                     )
                 case 5:
                     return (
-                        <Assignment
+                        <div className=''>
+                            <Assignment
                             content={chapterContent}
                             moduleId={+moduleID}
                             projectId={projectId}
                             bootcampId={+viewcourses}
                             completeChapter={completeChapter}
                         />
+                        </div>
                     )
                 case 6:
                     return (

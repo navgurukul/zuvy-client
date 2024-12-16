@@ -106,8 +106,8 @@ const Assessment = ({
     const isDisabled = !hasQuestions
 
     return (
-        <React.Fragment>
-            <div className="flex flex-col items-center justify-center px-4 py-8">
+        <div className='h-full'>
+            <div className="flex flex-col items-center justify-center px-4 py-8 mt-20">
                 <div className="flex flex-col gap-4 text-left w-full max-w-2xl">
                     <div className="flex items-center gap-4">
                         <h1 className="text-2xl font-bold text-gray-800 text-center">
@@ -299,7 +299,7 @@ const Assessment = ({
                     </TooltipProvider>
                 )}
             </div>
-        </React.Fragment>
+        </div>
     )
 }
 

@@ -714,7 +714,6 @@ export async function fetchPreviewAssessmentData(
         const response = await api.get(
             `Content/chapterDetailsById/${params?.chapterId}?bootcampId=${params?.courseId}&moduleId=${params?.moduleId}&topicId=${params?.topicId}`
         )
-
         setAssessmentPreviewContent(response.data)
         setAssessmentPreviewCodingContent &&
             setAssessmentPreviewCodingContent(response.data.CodingQuestions)
