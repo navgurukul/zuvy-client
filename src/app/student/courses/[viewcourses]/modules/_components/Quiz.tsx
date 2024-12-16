@@ -59,6 +59,15 @@ function Quiz(props: Props) {
                 )
                 setQuestions(updatedQuestions)
                 setStatus(res.data.data.status === 'Completed')
+                // setTimeout(() => {
+                //     setStatus(res.data.data.status === 'Completed')
+                //     console.log(
+                //         'Status res.data getAllQuizQuestionHandler',
+                //         res.data.data.status === 'Completed'
+                //     )
+                // }, 500)
+
+                // console.log('Status getAllQuizQuestionHandler', status)
             } else {
                 console.error('Failed to fetch quiz details')
             }
@@ -119,8 +128,9 @@ function Quiz(props: Props) {
             })
     }
 
+    console.log('Status above retur JSX', status)
     return (
-        <ScrollArea className='h-screen'>
+        <ScrollArea className="h-screen">
             {questions.length == 0 ? (
                 <div>
                     <h1 className="text-center font-semibold text-2xl">
