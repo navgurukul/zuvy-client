@@ -86,9 +86,7 @@ const AddAssignent = ({
     }
 
     const formSchema = z.object({
-        title: z.string().min(2, {
-            message: 'Title must be at least 2 characters.',
-        }),
+        title: z.string(),
         startDate: z.date({
             required_error: 'A start date is required.',
         }),
@@ -101,7 +99,7 @@ const AddAssignent = ({
 
     const [title, setTitle] = useState('')
     const [titles, setTitles] = useState('')
-    const {isChapterUpdated, setIsChapterUpdated} = getChapterUpdateStatus()
+    const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
 
     const form = useForm({
         resolver: zodResolver(formSchema),
@@ -208,7 +206,6 @@ const AddAssignent = ({
                                             <FormControl>
                                                 <div className="w-2/6 flex justify-center align-middle items-center relative">
                                                     <Input
-                                                        required
                                                         {...field}
                                                         onChange={(e) => {
                                                             setTitles(
@@ -216,7 +213,7 @@ const AddAssignent = ({
                                                             )
                                                             field.onChange(e)
                                                         }}
-                                                        placeholder="Untitled Article"
+                                                        placeholder="Untitled Assignment"
                                                         className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
                                                         autoFocus
                                                     />

@@ -2,7 +2,10 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import QuizLibrary from '@/app/admin/courses/[courseId]/module/_components/quiz/QuizLibrary'
-import { quizData, Options } from '@/app/admin/courses/[courseId]/module/_components/quiz/QuizLibrary'
+import {
+    quizData,
+    Options,
+} from '@/app/admin/courses/[courseId]/module/_components/quiz/QuizLibrary'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import QuizModal from '@/app/admin/courses/[courseId]/module/_components/quiz/QuizModal'
@@ -17,13 +20,13 @@ import QuizPreview from '@/app/admin/courses/[courseId]/module/_components/quiz/
 function Quiz(props: any) {
     const [tags, setTags] = useState<Tag[]>([])
     const [isOpen, setIsOpen] = useState(false)
-    const [inputValue, setInputValue] = useState('')
     const [addQuestion, setAddQuestion] = useState<quizData[]>([])
     const [questionId, setQuestionId] = useState()
     const { quizData, setStoreQuizData } = getAllQuizData()
     const [showPreview, setShowPreview] = useState(false)
     const [quizTitle, setQuizTitle] = useState('')
-    const {isChapterUpdated, setIsChapterUpdated} = getChapterUpdateStatus()
+    const [inputValue, setInputValue] = useState(props.activeChapterTitle)
+    const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
 
     const handleAddQuestion = (data: any) => {
         const uniqueData = data.filter((question: quizData) => {
@@ -138,7 +141,8 @@ function Quiz(props: any) {
                                     onChange={(e) => {
                                         setInputValue(e.target.value)
                                     }}
-                                    placeholder={quizTitle}
+                                    value={inputValue}
+                                    placeholder="Untitled Quiz"
                                     className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
                                     autoFocus
                                 />

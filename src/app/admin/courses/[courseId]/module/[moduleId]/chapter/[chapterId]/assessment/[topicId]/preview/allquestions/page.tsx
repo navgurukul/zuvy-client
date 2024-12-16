@@ -161,10 +161,10 @@ function AllQuestions({ params }: { params: any }) {
                                     <p className="mt-2">
                                         {codingQuestion.description}
                                     </p>
-                                    {/* <p className="text-sm text-gray-500 mt-1">
+                                    <p className="text-sm text-gray-500 mt-1">
                                         Tag:{' '}
                                         {getTagNameById(codingQuestion.tagId)}
-                                    </p> */}
+                                    </p>
                                     <div
                                         onClick={() =>
                                             solveCodingQuestion(

@@ -174,6 +174,7 @@ export default function Page({
                             chapterId={chapterId}
                             moduleId={moduleID}
                             content={chapterContent}
+                            activeChapterTitle={activeChapterTitle}
                         />
                     )
                 case 5:
@@ -198,19 +199,18 @@ export default function Page({
                             fetchChapterContent={fetchChapterContent}
                             moduleId={moduleID}
                             topicId={topicId}
+                            activeChapterTitle={activeChapterTitle}
                         />
                     )
                 case 7:
                     return (
-               
-                            <AddForm
-                                key={chapterId}
-                                chapterData={currentChapter}
-                                content={chapterContent}
-                                // fetchChapterContent={fetchChapterContent}
-                                moduleId={moduleID}
-                            />
-               
+                        <AddForm
+                            key={chapterId}
+                            chapterData={currentChapter}
+                            content={chapterContent}
+                            // fetchChapterContent={fetchChapterContent}
+                            moduleId={moduleID}
+                        />
                     )
                 default:
                     return <h1>Create New Chapter</h1>

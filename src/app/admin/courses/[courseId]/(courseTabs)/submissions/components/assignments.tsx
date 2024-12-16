@@ -18,6 +18,7 @@ type Props = {
 
 const Assignments = ({ courseId, debouncedSearch }: Props) => {
     const [assignmentData, setAssignmentData] = useState<any[]>([])
+    const [totalStudents, setTotalStudents] = useState(0)
 
     useEffect(() => {
         const fetchAssignmentDataHandler = async () => {
@@ -27,6 +28,7 @@ const Assignments = ({ courseId, debouncedSearch }: Props) => {
                     : `/submission/submissionsOfAssignment/${courseId}`
                 const res = await api.get(url)
                 setAssignmentData(res.data.data.trackingData)
+                setTotalStudents(res.data.data.totalStudents)
             } catch (error) {
                 toast({
                     title: 'Error',
@@ -108,14 +110,11 @@ const Assignments = ({ courseId, debouncedSearch }: Props) => {
 
                 if (moduleDataLength > 0)
                     return (
-                        <div className="" key={data.id}>
+                        <div className="my-3" key={data.id}>
                             <div className="w-full flex flex-col gap-y-5">
                                 <h1 className="w-full text-[20px] text-left font-semibold">
-                                    Title: {data.name}
+                                    Module: {data.name}
                                 </h1>
-                                <p className="font-semibold text-left">
-                                    <span>Description:</span> {data.description}
-                                </p>
                             </div>
 
                             <div className="grid grid-cols-1 gap-8 mt-2 md:mt-4 md:grid-cols-2 lg:grid-cols-3">
@@ -125,13 +124,18 @@ const Assignments = ({ courseId, debouncedSearch }: Props) => {
                                             moduleData.submitStudents === 0
                                         const chapterId = moduleData.id
 
+                                        const submissionPercentage =
+                                            moduleData.submitStudents > 0
+                                                ? totalStudents /
+                                                  moduleData.submitStudents
+                                                : 0
                                         return (
                                             <div
-                                                className="relative lg:flex h-[100px] w-full shadow-[0_4px_4px_rgb(1,1,0,0.12)] my-4 rounded-md p-3"
+                                                className="relative lg:flex py-5 h-[120px] w-full shadow-[0_4px_4px_rgb(1,1,0,0.12)] my-4 rounded-md p-3"
                                                 key={moduleData.id}
                                             >
                                                 {/* Icon at the top-right */}
-                                                <div className="absolute top-2 right-2 group">
+                                                <div className="absolute top-5 pr-3 right-2 group">
                                                     <button
                                                         className={`ml-2 cursor-pointer ${
                                                             isDisabled
@@ -164,22 +168,38 @@ const Assignments = ({ courseId, debouncedSearch }: Props) => {
                                                 </div>
 
                                                 {/* Content */}
-                                                <div className="font-semibold flex w-full flex-col justify-between">
-                                                    <div className="flex w-full">
-                                                        <h1 className="w-1/2">
-                                                            {moduleData.title}
-                                                        </h1>
-                                                        <h2 className="w-1/2 flex">
-                                                            <span>
-                                                                Total Submitted:{' '}
-                                                            </span>
-                                                            <span>
+                                                <div className="font-semibold pl-3 flex w-full flex-col justify-between">
+                                                    <h1 className="w-1/2 text-start">
+                                                        {moduleData.title}
+                                                    </h1>
+                                                    <h2 className="w-1/2 flex mt-2">
+                                                        <div className="text-start flex gap-x-2">
+                                                            <div className="flex items-center justify-center">
+                                                                <div
+                                                                    className={`w-2 h-2 rounded-full flex items-center justify-center ${
+                                                                        submissionPercentage >=
+                                                                        0.8
+                                                                            ? 'bg-green-300'
+                                                                            : submissionPercentage <=
+                                                                                  0.8 &&
+                                                                              submissionPercentage >=
+                                                                                  0.5
+                                                                            ? 'bg-yellow-300'
+                                                                            : 'bg-red-500'
+                                                                    }`}
+                                                                ></div>
+                                                            </div>
+                                                            <p>
                                                                 {
                                                                     moduleData.submitStudents
                                                                 }
-                                                            </span>
-                                                        </h2>
-                                                    </div>
+                                                                /{totalStudents}
+                                                            </p>
+                                                            <h3 className="text-gray-400 font-semibold cursor-not-allowed">
+                                                                Submissions
+                                                            </h3>
+                                                        </div>
+                                                    </h2>
 
                                                     {/* Fix View Submissions button to right bottom corner */}
                                                     <div className="w-full flex justify-end">

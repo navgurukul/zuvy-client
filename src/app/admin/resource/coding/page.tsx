@@ -248,6 +248,7 @@ const CodingProblems = () => {
             searchTerm,
             selectedOptions,
             difficulty,
+            setTotalCodingQuestion,
             // selectedDifficulty,
             debouncedSearch,
             isCodingDialogOpen,
@@ -259,6 +260,7 @@ const CodingProblems = () => {
     console.log('Search Term:', searchTerm)
 
     useEffect(() => {
+        // console.log('Current Offset in Effect:', offset)
         getAllCodingQuestions(setAllCodingQuestions)
         fetchCodingQuestions(offset)
         // filteredCodingQuestions(
@@ -285,12 +287,13 @@ const CodingProblems = () => {
         searchTerm,
         selectedOptions,
         difficulty,
+        setTotalCodingQuestion,
         // selectedDifficulty,
         debouncedSearch,
         isCodingDialogOpen,
         openEditDialog,
         position,
-        offset,
+        // offset,
     ])
 
     useEffect(() => {
@@ -337,6 +340,9 @@ const CodingProblems = () => {
             })
         }
     }
+
+    console.log('offset', offset)
+    console.log('position', position)
 
     const selectedTagCount = selectedOptions.length
     const difficultyCount = difficulty.length

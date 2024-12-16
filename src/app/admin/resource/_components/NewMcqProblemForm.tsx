@@ -1040,6 +1040,18 @@ const NewMcqProblemForm = ({
                                         />
                                     )}
                                 />
+                                {fields.length > 1 && (
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.preventDefault()
+                                            remove(index)
+                                            removeNumQuestions(index)
+                                        }}
+                                    >
+                                        <X className="h-5 w-5 ml-3 mt-2 text-muted-foreground" />
+                                    </button>
+                                )}
                             </div>
                         ))}
 
@@ -1048,7 +1060,7 @@ const NewMcqProblemForm = ({
                             type="button"
                             variant={'ghost'}
                             onClick={addTopicField}
-                            className="mt-4 justify-start"
+                            className="mt-4 w-1/6"
                         >
                             + Add Topic
                         </Button>

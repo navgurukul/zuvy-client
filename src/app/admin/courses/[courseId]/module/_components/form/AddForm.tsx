@@ -64,7 +64,7 @@ const AddForm: React.FC<AddFormProps> = ({
     // fetchChapterContent,
     moduleId,
 }) => {
-    const {isChapterUpdated, setIsChapterUpdated} = getChapterUpdateStatus()
+    const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     // const heightClass = useResponsiveHeight()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -84,6 +84,7 @@ const AddForm: React.FC<AddFormProps> = ({
                     : [
                           {
                               //   id: 'initial-1',
+                              questionType: 'Multiple Choice',
                               id: 'new-1',
                               question: 'Question 1',
                               typeId: 1,
@@ -108,6 +109,7 @@ const AddForm: React.FC<AddFormProps> = ({
                     : [
                           {
                               //   id: 'initial-1',
+                              questionType: 'Multiple Choice',
                               id: 'new-1',
                               question: 'Question 1',
                               typeId: 1,
