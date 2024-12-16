@@ -69,35 +69,41 @@ const McqPreview = ({ params }: { params: any[] }) => {
                                     <FormItem className="flex flex-col items-start mb-10 w-full max-w-md">
                                         <FormLabel className="text-[#4A4A4A] font-semibold text-md">
                                             {index + 1}.{' '}
-                                            {question.quizVariants[0].question}
+                                            {
+                                                question?.quizVariants[0]
+                                                    ?.question
+                                            }
                                         </FormLabel>
                                         <FormControl>
                                             <RadioGroup
                                                 value={field.value}
                                                 onValueChange={field.onChange}
                                             >
-                                                {Object.keys(
-                                                    question.quizVariants[0]
-                                                        .options
-                                                ).map((key) => (
-                                                    <div
-                                                        key={key}
-                                                        className="flex items-center gap-2 mb-2"
-                                                    >
-                                                        <RadioGroupItem
-                                                            value={key}
-                                                        />
-                                                        <p>
-                                                            {
-                                                                question
-                                                                    .quizVariants[0]
-                                                                    .options[
-                                                                    key
-                                                                ]
-                                                            }
-                                                        </p>
-                                                    </div>
-                                                ))}
+                                                {question?.quizVariants.length >
+                                                    0 &&
+                                                    Object.keys(
+                                                        question
+                                                            ?.quizVariants[0]
+                                                            ?.options
+                                                    ).map((key) => (
+                                                        <div
+                                                            key={key}
+                                                            className="flex items-center gap-2 mb-2"
+                                                        >
+                                                            <RadioGroupItem
+                                                                value={key}
+                                                            />
+                                                            <p>
+                                                                {
+                                                                    question
+                                                                        ?.quizVariants[0]
+                                                                        ?.options[
+                                                                        key
+                                                                    ]
+                                                                }
+                                                            </p>
+                                                        </div>
+                                                    ))}
                                             </RadioGroup>
                                         </FormControl>
                                         <FormMessage />

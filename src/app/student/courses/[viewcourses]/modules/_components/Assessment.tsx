@@ -96,6 +96,13 @@ const Assessment = ({
     const isAssessmentStarted =
         assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.startedAt
 
+    const isPassed =
+        assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.isPassed
+    const marks = assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.marks
+    const percentage =
+        assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.percentage
+    const passPercentage = assessmentShortInfo?.passPercentage
+
     const isDisabled = !hasQuestions
 
     return (
@@ -214,11 +221,47 @@ const Assessment = ({
                             </span>
                         </p>
                     )}
+                    {/* <div className="h-[100px] w-1/3 text-lg description bg-primary-foreground p-5 rounded-lg"> */}
+                    <div
+                        className={`${
+                            isPassed
+                                ? 'bg-green-100 h-[100px]'
+                                : 'bg-red-100 h-[120px]'
+                        } flex justify-between mt-10 w-2/3 p-5 rounded-lg`}
+                    >
+                        <div>
+                            <p className="text-lg font-semibold">
+                                Your Score: {percentage || 0}/100
+                            </p>
+                            <p>
+                                {isPassed
+                                    ? 'Congratulations, you passed!'
+                                    : `You needed at least ${passPercentage} percentage to pass`}
+                            </p>
+                        </div>
+                        <Button
+                            variant="ghost"
+                            className={`${
+                                isPassed
+                                    ? 'text-secondary hover:text-secondary'
+                                    : 'text-red-500 hover:text-red-500'
+                            } text-lg font-semibold`}
+                            onClick={handleViewResults}
+                            disabled={chapterContent.status === 'Pending'}
+                        >
+                            View Results
+                        </Button>
+                    </div>
+                    {isTimeOver && chapterContent.status === 'Pending' && (
+                        <p className="text-red-500 mt-4">
+                            You have not submitted the assessment properly.
+                        </p>
+                    )}
                 </div>
             </div>
 
             <div className="mt-8 flex flex-col items-center justify-center">
-                {isAssessmentStarted ? (
+                {/* {!isAssessmentStarted ? (
                     <>
                         <Button
                             onClick={handleViewResults}
@@ -232,7 +275,8 @@ const Assessment = ({
                             </p>
                         )}
                     </>
-                ) : (
+                ) :  */}
+                {!isAssessmentStarted && (
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
