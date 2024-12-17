@@ -210,7 +210,7 @@ function CodingChallenge({
                     tags={tags}
                 />
             ) : (
-                <div>
+                <div className="pl-10">
                     {/* SearchBar component */}
                     <div className="flex flex-col items-start mb-15">
                         <div className="w-2/6 flex justify-center align-middle items-center relative">
@@ -248,17 +248,21 @@ function CodingChallenge({
 
                     <div className="grid grid-cols-2">
                         <div>
-                            <CodingTopics
-                                setSearchTerm={setSearchTerm}
-                                searchTerm={searchTerm}
-                                selectedTopics={selectedOptions}
-                                setSelectedTopics={setSelectedOptions}
-                                selectedDifficulties={selectedDifficulty}
-                                setSelectedDifficulties={setSelectedDifficulty}
-                                // selectedLanguage={selectedLanguage}
-                                // setSelectedLanguage={setSelectedLanguage}
-                                tags={tags}
-                            />
+                            <div className="flex">
+                                <CodingTopics
+                                    setSearchTerm={setSearchTerm}
+                                    searchTerm={searchTerm}
+                                    selectedTopics={selectedOptions}
+                                    setSelectedTopics={setSelectedOptions}
+                                    selectedDifficulties={selectedDifficulty}
+                                    setSelectedDifficulties={
+                                        setSelectedDifficulty
+                                    }
+                                    // selectedLanguage={selectedLanguage}
+                                    // setSelectedLanguage={setSelectedLanguage}
+                                    tags={tags}
+                                />
+                            </div>
                             {/* <ScrollArea className="h-dvh pr-4"> */}
                             <ScrollArea className="h-[500px] pr-4">
                                 {filteredQuestions?.map((question: any) => (
