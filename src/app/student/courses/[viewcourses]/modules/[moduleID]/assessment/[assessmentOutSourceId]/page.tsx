@@ -186,6 +186,8 @@ function Page({
         isCopyPasteProctorOn,
         isEyeTrackingProctorOn,
         startedAt,
+        isFullScreen,
+        assessmentData,
     ])
 
     // useEffect(() => {
@@ -260,7 +262,6 @@ function Page({
             type === 'open-ended' &&
             seperateOpenEndedQuestions[0]?.submissionsData.length > 0
         ) {
-            
             toast({
                 title: 'Open Ended Questions Already Submitted',
                 description:
@@ -303,7 +304,6 @@ function Page({
                 `/Content/assessmentDetailsOfQuiz/${decodedParams.assessmentOutSourceId}`
             )
             setSeperateQuizQuestions(res.data)
-            console.log('res.data', res.data )
         } catch (e) {
             console.error(e)
         }
@@ -320,14 +320,17 @@ function Page({
     }
 
     useEffect(() => {
-        getAssessmentData()
+        if (isFullScreen) {
+            getAssessmentData()
+        }
         getSeperateQuizQuestions()
         getSeperateOpenEndedQuestions()
-    }, [decodedParams.assessmentOutSourceId])
+    }, [decodedParams.assessmentOutSourceId, isFullScreen])
 
     if (isSolving && isFullScreen) {
         if (
-            selectedQuesType === 'quiz' && !assessmentData.IsQuizzSubmission &&
+            selectedQuesType === 'quiz' &&
+            !assessmentData.IsQuizzSubmission &&
             assessmentData.hardMcqQuestions +
                 assessmentData.easyMcqQuestions +
                 assessmentData.mediumMcqQuestions >
@@ -345,7 +348,8 @@ function Page({
                 />
             )
         } else if (
-            selectedQuesType === 'open-ended' && !(seperateOpenEndedQuestions[0]?.submissionsData.length > 0)
+            selectedQuesType === 'open-ended' &&
+            !(seperateOpenEndedQuestions[0]?.submissionsData.length > 0)
         ) {
             return (
                 <OpenEndedQuestions
@@ -515,7 +519,7 @@ function Page({
                                 </ul>
                             </div>
                         </div>
-                        {assessmentData.codingQuestions.length > 0 && (
+                        {assessmentData?.codingQuestions?.length > 0 && (
                             <div className="flex justify-center">
                                 <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
                                     <h2 className="font-bold">
@@ -526,9 +530,15 @@ function Page({
                                             <QuestionCard
                                                 key={question.id}
                                                 id={question.id}
-                                                easyCodingMark = {assessmentData.easyCodingMark}
-                                                mediumCodingMark = {assessmentData.mediumCodingMark}
-                                                hardCodingMark = {assessmentData.hardCodingMark}
+                                                easyCodingMark={
+                                                    assessmentData.easyCodingMark
+                                                }
+                                                mediumCodingMark={
+                                                    assessmentData.mediumCodingMark
+                                                }
+                                                hardCodingMark={
+                                                    assessmentData.hardCodingMark
+                                                }
                                                 title={question.title}
                                                 description={
                                                     question.difficulty

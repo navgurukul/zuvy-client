@@ -16,6 +16,7 @@ import { DataTablePagination } from '@/app/_components/datatable/data-table-pagi
 import useDebounce from '@/hooks/useDebounce'
 import { Spinner } from '@/components/ui/spinner'
 import { toast } from '@/components/ui/use-toast'
+import ClassCardSkeleton from '../../_components/classCardSkeleton'
 
 type ClassType = 'active' | 'upcoming' | 'complete'
 
@@ -195,6 +196,7 @@ function Page({ params }: any) {
         }
     }
 
+    console.log('classes', classes)
     return (
         <>
             {loading ? (
@@ -260,42 +262,66 @@ function Page({ params }: any) {
                     ) : (
                         <div>
                             {classes.length > 0 ? (
-                                <>
+                                activeTab === classes[0].status ? (
+                                    <>
+                                        <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
+                                            {classes.map(
+                                                (classData: any, index: any) =>
+                                                    activeTab ===
+                                                    classData.status ? (
+                                                        activeTab ===
+                                                        'completed' ? (
+                                                            <RecordingCard
+                                                                classData={
+                                                                    classData
+                                                                }
+                                                                key={index}
+                                                                isAdmin
+                                                            />
+                                                        ) : (
+                                                            <ClassCard
+                                                                classData={
+                                                                    classData
+                                                                }
+                                                                key={index}
+                                                                classType={
+                                                                    activeTab
+                                                                }
+                                                                getClasses={
+                                                                    getHandleAllClasses
+                                                                }
+                                                                activeTab={
+                                                                    activeTab
+                                                                }
+                                                                studentSide={
+                                                                    false
+                                                                }
+                                                            />
+                                                        )
+                                                    ) : (
+                                                        <ClassCardSkeleton />
+                                                    )
+                                            )}
+                                        </div>
+                                        <DataTablePagination
+                                            totalStudents={totalStudents}
+                                            position={position}
+                                            setPosition={setPosition}
+                                            pages={pages}
+                                            lastPage={lastPage}
+                                            currentPage={currentPage}
+                                            setCurrentPage={setCurrentPage}
+                                            fetchStudentData={
+                                                getHandleAllClasses
+                                            }
+                                            setOffset={setOffset}
+                                        />
+                                    </>
+                                ) : (
                                     <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
-                                        {classes.map(
-                                            (classData: any, index: any) =>
-                                                activeTab === 'completed' ? (
-                                                    <RecordingCard
-                                                        classData={classData}
-                                                        key={index}
-                                                        isAdmin
-                                                    />
-                                                ) : (
-                                                    <ClassCard
-                                                        classData={classData}
-                                                        key={index}
-                                                        classType={activeTab}
-                                                        getClasses={
-                                                            getHandleAllClasses
-                                                        }
-                                                        activeTab={activeTab}
-                                                        studentSide={false}
-                                                    />
-                                                )
-                                        )}
+                                        <ClassCardSkeleton />
                                     </div>
-                                    <DataTablePagination
-                                        totalStudents={totalStudents}
-                                        position={position}
-                                        setPosition={setPosition}
-                                        pages={pages}
-                                        lastPage={lastPage}
-                                        currentPage={currentPage}
-                                        setCurrentPage={setCurrentPage}
-                                        fetchStudentData={getHandleAllClasses}
-                                        setOffset={setOffset}
-                                    />
-                                </>
+                                )
                             ) : (
                                 <div className="w-full flex mb-10 items-center flex-col gap-y-3 justify-center absolute text-center mt-2">
                                     <Image
