@@ -25,7 +25,6 @@ const IndividualStudentAssesment = ({
     totalOpenEndedScore,
 }: any) => {
     const { courseId, StudentAssesmentData, IndividualReport, report } = params
-    console.log(data)
     const color = getAssesmentBackgroundColorClass(25, 5)
     const renderQuestion = () => {
         switch (type) {

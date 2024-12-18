@@ -204,12 +204,24 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
         })
     }
 
-    const handleWeightageChange = (
+      const handleWeightageChange = (
         e: React.ChangeEvent<HTMLInputElement>,
         field: any
     ) => {
-        const value = e.target.value
-        field.onChange(value === '' ? null : Number(value))
+        const value = e.target.value === '' ? null : Number(e.target.value)
+        
+        // Determine which weightage field is being changed
+        const isCodeField = field.name === 'codingProblemsWeightage'
+        const otherField = isCodeField ? 'mcqsWeightage' : 'codingProblemsWeightage'
+        
+        // Set the value for the current field
+        field.onChange(value)
+        
+        // Automatically update the other field to total 100
+        const otherFieldValue = value ? 100 - value : 100
+        form.setValue(otherField, otherFieldValue, {
+            shouldValidate: true,
+        })
     }
 
     useEffect(() => {
@@ -305,6 +317,8 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
         }
     }
 
+   
+
     useEffect(() => {
         form.reset({
             codingProblemsEasy: content?.easyCodingQuestions || 0,
@@ -314,9 +328,9 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
             mcqsMedium: content?.mediumMcqQuestions || 0,
             mcqsHard: content?.hardMcqQuestions || 0,
             codingProblemsWeightage:
-                codingMax > 0 && mcqMax > 0 ? 50 : codingMax > 0 ? 100 : 0,
+                codingMax > 0 && mcqMax > 0 ? content?.weightageCodingQuestions || 50 : codingMax > 0 ? 100 : 0,
             mcqsWeightage:
-                codingMax > 0 && mcqMax > 0 ? 50 : mcqMax > 0 ? 100 : 0,
+                codingMax > 0 && mcqMax > 0 ? content?.weightageMcqQuestions || 50 : mcqMax > 0 ? 100 : 0,
             canCopyPaste: content?.canCopyPaste || false,
             tabSwitch: content?.canTabChange || false,
             screenExit: content?.canScreenExit || false,

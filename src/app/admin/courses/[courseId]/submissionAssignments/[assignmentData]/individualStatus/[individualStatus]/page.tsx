@@ -91,7 +91,7 @@ const Page = ({ params }: any) => {
 
                         setAssignmentTItle(data.title)
                     } else {
-                        console.log('Incomplete data received')
+                        console.error('Incomplete data received')
                     }
                 } else {
                     throw new Error('No data found')

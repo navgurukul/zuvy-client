@@ -98,10 +98,6 @@ const OpenEndedQuestions = ({
         }
     }
 
-    useEffect(()=>{
-        console.log('questions', questions)
-    },[questions])
-
     return (
         <div className="px-4">
             <div className="flex items-center justify-between gap-2">

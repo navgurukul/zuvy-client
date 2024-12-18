@@ -113,7 +113,7 @@ function Page({ params }: any) {
                         setStudents(res.data.totalNumberOfStudents)
                     })
             } catch (error) {
-                console.log(error)
+                console.error(error)
             }
         }
 
@@ -138,7 +138,7 @@ function Page({ params }: any) {
                     }, delay)
                     timeouts.push(timeout)
                 } else {
-                    console.log('Start time is in the past for', item.time)
+                    console.error('Start time is in the past for', item.time)
                 }
             })
         }
@@ -162,7 +162,7 @@ function Page({ params }: any) {
                     setBootcampData(transformedData)
                 })
                 .catch((error) => {
-                    console.log('Error fetching data:', error)
+                    console.error('Error fetching data:', error)
                 })
         }
     }, [params.courseId])

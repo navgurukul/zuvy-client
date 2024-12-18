@@ -74,7 +74,6 @@ const EyeTrackingProctor: React.FC<EyeTrackingProctorProps> = ({ assessmentSubmi
         const data: EyeTrackingResult = await response.json();
         setResult(data);
         setIsLoading(false);
-        console.log('data:', data);
 
         // Check for direction change and play audio feedback
         if (data.direction !== lastDirection) {

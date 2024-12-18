@@ -186,7 +186,6 @@ const OpenEndedQuestions = (props: Props) => {
             }
         }
     }
-    console.log('potion', position)
 
     useEffect(() => {
         getAllTags(setTags, setOptions)

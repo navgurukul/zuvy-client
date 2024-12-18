@@ -177,7 +177,7 @@ const BatchesInfo = ({
                     setInstructorInfo(batchData)
                 } catch (error: any) {
                     router.push('/not-found')
-                    console.log(
+                    console.error(
                         'Error fetching instructor info:',
                         error.message
                     )

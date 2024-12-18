@@ -28,7 +28,7 @@ const AttandanceRefreshComp = ({ attendanceData }: Props) => {
                 })
         } catch (error: any) {
             setLoading(false)
-            console.log(
+            console.error(
                 error.response.data.message || 'Error Refreshing the Data'
             )
         } finally {

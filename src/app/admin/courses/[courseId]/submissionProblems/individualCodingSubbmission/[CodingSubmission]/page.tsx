@@ -72,7 +72,7 @@ const Page = ({ params }: any) => {
                     setDecodedString(res?.data?.data.sourceCode)
                 })
         } catch (error: any) {
-            console.log('Error Fetching Data')
+            console.error('Error Fetching Data')
         }
     }, [questionId, params.CodingSubmission, setCodingSubmissiondata])
 
@@ -80,7 +80,6 @@ const Page = ({ params }: any) => {
         fetchCodingSubbmissionDataHandler()
     }, [fetchCodingSubbmissionDataHandler])
 
-    console.log(params)
 
     return (
         <>

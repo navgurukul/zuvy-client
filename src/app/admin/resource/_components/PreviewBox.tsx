@@ -43,7 +43,6 @@ export default function DialogBox({
     }
     if (quizData) {
     }
-    // console.log(quizData)
 
     const difficultyColor = (difficulty: string) => {
         switch (difficulty) {
