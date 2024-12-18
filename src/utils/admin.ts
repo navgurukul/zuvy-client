@@ -847,3 +847,22 @@ export async function handleSaveChapter(
         })
     }
 }
+
+
+export const proctoringOptions = [
+    {
+        label: 'Copy Paste',
+        name: 'canCopyPaste' as const,
+        tooltip: 'Prevents users from copying and pasting content during the exam to maintain test integrity.'
+    },
+    {
+        label: 'Tab Change',
+        name: 'tabSwitch' as const,
+        tooltip: 'Monitors and restricts switching between browser tabs during the exam to prevent unauthorized access to external resources.'
+    },
+    {
+        label: 'Screen Exit',
+        name: 'screenExit' as const,
+        tooltip: 'Detects and logs any attempts to exit the exam screen, helping to identify potential cheating attempts.'
+    }
+];

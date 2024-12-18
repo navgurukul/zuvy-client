@@ -188,7 +188,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                                     </span>
                                 </div>
                                 <p className="text-xl mt-2 text-start">
-                                    Score: {viewResultsData.codingScore}/
+                                    Score: {Math.trunc(viewResultsData.codingScore)}/
                                     {
                                         viewResultsData
                                             .submitedOutsourseAssessment
@@ -249,7 +249,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                             {totalMcqQuestions}
                         </p>
                         <p className="text-xl mt-2 text-start">
-                            Score: {viewResultsData.mcqScore}/
+                            Score: {Math.trunc(viewResultsData.mcqScore)}/
                             {weightageMcqQuestions}
                         </p>
 
@@ -330,7 +330,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                     >
                         <div>
                             <p className="text-lg font-semibold">
-                                Your Score: {percentage || 0}/100
+                                Your Score: {Math.trunc(percentage || 0)}/100
                             </p>
                             <p>
                                 {isPassed
