@@ -128,7 +128,6 @@ function CodingChallenge({
         )
     }
 
-    console.log(codingQuestions)
 
     return (
         <div className='mt-20'>

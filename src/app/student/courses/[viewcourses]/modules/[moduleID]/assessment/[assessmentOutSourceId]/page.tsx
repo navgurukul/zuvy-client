@@ -229,7 +229,6 @@ function Page({
     ) => {
         setSelectedQuesType(type)
         setIsSolving(true)
-        console.log('id', id)
 
         if (type === 'coding' && id) {
             const action = await getCodingSubmissionsData(

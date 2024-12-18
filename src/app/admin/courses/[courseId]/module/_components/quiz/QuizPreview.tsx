@@ -27,8 +27,6 @@ const QuizPreview = ({
         fetchAllQuizQuestions()
     }, [fetchAllQuizQuestions])
 
-    console.log(quizData)
-
     // Guard against undefined or null quizData or quizQuestionDetails
     if (quizData?.quizQuestionDetails?.length > 0) {
         return (

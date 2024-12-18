@@ -15,7 +15,6 @@ const PreviewArticle = ({
     content: any
     setShowPreview: React.Dispatch<React.SetStateAction<boolean>>
 }) => {
-    console.log(content)
 
     let editorContent
 

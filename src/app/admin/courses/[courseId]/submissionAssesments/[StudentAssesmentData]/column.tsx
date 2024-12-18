@@ -126,7 +126,6 @@ export const columns: ColumnDef<Task>[] = [
         id: 'actions',
         cell: ({ row }) => {
             const { bootcampId, newId, userId, id } = row.original
-            // console.log(row.original)
             return (
                 <div className="flex space-x-2">
                     <Link

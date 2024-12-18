@@ -711,9 +711,6 @@ const NewMcqProblemForm = ({
 
                             existingQuestions.push(question.toLowerCase())
                             setGeneratedCount(generatedQuestions.length) // **Update Generated Count**
-                            // console.log(
-                            //     `Generated ${generatedQuestions.length}/${totalNumbersOfQuestions} MCQs`
-                            // )
                         } else {
                             console.warn(
                                 'Unexpected response structure:',
@@ -728,11 +725,6 @@ const NewMcqProblemForm = ({
 
                     // **Change Delay from 5-10 seconds to 3-4 seconds**
                     const randomDelay = Math.floor(Math.random() * 1000) + 3000
-                    console.log(
-                        `Waiting for ${
-                            randomDelay / 1000
-                        } seconds before next request...`
-                    )
                     await sleep(randomDelay)
                 }
             }

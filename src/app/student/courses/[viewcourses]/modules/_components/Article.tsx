@@ -52,7 +52,6 @@ function Article({
 
     useEffect(() => {
         setIsCompleted(status === 'Completed')
-        console.log('content', content)
     }, [status])
 
     return (

@@ -70,7 +70,7 @@ const QuizQuestions = ({
 
     // Set default values based on submissionsData when the component mounts or questions change
     useEffect(() => {
-        console.log('questions', questions)
+
         const defaultValues = {
             answers: questions?.data?.mcqs?.map((question: any) =>
                 question.submissionsData && question.submissionsData.length > 0

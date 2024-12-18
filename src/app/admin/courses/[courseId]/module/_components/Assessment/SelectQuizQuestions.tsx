@@ -33,8 +33,6 @@ const SelectQuizQuestions = ({
     type:string
 }) => {
 
-
-    console.log('selectedQuestions', selectedQuestions)
     return (
         <>
             <div className="w-full">

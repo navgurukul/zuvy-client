@@ -76,7 +76,7 @@ const Assignments = ({
                     setStatus(res.data.data.status)
                 })
         } catch (error: any) {
-            console.log(error.message)
+            console.error(error.message)
         } finally {
         }
     }, [content.id])

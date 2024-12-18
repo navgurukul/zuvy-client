@@ -46,7 +46,6 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
         }
     }
 
-    console.log('viewResultsData', viewResultsData)
 
     const isPassed = viewResultsData?.isPassed
     // const marks = viewResultsData?.submitedOutsourseAssessments?.[0]?.marks

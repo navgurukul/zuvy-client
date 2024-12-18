@@ -91,21 +91,10 @@ function Chapters({ params }: any) {
             setChapters(response.data.trackingData)
             // setProjectId(response?.data.moduleDetails[0]?.projectId)
         } catch (error) {
-            console.log(error)
+            console.error(error)
         }
     }, [])
 
-    // useEffect(() => {
-    //     if (activeChapterRef.current) {
-    //         // Only scroll if it's not triggered by a chapter click
-    //         setTimeout(() => {
-    //             activeChapterRef.current?.scrollIntoView({
-    //                 // block: 'center',
-    //                 // behavior: 'smooth',
-    //             })
-    //         }, 100)
-    //     }
-    // }, [activeChapter, chapters])
 
     useEffect(() => {
         if (activeChapterRef.current && scrollAreaRef.current) {
@@ -148,7 +137,7 @@ function Chapters({ params }: any) {
             )
             setModuleName(response.data.moduleDetails[0].name)
         } catch (error) {
-            console.log(error)
+            console.error(error)
         }
     }, [])
 

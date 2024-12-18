@@ -320,7 +320,6 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
    
 
     useEffect(() => {
-        console.log(content)
         form.reset({
             codingProblemsEasy: content?.easyCodingQuestions || 0,
             codingProblemsMedium: content?.mediumCodingQuestions || 0,

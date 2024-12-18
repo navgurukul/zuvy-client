@@ -46,7 +46,7 @@ const Page = ({ params }: any) => {
             setData(res.data.data.bootcampModules[0])
             setTotalStudents(res.data.totalStudents)
         } catch (error) {
-            console.log(error)
+            console.error(error)
         }
     }, [params.courseId])
     const getBootcampHandler = useCallback(async () => {

@@ -18,13 +18,10 @@ const SubmissionComponent = (props: Props) => {
     const handleDownloadPdf = async (id: any) => {
         const apiUrl = `submission/practiseProblemStatus/${props.moduleId}?chapterId=365&questionId=102`
 
-        // console.log("fatch", apiUrl)
         async function fetchData() {
             try {
                 const response = await api.get(apiUrl)
-                // console.log("try", response)
                 const assessments = response.data.data
-                // console.log("assement", assessments)
                 const doc = new jsPDF()
 
                 // Title Styling
