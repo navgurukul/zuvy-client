@@ -288,7 +288,7 @@ function Page({
             )
             setIsTabProctorOn(res?.data.data.canTabChange)
             setIsFullScreenProctorOn(res?.data.data.canScreenExit)
-            setIsCopyPasteProctorOn(res?.data.data.CanCopyPaste)
+            setIsCopyPasteProctorOn(res?.data.data.canCopyPaste)
             setIsEyeTrackingProctorOn(res?.data.data.canEyeTrack)
             setAssessmentSubmitId(res?.data.data.submission.id)
             setChapterId(res?.data.data.chapterId)
@@ -303,7 +303,6 @@ function Page({
                 `/Content/assessmentDetailsOfQuiz/${decodedParams.assessmentOutSourceId}`
             )
             setSeperateQuizQuestions(res.data)
-            console.log('res.data', res.data )
         } catch (e) {
             console.error(e)
         }
@@ -414,13 +413,16 @@ function Page({
     async function handleCopyPasteAttempt(event: any) {
         if (assessmentSubmitId) {
             if (isCopyPasteProctorOn) {
-                const { tabChange, copyPaste, fullScreenExit, eyeMomentCount } =
+                let { tabChange, copyPaste, fullScreenExit, eyeMomentCount } =
                     await getProctoringData(assessmentSubmitId)
+
+
+                let storedCopyPaste = copyPaste + 1
 
                 updateProctoringData(
                     assessmentSubmitId,
                     tabChange,
-                    copyPaste + 1,
+                    storedCopyPaste,
                     fullScreenExit,
                     eyeMomentCount
                 )
@@ -435,10 +437,12 @@ function Page({
     }
 
     return (
-        <AlertProvider>
+       <div 
+       onPaste={(e) => handleCopyPasteAttempt(e)}
+       onCopy={(e) => handleCopyPasteAttempt(e)}
+       >
+         <AlertProvider>
             <div
-                onPaste={(e) => handleCopyPasteAttempt(e)}
-                onCopy={(e) => handleCopyPasteAttempt(e)}
                 className="h-auto mb-24"
             >
                 {!isFullScreen ? (
@@ -461,10 +465,7 @@ function Page({
                         </div>
                     </>
                 ) : (
-                    <div
-                        onPaste={(e) => handleCopyPasteAttempt(e)}
-                        onCopy={(e) => handleCopyPasteAttempt(e)}
-                    >
+                    <div>
                         <div className="flex items-center justify-center gap-2">
                             <div className="font-bold text-xl">
                                 <TimerDisplay remainingTime={remainingTime} />
@@ -603,6 +604,7 @@ function Page({
                 )}
             </div>
         </AlertProvider>
+       </div>
     )
 }
 
