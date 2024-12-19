@@ -98,7 +98,7 @@ function Page({
                 setBootcampData(response.data)
             })
             .catch((error) => {
-                console.log('Error fetching bootcamp data:', error)
+                console.error('Error fetching bootcamp data:', error)
             })
     }, [params.viewcourses])
 

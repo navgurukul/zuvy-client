@@ -75,7 +75,7 @@ function AllQuestions({ params }: { params: any }) {
                 response.data.data.codingQuestions
             )
         } catch (error) {
-            console.log(error)
+            console.error(error)
         }
     }
 

@@ -265,7 +265,6 @@ const EditMcqForm = ({
                     correctOption: variant.selectedOption + 1,
                 })),
             }
-            // console.log(transformedObj)
             try {
                 await api
                     .post(`/Content/editquiz`, transformedObj)

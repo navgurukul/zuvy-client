@@ -42,7 +42,7 @@ export default function Project() {
             )
             setModuleName(response.data.moduleDetails[0].name)
         } catch (error) {
-            console.log(error)
+            console.error(error)
         }
     }, [])
 

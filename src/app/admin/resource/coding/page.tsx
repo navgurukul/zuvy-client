@@ -257,32 +257,10 @@ const CodingProblems = () => {
             offset,
         ]
     )
-    console.log('Search Term:', searchTerm)
 
     useEffect(() => {
-        // console.log('Current Offset in Effect:', offset)
         getAllCodingQuestions(setAllCodingQuestions)
         fetchCodingQuestions(offset)
-        // filteredCodingQuestions(
-        //     offset,
-        //     setCodingQuestions,
-        //     difficulty,
-        //     selectedOptions,
-        //     selectedLanguage,
-        //     debouncedSearch,
-        //     position,
-        //     setLastPage,
-        //     setTotalPages,
-        //     setTotalCodingQuestion
-        // )
-        // filterQuestions(
-        //     setCodingQuestions,
-        //     selectedDifficulty,
-        //     selectedOptions,
-        //     selectedLanguage,
-        //     debouncedSearch,
-        //     'coding'
-        // )
     }, [
         searchTerm,
         selectedOptions,
@@ -340,9 +318,6 @@ const CodingProblems = () => {
             })
         }
     }
-
-    console.log('offset', offset)
-    console.log('position', position)
 
     const selectedTagCount = selectedOptions.length
     const difficultyCount = difficulty.length

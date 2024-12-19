@@ -23,9 +23,9 @@ export default function RootLayout({
         user && (user.rolesList.length === 0 ? 'student' : user.rolesList[0])
 
     const isAssessmentRouteClasses = (route: string) => {
-        const regex = /admin.*courses.*module.*chapters/
+        const adminRoutes = /admin.*courses.*module.*chapters/
 
-        if (regex.test(pathname || '')) {
+        if (adminRoutes.test(pathname || '')) {
             return 'overflow-hidden'
         }
         return ''

@@ -76,7 +76,7 @@ const Assignments = ({
                     setStatus(res.data.data.status)
                 })
         } catch (error: any) {
-            console.log(error.message)
+            console.error(error.message)
         } finally {
         }
     }, [content.id])
@@ -192,7 +192,7 @@ const Assignments = ({
 
     return (
        <ScrollArea className='h-screen'>
-         <div className="flex flex-col mt-20">
+         <div className="flex flex-col mt-20 relative">
             <h1 className="text-left text-xl font-semibold flex flex-col ">
                 <span className="flex items-center gap-x-2 ">
                     {content?.title}{' '}
@@ -262,8 +262,8 @@ const Assignments = ({
                             </FormItem>
                         )}
                     />
-                    <div className="flex justify-end">
-                        <Button className="w-1/6 mr-3" type="submit">
+                    <div className="flex justify-end absolute top-0 right-0">
+                        <Button className="w-full mr-3" type="submit">
                             Submit
                         </Button>
                     </div>

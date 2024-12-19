@@ -81,7 +81,7 @@ const Projects = ({ projectId, moduleId, bootcampId }: Props) => {
                     ?.updatedAt
             )
         } catch (error: any) {
-            console.log(error.message)
+            console.error(error.message)
         }
     }, [moduleId, projectId, editor])
 

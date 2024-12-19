@@ -17,9 +17,7 @@ export function handleDelete(
     offset?: number,
     position?: String
 ) {
-    // console.log("selectedoption", selectedOptions)
-    // console.log("difficulty", difficulty )
-    // const offset=10
+
     api({
         method: 'delete',
         url: 'Content/deleteCodingQuestion',
@@ -117,8 +115,7 @@ export const handleConfirm = (
     offset?: number,
     position?: String
 ) => {
-    //     console.log(" selectedoption and handleconform",selectedOptions)
-    //     console.log(" difficuty and handleconform",difficulty)
+  
     handleDelete(
         deleteCodingQuestionId,
         setCodingQuestions,
@@ -368,7 +365,7 @@ export async function filteredCodingQuestions(
 
     // setTotalCodingQuestion: any, // Accepting setTotalBootcamps from parent
 ) {
-    // console.log("selectedoption in filtercodingquestion",selectedOptions)
+
     try {
         const safeOffset = Math.max(0, offset)
 
@@ -464,7 +461,7 @@ export async function filteredQuizQuestions(
             url += `&${queryParams.join('&')}`
         }
         const res = await api.get(url)
-        console.log('response.data.data', res.data.data)
+   
         setStoreQuizData(res.data.data)
         setTotalMCQQuestion(res.data.totalRows)
         setTotalPages(res.data.totalPages)
@@ -486,7 +483,7 @@ export async function filteredOpenEndedQuestions(
     selectedLanguage?: string,
     debouncedSearch?: string | undefined
 ) {
-    console.log('setopenendedquestion', setTotalOpenEndedQuestion)
+   
     try {
         const safeOffset = Math.max(0, offset)
 
@@ -534,7 +531,7 @@ export async function filteredOpenEndedQuestions(
         setTotalOpenEndedQuestion(response.data.totalRows)
         setTotalPages(response.data.totalPages)
         setLastPage(response.data.totalPages)
-        console.log('response.data.data', response)
+
     } catch (error) {
         console.error('Error:', error)
     }
@@ -847,3 +844,22 @@ export async function handleSaveChapter(
         })
     }
 }
+
+
+export const proctoringOptions = [
+    {
+        label: 'Copy Paste',
+        name: 'canCopyPaste' as const,
+        tooltip: 'Prevents users from copying and pasting content during the exam to maintain test integrity.'
+    },
+    {
+        label: 'Tab Change',
+        name: 'tabSwitch' as const,
+        tooltip: 'Monitors and restricts switching between browser tabs during the exam to prevent unauthorized access to external resources.'
+    },
+    {
+        label: 'Screen Exit',
+        name: 'screenExit' as const,
+        tooltip: 'Detects and logs any attempts to exit the exam screen, helping to identify potential cheating attempts.'
+    }
+];

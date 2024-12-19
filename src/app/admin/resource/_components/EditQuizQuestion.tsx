@@ -91,7 +91,7 @@ const EditQuizQuestion = ({
                     setQuizQuestionById(res.data.data[0])
                 })
         } catch (error: any) {
-            console.log(error.message)
+            console.error(error.message)
         } finally {
             setLoadingState('formIsLoaded')
         }

@@ -48,8 +48,6 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
         }
     }
 
-    console.log('viewResultsData', viewResultsData)
-
     const isPassed = viewResultsData?.isPassed
     // const marks = viewResultsData?.submitedOutsourseAssessments?.[0]?.marks
     const percentage = viewResultsData?.percentage
@@ -196,19 +194,15 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                                         {codingQuestion.status}
                                     </span>
                                 </div>
-                                <div className="flex items-center gap-x-2 mt-2">
-                                    <div
-                                        className={`w-2 h-2 rounded-full flex items-center justify-center cursor-pointer ${color}`}
-                                    ></div>
-                                    <p className="text-xl text-start">
-                                        Score: {viewResultsData.codingScore}/
-                                        {
-                                            viewResultsData
-                                                .submitedOutsourseAssessment
-                                                .weightageCodingQuestions
-                                        }
-                                    </p>
-                                </div>
+                                <p className="text-xl mt-2 text-start">
+                                    Score:{' '}
+                                    {Math.trunc(viewResultsData.codingScore)}/
+                                    {
+                                        viewResultsData
+                                            .submitedOutsourseAssessment
+                                            .weightageCodingQuestions
+                                    }
+                                </p>
                                 <div
                                     onClick={() =>
                                         viewCodingSubmission(
@@ -267,15 +261,11 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                             Attempted {viewResultsData.attemptedMCQQuestions}/
                             {totalMcqQuestions}
                         </p>
-                        <div className="flex items-center gap-x-2 mt-2">
-                            <div
-                                className={`w-2 h-2 rounded-full flex items-center justify-center cursor-pointer ${color}`}
-                            ></div>
-                            <p className="text-xl text-start">
-                                Score: {viewResultsData.mcqScore}/
-                                {weightageMcqQuestions}
-                            </p>
-                        </div>
+                        <p className="text-xl mt-2 text-start">
+                            Score: {Math.trunc(viewResultsData.mcqScore)}/
+                            {weightageMcqQuestions}
+                        </p>
+
                         <div
                             onClick={() =>
                                 navigateTo(
@@ -350,25 +340,15 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                                 : 'bg-red-100 border-red-500'
                         } h-[100px] flex justify-between mt-2 max-w-lg p-5 rounded-lg border`}
                     >
-                        <div className="flex gap-3">
-                            <div className="mt-2">
-                                <Image
-                                    src="/flag.svg"
-                                    alt="Empty State"
-                                    width={40}
-                                    height={40}
-                                />
-                            </div>
-                            <div>
-                                <p className="text-lg font-semibold">
-                                    Your Score: {percentage || 0}/100
-                                </p>
-                                <p>
-                                    {isPassed
-                                        ? 'Congratulations, you passed!'
-                                        : `You needed at least ${passPercentage} percentage to pass`}
-                                </p>
-                            </div>
+                        <div>
+                            <p className="text-lg font-semibold">
+                                Your Score: {Math.trunc(percentage || 0)}/100
+                            </p>
+                            <p>
+                                {isPassed
+                                    ? 'Congratulations, you passed!'
+                                    : `You needed at least ${passPercentage} percentage to pass`}
+                            </p>
                         </div>
                     </div>
                 </div>

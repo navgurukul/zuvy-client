@@ -114,7 +114,7 @@ function Page({ params }: any) {
                         setStudents(res.data.totalNumberOfStudents)
                     })
             } catch (error) {
-                console.log(error)
+                console.error(error)
             }
         }
 
@@ -139,7 +139,7 @@ function Page({ params }: any) {
                     }, delay)
                     timeouts.push(timeout)
                 } else {
-                    console.log('Start time is in the past for', item.time)
+                    console.error('Start time is in the past for', item.time)
                 }
             })
         }
@@ -163,7 +163,7 @@ function Page({ params }: any) {
                     setBootcampData(transformedData)
                 })
                 .catch((error) => {
-                    console.log('Error fetching data:', error)
+                    console.error('Error fetching data:', error)
                 })
         }
     }, [params.courseId])
@@ -208,7 +208,7 @@ function Page({ params }: any) {
                     </div>
                 </div>
             ) : (
-                <div>
+                <div className=''>
                     <div className="relative flex text-start gap-6 my-6 w-[200px]">
                         <Combobox
                             data={bootcampData}
@@ -323,7 +323,7 @@ function Page({ params }: any) {
                                     </div>
                                 )
                             ) : (
-                                <div className="w-full flex mb-10 items-center flex-col gap-y-3 justify-center absolute text-center mt-2">
+                                <div className="w- flex mb-10 items-center flex-col gap-y-3 justify-center text-center mt-2">
                                     <Image
                                         src={
                                             '/emptyStates/undraw_online_learning_re_qw08.svg'

@@ -134,7 +134,7 @@ const IndividualStudentAssesment = ({
                             className="text-secondary font-semibold text-md flex items-center w-full truncate"
                             href={questionInfo.link}
                         >
-                            View Solution
+                            View Answers
                             <ChevronRight size={20} className="ml-1" />
                         </Link>
                     </Button>

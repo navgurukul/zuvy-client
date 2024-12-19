@@ -68,7 +68,6 @@ export function middleware(request: NextRequest) {
                 return NextResponse.next()
             }
             if (decodedUrl) {
-                console.log('redirect Condition 1')
                 const response = NextResponse.redirect(
                     new URL(decodedUrl, request.url)
                 )
@@ -94,7 +93,6 @@ export function middleware(request: NextRequest) {
                 return NextResponse.next()
             }
             if (decodedUrl) {
-                console.log('redirect Condition 1')
                 const response = NextResponse.redirect(
                     new URL(decodedUrl, request.url)
                 )
@@ -114,7 +112,6 @@ export function middleware(request: NextRequest) {
                 return NextResponse.next()
             }
             if (decodedUrl) {
-                console.log('redirect Condition 1')
                 const response = NextResponse.redirect(
                     new URL(decodedUrl, request.url)
                 )
@@ -143,7 +140,6 @@ export function middleware(request: NextRequest) {
                 return NextResponse.redirect(new URL('/', request.url))
             }
         } else if (decodedUrl && user !== 'admin') {
-            console.log('redirect Condition 2')
             const absoluteUrl = new URL(decodedUrl, request.url) // Construct the full URL
             const response = NextResponse.redirect(absoluteUrl)
             // Set a cookie to track the redirect

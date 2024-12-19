@@ -137,14 +137,6 @@ export default function NewMcqForm({
             })),
         }
 
-        console.log(transformedObj)
-        // const clean = DOMPurify.sanitize(transformedObj.variantMCQs[0].question)
-        // const updatedHtml = clean.replace(
-        //     /<pre>/g,
-        //     '<pre class="text-gray-800 bg-gray-300 p-2 rounded-lg text-left">'
-        // )
-        // setCodeSnippet(updatedHtml)
-
         try {
             await api.post(`/Content/quiz`, { quizzes: [transformedObj] })
             toast({
