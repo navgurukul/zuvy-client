@@ -25,7 +25,6 @@ const IndividualStudentAssesment = ({
     totalOpenEndedScore,
 }: any) => {
     const { courseId, StudentAssesmentData, IndividualReport, report } = params
-    console.log(data)
     const color = getAssesmentBackgroundColorClass(25, 5)
     const renderQuestion = () => {
         switch (type) {
@@ -87,7 +86,7 @@ const IndividualStudentAssesment = ({
 
     return (
         <div
-            className={`flex flex-col h-[260px] lg:h-[220px] p-3 shadow-lg  transition-transform transform hover:shadow-xl rounded-md overflow-hidden mt-3 w-5/6 relative`}
+            className={`flex flex-col h-[160px] lg:h-[150px] p-3 shadow-lg  transition-transform transform hover:shadow-xl rounded-md overflow-hidden mt-3 w-5/6 relative`}
         >
             <div className="flex flex-col w-full h-full justify-between">
                 <div className="flex flex-col p-4 gap-y-4 lg:gap-y-7 overflow-hidden">
