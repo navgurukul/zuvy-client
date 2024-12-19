@@ -100,9 +100,9 @@ function AllQuestions({ params }: { params: any }) {
                 <div className="flex flex-col gap-5 w-1/2 text-left">
                     <div className="flex justify-between">
                         <h2 className="font-bold">Testing Your Knowledge</h2>
-                        <Button onClick={shuffleQuestions}>
+                        {/* <Button onClick={shuffleQuestions}>
                             Shuffle Coding Qs
-                        </Button>
+                        </Button> */}
                     </div>
                     <p className="deadline flex items-center gap-2">
                         <Clock size={18} />
@@ -125,6 +125,10 @@ function AllQuestions({ params }: { params: any }) {
                     <p className="description">
                         All the problems i.e. coding challenges, MCQs, and
                         open-ended questions can be submitted only once.
+                    </p>
+                    <p className="description">
+                        These questions will change for every user depending on
+                        the randomization settings set by you
                     </p>
                 </div>
             </div>

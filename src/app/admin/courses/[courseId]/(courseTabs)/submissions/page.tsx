@@ -350,7 +350,7 @@ const Page = ({ params }: { params: any }) => {
                                                         variant={'ghost'}
                                                         className="text-secondary text-md"
                                                     >
-                                                        View Submission{' '}
+                                                        View Submission
                                                         <ChevronRight
                                                             className="text-secondary"
                                                             size={17}
