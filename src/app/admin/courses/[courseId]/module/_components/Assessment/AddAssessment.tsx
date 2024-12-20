@@ -20,6 +20,8 @@ import useDebounce from '@/hooks/useDebounce'
 import { getAssessmentPreviewStore } from '@/store/store'
 import { useRouter } from 'next/navigation'
 
+
+// defined types below:
 type AddAssessmentProps = {
     chapterData: any
     content: any
