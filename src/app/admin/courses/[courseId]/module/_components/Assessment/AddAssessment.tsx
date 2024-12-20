@@ -19,9 +19,8 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import useDebounce from '@/hooks/useDebounce'
 import { getAssessmentPreviewStore } from '@/store/store'
 import { useRouter } from 'next/navigation'
+import { Separator } from '@/components/ui/separator'
 
-
-// defined types below:
 type AddAssessmentProps = {
     chapterData: any
     content: any
@@ -305,7 +304,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     }, [])
 
     return (
-        <div className="w-full p-2">
+        <div className="w-full py-2 pl-10">
             {questionType !== 'settings' && (
                 <div className="flex items-center mb-5 w-full justify-between">
                     <div className="w-2/6 flex justify-center align-middle items-center relative">
@@ -393,7 +392,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
             {/* DropDown Filters for questions:- */}
             {questionType !== 'settings' && (
                 <>
-                    <div className="mb-5 grid grid-cols-2">
+                    <div className="flex mb-3">
                         <CodingTopics
                             searchTerm={searchQuestionsInAssessment}
                             setSearchTerm={setSearchQuestionsInAssessment}
@@ -414,7 +413,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                 ? 'Open-Ended Question Library'
                                 : ''}
                         </h3>
-                        <h1 className="text-left font-bold mb-5 mr-10">
+                        <h1 className="text-left font-bold mb-5 mr-3">
                             Selected Questions
                         </h1>
                     </div>
@@ -427,7 +426,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                     className={`${
                         questionType == 'settings'
                             ? 'grid grid-cols-1'
-                            : 'grid grid-cols-2'
+                            : 'grid grid-cols-[1fr_2px_1fr]'
                     } h-screen `}
                 >
                     <>
@@ -503,9 +502,14 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                         </div>
                     </>
 
+                    <Separator
+                        orientation="vertical"
+                        className="mx-4 w-[2px] h-96 rounded"
+                    />
+
                     {questionType !== 'settings' && (
                         <div>
-                            <ScrollArea className="h-96  w-full pr-5">
+                            <ScrollArea className="h-96 ml-5 w-full pr-5">
                                 <ScrollBar
                                     orientation="vertical"
                                     className="h-96"
