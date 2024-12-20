@@ -186,6 +186,8 @@ function Page({
         isCopyPasteProctorOn,
         isEyeTrackingProctorOn,
         startedAt,
+        isFullScreen,
+        assessmentData,
     ])
 
     // useEffect(() => {
@@ -259,7 +261,6 @@ function Page({
             type === 'open-ended' &&
             seperateOpenEndedQuestions[0]?.submissionsData.length > 0
         ) {
-            
             toast({
                 title: 'Open Ended Questions Already Submitted',
                 description:
@@ -318,14 +319,17 @@ function Page({
     }
 
     useEffect(() => {
-        getAssessmentData()
+        if (isFullScreen) {
+            getAssessmentData()
+        }
         getSeperateQuizQuestions()
         getSeperateOpenEndedQuestions()
-    }, [decodedParams.assessmentOutSourceId])
+    }, [decodedParams.assessmentOutSourceId, isFullScreen])
 
     if (isSolving && isFullScreen) {
         if (
-            selectedQuesType === 'quiz' && !assessmentData.IsQuizzSubmission &&
+            selectedQuesType === 'quiz' &&
+            !assessmentData.IsQuizzSubmission &&
             assessmentData.hardMcqQuestions +
                 assessmentData.easyMcqQuestions +
                 assessmentData.mediumMcqQuestions >
@@ -343,7 +347,8 @@ function Page({
                 />
             )
         } else if (
-            selectedQuesType === 'open-ended' && !(seperateOpenEndedQuestions[0]?.submissionsData.length > 0)
+            selectedQuesType === 'open-ended' &&
+            !(seperateOpenEndedQuestions[0]?.submissionsData.length > 0)
         ) {
             return (
                 <OpenEndedQuestions
@@ -415,7 +420,6 @@ function Page({
                 let { tabChange, copyPaste, fullScreenExit, eyeMomentCount } =
                     await getProctoringData(assessmentSubmitId)
 
-
                 let storedCopyPaste = copyPaste + 1
 
                 updateProctoringData(
@@ -436,174 +440,188 @@ function Page({
     }
 
     return (
-       <div 
-       onPaste={(e) => handleCopyPasteAttempt(e)}
-       onCopy={(e) => handleCopyPasteAttempt(e)}
-       >
-         <AlertProvider>
-            <div
-                className="h-auto mb-24"
-            >
-                {!isFullScreen ? (
-                    <>
-                        <div className="flex items-center justify-center gap-2">
-                            <div className="font-bold text-xl">
-                                <TimerDisplay remainingTime={remainingTime} />
+        <div
+            onPaste={(e) => handleCopyPasteAttempt(e)}
+            onCopy={(e) => handleCopyPasteAttempt(e)}
+        >
+            <AlertProvider>
+                <div className="h-auto mb-24">
+                    {!isFullScreen ? (
+                        <>
+                            <div className="flex items-center justify-center gap-2">
+                                <div className="font-bold text-xl">
+                                    <TimerDisplay
+                                        remainingTime={remainingTime}
+                                    />
+                                </div>
                             </div>
-                        </div>
-                        <Separator className="my-6" />
-                        <h1>
-                            Enter Full Screen to see the Questions. Warning: If
-                            you exit fullscreen, your test will get submitted
-                            automatically
-                        </h1>
-                        <div className="flex justify-center mt-10">
-                            <Button onClick={handleFullScreenRequest}>
-                                Enter Full Screen
+                            <Separator className="my-6" />
+                            <h1>
+                                Enter Full Screen to see the Questions. Warning:
+                                If you exit fullscreen, your test will get
+                                submitted automatically
+                            </h1>
+                            <div className="flex justify-center mt-10">
+                                <Button onClick={handleFullScreenRequest}>
+                                    Enter Full Screen
+                                </Button>
+                            </div>
+                        </>
+                    ) : (
+                        <div>
+                            <div className="flex items-center justify-center gap-2">
+                                <div className="font-bold text-xl">
+                                    <TimerDisplay
+                                        remainingTime={remainingTime}
+                                    />
+                                </div>
+                            </div>
+                            <Separator className="my-6" />
+                            <div className="flex justify-center">
+                                <div className="flex flex-col gap-5 w-1/2 text-left">
+                                    <h2 className="font-bold">
+                                        Testing Your Knowledge
+                                    </h2>
+                                    <p className="deadline flex items-center gap-2">
+                                        <Clock size={18} />
+                                        Deadline:{' '}
+                                        {assessmentData.deadline ||
+                                            'No Deadline For This Assessment'}
+                                    </p>
+                                    <p className="testTime flex items-center gap-2">
+                                        <Timer size={18} />
+                                        Test Time:{' '}
+                                        {Math.floor(
+                                            assessmentData.timeLimit / 3600
+                                        )}{' '}
+                                        Hours{' '}
+                                        {Math.floor(
+                                            (assessmentData.timeLimit % 3600) /
+                                                60
+                                        )}{' '}
+                                        Minutes
+                                    </p>
+                                    <p className="description">
+                                        Timer has started. Questions will
+                                        disappear if you exit full screen. All
+                                        the problems i.e. coding challenges,
+                                        MCQs and open-ended questions have to be
+                                        completed all at once
+                                    </p>
+
+                                    <h1 className="font-bold">
+                                        Proctoring Rules
+                                    </h1>
+                                    <p>
+                                        To ensure fair assessments, the
+                                        assessments are proctored are proctored
+                                        for the following cases below. Please
+                                        avoid violating the rules:
+                                    </p>
+                                    <ul className="list-disc ml-5">
+                                        <li>Copy and pasting</li>
+                                        <li>Tab switching</li>
+                                        <li>Assessment screen exit</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            {assessmentData?.codingQuestions?.length > 0 && (
+                                <div className="flex justify-center">
+                                    <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
+                                        <h2 className="font-bold">
+                                            Coding Challenges
+                                        </h2>
+                                        {assessmentData.codingQuestions?.map(
+                                            (question: any) => (
+                                                <QuestionCard
+                                                    key={question.id}
+                                                    id={question.id}
+                                                    easyCodingMark={
+                                                        assessmentData.easyCodingMark
+                                                    }
+                                                    mediumCodingMark={
+                                                        assessmentData.mediumCodingMark
+                                                    }
+                                                    hardCodingMark={
+                                                        assessmentData.hardCodingMark
+                                                    }
+                                                    title={question.title}
+                                                    description={
+                                                        question.difficulty
+                                                    }
+                                                    codingQuestions={true}
+                                                    onSolveChallenge={() =>
+                                                        handleSolveChallenge(
+                                                            'coding',
+                                                            question.id,
+                                                            question.codingOutsourseId
+                                                        )
+                                                    }
+                                                />
+                                            )
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                            {assessmentData.hardMcqQuestions +
+                                assessmentData.easyMcqQuestions +
+                                assessmentData.mediumMcqQuestions >
+                                0 && (
+                                <div className="flex justify-center">
+                                    <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
+                                        <h2 className="font-bold">MCQs</h2>
+                                        <QuestionCard
+                                            id={1}
+                                            title="Quiz"
+                                            weightage={
+                                                assessmentData.weightageMcqQuestions
+                                            }
+                                            description={`${
+                                                assessmentData.hardMcqQuestions +
+                                                    assessmentData.easyMcqQuestions +
+                                                    assessmentData.mediumMcqQuestions ||
+                                                0
+                                            } questions`}
+                                            onSolveChallenge={() =>
+                                                handleSolveChallenge('quiz')
+                                            }
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                            {seperateOpenEndedQuestions.length > 0 && (
+                                <div className="flex justify-center">
+                                    <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
+                                        <h2 className="font-bold">
+                                            Open-Ended Questions
+                                        </h2>
+                                        <QuestionCard
+                                            id={1}
+                                            title="Open-Ended Questions"
+                                            description={`${
+                                                seperateOpenEndedQuestions.length ||
+                                                0
+                                            } questions`}
+                                            onSolveChallenge={() =>
+                                                handleSolveChallenge(
+                                                    'open-ended'
+                                                )
+                                            }
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                            <Button
+                                onClick={submitAssessment}
+                                disabled={disableSubmit}
+                            >
+                                Submit Assessment
                             </Button>
                         </div>
-                    </>
-                ) : (
-                    <div>
-                        <div className="flex items-center justify-center gap-2">
-                            <div className="font-bold text-xl">
-                                <TimerDisplay remainingTime={remainingTime} />
-                            </div>
-                        </div>
-                        <Separator className="my-6" />
-                        <div className="flex justify-center">
-                            <div className="flex flex-col gap-5 w-1/2 text-left">
-                                <h2 className="font-bold">
-                                    Testing Your Knowledge
-                                </h2>
-                                <p className="deadline flex items-center gap-2">
-                                    <Clock size={18} />
-                                    Deadline:{' '}
-                                    {assessmentData.deadline ||
-                                        'No Deadline For This Assessment'}
-                                </p>
-                                <p className="testTime flex items-center gap-2">
-                                    <Timer size={18} />
-                                    Test Time:{' '}
-                                    {Math.floor(
-                                        assessmentData.timeLimit / 3600
-                                    )}{' '}
-                                    Hours{' '}
-                                    {Math.floor(
-                                        (assessmentData.timeLimit % 3600) / 60
-                                    )}{' '}
-                                    Minutes
-                                </p>
-                                <p className="description">
-                                    Timer has started. Questions will disappear
-                                    if you exit full screen. All the problems
-                                    i.e. coding challenges, MCQs and open-ended
-                                    questions have to be completed all at once
-                                </p>
-
-                                <h1 className="font-bold">Proctoring Rules</h1>
-                                <p>
-                                    To ensure fair assessments, the assessments
-                                    are proctored are proctored for the
-                                    following cases below. Please avoid
-                                    violating the rules:
-                                </p>
-                                <ul className="list-disc ml-5">
-                                    <li>Copy and pasting</li>
-                                    <li>Tab switching</li>
-                                    <li>Assessment screen exit</li>
-                                </ul>
-                            </div>
-                        </div>
-                        {assessmentData.codingQuestions.length > 0 && (
-                            <div className="flex justify-center">
-                                <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
-                                    <h2 className="font-bold">
-                                        Coding Challenges
-                                    </h2>
-                                    {assessmentData.codingQuestions?.map(
-                                        (question: any) => (
-                                            <QuestionCard
-                                                key={question.id}
-                                                id={question.id}
-                                                easyCodingMark = {assessmentData.easyCodingMark}
-                                                mediumCodingMark = {assessmentData.mediumCodingMark}
-                                                hardCodingMark = {assessmentData.hardCodingMark}
-                                                title={question.title}
-                                                description={
-                                                    question.difficulty
-                                                }
-                                                codingQuestions={true}
-                                                onSolveChallenge={() =>
-                                                    handleSolveChallenge(
-                                                        'coding',
-                                                        question.id,
-                                                        question.codingOutsourseId
-                                                    )
-                                                }
-                                            />
-                                        )
-                                    )}
-                                </div>
-                            </div>
-                        )}
-                        {assessmentData.hardMcqQuestions +
-                            assessmentData.easyMcqQuestions +
-                            assessmentData.mediumMcqQuestions >
-                            0 && (
-                            <div className="flex justify-center">
-                                <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
-                                    <h2 className="font-bold">MCQs</h2>
-                                    <QuestionCard
-                                        id={1}
-                                        title="Quiz"
-                                        weightage={
-                                            assessmentData.weightageMcqQuestions
-                                        }
-                                        description={`${
-                                            assessmentData.hardMcqQuestions +
-                                                assessmentData.easyMcqQuestions +
-                                                assessmentData.mediumMcqQuestions ||
-                                            0
-                                        } questions`}
-                                        onSolveChallenge={() =>
-                                            handleSolveChallenge('quiz')
-                                        }
-                                    />
-                                </div>
-                            </div>
-                        )}
-                        {seperateOpenEndedQuestions.length > 0 && (
-                            <div className="flex justify-center">
-                                <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
-                                    <h2 className="font-bold">
-                                        Open-Ended Questions
-                                    </h2>
-                                    <QuestionCard
-                                        id={1}
-                                        title="Open-Ended Questions"
-                                        description={`${
-                                            seperateOpenEndedQuestions.length ||
-                                            0
-                                        } questions`}
-                                        onSolveChallenge={() =>
-                                            handleSolveChallenge('open-ended')
-                                        }
-                                    />
-                                </div>
-                            </div>
-                        )}
-                        <Button
-                            onClick={submitAssessment}
-                            disabled={disableSubmit}
-                        >
-                            Submit Assessment
-                        </Button>
-                    </div>
-                )}
-            </div>
-        </AlertProvider>
-       </div>
+                    )}
+                </div>
+            </AlertProvider>
+        </div>
     )
 }
 
