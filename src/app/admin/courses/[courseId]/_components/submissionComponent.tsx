@@ -96,10 +96,10 @@ const SubmissionComponent = (props: Props) => {
                     </h1>
                     <div className="relative group">
                         <button
-                            className={`ml-2 ${
+                            className={`ml-2 cursor-pointer ${
                                 isDisabled
-                                    ? 'text-gray-400 cursor-no-drop'
-                                    : 'text-gray-500 hover:text-gray-700 cursor-pointer'
+                                    ? 'text-gray-400'
+                                    : 'text-gray-500 hover:text-gray-700'
                             }`}
                             onClick={isDisabled ? undefined : handleDownloadPdf}
                             aria-label="Download full report"

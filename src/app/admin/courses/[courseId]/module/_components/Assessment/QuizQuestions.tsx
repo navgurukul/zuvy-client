@@ -37,7 +37,7 @@ const QuizQuestions = ({
 }) => {
     return (
         <ScrollArea className="h-[calc(100vh-200px)] pb-44  pr-4">
-            {/* <ScrollBar orientation="vertical" className="h-dvh" /> */}
+            <ScrollBar orientation="vertical" className="h-dvh" />
             {questions.map((question: MCQQuestion) => {
                 const tag = tags?.find(
                     (tag: any) => tag?.id === question?.tagId

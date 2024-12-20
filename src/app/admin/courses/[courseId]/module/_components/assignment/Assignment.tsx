@@ -180,7 +180,7 @@ const AddAssignent = ({
     }, [content, editor])
 
     return (
-        <div className="px-5">
+        <div>
             {showPreview ? (
                 <PreviewAssignment
                     content={content}

@@ -7,8 +7,6 @@ import { api } from '@/utils/axios.config'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
-import Image from 'next/image'
-import { getAssesmentBackgroundColorClass } from '@/lib/utils'
 
 const ViewAssessmentResults = ({ params }: { params: any }) => {
     // State Variables
@@ -47,6 +45,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
             )
         }
     }
+
 
     const isPassed = viewResultsData?.isPassed
     // const marks = viewResultsData?.submitedOutsourseAssessments?.[0]?.marks
@@ -128,13 +127,6 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
             }
             return weightageCodingQuestions
         }
-
-        const color = getAssesmentBackgroundColorClass(
-            viewResultsData.submitedOutsourseAssessment
-                .weightageCodingQuestions,
-            viewResultsData.codingScore
-        )
-
         if (
             viewResultsData.submitedOutsourseAssessment.easyCodingQuestions ||
             viewResultsData.submitedOutsourseAssessment.mediumCodingQuestions ||
@@ -195,8 +187,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                                     </span>
                                 </div>
                                 <p className="text-xl mt-2 text-start">
-                                    Score:{' '}
-                                    {Math.trunc(viewResultsData.codingScore)}/
+                                    Score: {Math.trunc(viewResultsData.codingScore)}/
                                     {
                                         viewResultsData
                                             .submitedOutsourseAssessment
@@ -233,11 +224,6 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
 
         const totalMcqQuestions =
             easyMcqQuestions + mediumMcqQuestions + hardMcqQuestions
-
-        const color = getAssesmentBackgroundColorClass(
-            weightageMcqQuestions,
-            viewResultsData.mcqScore
-        )
 
         if (totalMcqQuestions > 0) {
             return (
@@ -330,15 +316,16 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                 <ChevronLeft width={24} />
                 Back
             </div>
+            {/* <div className="headings mx-auto my-5 max-w-2xl"> */}
             <div className="flex flex-col items-center justify-center px-4 py-8">
                 <div className="flex flex-col gap-4 text-left w-full max-w-2xl">
                     <div className="">{timeTaken}</div>
                     <div
                         className={`${
                             isPassed
-                                ? 'bg-green-100 border-green-500'
-                                : 'bg-red-100 border-red-500'
-                        } h-[100px] flex justify-between mt-2 max-w-lg p-5 rounded-lg border`}
+                                ? 'bg-green-100 h-[100px]'
+                                : 'bg-red-100 h-[120px]'
+                        } flex justify-between mt-2 w-2/3 p-5 rounded-lg`}
                     >
                         <div>
                             <p className="text-lg font-semibold">
@@ -353,6 +340,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                     </div>
                 </div>
             </div>
+            {/* </div> */}
             {renderCodingChallenges()}
             {renderQuizQuestions()}
             {renderOpenEndedQuestions()}

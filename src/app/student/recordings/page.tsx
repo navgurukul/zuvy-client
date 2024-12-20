@@ -65,7 +65,6 @@ function Page({}: any) {
     const [currentPage, setCurrentPage] = useState<number>(1)
     const [totalStudents, setTotalStudents] = useState<number>(0)
     const [lastPage, setLastPage] = useState<number>(0)
-    const [loading, setLoading] = useState(true)
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id
     const debouncedSearch = useDebounce(search, 1000)
@@ -86,7 +85,6 @@ function Page({}: any) {
 
                     const response = await api.get(baseUrl)
                     setCompletedClasses(response.data.classes)
-                    setLoading(false)
                     setTotalStudents(response.data.total_items)
                     setPages(response.data.total_pages)
                     setLastPage(response.data.total_pages)
@@ -123,7 +121,6 @@ function Page({}: any) {
     }, [userID, getEnrolledCourses])
 
     useEffect(() => {
-        setLoading(true)
         if (selectedCourse?.id) {
             fetchRecordings(offset)
         }
@@ -132,10 +129,9 @@ function Page({}: any) {
     const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value)
     }
-
     // JSX render:-\
     return (
-        <div className="px-10">
+        <>
             <div className="flex items-center justify-start w-full pt-4 ">
                 <h1 className="text-2xl font-semibold mb-5">
                     Class Recordings
@@ -177,12 +173,9 @@ function Page({}: any) {
             </div>
 
             <div className=" mt-10 ">
-                <Recordings
-                    completedClasses={completedClasses}
-                    loading={loading}
-                />
+                <Recordings completedClasses={completedClasses} />{' '}
             </div>
-            {!loading && completedClasses.length > 0 && (
+            {completedClasses.length > 0 && (
                 <DataTablePagination
                     totalStudents={totalStudents}
                     position={position}
@@ -195,7 +188,7 @@ function Page({}: any) {
                     setOffset={setOffset}
                 />
             )}
-        </div>
+        </>
     )
 }
 

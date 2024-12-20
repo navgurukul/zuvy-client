@@ -10,7 +10,6 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
-import Image from 'next/image'
 
 const Assessment = ({
     assessmentShortInfo,
@@ -109,8 +108,8 @@ const Assessment = ({
     return (
         <div className="h-full">
             <div className="flex flex-col items-center justify-center px-4 py-8 mt-20">
-                <div className="flex flex-col gap-4 text-left w-full max-w-lg">
-                    <div className="flex items-center justify-between gap-4 pr-10">
+                <div className="flex flex-col gap-4 text-left w-full max-w-2xl">
+                    <div className="flex items-center gap-4">
                         <h1 className="text-2xl font-bold text-gray-800 text-center">
                             {assessmentShortInfo?.ModuleAssessment?.title}
                         </h1>
@@ -226,29 +225,19 @@ const Assessment = ({
                         <div
                             className={`${
                                 isPassed
-                                    ? 'bg-green-100 border-green-500 h-[100px]'
-                                    : 'bg-red-100 border-red-500 h-[120px]'
-                            } flex justify-between mt-10 max-w-lg p-5 rounded-lg border`}
+                                    ? 'bg-green-100 h-[100px]'
+                                    : 'bg-red-100 h-[120px]'
+                            } flex justify-between mt-10 w-2/3 p-5 rounded-lg`}
                         >
-                            <div className="flex gap-3">
-                                <div className="mt-2">
-                                    <Image
-                                        src="/flag.svg"
-                                        alt="Empty State"
-                                        width={40}
-                                        height={40}
-                                    />
-                                </div>
-                                <div>
-                                    <p className="text-lg font-semibold">
-                                        Your Score: {percentage || 0}/100
-                                    </p>
-                                    <p>
-                                        {isPassed
-                                            ? 'Congratulations, you passed!'
-                                            : `You needed at least ${passPercentage} percentage to pass`}
-                                    </p>
-                                </div>
+                            <div>
+                                <p className="text-lg font-semibold">
+                                    Your Score: {percentage || 0}/100
+                                </p>
+                                <p>
+                                    {isPassed
+                                        ? 'Congratulations, you passed!'
+                                        : `You needed at least ${passPercentage} percentage to pass`}
+                                </p>
                             </div>
                             <Button
                                 variant="ghost"
