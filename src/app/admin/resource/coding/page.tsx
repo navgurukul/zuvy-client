@@ -271,7 +271,7 @@ const CodingProblems = () => {
         isCodingDialogOpen,
         openEditDialog,
         position,
-        // offset,
+        offset,
     ])
 
     useEffect(() => {
