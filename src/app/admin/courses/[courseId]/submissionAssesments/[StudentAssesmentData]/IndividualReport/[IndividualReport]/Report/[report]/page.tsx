@@ -287,16 +287,10 @@ const Page = ({ params }: { params: any }) => {
                         tabchanges={assesmentData?.tabChange}
                         embeddedSearch={assesmentData?.embeddedGoogleSearch}
                         submissionType={assesmentData?.typeOfsubmission}
-                        totalCodingScore={
-                            assesmentData?.submitedOutsourseAssessment
-                                .weightageCodingQuestions
-                        }
+                        totalCodingScore={assesmentData?.requiredCodingScore}
                         codingScore={assesmentData?.codingScore}
                         mcqScore={assesmentData?.mcqScore}
-                        totalMcqScore={
-                            assesmentData?.submitedOutsourseAssessment
-                                .weightageMcqQuestions
-                        }
+                        totalMcqScore={assesmentData?.requiredMCQScore}
                         openEndedScore={assesmentData?.openEndedScore}
                         totalOpenEndedScore={
                             assesmentData?.requiredOpenEndedScore
@@ -341,9 +335,7 @@ const Page = ({ params }: { params: any }) => {
                                                     assesmentData?.tabChange
                                                 }
                                                 totalCodingScore={
-                                                    assesmentData
-                                                        ?.submitedOutsourseAssessment
-                                                        .weightageCodingQuestions
+                                                    assesmentData?.requiredCodingScore
                                                 }
                                                 codingScore={
                                                     assesmentData?.codingScore
@@ -360,12 +352,7 @@ const Page = ({ params }: { params: any }) => {
                             )}
 
                             {/* Quiz Submission */}
-                            {(assesmentData?.submitedOutsourseAssessment
-                                ?.easyMcqQuestions ||
-                                assesmentData?.submitedOutsourseAssessment
-                                    ?.mediumMcqQuestions ||
-                                assesmentData?.submitedOutsourseAssessment
-                                    ?.hardMcqQuestions > 0) && (
+                            {(assesmentData?.submitedOutsourseAssessment?.easyMcqQuestions || assesmentData?.submitedOutsourseAssessment?.mediumMcqQuestions || assesmentData?.submitedOutsourseAssessment?.hardMcqQuestions > 0) && (
                                 <div className="w-full">
                                     <h1 className="text-left font-semibold">
                                         MCQs
@@ -389,9 +376,7 @@ const Page = ({ params }: { params: any }) => {
                                             }
                                             mcqScore={assesmentData?.mcqScore}
                                             totalMcqScore={
-                                                assesmentData
-                                                    ?.submitedOutsourseAssessment
-                                                    .weightageMcqQuestions
+                                                assesmentData?.requiredMCQScore
                                             }
                                         />
                                     ) : (

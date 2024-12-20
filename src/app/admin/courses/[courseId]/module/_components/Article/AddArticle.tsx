@@ -141,7 +141,7 @@ const AddArticle = ({
     }, [content, editor])
 
     return (
-        <div className="px-5">
+        <div className="">
             <div className="w-full ">
                 {showPreview ? (
                     <PreviewArticle
