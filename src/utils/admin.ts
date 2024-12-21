@@ -228,7 +228,7 @@ export async function getAllQuizQuestion(
         let url = `/Content/allQuizQuestions`
 
         let selectedDiff = ''
-        difficulty.map(
+        difficulty?.map(
             (item: any) => (selectedDiff += '&difficulty=' + item.value)
         )
 
@@ -408,42 +408,42 @@ export async function filteredCodingQuestions(
         console.error('Error:', error)
     }
 }
+
 export async function filteredQuizQuestions(
-    setStoreQuizData?: any,
-    // setFilteredQuestions: (newValue: any[]) => void,
+    setStoreQuizData: (newValue: any[]) => void,
     offset?: number,
     position?: string,
     difficulty?: any,
     selectedOptions?: any,
     setTotalMCQQuestion?: any,
-    selectedTopic?: any,
+    // selectedTopic?: any,
     setLastPage?: any,
     setTotalPages?: any,
-    selectedLanguage?: string,
-    debouncedSearch?: string | undefined
+    debouncedSearch?: string | undefined,
+    selectedLanguage?: string
 ) {
     try {
         // const safeOffset = Math.max(0, offset)
         let url = `/Content/allQuizQuestions?limit=${position}&offset=${offset}`
 
         let selectedTagIds = ''
-        selectedOptions.map(
+        selectedOptions?.map(
             (item: any) => (selectedTagIds += '&tagId=' + item.value)
         )
 
         let selectedDiff = ''
-        difficulty.map(
+        difficulty?.map(
             (item: any) => (selectedDiff += '&difficulty=' + item.value)
         )
 
         const queryParams = []
 
-        if (difficulty.length > 0) {
+        if (difficulty?.length > 0) {
             if (difficulty[0].value !== 'None') {
                 queryParams.push(selectedDiff.substring(1))
             }
         }
-        if (selectedTagIds.length > 0) {
+        if (selectedTagIds?.length > 0) {
             if (selectedOptions[0].value !== '-1') {
                 queryParams.push(selectedTagIds.substring(1))
             }
