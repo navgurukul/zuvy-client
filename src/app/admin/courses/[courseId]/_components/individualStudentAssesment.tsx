@@ -55,14 +55,14 @@ const IndividualStudentAssesment = ({
         let score, totalScore
 
         if (type === 'codingSubmission') {
-            score = codingScore
-            totalScore = totalCodingScore
+            score = +codingScore
+            totalScore = +totalCodingScore
         } else if (type === 'quizSubmission') {
-            score = mcqScore
-            totalScore = totalMcqScore
+            score = +mcqScore
+            totalScore = +totalMcqScore
         } else {
-            score = openEndedScore
-            totalScore = totalOpenEndedScore
+            score = +openEndedScore
+            totalScore = +totalOpenEndedScore
         }
 
         const percentage = (score / totalScore) * 100
@@ -79,7 +79,7 @@ const IndividualStudentAssesment = ({
         }
 
         return {
-            score: score + '/' + totalScore,
+            score: Math.trunc(+score) + '/' + Math.trunc(+totalScore),
             className: bgColorClass,
         }
     }

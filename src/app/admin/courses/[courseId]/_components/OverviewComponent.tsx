@@ -15,6 +15,9 @@ type Props = {
     tabchanges: number
     embeddedSearch: number
     submissionType: string
+    proctoringData: any
+    eyeMomentCount: number
+    fullScreenExit: number
 }
 
 const OverviewComponent = (props: any) => {
@@ -35,7 +38,7 @@ const OverviewComponent = (props: any) => {
                             {props.totalCodingChallenges > 0 && (
                                 <div className="flex flex-col">
                                     <h1 className="text-sm md:text-base lg:text-lg font-semibold">
-                                        {props.codingScore}/{' '}
+                                        {Math.trunc(props.codingScore)}/{' '}
                                         {props.totalCodingScore}
                                     </h1>
                                     <p className="text-xs md:text-sm lg:text-base text-gray-500">
@@ -46,7 +49,8 @@ const OverviewComponent = (props: any) => {
                             {props.totalCorrectedMcqs > 0 && (
                                 <div className="flex flex-col">
                                     <h1 className="text-sm md:text-base lg:text-lg font-semibold">
-                                        {props.mcqScore} / {props.totalMcqScore}
+                                        {Math.trunc(props.mcqScore)} /{' '}
+                                        {props.totalMcqScore}
                                     </h1>
                                     <p className="text-xs md:text-sm lg:text-base text-gray-500">
                                         MCQs
@@ -56,7 +60,7 @@ const OverviewComponent = (props: any) => {
                             {props.totalOpenEnded > 0 && (
                                 <div className="flex flex-col">
                                     <h1 className="text-sm md:text-base lg:text-lg font-semibold">
-                                        {props.openEndedScore} /{' '}
+                                        {Math.trunc(props.openEndedScore)} /{' '}
                                         {props.totalOpenEndedScore}
                                     </h1>
                                     <p className="text-xs md:text-sm lg:text-base text-gray-500">
@@ -70,33 +74,64 @@ const OverviewComponent = (props: any) => {
 
                 <div className="flex h-[160px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md w-full md:w-5/6 lg:w-5/6 bg-white">
                     <div className="flex flex-col w-full justify-between">
-                        <div className="flex items-center p-3 md:p-4 h-[75px] justify-between rounded-md bg-green-300">
-                            <h1 className=" font-semibold text-gray-800 dark:text-white">
-                                Proctoring Report
-                            </h1>
-                        </div>
-                        <div className="flex flex-col md:flex-row p-3 md:p-4 gap-3">
-                            <div className="flex flex-col">
-                                <h1 className="text-sm text-left md:text-base lg:text-lg font-semibold">
-                                    {props.copyPaste === 0
-                                        ? 'None'
-                                        : props.copyPaste}
+                        {!props?.proctoringData?.canCopyPaste &&
+                        !props?.proctoringData?.canTabChange &&
+                        !props?.proctoringData?.canScreenExit ? (
+                            <div className="flex items-center p-3 md:p-4 h-[75px] justify-between rounded-md bg-red-300">
+                                <h1 className="font-semibold text-gray-800 dark:text-white">
+                                    No Proctoring Enabled By the Admin
                                 </h1>
-                                <p className="text-xs md:text-sm lg:text-base text-gray-500">
-                                    Copy Paste Instances
-                                </p>
                             </div>
-                            <div className="flex flex-col">
-                                <h1 className="text-sm md:text-base lg:text-lg font-bold">
-                                    {props.tabchanges === 0
-                                        ? 'None'
-                                        : props.tabchanges}
-                                </h1>
-                                <p className="text-xs md:text-sm lg:text-base text-gray-500">
-                                    Tab Changes
-                                </p>
-                            </div>
-                        </div>
+                        ) : (
+                            <>
+                                <div className="flex items-center p-3 md:p-4 h-[75px] justify-between rounded-md bg-green-300">
+                                    <h1 className="font-semibold text-gray-800 dark:text-white">
+                                        Proctoring Report
+                                    </h1>
+                                </div>
+                                <div className="flex flex-col md:flex-row p-3 md:p-4 gap-3">
+                                    {props?.proctoringData?.canCopyPaste && (
+                                        <div className="flex flex-col">
+                                            <h1 className="text-sm text-left md:text-base lg:text-lg font-semibold">
+                                                {props.copyPaste ||
+                                                props.copyPaste === 0
+                                                    ? props.copyPaste
+                                                    : 'None'}
+                                            </h1>
+                                            <p className="text-xs md:text-sm lg:text-base text-gray-500">
+                                                Copy Paste
+                                            </p>
+                                        </div>
+                                    )}
+                                    {props?.proctoringData?.canTabChange && (
+                                        <div className="flex flex-col">
+                                            <h1 className="text-sm md:text-base lg:text-lg font-bold">
+                                                {props.tabchanges ||
+                                                props.tabchanges === 0
+                                                    ? props.tabchanges
+                                                    : 'None'}
+                                            </h1>
+                                            <p className="text-xs md:text-sm lg:text-base text-gray-500">
+                                                Tab Changes
+                                            </p>
+                                        </div>
+                                    )}
+                                    {props?.proctoringData?.canScreenExit && (
+                                        <div className="flex flex-col">
+                                            <h1 className="text-sm md:text-base lg:text-lg font-bold">
+                                                {props.fullScreenExit ||
+                                                props.fullScreenExit === 0
+                                                    ? props.fullScreenExit
+                                                    : 'None'}
+                                            </h1>
+                                            <p className="text-xs md:text-sm lg:text-base text-gray-500">
+                                                Full Screen Exit
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
