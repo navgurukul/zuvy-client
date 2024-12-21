@@ -276,19 +276,22 @@ function Page({ params }: any) {
                                                     classData.status ? (
                                                         activeTab ===
                                                         'completed' ? (
-                                                            <RecordingCard
+                                                           <div  key={classData}>
+                                                             <RecordingCard
                                                                 classData={
                                                                     classData
                                                                 }
-                                                                key={index}
+                                                               
                                                                 isAdmin
                                                             />
+                                                           </div>
                                                         ) : (
-                                                            <ClassCard
+                                                          <div key={classData}>
+                                                              <ClassCard
                                                                 classData={
                                                                     classData
                                                                 }
-                                                                key={index}
+                                                    
                                                                 classType={
                                                                     activeTab
                                                                 }
@@ -302,9 +305,12 @@ function Page({ params }: any) {
                                                                     false
                                                                 }
                                                             />
+                                                          </div>
                                                         )
                                                     ) : (
-                                                        <ClassCardSkeleton />
+                                                        <div key={classData}>
+                                                            <ClassCardSkeleton />
+                                                        </div>
                                                     )
                                             )}
                                         </div>
