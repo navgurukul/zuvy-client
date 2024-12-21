@@ -130,6 +130,7 @@ const Page = ({ params }: { params: any }) => {
     const [codingdata, setCodingData] = useState<CodingQuestion[]>([])
     const [username, setUsername] = useState<string>('')
     const [moduleId, setmoduleId] = useState<number>(0)
+    const [proctoringData, setProctoringData] = useState<any>()
     const [loading, setLoading] = useState<boolean>(true)
     const [totalQuestions, setTotalQuestion] = useState({
         totalCodingQuestion: 0,
@@ -161,8 +162,6 @@ const Page = ({ params }: { params: any }) => {
         },
         {
             crumb: username,
-
-            href: '',
             isLast: true,
         },
     ]
@@ -194,6 +193,19 @@ const Page = ({ params }: { params: any }) => {
                         totalMcqQuestion: res?.data?.mcqQuestionCount,
                         totalOpenEnded: res?.data?.openEndedQuestionCount,
                     })
+                    setProctoringData({
+                        canEyeTrack:
+                            res?.data?.submitedOutsourseAssessment?.canEyeTrack,
+                        canTabChange:
+                            res?.data?.submitedOutsourseAssessment
+                                ?.canTabChange,
+                        canScreenExit:
+                            res?.data?.submitedOutsourseAssessment
+                                ?.canScreenExit,
+                        canCopyPaste:
+                            res?.data?.submitedOutsourseAssessment
+                                ?.canCopyPaste,
+                    })
                 })
         } catch (error) {
             toast({
@@ -218,6 +230,8 @@ const Page = ({ params }: { params: any }) => {
         day: 'numeric',
     }
     const formattedDate = date.toLocaleDateString('en-US', options2)
+
+    // console.log(proctoringData)
 
     return (
         <>
@@ -285,6 +299,8 @@ const Page = ({ params }: { params: any }) => {
                         totalScore={100}
                         copyPaste={assesmentData?.copyPaste}
                         tabchanges={assesmentData?.tabChange}
+                        fullScreenExit={assesmentData?.fullScreenExit}
+                        eyeMomentCount={assesmentData?.eyeMomentCount}
                         embeddedSearch={assesmentData?.embeddedGoogleSearch}
                         submissionType={assesmentData?.typeOfsubmission}
                         totalCodingScore={
@@ -301,6 +317,7 @@ const Page = ({ params }: { params: any }) => {
                         totalOpenEndedScore={
                             assesmentData?.requiredOpenEndedScore
                         }
+                        proctoringData={proctoringData}
                     />
                 ) : (
                     <div className="flex gap-x-20  ">
