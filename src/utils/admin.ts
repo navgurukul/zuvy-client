@@ -17,7 +17,6 @@ export function handleDelete(
     offset?: number,
     position?: String
 ) {
-
     api({
         method: 'delete',
         url: 'Content/deleteCodingQuestion',
@@ -115,7 +114,6 @@ export const handleConfirm = (
     offset?: number,
     position?: String
 ) => {
-  
     handleDelete(
         deleteCodingQuestionId,
         setCodingQuestions,
@@ -230,7 +228,7 @@ export async function getAllQuizQuestion(
         let url = `/Content/allQuizQuestions`
 
         let selectedDiff = ''
-        difficulty.map(
+        difficulty?.map(
             (item: any) => (selectedDiff += '&difficulty=' + item.value)
         )
 
@@ -365,7 +363,6 @@ export async function filteredCodingQuestions(
 
     // setTotalCodingQuestion: any, // Accepting setTotalBootcamps from parent
 ) {
-
     try {
         const safeOffset = Math.max(0, offset)
 
@@ -411,42 +408,42 @@ export async function filteredCodingQuestions(
         console.error('Error:', error)
     }
 }
+
 export async function filteredQuizQuestions(
-    setStoreQuizData?: any,
-    // setFilteredQuestions: (newValue: any[]) => void,
+    setStoreQuizData: (newValue: any[]) => void,
     offset?: number,
     position?: string,
     difficulty?: any,
     selectedOptions?: any,
     setTotalMCQQuestion?: any,
-    selectedTopic?: any,
+    // selectedTopic?: any,
     setLastPage?: any,
     setTotalPages?: any,
-    selectedLanguage?: string,
-    debouncedSearch?: string | undefined
+    debouncedSearch?: string | undefined,
+    selectedLanguage?: string
 ) {
     try {
         // const safeOffset = Math.max(0, offset)
         let url = `/Content/allQuizQuestions?limit=${position}&offset=${offset}`
 
         let selectedTagIds = ''
-        selectedOptions.map(
+        selectedOptions?.map(
             (item: any) => (selectedTagIds += '&tagId=' + item.value)
         )
 
         let selectedDiff = ''
-        difficulty.map(
+        difficulty?.map(
             (item: any) => (selectedDiff += '&difficulty=' + item.value)
         )
 
         const queryParams = []
 
-        if (difficulty.length > 0) {
+        if (difficulty?.length > 0) {
             if (difficulty[0].value !== 'None') {
                 queryParams.push(selectedDiff.substring(1))
             }
         }
-        if (selectedTagIds.length > 0) {
+        if (selectedTagIds?.length > 0) {
             if (selectedOptions[0].value !== '-1') {
                 queryParams.push(selectedTagIds.substring(1))
             }
@@ -461,7 +458,7 @@ export async function filteredQuizQuestions(
             url += `&${queryParams.join('&')}`
         }
         const res = await api.get(url)
-   
+
         setStoreQuizData(res.data.data)
         setTotalMCQQuestion(res.data.totalRows)
         setTotalPages(res.data.totalPages)
@@ -483,13 +480,10 @@ export async function filteredOpenEndedQuestions(
     selectedLanguage?: string,
     debouncedSearch?: string | undefined
 ) {
-   
     try {
         const safeOffset = Math.max(0, offset)
 
-        let url = `/Content/openEndedQuestions?pageNo=${
-            offset + 1
-        }&limit_=${position}`
+        let url = `/Content/openEndedQuestions?limit=${position}&offset=${offset}`
 
         let selectedTagIds = ''
         selectedOptions.map(
@@ -531,7 +525,6 @@ export async function filteredOpenEndedQuestions(
         setTotalOpenEndedQuestion(response.data.totalRows)
         setTotalPages(response.data.totalPages)
         setLastPage(response.data.totalPages)
-
     } catch (error) {
         console.error('Error:', error)
     }
@@ -845,21 +838,23 @@ export async function handleSaveChapter(
     }
 }
 
-
 export const proctoringOptions = [
     {
         label: 'Copy Paste',
         name: 'canCopyPaste' as const,
-        tooltip: 'Prevents users from copying and pasting content during the exam to maintain test integrity.'
+        tooltip:
+            'Prevents users from copying and pasting content during the exam to maintain test integrity.',
     },
     {
         label: 'Tab Change',
         name: 'tabSwitch' as const,
-        tooltip: 'Monitors and restricts switching between browser tabs during the exam to prevent unauthorized access to external resources.'
+        tooltip:
+            'Monitors and restricts switching between browser tabs during the exam to prevent unauthorized access to external resources.',
     },
     {
         label: 'Screen Exit',
         name: 'screenExit' as const,
-        tooltip: 'Detects and logs any attempts to exit the exam screen, helping to identify potential cheating attempts.'
-    }
-];
+        tooltip:
+            'Detects and logs any attempts to exit the exam screen, helping to identify potential cheating attempts.',
+    },
+]
