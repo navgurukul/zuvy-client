@@ -131,7 +131,7 @@ function SubmissionCard({
                     <div className="hidden lg:flex text-end">
                         <Button variant={'ghost'} className="text-lg font-bold">
                             <Link
-                                href={`/student/courses/${classData.bootcampId}/modules/${classData.moduleId}`}
+                                href={`/student/courses/${classData.bootcampId}/modules/${classData.moduleId}/chapters/${classData.chapterId}`}
                                 className="gap-3 flex  items-center text-secondary"
                             >
                                 <p>Start Assignment</p>
@@ -148,7 +148,7 @@ function SubmissionCard({
                             className="bg-transparent border-none text-red-500 hover:bg-red-50 text-lg font-bold"
                         >
                             <Link
-                                href={`/student/courses/${classData.bootcampId}/modules/${classData.moduleId}`}
+                                href={`/student/courses/${classData.bootcampId}/modules/${classData.moduleId}/chapters/${classData.chapterId}`}
                                 className="gap-3 flex items-center text-red-500"
                             >
                                 <p>Start Assignment</p>
@@ -173,7 +173,7 @@ function SubmissionCard({
                         className="bg-transparent border-none text-red-500 hover:bg-red-50 text-lg font-bold"
                     >
                         <Link
-                            href={`/student/courses/${classData.bootcampId}/modules/${classData.moduleId}`}
+                            href={`/student/courses/${classData.bootcampId}/modules/${classData.moduleId}/chapters/${classData.chapterId}`}
                             className="gap-3 flex items-center text-red-500"
                         >
                             <p>Start Assignment</p>
@@ -190,7 +190,7 @@ function SubmissionCard({
                         className="bg-transparent border-none text-red-500 hover:bg-red-50 text-lg font-bold"
                     >
                         <Link
-                            href={`/student/courses/${classData.bootcampId}/modules/${classData.moduleId}`}
+                            href={`/student/courses/${classData.bootcampId}/modules/${classData.moduleId}/chapters/${classData.chapterId}`}
                             className="gap-3 flex items-center text-red-500"
                         >
                             <p>Start Assignment</p>
@@ -205,7 +205,7 @@ function SubmissionCard({
                 <div className="block lg:hidden text-end">
                     <Button variant={'ghost'} className="text-lg font-bold">
                         <Link
-                            href={`/student/courses/${classData.bootcampId}/modules/${classData.moduleId}`}
+                            href={`/student/courses/${classData.bootcampId}/modules/${classData.moduleId}/chapters/${classData.chapterId}`}
                             className="gap-3 flex  items-center text-secondary"
                         >
                             <p>Start Assignment</p>
