@@ -26,6 +26,8 @@ export const taskSchema = z.object({
     isPassed: z.boolean(),
     percentage: z.number(),
     questionId: z.number(),
+    startedAt: z.string(),
+    submitedAt: z.string(),
 })
 
 export const testCaseSchema = z.object({

@@ -786,6 +786,24 @@ export function transformQuizzes(data: any): { quizzes: any[] } {
     return { quizzes: Object.values(quizzesMap) }
 }
 
+export const calculateTimeTaken = (
+    startedAt: string,
+    submittedAt: string
+): string => {
+    const start = new Date(startedAt)
+    const end = new Date(submittedAt)
+
+    // Calculate the difference in milliseconds
+    const diffInMs = end.getTime() - start.getTime()
+
+    // Convert milliseconds to minutes and seconds
+    const hours = Math.floor(diffInMs / (1000 * 60 * 60))
+    const minutes = Math.floor((diffInMs % (1000 * 60 * 60)) / (1000 * 60))
+    const seconds = Math.floor((diffInMs % (1000 * 60)) / 1000)
+
+    return `${hours}:${minutes}:${seconds}`
+}
+
 export const addClassToCodeTags: any = (
     htmlString: string,
     codeBlockClass: string
