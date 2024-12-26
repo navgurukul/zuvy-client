@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {
     handleFullScreenChange,
     handleKeyDown,
@@ -86,7 +86,7 @@ function Page({
     const [startedAt, setStartedAt] = useState(
         new Date(assessmentData?.submission?.startedAt).getTime()
     )
-
+    const intervalIdRef = useRef<number | null>(null)
     const pathname = usePathname()
 
     function isCurrentPageSubmitAssessment() {
@@ -103,7 +103,7 @@ function Page({
     }
 
     const startTimer = (endTime: number) => {
-        const newIntervalId = setInterval(() => {
+        intervalIdRef.current = window.setInterval(() => {
             const currentTime = Date.now()
             const newRemainingTime = Math.max(
                 Math.floor((endTime - currentTime) / 1000),
@@ -111,83 +111,97 @@ function Page({
             )
             setRemainingTime(newRemainingTime)
 
-            // Show toast when remaining time is 5 minutes
+            // Show toast when remaining time is 5 minutes (300 seconds)
             if (newRemainingTime === 300) {
                 toast({
                     title: 'WARNING',
-                    description: 'Hurry up less than 5 minutes remaining now!',
+                    description: 'Hurry up, less than 5 minutes remaining now!',
                     className:
                         'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-red-600 text-white',
                 })
             }
 
-            if (newRemainingTime === 0 && newIntervalId) {
+            // Submit assessment and clear interval when time is up
+            if (newRemainingTime === 0) {
                 submitAssessment()
-                clearInterval(newIntervalId)
+                if (intervalIdRef.current) {
+                    clearInterval(intervalIdRef.current)
+                    intervalIdRef.current = null
+                }
             }
         }, 1000)
-        setIntervalId(newIntervalId)
     }
 
     useEffect(() => {
         const endTime = startedAt + assessmentData.timeLimit * 1000
 
-        // get all the proctoring violation counts data for tab switching, copy paste, etc.:-
+        // Fetch proctoring data
         if (assessmentSubmitId) {
             getProctoringData(assessmentSubmitId)
         }
 
-        if (endTime) {
-            startTimer(endTime)
+        // Start the timer
+        startTimer(endTime)
+
+        // Define event handlers for proctoring
+        const visibilityChangeHandler = () =>
+            handleVisibilityChange(
+                submitAssessment,
+                isCurrentPageSubmitAssessment,
+                assessmentSubmitId
+            )
+
+        const fullscreenChangeHandler = () =>
+            handleFullScreenChange(
+                submitAssessment,
+                isCurrentPageSubmitAssessment,
+                setIsFullScreen,
+                assessmentSubmitId
+            )
+
+        // Add event listeners
+        if (isTabProctorOn) {
+            document.addEventListener(
+                'visibilitychange',
+                visibilityChangeHandler
+            )
         }
 
-        isTabProctorOn &&
-            document.addEventListener('visibilitychange', () =>
-                handleVisibilityChange(
-                    submitAssessment,
-                    isCurrentPageSubmitAssessment,
-                    assessmentSubmitId
-                )
+        if (isFullScreenProctorOn) {
+            document.addEventListener(
+                'fullscreenchange',
+                fullscreenChangeHandler
             )
+        }
 
-        isFullScreenProctorOn &&
-            document.addEventListener('fullscreenchange', () =>
-                handleFullScreenChange(
-                    submitAssessment,
-                    isCurrentPageSubmitAssessment,
-                    setIsFullScreen,
-                    assessmentSubmitId
-                )
-            )
-
+        // Cleanup on unmount
         return () => {
-            document.removeEventListener('visibilitychange', () =>
-                handleVisibilityChange(
-                    submitAssessment,
-                    isCurrentPageSubmitAssessment,
-                    assessmentSubmitId
+            if (isTabProctorOn) {
+                document.removeEventListener(
+                    'visibilitychange',
+                    visibilityChangeHandler
                 )
-            )
-            document.removeEventListener('fullscreenchange', () =>
-                handleFullScreenChange(
-                    submitAssessment,
-                    isCurrentPageSubmitAssessment,
-                    setIsFullScreen,
-                    assessmentSubmitId
+            }
+            if (isFullScreenProctorOn) {
+                document.removeEventListener(
+                    'fullscreenchange',
+                    fullscreenChangeHandler
                 )
-            )
-            if (intervalId) {
-                clearInterval(intervalId)
+            }
+            if (intervalIdRef.current) {
+                clearInterval(intervalIdRef.current)
             }
         }
     }, [
         isTabProctorOn,
         isFullScreenProctorOn,
-        isCopyPasteProctorOn,
-        isEyeTrackingProctorOn,
+        submitAssessment,
+        isCurrentPageSubmitAssessment,
+        assessmentSubmitId,
         startedAt,
-        isFullScreen,
         assessmentData,
+        handleVisibilityChange,
+        handleFullScreenChange,
     ])
 
     // useEffect(() => {
