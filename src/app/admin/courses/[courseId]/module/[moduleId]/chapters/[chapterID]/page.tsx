@@ -79,7 +79,6 @@ export default function Page({
                     setActiveChapterTitle(currentModule?.chapterTitle)
                     setCurrentChapter(currentModule)
                 }
-
                 setChapterContent(response.data)
 
                 setTimeout(() => {
@@ -98,8 +97,6 @@ export default function Page({
         [moduleData, courseId, moduleId]
     )
 
-    
-
     useEffect(() => {
         if (chapterData.length > 0 && topicId != null) {
             fetchChapterContent(chapter_id, topicId)
@@ -116,8 +113,8 @@ export default function Page({
         fetchChapterContent,
         articleUpdateOnPreview,
         assignmentUpdateOnPreview,
-        topicId,
-        chapter_id
+        // topicId, // {  This is Changed. This was not there before }
+        // chapter_id, // {  This is Changed,. This was not there before }
     ])
 
     const renderChapterContent = () => {
@@ -131,7 +128,6 @@ export default function Page({
                 case 1:
                     return (
                         <ScrollArea
-                            // className="h-[600px] lg:h-[600px] pr-4"
                             className={`${heightClass} pr-4`}
                             type="hover"
                             style={{
