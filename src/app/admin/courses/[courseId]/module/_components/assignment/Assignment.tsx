@@ -38,7 +38,12 @@ import {
 } from '@/components/ui/popover'
 import { Calendar } from '@/components/ui/calendar'
 import PreviewAssignment from './PreviewAssignment'
-import { getChapterUpdateStatus } from '@/store/store'
+import {
+    getChapterUpdateStatus,
+    getAssignmentPreviewStore,
+} from '@/store/store'
+import { Eye } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 interface ContentDetail {
     title: string
@@ -58,12 +63,14 @@ interface Content {
 
 interface AssignmentProps {
     content: Content
+    courseId: any
     assignmentUpdateOnPreview: boolean
     setAssignmentUpdateOnPreview: React.Dispatch<React.SetStateAction<boolean>> // Correct type for setter
 }
 
 const AddAssignent = ({
     content,
+    courseId,
     assignmentUpdateOnPreview,
     setAssignmentUpdateOnPreview,
 }: AssignmentProps) => {
@@ -97,9 +104,11 @@ const AddAssignent = ({
         content,
     })
 
+    const router = useRouter()
     const [title, setTitle] = useState('')
     const [titles, setTitles] = useState('')
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
+    const { setAssignmentPreviewContent } = getAssignmentPreviewStore()
 
     const form = useForm({
         resolver: zodResolver(formSchema),
@@ -179,6 +188,15 @@ const AddAssignent = ({
         getAssignmentContent()
     }, [content, editor])
 
+    function previewArticle() {
+        if (content) {
+            setAssignmentPreviewContent(content)
+            router.push(
+                `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/assignment/${content.topicId}/preview`
+            )
+        }
+    }
+
     return (
         <div className="px-5">
             {showPreview ? (
@@ -238,6 +256,16 @@ const AddAssignent = ({
                                                     <ArrowUpRightSquare />
                                                     <h1>Preview</h1>
                                                 </Button>
+                                                <div
+                                                    id="previewArticle"
+                                                    onClick={previewArticle}
+                                                    className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer"
+                                                >
+                                                    <Eye size={18} />
+                                                    <h6 className="ml-1 text-sm">
+                                                        Preview
+                                                    </h6>
+                                                </div>
                                                 <div className="flex justify-end ">
                                                     <Button
                                                         type="submit"

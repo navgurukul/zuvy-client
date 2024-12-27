@@ -25,7 +25,9 @@ import { Pencil } from 'lucide-react'
 import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 import PreviewArticle from './PreviewArticle'
 import { ArrowUpRightSquare } from 'lucide-react'
-import { getChapterUpdateStatus } from '@/store/store'
+import { getChapterUpdateStatus, getArticlePreviewStore } from '@/store/store'
+import { Eye } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 interface ContentDetail {
     title: string
@@ -45,18 +47,23 @@ interface Content {
 
 const AddArticle = ({
     content,
+    courseId,
     articleUpdateOnPreview,
     setArticleUpdateOnPreview,
 }: {
     content: any
+    courseId: any
     articleUpdateOnPreview: any
     setArticleUpdateOnPreview: any
 }) => {
     const heightClass = useResponsiveHeight()
     // state
+    const router = useRouter()
     const [title, setTitle] = useState('')
     const [showPreview, setShowPreview] = useState<boolean>(false)
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
+    const { setArticlePreviewContent } = getArticlePreviewStore()
+
     // misc
     const formSchema = z.object({
         title: z.string(),
@@ -140,6 +147,15 @@ const AddArticle = ({
         getArticleContent()
     }, [content, editor])
 
+    function previewArticle() {
+        if (content) {
+            setArticlePreviewContent(content)
+            router.push(
+                `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/article/${content.topicId}/preview`
+            )
+        }
+    }
+
     return (
         <div className="px-5">
             <div className="w-full ">
@@ -187,7 +203,7 @@ const AddArticle = ({
                                                 </div>
                                             </FormControl>
                                             <div className="flex items-center justify-between ">
-                                                <Button
+                                                {/* <Button
                                                     variant={'ghost'}
                                                     type="button"
                                                     className="text-secondary w-[100px] h-[30px] gap-x-1"
@@ -195,7 +211,17 @@ const AddArticle = ({
                                                 >
                                                     <ArrowUpRightSquare />
                                                     <h1>Preview</h1>
-                                                </Button>
+                                                </Button> */}
+                                                <div
+                                                    id="previewArticle"
+                                                    onClick={previewArticle}
+                                                    className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer"
+                                                >
+                                                    <Eye size={18} />
+                                                    <h6 className="ml-1 text-sm">
+                                                        Preview
+                                                    </h6>
+                                                </div>
                                                 <div className="flex justify-end mt-5  ">
                                                     <Button
                                                         type="submit"

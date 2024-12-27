@@ -151,6 +151,7 @@ export default function Page({
                         <AddArticle
                             key={chapterId}
                             content={chapterContent}
+                            courseId={courseId}
                             articleUpdateOnPreview={articleUpdateOnPreview}
                             setArticleUpdateOnPreview={
                                 setArticleUpdateOnPreview
@@ -181,6 +182,7 @@ export default function Page({
                         <Assignment
                             key={chapterId}
                             content={chapterContent}
+                            courseId={courseId}
                             assignmentUpdateOnPreview={
                                 assignmentUpdateOnPreview
                             }
