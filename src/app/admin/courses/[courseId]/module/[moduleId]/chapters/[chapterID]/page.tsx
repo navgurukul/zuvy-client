@@ -163,6 +163,7 @@ export default function Page({
                         <CodingChallenge
                             key={chapterId}
                             moduleId={moduleID}
+                            courseId={courseId}
                             content={chapterContent}
                             activeChapterTitle={activeChapterTitle}
                         />
