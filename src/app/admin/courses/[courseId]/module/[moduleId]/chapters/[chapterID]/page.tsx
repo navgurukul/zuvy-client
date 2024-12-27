@@ -98,8 +98,6 @@ export default function Page({
         [moduleData, courseId, moduleId]
     )
 
-    
-
     useEffect(() => {
         if (chapterData.length > 0 && topicId != null) {
             fetchChapterContent(chapter_id, topicId)
@@ -117,7 +115,7 @@ export default function Page({
         articleUpdateOnPreview,
         assignmentUpdateOnPreview,
         topicId,
-        chapter_id
+        chapter_id,
     ])
 
     const renderChapterContent = () => {
@@ -142,6 +140,7 @@ export default function Page({
                             <AddVideo
                                 key={chapterId}
                                 moduleId={moduleID}
+                                courseId={courseId}
                                 content={chapterContent}
                                 fetchChapterContent={fetchChapterContent}
                             />

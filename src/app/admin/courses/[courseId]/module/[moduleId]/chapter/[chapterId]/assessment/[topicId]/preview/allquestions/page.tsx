@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { fetchPreviewAssessmentData } from '@/utils/admin'
+import { fetchPreviewData } from '@/utils/admin'
 import { ChevronRight, Clock, DoorClosed, Timer, X } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
@@ -24,13 +24,13 @@ function AllQuestions({ params }: { params: any }) {
     const router = useRouter()
 
     useEffect(() => {
-        fetchPreviewAssessmentData(
+        fetchPreviewData(
             params,
             setAssessmentPreviewContent,
             setAssessmentPreviewCodingContent
         )
         fetchAllTags() // Fetch all tags when the component mounts
-    }, [params.chapterId, fetchPreviewAssessmentData])
+    }, [params.chapterId, fetchPreviewData])
 
     // Fetch all tags from the API
     async function fetchAllTags() {
