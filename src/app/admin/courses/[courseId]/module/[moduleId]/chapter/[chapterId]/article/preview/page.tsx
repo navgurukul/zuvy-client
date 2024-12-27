@@ -1,3 +1,4 @@
+'use client'
 import { useEditor } from '@tiptap/react'
 import React from 'react'
 import extensions from '@/app/_components/editor/TiptapExtensions'
@@ -8,32 +9,14 @@ import { X } from 'lucide-react'
 
 type Props = {}
 
-const PreviewAssignment = ({
+const PreviewArticle = ({
     content,
     setShowPreview,
 }: {
     content: any
     setShowPreview: React.Dispatch<React.SetStateAction<boolean>>
 }) => {
-    const timestamp = content.completionDate
-    const date = new Date(timestamp)
-
-    const options: any = {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        timeZone: 'UTC',
-        timeZoneName: 'short',
-    }
-    const options2: any = {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-    }
-    const formattedDate = date.toLocaleDateString('en-US', options)
+    console.log(content)
 
     let editorContent
 
@@ -45,6 +28,18 @@ const PreviewAssignment = ({
         content.contentDetails[0].content.length > 0
     ) {
         editorContent = content.contentDetails[0].content[0]
+    } else {
+        editorContent = {
+            type: 'doc',
+            content: [
+                {
+                    type: 'paragraph',
+                    attrs: {
+                        textAlign: 'left',
+                    },
+                },
+            ],
+        }
     }
 
     const editor = useEditor({
@@ -59,24 +54,17 @@ const PreviewAssignment = ({
                 <h1 className="text-2xl font-semibold text-left">
                     {content?.title ? content.title : 'No Title yet'}
                 </h1>
-                <h1 className="font-semibold">Deadline: {formattedDate}</h1>
-
-                <Button
-                    onClick={() => setShowPreview(false)}
-                    className="gap-x-1 flex items-center"
-                    variant={'ghost'}
-                >
+                <Button className="gap-x-1 flex items-center" variant={'ghost'}>
                     <X className="text-red-400" size={15} />
-                    <h1 className="text-red-400">Close Preview</h1>
                 </Button>
             </div>
 
             <TiptapEditor editor={editor} />
             <div className="mt-2 text-end">
-                <Button>Mark as Done</Button>
+                <Button disabled>Mark as Done </Button>
             </div>
         </div>
     )
 }
 
-export default PreviewAssignment
+export default PreviewArticle

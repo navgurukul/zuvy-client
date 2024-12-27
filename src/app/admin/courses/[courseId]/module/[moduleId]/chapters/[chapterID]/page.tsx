@@ -142,6 +142,8 @@ export default function Page({
                                 moduleId={moduleID}
                                 content={chapterContent}
                                 fetchChapterContent={fetchChapterContent}
+                                courseId={courseId}
+                                chapterId={chapter_id}
                             />
                         </ScrollArea>
                     )
@@ -154,15 +156,20 @@ export default function Page({
                             setArticleUpdateOnPreview={
                                 setArticleUpdateOnPreview
                             }
+                            courseId={courseId}
+                            moduleId={moduleId}
+                            chapterId={chapter_id}
                         />
                     )
                 case 3:
                     return (
                         <CodingChallenge
                             key={chapterId}
-                            moduleId={moduleID}
                             content={chapterContent}
                             activeChapterTitle={activeChapterTitle}
+                            courseId={courseId}
+                            moduleId={moduleId}
+                            chapterId={chapterId}
                         />
                     )
                 case 4:
@@ -172,6 +179,7 @@ export default function Page({
                             chapterId={chapterId}
                             moduleId={moduleID}
                             content={chapterContent}
+                            courseId={courseId}
                         />
                     )
                 case 5:
@@ -194,6 +202,9 @@ export default function Page({
                                 setAssignmentUpdateOnPreview={
                                     setAssignmentUpdateOnPreview
                                 }
+                                courseId={courseId}
+                                chapterId={chapter_id}
+                                moduleId={moduleId}
                             />
                         </ScrollArea>
                     )
