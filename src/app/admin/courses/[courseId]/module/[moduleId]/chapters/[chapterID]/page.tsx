@@ -174,6 +174,7 @@ export default function Page({
                             key={chapterId}
                             chapterId={chapterId}
                             moduleId={moduleID}
+                            courseId={courseId}
                             content={chapterContent}
                             activeChapterTitle={activeChapterTitle}
                         />
@@ -212,6 +213,7 @@ export default function Page({
                             content={chapterContent}
                             // fetchChapterContent={fetchChapterContent}
                             moduleId={moduleID}
+                            courseId={courseId}
                         />
                     )
                 default:

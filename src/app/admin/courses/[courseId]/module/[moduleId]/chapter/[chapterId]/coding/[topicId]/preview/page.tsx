@@ -40,7 +40,7 @@ const PreviewCoding = ({ params }: { params: any }) => {
     const selectedCodingOutsourseId = ''
     return (
         <>
-            <div className="fixed top-0 left-0 right-0 h-12 bg-[#518672] flex items-center justify-center">
+            <div className="fixed top-0 left-0 right-0 h-12 bg-[#518672] flex items-center justify-center z-50">
                 <h1 className="text-center text-[#FFFFFF]">
                     You are in the Admin Preview Mode. The questions cannot be
                     interacted with.

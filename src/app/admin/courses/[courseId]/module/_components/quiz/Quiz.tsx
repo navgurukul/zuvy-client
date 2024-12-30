@@ -13,11 +13,18 @@ import { api } from '@/utils/axios.config'
 import { Tag } from '@/app/admin/resource/mcq/page'
 import { toast } from '@/components/ui/use-toast'
 import { getAllQuizQuestion } from '@/utils/admin'
-import { getAllQuizData, getChapterUpdateStatus } from '@/store/store'
+import {
+    getAllQuizData,
+    getChapterUpdateStatus,
+    getQuizPreviewStore,
+} from '@/store/store'
 import { ArrowUpRightSquare, Pencil } from 'lucide-react'
 import QuizPreview from '@/app/admin/courses/[courseId]/module/_components/quiz/QuizPreview'
+import { Eye } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 function Quiz(props: any) {
+    const router = useRouter()
     const [tags, setTags] = useState<Tag[]>([])
     const [isOpen, setIsOpen] = useState(false)
     const [addQuestion, setAddQuestion] = useState<quizData[]>([])
@@ -27,6 +34,7 @@ function Quiz(props: any) {
     const [quizTitle, setQuizTitle] = useState('')
     const [inputValue, setInputValue] = useState(props.activeChapterTitle)
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
+    const { setQuizPreviewContent } = getQuizPreviewStore()
 
     const handleAddQuestion = (data: any) => {
         const uniqueData = data.filter((question: quizData) => {
@@ -126,6 +134,15 @@ function Quiz(props: any) {
         getAllSavedQuizQuestion()
     }, [getAllSavedQuizQuestion])
 
+    function previewQuiz() {
+        if (props.content) {
+            setQuizPreviewContent(props.content)
+            router.push(
+                `/admin/courses/${props.courseId}/module/${props.moduleId}/chapter/${props.chapterId}/quiz/${props.content.topicId}/preview`
+            )
+        }
+    }
+
     return (
         <div>
             {showPreview ? (
@@ -157,7 +174,7 @@ function Quiz(props: any) {
                             </div>
 
                             {/* Preview Button */}
-                            <Button
+                            {/* <Button
                                 variant={'ghost'}
                                 type="button"
                                 className="text-secondary w-[100px] h-[30px] gap-x-1"
@@ -165,7 +182,15 @@ function Quiz(props: any) {
                             >
                                 <ArrowUpRightSquare />
                                 <h1>Preview</h1>
-                            </Button>
+                            </Button> */}
+                            <div
+                                id="previewQuiz"
+                                onClick={previewQuiz}
+                                className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer"
+                            >
+                                <Eye size={18} />
+                                <h6 className="ml-1 text-sm">Preview</h6>
+                            </div>
                         </div>
                     </div>
 
