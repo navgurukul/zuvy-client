@@ -44,7 +44,6 @@ import {
 } from '@/store/store'
 import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-
 interface ContentDetail {
     title: string
     description: string | null
@@ -187,7 +186,6 @@ const AddAssignent = ({
     // async
     useEffect(() => {
         getAssignmentContent()
-        console.log('content', content)
     }, [content, editor])
 
     function previewAssignment() {
@@ -220,29 +218,38 @@ const AddAssignent = ({
                                 name="title"
                                 render={({ field }) => (
                                     <FormItem className="flex flex-col gap-0">
-                                        {' '}
                                         <FormControl>
-                                            <div className="w-2/6 flex justify-center align-middle items-center relative">
-                                                <Input
-                                                    {...field}
-                                                    onChange={(e) => {
-                                                        setTitles(
-                                                            e.target.value
-                                                        )
-                                                        field.onChange(e)
-                                                    }}
-                                                    placeholder="Untitled Assignment"
-                                                    className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
-                                                    autoFocus
-                                                />
-                                                {!titles && ( // Show pencil icon only when the title is empty
-                                                    <Pencil
-                                                        fill="true"
-                                                        fillOpacity={0.4}
-                                                        size={20}
-                                                        className="absolute text-gray-100 pointer-events-none mt-1 right-5"
+                                            <div className="flex justify-between items-center">
+                                                <div className="w-2/6 flex justify-center align-middle items-center relative">
+                                                    <Input
+                                                        {...field}
+                                                        onChange={(e) => {
+                                                            setTitles(
+                                                                e.target.value
+                                                            )
+                                                            field.onChange(e)
+                                                        }}
+                                                        placeholder="Untitled Assignment"
+                                                        className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                                                        autoFocus
                                                     />
-                                                )}
+                                                    {!titles && ( // Show pencil icon only when the title is empty
+                                                        <Pencil
+                                                            fill="true"
+                                                            fillOpacity={0.4}
+                                                            size={20}
+                                                            className="absolute text-gray-100 pointer-events-none mt-1 right-5"
+                                                        />
+                                                    )}
+                                                </div>
+                                                <div className="mt-5">
+                                                    <Button
+                                                        type="submit"
+                                                        form="myForm"
+                                                    >
+                                                        Save
+                                                    </Button>
+                                                </div>
                                             </div>
                                         </FormControl>
                                         {/* Button aligned below the input */}
@@ -265,14 +272,6 @@ const AddAssignent = ({
                                                 <h6 className="ml-1 text-sm">
                                                     Preview
                                                 </h6>
-                                            </div>
-                                            <div className="flex justify-end ">
-                                                <Button
-                                                    type="submit"
-                                                    form="myForm"
-                                                >
-                                                    Save
-                                                </Button>
                                             </div>
                                         </div>
                                         <FormMessage className="h-5" />

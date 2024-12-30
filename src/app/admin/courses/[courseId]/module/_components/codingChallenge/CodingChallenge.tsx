@@ -22,9 +22,9 @@ import { ArrowUpRightSquare } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import PreviewCodingChallenge from './PreviewCodingChallenge'
 import { toast } from '@/components/ui/use-toast'
+import { handleSaveChapter } from '@/utils/admin'
 import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { handleSaveChapter } from '@/utils/admin'
 
 interface Example {
     input: number[]
@@ -284,14 +284,14 @@ function CodingChallenge({
                     </div>
                     <div className="mt-2">
                         {/* <Button
-                            variant={'ghost'}
-                            type="button"
-                            className="text-secondary w-[100px] h-[30px] flex items-center gap-x-1"
-                            onClick={handlePreviewClick}
-                        >
-                            <ArrowUpRightSquare />
-                            <h1>Preview</h1>
-                        </Button> */}
+                                variant={'ghost'}
+                                type="button"
+                                className="text-secondary w-[100px] h-[30px] flex items-center gap-x-1"
+                                onClick={handlePreviewClick}
+                            >
+                                <ArrowUpRightSquare />
+                                <h1>Preview</h1>
+                            </Button> */}
                         <div
                             id="previewCodingChallenge"
                             onClick={previewCodingChallenge}

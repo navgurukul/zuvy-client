@@ -102,14 +102,14 @@ const AddVideo = ({
         order: number
         contentDetails: ContentDetail[]
     }
-    moduleId: string
     courseId: any
+    moduleId: string
     fetchChapterContent: (chapterId: number, topicId: number) => Promise<void>
 }) => {
     // const heightClass = useResponsiveHeight()
     const router = useRouter()
     const fileInputRef = useRef<HTMLInputElement>(null)
-    // const [showPreview, setShowPreview] = useState<boolean>(false)
+    const [showPreview, setShowPreview] = useState<boolean>(false)
     const [showVideoBox, setShowVideoBox] = useState<boolean>(true)
     const [videoTitle, setVideoTitle] = useState('')
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
@@ -193,35 +193,35 @@ const AddVideo = ({
             console.error('Error updating chapter:', error)
         }
     }
-    // const handlePreviewClick = () => {
-    //     // Check if title is empty or invalid
-    //     if (
-    //         !form.watch('videoTitle') ||
-    //         form.watch('videoTitle').trim().length === 0
-    //     ) {
-    //         toast({
-    //             title: 'No Title',
-    //             description: 'Please provide a title for the video to preview.',
-    //             className:
-    //                 'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
-    //         })
-    //         return
-    //     }
+    const handlePreviewClick = () => {
+        // Check if title is empty or invalid
+        if (
+            !form.watch('videoTitle') ||
+            form.watch('videoTitle').trim().length === 0
+        ) {
+            toast({
+                title: 'No Title',
+                description: 'Please provide a title for the video to preview.',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
+            })
+            return
+        }
 
-    //     // Check if links are empty or invalid
-    //     const links = form.watch('links').trim()
-    //     if (!links || !isLinkValid(links)) {
-    //         toast({
-    //             title: 'Invalid Link',
-    //             description: 'Please provide a valid video link to preview.',
-    //             className:
-    //                 'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
-    //         })
-    //         return
-    //     }
+        // Check if links are empty or invalid
+        const links = form.watch('links').trim()
+        if (!links || !isLinkValid(links)) {
+            toast({
+                title: 'Invalid Link',
+                description: 'Please provide a valid video link to preview.',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
+            })
+            return
+        }
 
-    //     setShowPreview(true)
-    // }
+        setShowPreview(true)
+    }
 
     function previewVideo() {
         if (content) {
@@ -269,8 +269,10 @@ const AddVideo = ({
                                                         ) // Update the local state
                                                         field.onChange(e) // Update the react-hook-form state
                                                     }}
-                                                    placeholder={content?.title}
-                                                    className="pl-1 pr-8 text-xl text-left font-semibold capitalize text-gray-400 placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                                                    placeholder={
+                                                        'Untitled Video'
+                                                    }
+                                                    className="pl-1 pr-8 text-xl text-left font-semibold capitalize  placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
                                                     autoFocus
                                                 />
                                                 {!videoTitle && (
