@@ -114,8 +114,8 @@ export default function Page({
         fetchChapterContent,
         articleUpdateOnPreview,
         assignmentUpdateOnPreview,
-        topicId,
-        chapter_id,
+        // topicId,
+        // chapter_id,
     ])
 
     const renderChapterContent = () => {
