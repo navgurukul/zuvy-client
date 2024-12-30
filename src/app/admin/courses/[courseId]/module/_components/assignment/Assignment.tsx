@@ -120,6 +120,7 @@ const AddAssignent = ({
             )
             const contentDetails = response.data.contentDetails[0]
             setTitle(contentDetails.title)
+            setTitles(contentDetails.title)
             contentDetails &&
                 editor?.commands.setContent(contentDetails.content)
         } catch (error) {
@@ -177,7 +178,10 @@ const AddAssignent = ({
     // async
     useEffect(() => {
         getAssignmentContent()
+        console.log('content', content)
     }, [content, editor])
+
+
 
     return (
         <div className="px-5">
@@ -202,8 +206,8 @@ const AddAssignent = ({
                                     name="title"
                                     render={({ field }) => (
                                         <FormItem className="flex flex-col gap-0">
-                                            {' '}
                                             <FormControl>
+                                                <div className='flex justify-between items-center'>
                                                 <div className="w-2/6 flex justify-center align-middle items-center relative">
                                                     <Input
                                                         {...field}
@@ -226,6 +230,15 @@ const AddAssignent = ({
                                                         />
                                                     )}
                                                 </div>
+                                                <div className="mt-5">
+                                                    <Button
+                                                        type="submit"
+                                                        form="myForm"
+                                                    >
+                                                        Save
+                                                    </Button>
+                                                </div>
+                                                </div>
                                             </FormControl>
                                             {/* Button aligned below the input */}
                                             <div className="flex items-center justify-between">
@@ -238,14 +251,7 @@ const AddAssignent = ({
                                                     <ArrowUpRightSquare />
                                                     <h1>Preview</h1>
                                                 </Button>
-                                                <div className="flex justify-end ">
-                                                    <Button
-                                                        type="submit"
-                                                        form="myForm"
-                                                    >
-                                                        Save
-                                                    </Button>
-                                                </div>
+                                            
                                             </div>
                                             <FormMessage className="h-5" />
                                         </FormItem>

@@ -20,6 +20,7 @@ import useDebounce from '@/hooks/useDebounce'
 import { getAssessmentPreviewStore } from '@/store/store'
 import { useRouter } from 'next/navigation'
 import { Separator } from '@/components/ui/separator'
+import { toast } from '@/components/ui/use-toast'
 
 type AddAssessmentProps = {
     chapterData: any
@@ -62,10 +63,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
 
     const [filteredQuestions, setFilteredQuestions] = useState<any[]>([])
 
-    const [chapterTitle, setChapterTitle] = useState<string>(
-        // content?.ModuleAssessment?.title
-        activeChapterTitle
-    )
+    const [chapterTitle, setChapterTitle] = useState<string>(activeChapterTitle)
 
     const [questionType, setQuestionType] = useState<string>('coding')
 
@@ -97,7 +95,6 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     >([])
 
     const debouncedSearch = useDebounce(searchQuestionsInAssessment, 500)
-    const [titleInputLength, setTitleInputLength] = useState(0)
 
     const [saveSettings, setSaveSettings] = useState(false)
 
@@ -157,11 +154,17 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     }
 
     function previewAssessment() {
-        if (content) {
+        if (content.Quizzes.length > 0 || content.CodingQuestions.length > 0 || content.OpenEndedQuestions.length > 0) {
             setAssessmentPreviewContent(content)
             router.push(
                 `/admin/courses/${content.bootcampId}/module/${content.moduleId}/chapter/${content.chapterId}/assessment/${topicId}/preview`
             )
+        }else{
+            toast({
+                title: 'No questions to preview',
+                description: 'Please save the assessment first to preview.',
+                className: 'border border-red-500 text-red-500 text-left w-[90%]',
+            })
         }
     }
 
@@ -304,7 +307,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     }, [])
 
     return (
-        <div className="w-full py-2 pl-10">
+        <div className="w-full pb-2 px-5">
             {questionType !== 'settings' && (
                 <div className="flex items-center mb-5 w-full justify-between">
                     <div className="w-2/6 flex justify-center align-middle items-center relative">
@@ -312,7 +315,6 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                             required
                             onChange={(e) => {
                                 setChapterTitle(e.target.value)
-                                setTitleInputLength(e.target.value.length)
                             }}
                             value={chapterTitle}
                             // placeholder={content?.ModuleAssessment?.title}
@@ -320,7 +322,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                             className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
                             autoFocus
                         />
-                        {titleInputLength == 0 && (
+                        {chapterTitle.length == 0 && (
                             <Pencil
                                 fill="true"
                                 fillOpacity={0.4}
