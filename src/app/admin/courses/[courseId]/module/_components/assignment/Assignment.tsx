@@ -129,6 +129,7 @@ const AddAssignent = ({
             )
             const contentDetails = response.data.contentDetails[0]
             setTitle(contentDetails.title)
+            setTitles(contentDetails.title)
             contentDetails &&
                 editor?.commands.setContent(contentDetails.content)
         } catch (error) {
@@ -186,6 +187,7 @@ const AddAssignent = ({
     // async
     useEffect(() => {
         getAssignmentContent()
+        console.log('content', content)
     }, [content, editor])
 
     function previewAssignment() {

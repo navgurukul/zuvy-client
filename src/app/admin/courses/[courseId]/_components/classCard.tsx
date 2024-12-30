@@ -33,6 +33,7 @@ import {
     AlertDialogAction,
     AlertDialogContent,
 } from '@/components/ui/alert-dialog'
+import { ellipsis } from '@/lib/utils'
 
 function ClassCard({
     classData,
@@ -113,7 +114,7 @@ function ClassCard({
                                 <Tooltip>
                                     <TooltipTrigger asChild>
                                         <h3 className="font-semibold">
-                                            {classData.title}
+                                            {ellipsis(classData.title, 30)}
                                         </h3>
                                     </TooltipTrigger>
                                     <TooltipContent className="font-semibold">

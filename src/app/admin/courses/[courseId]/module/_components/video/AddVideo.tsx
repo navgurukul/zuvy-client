@@ -164,15 +164,16 @@ const AddVideo = ({
     }
 
     useEffect(() => {
-        if (content?.contentDetails?.[0]?.links?.[0])
+        if (content?.contentDetails?.[0]?.links?.[0]) {
             form.reset({
                 videoTitle: content?.contentDetails?.[0]?.title ?? '',
                 description: content?.contentDetails?.[0]?.description ?? '',
                 links: content?.contentDetails?.[0]?.links?.[0] ?? '',
             })
-        else {
+        } else {
             setShowVideoBox(false)
         }
+        setVideoTitle(content?.contentDetails?.[0]?.title ?? '')
     }, [content?.contentDetails, form])
 
     const handleClose = async () => {

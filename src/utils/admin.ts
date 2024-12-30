@@ -786,24 +786,6 @@ export function transformQuizzes(data: any): { quizzes: any[] } {
     return { quizzes: Object.values(quizzesMap) }
 }
 
-export const calculateTimeTaken = (
-    startedAt: string,
-    submittedAt: string
-): string => {
-    const start = new Date(startedAt)
-    const end = new Date(submittedAt)
-
-    // Calculate the difference in milliseconds
-    const diffInMs = end.getTime() - start.getTime()
-
-    // Convert milliseconds to minutes and seconds
-    const hours = Math.floor(diffInMs / (1000 * 60 * 60))
-    const minutes = Math.floor((diffInMs % (1000 * 60 * 60)) / (1000 * 60))
-    const seconds = Math.floor((diffInMs % (1000 * 60)) / 1000)
-
-    return `${hours}:${minutes}:${seconds}`
-}
-
 export const addClassToCodeTags: any = (
     htmlString: string,
     codeBlockClass: string
@@ -872,7 +854,25 @@ export const proctoringOptions = [
     {
         label: 'Screen Exit',
         name: 'screenExit' as const,
-        tooltip:
-            'Detects and logs any attempts to exit the exam screen, helping to identify potential cheating attempts.',
-    },
-]
+        tooltip: 'Detects and logs any attempts to exit the exam screen, helping to identify potential cheating attempts.'
+    }
+];
+
+// Calculate the time taken between start and submit times
+export const calculateTimeTaken = (start: string, submit: string): string => {
+    const startDate = new Date(start);
+    const submitDate = new Date(submit);
+  
+    const diffInMilliseconds = submitDate.getTime() - startDate.getTime();
+    const minutes = Math.floor(diffInMilliseconds / (1000 * 60));
+    const seconds = Math.floor((diffInMilliseconds % (1000 * 60)) / 1000);
+  
+    return `${minutes} minutes and ${seconds} seconds`;
+  };
+  
+  // Extract the submission date in YYYY-MM-DD format
+  export const getSubmissionDate = (submit: string): string => {
+    const submitDate = new Date(submit);
+    return submitDate.toISOString().split("T")[0];
+  };
+  
