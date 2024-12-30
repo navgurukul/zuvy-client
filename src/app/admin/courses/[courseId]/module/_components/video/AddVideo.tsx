@@ -157,15 +157,17 @@ const AddVideo = ({
     }
 
     useEffect(() => {
-        if (content?.contentDetails?.[0]?.links?.[0])
+        if (content?.contentDetails?.[0]?.links?.[0]){
             form.reset({
                 videoTitle: content?.contentDetails?.[0]?.title ?? '',
                 description: content?.contentDetails?.[0]?.description ?? '',
                 links: content?.contentDetails?.[0]?.links?.[0] ?? '',
             })
+        }
         else {
             setShowVideoBox(false)
         }
+        setVideoTitle(content?.contentDetails?.[0]?.title ?? '')
     }, [content?.contentDetails, form])
 
     const handleClose = async () => {
@@ -253,9 +255,9 @@ const AddVideo = ({
                                                             field.onChange(e) // Update the react-hook-form state
                                                         }}
                                                         placeholder={
-                                                            content?.title
+                                                            'Untitled Video'
                                                         }
-                                                        className="pl-1 pr-8 text-xl text-left font-semibold capitalize text-gray-400 placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                                                        className="pl-1 pr-8 text-xl text-left font-semibold capitalize  placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
                                                         autoFocus
                                                     />
                                                     {!videoTitle && (

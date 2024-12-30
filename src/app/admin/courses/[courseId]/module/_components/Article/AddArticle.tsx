@@ -154,16 +154,16 @@ const AddArticle = ({
                             <form
                                 id="myForm"
                                 onSubmit={form.handleSubmit(editArticleContent)}
-                                className="space-y-8 mb-10"
+                                className=""
                             >
                                 <FormField
                                     control={form.control}
                                     name="title"
                                     render={({ field }) => (
                                         <FormItem className="flex flex-col">
-                                            <FormLabel></FormLabel>
                                             <FormControl>
-                                                <div className="w-2/6 flex justify-center align-middle items-center relative">
+                                            <div className='flex justify-between items-center'>
+                                            <div className="w-2/6 flex justify-center align-middle items-center relative">
                                                     <Input
                                                         {...field}
                                                         onChange={(e) => {
@@ -185,6 +185,15 @@ const AddArticle = ({
                                                         />
                                                     )}
                                                 </div>
+                                                <div className="flex justify-end mt-5  ">
+                                                    <Button
+                                                        type="submit"
+                                                        form="myForm"
+                                                    >
+                                                        Save
+                                                    </Button>
+                                                </div>
+                                            </div>
                                             </FormControl>
                                             <div className="flex items-center justify-between ">
                                                 <Button
@@ -196,14 +205,7 @@ const AddArticle = ({
                                                     <ArrowUpRightSquare />
                                                     <h1>Preview</h1>
                                                 </Button>
-                                                <div className="flex justify-end mt-5  ">
-                                                    <Button
-                                                        type="submit"
-                                                        form="myForm"
-                                                    >
-                                                        Save
-                                                    </Button>
-                                                </div>
+                                              
                                             </div>
 
                                             <FormMessage className="h-5" />

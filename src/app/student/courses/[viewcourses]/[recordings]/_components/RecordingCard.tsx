@@ -15,6 +15,13 @@ import {
     SheetTrigger,
 } from '@/components/ui/sheet'
 
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
+
 import { ellipsis } from '@/lib/utils'
 import { api } from '@/utils/axios.config'
 import { Button } from '@/components/ui/button'
@@ -145,7 +152,18 @@ function RecordingCard({
                 <Clapperboard size={40} className="text-yellow-dark mr-2" />
                 <div>
                     <p className="text-xl text-start">
-                        {ellipsis(classData.title, 40)}
+                    <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <h3 className="font-semibold">
+                                        {ellipsis(classData.title, 30)}
+                                        </h3>
+                                    </TooltipTrigger>
+                                    <TooltipContent className="font-semibold">
+                                    {(classData.title)}
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>                        
                     </p>
                     <div className="text-md flex font-semibold capitalize items-center">
                         <Moment format="D MMMM">{classData.startTime}</Moment>

@@ -6,7 +6,7 @@ import {
     quizData,
     Options,
 } from '@/app/admin/courses/[courseId]/module/_components/quiz/QuizLibrary'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import QuizModal from '@/app/admin/courses/[courseId]/module/_components/quiz/QuizModal'
 import { api } from '@/utils/axios.config'
@@ -131,11 +131,12 @@ function Quiz(props: any) {
             {showPreview ? (
                 <QuizPreview setShowPreview={setShowPreview} />
             ) : (
-                <div className="ml-12">
+                <div className="px-5">
                     <div className="flex flex-row items-center justify-start gap-x-6 mb-10">
-                        <div className="w-2/6 flex flex-col items-start gap-3 relative">
+                        <div className="w-full flex flex-col items-start gap-3">
                             {/* Input Field */}
-                            <div className="w-full relative">
+                         <div className='flex justify-between items-center w-full'>
+                         <div className="w-full relative">
                                 <Input
                                     required
                                     onChange={(e) => {
@@ -143,7 +144,7 @@ function Quiz(props: any) {
                                     }}
                                     value={inputValue}
                                     placeholder="Untitled Quiz"
-                                    className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                                    className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 w-1/3 border-gray-400 border-dashed focus:outline-none"
                                     autoFocus
                                 />
                                 {!inputValue && (
@@ -155,6 +156,19 @@ function Quiz(props: any) {
                                     />
                                 )}
                             </div>
+                            <div>
+                                {addQuestion?.length > 0 && (
+                                    <div className="mt-5">
+                                        <Button
+                                            onClick={handleSaveQuiz}
+                                            className=""
+                                        >
+                                            Save
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
+                         </div>
 
                             {/* Preview Button */}
                             <Button
@@ -179,25 +193,14 @@ function Quiz(props: any) {
                             orientation="vertical"
                             className="mx-4 w-[2px] h-96 mt-36 rounded"
                         />
-                        <ScrollArea className="w-full rounded-md">
+                        <div className="w-full">
                             <div>
                                 <div className="flex flex-col items-center justify-between">
                                     <div className="flex justify-between w-full mt-36">
                                         <h2 className="text-left text-gray-700 w-full font-semibold">
                                             Selected Question
                                         </h2>
-                                        <div>
-                                            {addQuestion?.length > 0 && (
-                                                <div className="text-end mr-10">
-                                                    <Button
-                                                        onClick={handleSaveQuiz}
-                                                        className="h-8"
-                                                    >
-                                                        Save
-                                                    </Button>
-                                                </div>
-                                            )}
-                                        </div>
+
                                     </div>
                                     <div className="text-left w-full">
                                         {addQuestion?.length === 0 && (
@@ -207,7 +210,8 @@ function Quiz(props: any) {
                                         )}
                                     </div>
                                 </div>
-                                <div className="h-96 overflow-y-scroll">
+                                <ScrollArea className="h-96 pr-3 pb-10">
+
                                     {addQuestion?.map(
                                         (
                                             questions: quizData,
@@ -227,9 +231,9 @@ function Quiz(props: any) {
                                             />
                                         )
                                     )}
-                                </div>
+                                </ScrollArea>
                             </div>
-                        </ScrollArea>
+                        </div>
                     </div>
                 </div>
             )}

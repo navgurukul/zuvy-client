@@ -43,10 +43,10 @@ const formSchema = z.object({
         required_error: 'You need to select a Difficulty type.',
     }),
     topics: z.number().min(1, 'You need to select a Topic'),
-    inputFormat: z.enum(['str', 'int', 'float', 'arrayOfnum', 'arrayOfStr'], {
+    inputFormat: z.enum(['str', 'int', 'float', 'arrayOfnum', 'arrayOfStr', 'bool'], {
         required_error: 'You need to select an Input Format',
     }),
-    outputFormat: z.enum(['str', 'int', 'float', 'arrayOfnum', 'arrayOfStr'], {
+    outputFormat: z.enum(['str', 'int', 'float', 'arrayOfnum', 'arrayOfStr', 'bool'], {
         required_error: 'You need to select an Output Format',
     }),
     testCases: z.array(
@@ -183,10 +183,10 @@ export default function EditCodingQuestionForm() {
                         .join(' '),
                     output:
                         testCase.expectedOutput.parameterValue !== null &&
-                        testCase.expectedOutput.parameterValue !== undefined
+                            testCase.expectedOutput.parameterValue !== undefined
                             ? cleanUpValues(
-                                  testCase.expectedOutput.parameterValue.toString()
-                              )
+                                testCase.expectedOutput.parameterValue.toString()
+                            )
                             : testCase.expectedOutput.parameterValue,
                     isExisting: true, // Mark as existing test case
                 })
@@ -215,12 +215,6 @@ export default function EditCodingQuestionForm() {
                 case 'arrayOfnum': {
                     const values = cleanedInput.split(',')
                     if (!values.every(isValidNumber)) {
-                        toast({
-                            title: 'Invalid number value.',
-                            description: 'Please enter a valid number.',
-                            className:
-                                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                        })
                         return null
                     }
                     return values.map(Number)
@@ -231,12 +225,6 @@ export default function EditCodingQuestionForm() {
                 case 'int': {
                     const values = cleanedInput.split(' ')
                     if (!values.every(isValidNumber)) {
-                        toast({
-                            title: 'Invalid number value.',
-                            description: 'Please enter a valid number.',
-                            className:
-                                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                        })
                         return null
                     }
                     const number = Number(values.join(''))
@@ -244,19 +232,18 @@ export default function EditCodingQuestionForm() {
                 }
                 case 'float': {
                     if (!isValidFloat(cleanedInput)) {
-                        toast({
-                            title: 'Invalid float value.',
-                            description: 'Please enter a valid float value.',
-                            className:
-                                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                        })
                         return null
                     }
-
                     return parseFloat(cleanedInput)
                 }
                 case 'str':
                     return cleanedInput
+                case 'bool':
+                    if (cleanedInput === 'true' || cleanedInput === 'false') {
+                        return cleanedInput
+                    } else {
+                        return null
+                    }
                 default:
                     return cleanedInput
             }
@@ -574,6 +561,9 @@ export default function EditCodingQuestionForm() {
                                             <SelectItem value="arrayOfStr">
                                                 Array Of Strings
                                             </SelectItem>
+                                            <SelectItem value="bool">
+                                                Boolean
+                                            </SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -612,6 +602,9 @@ export default function EditCodingQuestionForm() {
                                             <SelectItem value="arrayOfStr">
                                                 Array Of Strings
                                             </SelectItem>
+                                            <SelectItem value="bool">
+                                                Boolean
+                                            </SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -641,12 +634,11 @@ export default function EditCodingQuestionForm() {
                                                 }
                                             />
                                             <p className="text-sm text-gray-500 mt-1">
-                                                {form.watch('inputFormat') ===
-                                                    'arrayOfnum' ||
-                                                form.watch('inputFormat') ===
-                                                    'arrayOfStr'
+                                                {form.watch('inputFormat') === 'arrayOfnum' || form.watch('inputFormat') === 'arrayOfStr'
                                                     ? 'Max 1 array accepted (e.g., 1,2,3,4)'
-                                                    : 'Enter values separated by spaces (e.g., 2 3 4)'}
+                                                    : form.watch('inputFormat') === 'bool'
+                                                        ? 'Enter true or false'
+                                                        : 'Enter values separated by spaces (e.g., 2 3 4)'}
                                             </p>
                                             <FormMessage />
                                         </FormItem>
@@ -670,10 +662,12 @@ export default function EditCodingQuestionForm() {
                                             <p className="text-sm text-gray-500 mt-1">
                                                 {form.watch('outputFormat') ===
                                                     'arrayOfnum' ||
-                                                form.watch('outputFormat') ===
+                                                    form.watch('outputFormat') ===
                                                     'arrayOfStr'
                                                     ? 'Max 1 array accepted (e.g., 1,2,3,4)'
-                                                    : 'Only one value accepted (e.g., 55)'}
+                                                    : form.watch('outputFormat') === 'bool' ?
+                                                        'Enter true or false' :
+                                                        'Only one value accepted (e.g., 55)'}
                                             </p>
                                             <FormMessage />
                                         </FormItem>

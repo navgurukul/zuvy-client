@@ -7,7 +7,7 @@ import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-co
 import { Task } from '@/utils/data/schema'
 import Link from 'next/link'
 import { FileText } from 'lucide-react'
-import { calculateTimeTaken } from '@/utils/admin'
+import { calculateTimeTaken, getSubmissionDate } from '@/utils/admin'
 
 export const columns: ColumnDef<Task>[] = [
     {
@@ -81,45 +81,44 @@ export const columns: ColumnDef<Task>[] = [
         },
     },
     {
-        accessorKey: 'date',
+        accessorKey: 'time taken',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Submission Date" />
+            <DataTableColumnHeader column={column} title="Time Taken" />
         ),
         cell: ({ row }) => {
-            const timestamp = row.original.startedAt
-            const date = new Date(timestamp)
-            const options2: any = {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-            }
-            const formattedDate = date.toLocaleDateString('en-US', options2)
+            const startedAt = row.original.startedAt
+            const submitedAt = row.original.submitedAt
+
+            const timeTaken = calculateTimeTaken(startedAt, submitedAt);
+
             return (
                 <div className="flex space-x-2">
-                    <p>{formattedDate}</p>
+                    <span className="max-w-[500px] truncate font-medium">
+                        {timeTaken}
+                    </span>
                 </div>
             )
         },
     },
     {
-        accessorKey: 'time',
+        accessorKey: 'submission date',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Time Taken" />
+            <DataTableColumnHeader column={column} title="Submission Date" />
         ),
         cell: ({ row }) => {
-            // const isChecked = row.original.isChecked
-            const timeTaken = calculateTimeTaken(
-                row.original.startedAt,
-                row.original.submitedAt
-            )
-            console.log('row', row.original)
+            const submitedAt = row.original.submitedAt
+            const submissionDate = getSubmissionDate(submitedAt);
+
             return (
                 <div className="flex space-x-2">
-                    <p>{timeTaken}</p>
+                    <span className="max-w-[500px] truncate font-medium">
+                        {submissionDate}
+                    </span>
                 </div>
             )
         },
     },
+
     {
         accessorKey: 'isPassed',
         header: ({ column }) => (

@@ -65,6 +65,7 @@ const AddForm: React.FC<AddFormProps> = ({
     moduleId,
 }) => {
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
+    const [titles, setTitles] = useState(content?.title || '')
     // const heightClass = useResponsiveHeight()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -74,24 +75,24 @@ const AddForm: React.FC<AddFormProps> = ({
             questions:
                 content.formQuestionDetails?.length > 0
                     ? content.formQuestionDetails.map((q: any) => ({
-                          id: q.id.toString(),
-                          question: q.question,
-                          typeId: q.typeId,
-                          isRequired: q.isRequired,
-                          //   options: Object.values(q.options || {}),
-                          options: q.options ? Object.values(q.options) : [],
-                      }))
+                        id: q.id.toString(),
+                        question: q.question,
+                        typeId: q.typeId,
+                        isRequired: q.isRequired,
+                        //   options: Object.values(q.options || {}),
+                        options: q.options ? Object.values(q.options) : [],
+                    }))
                     : [
-                          {
-                              //   id: 'initial-1',
-                              questionType: 'Multiple Choice',
-                              id: 'new-1',
-                              question: 'Question 1',
-                              typeId: 1,
-                              isRequired: true,
-                              options: ['', ''],
-                          },
-                      ],
+                        {
+                            //   id: 'initial-1',
+                            questionType: 'Multiple Choice',
+                            id: 'new-1',
+                            question: 'Question 1',
+                            typeId: 1,
+                            isRequired: true,
+                            options: ['', ''],
+                        },
+                    ],
         },
         values: {
             title: content?.title ?? '',
@@ -99,24 +100,24 @@ const AddForm: React.FC<AddFormProps> = ({
             questions:
                 content.formQuestionDetails?.length > 0
                     ? content.formQuestionDetails.map((q: any) => ({
-                          id: q.id.toString(),
-                          question: q.question,
-                          typeId: q.typeId,
-                          isRequired: q.isRequired,
-                          //   options: Object.values(q.options || {}),
-                          options: q.options ? Object.values(q.options) : [],
-                      }))
+                        id: q.id.toString(),
+                        question: q.question,
+                        typeId: q.typeId,
+                        isRequired: q.isRequired,
+                        //   options: Object.values(q.options || {}),
+                        options: q.options ? Object.values(q.options) : [],
+                    }))
                     : [
-                          {
-                              //   id: 'initial-1',
-                              questionType: 'Multiple Choice',
-                              id: 'new-1',
-                              question: 'Question 1',
-                              typeId: 1,
-                              isRequired: true,
-                              options: ['', ''],
-                          },
-                      ],
+                        {
+                            //   id: 'initial-1',
+                            questionType: 'Multiple Choice',
+                            id: 'new-1',
+                            question: 'Question 1',
+                            typeId: 1,
+                            isRequired: true,
+                            options: ['', ''],
+                        },
+                    ],
         },
     })
 
@@ -294,20 +295,35 @@ const AddForm: React.FC<AddFormProps> = ({
                             render={({ field }) => (
                                 <FormItem>
                                     <FormControl>
-                                        <div className="w-2/6 flex justify-center align-middle items-center relative">
-                                            <Input
-                                                required
-                                                {...field}
-                                                placeholder="Untitled Form"
-                                                className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
-                                                autoFocus
-                                            />
-                                            <Pencil
-                                                fill="true"
-                                                fillOpacity={0.4}
-                                                size={20}
-                                                className="absolute text-gray-100 pointer-events-none mt-1 right-5"
-                                            />
+                                        <div className="flex justify-between items-center">
+                                            <div className="w-2/6 flex justify-center align-middle items-center relative">
+                                                <Input
+                                                    required
+                                                    {...field}
+                                                    onChange={(e) => {
+                                                        setTitles(
+                                                            e.target.value
+                                                        )
+                                                        field.onChange(e)
+                                                    }}
+                                                    placeholder="Untitled Form"
+                                                    className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                                                    autoFocus
+                                                />
+                                                {!titles && (
+                                                    <Pencil
+                                                        fill="true"
+                                                        fillOpacity={0.4}
+                                                        size={20}
+                                                        className="absolute text-gray-100 pointer-events-none mt-2 right-3"
+                                                    />
+                                                )}
+                                            </div>
+                                            <div className="flex justify-start">
+                                                <Button type="submit" className="w-3/3">
+                                                    Save
+                                                </Button>
+                                            </div>
                                         </div>
                                     </FormControl>
                                     <FormMessage />
@@ -355,11 +371,7 @@ const AddForm: React.FC<AddFormProps> = ({
                                 <Plus /> Add Question
                             </Button>
                         </div>
-                        <div className="flex justify-start">
-                            <Button type="submit" className="w-1/3">
-                                Save
-                            </Button>
-                        </div>
+
                     </form>
                 </Form>
             </div>
