@@ -22,7 +22,9 @@ import {
     FormLabel,
     FormMessage,
 } from '@/components/ui/form'
-import { getChapterUpdateStatus } from '@/store/store'
+import { getChapterUpdateStatus, getFormPreviewStore } from '@/store/store'
+import { Eye } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 // import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 
 type AddFormProps = {
@@ -30,6 +32,7 @@ type AddFormProps = {
     content: any
     // fetchChapterContent: any
     moduleId: any
+    courseId: any
 }
 
 interface chapterDetails {
@@ -63,8 +66,11 @@ const AddForm: React.FC<AddFormProps> = ({
     content,
     // fetchChapterContent,
     moduleId,
+    courseId,
 }) => {
+    const router = useRouter()
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
+    const { setFormPreviewContent } = getFormPreviewStore()
     const [titles, setTitles] = useState(content?.title || '')
     // const heightClass = useResponsiveHeight()
     const form = useForm<z.infer<typeof formSchema>>({
@@ -75,24 +81,24 @@ const AddForm: React.FC<AddFormProps> = ({
             questions:
                 content.formQuestionDetails?.length > 0
                     ? content.formQuestionDetails.map((q: any) => ({
-                        id: q.id.toString(),
-                        question: q.question,
-                        typeId: q.typeId,
-                        isRequired: q.isRequired,
-                        //   options: Object.values(q.options || {}),
-                        options: q.options ? Object.values(q.options) : [],
-                    }))
+                          id: q.id.toString(),
+                          question: q.question,
+                          typeId: q.typeId,
+                          isRequired: q.isRequired,
+                          //   options: Object.values(q.options || {}),
+                          options: q.options ? Object.values(q.options) : [],
+                      }))
                     : [
-                        {
-                            //   id: 'initial-1',
-                            questionType: 'Multiple Choice',
-                            id: 'new-1',
-                            question: 'Question 1',
-                            typeId: 1,
-                            isRequired: true,
-                            options: ['', ''],
-                        },
-                    ],
+                          {
+                              //   id: 'initial-1',
+                              questionType: 'Multiple Choice',
+                              id: 'new-1',
+                              question: 'Question 1',
+                              typeId: 1,
+                              isRequired: true,
+                              options: ['', ''],
+                          },
+                      ],
         },
         values: {
             title: content?.title ?? '',
@@ -100,24 +106,24 @@ const AddForm: React.FC<AddFormProps> = ({
             questions:
                 content.formQuestionDetails?.length > 0
                     ? content.formQuestionDetails.map((q: any) => ({
-                        id: q.id.toString(),
-                        question: q.question,
-                        typeId: q.typeId,
-                        isRequired: q.isRequired,
-                        //   options: Object.values(q.options || {}),
-                        options: q.options ? Object.values(q.options) : [],
-                    }))
+                          id: q.id.toString(),
+                          question: q.question,
+                          typeId: q.typeId,
+                          isRequired: q.isRequired,
+                          //   options: Object.values(q.options || {}),
+                          options: q.options ? Object.values(q.options) : [],
+                      }))
                     : [
-                        {
-                            //   id: 'initial-1',
-                            questionType: 'Multiple Choice',
-                            id: 'new-1',
-                            question: 'Question 1',
-                            typeId: 1,
-                            isRequired: true,
-                            options: ['', ''],
-                        },
-                    ],
+                          {
+                              //   id: 'initial-1',
+                              questionType: 'Multiple Choice',
+                              id: 'new-1',
+                              question: 'Question 1',
+                              typeId: 1,
+                              isRequired: true,
+                              options: ['', ''],
+                          },
+                      ],
         },
     })
 
@@ -280,6 +286,15 @@ const AddForm: React.FC<AddFormProps> = ({
         }
     }
 
+    function previewForm() {
+        if (content) {
+            setFormPreviewContent(content)
+            router.push(
+                `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/form/${content.topicId}/preview`
+            )
+        }
+    }
+
     return (
         <ScrollArea className="h-dvh pr-4 pb-24" type="hover">
             <ScrollBar className="h-dvh " orientation="vertical" />
@@ -320,12 +335,27 @@ const AddForm: React.FC<AddFormProps> = ({
                                                 )}
                                             </div>
                                             <div className="flex justify-start">
-                                                <Button type="submit" className="w-3/3">
+                                                <Button
+                                                    type="submit"
+                                                    className="w-3/3"
+                                                >
                                                     Save
                                                 </Button>
                                             </div>
                                         </div>
                                     </FormControl>
+                                    <div className="flex items-center justify-between">
+                                        <div
+                                            id="previewForm"
+                                            onClick={previewForm}
+                                            className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer"
+                                        >
+                                            <Eye size={18} />
+                                            <h6 className="ml-1 text-sm">
+                                                Preview
+                                            </h6>
+                                        </div>
+                                    </div>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -371,7 +401,6 @@ const AddForm: React.FC<AddFormProps> = ({
                                 <Plus /> Add Question
                             </Button>
                         </div>
-
                     </form>
                 </Form>
             </div>

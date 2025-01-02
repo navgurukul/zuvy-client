@@ -17,7 +17,7 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { useRouter } from 'next/navigation'
-import { fetchPreviewAssessmentData } from '@/utils/admin'
+import { fetchPreviewData } from '@/utils/admin'
 
 const McqPreview = ({ params }: { params: any[] }) => {
     const router = useRouter()
@@ -26,7 +26,7 @@ const McqPreview = ({ params }: { params: any[] }) => {
 
     // Fetching assessment data
     useEffect(() => {
-        fetchPreviewAssessmentData(params, setAssessmentPreviewContent)
+        fetchPreviewData(params, setAssessmentPreviewContent)
     }, [params])
 
     // Zod schema for validation

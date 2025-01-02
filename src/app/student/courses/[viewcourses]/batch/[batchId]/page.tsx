@@ -138,7 +138,15 @@ function Page({
                     `/tracking/allModulesForStudents/${params.viewcourses}`
                 )
                 response.data.map((module: any) => {
-                    setModulesProgress(response.data)
+                    const modules = response.data.filter(
+                        (module: any) =>
+                            module.articlesCount +
+                                module.assignmentCount +
+                                module.codingProblemsCount +
+                                module.formCount >
+                            0
+                    )
+                    setModulesProgress(modules)
                 })
             } catch (error) {
                 console.error('Error getting modules progress', error)
@@ -163,6 +171,8 @@ function Page({
         }
         if (userID) getCourseProgress()
     }, [userID, params.viewcourses])
+
+    console.log('modulesProgress', modulesProgress)
 
     return (
         <MaxWidthWrapper>

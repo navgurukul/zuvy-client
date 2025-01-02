@@ -695,16 +695,16 @@ export const convertSeconds = (seconds: number) => {
 // --------------------------------------------
 // Preview Assessment Page functions:-
 
-export async function fetchPreviewAssessmentData(
+export async function fetchPreviewData(
     params: any,
-    setAssessmentPreviewContent: any,
+    setPreviewContent: any,
     setAssessmentPreviewCodingContent?: any
 ) {
     try {
         const response = await api.get(
             `Content/chapterDetailsById/${params?.chapterId}?bootcampId=${params?.courseId}&moduleId=${params?.moduleId}&topicId=${params?.topicId}`
         )
-        setAssessmentPreviewContent(response.data)
+        setPreviewContent(response.data)
         setAssessmentPreviewCodingContent &&
             setAssessmentPreviewCodingContent(response.data.CodingQuestions)
     } catch (error) {

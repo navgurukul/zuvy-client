@@ -25,8 +25,9 @@ import { Pencil } from 'lucide-react'
 import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 import PreviewArticle from './PreviewArticle'
 import { ArrowUpRightSquare } from 'lucide-react'
-import { getChapterUpdateStatus } from '@/store/store'
-
+import { getChapterUpdateStatus, getArticlePreviewStore } from '@/store/store'
+import { Eye } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 interface ContentDetail {
     title: string
     description: string | null
@@ -45,18 +46,23 @@ interface Content {
 
 const AddArticle = ({
     content,
+    courseId,
     articleUpdateOnPreview,
     setArticleUpdateOnPreview,
 }: {
     content: any
+    courseId: any
     articleUpdateOnPreview: any
     setArticleUpdateOnPreview: any
 }) => {
     const heightClass = useResponsiveHeight()
+    const router = useRouter()
     // state
     const [title, setTitle] = useState('')
     const [showPreview, setShowPreview] = useState<boolean>(false)
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
+    const { setArticlePreviewContent } = getArticlePreviewStore()
+
     // misc
     const formSchema = z.object({
         title: z.string(),
@@ -140,30 +146,39 @@ const AddArticle = ({
         getArticleContent()
     }, [content, editor])
 
+    function previewArticle() {
+        if (content) {
+            setArticlePreviewContent(content)
+            router.push(
+                `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/article/${content.topicId}/preview`
+            )
+        }
+    }
+
     return (
         <div className="px-5">
             <div className="w-full ">
-                {showPreview ? (
+                {/* {showPreview ? (
                     <PreviewArticle
                         content={content}
                         setShowPreview={setShowPreview}
                     />
-                ) : (
-                    <>
-                        <Form {...form}>
-                            <form
-                                id="myForm"
-                                onSubmit={form.handleSubmit(editArticleContent)}
-                                className=""
-                            >
-                                <FormField
-                                    control={form.control}
-                                    name="title"
-                                    render={({ field }) => (
-                                        <FormItem className="flex flex-col">
-                                            <FormControl>
-                                            <div className='flex justify-between items-center'>
-                                            <div className="w-2/6 flex justify-center align-middle items-center relative">
+                ) : ( */}
+                <>
+                    <Form {...form}>
+                        <form
+                            id="myForm"
+                            onSubmit={form.handleSubmit(editArticleContent)}
+                            className=""
+                        >
+                            <FormField
+                                control={form.control}
+                                name="title"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-col">
+                                        <FormControl>
+                                            <div className="flex justify-between items-center">
+                                                <div className="w-2/6 flex justify-center align-middle items-center relative">
                                                     <Input
                                                         {...field}
                                                         onChange={(e) => {
@@ -185,6 +200,7 @@ const AddArticle = ({
                                                         />
                                                     )}
                                                 </div>
+
                                                 <div className="flex justify-end mt-5  ">
                                                     <Button
                                                         type="submit"
@@ -194,9 +210,9 @@ const AddArticle = ({
                                                     </Button>
                                                 </div>
                                             </div>
-                                            </FormControl>
-                                            <div className="flex items-center justify-between ">
-                                                <Button
+                                        </FormControl>
+                                        <div className="flex items-center justify-between ">
+                                            {/* <Button
                                                     variant={'ghost'}
                                                     type="button"
                                                     className="text-secondary w-[100px] h-[30px] gap-x-1"
@@ -204,23 +220,32 @@ const AddArticle = ({
                                                 >
                                                     <ArrowUpRightSquare />
                                                     <h1>Preview</h1>
-                                                </Button>
-                                              
+                                                </Button> */}
+                                            <div
+                                                id="previewArticle"
+                                                onClick={previewArticle}
+                                                className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer"
+                                            >
+                                                <Eye size={18} />
+                                                <h6 className="ml-1 text-sm">
+                                                    Preview
+                                                </h6>
                                             </div>
+                                        </div>
 
-                                            <FormMessage className="h-5" />
-                                        </FormItem>
-                                    )}
-                                />
-                            </form>
-                        </Form>
+                                        <FormMessage className="h-5" />
+                                    </FormItem>
+                                )}
+                            />
+                        </form>
+                    </Form>
 
-                        <div className="text-left">
-                            <TiptapToolbar editor={editor} />
-                            <TiptapEditor editor={editor} />
-                        </div>
-                    </>
-                )}
+                    <div className="text-left">
+                        <TiptapToolbar editor={editor} />
+                        <TiptapEditor editor={editor} />
+                    </div>
+                </>
+                {/* )} */}
             </div>
         </div>
     )

@@ -98,8 +98,6 @@ export default function Page({
         [moduleData, courseId, moduleId]
     )
 
-    
-
     useEffect(() => {
         if (chapterData.length > 0 && topicId != null) {
             fetchChapterContent(chapter_id, topicId)
@@ -116,8 +114,8 @@ export default function Page({
         fetchChapterContent,
         articleUpdateOnPreview,
         assignmentUpdateOnPreview,
-        topicId,
-        chapter_id
+        // topicId,
+        // chapter_id,
     ])
 
     const renderChapterContent = () => {
@@ -142,6 +140,7 @@ export default function Page({
                             <AddVideo
                                 key={chapterId}
                                 moduleId={moduleID}
+                                courseId={courseId}
                                 content={chapterContent}
                                 fetchChapterContent={fetchChapterContent}
                             />
@@ -152,6 +151,7 @@ export default function Page({
                         <AddArticle
                             key={chapterId}
                             content={chapterContent}
+                            courseId={courseId}
                             articleUpdateOnPreview={articleUpdateOnPreview}
                             setArticleUpdateOnPreview={
                                 setArticleUpdateOnPreview
@@ -163,6 +163,7 @@ export default function Page({
                         <CodingChallenge
                             key={chapterId}
                             moduleId={moduleID}
+                            courseId={courseId}
                             content={chapterContent}
                             activeChapterTitle={activeChapterTitle}
                         />
@@ -173,6 +174,7 @@ export default function Page({
                             key={chapterId}
                             chapterId={chapterId}
                             moduleId={moduleID}
+                            courseId={courseId}
                             content={chapterContent}
                             activeChapterTitle={activeChapterTitle}
                         />
@@ -182,6 +184,7 @@ export default function Page({
                         <Assignment
                             key={chapterId}
                             content={chapterContent}
+                            courseId={courseId}
                             assignmentUpdateOnPreview={
                                 assignmentUpdateOnPreview
                             }
@@ -210,6 +213,7 @@ export default function Page({
                             content={chapterContent}
                             // fetchChapterContent={fetchChapterContent}
                             moduleId={moduleID}
+                            courseId={courseId}
                         />
                     )
                 default:

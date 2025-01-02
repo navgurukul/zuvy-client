@@ -148,6 +148,80 @@ export const getAssessmentPreviewStore = create<assessmentPreviewStore>(
     })
 )
 
+type videoPreviewStore = {
+    videoPreviewContent: any
+    setVideoPreviewContent: (newValue: any) => void
+}
+
+export const getVideoPreviewStore = create<videoPreviewStore>((set) => ({
+    videoPreviewContent: null,
+    setVideoPreviewContent: (newValue: any) => {
+        set({ videoPreviewContent: newValue })
+    },
+}))
+
+type articlePreviewStore = {
+    articlePreviewContent: any
+    setArticlePreviewContent: (newValue: any) => void
+}
+
+export const getArticlePreviewStore = create<articlePreviewStore>((set) => ({
+    articlePreviewContent: null,
+    setArticlePreviewContent: (newValue: any) => {
+        set({ articlePreviewContent: newValue })
+    },
+}))
+
+type codingPreviewStore = {
+    codingPreviewContent: any
+    setCodingPreviewContent: (newValue: any) => void
+}
+
+export const getCodingPreviewStore = create<codingPreviewStore>((set) => ({
+    codingPreviewContent: null,
+    setCodingPreviewContent: (newValue: any) => {
+        set({ codingPreviewContent: newValue })
+    },
+}))
+
+type quizPreviewStore = {
+    quizPreviewContent: any
+    setQuizPreviewContent: (newValue: any) => void
+}
+
+export const getQuizPreviewStore = create<quizPreviewStore>((set) => ({
+    quizPreviewContent: null,
+    setQuizPreviewContent: (newValue: any) => {
+        set({ quizPreviewContent: newValue })
+    },
+}))
+
+type assignmentPreviewStore = {
+    assignmentPreviewContent: any
+    setAssignmentPreviewContent: (newValue: any) => void
+}
+
+export const getAssignmentPreviewStore = create<assignmentPreviewStore>(
+    (set) => ({
+        assignmentPreviewContent: null,
+        setAssignmentPreviewContent: (newValue: any) => {
+            set({ assignmentPreviewContent: newValue })
+        },
+    })
+)
+
+type formPreviewStore = {
+    formPreviewContent: any
+    setFormPreviewContent: (newValue: any) => void
+}
+
+export const getFormPreviewStore = create<formPreviewStore>((set) => ({
+    formPreviewContent: null,
+    setFormPreviewContent: (newValue: any) => {
+        set({ formPreviewContent: newValue })
+    },
+}))
+
 // ------------------------------
 // Define the type for the assessment store
 type assessmentStore = {

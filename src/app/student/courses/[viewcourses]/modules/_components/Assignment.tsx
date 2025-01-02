@@ -191,87 +191,86 @@ const Assignments = ({
     const AssignmentStatus = getSubmissionStatus(submittedDate, deadlineDate)
 
     return (
-       <ScrollArea className='h-screen'>
-         <div className="flex flex-col mt-20 relative">
-            <h1 className="text-left text-xl font-semibold flex flex-col ">
-                <span className="flex items-center gap-x-2 ">
-                    {content?.title}{' '}
-                    {status === 'Completed' && (
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="lucide lucide-circle-check-big text-primary"
-                        >
-                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                            <path d="m9 11 3 3L22 4" />
-                        </svg>
-                    )}
-                </span>
-                <span className=" text-[14px]">
-                    Deadline :- {formattedDate}
-                </span>
-                <span className=" text-xl font-semibold">
-                    {formattedSubmittedDate === 'Invalid Date' ? (
-                        AssignmentStatus
-                    ) : (
-                        <>
-                            You have submitted on: {formattedSubmittedDate} (
-                            {AssignmentStatus})
-                        </>
-                    )}
-                </span>
-            </h1>
-            <div>
-                <h1 className="text-xl text-left font-semibold">
-                    {' '}
-                    Assignment Description
-                </h1>
-                {editor && <TiptapEditor editor={editor} />}
-            </div>
-            <Form {...form}>
-                <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="w-full space-y-6"
-                >
-                    <FormField
-                        control={form.control}
-                        name="link"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormControl>
-                                    <div className="flex items-center">
-                                        {icon}
-                                        <Input
-                                            placeholder="Paste your Assignment Link Here"
-                                            {...field}
-                                            onChange={(e) => {
-                                                field.onChange(e)
-                                                updateIcon(e.target.value)
-                                            }}
-                                        />
-                                    </div>
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
+        <ScrollArea className="h-screen">
+            <div className="flex flex-col mt-20 relative">
+                <h1 className="text-left text-xl font-semibold flex flex-col ">
+                    <span className="flex items-center gap-x-2 ">
+                        {content?.title}{' '}
+                        {status === 'Completed' && (
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="lucide lucide-circle-check-big text-primary"
+                            >
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                <path d="m9 11 3 3L22 4" />
+                            </svg>
                         )}
-                    />
-                    <div className="flex justify-end absolute top-0 right-0">
-                        <Button className="w-full mr-3" type="submit">
-                            Submit
-                        </Button>
-                    </div>
-                </form>
-            </Form>
-
-        </div>
-       </ScrollArea>
+                    </span>
+                    <span className=" text-[14px]">
+                        Deadline :- {formattedDate}
+                    </span>
+                    <span className=" text-xl font-semibold">
+                        {formattedSubmittedDate === 'Invalid Date' ? (
+                            AssignmentStatus
+                        ) : (
+                            <>
+                                You have submitted on: {formattedSubmittedDate}{' '}
+                                ({AssignmentStatus})
+                            </>
+                        )}
+                    </span>
+                </h1>
+                <div>
+                    <h1 className="text-xl text-left font-semibold">
+                        {' '}
+                        Assignment Description
+                    </h1>
+                    {editor && <TiptapEditor editor={editor} />}
+                </div>
+                <Form {...form}>
+                    <form
+                        onSubmit={form.handleSubmit(onSubmit)}
+                        className="w-full space-y-6"
+                    >
+                        <FormField
+                            control={form.control}
+                            name="link"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormControl>
+                                        <div className="flex items-center">
+                                            {icon}
+                                            <Input
+                                                placeholder="Paste your Assignment Link Here"
+                                                {...field}
+                                                onChange={(e) => {
+                                                    field.onChange(e)
+                                                    updateIcon(e.target.value)
+                                                }}
+                                            />
+                                        </div>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <div className="flex justify-end absolute top-0 right-0">
+                            <Button className="w-full mr-3" type="submit">
+                                Submit
+                            </Button>
+                        </div>
+                    </form>
+                </Form>
+            </div>
+        </ScrollArea>
     )
 }
 
