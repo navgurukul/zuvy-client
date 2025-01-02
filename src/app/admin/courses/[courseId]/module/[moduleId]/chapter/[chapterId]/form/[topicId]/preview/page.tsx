@@ -107,7 +107,9 @@ const PreviewForm = ({ params }: { params: any }) => {
                                             <div className="mt-2">
                                                 {Object.keys(item.options).map(
                                                     (optionKey) => (
-                                                        <div className="flex">
+                                                        <div
+                                                        key={optionKey} 
+                                                        className="flex">
                                                             <Checkbox
                                                                 aria-label={
                                                                     item
