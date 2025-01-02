@@ -7,7 +7,7 @@ import {
     ResizablePanel,
     ResizableHandle,
 } from '@/components/ui/resizable'
-import { Code, Lock, Play, Upload } from 'lucide-react'
+import { ChevronLeft, Code, Lock, Play, Upload } from 'lucide-react'
 import { useLazyLoadedStudentData } from '@/store/store'
 import { api } from '@/utils/axios.config'
 import Editor from '@monaco-editor/react'
@@ -26,6 +26,17 @@ import SubmissionsList from '../_components/submissions-list'
 import { b64DecodeUnicode, b64EncodeUnicode } from '@/utils/base64'
 import { usePathname } from 'next/navigation'
 import { useParams } from 'next/navigation'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 
 interface questionDetails {
     title: string
@@ -137,8 +148,8 @@ const IDE: React.FC<IDEProps> = ({
             }
             setResult(
                 response.data.data[0].stdOut ||
-                    response.data.data[0].stdout ||
-                    'No Output Available'
+                response.data.data[0].stdout ||
+                'No Output Available'
             )
             setCodeResult(response.data.data)
             const testCases = response.data.data
@@ -150,9 +161,8 @@ const IDE: React.FC<IDEProps> = ({
 
             if (allTestCasesPassed) {
                 toast({
-                    title: `Test Cases Passed${
-                        action === 'submit' ? ', Solution submitted' : ''
-                    }`,
+                    title: `Test Cases Passed${action === 'submit' ? ', Solution submitted' : ''
+                        }`,
                     className: 'text-start capitalize border border-secondary',
                 })
             } else {
@@ -173,7 +183,7 @@ const IDE: React.FC<IDEProps> = ({
             })
             setCodeError(
                 error.response?.data?.data?.[0]?.stderr ||
-                    'Error occurred during submission.'
+                'Error occurred during submission.'
             )
         }
     }
@@ -217,11 +227,34 @@ const IDE: React.FC<IDEProps> = ({
         <div>
             <div className="flex justify-between mb-2">
                 <div>
-                    <Button variant="ghost" size="icon" onClick={handleBack}>
-                        <ArrowLeft className="h-5 w-5" />
-                    </Button>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" >
+                                <ArrowLeft className="h-5 w-5" />
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                    Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This action cannot be undone. If you have not submitted your solution, it will be lost.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                    className="bg-red-500"
+                                    onClick={handleBack}
+                                >
+                                    Go Back
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                     <SubmissionsList questionId={params.editor} />
                 </div>
+
                 <div>
                     <Button
                         onClick={(e) => handleSubmit(e, 'run')}
@@ -369,6 +402,9 @@ const IDE: React.FC<IDEProps> = ({
                                                     }
                                                     className="p-2"
                                                     defaultValue="Please select a language above!"
+                                                    options={{
+                                                        wordWrap: "on",
+                                                      }}
                                                 />
                                             </div>
                                         </form>
@@ -377,7 +413,7 @@ const IDE: React.FC<IDEProps> = ({
                             </ResizablePanel>
                             <ResizableHandle withHandle />
                             <ResizablePanel className="" defaultSize={40}>
-                                <div className="flex h-full">
+                                <div className="flex h-full ">
                                     <div className="w-full max-w-5xl bg-muted p-2 mx-2">
                                         <div className="flex justify-between p-2 bg-gray-800 border-b border-gray-700">
                                             <p className="text-lg text-gray-300">
@@ -410,12 +446,11 @@ const IDE: React.FC<IDEProps> = ({
                                                                 </p>
 
                                                                 <p
-                                                                    className={`text-gray-300 ${
-                                                                        testCase.status ===
+                                                                    className={`text-gray-300 ${testCase.status ===
                                                                         'Accepted'
-                                                                            ? 'text-green-500'
-                                                                            : 'text-red-500'
-                                                                    }`}
+                                                                        ? 'text-green-500'
+                                                                        : 'text-red-500'
+                                                                        }`}
                                                                 >
                                                                     Status:{' '}
                                                                     {
@@ -441,12 +476,11 @@ const IDE: React.FC<IDEProps> = ({
                                                             </>
                                                         ) : (
                                                             <p
-                                                                className={`text-gray-300 ${
-                                                                    testCase.status ===
+                                                                className={`text-gray-300 ${testCase.status ===
                                                                     'Accepted'
-                                                                        ? 'text-green-500'
-                                                                        : 'text-red-500'
-                                                                }`}
+                                                                    ? 'text-green-500'
+                                                                    : 'text-red-500'
+                                                                    }`}
                                                             >
                                                                 Test Case{' '}
                                                                 {index + 1}{' '}

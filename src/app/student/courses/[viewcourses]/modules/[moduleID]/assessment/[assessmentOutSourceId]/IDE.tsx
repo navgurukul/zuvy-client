@@ -27,6 +27,18 @@ import SubmissionsList from '@/app/student/playground/_components/submissions-li
 import { b64DecodeUnicode, b64EncodeUnicode } from '@/utils/base64'
 import TimerDisplay from '@/app/student/courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/TimerDisplay'
 import CodingSubmissions from './CodingSubmissions'
+import AlertDialogDemo from '@/app/admin/courses/[courseId]/(courseTabs)/students/components/deleteModalNew'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 
 interface questionDetails {
     title: string
@@ -142,10 +154,11 @@ const IDE: React.FC<IDEProps> = ({
                     title: `Test Cases Passed Solution submitted`,
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
-                    })
-                    getAssessmentData()
+                })
+                getAssessmentData()
 
                 if (onBack) {
+                    console.log('onBack')
                     onBack()
                 }
 
@@ -173,7 +186,7 @@ const IDE: React.FC<IDEProps> = ({
             )
             setLoading(false);
         } catch (error: any) {
-            if(error?.response?.data?.message.includes('sourceCode should not be empty')){
+            if (error?.response?.data?.message.includes('sourceCode should not be empty')) {
                 setLoading(false)
             }
             toast({
@@ -224,11 +237,40 @@ const IDE: React.FC<IDEProps> = ({
     return (
         <div>
             <div className="flex justify-between mb-2">
-                <div>
+                {/* <div>
                     <Button variant="ghost" size="icon" onClick={onBack}>
                         <ChevronLeft fontSize={24} />
                     </Button>
-                </div>
+                </div> */}
+
+                <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="icon" >
+                            <ChevronLeft fontSize={24} />
+                        </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>
+                                Are you absolutely sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This action cannot be undone. If you have not submitted your solution, it will be lost.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                                className="bg-red-500"
+                                onClick={onBack}
+                            >
+                                Go Back
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+
+
+
                 <div className="font-bold text-xl">
                     <TimerDisplay remainingTime={remainingTime} />
                 </div>
@@ -397,6 +439,9 @@ const IDE: React.FC<IDEProps> = ({
                                                     }
                                                     className="p-2"
                                                     defaultValue="Please Select a language above! "
+                                                    options={{
+                                                        wordWrap: "on",
+                                                      }}
                                                 />
                                             </div>
                                         </form>

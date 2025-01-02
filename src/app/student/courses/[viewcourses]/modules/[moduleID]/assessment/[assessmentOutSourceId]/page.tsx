@@ -245,6 +245,9 @@ function Page({
     ) => {
         setSelectedQuesType(type)
         setIsSolving(true)
+        console.log('hasdkfjksd')
+        console.log(id)
+        console.log(assessmentData)
 
         if (type === 'coding' && id) {
             const action = await getCodingSubmissionsData(
@@ -261,6 +264,8 @@ function Page({
                     className: 'text-left capitalize',
                 })
             } else {
+                console.log(id)
+          
                 setSelectedQuestionId(id)
                 setSelectedCodingOutsourseId(codingOutsourseId)
                 requestFullScreen(document.documentElement)
@@ -541,7 +546,7 @@ function Page({
                             </div>
                             {assessmentData?.codingQuestions?.length > 0 && (
                                 <div className="flex justify-center">
-                                    <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
+                                    <div className="flex flex-col gap-5 w-1/2 text-left mt-10"> 
                                         <h2 className="font-bold">
                                             Coding Challenges
                                         </h2>
@@ -567,7 +572,7 @@ function Page({
                                                     onSolveChallenge={() =>
                                                         handleSolveChallenge(
                                                             'coding',
-                                                            question.id,
+                                                            question.codingQuestionId,
                                                             question.codingOutsourseId
                                                         )
                                                     }
