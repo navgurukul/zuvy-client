@@ -25,7 +25,6 @@ import {
 import SubmissionsList from '../_components/submissions-list'
 import { b64DecodeUnicode, b64EncodeUnicode } from '@/utils/base64'
 import { usePathname } from 'next/navigation'
-import { useParams } from 'next/navigation'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -37,6 +36,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
+import { Spinner } from '@/components/ui/spinner'
 
 interface questionDetails {
     title: string
@@ -60,7 +60,6 @@ const IDE: React.FC<IDEProps> = ({
     selectedCodingOutsourseId,
 }) => {
     const pathname = usePathname()
-    const { viewcourses, moduleID, chapterID } = useParams()
     const [questionDetails, setQuestionDetails] = useState<questionDetails>({
         title: '',
         description: '',
@@ -78,6 +77,7 @@ const IDE: React.FC<IDEProps> = ({
     const [templates, setTemplates] = useState<any>([])
     const [examples, setExamples] = useState<any>([])
     const [isSubmitted, setIsSubmitted] = useState(false)
+    const [loading, setLoading] = useState(false)
     const router = useRouter()
     const { toast } = useToast()
 
@@ -122,6 +122,7 @@ const IDE: React.FC<IDEProps> = ({
         action: string
     ) => {
         e.preventDefault()
+        setLoading(true)
 
         if (admin) return
 
@@ -142,14 +143,11 @@ const IDE: React.FC<IDEProps> = ({
             )
             if (action === 'submit') {
                 setIsSubmitted(true)
-                await api.post(
-                    `tracking/updateChapterStatus/${viewcourses}/${moduleID}?chapterId=${chapterID}`
-                )
             }
             setResult(
                 response.data.data[0].stdOut ||
-                response.data.data[0].stdout ||
-                'No Output Available'
+                    response.data.data[0].stdout ||
+                    'No Output Available'
             )
             setCodeResult(response.data.data)
             const testCases = response.data.data
@@ -161,8 +159,9 @@ const IDE: React.FC<IDEProps> = ({
 
             if (allTestCasesPassed) {
                 toast({
-                    title: `Test Cases Passed${action === 'submit' ? ', Solution submitted' : ''
-                        }`,
+                    title: `Test Cases Passed${
+                        action === 'submit' ? ', Solution submitted' : ''
+                    }`,
                     className: 'text-start capitalize border border-secondary',
                 })
             } else {
@@ -173,7 +172,9 @@ const IDE: React.FC<IDEProps> = ({
                 })
             }
             setCodeError('')
+            setLoading(false)
         } catch (error: any) {
+            setLoading(false)
             toast({
                 title: 'Failed',
                 description:
@@ -183,7 +184,7 @@ const IDE: React.FC<IDEProps> = ({
             })
             setCodeError(
                 error.response?.data?.data?.[0]?.stderr ||
-                'Error occurred during submission.'
+                    'Error occurred during submission.'
             )
         }
     }
@@ -222,23 +223,26 @@ const IDE: React.FC<IDEProps> = ({
             setCurrentCode(b64DecodeUnicode(templates?.[language]?.template))
         }
     }, [language])
-// 
+    //
     return (
         <div>
             <div className="flex justify-between mb-2">
                 <div>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" >
+                            <Button variant="ghost" size="icon">
                                 <ArrowLeft className="h-5 w-5" />
                             </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
                                 <AlertDialogTitle>
-                                    Are you absolutely sure?</AlertDialogTitle>
+                                    Are you absolutely sure?
+                                </AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    This action cannot be undone. If you have not submitted your solution, it will be lost.
+                                    This action cannot be undone. If you have
+                                    not submitted your solution, it will be
+                                    lost.
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
@@ -260,17 +264,17 @@ const IDE: React.FC<IDEProps> = ({
                         onClick={(e) => handleSubmit(e, 'run')}
                         size="sm"
                         className="mr-2"
-                        disabled={codePanel && isSubmitted}
+                        disabled={loading || (codePanel && isSubmitted)}
                     >
-                        <Play size={20} />
+                        {loading ? <Spinner /> : <Play size={20} />}
                         <span className="ml-2 text-lg font-bold">Run</span>
                     </Button>
                     <Button
                         onClick={(e) => handleSubmit(e, 'submit')}
                         size="sm"
-                        disabled={codePanel && isSubmitted}
+                        disabled={loading || (codePanel && isSubmitted)}
                     >
-                        <Upload size={20} />
+                        {loading ? <Spinner /> : <Upload size={20} />}
                         <span className="ml-2 text-lg font-bold">Submit</span>
                     </Button>
                 </div>
@@ -403,8 +407,8 @@ const IDE: React.FC<IDEProps> = ({
                                                     className="p-2"
                                                     defaultValue="Please select a language above!"
                                                     options={{
-                                                        wordWrap: "on",
-                                                      }}
+                                                        wordWrap: 'on',
+                                                    }}
                                                 />
                                             </div>
                                         </form>
@@ -420,79 +424,98 @@ const IDE: React.FC<IDEProps> = ({
                                                 Output Window
                                             </p>
                                         </div>
-                                        <div className="h-full p-4 text-start text-gray-100 overflow-y-auto font-mono bg-gray-900 border border-gray-700 rounded-b-lg">
-                                            <p className="font-mono text-destructive">
-                                                {codeError && codeError}
-                                            </p>
-                                            {codeResult?.map(
-                                                (testCase: any, index: any) => (
-                                                    <div
-                                                        key={index}
-                                                        className="shadow-sm rounded-lg p-4 my-4 bg-gray-800 border border-gray-700"
-                                                    >
-                                                        {index < 2 ? (
-                                                            <>
-                                                                <h2 className="text-xl font-semibold mb-2 text-gray-300">
-                                                                    Test Case{' '}
-                                                                    {index + 1}
-                                                                </h2>
-                                                                <p className="text-gray-300">
-                                                                    <span className="font-medium text-gray-400">
-                                                                        Your
-                                                                        Output:
-                                                                    </span>
-                                                                    {testCase?.stdOut ||
-                                                                        testCase?.stdout}
-                                                                </p>
 
-                                                                <p
-                                                                    className={`text-gray-300 ${testCase.status ===
-                                                                        'Accepted'
-                                                                        ? 'text-green-500'
-                                                                        : 'text-red-500'
+                                        <div className="h-full p-4 text-start text-gray-100 overflow-y-auto font-mono bg-gray-900 border border-gray-700 rounded-b-lg">
+                                            {loading && (
+                                                <div className="flex justify-center items-center my-4">
+                                                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                                                    <span className="ml-2 text-lg text-gray-500">
+                                                        Processing...
+                                                    </span>
+                                                </div>
+                                            )}
+                                            <p className="font-mono text-destructive">
+                                                {!loading &&
+                                                    codeError &&
+                                                    codeError}
+                                            </p>
+                                            {!loading &&
+                                                codeResult?.map(
+                                                    (
+                                                        testCase: any,
+                                                        index: any
+                                                    ) => (
+                                                        <div
+                                                            key={index}
+                                                            className="shadow-sm rounded-lg p-4 my-4 bg-gray-800 border border-gray-700"
+                                                        >
+                                                            {index < 2 ? (
+                                                                <>
+                                                                    <h2 className="text-xl font-semibold mb-2 text-gray-300">
+                                                                        Test
+                                                                        Case{' '}
+                                                                        {index +
+                                                                            1}
+                                                                    </h2>
+                                                                    <p className="text-gray-300">
+                                                                        <span className="font-medium text-gray-400">
+                                                                            Your
+                                                                            Output:
+                                                                        </span>
+                                                                        {testCase?.stdOut ||
+                                                                            testCase?.stdout}
+                                                                    </p>
+
+                                                                    <p
+                                                                        className={`text-gray-300 ${
+                                                                            testCase.status ===
+                                                                            'Accepted'
+                                                                                ? 'text-green-500'
+                                                                                : 'text-red-500'
                                                                         }`}
+                                                                    >
+                                                                        Status:{' '}
+                                                                        {
+                                                                            testCase.status
+                                                                        }
+                                                                    </p>
+                                                                    <p
+                                                                        className={`text-gray-300`}
+                                                                    >
+                                                                        Memory:{' '}
+                                                                        {
+                                                                            testCase.memory
+                                                                        }
+                                                                    </p>
+                                                                    <p
+                                                                        className={`text-gray-300`}
+                                                                    >
+                                                                        Time:{' '}
+                                                                        {
+                                                                            testCase.time
+                                                                        }
+                                                                    </p>
+                                                                </>
+                                                            ) : (
+                                                                <p
+                                                                    className={`text-gray-300 ${
+                                                                        testCase.status ===
+                                                                        'Accepted'
+                                                                            ? 'text-green-500'
+                                                                            : 'text-red-500'
+                                                                    }`}
                                                                 >
-                                                                    Status:{' '}
+                                                                    Test Case{' '}
+                                                                    {index + 1}{' '}
+                                                                    status:{' '}
                                                                     {
                                                                         testCase.status
                                                                     }
                                                                 </p>
-                                                                <p
-                                                                    className={`text-gray-300`}
-                                                                >
-                                                                    Memory:{' '}
-                                                                    {
-                                                                        testCase.memory
-                                                                    }
-                                                                </p>
-                                                                <p
-                                                                    className={`text-gray-300`}
-                                                                >
-                                                                    Time:{' '}
-                                                                    {
-                                                                        testCase.time
-                                                                    }
-                                                                </p>
-                                                            </>
-                                                        ) : (
-                                                            <p
-                                                                className={`text-gray-300 ${testCase.status ===
-                                                                    'Accepted'
-                                                                    ? 'text-green-500'
-                                                                    : 'text-red-500'
-                                                                    }`}
-                                                            >
-                                                                Test Case{' '}
-                                                                {index + 1}{' '}
-                                                                status:{' '}
-                                                                {
-                                                                    testCase.status
-                                                                }
-                                                            </p>
-                                                        )}
-                                                    </div>
-                                                )
-                                            )}
+                                                            )}
+                                                        </div>
+                                                    )
+                                                )}
                                         </div>
                                     </div>
                                 </div>
