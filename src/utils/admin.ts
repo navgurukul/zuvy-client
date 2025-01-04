@@ -867,7 +867,7 @@ export const calculateTimeTaken = (start: string, submit: string): string => {
     const minutes = Math.floor(diffInMilliseconds / (1000 * 60));
     const seconds = Math.floor((diffInMilliseconds % (1000 * 60)) / 1000);
   
-    return `${minutes} minutes and ${seconds} seconds`;
+    return `${minutes}m & ${seconds}s`;
   };
   
   // Extract the submission date in YYYY-MM-DD format
