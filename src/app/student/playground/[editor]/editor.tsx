@@ -178,13 +178,13 @@ const IDE: React.FC<IDEProps> = ({
             toast({
                 title: 'Failed',
                 description:
-                    error.response?.data?.message || 'An error occurred.',
+                    error.response?.data?.message || 'Network connection lost.',
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
             setCodeError(
                 error.response?.data?.data?.[0]?.stderr ||
-                    'Error occurred during submission.'
+                    'Error occurred during submission. Network connection lost.'
             )
         }
     }
@@ -287,7 +287,7 @@ const IDE: React.FC<IDEProps> = ({
                 >
                     <ResizablePanel defaultSize={50}>
                         <div className="flex h-[90vh]">
-                            <div className="w-full max-w-12xl p-2  bg-muted text-left">
+                            <div className="w-full max-w-12xl p-2 bg-muted text-left">
                                 <div className="p-2">
                                     <h1 className="text-xl font-bold">
                                         {questionDetails?.title}

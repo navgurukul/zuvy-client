@@ -195,13 +195,13 @@ const IDE: React.FC<IDEProps> = ({
             toast({
                 title: 'Failed',
                 description:
-                    error.response?.data?.message || 'An error occurred.',
+                    error.response?.data?.message || 'Network connection lost.',
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
             setCodeError(
                 error.response?.data?.data?.[0]?.stderr ||
-                    'Error occurred during submission.'
+                    'Error occurred during submission. Network connection lost.'
             )
         }
     }
@@ -323,7 +323,7 @@ const IDE: React.FC<IDEProps> = ({
                 >
                     <ResizablePanel defaultSize={50}>
                         <div className="flex h-[90vh]">
-                            <div className="w-full max-w-12xl p-2  bg-muted text-left">
+                            <div className="w-full max-w-12xl p-2 bg-muted text-left">
                                 <div className="p-2">
                                     <h1 className="text-xl font-bold">
                                         {questionDetails?.title}
@@ -388,7 +388,7 @@ const IDE: React.FC<IDEProps> = ({
                         <ResizablePanelGroup direction="vertical">
                             <ResizablePanel defaultSize={70}>
                                 <div className="flex h-full">
-                                    <div className="w-full max-w-5xl bg-muted p-2">
+                                    <div className="w-full max-w-9xl bg-muted p-2">
                                         <form>
                                             <div>
                                                 <div className="flex justify-between p-2">
@@ -433,7 +433,7 @@ const IDE: React.FC<IDEProps> = ({
                                                     </Select>
                                                 </div>
                                                 <Editor
-                                                    height="52vh"
+                                                    height="90vh"
                                                     language={language}
                                                     theme="vs-dark"
                                                     value={currentCode}
@@ -454,7 +454,7 @@ const IDE: React.FC<IDEProps> = ({
                             <ResizableHandle withHandle />
                             <ResizablePanel className="" defaultSize={40}>
                                 <div className="flex h-full">
-                                    <div className="w-full max-w-5xl bg-muted p-2 mx-2">
+                                    <div className="w-full max-w-9xl bg-muted p-2 mx-2">
                                         <div className="flex justify-between p-2 bg-gray-800 border-b border-gray-700">
                                             <p className="text-lg text-gray-300">
                                                 Output Window
