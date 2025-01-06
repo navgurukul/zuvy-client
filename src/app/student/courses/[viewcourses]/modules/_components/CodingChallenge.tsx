@@ -43,10 +43,6 @@ function CodingChallenge({
             const res = await api.get(
                 `/tracking/getQuizAndAssignmentWithStatus?chapterId=${content.id}`
             )
-            console.log(
-                'res.data.data.codingProblem',
-                res.data.data.codingProblem[0].id
-            )
             setCodingQuestions(res.data.data.codingProblem)
             setCodingQuestionId(res.data.data.codingProblem[0].id)
             setTagId(res.data.data.codingProblem[0].tagId)

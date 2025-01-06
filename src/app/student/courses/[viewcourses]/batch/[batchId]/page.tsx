@@ -172,8 +172,6 @@ function Page({
         if (userID) getCourseProgress()
     }, [userID, params.viewcourses])
 
-    console.log('modulesProgress', modulesProgress)
-
     return (
         <MaxWidthWrapper>
             <BreadcrumbCmponent crumbs={crumbs} />
