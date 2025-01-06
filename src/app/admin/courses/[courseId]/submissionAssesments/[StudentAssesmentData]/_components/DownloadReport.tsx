@@ -46,7 +46,7 @@ const DownloadReport = ({ userInfo }: any) => {
         doc.text(`Name: ${reportData.user?.name || 'N/A'}`, 10, 20);
         doc.text(`Email: ${reportData.user?.email || 'N/A'}`, 10, 30);
         doc.text(`Marks: ${reportData.marks || 0}`, 10, 40);
-        doc.text(`Percentage: ${reportData.percentage > -1 ? reportData?.percentage : 0}%`, 10, 50);
+        doc.text(`Percentage: ${reportData.percentage ? reportData?.percentage : 0}%`, 10, 50);
         doc.text(`Passed: ${reportData.isPassed ? 'Yes' : 'No'}`, 10, 60);
 
         // Prepare Submission Details
