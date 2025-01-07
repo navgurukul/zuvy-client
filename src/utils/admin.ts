@@ -461,3 +461,14 @@ export const convertSeconds = (seconds: number) => {
         days: days,
     }
 }
+
+export const calculateTimeTaken = (start: string, submit: string): string => {
+    const startDate = new Date(start)
+    const submitDate = new Date(submit)
+    const diffInMilliseconds = submitDate.getTime() - startDate.getTime()
+    const hours = Math.floor(diffInMilliseconds / (1000 * 60 * 60))
+    const minutes = Math.floor(
+        (diffInMilliseconds % (1000 * 60 * 60)) / (1000 * 60)
+    )
+    return `${hours}h & ${minutes}m`
+}
