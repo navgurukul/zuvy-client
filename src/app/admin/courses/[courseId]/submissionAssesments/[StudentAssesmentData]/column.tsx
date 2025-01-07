@@ -7,6 +7,7 @@ import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-co
 import { Task } from '@/utils/data/schema'
 import Link from 'next/link'
 import { FileText } from 'lucide-react'
+import DownloadReport from './_components/DownloadReport'
 
 export const columns: ColumnDef<Task>[] = [
     {
@@ -138,6 +139,12 @@ export const columns: ColumnDef<Task>[] = [
                     </Link>
                 </div>
             )
+        },
+    },
+    {
+        id: 'actions',
+        cell: ({ row }) => {
+            return <DownloadReport userInfo={row.original} />
         },
     },
 ]
