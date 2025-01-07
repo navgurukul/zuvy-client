@@ -494,17 +494,19 @@ const CodingProblems = () => {
                             )}
                         </>
                     )}
-                    <DataTablePagination
-                        totalStudents={totalCodingQuestion}
-                        position={position}
-                        setPosition={setPosition}
-                        pages={totalPages}
-                        lastPage={lastPage}
-                        currentPage={currentPage}
-                        setCurrentPage={setCurrentPage}
-                        fetchStudentData={fetchCodingQuestions}
-                        setOffset={setOffset}
-                    />
+                    {!isCodingDialogOpen && (
+                        <DataTablePagination
+                            totalStudents={totalCodingQuestion}
+                            position={position}
+                            setPosition={setPosition}
+                            pages={totalPages}
+                            lastPage={lastPage}
+                            currentPage={currentPage}
+                            setCurrentPage={setCurrentPage}
+                            fetchStudentData={fetchCodingQuestions}
+                            setOffset={setOffset}
+                        />
+                    )}
                 </div>
             )}
         </>

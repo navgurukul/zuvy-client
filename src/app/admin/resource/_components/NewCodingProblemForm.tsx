@@ -22,11 +22,12 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Plus, X } from 'lucide-react'
+import { Plus, PlusCircleIcon, X } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { cleanUpValues } from '@/utils/admin'
 import { Toast } from '@/components/ui/toast'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 
 // Regular expression to check for special characters
 const noSpecialCharacters = /^[a-zA-Z0-9\s]*$/
@@ -49,12 +50,18 @@ const formSchema = z.object({
         required_error: 'You need to select a Difficulty type.',
     }),
     topics: z.number().min(1, 'You need to select a Topic'),
-    inputFormat: z.enum(['str', 'int', 'float', 'arrayOfnum', 'arrayOfStr', 'bool'], {
-        required_error: 'You need to select an Input Format',
-    }),
-    outputFormat: z.enum(['str', 'int', 'float', 'arrayOfnum', 'arrayOfStr', 'bool'], {
-        required_error: 'You need to select an Output Format',
-    }),
+    inputFormat: z.enum(
+        ['str', 'int', 'float', 'arrayOfnum', 'arrayOfStr', 'bool'],
+        {
+            required_error: 'You need to select an Input Format',
+        }
+    ),
+    outputFormat: z.enum(
+        ['str', 'int', 'float', 'arrayOfnum', 'arrayOfStr', 'bool'],
+        {
+            required_error: 'You need to select an Output Format',
+        }
+    ),
     testCases: z.array(
         z.object({
             input: z.string().min(1, 'Input cannot be empty.'),
@@ -71,21 +78,28 @@ export default function NewCodingProblemForm({
     selectedOptions,
     difficulty,
     offset,
-    position
+    position,
 }: {
     tags: any
-    setIsDialogOpen: any,
+    setIsDialogOpen: any
     setCodingQuestions: any
-    filteredCodingQuestions?: any,
-    selectedOptions?: any,
-    difficulty?: any,
-    offset?: number,
+    filteredCodingQuestions?: any
+    selectedOptions?: any
+    difficulty?: any
+    offset?: number
     position?: String
 }) {
     const [testCases, setTestCases] = useState([
         { id: 1, input: '', output: '' },
         { id: 2, input: '', output: '' },
     ])
+    const [selectedValues, setSelectedValues] = useState<any[]>(['int'])
+
+    const handleIconClick = (value: any) => {
+        setSelectedValues((prev: any) => [...prev, value])
+        // if (!selectedValues.includes(value)) {
+        // }
+    }
 
     const handleAddTestCase = () => {
         setTestCases((prevTestCases: any) => [
@@ -139,6 +153,7 @@ export default function NewCodingProblemForm({
         }
     }
 
+    console.log(selectedValues)
     const handleSubmit = (values: z.infer<typeof formSchema>) => {
         const processInput = (input: string, format: string) => {
             const cleanedInput = cleanUpValues(input)
@@ -175,9 +190,9 @@ export default function NewCodingProblemForm({
                 case 'str':
                     return cleanedInput
                 case 'bool':
-                    if(cleanedInput === 'true' || cleanedInput === 'false') {
+                    if (cleanedInput === 'true' || cleanedInput === 'false') {
                         return cleanedInput
-                    }else {
+                    } else {
                         return null
                     }
                 default:
@@ -280,7 +295,13 @@ export default function NewCodingProblemForm({
         }
 
         createCodingQuestion(formattedData)
-        filteredCodingQuestions(setCodingQuestions, offset, position, difficulty, selectedOptions)
+        filteredCodingQuestions(
+            setCodingQuestions,
+            offset,
+            position,
+            difficulty,
+            selectedOptions
+        )
     }
 
     return (
@@ -430,36 +451,100 @@ export default function NewCodingProblemForm({
                             render={({ field }) => (
                                 <FormItem className="text-left w-full">
                                     <FormLabel>Input format</FormLabel>
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        defaultValue={String(field.value)}
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Choose Input Format" />
+                                    <h2 className="font-semibold text-sm">
+                                        Selected Inputs:
+                                    </h2>
+                                    <ScrollArea className="mt-4 flex text-sm w-72 pb-3">
+                                        <ScrollBar orientation="horizontal" />
+                                        <ul className="flex items-center gap-x-2   ">
+                                            {selectedValues.map(
+                                                (val, index) => (
+                                                    <li
+                                                        key={index}
+                                                        className="flex items-center gap-x-2 border rounded px-2 py-1 bg-gray-100"
+                                                    >
+                                                        <span>{val}</span>
+                                                        <button
+                                                            type="button"
+                                                            className="text-red-500 cursor-pointer hover:text-red-700"
+                                                            onClick={() =>
+                                                                setSelectedValues(
+                                                                    (prev) =>
+                                                                        prev.filter(
+                                                                            (
+                                                                                _,
+                                                                                i
+                                                                            ) =>
+                                                                                i !==
+                                                                                index
+                                                                        )
+                                                                )
+                                                            }
+                                                        >
+                                                            ✕
+                                                        </button>
+                                                    </li>
+                                                )
+                                            )}
+                                        </ul>
+                                    </ScrollArea>
+                                    <div>
+                                        <Select>
+                                            <SelectTrigger className="w-80">
+                                                <SelectValue placeholder="Select an option" />
                                             </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            <SelectItem value="str">
-                                                String
-                                            </SelectItem>
-                                            <SelectItem value="int">
-                                                Number
-                                            </SelectItem>
-                                            <SelectItem value="float">
-                                                Float
-                                            </SelectItem>
-                                            <SelectItem value="arrayOfnum">
-                                                Array Of Numbers
-                                            </SelectItem>
-                                            <SelectItem value="arrayOfStr">
-                                                Array Of Strings
-                                            </SelectItem>
-                                            <SelectItem value="bool">
-                                                Boolean
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                            <SelectContent>
+                                                {[
+                                                    {
+                                                        label: 'String',
+                                                        value: 'str',
+                                                    },
+                                                    {
+                                                        label: 'Number',
+                                                        value: 'int',
+                                                    },
+                                                    {
+                                                        label: 'Float',
+                                                        value: 'float',
+                                                    },
+                                                    {
+                                                        label: 'Array of Numbers',
+                                                        value: 'arrayOfnum',
+                                                    },
+                                                    {
+                                                        label: 'Array of Strings',
+                                                        value: 'arrayOfStr',
+                                                    },
+                                                    {
+                                                        label: 'Boolean',
+                                                        value: 'bool',
+                                                    },
+                                                ].map((item) => (
+                                                    <div
+                                                        key={item.value}
+                                                        className="flex items-center justify-between w-[300px] px-3 py-2 cursor-pointer hover:bg-gray-100"
+                                                        onClick={(e) =>
+                                                            e.stopPropagation()
+                                                        } // Prevent menu close
+                                                    >
+                                                        <span>
+                                                            {item.label}
+                                                        </span>
+                                                        <PlusCircleIcon
+                                                            size={16}
+                                                            className="cursor-pointer"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation() // Prevent dropdown selection when clicking the icon
+                                                                handleIconClick(
+                                                                    item.value
+                                                                )
+                                                            }}
+                                                        />
+                                                    </div>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -468,8 +553,24 @@ export default function NewCodingProblemForm({
                             control={form.control}
                             name="outputFormat"
                             render={({ field }) => (
-                                <FormItem className="text-left w-full">
-                                    <FormLabel>Output Format</FormLabel>
+                                <FormItem className="text-left  w-full">
+                                    <FormLabel>Output format</FormLabel>
+                                    <h2 className="font-semibold text-sm">
+                                        Selected Output:
+                                    </h2>
+                                    <ScrollArea className="mt-4 flex text-sm w-72 pb-3">
+                                        <ScrollBar orientation="horizontal" />
+                                        <ul className="flex items-center gap-x-2  ">
+                                            <li className="flex items-center gap-x-2 border rounded px-2 py-1 bg-gray-100">
+                                                <span>{field.value}</span>
+                                                <button
+                                                    type="button"
+                                                    className="text-red-500 cursor-pointer hover:text-red-700"
+                                                ></button>
+                                            </li>
+                                        </ul>
+                                    </ScrollArea>
+
                                     <Select
                                         onValueChange={field.onChange}
                                         defaultValue={String(field.value)}
@@ -524,11 +625,16 @@ export default function NewCodingProblemForm({
                                                 onChange={field.onChange}
                                             />
                                             <p className="text-sm text-gray-500 mt-1">
-                                                {form.watch('inputFormat') === 'arrayOfnum' || form.watch('inputFormat') === 'arrayOfStr'
+                                                {form.watch('inputFormat') ===
+                                                    'arrayOfnum' ||
+                                                form.watch('inputFormat') ===
+                                                    'arrayOfStr'
                                                     ? 'Max 1 array accepted (e.g., 1,2,3,4)'
-                                                    : form.watch('inputFormat') === 'bool'
-                                                        ? 'Enter true or false'
-                                                        : 'Enter values separated by spaces (e.g., 2 3 4)'}
+                                                    : form.watch(
+                                                          'inputFormat'
+                                                      ) === 'bool'
+                                                    ? 'Enter true or false'
+                                                    : 'Enter values separated by spaces (e.g., 2 3 4)'}
                                             </p>
 
                                             <FormMessage />
@@ -548,12 +654,14 @@ export default function NewCodingProblemForm({
                                             <p className="text-sm text-gray-500 mt-1">
                                                 {form.watch('outputFormat') ===
                                                     'arrayOfnum' ||
-                                                    form.watch('outputFormat') ===
+                                                form.watch('outputFormat') ===
                                                     'arrayOfStr'
                                                     ? 'Max 1 array accepted (e.g., 1,2,3,4)'
-                                                    : form.watch('outputFormat') === 'bool'?
-                                                    'Enter true or false': 
-                                                    'Only one value accepted (e.g., 55)'}
+                                                    : form.watch(
+                                                          'outputFormat'
+                                                      ) === 'bool'
+                                                    ? 'Enter true or false'
+                                                    : 'Only one value accepted (e.g., 55)'}
                                             </p>
                                             <FormMessage />
                                         </FormItem>
