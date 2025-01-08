@@ -70,11 +70,12 @@ const Page = ({ params }: any) => {
             setAssessmentData(data.ModuleAssessment)
             setPassPercentage(data.passPercentage)
 
-            const updatedAssessments = data.submitedOutsourseAssessments.map(
+            const updatedAssessments = data?.submitedOutsourseAssessments.map(
                 (assessment: any) => ({
                     ...assessment,
                     bootcampId: data.bootcampId,
                     newId: data.id,
+                    title: data.ModuleAssessment.title
                 })
             )
             setDataTableAssessments(updatedAssessments)
