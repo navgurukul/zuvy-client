@@ -457,7 +457,7 @@ const IDE: React.FC<IDEProps> = ({
                                                                         {index +
                                                                             1}
                                                                     </h2>
-                                                                    <p className="text-gray-300">
+                                                                    <p className="text-gray-300 whitespace-normal break-words">
                                                                         <span className="font-medium text-gray-400">
                                                                             Your
                                                                             Output:
