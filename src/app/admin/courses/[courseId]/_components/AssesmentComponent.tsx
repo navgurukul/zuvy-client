@@ -114,12 +114,12 @@ const AssesmentComponent = (props: Props) => {
             ref={printRef}
             className="lg:flex-row h-auto lg:h-[290px] sm:h-[360px] w-full shadow-lg my-5 rounded-lg p-4 lg:p-6 bg-white dark:bg-gray-800 transition-transform transform hover:shadow-xl"
         >
-            <div className="w-full justify-between py-2 lg:mx-4 min-h-[250px] sm:min-h-[200px]">
+            <div className="w-full justify-between pt-2 min-h-[250px] sm:min-h-[200px]">
                 <div className="flex items-center justify-between">
                     <h1 className="text-sm lg:text-base text-start font-medium text-gray-900 dark:text-white">
                         {props.title}
                     </h1>
-                    <div className={`relative group pr-5`}>
+                    <div className={`relative group`}>
                         <button
                             onClick={isDisabled ? undefined : handleDownloadPdf}
                             className={`ml-2 ${
