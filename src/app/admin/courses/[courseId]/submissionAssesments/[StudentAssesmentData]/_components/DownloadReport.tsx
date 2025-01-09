@@ -1,22 +1,24 @@
 'use client'
 import { calculateTimeTaken } from '@/utils/admin'
 import { api } from '@/utils/axios.config'
-import { time } from 'console'
 import { format } from 'date-fns'
+import { color } from 'framer-motion'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { ArrowBigDownDash } from 'lucide-react'
-import { useEffect, useState } from 'react'
+
 const DownloadReport = ({ userInfo }: any) => {
     const { userId, id, title } = userInfo
+
     const formatDate = (dateString: string) => {
         if (!dateString) return 'N/A'
         try {
-            return format(new Date(dateString), 'MMMM dd, yyyy hh:mm a') // Example: December 16, 2024 09:08 AM
+            return format(new Date(dateString), 'MMMM dd, yyyy hh:mm a')
         } catch {
             return 'Invalid Date'
         }
     }
+
     async function fetchReportData() {
         try {
             const res = await api.get(
@@ -27,67 +29,137 @@ const DownloadReport = ({ userInfo }: any) => {
             console.error('Error fetching report data:', error)
         }
     }
+
     async function generatePDF(reportData: any) {
-        const doc = new jsPDF()
-        // Add Title
-        doc.setFontSize(16)
-        doc.text(`Assessment Name - ${title}`, 10, 10)
-        // Add User Info
-        doc.setFontSize(12)
-        doc.text(`Name: ${reportData.user?.name || 'N/A'}`, 10, 20)
-        doc.text(`Email: ${reportData.user?.email || 'N/A'}`, 10, 30)
-        doc.text(`Marks: ${reportData.marks || 0}`, 10, 40)
+        const doc = new jsPDF();
+
+        // Add Assessment Summary at the Top
+        // Add "Zuvy Assessment Report" in bold and red
+        doc.setFont('helvetica', 'bold'); // Set font to bold
+        doc.setTextColor(96, 144, 130); // Set text color to zuvy color
+        doc.setFontSize(16);
+        doc.text('Zuvy Assessment Report', 105, 10, { align: 'center' });
+
+        // Reset font and color for subsequent text
+        doc.setFont('helvetica', 'normal'); // Reset to normal font
+        doc.setFontSize(11);
+        doc.setTextColor(0, 0, 0);
+        doc.text(`Assessment Name: ${title || 'N/A'}`, 15, 20);
+        doc.text(`Name: ${reportData.user?.name || 'N/A'}`, 15, 25);
+        doc.text(`Email: ${reportData.user?.email || 'N/A'}`, 15, 30);
+        doc.text(`Submitted On: ${new Date(reportData.submitedAt).toLocaleString()}`, 15, 35);
         doc.text(
-            `Percentage: ${reportData.percentage ? Math.trunc(reportData?.percentage) : 0
-            }%`,
-            10,
-            50
-        )
-        doc.text(`Qualified: ${reportData.isPassed ? 'Yes' : 'No'}`, 10, 60)
-        // Prepare Submission Details
-        const tableBody = [
-            ['Submitted At', formatDate(reportData?.submitedAt) || 'N/A'],
-            [
-                'Time Taken',
-                calculateTimeTaken(
-                    reportData?.startedAt,
-                    reportData?.submitedAt
-                ) || 0,
-            ],
+            `Time Taken: ${calculateTimeTaken(reportData.startedAt, reportData.submitedAt)}`,
+            15,
+            40
+        );
+        doc.text(`Total Marks: ${reportData.marks || 0}`, 15, 45);
+        doc.text(`Percentage: ${Math.trunc(reportData.percentage || 0)}%`, 15, 50);
 
-            ['Copy Paste', `${reportData?.copyPaste || 0} times`],
-            ['Tab Change', `${reportData?.tabChange || 0} times`],
-        ]
-
-        const isQuestionsAvailable =
-            reportData?.codingQuestionCount > 0 ||
-            reportData?.mcqQuestionCount > 0
-
-        if (isQuestionsAvailable) {
-            if (reportData?.codingQuestionCount > 0) {
-                tableBody.push(
-                    [
-                        'Coding Questions Attempted',
-                        `${reportData?.attemptedCodingQuestions || 0} out of ${reportData?.codingQuestionCount || 0}`,
-                    ],
-                    ['Coding Score', `${reportData?.codingScore || 0} out of ${reportData?.requiredCodingScore || 0}`]
-                )
-            }
-            if (reportData?.mcqQuestionCount > 0) {
-                tableBody.push(
-                    ['MCQ Score', `${reportData?.mcqScore || 0} out of ${reportData?.requiredMCQScore || 0}`]
-                )
-            }
-        }
-        // Add Submission Details to PDF
+        // Table for CopyPaste and TabChange
+        // Table for CopyPaste and TabChange
         autoTable(doc, {
-            startY: 70,
-            head: [['Assessment Details', '']],
-            body: tableBody,
-        })
+            head: [['Proctoring Details', 'Count']],
+            body: [
+                ['Copy Paste', `${reportData.copyPaste || 0} times`],
+                ['Tab Change', `${reportData.tabChange || 0} times`],
+            ],
+            startY: 60,
+            theme: 'grid',
+            headStyles: {
+                fillColor: [96, 144, 130],
+                textColor: [255, 255, 255], // White text for contrast
+            },
+            bodyStyles: {
+                textColor: [0, 0, 0], // Black text for body cells
+            },
+            columnStyles: {
+                0: { cellWidth: 120 },
+                1: { cellWidth: 60 },
+            },
+        });
+
+        // Table for Coding Problems
+        autoTable(doc, {
+            head: [['Coding Details', 'Questions & Score']],
+            body: [
+                [
+                    'Coding Questions Attempted',
+                    `${reportData.attemptedCodingQuestions || 0} / ${reportData.codingQuestionCount || 0}`,
+                ],
+                [
+                    'Coding Score',
+                    `${reportData.codingScore || 0} / ${reportData.requiredCodingScore || 0}`,
+                ],
+            ],
+            theme: 'grid',
+            headStyles: {
+                fillColor: [96, 144, 130],
+                textColor: [255, 255, 255], // White text for contrast
+            },
+            bodyStyles: {
+                textColor: [0, 0, 0], // Black text for body cells
+            },
+            columnStyles: {
+                0: { cellWidth: 120 },
+                1: { cellWidth: 60 },
+            },
+        });
+
+        // Table for MCQs
+        autoTable(doc, {
+            head: [[`MCQ Details`, 'Score']],
+            body: [
+                [
+                    'MCQ Score',
+                    `${reportData.mcqScore || 0} / ${reportData.requiredMCQScore || 0}`,
+                ],
+            ],
+            theme: 'grid',
+            headStyles: {
+                fillColor: [96, 144, 130],
+                textColor: [255, 255, 255], // White text for contrast
+            },
+            bodyStyles: {
+                textColor: [0, 0, 0], // Black text for body cells
+            },
+            columnStyles: {
+                0: { cellWidth: 120 },
+                1: { cellWidth: 60 },
+            },
+        });
+
+        // Tables for Each PracticeCode
+        reportData.PracticeCode.forEach((practiceCode: any, index: any) => {
+            autoTable(doc, {
+                head: [[`Coding Question ${index + 1}`, 'Status']],
+                body: [
+                    [
+                        practiceCode.questionDetail.title,
+                        practiceCode.status,
+                    ],
+                ],
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [96, 144, 130],
+                    textColor: [255, 255, 255], // White text for contrast
+                },
+                bodyStyles: {
+                    textColor: [0, 0, 0], // Black text for body cells
+                },
+                columnStyles: {
+                    0: { cellWidth: 120 },
+                    1: { cellWidth: 60 },
+                },
+            });
+        });
+
+
         // Save the PDF
-        doc.save(`${reportData.user.name}'s_${title}.pdf`)
+        doc.save(`${reportData.user?.name}_${title}.pdf`);
     }
+
+
     async function handleDownload() {
         await fetchReportData()
     }
@@ -98,12 +170,11 @@ const DownloadReport = ({ userInfo }: any) => {
                 onClick={handleDownload}
                 className="max-w-[500px] text-secondary font-medium flex items-center"
             >
-                <ArrowBigDownDash className="" />
+                <ArrowBigDownDash className="mr-2" />
                 Download Report
             </button>
         </div>
     )
 }
-
 
 export default DownloadReport
