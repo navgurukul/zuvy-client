@@ -31,58 +31,60 @@
                 try {
                     const response = await api.get(apiUrl);
                     const assessments = response.data.submitedOutsourseAssessments;
+                    const requiredCodingScore = assessments[0]?.requiredCodingScore || null;
+                    const requiredMcqScore = assessments[0]?.requiredMCQScore || null;
         
-                    if (Array.isArray(assessments) && assessments.length === 0) {
+                    if (!Array.isArray(assessments) || assessments.length === 0) {
+                        toast.error('No data available to generate PDF.');
                         return;
                     }
         
                     const doc = new jsPDF({ format: 'a4', orientation: 'landscape' });
         
-                    doc.setFontSize(12); 
-                    doc.setFont('Regular', 'normal');
-                    doc.text(`Assessment Name: ${props.title}`, 10, 8);
-   
-                    doc.setFont('Regular', 'normal');
-                    doc.text(`Qualifying Criteria: ${response?.data.passPercentage}`, 10, 14);
-       
-                    doc.setFont('Regular', 'normal');
-                    doc.text('List of Students-:', 10, 20);
-
+                    // Add Title and Details
+                    doc.setFontSize(14);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(`Assessment Report`, 10, 10);
+        
+                    doc.setFontSize(12);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(`Assessment Name: ${props.title}`, 10, 20);
+                    doc.text(`Qualifying Criteria: ${response?.data.passPercentage}%`, 10, 26);
+                    requiredCodingScore && doc.text(`Required Coding Score: ${requiredCodingScore}`, 10, 32);
+                    requiredMcqScore && doc.text(`Required MCQ Score: ${requiredMcqScore}`, 10, 38);
+                    doc.text(`No of Students Attempted: ${assessments.length}`, 10, 44);
+        
+                    // Dynamically Define Columns
                     const columns = [
                         { header: 'Name', dataKey: 'name' },
                         { header: 'Email', dataKey: 'email' },
                         { header: 'Qualified', dataKey: 'qualified' },
                         { header: 'Percentage', dataKey: 'percentage' },
-                        { header: 'Coding Score', dataKey: 'codingScore' },
-                        { header: 'MCQ Score', dataKey: 'mcqScore' },
-                        { header: 'Tab Change', dataKey: 'tabChange' },
-                        { header: 'Copy Paste', dataKey: 'copyPaste' },
+                        ...(props.codingChallenges > 0 ? [{ header: 'Coding Score', dataKey: 'codingScore' }] : []),
+                        ...(props.mcq > 0 ? [{ header: 'MCQ Score', dataKey: 'mcqScore' }] : []),
+                        { header: 'Tab Changed', dataKey: 'tabChange' },
+                        { header: 'Copy Pasted', dataKey: 'copyPaste' },
                     ];
         
-                    const rows = assessments.map((assessment:any) => ({
+                    // Row Data Preparation
+                    const rows = assessments.map((assessment: any) => ({
                         name: assessment.name || 'N/A',
                         email: assessment.email || 'N/A',
                         qualified: assessment.isPassed ? 'Yes' : 'No',
-                        percentage: Math.floor(assessment.percentage) || 0,
-                        codingScore: assessment.codingScore || 0,
-                        mcqScore: assessment.mcqScore || 0,
+                        percentage: `${Math.floor(assessment.percentage) || 0}%`,
+                        codingScore: props.codingChallenges > 0 ? assessment.codingScore || 0 : undefined,
+                        mcqScore: props.mcq > 0 ? assessment.mcqScore || 0 : undefined,
                         tabChange: assessment.tabChange || 0,
                         copyPaste: assessment.copyPaste || 0,
                     }));
         
+                    // Generate Table
                     autoTable(doc, {
                         head: [columns.map((col) => col.header)],
-                        body: rows.map((row:any) => [
-                            row.name,
-                            row.email,
-                            row.qualified,
-                            row.percentage,
-                            row.codingScore,
-                            row.mcqScore,
-                            row.tabChange,
-                            row.copyPaste,
-                        ]),
-                        startY: 25,
+                        body: rows.map((row: any) =>
+                            columns.map((col) => row[col.dataKey])
+                        ),
+                        startY: 50, // Start below the new details
                         margin: { horizontal: 10 },
                         styles: {
                             overflow: 'linebreak',
@@ -90,11 +92,16 @@
                             fontSize: 10,
                             textColor: [0, 0, 0],
                         },
-                        headStyles: { fillColor: [22, 160, 133], fontSize: 11, textColor: [255, 255, 255] },
+                        headStyles: {
+                            fillColor: [22, 160, 133],
+                            fontSize: 11,
+                            textColor: [255, 255, 255],
+                        },
                         theme: 'grid',
                     });
         
-                    doc.save(`${props.title}.pdf`);
+                    // Save PDF
+                    doc.save(`${props.title}-Report.pdf`);
                 } catch (error) {
                     toast.error('Failed to download PDF. Please try again later.');
                 }
@@ -102,6 +109,8 @@
         
             fetchData();
         };
+        
+        
         
         const color = getAssesmentBackgroundColorClass(
             props.totalSubmissions,
