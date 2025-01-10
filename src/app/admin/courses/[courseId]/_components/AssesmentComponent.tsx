@@ -41,7 +41,7 @@
         
                     const doc = new jsPDF({ format: 'a4', orientation: 'landscape' });
         
-                    // Add Title and Details
+
                     doc.setFontSize(14);
                     doc.setFont('helvetica', 'bold');
                     doc.text(`Assessment Report`, 10, 10);
@@ -50,11 +50,10 @@
                     doc.setFont('helvetica', 'normal');
                     doc.text(`Assessment Name: ${props.title}`, 10, 20);
                     doc.text(`Qualifying Criteria: ${response?.data.passPercentage}%`, 10, 26);
-                    requiredCodingScore && doc.text(`Required Coding Score: ${requiredCodingScore}`, 10, 32);
-                    requiredMcqScore && doc.text(`Required MCQ Score: ${requiredMcqScore}`, 10, 38);
+                    requiredCodingScore && doc.text(`Total Coding Score: ${requiredCodingScore}`, 10, 32);
+                    requiredMcqScore && doc.text(`Total MCQ Score: ${requiredMcqScore}`, 10, 38);
                     doc.text(`No of Students Attempted: ${assessments.length}`, 10, 44);
         
-                    // Dynamically Define Columns
                     const columns = [
                         { header: 'Name', dataKey: 'name' },
                         { header: 'Email', dataKey: 'email' },
@@ -66,7 +65,6 @@
                         { header: 'Copy Pasted', dataKey: 'copyPaste' },
                     ];
         
-                    // Row Data Preparation
                     const rows = assessments.map((assessment: any) => ({
                         name: assessment.name || 'N/A',
                         email: assessment.email || 'N/A',
@@ -78,13 +76,12 @@
                         copyPaste: assessment.copyPaste || 0,
                     }));
         
-                    // Generate Table
                     autoTable(doc, {
                         head: [columns.map((col) => col.header)],
                         body: rows.map((row: any) =>
                             columns.map((col) => row[col.dataKey])
                         ),
-                        startY: 50, // Start below the new details
+                        startY: 50,
                         margin: { horizontal: 10 },
                         styles: {
                             overflow: 'linebreak',
@@ -100,7 +97,6 @@
                         theme: 'grid',
                     });
         
-                    // Save PDF
                     doc.save(`${props.title}-Report.pdf`);
                 } catch (error) {
                     toast.error('Failed to download PDF. Please try again later.');
