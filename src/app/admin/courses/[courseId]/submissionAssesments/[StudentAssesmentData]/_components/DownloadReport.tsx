@@ -38,13 +38,12 @@ const DownloadReport = ({ userInfo }: any) => {
         doc.setFont('helvetica', 'bold'); // Set font to bold
         doc.setTextColor(96, 144, 130); // Set text color to zuvy color
         doc.setFontSize(16);
-        doc.text('Zuvy Assessment Report', 105, 10, { align: 'center' });
+        doc.text(`${title} Assessment Report`, 105, 10, { align: 'center' });
 
         // Reset font and color for subsequent text
         doc.setFont('helvetica', 'normal'); // Reset to normal font
         doc.setFontSize(11);
         doc.setTextColor(0, 0, 0);
-        doc.text(`Assessment Name: ${title || 'N/A'}`, 15, 20);
         doc.text(`Name: ${reportData.user?.name || 'N/A'}`, 15, 25);
         doc.text(`Email: ${reportData.user?.email || 'N/A'}`, 15, 30);
         doc.text(`Submitted On: ${new Date(reportData.submitedAt).toLocaleString()}`, 15, 35);
@@ -129,30 +128,30 @@ const DownloadReport = ({ userInfo }: any) => {
             },
         });
 
-        // Tables for Each PracticeCode
-        reportData.PracticeCode.forEach((practiceCode: any, index: any) => {
-            autoTable(doc, {
-                head: [[`Coding Question ${index + 1}`, 'Status']],
-                body: [
-                    [
-                        practiceCode.questionDetail.title,
-                        practiceCode.status,
-                    ],
-                ],
-                theme: 'grid',
-                headStyles: {
-                    fillColor: [96, 144, 130],
-                    textColor: [255, 255, 255], // White text for contrast
-                },
-                bodyStyles: {
-                    textColor: [0, 0, 0], // Black text for body cells
-                },
-                columnStyles: {
-                    0: { cellWidth: 120 },
-                    1: { cellWidth: 60 },
-                },
-            });
+        // Create an array to hold all rows for the table
+        const tableData = reportData.PracticeCode.map((practiceCode: any, index: any) => [
+            `Q${index + 1}. ${practiceCode.questionDetail.title}`,
+            practiceCode.status == 'Accepted' ? 'Correct Answer' : 'Wrong Answer',
+        ]);
+
+        // Generate a single table with all rows
+        autoTable(doc, {
+            head: [['Coding Questions', 'Status']],
+            body: tableData,
+            theme: 'grid',
+            headStyles: {
+                fillColor: [96, 144, 130],
+                textColor: [255, 255, 255], // White text for contrast
+            },
+            bodyStyles: {
+                textColor: [0, 0, 0], // Black text for body cells
+            },
+            columnStyles: {
+                0: { cellWidth: 120 },
+                1: { cellWidth: 60 },
+            },
         });
+
 
 
         // Save the PDF
