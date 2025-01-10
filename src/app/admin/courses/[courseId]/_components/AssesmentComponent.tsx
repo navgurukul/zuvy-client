@@ -26,80 +26,89 @@
 
         const handleDownloadPdf = async () => {
             const apiUrl = `/admin/assessment/students/assessment_id${props.id}`;
-
+        
             async function fetchData() {
                 try {
                     const response = await api.get(apiUrl);
                     const assessments = response.data.submitedOutsourseAssessments;
-
+        
                     if (Array.isArray(assessments) && assessments.length === 0) {
-
                         return;
                     }
-
-                    const doc = new jsPDF();
-
-                    // Title Styling
-                    doc.setFontSize(18);
+        
+                    const doc = new jsPDF({ format: 'a4', orientation: 'landscape' });
+        
+                    doc.setFontSize(12); 
                     doc.setFont('Regular', 'normal');
-                    doc.text(props.title, 14, 10);
-
-                    // Passed Percentage Styling
-                    doc.setFontSize(14);
+                    doc.text(`Assessment Name: ${props.title}`, 10, 8);
+   
                     doc.setFont('Regular', 'normal');
-                    doc.text('Passed Percentage: 70%', 14, 16); // Closer to the title
-
-                    // Add section title for students (closer to the table)
-                    doc.setFontSize(15);
+                    doc.text(`Qualifying Criteria: ${response?.data.passPercentage}`, 10, 14);
+       
                     doc.setFont('Regular', 'normal');
-                    doc.text('List of Students-:', 14, 23); // Closer to the table
+                    doc.text('List of Students-:', 10, 20);
 
-                    // Define columns for the table
                     const columns = [
                         { header: 'Name', dataKey: 'name' },
                         { header: 'Email', dataKey: 'email' },
                         { header: 'Qualified', dataKey: 'qualified' },
-                        { header: 'Percentage', dataKey: 'percentage' }
+                        { header: 'Percentage', dataKey: 'percentage' },
+                        { header: 'Coding Score', dataKey: 'codingScore' },
+                        { header: 'MCQ Score', dataKey: 'mcqScore' },
+                        { header: 'Tab Change', dataKey: 'tabChange' },
+                        { header: 'Copy Paste', dataKey: 'copyPaste' },
                     ];
-
-                    // Prepare rows for the table
-                    const rows = assessments.map((assessment: { name: any; email: any; isPassed: any; percentage: number }) => ({
+        
+                    const rows = assessments.map((assessment:any) => ({
                         name: assessment.name || 'N/A',
                         email: assessment.email || 'N/A',
                         qualified: assessment.isPassed ? 'Yes' : 'No',
-                        percentage: Math.floor(assessment.percentage) || 0
+                        percentage: Math.floor(assessment.percentage) || 0,
+                        codingScore: assessment.codingScore || 0,
+                        mcqScore: assessment.mcqScore || 0,
+                        tabChange: assessment.tabChange || 0,
+                        copyPaste: assessment.copyPaste || 0,
                     }));
-
-                    // Use autoTable to create the table in the PDF
+        
                     autoTable(doc, {
-                        head: [columns.map(col => col.header)],
-                        body: rows.map((row: { name: any; email: any; qualified: any; percentage: any }) => [row.name, row.email, row.qualified, row.percentage]),
-                        startY: 25, // Start the table closer to the section title
+                        head: [columns.map((col) => col.header)],
+                        body: rows.map((row:any) => [
+                            row.name,
+                            row.email,
+                            row.qualified,
+                            row.percentage,
+                            row.codingScore,
+                            row.mcqScore,
+                            row.tabChange,
+                            row.copyPaste,
+                        ]),
+                        startY: 25,
                         margin: { horizontal: 10 },
-                        styles: { overflow: 'linebreak', halign: 'center' },
-                        headStyles: { fillColor: [22, 160, 133] },
-                        theme: 'grid'
+                        styles: {
+                            overflow: 'linebreak',
+                            halign: 'left',
+                            fontSize: 10,
+                            textColor: [0, 0, 0],
+                        },
+                        headStyles: { fillColor: [22, 160, 133], fontSize: 11, textColor: [255, 255, 255] },
+                        theme: 'grid',
                     });
-
-                    // Save the document
+        
                     doc.save(`${props.title}.pdf`);
                 } catch (error) {
-
-
+                    toast.error('Failed to download PDF. Please try again later.');
                 }
             }
-
+        
             fetchData();
         };
-
-
-
+        
         const color = getAssesmentBackgroundColorClass(
             props.totalSubmissions,
             props.studentsSubmitted
         );
 
-        const isDisabled = props.studentsSubmitted === 0; // Disable if no submissions
+        const isDisabled = props.studentsSubmitted === 0; 
 
         return (
             <div ref={printRef} className="lg:flex-row h-auto lg:h-[280px] sm:h-[360px] w-full shadow-lg my-5 rounded-lg p-4 lg:p-6 bg-white dark:bg-gray-800 transition-transform transform hover:shadow-xl">
@@ -113,7 +122,7 @@
                                 className={`ml-2 cursor-pointer ${isDisabled ? 'text-gray-400' : 'text-gray-500 hover:text-gray-700'}`}
                                 onClick={isDisabled ? undefined : handleDownloadPdf}
                                 aria-label="Download full report"
-                                disabled={isDisabled} // Disable button
+                                disabled={isDisabled}
                             >
                                 <ArrowDownToLine size={20} />
                             </button>
