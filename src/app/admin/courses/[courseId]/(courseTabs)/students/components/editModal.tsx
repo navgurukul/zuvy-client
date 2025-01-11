@@ -52,33 +52,37 @@ export const EditModal: React.FC<AlertDialogProps> = ({
         email: email || '',
         name: name || '',
     })
+    const [isOpen, setIsOpen] = useState(false)
 
     const handleSingleStudent = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
         setStudentData({ ...studentData, [name]: value })
     }
 
-    async function deleteStudentHandler(userId: any, bootcampId: any) {
+    async function editStudentHandler(userId: any, bootcampId: any) {
         try {
-            await api.delete(`/student/${userId}/${bootcampId}`).then((res) => {
-                toast({
-                    title: res.data.status,
-                    description: res.data.message,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+            await api
+                .patch(`/bootcamp/updateUserDetails/${userId}`, studentData)
+                .then((res) => {
+                    toast({
+                        title: res.data.status,
+                        description: res.data.message,
+                        className:
+                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+                    })
+                    fetchStudentsHandler({
+                        courseId: bootcampId,
+                        limit,
+                        offset,
+                        searchTerm: search,
+                        setLoading,
+                        setStudents,
+                        setTotalPages,
+                        setTotalStudents,
+                        setCurrentPage,
+                    })
+                    setIsOpen(false)
                 })
-                fetchStudentsHandler({
-                    courseId: bootcampId,
-                    limit,
-                    offset,
-                    searchTerm: search,
-                    setLoading,
-                    setStudents,
-                    setTotalPages,
-                    setTotalStudents,
-                    setCurrentPage,
-                })
-            })
         } catch (error: any) {
             toast({
                 title: 'Failed',
@@ -87,11 +91,12 @@ export const EditModal: React.FC<AlertDialogProps> = ({
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
+            setIsOpen(false)
         }
     }
 
     return (
-        <AlertDialog>
+        <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
             <AlertDialogTrigger asChild>
                 <Button className="bg-white text-red-400">
                     <Pencil />
@@ -123,7 +128,7 @@ export const EditModal: React.FC<AlertDialogProps> = ({
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <Button
                         className="gap-x-2"
-                        onClick={() => deleteStudentHandler(userId, bootcampId)}
+                        onClick={() => editStudentHandler(userId, bootcampId)}
                     >
                         Edit
                     </Button>
