@@ -371,6 +371,19 @@ export const getTopicId = create<topicId>((set) => ({
     },
 }))
 
+type activeChapter = {
+    activeChapter: number
+    setActiveChapter: (newValue: number) => void
+}
+
+export const getActiveChapter = (initialTopicId: number | 0) =>
+    create<activeChapter>((set) => ({
+        activeChapter: initialTopicId,
+        setActiveChapter: (newValue: number) => {
+            set({ activeChapter: newValue })
+        },
+    }))
+
 type moduleName = {
     moduleName: string
     setModuleName: (newValue: string) => void

@@ -18,6 +18,7 @@ import { getAttendanceColorClass } from '@/utils/students'
 import { ComboboxStudent } from './components/comboboxStudentDataTable'
 import { AlertDialogDemo } from './components/deleteModalNew'
 import { Checkbox } from '@/components/ui/checkbox'
+import EditModal from './components/editModal'
 
 export const columns: ColumnDef<Task>[] = [
     {
@@ -242,6 +243,27 @@ export const columns: ColumnDef<Task>[] = [
                         </span>
                     </div>
                 </div>
+            )
+        },
+    },
+    {
+        id: 'actions',
+        // cell: ({ row }) => <DataTableRowActions row={row} />,
+        cell: ({ row }) => {
+            const student = row.original
+            const { userId, bootcampId, name, email } = student
+
+            return (
+                <>
+                    <div>
+                        <EditModal
+                            userId={userId}
+                            bootcampId={bootcampId}
+                            name={name}
+                            email={email}
+                        />
+                    </div>
+                </>
             )
         },
     },

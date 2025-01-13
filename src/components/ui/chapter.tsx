@@ -21,6 +21,7 @@ import {
     getChapterDataState,
     getModuleData,
     getTopicId,
+    getActiveChapter,
     getCurrentModuleName,
     getChapterUpdateStatus,
 } from '@/store/store'
@@ -61,7 +62,8 @@ function Chapter() {
     const [chapterId, setChapterId] = useState<number>(0)
     const [activeChapterTitle, setActiveChapterTitle] = useState('')
     const { moduleData, setModuleData } = getModuleData()
-    const [activeChapter, setActiveChapter] = useState(chapter_id)
+    // const [activeChapter, setActiveChapter] = useState(chapter_id)
+    const { activeChapter, setActiveChapter } = getActiveChapter(chapter_id)()
     const { topicId, setTopicId } = getTopicId()
     const moduleName = getCurrentModuleName((state) => state.moduleName)
     const setModuleName = getCurrentModuleName((state) => state.setModuleName)
@@ -73,7 +75,7 @@ function Chapter() {
     const [isChapterClicked, setIsChapterClicked] = useState(false)
     const isChapterClickedRef = useRef(false)
     const [currentChapter, setCurrentChapter] = useState<any>([])
-    const {isChapterUpdated, setIsChapterUpdated} = getChapterUpdateStatus()
+    const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
 
     const crumbs = [
         {
@@ -100,6 +102,7 @@ function Chapter() {
             const clickedChapter = response.data.chapterWithTopic.find(
                 (item: any) => item.chapterId === chapter_id
             )
+            setTopicId(clickedChapter?.topicId)
             setCurrentChapter(clickedChapter)
             setChapterData(response.data.chapterWithTopic)
             setModuleName(response.data.moduleName)
@@ -193,11 +196,11 @@ function Chapter() {
         }
     }
 
-    useEffect(() => {
-        if (currentChapter?.topicId) {
-            setTopicId(currentChapter?.topicId)
-        }
-    }, [currentChapter])
+    // useEffect(() => {
+    //     if (currentChapter?.topicId) {
+    //         setTopicId(currentChapter?.topicId)
+    //     }
+    // }, [currentChapter])
 
     return (
         <div className="flex flex-col h-screen pb-20">
