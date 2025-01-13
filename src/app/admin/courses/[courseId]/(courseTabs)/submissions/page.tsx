@@ -17,6 +17,7 @@ import PraticeProblemsComponent from './components/PraticeProblemsComponent'
 import useDebounce from '@/hooks/useDebounce'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import VideoSubmission from './components/VideoSubmission'
 
 const Page = ({ params }: { params: any }) => {
     const [activeTab, setActiveTab] = useState('practice')
@@ -161,6 +162,16 @@ const Page = ({ params }: { params: any }) => {
                         }`}
                     >
                         Assignments
+                    </Button>
+                    <Button
+                        onClick={() => handleTabChange('video')}
+                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
+                            activeTab === 'video'
+                                ? 'bg-secondary  text-white'
+                                : 'bg-gray-200 text-gray-800'
+                        }`}
+                    >
+                        Video
                     </Button>
                 </div>
             )}
@@ -396,6 +407,13 @@ const Page = ({ params }: { params: any }) => {
                 )}
                 {activeTab === 'assignments' && (
                     <Assignments
+                        debouncedSearch={debouncedSearch}
+                        courseId={params.courseId}
+                    />
+                )}
+
+                {activeTab === 'video' && (
+                    <VideoSubmission
                         debouncedSearch={debouncedSearch}
                         courseId={params.courseId}
                     />

@@ -28,6 +28,7 @@ export const taskSchema = z.object({
     questionId: z.number(),
     startedAt: z.string(),
     submitedAt: z.string(),
+    completedAt: z.string(),
 })
 
 export const testCaseSchema = z.object({
