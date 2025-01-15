@@ -101,7 +101,7 @@ const Assessment = ({
 
     const isDisabled = !hasQuestions
 
-    const isDeadlineCrossed = new Date(assessmentShortInfo?.deadline) < new Date()
+    const isDeadlineCrossed = assessmentShortInfo?.deadline? new Date(assessmentShortInfo?.deadline) < new Date() : false
 
 
     return (
