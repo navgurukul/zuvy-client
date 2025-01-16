@@ -21,14 +21,6 @@ import {
     getAllCodingQuestions,
     handleEditCodingQuestion,
 } from '@/utils/admin'
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from '@/components/ui/dialog'
-import EditCodingQuestionForm from '@/app/admin/resource/_components/EditCodingQuestionForm'
 
 export const columns: ColumnDef<CodingQuestion>[] = [
     {
@@ -78,7 +70,7 @@ export const columns: ColumnDef<CodingQuestion>[] = [
 
             return (
                 <div className="flex items-center">
-                    {codingQuestion.usage + ' times'}
+                    {codingQuestion?.usage ? codingQuestion?.usage + ' times' : 0 + ' times'}
                 </div>
             )
         },
@@ -99,8 +91,8 @@ export const columns: ColumnDef<CodingQuestion>[] = [
 
             const {
                 setEditCodingQuestionId,
-                isCodingDialogOpen,
-                setIsCodingDialogOpen,
+                isCodingEditDialogOpen,
+                setIsCodingEditDialogOpen,
             } = getEditCodingQuestionDialogs()
 
             const { codingQuestions, setCodingQuestions } =
@@ -109,43 +101,18 @@ export const columns: ColumnDef<CodingQuestion>[] = [
             return (
                 <>
                     <div className="flex">
-                        <Dialog
-                            onOpenChange={setIsCodingDialogOpen}
-                            open={isCodingDialogOpen}
-                        >
-                            <DialogTrigger>
                                 <Pencil
                                     className="cursor-pointer mr-5"
                                     size={20}
                                     onClick={() => {
                                         handleEditCodingQuestion(
                                             codingQuestion,
-                                            setIsCodingDialogOpen,
+                                            setIsCodingEditDialogOpen,
                                             setEditCodingQuestionId
                                         )
                                     }}
                                 />
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-[500px]">
-                                <DialogHeader>
-                                    <DialogTitle>
-                                        Edit Coding Question
-                                    </DialogTitle>
-                                </DialogHeader>
-                                <div className="w-full">
-                                    <EditCodingQuestionForm
-                                        setIsCodingDialogOpen={
-                                            setIsCodingDialogOpen
-                                        }
-                                        getAllCodingQuestions={
-                                            getAllCodingQuestions
-                                        }
-                                        setCodingQuestions={setCodingQuestions}
-                                        codingQuestions={codingQuestions}
-                                    />
-                                </div>
-                            </DialogContent>
-                        </Dialog>
+                    
                         <Trash2
                             onClick={(e) => {
                                 e.stopPropagation()

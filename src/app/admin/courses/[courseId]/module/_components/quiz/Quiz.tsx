@@ -1,27 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react'
-
-import Link from 'next/link'
-
 import { Input } from '@/components/ui/input'
-import { cn } from '@/lib/utils'
-
 import { Separator } from '@/components/ui/separator'
-import { ExternalLink } from 'lucide-react'
 import QuizLibrary from './QuizLibrary'
 import { quizData, Options } from './QuizLibrary'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import QuizModal from './QuizModal'
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from '@/components/ui/dialog'
-import NewMcqProblemForm from '@/app/admin/resource/_components/NewMcqProblemForm'
 import { api } from '@/utils/axios.config'
 import { Tag } from '@/app/admin/resource/mcq/page'
 import { toast } from '@/components/ui/use-toast'
@@ -77,7 +61,8 @@ function Quiz(props: any) {
                 toast({
                     title: 'Success',
                     description: res.message,
-                    className: 'text-start capitalize border border-secondary',
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
             })
             .catch((error: any) => {
@@ -86,7 +71,7 @@ function Quiz(props: any) {
                     description:
                         'An error occurred while saving the chapter the chapter.',
                     className:
-                        'text-start capitalize border border-destructive',
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             })
     }
@@ -109,13 +94,13 @@ function Quiz(props: any) {
                     placeholder="Untitled Quiz"
                     className="p-0 text-3xl w-1/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize"
                 />
-                <Link
+                {/* <Link
                     className="text-secondary font-semibold flex mt-2"
                     href=""
                 >
                     Preview
                     <ExternalLink size={20} />
-                </Link>
+                </Link> */}
             </div>
 
             <div className="flex gap-x-2">
@@ -148,71 +133,10 @@ function Quiz(props: any) {
                                 </Button>
                             </div>
                         )}
-                        {/* <Dialog>
-                            <DialogTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    className="text-secondary font-semibold"
-                                >
-                                    Add Question
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>New MCQ</DialogTitle>
-                                </DialogHeader>
-                                <div className="w-full">
-                                    <NewMcqProblemForm
-                                        tags={tags}
-                                        closeModal={closeModal}
-                                        setStoreQuizData={setStoreQuizData}
-                                        getAllQuizQuesiton={getAllQuizQuestion}
-                                    />
-                                </div>
-                            </DialogContent>
-                        </Dialog> */}
+            
                     </div>
                 </ScrollArea>
 
-                {/* <div className="w-full mt-6">
-                    {content &&
-                        (
-                            content as {
-                                id: number
-                                question: string
-                                options: string[]
-                                correctOption: string
-                            }[]
-                        ).map(
-                            (
-                                { id, question, options, correctOption },
-                                index
-                            ) => (
-                                <div key={id} className="text-start mb-5">
-                                    <p>
-                                        Q{index + 1}. {question}
-                                    </p>
-                                    <ul className="text-start">
-                                        {Object.entries(options).map(
-                                            ([key, value]) => (
-                                                <li
-                                                    key={key}
-                                                    className={`rounded-sm my-1 p-2 ${
-                                                        correctOption ===
-                                                        key.toString()
-                                                            ? 'bg-secondary text-white'
-                                                            : ''
-                                                    }`}
-                                                >
-                                                    {value}
-                                                </li>
-                                            )
-                                        )}
-                                    </ul>
-                                </div>
-                            )
-                        )}
-                </div> */}
             </div>
         </>
     )

@@ -4,7 +4,7 @@ import { useParams, useRouter, usePathname, notFound } from 'next/navigation'
 import ErrorPage from 'next/error'
 
 import { Input } from '@/components/ui/input'
-import { Trash2 } from 'lucide-react'
+import { Plus, Trash2 } from 'lucide-react'
 import { Pencil } from 'lucide-react'
 
 import { toast } from '@/components/ui/use-toast'
@@ -25,6 +25,7 @@ import {
     DialogClose,
     DialogContent,
     DialogHeader,
+    DialogOverlay,
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
@@ -45,6 +46,7 @@ import { DataTable } from '@/app/_components/datatable/data-table'
 import { Spinner } from '@/components/ui/spinner'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import BreadcrumbCmponent from '@/app/_components/breadcrumbCmponent'
+import AddStudentsModal from '../../_components/addStudentsmodal'
 
 const BatchesInfo = ({
     params,
@@ -80,11 +82,7 @@ const BatchesInfo = ({
         },
         {
             crumb: `${bootcamp?.name}`,
-            href: `/admin/courses/${
-                studentData?.length > 0
-                    ? studentData[0].bootcampId
-                    : params.batchId
-            }/batches`,
+            href: `/admin/courses/${params.courseId}/batches`,
             isLast: false,
         },
         {
@@ -100,8 +98,8 @@ const BatchesInfo = ({
         name: z.string().min(2, {
             message: 'Batch name must be at least 2 characters.',
         }),
-        instructorId: z.string().min(2, {
-            message: 'Instructor ID must be at least 2 characters.',
+        instructorEmail: z.string().min(2, {
+            message: 'Instructor email must be at least 2 characters.',
         }),
         capEnrollment: z.string().refine(
             (capEnrollment) => {
@@ -121,14 +119,17 @@ const BatchesInfo = ({
         resolver: zodResolver(formSchema),
         defaultValues: {
             name: instructorsInfo.name || '',
-            instructorId: instructorsInfo.instructorId || '',
+            instructorEmail: instructorsInfo.instructorEmail || '',
             capEnrollment: instructorsInfo.capEnrollment || '',
         },
         mode: 'onChange',
     })
     useEffect(() => {
         form.setValue('name', instructorsInfo?.name || '')
-        form.setValue('instructorId', `${instructorsInfo?.instructorId || ''}`)
+        form.setValue(
+            'instructorEmail',
+            `${instructorsInfo?.instructorEmail || ''}`
+        )
         form.setValue(
             'capEnrollment',
             `${instructorsInfo?.capEnrollment || ''}`
@@ -173,14 +174,16 @@ const BatchesInfo = ({
             await api.delete(`/batch/${params.batchId}`)
             toast({
                 title: 'Batch Deleted Successfully',
-                className: 'text-start capitalize border border-secondary',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
             setDeleteModalOpen(false)
             router.push(`/admin/courses/${params.courseId}/batches`)
         } catch (error) {
             toast({
                 title: 'Batch not Deleted',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -189,7 +192,7 @@ const BatchesInfo = ({
         const convertedData = {
             ...values,
             name: values.name,
-            instructorId: +values.instructorId,
+            instructorEmail: values.instructorEmail,
             capEnrollment: +values.capEnrollment,
         }
         try {
@@ -200,14 +203,15 @@ const BatchesInfo = ({
                         title: res.data.status,
                         description: res.data.message,
                         className:
-                            'text-start capitalize border border-secondary',
+                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     const fetchBatchesInfo = async () => {
                         try {
                             const response = await api.get(
                                 `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}`
                             )
-                            setStudentData(response.data.studentsEmails)
+                            setStudentData(response.data.modifiedStudentInfo)
+
                             //   }
                         } catch (error) {}
                     }
@@ -218,13 +222,15 @@ const BatchesInfo = ({
         } catch (error) {
             toast({
                 title: "Batches Didn't Update Succesfully",
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
     useEffect(() => {
         const getBootCamp = async () => {
-            await api.get(`/bootcamp/${params.courseId}`)
+            await api
+                .get(`/bootcamp/${params.courseId}`)
                 .then((response) => setBootcamp(response.data.bootcamp))
         }
         getBootCamp()
@@ -237,8 +243,8 @@ const BatchesInfo = ({
                 endpoint += `&searchTerm=${debouncedValue}`
             }
             await api.get(endpoint).then((response) => {
-                setStudentData(response.data.totalStudents)
-                setStoreStudentData(response.data.totalStudents)
+                setStudentData(response.data.modifiedStudentInfo)
+                setStoreStudentData(response.data.modifiedStudentInfo)
                 setLastPage(response.data.totalPages)
                 setPages(response.data.totalPages)
                 setTotalStudents(response.data.totalStudentsCount)
@@ -264,7 +270,6 @@ const BatchesInfo = ({
     const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value)
     }
-
     return (
         <>
             <BreadcrumbCmponent crumbs={crumbs} />
@@ -454,9 +459,18 @@ const BatchesInfo = ({
                                         </clipPath>
                                     </defs>
                                 </svg>
-                                <span className="text-xl">
-                                    {instructorsInfo?.instructorName}
-                                </span>
+                                <div className="text-xl font-semibold space-y-1">
+                                    <div className="flex items-center">
+                                        <span className="ml-1">
+                                            {instructorsInfo?.instructorName}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <span className="ml-1">
+                                            {instructorsInfo?.instructorEmail}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <Input
@@ -508,15 +522,15 @@ const BatchesInfo = ({
                                                 />
                                                 <FormField
                                                     control={form.control}
-                                                    name="instructorId"
+                                                    name="instructorEmail"
                                                     render={({ field }) => (
                                                         <FormItem>
                                                             <FormLabel>
-                                                                Instructor Id
+                                                                Instructor Email
                                                             </FormLabel>
                                                             <FormControl>
                                                                 <Input
-                                                                    placeholder="Instructor Id"
+                                                                    placeholder="Instructor Email"
                                                                     type="name"
                                                                     {...field}
                                                                 />
@@ -553,6 +567,10 @@ const BatchesInfo = ({
                                                         <Button
                                                             className="w-1/2"
                                                             type="submit"
+                                                            disabled={
+                                                                !form.formState
+                                                                    .isValid
+                                                            }
                                                         >
                                                             Update batch
                                                         </Button>
@@ -564,7 +582,7 @@ const BatchesInfo = ({
                                 </DialogContent>
                             </Dialog>
                         </div>
-                        <div className="flex items-center text-sm">
+                        <div className="flex items-center gap-x-5 text-sm">
                             <Trash2
                                 onClick={() => setDeleteModalOpen(true)}
                                 className="text-destructive cursor-pointer"
@@ -587,6 +605,21 @@ const BatchesInfo = ({
                                 buttonText="Delete Batch"
                                 instructorInfo={instructorsInfo}
                             />
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button className=" gap-x-2 ">
+                                        <Plus /> Add Students
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogOverlay />
+                                <AddStudentsModal
+                                    message={false}
+                                    id={+params.courseId || 0}
+                                    batch={true}
+                                    batchId={params.batchId}
+                                    fetchBatchesData={fetchStudentData}
+                                />
+                            </Dialog>
                         </div>
                     </div>
                 </div>
@@ -610,19 +643,6 @@ const BatchesInfo = ({
                         />
                     </div>
                 )}
-                {/* <DataTable columns={columns} data={studentsData} />
-
-                <DataTablePagination
-                    totalStudents={totalStudents}
-                    position={position}
-                    setPosition={setPosition}
-                    pages={pages}
-                    lastPage={lastPage}
-                    currentPage={currentPage}
-                    setCurrentPage={setCurrentPage}
-                    fetchStudentData={fetchStudentData}
-                    setOffset={setOffset}
-                /> */}
             </MaxWidthWrapper>
         </>
     )

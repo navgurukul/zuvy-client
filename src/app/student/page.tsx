@@ -1,13 +1,18 @@
 'use client'
+
+// External imports
 import React, { useEffect, useState } from 'react'
-// import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import Image from 'next/image'
 // import { PartyPopper } from "lucide-react";
 
+
+// Internal imports
+// import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Heading from './_components/heading'
 import Schedule from './_components/schedule'
-import Doubt from './_components/doubt'
-import Image from 'next/image'
 import { Spinner } from '@/components/ui/spinner'
+import { Stat } from './_components/stat'
+import Attendance from './_components/attendance'
 
 function Page() {
     const [loading, setLoading] = useState(true)
@@ -47,14 +52,25 @@ function Page() {
                             to becoming a star programmer. Happy coding!
                         </p>
                     </div>
-                    <div className="flex flex-wrap items-stretch my-3 gap-5">
-                        <div className="flex-1">
+
+                    <div className="flex flex-col lg:flex-row gap-4 my-3">
+                        {/* For Small screen like mobile and small tab */}
+                        <div className="lg:hidden flex flex-col gap-5 w-full">
+                            <Attendance />
+                            <Stat />
                             <Schedule />
                         </div>
-                        {/* <div className="max-sm:w-full">
-          <Stat />
-          <Doubt />
-        </div> */}
+
+                        {/* For Large screen like desktop and large tab */}
+                        <div className="hidden lg:flex w-full gap-5">
+                            <div className="w-[70%]">
+                                <Schedule />
+                            </div>
+                            <div className="w-[28%] flex flex-col gap-5">
+                                <Attendance />
+                                <Stat />
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

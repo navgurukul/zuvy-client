@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import moment from 'moment'
-
 import { api } from '@/utils/axios.config'
 import { getCourseData } from '@/store/store'
 import { Button } from '@/components/ui/button'
@@ -13,7 +12,7 @@ import NewModuleDialog from '@/app/admin/courses/[courseId]/_components/newModul
 import { Reorder } from 'framer-motion'
 import { toast } from '@/components/ui/use-toast'
 import { Spinner } from '@/components/ui/spinner'
-
+import EditModuleDialog from '../../_components/EditModuleDialog'
 interface CurriculumItem {
     id: number
     name: string
@@ -32,163 +31,215 @@ interface ModuleData {
     description: string
     type: string
     timeAlloted: number
+    typeId: number
 }
-
 function Page() {
     // state and variables
     const [curriculum, setCurriculum] = useState([])
     const { courseData } = getCourseData()
-    const [typeId, setTypeId] = useState(0)
+    const [typeId, setTypeId] = useState(1)
     const [loading, setLoading] = useState(true)
     const [editMode, setEditMode] = useState(false)
     const [moduleId, setModuleId] = useState(0)
     const [isOpen, setIsOpen] = useState(false)
+    const [isEditOpen, setIsEditOpen] = useState(false)
     const [selectedModuleData, setSelectedModuleData] =
         useState<ModuleData | null>(null)
     const [moduleData, setModuleData] = useState({
         name: '',
         description: '',
     })
-
     const [timeData, setTimeData] = useState({
         months: -1,
         weeks: -1,
         days: -1,
     })
-
     // func
     const handleTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { value } = event.target
         setTypeId(value === 'learning-material' ? 1 : 2)
     }
-
     const handleModuleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
         setModuleData((prev) => ({ ...prev, [name]: value }))
     }
-
     const handleTimeAllotedChange = (
         e: React.ChangeEvent<HTMLInputElement>
     ) => {
         const { name, value } = e.target
         setTimeData((prev) => ({ ...prev, [name]: parseInt(value, 10) }))
     }
-
     useEffect(() => {
         api.get(`/content/allModules/${courseData?.id}`).then((res) => {
             const data = res.data.find((item: any) => moduleId === item.id)
             setSelectedModuleData(data)
         })
     }, [moduleId])
-
     const editHandle = (module: any) => {
         setEditMode(true)
         setModuleId(module)
-        setIsOpen(true)
+        setIsEditOpen(true)
     }
-
+    // Convert seconds to months, weeks and days:-
     const convertSeconds = (seconds: number) => {
         const SECONDS_IN_A_MINUTE = 60
         const SECONDS_IN_AN_HOUR = 60 * SECONDS_IN_A_MINUTE
         const SECONDS_IN_A_DAY = 24 * SECONDS_IN_AN_HOUR
         const SECONDS_IN_A_WEEK = 7 * SECONDS_IN_A_DAY
-        const SECONDS_IN_A_MONTH = 30.44 * SECONDS_IN_A_DAY
-
+        const SECONDS_IN_A_MONTH = 28 * SECONDS_IN_A_DAY
         const months = Math.floor(seconds / SECONDS_IN_A_MONTH)
         seconds %= SECONDS_IN_A_MONTH
-
         const weeks = Math.floor(seconds / SECONDS_IN_A_WEEK)
         seconds %= SECONDS_IN_A_WEEK
-
         const days = Math.floor(seconds / SECONDS_IN_A_DAY)
         seconds %= SECONDS_IN_A_DAY
-
         return {
             months: months,
             weeks: weeks,
             days: days,
         }
     }
-
     useEffect(() => {
-        if (selectedModuleData) {
+        if (isOpen) {
             setModuleData({
-                name: selectedModuleData.name || '',
-                description: selectedModuleData.description || '',
+                name: '',
+                description: '',
             })
-            const result = convertSeconds(selectedModuleData.timeAlloted)
             setTimeData({
-                days: result.days,
-                weeks: result.weeks,
-                months: result.months,
+                months: -1,
+                weeks: -1,
+                days: -1,
+            })
+        }
+    }, [isOpen])
+    useEffect(() => {
+        if (isEditOpen) {
+            if (selectedModuleData) {
+                setModuleData({
+                    name: selectedModuleData.name || '',
+                    description: selectedModuleData.description || '',
+                })
+                setTypeId(selectedModuleData.typeId)
+                const result = convertSeconds(selectedModuleData.timeAlloted)
+                setTimeData({
+                    days: result.days,
+                    weeks: result.weeks,
+                    months: result.months,
+                })
+            }
+        } else {
+            setModuleData({
+                name: '',
+                description: '',
+            })
+            setTimeData({
+                months: -1,
+                weeks: -1,
+                days: -1,
             })
         }
     }, [selectedModuleData])
-
+     
+    useEffect(() => {
+        if (isEditOpen && moduleId) {
+            // Fetch the module data when the dialog is opened
+                const res =api.get(`/content/allModules/${courseData?.id}`).then((res) => {
+                const data = res.data.find((module: any) => module.id === moduleId);
+                setSelectedModuleData(data) // Set the selected module's data
+    
+                // Update the form fields when module data is fetched
+                setModuleData({
+                    name: data?.name || '',
+                    description: data?.description || '',
+                })
+                setTypeId(data?.typeId || 1)
+                
+                // Convert seconds to time data and set it in state
+                const result = convertSeconds(data?.timeAlloted)
+                setTimeData({
+                    days: result.days,
+                    weeks: result.weeks,
+                    months: result.months,
+                })
+            })
+        }
+    }, [isEditOpen, moduleId]) 
+    //  Edit Module Function:-
     const editModule = () => {
         const { days, weeks, months } = timeData
-
-        const totalSeconds = moment
-            .duration({ days, weeks, months })
-            .asSeconds()
-
+        const totalDays = days + weeks * 7 + months * 28
+        const totalSeconds = totalDays * 86400
         const moduleDto = {
             ...moduleData,
             timeAlloted: totalSeconds,
             isLock: false,
         }
-
-        api.put(
-            `/content/editModuleOfBootcamp/${courseData?.id}?moduleId=${moduleId}`,
-            { moduleDto }
-        )
-            .then((res) => {
-                toast({
-                    title: 'Success',
-                    description: 'Module Edited Successfully',
-                    className: 'text-start capitalize border border-secondary',
-                })
-                fetchCourseModules()
+        if (totalSeconds == 0) {
+            toast({
+                title: 'Duration cannot be 0',
+                description: 'Please enter a valid duration',
+                className: 'text-start capitalize border border-destructive',
             })
-            .catch((error) => {
-                toast({
-                    title: 'Error',
-                    description: 'Error creating module',
-                    className:
-                        'text-start capitalize border border-destructive',
+        } else {
+            api.put(
+                `/content/editModuleOfBootcamp/${courseData?.id}?moduleId=${moduleId}`,
+                { moduleDto }
+            )
+                .then((res) => {
+                    toast({
+                        title: 'Success',
+                        description: 'Module Edited Successfully',
+                        className:
+                            'text-start capitalize border border-secondary',
+                    })
+                    fetchCourseModules()
+                    setIsEditOpen(false)
                 })
-            })
+                .catch((error) => {
+                    toast({
+                        title: 'Error',
+                        description: 'Error creating module',
+                        className:
+                            'text-start capitalize border border-destructive',
+                    })
+                })
+        }
     }
-
     const createModule = () => {
         const { days, weeks, months } = timeData
-
-        const totalSeconds = moment
-            .duration({ days, weeks, months })
-            .asSeconds()
-
-        api.post(`/content/modules/${courseData?.id}?typeId=${typeId}`, {
-            ...moduleData,
-            timeAlloted: totalSeconds,
-        })
-            .then((res) => {
-                toast({
-                    title: 'Success',
-                    description: 'Module Created Successfully',
-                    className: 'text-start capitalize border border-secondary',
-                })
-                fetchCourseModules()
+        const totalDays = days + weeks * 7 + months * 28
+        const totalSeconds = totalDays * 86400
+        if (totalSeconds == 0) {
+            toast({
+                title: 'Duration cannot be 0',
+                description: 'Please enter a valid duration',
+                className: 'text-start capitalize border border-destructive',
             })
-            .catch((error) => {
-                toast({
-                    title: 'Error',
-                    description: 'Error creating module',
-                    className:
-                        'text-start capitalize border border-destructive',
-                })
+        } else {
+            api.post(`/content/modules/${courseData?.id}?typeId=${typeId}`, {
+                ...moduleData,
+                timeAlloted: totalSeconds,
             })
+                .then((res) => {
+                    toast({
+                        title: 'Success',
+                        description: 'Module Created Successfully',
+                        className:
+                            'text-start capitalize border border-secondary',
+                    })
+                    fetchCourseModules()
+                    setIsOpen(false)
+                })
+                .catch((error) => {
+                    toast({
+                        title: 'Error',
+                        description: 'Error creating module',
+                        className:
+                            'text-start capitalize border border-destructive',
+                    })
+                })
+        }
     }
-
     const fetchCourseModules = async () => {
         try {
             const response = await api.get(
@@ -204,14 +255,12 @@ function Page() {
             })
         }
     }
-
     //   async
     useEffect(() => {
         if (courseData?.id) {
             fetchCourseModules()
         }
     }, [courseData?.id])
-
     async function handleReorder(newOrderModules: any) {
         newOrderModules = newOrderModules.map((item: any, index: any) => ({
             ...item,
@@ -243,49 +292,51 @@ function Page() {
             })
         }
     }
-
     const handleReorderModules = async (newOrderModules: any) => {
         handleReorder(newOrderModules)
     }
-
     return (
-        <div>
+        <div className="w-full ">
             {curriculum.length > 0 && (
-                <div className="flex justify-end ">
-                    <Dialog>
-                        <DialogTrigger asChild>
-                            <Button className="text-white bg-secondary">
-                                Add Module
-                            </Button>
-                        </DialogTrigger>
-                        <DialogOverlay />
-                        <NewModuleDialog
-                            editMode={editMode}
-                            moduleData={moduleData}
-                            timeData={timeData}
-                            createModule={createModule}
-                            editModule={editModule}
-                            handleModuleChange={handleModuleChange}
-                            handleTimeAllotedChange={handleTimeAllotedChange}
-                            handleTypeChange={handleTypeChange}
-                            typeId={typeId}
-                        />
-                    </Dialog>
+                <div className=" w-full flex justify-end pr-4 ">
+                    <div>
+                        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                            <DialogTrigger asChild>
+                                <Button className="text-white bg-secondary  ">
+                                    Add Module
+                                </Button>
+                            </DialogTrigger>
+                            <DialogOverlay />
+                            <NewModuleDialog
+                                moduleData={moduleData}
+                                timeData={timeData}
+                                createModule={createModule}
+                                handleModuleChange={handleModuleChange}
+                                handleTimeAllotedChange={
+                                    handleTimeAllotedChange
+                                }
+                                handleTypeChange={handleTypeChange}
+                                typeId={typeId}
+                                isOpen={isOpen}
+                            />
+                        </Dialog>
+                    </div>
                 </div>
             )}
-            <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                <NewModuleDialog
-                    editMode={editMode}
-                    moduleData={moduleData}
-                    timeData={timeData}
-                    createModule={createModule}
-                    editModule={editModule}
-                    handleModuleChange={handleModuleChange}
-                    handleTimeAllotedChange={handleTimeAllotedChange}
-                    handleTypeChange={handleTypeChange}
-                    typeId={typeId}
-                />
-            </Dialog>
+            {isEditOpen && (
+                <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+                    <EditModuleDialog
+                        editMode={editMode}
+                        moduleData={moduleData}
+                        timeData={timeData}
+                        createModule={createModule}
+                        editModule={editModule}
+                        handleModuleChange={handleModuleChange}
+                        handleTimeAllotedChange={handleTimeAllotedChange}
+                        typeId={typeId}
+                    />
+                </Dialog>
+            )}
             {loading ? (
                 <div className="my-5 flex justify-center items-center">
                     <div className="absolute h-screen">
@@ -361,7 +412,6 @@ function Page() {
                                 width={200}
                                 height={200}
                             />
-
                             <p>
                                 Create new modules for the curriculum on Strapi
                                 CMS
@@ -369,15 +419,13 @@ function Page() {
                             <Dialog>
                                 <DialogTrigger asChild>
                                     <Button className="text-white bg-secondary">
-                                        Add Module
+                                        Add module
                                     </Button>
                                 </DialogTrigger>
                                 <DialogOverlay />
                                 <NewModuleDialog
-                                    editMode={editMode}
                                     moduleData={moduleData}
                                     createModule={createModule}
-                                    editModule={editModule}
                                     handleModuleChange={handleModuleChange}
                                     handleTimeAllotedChange={
                                         handleTimeAllotedChange
@@ -385,6 +433,7 @@ function Page() {
                                     timeData={timeData}
                                     handleTypeChange={handleTypeChange}
                                     typeId={typeId}
+                                    isOpen={isOpen}
                                 />
                             </Dialog>
                         </div>
@@ -394,5 +443,4 @@ function Page() {
         </div>
     )
 }
-
 export default Page

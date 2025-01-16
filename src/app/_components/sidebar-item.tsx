@@ -1,11 +1,14 @@
 'use client'
 
+// External imports
+import { useState } from 'react'
 import { ChevronDown, LucideIcon } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
+
+// Internal imports
 import { Logout } from '@/utils/logout'
 import { cn } from '@/lib/utils'
 import { SheetClose } from '@/components/ui/sheet'
-import { useState } from 'react'
 
 interface SidebarItemProps {
     icon?: LucideIcon
@@ -33,13 +36,15 @@ export const SidebarItem = ({
             Logout()
         } else if (href) {
             router.push(href)
+            if (label !== 'Resource Library') {
+                setOpen(false)
+            }
         } else if (subtabs) {
             setOpen(!open)
         }
     }
 
-    return (
-        // <SheetClose asChild>
+    const content = (
         <div>
             <button
                 onClick={onClick}
@@ -95,6 +100,7 @@ export const SidebarItem = ({
                 </div>
             ) : null}
         </div>
-        // </SheetClose>
     )
+
+    return label === 'Resource Library' ? content : <SheetClose asChild>{content}</SheetClose>
 }

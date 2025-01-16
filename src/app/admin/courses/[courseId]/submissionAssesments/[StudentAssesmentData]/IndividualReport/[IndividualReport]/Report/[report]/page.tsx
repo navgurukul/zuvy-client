@@ -13,6 +13,9 @@ import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import OverviewComponent from '@/app/admin/courses/[courseId]/_components/OverviewComponent'
 import IndividualStudentAssesment from '@/app/admin/courses/[courseId]/_components/individualStudentAssesment'
 import { Skeleton } from '@/components/ui/skeleton'
+import { toast } from '@/components/ui/use-toast'
+import { getProctoringDataStore } from '@/store/store'
+import { Check, CheckCircle, User, X, XCircle } from 'lucide-react'
 
 type User = {
     name: string
@@ -69,7 +72,7 @@ type StudentAssessment = {
     user: User
     openEndedSubmission: OpenEndedSubmission[]
     quizSubmission: QuizSubmission[]
-    codingSubmission: CodingSubmission[]
+    PracticeCode: any
     totalQuizzes: number
     totalOpenEndedQuestions: number
     totalCodingQuestions: number
@@ -81,11 +84,59 @@ type newDataType =
           codingSubmission: CodingSubmission[]
       }
     | any
+
+interface Example {
+    input: string[]
+    output: string[]
+}
+
+interface TestCase {
+    input: string[]
+    output: string[]
+}
+
+interface Submission {
+    id: number
+    status: string
+    action: string
+    createdAt: string
+    codingOutsourseId: number
+}
+
+interface CodingQuestion {
+    questionId: number
+    id: number
+    title: string
+    description: string
+    difficulty: string
+    tags: number
+    constraints: string
+    authorId: number
+    inputBase64: string | null
+    examples: Example[]
+    testCases: TestCase[]
+    expectedOutput: string[]
+    solution: string
+    createdAt: string | null
+    updatedAt: string | null
+    usage: number
+    submissions: Submission[]
+    codingOutsourseId: number
+}
+
 const Page = ({ params }: { params: any }) => {
-    const [individualAssesmentData, setIndividualAssesmentData] =
-        useState<StudentAssessment>()
     const [bootcampData, setBootcampData] = useState<any>()
     const [assesmentData, setAssesmentData] = useState<any>()
+    const [codingdata, setCodingData] = useState<CodingQuestion[]>([])
+    const [username, setUsername] = useState<string>('')
+    const [moduleId, setmoduleId] = useState<number>(0)
+    const [loading, setLoading] = useState<boolean>(true)
+    const [totalQuestions, setTotalQuestion] = useState({
+        totalCodingQuestion: 0,
+        totalMcqQuestion: 0,
+        totalOpenEnded: 0,
+    })
+
     const crumbs = [
         {
             crumb: 'My Courses',
@@ -104,12 +155,12 @@ const Page = ({ params }: { params: any }) => {
             isLast: false,
         },
         {
-            crumb: assesmentData?.title,
+            crumb: `Assesment for Module ${moduleId}`,
             href: `/admin/courses/${params.courseId}/submissionAssesments/${params.StudentAssesmentData}`,
             isLast: false,
         },
         {
-            crumb: individualAssesmentData && individualAssesmentData.user.name,
+            crumb: username,
 
             href: '',
             isLast: true,
@@ -124,243 +175,265 @@ const Page = ({ params }: { params: any }) => {
             console.error('API Error:', error)
         }
     }, [params.courseId])
-    const getIndividualStudentAssesmentDataHandler = useCallback(async () => {
-        await api
-            .get(
-                `/admin/assessment/submission/user_id${params.IndividualReport}?submission_id=${params.report}`
-            )
-            .then((res) => {
-                setIndividualAssesmentData(res.data)
-            })
-    }, [params.IndividualReport, params.report])
 
-    const getStudentAssesmentDataHandler = useCallback(async () => {
-        await api
-            .get(
-                `/admin/assessment/students/assessment_id${params.StudentAssesmentData}`
-            )
-            .then((res) => {
-                setAssesmentData(res.data.ModuleAssessment)
+    const getIndividualCodingDataHandler = useCallback(async () => {
+        try {
+            await api
+                .get(
+                    `/tracking/assessment/submissionId=${params.report}?studentId=${params.IndividualReport}`
+                )
+                .then((res) => {
+                    setCodingData(res?.data?.PracticeCode)
+                    setUsername(res?.data?.user?.name)
+                    setmoduleId(
+                        res?.data?.submitedOutsourseAssessment?.moduleId
+                    )
+                    setAssesmentData(res?.data)
+                    setTotalQuestion({
+                        totalCodingQuestion: res?.data?.codingQuestionCount,
+                        totalMcqQuestion: res?.data?.mcqQuestionCount,
+                        totalOpenEnded: res?.data?.openEndedQuestionCount,
+                    })
+                })
+        } catch (error) {
+            toast({
+                title: 'Error',
+                description: 'Error in fetching the data',
             })
-    }, [params.StudentAssesmentData])
+        } finally {
+            // setLoading(false)
+        }
+    }, [params])
 
     useEffect(() => {
         getBootcampHandler()
-        getIndividualStudentAssesmentDataHandler()
-        getStudentAssesmentDataHandler()
-    }, [
-        getIndividualStudentAssesmentDataHandler,
-        getBootcampHandler,
-        getStudentAssesmentDataHandler,
-    ])
+        getIndividualCodingDataHandler()
+    }, [getBootcampHandler, getIndividualCodingDataHandler, params])
 
-    const newDatafuntion = (data: StudentAssessment | undefined) => {
-        if (data) {
-            return {
-                openEndedSubmission: data.openEndedSubmission,
-                quizSubmission: data.quizSubmission,
-                codingSubmission: data.codingSubmission,
-            }
-        }
-        return null
+    const timestamp = assesmentData?.submitedAt
+    const date = new Date(timestamp)
+    const options2: any = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
     }
+    const formattedDate = date.toLocaleDateString('en-US', options2)
 
-    const newData: newDataType = newDatafuntion(individualAssesmentData)
-    console.log(params)
     return (
         <>
-            {individualAssesmentData ? (
+            {codingdata ? (
                 <BreadcrumbComponent crumbs={crumbs} />
             ) : (
                 <Skeleton className="h-4 w-4/6" />
             )}
-            <MaxWidthWrapper className="p-4">
+            <MaxWidthWrapper className="p-10 ">
                 <div className="flex flex-col relative items-start">
                     <div className="flex items-center">
-                        {individualAssesmentData ? (
-                            <Avatar className="w-5 h-5">
-                                <AvatarImage
-                                    src="https://github.com/shadcn.png"
-                                    alt="@shadcn"
-                                />
-                                <AvatarFallback>CN</AvatarFallback>
-                            </Avatar>
-                        ) : (
-                            <Skeleton className="h-6 w-6 rounded-full" />
-                        )}
-                        <h1 className="text-start flex ml-6 font-bold text-xl ">
-                            {individualAssesmentData ? (
-                                individualAssesmentData.user.name
-                            ) : (
-                                <div className="flex items-center space-x-4">
-                                    <div className="space-y-2">
-                                        <Skeleton className="h-4 w-[250px]" />
+                        <h1 className="text-start flex  font-bold text-xl ">
+                            {codingdata && (
+                                <div className=" rounded-lg bg-white  transition-transform transform  ">
+                                    <div className="flex flex-col gap-y-4">
+                                        <div className="flex gap-x-2 items-center">
+                                            <Avatar>
+                                                <AvatarImage
+                                                    src="https://github.com/shadcn.png"
+                                                    alt="@shadcn"
+                                                />
+                                                <AvatarFallback>
+                                                    CN
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <span className="font-semibold text-[20px] text-gray-900 dark:text-white">
+                                                {username} -
+                                            </span>
+                                            <span className="font-semibold text-[20px] text-gray-700 dark:text-gray-300">
+                                                Individual Report:
+                                            </span>
+                                        </div>
+
+                                        <div className="flex gap-x-1 items-center">
+                                            <span className="font-normal text-[15px] text-gray-700 dark:text-gray-300">
+                                                Submitted On
+                                            </span>
+                                            <span className="font-normal text-[15px] text-gray-900 dark:text-white">
+                                                {formattedDate}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             )}
-
-                            {individualAssesmentData ? (
-                                '-Individual Report'
-                            ) : (
-                                <Skeleton className="h-4 w-[100px]" />
-                            )}
                         </h1>
                     </div>
-                    <h1 className="flex  mb-10 text-gray-600">
-                        {individualAssesmentData ? (
-                            <h3>
-                                Submitted on:{' '}
-                                {formatDate(individualAssesmentData.submitedAt)}
-                            </h3>
-                        ) : (
-                            <Skeleton className="h-4 w-[400px]" />
-                        )}
-                    </h1>
                 </div>
 
-                <h1 className="text-start font-bold text-xl ">Overview</h1>
-                {individualAssesmentData ? (
+                <h1 className="text-start font-bold text-xl mt-4">Overview</h1>
+                {codingdata ? (
                     <OverviewComponent
                         totalCodingChallenges={
-                            individualAssesmentData.totalCodingQuestions
+                            assesmentData?.attemptedCodingQuestions
                         }
-                        correctedCodingChallenges={
-                            individualAssesmentData.codingSubmission.length
-                        }
-                        correctedMcqs={
-                            individualAssesmentData.quizSubmission.length
-                        }
+                        correctedCodingChallenges={9}
+                        correctedMcqs={9}
                         totalCorrectedMcqs={
-                            individualAssesmentData.totalQuizzes
+                            assesmentData?.attemptedMCQQuestions
                         }
-                        openEndedCorrect={
-                            individualAssesmentData.openEndedSubmission.length
-                        }
+                        openEndedCorrect={1}
                         totalOpenEnded={
-                            individualAssesmentData.totalOpenEndedQuestions
+                            assesmentData?.attemptedOpenEndedQuestions
                         }
-                        score={50}
+                        score={assesmentData?.percentage}
                         totalScore={100}
-                        copyPaste={individualAssesmentData.copyPaste}
-                        tabchanges={individualAssesmentData.tabChange}
+                        copyPaste={assesmentData?.copyPaste}
+                        tabchanges={assesmentData?.tabChange}
+                        embeddedSearch={assesmentData?.embeddedGoogleSearch}
+                        submissionType={assesmentData?.typeOfsubmission}
+                        totalCodingScore={assesmentData?.requiredCodingScore}
+                        codingScore={assesmentData?.codingScore}
+                        mcqScore={assesmentData?.mcqScore}
+                        totalMcqScore={assesmentData?.requiredMCQScore}
+                        openEndedScore={assesmentData?.openEndedScore}
+                        totalOpenEndedScore={
+                            assesmentData?.requiredOpenEndedScore
+                        }
                     />
                 ) : (
                     <div className="flex gap-x-20  ">
                         <div>
                             <Skeleton className="h-[175px] w-[700px] rounded-xl" />
-                            <div className="space-y-2 ">
-                                {/* <Skeleton className="h-4 w-[500px]" /> */}
-                            </div>
+                            <div className="space-y-2 "></div>
                         </div>
                         <div>
                             <Skeleton className="h-[175px] w-[700px] rounded-xl" />
-                            <div className="space-y-2 ">
-                                {/* <Skeleton className="h-4 w-[500px]" /> */}
-                            </div>
+                            <div className="space-y-2 "></div>
                         </div>
                     </div>
                 )}
 
-                {/* <h1 className="text-start  font-bold text-xl ">
-                Coding Challenges
-            </h1>
-            <IndividualStudentAssesment /> */}
-                <div className="grid grid-cols-1   gap-20 mt-4 md:mt-8 md:grid-cols-2">
-                    {newData ? (
-                        Object.keys(newData).map((key: string, index) => (
-                            <div key={index}>
-                                <h2 className="text-md capitalize text-start mb-3 font-semibold text-gray-800  dark:text-white ">
-                                    {key}
-                                </h2>
-                                {newData[key].map((data: newDataType) => (
-                                    <div key={key}>
+                <div className="grid grid-cols-1 gap-20 mt-4 md:mt-8 md:grid-cols-2">
+                    {codingdata ? (
+                        <>
+                            {/* Coding Submission */}
+                            {codingdata.length > 0 && (
+                                <div className="w-full">
+                                    <h1 className="text-left font-semibold">
+                                        Coding Challenges
+                                    </h1>
+                                    {codingdata.length > 0 ? (
+                                        codingdata.map((data) => (
+                                            <IndividualStudentAssesment
+                                                key={data.id}
+                                                data={data}
+                                                params={params}
+                                                type="codingSubmission"
+                                                codingOutsourseId={
+                                                    data.codingOutsourseId
+                                                }
+                                                copyPaste={
+                                                    assesmentData?.copyPaste
+                                                }
+                                                tabchanges={
+                                                    assesmentData?.tabChange
+                                                }
+                                                totalCodingScore={
+                                                    assesmentData?.requiredCodingScore
+                                                }
+                                                codingScore={
+                                                    assesmentData?.codingScore
+                                                }
+                                            />
+                                        ))
+                                    ) : (
+                                        <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg  transition-transform transform hover:shadow-xl">
+                                            This student has not submitted any
+                                            coding question.
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Quiz Submission */}
+                            {assesmentData?.mcqQuestionCount > 0 && (
+                                <div className="w-full">
+                                    <h1 className="text-left font-semibold">
+                                        MCQs
+                                    </h1>
+                                    {assesmentData?.mcqQuestionCount === 0 &&
+                                    assesmentData?.attemptedMCQQuestions ===
+                                        0 ? (
+                                        <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg  transition-transform transform hover:shadow-xl">
+                                            There are no quiz questions in this
+                                            assessment.
+                                        </p>
+                                    ) : assesmentData?.attemptedMCQQuestions >=
+                                      1 ? (
                                         <IndividualStudentAssesment
-                                            data={data}
+                                            data={[]}
+                                            params={params}
+                                            type="quizSubmission"
+                                            copyPaste={assesmentData?.copyPaste}
+                                            tabchanges={
+                                                assesmentData?.tabChange
+                                            }
+                                            mcqScore={assesmentData?.mcqScore}
+                                            totalMcqScore={
+                                                assesmentData?.requiredMCQScore
+                                            }
                                         />
-                                    </div>
-                                ))}
-                            </div>
-                        ))
+                                    ) : (
+                                        <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg  transition-transform transform hover:shadow-xl">
+                                            This student has not submitted any
+                                            quiz question.
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Open Ended Submission */}
+                            {assesmentData?.openEndedQuestionCount > 0 && (
+                                <div className="w-full">
+                                    <h1 className="text-left font-semibold">
+                                        Open-Ended
+                                    </h1>
+                                    {assesmentData?.openEndedQuestionCount ===
+                                        0 &&
+                                    assesmentData?.attemptedOpenEndedQuestions ===
+                                        0 ? (
+                                        <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg  transition-transform transform hover:shadow-xl">
+                                            There are no open-ended questions in
+                                            this assessment.
+                                        </p>
+                                    ) : assesmentData?.attemptedOpenEndedQuestions >=
+                                      1 ? (
+                                        <IndividualStudentAssesment
+                                            data={[]}
+                                            params={params}
+                                            type="openEndedSubmission"
+                                            copyPaste={assesmentData?.copyPaste}
+                                            tabchanges={
+                                                assesmentData?.tabChange
+                                            }
+                                            openEndedScore={
+                                                assesmentData?.openEndedScore
+                                            }
+                                            totalOpenEndedScore={
+                                                assesmentData.requiredOpenEndedScore
+                                            }
+                                        />
+                                    ) : (
+                                        <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg  transition-transform transform hover:shadow-xl">
+                                            This student has not submitted any
+                                            open-ended questions.
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+                        </>
                     ) : (
-                        <div className="absolute w-full flex justify-start items-center">
-                            <div className="grid grid-cols-1   gap-20 mt-4 md:mt-8 md:grid-cols-2 ">
-                                <div>
-                                    <Skeleton className="h-[125px] w-[700px] rounded-xl" />
-                                    <div className="space-y-2 ">
-                                        <Skeleton className="h-4 w-[700px]" />
-                                    </div>
-                                </div>
-                                <div>
-                                    <Skeleton className="h-[125px] w-[700px] rounded-xl" />
-                                    <div className="space-y-2 ">
-                                        <Skeleton className="h-4 w-[700px]" />
-                                    </div>
-                                </div>
-                                <div>
-                                    <Skeleton className="h-[125px] w-[700px] rounded-xl" />
-                                    <div className="space-y-2 ">
-                                        <Skeleton className="h-4 w-[700px]" />
-                                    </div>
-                                </div>
-                                <div>
-                                    <Skeleton className="h-[125px] w-[700px] rounded-xl" />
-                                    <div className="space-y-2 ">
-                                        <Skeleton className="h-4 w-[700px]" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <p className="text-center font-semibold">
+                            Loading data...
+                        </p>
                     )}
                 </div>
-
-                {/* {individualAssesmentData ? (
-                <div>
-                    <h2 className="text-start text-[20px] font-semibold">
-                        Open Ended Submission
-                    </h2>
-                    <div className="grid grid-cols-1  gap-20 mt-4 md:mt-8 md:grid-cols-2">
-                        {individualAssesmentData.openEndedSubmission.map(
-                            (submission: any) => (
-                                <div className="" key={submission.id}>
-                                    <IndividualStudentAssesment
-                                        data={submission}
-                                    />
-                                </div>
-                            )
-                        )}
-                    </div>
-
-                    <h2 className="text-start text-[20px] font-semibold">
-                        Quiz Submission
-                    </h2>
-                    {individualAssesmentData.quizSubmission.map(
-                        (submission: any) => (
-                            <div className="" key={submission.id}>
-                                <IndividualStudentAssesment data={submission} />
-                            </div>
-                        )
-                    )}
-
-                    <h2 className="text-start text-[20px] font-semibold">
-                        Coding Submission
-                    </h2>
-                    {individualAssesmentData.codingSubmission.length === 0 ? (
-                        <p>No coding submissions</p>
-                    ) : (
-                        individualAssesmentData.codingSubmission.map(
-                            (submission: any, index: number) => (
-                                <div className="" key={submission.id}>
-                                    <IndividualStudentAssesment
-                                        data={submission}
-                                    />
-                                </div>
-                            )
-                        )
-                    )}
-                </div>
-            ) : (
-                <Spinner />
-            )} */}
             </MaxWidthWrapper>
         </>
     )

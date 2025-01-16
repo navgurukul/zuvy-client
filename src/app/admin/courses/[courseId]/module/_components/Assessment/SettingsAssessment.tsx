@@ -29,12 +29,12 @@ import { useEffect } from 'react'
 const formSchema = z.object({
     hour: z
         .number()
-        .min(1, 'Hour must be between 1 and 5')
-        .max(5, 'Hour must be between 1 and 5'),
+        .min(0, 'Hour must be between 0 and 5')
+        .max(5, 'Hour must be between 0 and 5'),
     minute: z
         .number()
-        .min(0, 'Minute must be between 0 and 59')
-        .max(59, 'Minute must be between 0 and 59'),
+        .min(15, 'Minute must be between 15 and 59')
+        .max(59, 'Minute must be between 15 and 59'),
     passPercentage: z.string().nonempty('Percentage is required'),
     copyPaste: z.boolean(),
     embeddedGoogleSearch: z.boolean(),
@@ -51,6 +51,8 @@ type SettingsAssessmentProps = {
     fetchChapterContent: (chapterId: number) => void
     chapterData: any
     chapterTitle: string
+    saveSettings: boolean
+    setSaveSettings: (value: boolean) => void
 }
 
 const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
@@ -61,22 +63,24 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     fetchChapterContent,
     chapterData,
     chapterTitle,
+    saveSettings,
+    setSaveSettings,
 }) => {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            hour: Math.floor(content.timeLimit / 3600),
+            hour: content.timeLimit ? Math.floor(content.timeLimit / 3600) : 2,
             minute: (content.timeLimit / 60) % 60,
             passPercentage:
                 content.passPercentage != null
                     ? content.passPercentage.toString()
-                    : '0',
-            copyPaste: content.copyPaste == null ? false : content.copyPaste,
+                    : '70',
+            copyPaste: content.copyPaste == null ? true : content.copyPaste,
             embeddedGoogleSearch:
                 content.embeddedGoogleSearch == null
                     ? false
                     : content.embeddedGoogleSearch,
-            tabChange: content.tabChange == null ? false : content.tabChange,
+            tabChange: content.tabChange == null ? true : content.tabChange,
             screenRecord:
                 content.screenRecord == null ? false : content.screenRecord,
             webCamera: content.webCamera == null ? false : content.webCamera,
@@ -85,23 +89,30 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
 
     useEffect(() => {
         form.reset({
-            hour: Math.floor(content.timeLimit / 3600),
-            minute: (content.timeLimit / 60) % 60,
+            hour: content.timeLimit ? Math.floor(content.timeLimit / 3600) : 2,
+            minute: (content.timeLimit / 60) % 60 >= 15 ? (content.timeLimit / 60) % 60 : 15,
             passPercentage:
                 content.passPercentage != null
                     ? content.passPercentage.toString()
-                    : '0',
-            copyPaste: content.copyPaste == null ? false : content.copyPaste,
+                    : '70',
+            copyPaste: content.copyPaste == null ? true : content.copyPaste,
             embeddedGoogleSearch:
                 content.embeddedGoogleSearch == null
                     ? false
                     : content.embeddedGoogleSearch,
-            tabChange: content.tabChange == null ? false : content.tabChange,
+            tabChange: content.tabChange == null ? true : content.tabChange,
             screenRecord:
                 content.screenRecord == null ? false : content.screenRecord,
             webCamera: content.webCamera == null ? false : content.webCamera,
         })
     }, [content])
+
+    useEffect(() => {
+        if (saveSettings) {
+            form.handleSubmit(handleSubmit)()
+            setSaveSettings(false)
+        }
+    }, [saveSettings])
 
     const handleSubmit = async (values: any) => {
         const timeLimit = values.hour * 3600 + values.minute * 60
@@ -123,20 +134,21 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
         }
 
         try {
-            await api.put(`Content/editAssessment/${content.id}`, data)
+            await api.put(`Content/editAssessment/${content.id}/${chapterData.chapterId}`, data)
             fetchChapterContent(chapterData.chapterId)
             toast({
                 title: 'Assessment Updated Successfully',
                 description: 'Assessment has been updated successfully',
-                className: 'text-start capitalize border border-secondary',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
         } catch (error) {
             console.error(error)
         }
     }
 
-    const hours = Array.from({ length: 5 }, (_, i) => i + 1)
-    const minutes = Array.from({ length: 60 }, (_, i) => i)
+    const hours = Array.from({ length: 6 }, (_, i) => i);
+    const minutes = Array.from({ length: 45 }, (_, i) => i + 15)
 
     return (
         <main className="flex flex-col p-3">
@@ -255,7 +267,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                         )}
                     />
 
-                    <div className="proctoring text-left">
+                    {/* <div className="proctoring text-left">
                         <h2 className=" mt-5 font-bold">
                             Manage Proctoring Boundaries
                         </h2>
@@ -359,12 +371,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                 </FormItem>
                             )}
                         />
-                    </div>
-                    <div className="flex justify-end">
-                        <Button type="submit" className="w-1/3 mt-5">
-                            Save Settings
-                        </Button>
-                    </div>
+                    </div> */}
                 </form>
             </Form>
         </main>

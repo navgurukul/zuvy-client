@@ -52,8 +52,10 @@ const CurricullumCard = ({
 }: Props) => {
     // states and variables
     const router = useRouter()
-    const timeAllotedInWeeks = Math.round(timeAlloted / 604800)
-    const timeAllotedInDays = Math.round(timeAlloted / 86400)
+
+    // Calculate time in weeks and days
+    const timeAllotedInWeeks = Math.ceil(timeAlloted / 604800)
+
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
 
     // functions
@@ -69,7 +71,8 @@ const CurricullumCard = ({
                 toast({
                     title: 'Success',
                     description: 'Module Deleted Successfully',
-                    className: 'text-start capitalize border border-secondary',
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
                 fetchCourseModules()
             })
@@ -79,7 +82,7 @@ const CurricullumCard = ({
                     description:
                         'There was an error while deleting. Please try again.',
                     className:
-                        'text-start capitalize border border-destructive',
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             })
     }
@@ -112,23 +115,17 @@ const CurricullumCard = ({
                     </div>
                 </div>
                 <p className="text-start mb-2">{description}</p>
-                <div className="flex flex-wrap justify-start  gap-x-4">
-                    <div className="flex  items-center justify-start gap-x-2 ">
+                <div className="flex flex-wrap justify-start gap-x-4">
+                    <div className="flex items-center justify-start gap-x-2">
                         <Clock1 size={15} />
                         <p className="text-md font-semibold capitalize text-gray-600">
-                            {timeAllotedInWeeks < 1
-                                ? `${timeAllotedInDays} ${
-                                      timeAllotedInDays === 1 ? 'day' : 'days'
-                                  }`
-                                : `${
-                                      timeAllotedInWeeks == 1
-                                          ? '1 week'
-                                          : `${timeAllotedInWeeks} weeks`
-                                  }`}
+                            {timeAllotedInWeeks > 1
+                                ? `${timeAllotedInWeeks} weeks`
+                                : `${timeAllotedInWeeks} week`}
                         </p>
                     </div>
                     {articlesCount > 0 ? (
-                        <div className="flex  items-center justify-start gap-x-2 ">
+                        <div className="flex items-center justify-start gap-x-2">
                             <BookOpenText size={15} />
                             <p className="text-md font-semibold capitalize text-gray-600">
                                 {articlesCount}{' '}
@@ -139,7 +136,7 @@ const CurricullumCard = ({
                         </div>
                     ) : null}
                     {assignmentCount > 0 ? (
-                        <div className="flex  items-center justify-start gap-x-2 ">
+                        <div className="flex items-center justify-start gap-x-2">
                             <PencilLine size={15} />
                             <p className="text-md font-semibold capitalize text-gray-600">
                                 {assignmentCount}{' '}
@@ -150,7 +147,7 @@ const CurricullumCard = ({
                         </div>
                     ) : null}
                     {quizCount > 0 ? (
-                        <div className="flex  items-center justify-start gap-x-2 ">
+                        <div className="flex items-center justify-start gap-x-2">
                             <FileQuestion size={15} />
                             <p className="text-md font-semibold capitalize text-gray-600">
                                 {quizCount}{' '}
@@ -159,7 +156,7 @@ const CurricullumCard = ({
                         </div>
                     ) : null}
                     {codingProblemsCount > 0 ? (
-                        <div className="flex  items-center justify-start gap-x-2 ">
+                        <div className="flex items-center justify-start gap-x-2">
                             <SquareCode size={15} />
                             <p className="text-md font-semibold capitalize text-gray-600">
                                 {codingProblemsCount}{' '}

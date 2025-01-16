@@ -1,66 +1,146 @@
 import React from 'react'
-import IndividualStudent from './IndividualStudent'
 import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { getAssesmentBackgroundColorClass } from '@/lib/utils'
-import { color } from 'framer-motion'
+import {
+    cn,
+    difficultyColor,
+    getAssesmentBackgroundColorClass,
+} from '@/lib/utils'
 
 type Props = {}
 
-const IndividualStudentAssesment = (props: any) => {
+const IndividualStudentAssesment = ({
+    data,
+    type,
+    params,
+    codingOutsourseId,
+    copyPaste,
+    tabchanges,
+    codingScore,
+    totalCodingScore,
+    mcqScore,
+    totalMcqScore,
+    openEndedScore,
+    totalOpenEndedScore,
+}: any) => {
+    const { courseId, StudentAssesmentData, IndividualReport, report } = params
+    console.log(data)
     const color = getAssesmentBackgroundColorClass(25, 5)
     const renderQuestion = () => {
-        if (props.data.submissionData) {
-            if (props.data.submissionData.OpenEndedQuestion) {
-                return props.data.submissionData.OpenEndedQuestion.question
-            } else if (props.data.submissionData.QuizQuestion) {
-                return props.data.submissionData.QuizQuestion.question
-            } else if (props.data.submissionData.CodingQuestion) {
-                return props.data.submissionData.CodingQuestion.question
-            } else {
-                return 'Question not available'
-            }
-        } else {
-            return 'Submission data not available'
+        switch (type) {
+            case 'openEndedSubmission':
+                return {
+                    title: 'Open Ended Question',
+                    link: `/admin/courses/${courseId}/submissionAssesments/${StudentAssesmentData}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionOpenEnded`,
+                }
+            case 'quizSubmission':
+                return {
+                    title: 'Quiz assessment',
+                    link: `/admin/courses/${courseId}/submissionAssesments/${StudentAssesmentData}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionQuizQuestion`,
+                }
+            case 'codingSubmission':
+                return {
+                    title: 'Coding Questions',
+                    link: `/admin/courses/${courseId}/submissionAssesments/${StudentAssesmentData}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionCodingQuestion/${codingOutsourseId}?id=${data?.questionId}`,
+                }
+            default:
+                return {
+                    title: 'Question not available',
+                    link: '/not-available',
+                }
         }
     }
+    const questionInfo = renderQuestion()
+    const scoreHandler = () => {
+        let score, totalScore
+
+        if (type === 'codingSubmission') {
+            score = codingScore
+            totalScore = totalCodingScore
+        } else if (type === 'quizSubmission') {
+            score = mcqScore
+            totalScore = totalMcqScore
+        } else {
+            score = openEndedScore
+            totalScore = totalOpenEndedScore
+        }
+
+        const percentage = (score / totalScore) * 100
+
+        let bgColorClass
+        if (percentage < 50) {
+            bgColorClass = 'bg-red-500'
+        } else if (percentage >= 50 && percentage < 70) {
+            bgColorClass = 'bg-yellow-300'
+        } else if (percentage >= 70 && percentage <= 80) {
+            bgColorClass = 'bg-green-200'
+        } else {
+            bgColorClass = 'bg-green-300'
+        }
+
+        return {
+            score: score + '/' + totalScore,
+            className: bgColorClass,
+        }
+    }
+
     return (
-        <div className="lg:flex h-[200px] my-3 p-3 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md ">
-            <div className="flex flex-col w-full justify-between   ">
-                <div className="flex items-start flex-col p-4 gap-y-7 justify-betweenrounded-md">
-                    <h1 className="text-[20px] capitalize text-start font-semibold text-gray-600  dark:text-white ">
-                        {renderQuestion()}
+        <div
+            className={`flex flex-col h-[260px] lg:h-[220px] p-3 shadow-lg  transition-transform transform hover:shadow-xl rounded-md overflow-hidden mt-3 w-5/6 relative`}
+        >
+            <div className="flex flex-col w-full h-full justify-between">
+                <div className="flex flex-col p-4 gap-y-4 lg:gap-y-7 overflow-hidden">
+                    <h1 className="  capitalize text-start font-semibold text-gray-600 dark:text-white truncate w-full">
+                        {type === 'codingSubmission'
+                            ? data.questionDetail.title
+                            : questionInfo.title}
                     </h1>
-                    <div className="flex flex-start gap-x-4 ">
-                        <div className="flex gap-x-2 ">
-                            <h1 className="text-start ">TIme Taken</h1>
-                            <p className="text-gray-500 text-start">10 mins</p>
-                        </div>
-                        <div className="flex gap-x-2 ">
-                            <h1 className="text-start ">Tab Change </h1>
-                            <p className="text-gray-500 text-start">5 times</p>
-                        </div>
-                        <div className="flex gap-x-2 ">
-                            <h1 className="text-start ">Copy Paste</h1>
-                            <p className="text-gray-500">none</p>
-                        </div>
+
+                    <div className="flex flex-col gap-y-2 md:flex-row md:gap-x-12 ">
+                        {/* <h1>Time Taken: 10mins</h1> */}
+                        {type !== 'quizSubmission' && (
+                            <h1>
+                                Copy Paste:{' '}
+                                {copyPaste == 0 ? 'None' : copyPaste}
+                            </h1>
+                        )}
+                        <h1>
+                            Tab Change: {tabchanges == 0 ? 'None' : tabchanges}
+                        </h1>
                     </div>
                     <div className="flex items-center gap-x-2">
                         <div
-                            className={`w-2 h-2 rounded-full flex items-center justify-center cursor-pointer ${color}`}
-                        ></div>
-                        <h1>Score: 2/25</h1>
+                            className={`h-2 w-2 ${
+                                type !== 'codingSubmission'
+                                    ? scoreHandler().className
+                                    : data.status == 'Accepted'
+                                    ? `bg-green-300`
+                                    : `bg-red-500`
+                            } rounded-full`}
+                        />
+                        <h1 className="text-start">
+                            {type !== 'codingSubmission' ? (
+                                <span>Score: {scoreHandler().score}</span>
+                            ) : (
+                                <span>Status: {data.status}</span>
+                            )}
+                        </h1>
                     </div>
                 </div>
-            </div>
-            <div className="flex justify-end items-end">
-                <Button
-                    variant={'ghost'}
-                    className="text-secondary text-md flex items-center "
-                >
-                    View Solution <ChevronRight size={20} />
-                </Button>
+
+                {/* Button positioned at the bottom-right */}
+                <div className="absolute bottom-3 right-3">
+                    <Button variant={'ghost'} className="w-full lg:w-auto">
+                        <Link
+                            className="text-secondary font-semibold text-md flex items-center w-full truncate"
+                            href={questionInfo.link}
+                        >
+                            View Solution
+                            <ChevronRight size={20} className="ml-1" />
+                        </Link>
+                    </Button>
+                </div>
             </div>
         </div>
     )

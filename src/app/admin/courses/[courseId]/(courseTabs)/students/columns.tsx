@@ -1,19 +1,13 @@
 'use client'
+
 import Image from 'next/image'
 
 import { ColumnDef } from '@tanstack/react-table'
 
-import { Trash2 } from 'lucide-react'
 import { DataTableColumnHeader } from '../../../../../_components/datatable/data-table-column-header'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Combobox } from '@/components/ui/combobox'
 
 import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
-import {
-    deleteStudentHandler,
-    fetchStudentData,
-    onBatchChange,
-} from '@/utils/students'
+import { fetchStudentData } from '@/utils/students'
 import { Task } from '@/utils/data/schema'
 import {
     getBatchData,
@@ -21,34 +15,11 @@ import {
     getStoreStudentData,
 } from '@/store/store'
 import { getAttendanceColorClass } from '@/utils/students'
-import { trace } from 'console'
+
+import { ComboboxStudent } from './components/comboboxStudentDataTable'
+
+import { AlertDialogDemo } from './components/deleteModalNew'
 export const columns: ColumnDef<Task>[] = [
-    // {
-    //     id: 'select',
-    //     header: ({ table }) => (
-    //         <Checkbox
-    //             checked={
-    //                 table.getIsAllPageRowsSelected() ||
-    //                 (table.getIsSomePageRowsSelected() && 'indeterminate')
-    //             }
-    //             onCheckedChange={(value) =>
-    //                 table.toggleAllPageRowsSelected(!!value)
-    //             }
-    //             aria-label="Select all"
-    //             className="translate-y-[2px]"
-    //         />
-    //     ),
-    //     cell: ({ row }) => (
-    //         <Checkbox
-    //             checked={row.getIsSelected()}
-    //             onCheckedChange={(value) => row.toggleSelected(!!value)}
-    //             aria-label="Select row"
-    //             className="translate-y-[2px]"
-    //         />
-    //     ),
-    //     enableSorting: false,
-    //     enableHiding: false,
-    // },
     {
         accessorKey: 'profilePicture',
         header: ({ column }) => (
@@ -118,59 +89,26 @@ export const columns: ColumnDef<Task>[] = [
             <DataTableColumnHeader column={column} title="Batch Assigned To" />
         ),
         cell: ({ row }) => {
-            const student = row.original
+            const { batchName, userId, bootcampId, batchId } = row.original
             const { batchData } = getBatchData()
-            const { setStoreStudentData } = getStoreStudentData()
-            const bootcampId = batchData && batchData[0]?.bootcampId
-            const initialvalue = row.original?.batchId?.toString()
-            const oldtransformedData = batchData?.reduce(
-                (transformedData: any[], item: { id: any; name: any }) => {
-                    if (item.id != null) {
-                        const isUnique = !transformedData.some(
-                            (existingItem) =>
-                                existingItem.value === item.id.toString()
-                        )
+            const newBatchData = batchData?.map((data) => {
+                return {
+                    value: data.id,
+                    label: data.name,
+                }
+            })
 
-                        if (isUnique) {
-                            transformedData.push({
-                                value: item.id.toString(),
-                                label: item.name,
-                            })
-                        }
-                    }
-
-                    return transformedData
-                },
-                []
+            return (
+                <div className="flex">
+                    <ComboboxStudent
+                        batchData={newBatchData}
+                        batchName={batchName}
+                        userId={userId}
+                        bootcampId={bootcampId}
+                        batchId={batchId}
+                    />
+                </div>
             )
-            const newtransformedData = {
-                value: student.batchId.toString(),
-                label: student.batchName,
-            }
-
-            if (oldtransformedData) {
-                return (
-                    <div className="flex text-start gap-6 my-6 max-w-[200px]">
-                        <Combobox
-                            data={oldtransformedData}
-                            title={'Batch'}
-                            onChange={(selectedValue) => {
-                                onBatchChange(
-                                    selectedValue,
-                                    student,
-                                    initialvalue,
-                                    bootcampId,
-                                    setStoreStudentData,
-                                    fetchStudentData
-                                )
-                            }}
-                            initialValue={initialvalue || ''}
-                            batch={true}
-                            batchChangeData={newtransformedData}
-                        />
-                    </div>
-                )
-            }
         },
     },
     {
@@ -282,49 +220,17 @@ export const columns: ColumnDef<Task>[] = [
         cell: ({ row }) => {
             const student = row.original
             const { userId, bootcampId } = student
-            // const { onDeleteHandler } = GetdataHandler(bootcampId);
-            const {
-                setDeleteModalOpen,
-                isDeleteModalOpen,
-                deleteStudentId,
-                setDeleteStudentId,
-            } = getDeleteStudentStore()
-            const { setStoreStudentData } = getStoreStudentData()
-
-            let deleteUser = null
-
-            const handleTrashClick = () => {
-                setDeleteModalOpen(true)
-                setDeleteStudentId(userId)
-            }
 
             return (
                 <>
-                    <Trash2
-                        onClick={() => {
-                            handleTrashClick()
-                        }}
-                        className="text-destructive cursor-pointer"
-                        size={20}
-                    />
-                    <DeleteConfirmationModal
-                        isOpen={isDeleteModalOpen}
-                        onClose={() => setDeleteModalOpen(false)}
-                        onConfirm={() => {
-                            deleteStudentHandler(
-                                deleteStudentId,
-                                bootcampId,
-                                setDeleteModalOpen,
-                                setStoreStudentData
-                            )
-                        }}
-                        modalText="This action cannot be undone. This will permanently delete the
-              student from this bootcamp"
-                        buttonText="Delete Student"
-                        input={false}
-                        modalText2=""
-                        instructorInfo={{}}
-                    />
+                    <div>
+                        <AlertDialogDemo
+                            userId={userId}
+                            bootcampId={bootcampId}
+                            title="Are you absolutely sure?"
+                            description="This action cannot be undone. This will permanently the student from the bootcamp"
+                        />
+                    </div>
                 </>
             )
         },

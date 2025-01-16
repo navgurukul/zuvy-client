@@ -39,9 +39,6 @@ interface Content {
 const AddArticle = ({ content }: { content: any }) => {
     // state
     const [title, setTitle] = useState('')
-    const [contentDetails, setContentDetails] = useState(
-        content.contentDetails[0].content
-    )
     // misc
     const formSchema = z.object({
         title: z.string().min(2, {
@@ -64,14 +61,12 @@ const AddArticle = ({ content }: { content: any }) => {
 
     // functions
     const getArticleContent = async () => {
-        console.log('asdfl')
         try {
             const response = await api.get(
                 `/Content/chapterDetailsById/${content.id}`
             )
-            setContentDetails(response.data.contentDetails[0].content)
-            setTitle(content.title)
-            contentDetails && editor?.commands.setContent(contentDetails)
+            setTitle(response.data.title)
+            editor?.commands.setContent(response.data.contentDetails[0].content)
         } catch (error) {
             console.error('Error fetching article content:', error)
         }
@@ -92,14 +87,16 @@ const AddArticle = ({ content }: { content: any }) => {
             toast({
                 title: 'Success',
                 description: 'Article Chapter Edited Successfully',
-                className: 'text-start capitalize border border-secondary',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
         } catch (error: any) {
             toast({
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'An error occurred.',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 variant: 'destructive',
             })
         }

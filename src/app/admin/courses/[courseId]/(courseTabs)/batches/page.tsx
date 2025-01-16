@@ -51,9 +51,7 @@ const Page = ({ params }: { params: any }) => {
         name: z.string().min(2, {
             message: 'Batch name must be at least 2 characters.',
         }),
-        instructorId: z
-            .string()
-            .refine((instructorId) => !isNaN(parseInt(instructorId))),
+        instructorEmail: z.string().email(),
         bootcampId: z
             .string()
             .refine((bootcampId) => !isNaN(parseInt(bootcampId))),
@@ -73,13 +71,13 @@ const Page = ({ params }: { params: any }) => {
         resolver: zodResolver(formSchema),
         defaultValues: {
             name: '',
-            instructorId: '',
+            instructorEmail: '',
             bootcampId: courseData?.id.toString() ?? '',
             capEnrollment: '',
         },
         values: {
             name: '',
-            instructorId: '',
+            instructorEmail: '',
             bootcampId: courseData?.id.toString() ?? '',
             capEnrollment: '',
         },
@@ -89,7 +87,7 @@ const Page = ({ params }: { params: any }) => {
         try {
             const convertedData = {
                 ...values,
-                instructorId: +values.instructorId,
+                instructorEmail: values.instructorEmail,
                 bootcampId: +values.bootcampId,
                 capEnrollment: +values.capEnrollment,
             }
@@ -101,14 +99,14 @@ const Page = ({ params }: { params: any }) => {
                     convertedName === batchDataItem.name.toLowerCase()
             )
 
-            console.log(convertedName)
+            // console.log(convertedData)
 
             if (matchedBatchData) {
                 toast({
                     title: 'Cannot Create New Batch',
                     description: 'This Batch Name Already Exists',
                     className:
-                        'text-start capitalize border border-destructive',
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             } else {
                 const res = await api.post(`/batch`, convertedData)
@@ -120,7 +118,8 @@ const Page = ({ params }: { params: any }) => {
                 toast({
                     title: res.data.status,
                     description: res.data.message,
-                    className: 'text-start capitalize border border-secondary',
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
             }
         } catch (error: any) {
@@ -128,7 +127,8 @@ const Page = ({ params }: { params: any }) => {
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'An error occurred.',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 variant: 'destructive',
             })
             console.error('Error creating batch:', error)
@@ -171,19 +171,24 @@ const Page = ({ params }: { params: any }) => {
             return (
                 <Dialog>
                     <DialogTrigger asChild>
-                        <Button>
+                        <Button className="lg:max-w-[150px] w-full mt-5">
                             {emptyState ? '+ Create Batch' : 'New Batch'}
                         </Button>
                     </DialogTrigger>
                     <DialogOverlay />
-                    <AddStudentsModal message={true} id={courseData?.id || 0} />
+                    <AddStudentsModal
+                        message={true}
+                        id={courseData?.id || 0}
+                        batch={false}
+                        batchId={0}
+                    />
                 </Dialog>
             )
         } else {
             return (
-                <Dialog>
+                <Dialog onOpenChange={(isOpen) => isOpen && form.reset()}>
                     <DialogTrigger asChild>
-                        <Button>
+                        <Button className="lg:max-w-[150px] w-full mt-5">
                             {emptyState ? '+ Create Batch' : 'New Batch'}
                         </Button>
                     </DialogTrigger>
@@ -201,7 +206,7 @@ const Page = ({ params }: { params: any }) => {
                                             description:
                                                 'Entered Corect values',
                                             className:
-                                                'text-start capitalize border border-destructive',
+                                                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                                         })
                                     }
                                     className="space-y-8"
@@ -226,15 +231,15 @@ const Page = ({ params }: { params: any }) => {
                                     />
                                     <FormField
                                         control={form.control}
-                                        name="instructorId"
+                                        name="instructorEmail"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>
-                                                    Instructor Id
+                                                    Instructor Email
                                                 </FormLabel>
                                                 <FormControl>
                                                     <Input
-                                                        placeholder="20230"
+                                                        placeholder="instructor@navgurukul.org"
                                                         type="name"
                                                         {...field}
                                                     />
@@ -272,6 +277,7 @@ const Page = ({ params }: { params: any }) => {
                                             <Button
                                                 className="w-1/2"
                                                 type="submit"
+                                                disabled={!form.formState.isValid}
                                             >
                                                 Create batch
                                             </Button>
@@ -288,12 +294,12 @@ const Page = ({ params }: { params: any }) => {
     if (courseData?.id) {
         return (
             <div>
-                <div className=" relative flex items-center justify-between mb-6">
-                    {batchData?.length ?? 0 > 0 ? (
+                <div className="relative flex flex-col lg:flex-row items-center justify-between mb-6">
+                    {batchData? (
                         <Input
                             type="search"
                             placeholder="Search"
-                            className="w-[400px]"
+                            className="lg:w-[400px] w-full"
                             value={search}
                             onChange={handleSetSearch}
                         />

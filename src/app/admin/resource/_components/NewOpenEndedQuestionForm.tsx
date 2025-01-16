@@ -29,12 +29,11 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 
 const formSchema = z.object({
-    questionDescription: z.string(),
-    marks: z
-        .string()
-        .refine((val) => !isNaN(Number(val)), { message: 'Must be a number' })
-        .transform((val) => Number(val)),
-    topics: z.number(),
+    questionDescription: z.string().min(5, {
+        message: 'Description must be at least 5 characters long',
+    }),
+
+    topics: z.number().min(1, { message: 'You must select a topic' }),
     difficulty: z.string(),
 })
 
@@ -68,7 +67,8 @@ function NewOpenEndedQuestionForm({
             toast({
                 title: 'Success',
                 description: 'Open-Ended Question Created Successfully',
-                className: 'text-start capitalize border border-secondary',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
             setIsDialogOpen(false)
         } catch (error: any) {
@@ -76,7 +76,8 @@ function NewOpenEndedQuestionForm({
                 title: 'Error',
                 description:
                     error?.response?.data?.message || 'An error occurred',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -87,7 +88,6 @@ function NewOpenEndedQuestionForm({
         const formattedData = {
             question: values.questionDescription,
             tagId: values.topics,
-            marks: values.marks,
             difficulty: values.difficulty,
         }
         createOpenEndedQuestion(formattedData)
@@ -185,28 +185,7 @@ function NewOpenEndedQuestionForm({
                             )
                         }}
                     />
-                    <FormField
-                        control={form.control}
-                        name="marks"
-                        render={({ field }) => {
-                            return (
-                                <FormItem className="text-left">
-                                    <FormLabel>
-                                        Set the Marks for the Question
-                                    </FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            type="number"
-                                            min="0"
-                                            placeholder="Enter the Marks for the Question"
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )
-                        }}
-                    />
+
                     <FormField
                         control={form.control}
                         name="questionDescription"
@@ -227,7 +206,6 @@ function NewOpenEndedQuestionForm({
                             )
                         }}
                     />
-
                     <div className="flex justify-end">
                         <Button type="submit" className="w-1/2 ">
                             Create Open-Ended Question

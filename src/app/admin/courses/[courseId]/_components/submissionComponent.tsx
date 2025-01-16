@@ -11,13 +11,8 @@ type Props = {
 }
 
 const SubmissionComponent = (props: Props) => {
-    const [color, setColor] = useState('#ff0000')
-
-    const handleClick = () => {
-        const randomColor =
-            '#' + Math.floor(Math.random() * 16777215).toString(16)
-        setColor(randomColor)
-    }
+    const submissionPercentage =
+        props.studentsSubmitted / props.totalSubmissions
 
     return (
         <Link
@@ -32,9 +27,14 @@ const SubmissionComponent = (props: Props) => {
                     <div className="text-start flex gap-x-2">
                         <div className="flex items-center justify-center">
                             <div
-                                className="w-2 h-2 rounded-full flex items-center justify-center cursor-pointer"
-                                style={{ backgroundColor: color }}
-                                onClick={handleClick}
+                                className={`w-2 h-2 rounded-full flex items-center justify-center cursor-pointer ${
+                                    submissionPercentage >= 0.8
+                                        ? 'bg-green-300'
+                                        : submissionPercentage <= 0.8 &&
+                                          submissionPercentage >= 0.5
+                                        ? 'bg-yellow-300'
+                                        : 'bg-red-500'
+                                } `}
                             ></div>
                         </div>
                         <h3>

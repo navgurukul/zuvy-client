@@ -123,7 +123,7 @@ const AddVideo = ({
                         title: 'Error',
                         description: 'No content details found',
                         className:
-                            'text-start capitalize border border-destructive',
+                            'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                     })
                     setChapterDetails({
                         title: '',
@@ -137,7 +137,7 @@ const AddVideo = ({
                     title: 'Error',
                     description: 'Content details not available',
                     className:
-                        'text-start capitalize border border-destructive',
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
                 setChapterDetails({
                     title: '',
@@ -150,7 +150,8 @@ const AddVideo = ({
             toast({
                 title: 'Error',
                 description: 'Error fetching chapter details:',
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }, [content.id])
@@ -176,7 +177,7 @@ const AddVideo = ({
                         title: res.data.status,
                         description: res.data.message,
                         className:
-                            'text-start capitalize border border-secondary',
+                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     fetchChapterDetailsHandler()
                 })
@@ -184,7 +185,8 @@ const AddVideo = ({
             toast({
                 title: 'Error',
                 description: "Couldn't Update the Chapter Module",
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }

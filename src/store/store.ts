@@ -2,6 +2,7 @@ import { set } from 'date-fns'
 import { create } from 'zustand'
 import { useEffect } from 'react'
 import { api } from '@/utils/axios.config'
+import { string } from 'zod'
 
 type CounterStore = {
     studentData: {
@@ -125,6 +126,33 @@ export const getDeleteStudentStore = create<deleteStudentStore>((set) => ({
 }))
 // ------------------------------
 
+// ------------------------------
+// Define the type for the assessment store
+type assessmentStore = {
+    tabChangeInstance: number
+    setTabChangeInstance: (newValue: number) => void
+    fullScreenExitInstance: number
+    setFullScreenExitInstance: (newValue: number) => void
+    copyPasteAttempt: number
+    setCopyPasteAttempt: (newValue: number) => void
+}
+
+export const getAssessmentStore = create<assessmentStore>((set) => ({
+    tabChangeInstance: 0,
+    setTabChangeInstance: (newValue: number) => {
+        set({ tabChangeInstance: newValue })
+    },
+    fullScreenExitInstance: 0,
+    setFullScreenExitInstance: (newValue: number) => {
+        set({ fullScreenExitInstance: newValue })
+    },
+    copyPasteAttempt: 0,
+    setCopyPasteAttempt: (newValue: number) => {
+        set({ copyPasteAttempt: newValue })
+    },
+}))
+// ------------------------------
+
 type storeStudentData = {
     studentsData: any[]
     setStoreStudentData: (newValue: any[]) => void
@@ -134,6 +162,17 @@ export const getStoreStudentData = create<storeStudentData>((set) => ({
     studentsData: [],
     setStoreStudentData: (newValue: any[]) => {
         set({ studentsData: newValue })
+    },
+}))
+type storeBatchValue = {
+    batchValueData: any
+    setbatchValueData: (newValue: any) => void
+}
+
+export const setStoreBatchValue = create<storeBatchValue>((set) => ({
+    batchValueData: '',
+    setbatchValueData: (newValue: any) => {
+        set({ batchValueData: newValue })
     },
 }))
 
@@ -264,58 +303,6 @@ export const getParamBatchId = create<saveParam>((set) => ({
         set({ paramBatchId: newvalue })
     },
 }))
-type TimerState = {
-    remainingTime: number
-    startTime: number | null
-    interval: number | null
-    startTimer: (duration: number) => void
-    stopTimer: () => void
-    resetTimer: () => void
-}
-
-export const useTimerStore = create<TimerState>(() => {
-    let remainingTime = 0
-    let interval: NodeJS.Timeout | null = null
-    let startTime: number | null = null
-
-    const startTimer = (duration: number) => {
-        startTime = Date.now()
-        interval = setInterval(() => {
-            const newElapsedTime = Math.floor((Date.now() - startTime!) / 1000)
-            const newRemainingTime = Math.max(duration - newElapsedTime, 0)
-            if (newRemainingTime === 0) {
-                if (interval) {
-                    clearInterval(interval)
-                }
-            }
-            remainingTime = newRemainingTime
-        }, 1000)
-    }
-
-    const stopTimer = () => {
-        if (interval) {
-            clearInterval(interval)
-            interval = null
-        }
-    }
-
-    const resetTimer = () => {
-        remainingTime = 0
-        if (interval) {
-            clearInterval(interval)
-            interval = null
-        }
-    }
-
-    return {
-        remainingTime,
-        startTime,
-        interval,
-        startTimer,
-        stopTimer,
-        resetTimer,
-    }
-})
 
 // ------------------------------
 type editOpenEndedDialogs = {
@@ -337,10 +324,13 @@ export const getEditOpenEndedDialogs = create<editOpenEndedDialogs>((set) => ({
 }))
 
 // ------------------------------
+
 // ------------------------------
 type editCodingQuestionDialogs = {
     isCodingDialogOpen: boolean
     setIsCodingDialogOpen: (newValue: boolean) => void
+    isCodingEditDialogOpen: boolean
+    setIsCodingEditDialogOpen: (newValue: boolean) => void
     editCodingQuestionId: null
     setEditCodingQuestionId: (newValue: any) => void
 }
@@ -350,6 +340,10 @@ export const getEditCodingQuestionDialogs = create<editCodingQuestionDialogs>(
         isCodingDialogOpen: false,
         setIsCodingDialogOpen: (newValue: boolean) => {
             set({ isCodingDialogOpen: newValue })
+        },
+        isCodingEditDialogOpen: false,
+        setIsCodingEditDialogOpen: (newValue: boolean) => {
+            set({ isCodingEditDialogOpen: newValue })
         },
         editCodingQuestionId: null,
         setEditCodingQuestionId: (newValue: any) => {
@@ -431,3 +425,105 @@ export const useLazyLoadedStudentData = () => {
         setAnotherStudentState,
     }
 }
+
+type proctoringDataType = {
+    proctoringData: any
+    setproctoringData: (newValue: any) => void
+    fetchProctoringData: (submissionId: string, studentId: string) => void
+}
+
+export const getProctoringDataStore = create<proctoringDataType>((set) => ({
+    proctoringData: {},
+    setproctoringData: (newValue: any) => {
+        set({ proctoringData: newValue })
+    },
+    fetchProctoringData: async (submissionId, studentId) => {
+        await api
+            .get(
+                `/tracking/assessment/submissionId=${submissionId}?studentId=${studentId}`
+            )
+            .then((res) => {
+                set({ proctoringData: res.data })
+            })
+    },
+}))
+
+type StoreStudentDataNew = {
+    students: any
+    totalPages: any
+    loading: any
+    offset: any
+    totalStudents: any
+    currentPage: any
+    limit: any
+    search: any
+    setStudents: (newValue: any) => void
+    setTotalPages: (newValue: any) => void
+    setLoading: (newValue: any) => void
+    setOffset: (newValue: number | ((prevValue: number) => number)) => void
+    setTotalStudents: (newValue: any) => void
+    setCurrentPage: (newValue: any) => void
+    setLimit: (newValue: any) => void
+    setSearch: (newValue: any) => void
+}
+
+export const getStoreStudentDataNew = create<StoreStudentDataNew>((set) => ({
+    students: [],
+    totalPages: 0,
+    loading: false,
+    offset: 0,
+    totalStudents: 0,
+    currentPage: 1,
+    limit: 10,
+    search: '',
+    setStudents: (newValue: any) => set({ students: newValue }),
+    setTotalPages: (newValue: any) => set({ totalPages: newValue }),
+    setLoading: (newValue: any) => set({ loading: newValue }),
+    setOffset: (newValue) =>
+        set((state) => ({
+            offset:
+                typeof newValue === 'function'
+                    ? newValue(state.offset)
+                    : newValue,
+        })),
+    setTotalStudents: (newValue: any) => set({ totalStudents: newValue }),
+    setCurrentPage: (newValue: any) => set({ currentPage: newValue }),
+    setLimit: (newValue: any) => set({ limit: newValue }),
+    setSearch: (newValue: any) => set({ search: newValue }),
+}))
+
+type storeBatchData = {
+    studentsBatchData: any[]
+    setStoreStudentBatchData: (newValue: any[]) => void
+}
+
+export const getStoreStudentBatchData = create<storeBatchData>((set) => ({
+    studentsBatchData: [],
+    setStoreStudentBatchData: (newValue: any[]) => {
+        set({ studentsBatchData: newValue })
+    },
+}))
+
+type mcqdifficulty = {
+    mcqDifficulty: string
+    setMcqDifficulty: (newValue: string) => void
+}
+
+export const getmcqdifficulty = create<mcqdifficulty>((set) => ({
+    mcqDifficulty: 'None',
+    setMcqDifficulty: (newValue: string) => {
+        set({ mcqDifficulty: newValue })
+    },
+}))
+
+type mcqSearch = {
+    mcqSearch: string
+    setmcqSearch: (newValue: string) => void
+}
+
+export const getMcqSearch = create<mcqSearch>((set) => ({
+    mcqSearch: 'None',
+    setmcqSearch: (newValue: string) => {
+        set({ mcqSearch: newValue })
+    },
+}))

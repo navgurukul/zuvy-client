@@ -31,12 +31,12 @@ const guestRoutes = [
         href: '/student/recordings',
         subtabs: [],
     },
-    {
-        icon: Code,
-        label: 'Coding Playground',
-        href: '/student/playground',
-        subtabs: [],
-    },
+    // {
+    //     icon: Code,
+    //     label: 'Coding Playground',
+    //     href: '/student/playground',
+    //     subtabs: [],
+    // },
     // {
     //   icon: Compass,
     //   label: "Explore",
@@ -87,7 +87,7 @@ const teacherRoutes = [
 ]
 
 const adminRoutes = [
-    { label: 'Home', icon: Home, href: '/admin', subtabs: [] },
+    // { label: 'Home', icon: Home, href: '/admin', subtabs: [] },
     { label: 'Courses', icon: Book, href: '/admin/courses', subtabs: [] },
     {
         label: 'Resource Library',

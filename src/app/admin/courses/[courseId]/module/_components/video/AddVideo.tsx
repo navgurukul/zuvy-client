@@ -19,6 +19,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import VideoEmbed from './VideoEmbed'
+import { X } from 'lucide-react'
 
 const isLinkValid = (link: string) => {
     const urlRegex = /^(https?:\/\/)?([\w-]+\.)*([\w-]+)(:\d{2,5})?(\/\S*)*$/
@@ -71,20 +72,8 @@ const AddVideo = ({
     moduleId: string
     fetchChapterContent: (chapterId: number) => Promise<void>
 }) => {
-    const [showVideo, setShowVideo] = useState(true)
     const fileInputRef = useRef<HTMLInputElement>(null)
-    const [newContent, setNewContent] = useState<chapterDetails>({
-        title: content.contentDetails[0]?.title ?? '',
-        description: content.contentDetails[0]?.description ?? '',
-        links: content.contentDetails[0]?.links ?? [],
-    })
-
-    const handleUploadClick = () => {
-        if (fileInputRef.current) {
-            fileInputRef.current.click()
-        }
-    }
-
+    const [showVideoBox, setShowVideoBox] = useState<boolean>(true)
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -93,9 +82,9 @@ const AddVideo = ({
             links: '',
         },
         values: {
-            videoTitle: newContent?.title ?? '',
-            description: newContent?.description ?? '',
-            links: newContent?.links[0] ?? '',
+            videoTitle: content?.contentDetails?.[0]?.title ?? '',
+            description: content?.contentDetails?.[0]?.description ?? '',
+            links: content?.contentDetails?.[0]?.links?.[0] ?? '',
         },
     })
 
@@ -105,6 +94,9 @@ const AddVideo = ({
             description: values.description,
             links: [values.links],
         }
+
+        console.log(convertedObj)
+
         try {
             await api
                 .put(
@@ -116,27 +108,50 @@ const AddVideo = ({
                         title: res.data.status,
                         description: res.data.message,
                         className:
-                            'text-start capitalize border border-secondary',
+                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
+                    setShowVideoBox(true)
                     fetchChapterContent(content.id)
                 })
         } catch (error) {
             toast({
                 title: 'Error',
                 description: "Couldn't Update the Chapter Module",
-                className: 'text-start capitalize border border-destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
-    useEffect(() => {
-        setShowVideo(newContent.links.length > 0)
-    }, [newContent.links])
 
-    const handleClose = () => {
-        setShowVideo(false)
-        form.setValue('videoTitle', '')
-        form.setValue('description', '')
+    useEffect(() => {
+        if (content?.contentDetails?.[0]?.links?.[0])
+            form.reset({
+                videoTitle: content?.contentDetails?.[0]?.title ?? '',
+                description: content?.contentDetails?.[0]?.description ?? '',
+                links: content?.contentDetails?.[0]?.links?.[0] ?? '',
+            })
+        else {
+            setShowVideoBox(false)
+        }
+    }, [content?.contentDetails, form])
+
+    const handleClose = async () => {
+        setShowVideoBox(false)
         form.setValue('links', '')
+        form.setValue('description', '')
+
+        try {
+            await api.put(
+                `/Content/editChapterOfModule/${moduleId}?chapterId=${content.id}`,
+                {
+                    title: '',
+                    description: '',
+                    links: [''],
+                }
+            )
+        } catch (error) {
+            console.error('Error updating chapter:', error)
+        }
     }
 
     return (
@@ -164,67 +179,26 @@ const AddVideo = ({
                         )}
                     />
                     <div className=" flex justify-between items-start relative">
-                        {showVideo && (
-                            <>
-                                <div className="flex items-center justify-center ">
-                                    <VideoEmbed
-                                        title={newContent?.title || ''}
-                                        src={newContent?.links[0] || ''}
-                                    />
-                                </div>
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="3"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className="lucide lucide-circle-x cursor-pointer absolute -right-3 -top-3  text-destructive"
+                        {showVideoBox && (
+                            <div className="flex items-start justify-center ">
+                                <VideoEmbed
+                                    title={
+                                        content?.contentDetails?.[0]?.title ||
+                                        ''
+                                    }
+                                    src={
+                                        content?.contentDetails?.[0]
+                                            ?.links?.[0] || ''
+                                    }
+                                />
+                                <X
+                                    className="text-destructive ml-2 cursor-pointer"
+                                    size={17}
                                     onClick={handleClose}
-                                >
-                                    <circle cx="12" cy="12" r="10" />
-                                    <path d="m15 9-6 6" />
-                                    <path d="m9 9 6 6" />
-                                </svg>
-                                {/* <CircleX
-                                    className="cursor-pointer text-destructive"
-                                    size={20}
-                                    onClick={handleClose}
-                                /> */}
-                            </>
+                                />
+                            </div>
                         )}
                     </div>
-                    {/* 
-                    {!showVideo && (
-                        <>
-                            <div className="rounded-lg p-5 w-[450px] py-20 border-dashed border-2 border-gray-500 flex flex-col items-center justify-center ">
-                                <input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    className="hidden"
-                                />
-                                <FileUp className="text-secondary" />
-                                <h1
-                                    className="flex-start font-bold py-2 px-4 rounded text-secondary cursor-pointer"
-                                    onClick={handleUploadClick}
-                                >
-                                    Upload Video
-                                </h1>
-                                <p className="text-left text-gray-500">
-                                    Supported File Types : .mp4, .mpg, .mkv,
-                                    .avi
-                                </p>
-                            </div>
-                            <div className="flex items-center gap-x-2">
-                                <Separator className="my-4 w-1/5" />
-                                or <Separator className="my-4 w-1/5" />
-                            </div>
-                        </>
-                    )} */}
-                    {/* <h1 >Title</h1> */}
 
                     <FormField
                         control={form.control}

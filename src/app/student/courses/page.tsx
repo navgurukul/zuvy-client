@@ -1,16 +1,19 @@
 'use client'
 
+// External imports
 import { useEffect, useState } from 'react'
-import { ChevronRight, Video } from 'lucide-react'
+import { ChevronRight, Video, BookOpenText } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+
+// Internal imports
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { BookOpenText } from 'lucide-react'
 import { useLazyLoadedStudentData } from '@/store/store'
 import Loader from './_components/Loader'
 import { api } from '@/utils/axios.config'
 import OptimizedImageWithFallback from '@/components/ImageWithFallback'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface EnrolledCourse {
     name: string
@@ -27,6 +30,7 @@ interface ResumeCourse {
     moduleName?: string
     bootcampId?: number
     moduleId?: number
+    typeId?: number
 }
 
 type pageProps = {}
@@ -39,6 +43,8 @@ const Page: React.FC<pageProps> = () => {
     const [enrolledCourse, setEnrolledCourse] = useState<EnrolledCourse[]>([])
     const [resumeCourse, setResumeCourse] = useState<ResumeCourse>({})
     const [courseStarted, setCourseStarted] = useState<boolean>(false)
+    const [flag, setFlag] = useState<boolean>(true)
+    const [message, setMessage] = useState()
     const userID = studentData?.id && studentData?.id
 
     // async
@@ -47,6 +53,7 @@ const Page: React.FC<pageProps> = () => {
             try {
                 const response = await api.get(`/student`)
                 setEnrolledCourse(response.data)
+                setFlag(false)
             } catch (error) {
                 console.error('Error getting enrolled courses:', error)
             }
@@ -57,25 +64,19 @@ const Page: React.FC<pageProps> = () => {
     useEffect(() => {
         const getResumeCourse = async () => {
             try {
-                const response = await api.get(
-                    'tracking/latestUpdatedCourse'
-                    // `/tracking/latest/learning/${userID}`
-                )
-                setResumeCourse(response.data)
-                // If we get res, then course started, hence courseStarted: true;
-                if (response?.data?.code === 404) {
+                const response = await api.get('tracking/latestUpdatedCourse')
+                if (Array.isArray(response.data.data)) {
                     setCourseStarted(false)
+                    const message = response.data.message.toLowerCase()
+                    if (!message.includes('start'))
+                        setMessage(response.data.message)
                 } else {
                     setCourseStarted(true)
+                    setResumeCourse(response.data.data)
                 }
             } catch (error) {
                 console.error('Error getting resume course:', error)
-                if (
-                    (error as any)?.response?.data?.message ===
-                    `Cannot read properties of undefined (reading 'moduleId')`
-                ) {
-                    setCourseStarted(false)
-                }
+                setCourseStarted(false)
             }
         }
         if (userID) getResumeCourse()
@@ -88,116 +89,214 @@ const Page: React.FC<pageProps> = () => {
             </div>
             <div className="px-2 py-2 md:px-6 md:py-10 ">
                 {/* If Course Already Started then Below Message will be displayed: */}
-                {enrolledCourse?.length > 0 && courseStarted ? (
+                {(message || (enrolledCourse?.length > 0 && courseStarted)) && (
                     <div className="flex flex-col flex-start">
-                        <h1 className="text-xl p-1 text-start font-bold">
+                        <h1 className="text-xl p-1 text-start font-bold mb-4">
                             Start From Where You Left Off
                         </h1>
-                        <div className="flex flex-row justify-between gap-6">
-                            <div className="flex flex-col">
-                                <div className="w-[800px]">
-                                    <Card className="w-full mb-3 border-none shadow p-6">
-                                        <div className="flex flex-row justify-between gap-6">
-                                            <div>
-                                                <div className="flex flex-row gap-6">
-                                                    {/* <Video size={25} /> */}
-                                                    <BookOpenText className="hidden sm:block mt-2" />
-                                                    <h1 className="text-lg p-1 text-start font-bold">
-                                                        {
+                        {courseStarted ? (
+                            <div className="flex flex-col lg:flex-row lg:justify-between gap-6">
+                                <div className="flex flex-col">
+                                    <div className="w-full lg:w-[860px]">
+                                        <Card className="w-full mb-3 border-none p-5 shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F]">
+                                            {/* For Large screen like Laptop and large tab */}
+                                            <div className="hidden lg:flex flex-row justify-between items-center gap-6">
+                                                <div>
+                                                    <div className="flex flex-row gap-3">
+                                                        {resumeCourse.newChapter
+                                                            ?.title &&
+                                                                resumeCourse.typeId === 1 && (
+                                                                <BookOpenText className="mt-2" />
+                                                            )}
+                                                        {resumeCourse.newChapter
+                                                            ?.title &&
+                                                                resumeCourse.typeId === 2 && (
+                                                                <h1 className="text-md mt-2 text-start font-bold">
+                                                                    Project:
+                                                                </h1>
+                                                            )}
+                                                        <h1
+                                                            className={`${
+                                                                resumeCourse
+                                                                    .newChapter
+                                                                    ?.title
+                                                                    ? 'text-md'
+                                                                    : 'text-lg text-destructive'
+                                                            } mt-2 text-start font-bold`}
+                                                        >
+                                                            {resumeCourse
+                                                                .newChapter
+                                                                ?.title ||
+                                                                resumeCourse.newChapter ||
+                                                                'There is no chapter in the module'}
+                                                        </h1>
+                                                    </div>
+                                                    <div className="flex flex-row gap-4">
+                                                        <p className="text-md text-start mt-3 mb-2">
+                                                            {
+                                                                resumeCourse?.bootcampName
+                                                            }
+                                                        </p>
+                                                        <span className="w-[5px] h-[5px] bg-gray-500 rounded-full self-center"></span>
+                                                        <p className="text-md text-start mt-3 mb-2">
+                                                            {
+                                                                resumeCourse?.moduleName
+                                                            }
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center text-end">
+                                                    <Button
+                                                        variant={'ghost'}
+                                                        className="text-lg font-bold"
+                                                    >
+                                                        <Link
+                                                            className="gap-3 flex items-center text-secondary"
+                                                            href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`}
+                                                        >
+                                                            <p>
+                                                                Resume Learning
+                                                            </p>
+                                                            <ChevronRight
+                                                                size={15}
+                                                            />
+                                                        </Link>
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                            {/* For Small screen like mobile and small tab */}
+                                            <div className="lg:hidden">
+                                                <div className="flex flex-row gap-4">
+                                                    {resumeCourse.newChapter
+                                                        ?.title &&
+                                                            resumeCourse.typeId === 1 && (
+                                                            <BookOpenText className="mt-2" />
+                                                        )}
+                                                    {resumeCourse.newChapter
+                                                        ?.title &&
+                                                        resumeCourse.typeId === 2 && (
+                                                            <h1 className="text-md mt-2 text-start font-bold">
+                                                                Project:
+                                                            </h1>
+                                                        )}
+                                                    <h1
+                                                        className={`${
                                                             resumeCourse
-                                                                ?.newChapter
+                                                                .newChapter
                                                                 ?.title
-                                                        }
+                                                                ? 'text-md'
+                                                                : 'text-lg text-destructive'
+                                                        } mt-2 text-start font-bold`}
+                                                    >
+                                                        {resumeCourse.newChapter
+                                                            ?.title ||
+                                                            resumeCourse.newChapter ||
+                                                            'There is no chapter in the module'}
                                                     </h1>
                                                 </div>
-                                                <div className="flex flex-row gap-6">
-                                                    <p className="text-md text-start mt-3 mb-2 text-center">
+                                                <div className="flex flex-row">
+                                                    <p className="text-md text-start mt-3 mb-2">
                                                         {
                                                             resumeCourse?.bootcampName
                                                         }
-                                                    </p>
-                                                    <span className="w-2 h-2 bg-gray-500 rounded-full mt-5"></span>
-                                                    <p className="text-md text-start mt-3 mb-2 text-center">
+                                                        &nbsp;-&nbsp;
                                                         {
                                                             resumeCourse?.moduleName
                                                         }
                                                     </p>
                                                 </div>
-                                            </div>
-                                            <div className="text-end">
-                                                <Button
-                                                    variant={'ghost'}
-                                                    className="text-xl font-bold"
-                                                >
-                                                    <Link
-                                                        className="gap-3 flex items-center text-secondary"
-                                                        href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`}
+                                                <div className="text-end">
+                                                    <Button
+                                                        variant={'ghost'}
+                                                        className="text-lg font-bold"
                                                     >
-                                                        <p>Resume Learning</p>
-                                                        <ChevronRight
-                                                            size={15}
-                                                        />
-                                                    </Link>
-                                                </Button>
+                                                        <Link
+                                                            className="gap-3 flex items-center text-secondary"
+                                                            href={`/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}`}
+                                                        >
+                                                            <p>
+                                                                Resume Learning
+                                                            </p>
+                                                            <ChevronRight
+                                                                size={15}
+                                                            />
+                                                        </Link>
+                                                    </Button>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </Card>
+                                        </Card>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        ) : (
+                            // If No Course Started then Below Message will be displayed:
+                            <h1 className="text-lg p-1 text-start font-semiBold text-destructive mb-4">
+                                {message}
+                            </h1>
+                        )}
                     </div>
-                ) : // If No Course Started then Below Message will be displayed:
-                null}
+                )}
 
                 <div className=" flex flex-col items-center justify-center mt-6">
-                    <div className="x-5 flex items-center justify-start w-full">
-                        <h1 className="p-1 mx-4 text-xl font-semibold ">
-                            Enrolled Courses
-                        </h1>
-                    </div>
                     <div className="container  mx-auto p-1">
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4">
-                            {enrolledCourse.length > 0 ? (
-                                enrolledCourse.map(
-                                    ({
-                                        name,
-                                        coverImage,
-                                        id,
-                                        progress,
-                                        batchId,
-                                    }: {
-                                        name: string
-                                        coverImage: string
-                                        id: number
-                                        progress: number
-                                        batchId: number
-                                    }) => (
-                                        <Link
-                                            key={id}
-                                            href={`courses/${id}/batch/${batchId}`}
-                                            className="text-gray-900 text-base"
-                                        >
-                                            <div className="bg-muted flex justify-center h-[200px] relative overflow-hidden rounded-sm">
-                                                <OptimizedImageWithFallback
-                                                    src={coverImage}
-                                                    alt="Placeholder Image"
-                                                    // className="rounded-md object-cover"
-                                                    // width={300}
-                                                    // height={48}
-                                                    fallBackSrc={
-                                                        '/logo_white.png'
-                                                    }
-                                                />
-                                            </div>
+                            {flag ? (
+                                <div className="animate-pulse flex gap-8">
+                                    {[...Array(3)].map((_, index) => (
+                                        <div key={index} className="mb-4">
+                                            <Skeleton className="h-[200px] w-[300px] rounded-sm" />
                                             <div className="px-1 py-4">
-                                                {name}
+                                                <Skeleton className="h-6 w-3/4 mb-2 rounded" />
                                             </div>
-                                            <Loader progress={progress} />
-                                        </Link>
-                                    )
-                                )
+                                            <Skeleton className="h-3 w-full rounded-full mt-2" />
+                                        </div>
+                                    ))}
+                                </div>
                             ) : (
-                                <p>No courses available.</p>
+                                <>
+                                    {enrolledCourse.length > 0 ? (
+                                        enrolledCourse.map(
+                                            ({
+                                                name,
+                                                coverImage,
+                                                id,
+                                                progress,
+                                                batchId,
+                                            }: {
+                                                name: string
+                                                coverImage: string
+                                                id: number
+                                                progress: number
+                                                batchId: number
+                                            }) => (
+                                                <Link
+                                                    key={id}
+                                                    href={`courses/${id}/batch/${batchId}`}
+                                                    className="text-gray-900 text-base"
+                                                >
+                                                    <div className="bg-muted flex justify-center h-[200px] relative overflow-hidden rounded-sm">
+                                                        <OptimizedImageWithFallback
+                                                            src={coverImage}
+                                                            alt="Placeholder Image"
+                                                            // className="rounded-md object-cover"
+                                                            // width={300}
+                                                            // height={48}
+                                                            fallBackSrc={
+                                                                '/logo_white.png'
+                                                            }
+                                                        />
+                                                    </div>
+                                                    <div className="px-1 py-4">
+                                                        {name}
+                                                    </div>
+                                                    <Loader progress={progress} />
+                                                </Link>
+                                            )
+                                        )
+                                    ) : (
+                                        <p>No courses available.</p>
+                                    )}
+                                </>
                             )}
                         </div>
                     </div>
