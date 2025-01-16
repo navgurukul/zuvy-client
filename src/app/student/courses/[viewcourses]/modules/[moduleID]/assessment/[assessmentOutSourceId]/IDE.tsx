@@ -26,11 +26,14 @@ import SubmissionsList from '@/app/student/playground/_components/submissions-li
 import { b64DecodeUnicode, b64EncodeUnicode } from '@/utils/base64'
 import TimerDisplay from '@/app/student/courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/TimerDisplay'
 import CodingSubmissions from './CodingSubmissions'
+import { formatParameter } from '@/utils/students'
+import { addClassToCodeTags } from '@/utils/admin'
 
 interface questionDetails {
     title: string
     description: string
     examples: { input: number[]; output: number }
+    constraints: any
 }
 
 interface IDEProps {
@@ -57,7 +60,10 @@ const IDE: React.FC<IDEProps> = ({
             input: [],
             output: 0,
         },
+        constraints: "",
     })
+    const codeBlockClass =
+    'text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full';
     const [currentCode, setCurrentCode] = useState('')
     const [result, setResult] = useState('')
     const [codeResult, setCodeResult] = useState<any>([])
@@ -85,6 +91,7 @@ const IDE: React.FC<IDEProps> = ({
         setLanguage(lang)
         const langID = getDataFromField(editorLanguages, lang, 'lang', 'id')
         setLanguageId(langID)
+
     }
 
     const getDataFromField = (
@@ -138,7 +145,7 @@ const IDE: React.FC<IDEProps> = ({
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
-                
+
                 if (onBack) {
                     onBack()
                 }
@@ -254,10 +261,17 @@ const IDE: React.FC<IDEProps> = ({
                                         {questionDetails?.title}
                                     </h1>
                                     <p>{questionDetails?.description}</p>
+                                    <p className='flex mt-4'> <h2 className='font-bold mr-1'>Constraints:</h2> <div
+                                        dangerouslySetInnerHTML={{
+                                            __html: addClassToCodeTags(
+                                                questionDetails?.constraints,
+                                                codeBlockClass
+                                            ),
+                                        }} /></p>
 
                                     {testCases
                                         ?.slice(0, 2)
-                                        .map((testCase: any, index: any) => (
+                                        .map((testCase: any, index: number) => (
                                             <div
                                                 key={index}
                                                 className="bg-gray-200 shadow-sm rounded-lg p-4 my-4"
@@ -265,45 +279,23 @@ const IDE: React.FC<IDEProps> = ({
                                                 <h2 className="text-xl font-semibold mb-2">
                                                     Test Case {index + 1}
                                                 </h2>
-                                                {testCase.inputs.map(
-                                                    (input: any, idx: any) => (
-                                                        <p
-                                                            key={idx}
-                                                            className="text-gray-700"
-                                                        >
-                                                            <span className="font-medium">
-                                                                Input {idx + 1}:
-                                                            </span>{' '}
-                                                            {
-                                                                input.parameterName
-                                                            }{' '}
-                                                            (
-                                                            {
-                                                                input.parameterType
-                                                            }
-                                                            ) ={' '}
-                                                            {
-                                                                input.parameterValue
-                                                            }
-                                                        </p>
-                                                    )
-                                                )}
+                                                {testCase.inputs.map((input: any, idx: number) => (
+                                                    <p key={idx} className="text-gray-700">
+                                                        <span className="font-medium">Input {idx + 1}:</span>{' '}
+                                                        {input.parameterName} = {formatParameter(input.parameterType, input.parameterValue)}
+                                                    </p>
+                                                ))}
+
                                                 <p className="text-gray-700 mt-2">
-                                                    <span className="font-medium">
-                                                        Expected Output:
-                                                    </span>{' '}
-                                                    {
-                                                        testCase.expectedOutput
-                                                            .parameterType
-                                                    }{' '}
-                                                    ={' '}
-                                                    {
-                                                        testCase.expectedOutput
-                                                            .parameterValue
-                                                    }
+                                                    <span className="font-medium">Expected Output:</span>{' '}
+                                                    {formatParameter(
+                                                        testCase.expectedOutput.parameterType,
+                                                        testCase.expectedOutput.parameterValue
+                                                    )}
                                                 </p>
                                             </div>
                                         ))}
+
                                 </div>
                             </div>
                         </div>
@@ -409,9 +401,9 @@ const IDE: React.FC<IDEProps> = ({
 
                                                                 <p
                                                                     className={`text-gray-300 ${testCase.status ===
-                                                                            'Accepted'
-                                                                            ? 'text-green-500'
-                                                                            : 'text-red-500'
+                                                                        'Accepted'
+                                                                        ? 'text-green-500'
+                                                                        : 'text-red-500'
                                                                         }`}
                                                                 >
                                                                     Status:{' '}
@@ -439,9 +431,9 @@ const IDE: React.FC<IDEProps> = ({
                                                         ) : (
                                                             <p
                                                                 className={`text-gray-300 ${testCase.status ===
-                                                                        'Accepted'
-                                                                        ? 'text-green-500'
-                                                                        : 'text-red-500'
+                                                                    'Accepted'
+                                                                    ? 'text-green-500'
+                                                                    : 'text-red-500'
                                                                     }`}
                                                             >
                                                                 Test Case{' '}
