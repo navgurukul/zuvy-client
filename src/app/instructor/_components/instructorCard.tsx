@@ -40,7 +40,6 @@ const InstructorCard: React.FC<Props> = ({
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
-                // console.log('link', link)
             })
             .catch((err) => {
                 console.error('Failed to copy: ', err)

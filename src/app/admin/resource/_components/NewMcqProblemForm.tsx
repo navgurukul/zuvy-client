@@ -711,9 +711,6 @@ const NewMcqProblemForm = ({
 
                             existingQuestions.push(question.toLowerCase())
                             setGeneratedCount(generatedQuestions.length) // **Update Generated Count**
-                            // console.log(
-                            //     `Generated ${generatedQuestions.length}/${totalNumbersOfQuestions} MCQs`
-                            // )
                         } else {
                             console.warn(
                                 'Unexpected response structure:',
@@ -728,11 +725,6 @@ const NewMcqProblemForm = ({
 
                     // **Change Delay from 5-10 seconds to 3-4 seconds**
                     const randomDelay = Math.floor(Math.random() * 1000) + 3000
-                    console.log(
-                        `Waiting for ${
-                            randomDelay / 1000
-                        } seconds before next request...`
-                    )
                     await sleep(randomDelay)
                 }
             }
@@ -1040,6 +1032,18 @@ const NewMcqProblemForm = ({
                                         />
                                     )}
                                 />
+                                {fields.length > 1 && (
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.preventDefault()
+                                            remove(index)
+                                            removeNumQuestions(index)
+                                        }}
+                                    >
+                                        <X className="h-5 w-5 ml-3 mt-2 text-muted-foreground" />
+                                    </button>
+                                )}
                             </div>
                         ))}
 
@@ -1048,7 +1052,7 @@ const NewMcqProblemForm = ({
                             type="button"
                             variant={'ghost'}
                             onClick={addTopicField}
-                            className="mt-4 justify-start"
+                            className="mt-4 w-1/6"
                         >
                             + Add Topic
                         </Button>

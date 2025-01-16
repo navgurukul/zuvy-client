@@ -148,6 +148,80 @@ export const getAssessmentPreviewStore = create<assessmentPreviewStore>(
     })
 )
 
+type videoPreviewStore = {
+    videoPreviewContent: any
+    setVideoPreviewContent: (newValue: any) => void
+}
+
+export const getVideoPreviewStore = create<videoPreviewStore>((set) => ({
+    videoPreviewContent: null,
+    setVideoPreviewContent: (newValue: any) => {
+        set({ videoPreviewContent: newValue })
+    },
+}))
+
+type articlePreviewStore = {
+    articlePreviewContent: any
+    setArticlePreviewContent: (newValue: any) => void
+}
+
+export const getArticlePreviewStore = create<articlePreviewStore>((set) => ({
+    articlePreviewContent: null,
+    setArticlePreviewContent: (newValue: any) => {
+        set({ articlePreviewContent: newValue })
+    },
+}))
+
+type codingPreviewStore = {
+    codingPreviewContent: any
+    setCodingPreviewContent: (newValue: any) => void
+}
+
+export const getCodingPreviewStore = create<codingPreviewStore>((set) => ({
+    codingPreviewContent: null,
+    setCodingPreviewContent: (newValue: any) => {
+        set({ codingPreviewContent: newValue })
+    },
+}))
+
+type quizPreviewStore = {
+    quizPreviewContent: any
+    setQuizPreviewContent: (newValue: any) => void
+}
+
+export const getQuizPreviewStore = create<quizPreviewStore>((set) => ({
+    quizPreviewContent: null,
+    setQuizPreviewContent: (newValue: any) => {
+        set({ quizPreviewContent: newValue })
+    },
+}))
+
+type assignmentPreviewStore = {
+    assignmentPreviewContent: any
+    setAssignmentPreviewContent: (newValue: any) => void
+}
+
+export const getAssignmentPreviewStore = create<assignmentPreviewStore>(
+    (set) => ({
+        assignmentPreviewContent: null,
+        setAssignmentPreviewContent: (newValue: any) => {
+            set({ assignmentPreviewContent: newValue })
+        },
+    })
+)
+
+type formPreviewStore = {
+    formPreviewContent: any
+    setFormPreviewContent: (newValue: any) => void
+}
+
+export const getFormPreviewStore = create<formPreviewStore>((set) => ({
+    formPreviewContent: null,
+    setFormPreviewContent: (newValue: any) => {
+        set({ formPreviewContent: newValue })
+    },
+}))
+
 // ------------------------------
 // Define the type for the assessment store
 type assessmentStore = {
@@ -286,16 +360,29 @@ export const getCurrentChapterState = create<currentChapter>((set) => ({
 }))
 
 type topicId = {
-    topicId: number
+    topicId: number | null
     setTopicId: (newValue: number) => void
 }
 
 export const getTopicId = create<topicId>((set) => ({
-    topicId: 1,
+    topicId: null,
     setTopicId: (newValue: number) => {
         set({ topicId: newValue })
     },
 }))
+
+type activeChapter = {
+    activeChapter: number
+    setActiveChapter: (newValue: number) => void
+}
+
+export const getActiveChapter = (initialTopicId: number | 0) =>
+    create<activeChapter>((set) => ({
+        activeChapter: initialTopicId,
+        setActiveChapter: (newValue: number) => {
+            set({ activeChapter: newValue })
+        },
+    }))
 
 type moduleName = {
     moduleName: string
@@ -407,7 +494,8 @@ type offset = {
 export const getOffset = create<offset>((set) => ({
     offset: OFFSET,
     setOffset: (newValue: number) => {
-        set({ offset: newValue })
+        const safeOffset = Math.max(0, newValue)
+        set({ offset: safeOffset })
     },
 }))
 
@@ -848,5 +936,18 @@ export const getUser = create<UserState>()(
         }
     )
 )
+
+// ---------------------------------------------
+type updateChapterList = {
+    isChapterUpdated: boolean
+    setIsChapterUpdated: (newValue: boolean) => void
+}
+
+export const getChapterUpdateStatus = create<updateChapterList>((set) => ({
+    isChapterUpdated: false,
+    setIsChapterUpdated: (newValue: boolean) => {
+        set({ isChapterUpdated: newValue })
+    },
+}))
 
 // ------------------------- User ------------------------

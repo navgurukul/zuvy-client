@@ -8,7 +8,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { getAssessmentPreviewStore } from '@/store/store'
-import { fetchPreviewAssessmentData } from '@/utils/admin'
+import { fetchPreviewData } from '@/utils/admin'
 import { api } from '@/utils/axios.config'
 import { AlertOctagon, ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -18,11 +18,12 @@ import Link from 'next/link'
 const PreviewAssessment = ({ params }: { params: any }) => {
     const { assessmentPreviewContent, setAssessmentPreviewContent } =
         getAssessmentPreviewStore()
+
     const router = useRouter()
 
     useEffect(() => {
-        fetchPreviewAssessmentData(params, setAssessmentPreviewContent)
-    }, [params.chapterId, fetchPreviewAssessmentData])
+        fetchPreviewData(params, setAssessmentPreviewContent)
+    }, [params.chapterId, fetchPreviewData])
 
     // Checking if there are any questions by their lengths
     const hasQuestions =
@@ -38,7 +39,7 @@ const PreviewAssessment = ({ params }: { params: any }) => {
 
     return (
         <>
-            <div className="fixed top-0 left-0 right-0 h-12 bg-[#518672] flex items-center justify-center">
+            <div className="fixed top-0 left-0 right-0 h-12 bg-[#518672] flex items-center justify-center z-50">
                 <h1 className="text-center text-[#FFFFFF]">
                     You are in the Admin Preview Mode. The questions cannot be
                     interacted with.

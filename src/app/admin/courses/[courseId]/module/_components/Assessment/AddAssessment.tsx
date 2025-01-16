@@ -19,6 +19,8 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import useDebounce from '@/hooks/useDebounce'
 import { getAssessmentPreviewStore } from '@/store/store'
 import { useRouter } from 'next/navigation'
+import { Separator } from '@/components/ui/separator'
+import { toast } from '@/components/ui/use-toast'
 
 type AddAssessmentProps = {
     chapterData: any
@@ -26,6 +28,7 @@ type AddAssessmentProps = {
     fetchChapterContent: (chapterId: number, topicId: number) => void
     moduleId: any
     topicId: any
+    activeChapterTitle: string
 }
 
 export type Tag = {
@@ -39,6 +42,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     fetchChapterContent,
     moduleId,
     topicId,
+    activeChapterTitle,
 }) => {
     const [searchQuestionsInAssessment, setSearchQuestionsInAssessment] =
         useState<string>('')
@@ -59,9 +63,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
 
     const [filteredQuestions, setFilteredQuestions] = useState<any[]>([])
 
-    const [chapterTitle, setChapterTitle] = useState<string>(
-        content?.ModuleAssessment?.title
-    )
+    const [chapterTitle, setChapterTitle] = useState<string>(activeChapterTitle)
 
     const [questionType, setQuestionType] = useState<string>('coding')
 
@@ -93,7 +95,6 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     >([])
 
     const debouncedSearch = useDebounce(searchQuestionsInAssessment, 500)
-    const [titleInputLength, setTitleInputLength] = useState(0)
 
     const [saveSettings, setSaveSettings] = useState(false)
 
@@ -153,11 +154,17 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     }
 
     function previewAssessment() {
-        if (content) {
+        if (content.Quizzes.length > 0 || content.CodingQuestions.length > 0 || content.OpenEndedQuestions.length > 0) {
             setAssessmentPreviewContent(content)
             router.push(
                 `/admin/courses/${content.bootcampId}/module/${content.moduleId}/chapter/${content.chapterId}/assessment/${topicId}/preview`
             )
+        }else{
+            toast({
+                title: 'No questions to preview',
+                description: 'Please save the assessment first to preview.',
+                className: 'border border-red-500 text-red-500 text-left w-[90%]',
+            })
         }
     }
 
@@ -300,7 +307,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     }, [])
 
     return (
-        <div className="w-full p-2">
+        <div className="w-full pb-2 px-5">
             {questionType !== 'settings' && (
                 <div className="flex items-center mb-5 w-full justify-between">
                     <div className="w-2/6 flex justify-center align-middle items-center relative">
@@ -308,13 +315,14 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                             required
                             onChange={(e) => {
                                 setChapterTitle(e.target.value)
-                                setTitleInputLength(e.target.value.length)
                             }}
-                            placeholder={content?.ModuleAssessment?.title}
+                            value={chapterTitle}
+                            // placeholder={content?.ModuleAssessment?.title}
+                            placeholder="Untitled Assessment"
                             className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
                             autoFocus
                         />
-                        {titleInputLength == 0 && (
+                        {chapterTitle.length == 0 && (
                             <Pencil
                                 fill="true"
                                 fillOpacity={0.4}
@@ -325,20 +333,20 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                     </div>
 
                     {/* preview & settings buttons */}
-                    <div className="text-[#4A4A4A] flex font-semibold items-center cursor-pointer mr-14">
+                    <div className="text-[#4A4A4A] flex font-semibold items-center cursor-pointer mr-14 gap-2">
                         <div
                             id="previewAssessment"
                             onClick={previewAssessment}
-                            className="flex"
+                            className="flex hover:bg-gray-300 rounded-md p-1"
                         >
                             <Eye size={18} />
-                            <h6 className="mr-5 ml-1 text-sm">Preview</h6>
+                            <h6 className="ml-1 text-sm">Preview</h6>
                         </div>
 
                         <div
                             onClick={handleSettingsButtonClick}
                             id="settingsAssessment"
-                            className="flex"
+                            className="flex hover:bg-gray-300 rounded-md p-1"
                         >
                             <Settings size={18} />
                             <h6 className="mx-1 text-sm">Settings</h6>
@@ -386,7 +394,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
             {/* DropDown Filters for questions:- */}
             {questionType !== 'settings' && (
                 <>
-                    <div className="mb-5 grid grid-cols-2">
+                    <div className="flex mb-3">
                         <CodingTopics
                             searchTerm={searchQuestionsInAssessment}
                             setSearchTerm={setSearchQuestionsInAssessment}
@@ -398,7 +406,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                         />
                     </div>
                     <div className="flex justify-between w-2/3">
-                        <h3 className="text-left font-bold mb-5">
+                        <h3 className="text-left font-bold mb-5 ml-2">
                             {questionType === 'coding'
                                 ? 'Coding Problem Library'
                                 : questionType === 'mcq'
@@ -407,7 +415,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                 ? 'Open-Ended Question Library'
                                 : ''}
                         </h3>
-                        <h1 className="text-left font-bold mb-5 mr-28">
+                        <h1 className="text-left font-bold mb-5 mr-3">
                             Selected Questions
                         </h1>
                     </div>
@@ -420,7 +428,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                     className={`${
                         questionType == 'settings'
                             ? 'grid grid-cols-1'
-                            : 'grid grid-cols-2'
+                            : 'grid grid-cols-[1fr_2px_1fr]'
                     } h-screen `}
                 >
                     <>
@@ -479,7 +487,6 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                         fetchChapterContent={
                                             fetchChapterContent
                                         }
-                                        chapterData={chapterData}
                                         chapterTitle={chapterTitle}
                                         saveSettings={saveSettings}
                                         setSaveSettings={setSaveSettings}
@@ -497,9 +504,14 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                         </div>
                     </>
 
+                    <Separator
+                        orientation="vertical"
+                        className="mx-4 w-[2px] h-96 rounded"
+                    />
+
                     {questionType !== 'settings' && (
                         <div>
-                            <ScrollArea className="h-96  w-full pr-5">
+                            <ScrollArea className="h-96 ml-5 w-full pr-5">
                                 <ScrollBar
                                     orientation="vertical"
                                     className="h-96"

@@ -23,7 +23,7 @@ function QuizList({
     tags: any
 }) {
     return (
-        <ScrollArea className="h-[580px] w-full ">
+        <ScrollArea className="h-[580px] w-full pb-10">
             {questionData.map((question: any) => {
                 const isSelected = addQuestion?.some(
                     (quest: any) => quest?.id === question.id
@@ -51,6 +51,7 @@ function QuizList({
                                             (ques: any) => {
                                                 return (
                                                     <span
+                                                    className='text-base'
                                                         key={ques}
                                                         dangerouslySetInnerHTML={{
                                                             __html: ellipsis(
@@ -70,7 +71,7 @@ function QuizList({
                                             </span>
                                             <span
                                                 className={cn(
-                                                    `text-[12px] rounded-[100px] px-2 py-1 mt-5 mr-3 `,
+                                                    `text-sm rounded-xl px-2 py-1 mt-5 mr-3 `,
                                                     difficultyColor(
                                                         question.difficulty
                                                     ), // Text color

@@ -12,11 +12,12 @@ import {
     BookOpenCheck,
 } from 'lucide-react'
 import DeleteConfirmationModal from '../../_components/deleteModal'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { DELETE_CHAPTER_CONFIRMATION } from '@/utils/constant'
 import { toast } from '@/components/ui/use-toast'
 import { useParams, useRouter } from 'next/navigation'
 import { getTopicId } from '@/store/store'
+
 
 function ChapterItem({
     title,
@@ -29,6 +30,7 @@ function ChapterItem({
     moduleId,
     activeChapterRef,
     isChapterClickedRef,
+    chapterData,
 }: {
     title: string
     topicId: number
@@ -40,11 +42,13 @@ function ChapterItem({
     moduleId: string
     activeChapterRef: any
     isChapterClickedRef: any
+    chapterData: any
 }) {
     // states and variables
     const { courseId } = useParams()
     const router = useRouter()
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
+    const { setTopicId } = getTopicId()
 
     // functions
     const setTopicIcon = () => {
@@ -74,6 +78,9 @@ function ChapterItem({
 
     const handleClick = () => {
         setActiveChapter(chapterId) // Set the active chapter in the parent component
+        if (topicId) {
+            setTopicId(topicId)
+        }
         router.push(
             `/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterId}`
         )
@@ -93,6 +100,11 @@ function ChapterItem({
                             'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     fetchChapters()
+                    if (chapterId === activeChapter) {
+                        router.push(
+                            `/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterData[0].chapterId}`
+                        )
+                    }
                 })
                 .catch((error) => {
                     toast({
@@ -110,6 +122,7 @@ function ChapterItem({
     const handleDeleteModal = () => {
         setDeleteModalOpen(true)
     }
+
 
     return (
         <div ref={chapterId === activeChapter ? activeChapterRef : null}>

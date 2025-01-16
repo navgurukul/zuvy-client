@@ -11,7 +11,6 @@ type Props = {
 }
 
 const ProjectPreview = ({ content, setShowPreview }: Props) => {
-    console.log()
 
     const timestamp = content.project[0].deadline
     const date = new Date(timestamp)
@@ -32,8 +31,6 @@ const ProjectPreview = ({ content, setShowPreview }: Props) => {
         day: 'numeric',
     }
     const formattedDate = date.toLocaleDateString('en-US', options)
-
-    console.log(formattedDate)
 
     let editorContent
 

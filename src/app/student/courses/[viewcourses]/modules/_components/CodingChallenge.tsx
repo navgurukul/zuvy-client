@@ -43,7 +43,10 @@ function CodingChallenge({
             const res = await api.get(
                 `/tracking/getQuizAndAssignmentWithStatus?chapterId=${content.id}`
             )
-
+            console.log(
+                'res.data.data.codingProblem',
+                res.data.data.codingProblem[0].id
+            )
             setCodingQuestions(res.data.data.codingProblem)
             setCodingQuestionId(res.data.data.codingProblem[0].id)
             setTagId(res.data.data.codingProblem[0].tagId)
@@ -105,7 +108,7 @@ function CodingChallenge({
     }
 
     useEffect(() => {
-        getResults()
+        if (codingQuestionId) getResults()
     }, [codingQuestionId, content.id])
 
     async function getAllTags() {
@@ -128,10 +131,8 @@ function CodingChallenge({
         )
     }
 
-    console.log(codingQuestions)
-
     return (
-        <>
+        <div className="mt-20">
             {codingQuestions.length > 0 ? (
                 <div className="flex justify-center">
                     <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
@@ -212,7 +213,7 @@ function CodingChallenge({
                     </div>
                 </div>
             )}
-        </>
+        </div>
     )
 }
 

@@ -64,7 +64,6 @@ export const columns: ColumnDef<quiz>[] = [
                 <CheckboxAndDeleteHandler
                     checked={row.getIsSelected()}
                     onCheckedChange={(value) => {
-                        // console.log(row)
                         row.toggleSelected(!!value)
                     }}
                     aria-label="Select row"
@@ -105,7 +104,7 @@ export const columns: ColumnDef<quiz>[] = [
             )
         },
         enableSorting: false,
-        enableHiding: false,
+        enableHiding: true,
     },
     {
         accessorKey: 'usage',
@@ -125,7 +124,7 @@ export const columns: ColumnDef<quiz>[] = [
             )
         },
         enableSorting: false,
-        enableHiding: false,
+        enableHiding: true,
     },
 
     {
@@ -151,7 +150,7 @@ export const columns: ColumnDef<quiz>[] = [
             )
         },
         enableSorting: false,
-        enableHiding: false,
+        enableHiding: true,
     },
 
     {
@@ -187,6 +186,7 @@ export const columns: ColumnDef<quiz>[] = [
                 </div>
             )
         },
+        enableHiding: true,
     },
 
     {
@@ -222,6 +222,7 @@ export const columns: ColumnDef<quiz>[] = [
                 </div>
             )
         },
+        enableHiding: true,
     },
     {
         id: 'actions3',
@@ -285,5 +286,6 @@ export const columns: ColumnDef<quiz>[] = [
                 </div>
             )
         },
+        enableHiding: true,
     },
 ]

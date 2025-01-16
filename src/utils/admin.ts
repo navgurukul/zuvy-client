@@ -17,9 +17,6 @@ export function handleDelete(
     offset?: number,
     position?: String
 ) {
-    // console.log("selectedoption", selectedOptions)
-    // console.log("difficulty", difficulty )
-    // const offset=10
     api({
         method: 'delete',
         url: 'Content/deleteCodingQuestion',
@@ -117,8 +114,6 @@ export const handleConfirm = (
     offset?: number,
     position?: String
 ) => {
-    //     console.log(" selectedoption and handleconform",selectedOptions)
-    //     console.log(" difficuty and handleconform",difficulty)
     handleDelete(
         deleteCodingQuestionId,
         setCodingQuestions,
@@ -233,7 +228,7 @@ export async function getAllQuizQuestion(
         let url = `/Content/allQuizQuestions`
 
         let selectedDiff = ''
-        difficulty.map(
+        difficulty?.map(
             (item: any) => (selectedDiff += '&difficulty=' + item.value)
         )
 
@@ -368,7 +363,6 @@ export async function filteredCodingQuestions(
 
     // setTotalCodingQuestion: any, // Accepting setTotalBootcamps from parent
 ) {
-    // console.log("selectedoption in filtercodingquestion",selectedOptions)
     try {
         const safeOffset = Math.max(0, offset)
 
@@ -414,42 +408,42 @@ export async function filteredCodingQuestions(
         console.error('Error:', error)
     }
 }
+
 export async function filteredQuizQuestions(
-    setStoreQuizData?: any,
-    // setFilteredQuestions: (newValue: any[]) => void,
+    setStoreQuizData: (newValue: any[]) => void,
     offset?: number,
     position?: string,
     difficulty?: any,
     selectedOptions?: any,
     setTotalMCQQuestion?: any,
-    selectedTopic?: any,
+    // selectedTopic?: any,
     setLastPage?: any,
     setTotalPages?: any,
-    selectedLanguage?: string,
-    debouncedSearch?: string | undefined
+    debouncedSearch?: string | undefined,
+    selectedLanguage?: string
 ) {
     try {
         // const safeOffset = Math.max(0, offset)
         let url = `/Content/allQuizQuestions?limit=${position}&offset=${offset}`
 
         let selectedTagIds = ''
-        selectedOptions.map(
+        selectedOptions?.map(
             (item: any) => (selectedTagIds += '&tagId=' + item.value)
         )
 
         let selectedDiff = ''
-        difficulty.map(
+        difficulty?.map(
             (item: any) => (selectedDiff += '&difficulty=' + item.value)
         )
 
         const queryParams = []
 
-        if (difficulty.length > 0) {
+        if (difficulty?.length > 0) {
             if (difficulty[0].value !== 'None') {
                 queryParams.push(selectedDiff.substring(1))
             }
         }
-        if (selectedTagIds.length > 0) {
+        if (selectedTagIds?.length > 0) {
             if (selectedOptions[0].value !== '-1') {
                 queryParams.push(selectedTagIds.substring(1))
             }
@@ -464,7 +458,7 @@ export async function filteredQuizQuestions(
             url += `&${queryParams.join('&')}`
         }
         const res = await api.get(url)
-        console.log('response.data.data', res.data.data)
+
         setStoreQuizData(res.data.data)
         setTotalMCQQuestion(res.data.totalRows)
         setTotalPages(res.data.totalPages)
@@ -486,13 +480,10 @@ export async function filteredOpenEndedQuestions(
     selectedLanguage?: string,
     debouncedSearch?: string | undefined
 ) {
-    console.log('setopenendedquestion', setTotalOpenEndedQuestion)
     try {
         const safeOffset = Math.max(0, offset)
 
-        let url = `/Content/openEndedQuestions?pageNo=${
-            offset + 1
-        }&limit_=${position}`
+        let url = `/Content/openEndedQuestions?limit=${position}&offset=${offset}`
 
         let selectedTagIds = ''
         selectedOptions.map(
@@ -534,7 +525,6 @@ export async function filteredOpenEndedQuestions(
         setTotalOpenEndedQuestion(response.data.totalRows)
         setTotalPages(response.data.totalPages)
         setLastPage(response.data.totalPages)
-        console.log('response.data.data', response)
     } catch (error) {
         console.error('Error:', error)
     }
@@ -705,16 +695,18 @@ export const convertSeconds = (seconds: number) => {
 // --------------------------------------------
 // Preview Assessment Page functions:-
 
-export async function fetchPreviewAssessmentData(
+export async function fetchPreviewData(
     params: any,
-    setAssessmentPreviewContent: any
+    setPreviewContent: any,
+    setAssessmentPreviewCodingContent?: any
 ) {
     try {
         const response = await api.get(
             `Content/chapterDetailsById/${params?.chapterId}?bootcampId=${params?.courseId}&moduleId=${params?.moduleId}&topicId=${params?.topicId}`
         )
-
-        setAssessmentPreviewContent(response.data)
+        setPreviewContent(response.data)
+        setAssessmentPreviewCodingContent &&
+            setAssessmentPreviewCodingContent(response.data.CodingQuestions)
     } catch (error) {
         console.error('Error fetching chapter content:', error)
     }
@@ -799,29 +791,33 @@ export const addClassToCodeTags: any = (
     codeBlockClass: string
 ) => {
     // Find the positions of the first <code> and the last </code>
-    const firstCodeIndex = htmlString.indexOf('<code');
-    const lastCodeIndex = htmlString.lastIndexOf('</code>');
+    const firstCodeIndex = htmlString.indexOf('<code')
+    const lastCodeIndex = htmlString.lastIndexOf('</code>')
 
-    if (firstCodeIndex === -1 || lastCodeIndex === -1 || lastCodeIndex < firstCodeIndex) {
+    if (
+        firstCodeIndex === -1 ||
+        lastCodeIndex === -1 ||
+        lastCodeIndex < firstCodeIndex
+    ) {
         // If no valid code blocks are found, return the string unchanged
-        return htmlString;
+        return htmlString
     }
 
     // Split the content into three parts
-    const beforeCode = htmlString.substring(0, firstCodeIndex); // Everything before the first <code>
-    const codeContent = htmlString.substring(firstCodeIndex, lastCodeIndex + 7); // From the first <code> to the last </code>
-    const afterCode = htmlString.substring(lastCodeIndex + 7); // Everything after the last </code>
+    const beforeCode = htmlString.substring(0, firstCodeIndex) // Everything before the first <code>
+    const codeContent = htmlString.substring(firstCodeIndex, lastCodeIndex + 7) // From the first <code> to the last </code>
+    const afterCode = htmlString.substring(lastCodeIndex + 7) // Everything after the last </code>
 
     // Wrap the codeContent with <pre> and the given class
     const styledCodeBlock = `
         <pre class="${codeBlockClass}">
             ${codeContent}
         </pre>
-    `;
+    `
 
     // Combine the parts back together
-    return `${beforeCode}${styledCodeBlock}${afterCode}`;
-};
+    return `${beforeCode}${styledCodeBlock}${afterCode}`
+}
 
 export async function handleSaveChapter(
     moduleId: string,
@@ -841,3 +837,43 @@ export async function handleSaveChapter(
         })
     }
 }
+
+export const proctoringOptions = [
+    {
+        label: 'Copy Paste',
+        name: 'canCopyPaste' as const,
+        tooltip:
+            'Prevents users from copying and pasting content during the exam to maintain test integrity.',
+    },
+    {
+        label: 'Tab Change',
+        name: 'tabSwitch' as const,
+        tooltip:
+            'Monitors and restricts switching between browser tabs during the exam to prevent unauthorized access to external resources.',
+    },
+    {
+        label: 'Screen Exit',
+        name: 'screenExit' as const,
+        tooltip: 'Detects and logs any attempts to exit the exam screen, helping to identify potential cheating attempts.'
+    }
+];
+
+// Calculate the time taken between start and submit times
+export const calculateTimeTaken = (start: string, submit: string): string => {
+    const startDate = new Date(start);
+    const submitDate = new Date(submit);
+
+    const diffInMilliseconds = submitDate.getTime() - startDate.getTime();
+    const hours = Math.floor(diffInMilliseconds / (1000 * 60 * 60));
+    const minutes = Math.floor((diffInMilliseconds % (1000 * 60 * 60)) / (1000 * 60));
+
+    return `${hours}h & ${minutes}m`;
+};
+
+  
+  // Extract the submission date in YYYY-MM-DD format
+  export const getSubmissionDate = (submit: string): string => {
+    const submitDate = new Date(submit);
+    return submitDate.toISOString().split("T")[0];
+  };
+  

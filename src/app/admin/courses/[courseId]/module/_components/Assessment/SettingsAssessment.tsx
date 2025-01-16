@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { ChevronLeft, AlertCircle } from 'lucide-react'
+import { ChevronLeft, AlertCircle, Info } from 'lucide-react'
 import {
     Form,
     FormControl,
@@ -26,6 +26,9 @@ import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
 import { useParams } from 'next/navigation'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
+import { getChapterUpdateStatus } from '@/store/store'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { proctoringOptions } from '@/utils/admin'
 
 type SettingsAssessmentProps = {
     selectedCodingQuesIds: any
@@ -35,7 +38,6 @@ type SettingsAssessmentProps = {
     selectedQuizQuesTagIds: any
     content: any
     fetchChapterContent: any
-    chapterData: any
     chapterTitle: string
     saveSettings: boolean
     setSaveSettings: (value: boolean) => void
@@ -53,7 +55,6 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     selectedQuizQuesTagIds,
     content,
     fetchChapterContent,
-    chapterData,
     chapterTitle,
     saveSettings,
     setSaveSettings,
@@ -83,6 +84,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     const [editingFields, setEditingFields] = useState<any>({})
     const hours = Array.from({ length: 6 }, (_, i) => i)
     const minutes = [15, 30, 45]
+    const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
 
     const formSchema = z
         .object({
@@ -188,13 +190,13 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     ) => {
         // Allow empty string, which will be handled by validation
         const numericValue: any = value === '' ? null : Number(value)
-        
+
         // Update total questions state 
         setTotalQuestions((prevValues) => ({
             ...prevValues,
             [field]: numericValue,
         }))
-        
+
         // Update form value
         form.setValue(field, numericValue, {
             shouldValidate: true,
@@ -202,12 +204,24 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
         })
     }
 
-    const handleWeightageChange = (
+      const handleWeightageChange = (
         e: React.ChangeEvent<HTMLInputElement>,
         field: any
     ) => {
-        const value = e.target.value
-        field.onChange(value === '' ? null : Number(value))
+        const value = e.target.value === '' ? null : Number(e.target.value)
+        
+        // Determine which weightage field is being changed
+        const isCodeField = field.name === 'codingProblemsWeightage'
+        const otherField = isCodeField ? 'mcqsWeightage' : 'codingProblemsWeightage'
+        
+        // Set the value for the current field
+        field.onChange(value)
+        
+        // Automatically update the other field to total 100
+        const otherFieldValue = value ? 100 - value : 100
+        form.setValue(otherField, otherFieldValue, {
+            shouldValidate: true,
+        })
     }
 
     useEffect(() => {
@@ -290,6 +304,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                 )
                 .then((res: any) => {
                     fetchChapterContent(chapterID, topicId)
+                    setIsChapterUpdated(!isChapterUpdated)
                 })
             toast({
                 title: 'Assessment Updated Successfully',
@@ -302,6 +317,8 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
         }
     }
 
+   
+
     useEffect(() => {
         form.reset({
             codingProblemsEasy: content?.easyCodingQuestions || 0,
@@ -311,9 +328,9 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
             mcqsMedium: content?.mediumMcqQuestions || 0,
             mcqsHard: content?.hardMcqQuestions || 0,
             codingProblemsWeightage:
-                codingMax > 0 && mcqMax > 0 ? 50 : codingMax > 0 ? 100 : 0,
+                codingMax > 0 && mcqMax > 0 ? content?.weightageCodingQuestions || 50 : codingMax > 0 ? 100 : 0,
             mcqsWeightage:
-                codingMax > 0 && mcqMax > 0 ? 50 : mcqMax > 0 ? 100 : 0,
+                codingMax > 0 && mcqMax > 0 ? content?.weightageMcqQuestions || 50 : mcqMax > 0 ? 100 : 0,
             canCopyPaste: content?.canCopyPaste || false,
             tabSwitch: content?.canTabChange || false,
             screenExit: content?.canScreenExit || false,
@@ -385,165 +402,162 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                 for each question type.
                             </p>
 
-                        <div className="flex justify-between items-start">
-                            {[
-                                {
-                                    title: 'Coding Problems',
-                                    fields: [
-                                        'codingProblemsEasy',
-                                        'codingProblemsMedium',
-                                        'codingProblemsHard',
-                                    ],
-                                    counts: selectCodingDifficultyCount,
-                                    max: codingMax,
-                                },
-                                {
-                                    title: 'MCQs',
-                                    fields: [
-                                        'mcqsEasy',
-                                        'mcqsMedium',
-                                        'mcqsHard',
-                                    ],
-                                    mcqCounts: selectQuizDifficultyCount,
-                                    max: mcqMax,
-                                },
-                            ].map((category, index) => (
-                                <div key={index} className="mb-4">
-                                    <h3 className="font-semibold mb-2">
-                                        {category.title}
-                                    </h3>
-                                    {category.fields.map((field, idx) => (
-                                        <FormField
-                                            key={field}
-                                            control={form.control}
-                                            name={
-                                                field as keyof typeof totalQuestions
-                                            }
-                                            render={({ field }) => {
-                                                const isError = Boolean(
-                                                    form.formState.errors[
+                            <div className="flex justify-between items-start">
+                                {[
+                                    {
+                                        title: 'Coding Problems',
+                                        fields: [
+                                            'codingProblemsEasy',
+                                            'codingProblemsMedium',
+                                            'codingProblemsHard',
+                                        ],
+                                        counts: selectCodingDifficultyCount,
+                                        max: codingMax,
+                                    },
+                                    {
+                                        title: 'MCQs',
+                                        fields: [
+                                            'mcqsEasy',
+                                            'mcqsMedium',
+                                            'mcqsHard',
+                                        ],
+                                        mcqCounts: selectQuizDifficultyCount,
+                                        max: mcqMax,
+                                    },
+                                ].map((category, index) => (
+                                    <div key={index} className="mb-4">
+                                        <h3 className="font-semibold mb-2">
+                                            {category.title}
+                                        </h3>
+                                        {category.fields.map((field, idx) => (
+                                            <FormField
+                                                key={field}
+                                                control={form.control}
+                                                name={
+                                                    field as keyof typeof totalQuestions
+                                                }
+                                                render={({ field }) => {
+                                                    const isError = Boolean(
+                                                        form.formState.errors[
                                                         field.name
-                                                    ]
-                                                )
-                                                return (
-                                                    <FormItem className="flex items-center mb-2">
-                                                        <FormControl>
-                                                            <Input
-                                                                {...field}
-                                                                type="number"
-                                                                className={`w-16 mr-2 no-spinners ${
-                                                                    form
-                                                                        .formState
-                                                                        .errors[
-                                                                        field
-                                                                            .name
-                                                                    ]
-                                                                        ? 'border-red-500 outline-red-500 text-red-500'
-                                                                        : 'border-gray-300'
-                                                                }`}
-                                                                onChange={(
-                                                                    e
-                                                                ) => {
-                                                                    handleInputChange(
-                                                                        field.name as keyof typeof totalQuestions,
-                                                                        e.target
-                                                                            .value
-                                                                    )
-                                                                }}
-                                                                onFocus={() => {
-                                                                    setEditingFields(
-                                                                        (prev:any) => ({
-                                                                            ...prev,
-                                                                            [field.name]:
-                                                                                true,
-                                                                        })
-                                                                    )
-                                                                }}
-                                                                onBlur={() => {
-                                                                    setEditingFields(
-                                                                        (prev:any) => ({
-                                                                            ...prev,
-                                                                            [field.name]:
-                                                                                false,
-                                                                        })
-                                                                    )
-                                                                }}
-                                                                value={
-                                                                     field.value
-                                                                }
-                                                            />
-                                                        </FormControl>
-                                                        <div className="flex flex-col">
-                                                            {!isError && (
-                                                                <FormLabel className="text-sm m-0 p-0">
-                                                                    {
-                                                                        [
-                                                                            'Easy',
-                                                                            'Medium',
-                                                                            'Hard',
-                                                                        ][idx]
-                                                                    }{' '}
-                                                                    question(s)
-                                                                    out of{' '}
-                                                                    {category.title ===
-                                                                    'Coding Problems'
-                                                                        ? (category.counts &&
-                                                                              category
-                                                                                  .counts[
-                                                                                  `codingProblems${
-                                                                                      [
-                                                                                          'Easy',
-                                                                                          'Medium',
-                                                                                          'Hard',
-                                                                                      ][
-                                                                                          idx
-                                                                                      ]
-                                                                                  }`
-                                                                              ]) ||
-                                                                          0
-                                                                        : (category.mcqCounts &&
-                                                                              category
-                                                                                  .mcqCounts[
-                                                                                  `${
-                                                                                      [
-                                                                                          'mcqsEasy',
-                                                                                          'mcqsMedium',
-                                                                                          'mcqsHard',
-                                                                                      ][
-                                                                                          idx
-                                                                                      ]
-                                                                                  }`
-                                                                              ]) ||
-                                                                          0}
-                                                                </FormLabel>
-                                                            )}
-                                                            {form.formState
-                                                                .errors[
-                                                                field.name
-                                                            ] && (
-                                                                <div className="flex items-center gap-1 mt-1 text-red-500">
-                                                                    <AlertCircle color="#db3939" />
-                                                                    <FormMessage className="text-sm">
+                                                        ]
+                                                    )
+                                                    return (
+                                                        <FormItem className="flex items-center mb-2">
+                                                            <FormControl>
+                                                                <Input
+                                                                    {...field}
+                                                                    type="number"
+                                                                    className={`w-16 mr-2 no-spinners ${form
+                                                                            .formState
+                                                                            .errors[
+                                                                            field
+                                                                                .name
+                                                                        ]
+                                                                            ? 'border-red-500 outline-red-500 text-red-500'
+                                                                            : 'border-gray-300'
+                                                                        }`}
+                                                                    onChange={(
+                                                                        e
+                                                                    ) => {
+                                                                        handleInputChange(
+                                                                            field.name as keyof typeof totalQuestions,
+                                                                            e.target
+                                                                                .value
+                                                                        )
+                                                                    }}
+                                                                    onFocus={() => {
+                                                                        setEditingFields(
+                                                                            (prev: any) => ({
+                                                                                ...prev,
+                                                                                [field.name]:
+                                                                                    true,
+                                                                            })
+                                                                        )
+                                                                    }}
+                                                                    onBlur={() => {
+                                                                        setEditingFields(
+                                                                            (prev: any) => ({
+                                                                                ...prev,
+                                                                                [field.name]:
+                                                                                    false,
+                                                                            })
+                                                                        )
+                                                                    }}
+                                                                    value={
+                                                                        field.value
+                                                                    }
+                                                                />
+                                                            </FormControl>
+                                                            <div className="flex flex-col">
+                                                                {!isError && (
+                                                                    <FormLabel className="text-sm m-0 p-0">
                                                                         {
-                                                                            form
-                                                                                .formState
-                                                                                .errors[
-                                                                                field
-                                                                                    .name
-                                                                            ]
-                                                                                ?.message
-                                                                        }
-                                                                    </FormMessage>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </FormItem>
-                                                )
-                                            }}
-                                        />
-                                    ))}
-                                </div>
-                            ))}
+                                                                            [
+                                                                                'Easy',
+                                                                                'Medium',
+                                                                                'Hard',
+                                                                            ][idx]
+                                                                        }{' '}
+                                                                        question(s)
+                                                                        out of{' '}
+                                                                        {category.title ===
+                                                                            'Coding Problems'
+                                                                            ? (category.counts &&
+                                                                                category
+                                                                                    .counts[
+                                                                                `codingProblems${[
+                                                                                    'Easy',
+                                                                                    'Medium',
+                                                                                    'Hard',
+                                                                                ][
+                                                                                idx
+                                                                                ]
+                                                                                }`
+                                                                                ]) ||
+                                                                            0
+                                                                            : (category.mcqCounts &&
+                                                                                category
+                                                                                    .mcqCounts[
+                                                                                `${[
+                                                                                    'mcqsEasy',
+                                                                                    'mcqsMedium',
+                                                                                    'mcqsHard',
+                                                                                ][
+                                                                                idx
+                                                                                ]
+                                                                                }`
+                                                                                ]) ||
+                                                                            0}
+                                                                    </FormLabel>
+                                                                )}
+                                                                {form.formState
+                                                                    .errors[
+                                                                    field.name
+                                                                ] && (
+                                                                        <div className="flex items-center gap-1 mt-1 text-red-500">
+                                                                            <AlertCircle color="#db3939" />
+                                                                            <FormMessage className="text-sm">
+                                                                                {
+                                                                                    form
+                                                                                        .formState
+                                                                                        .errors[
+                                                                                        field
+                                                                                            .name
+                                                                                    ]
+                                                                                        ?.message
+                                                                                }
+                                                                            </FormMessage>
+                                                                        </div>
+                                                                    )}
+                                                            </div>
+                                                        </FormItem>
+                                                    )
+                                                }}
+                                            />
+                                        ))}
+                                    </div>
+                                ))}
 
                                 <div className="mb-4">
                                     <h3 className="font-semibold mb-2 mr-3">
@@ -554,25 +568,23 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                             <span className="text-sm font-bold">
                                                 Coding:{' '}
                                             </span>
-                                            {`${
-                                                Number.isNaN(
-                                                    totalSelectedCodingQues
-                                                )
+                                            {`${Number.isNaN(
+                                                totalSelectedCodingQues
+                                            )
                                                     ? 0
                                                     : totalSelectedCodingQues
-                                            } out of ${codingMax}`}
+                                                } out of ${codingMax}`}
                                         </p>
                                         <p className="text-sm ml-2">
                                             <span className="text-sm font-bold ">
                                                 Quiz:{' '}
                                             </span>
-                                            {`${
-                                                Number.isNaN(
-                                                    totalSelectedQuizQues
-                                                )
+                                            {`${Number.isNaN(
+                                                totalSelectedQuizQues
+                                            )
                                                     ? 0
                                                     : totalSelectedQuizQues
-                                            } out of ${mcqMax}`}
+                                                } out of ${mcqMax}`}
                                         </p>
                                     </div>
                                 </div>
@@ -618,11 +630,10 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                         <Input
                                                             {...field}
                                                             type="number"
-                                                            className={`w-16 mr-2 no-spinners ${
-                                                                isError
+                                                            className={`w-16 mr-2 no-spinners ${isError
                                                                     ? 'border-red-500 outline-red-500 text-red-500'
                                                                     : 'border-gray-300'
-                                                            }`}
+                                                                }`}
                                                             disabled={
                                                                 category.disabled
                                                             }
@@ -637,11 +648,10 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                         />
                                                     </FormControl>
                                                     <FormLabel
-                                                        className={`text-sm ${
-                                                            isError
+                                                        className={`text-sm ${isError
                                                                 ? 'text-red-500'
                                                                 : 'text-gray-700'
-                                                        }`}
+                                                            }`}
                                                     >
                                                         {category.title}
                                                     </FormLabel>
@@ -653,17 +663,17 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                 {/* Display error messages if any */}
                                 {form.formState.errors
                                     .codingProblemsWeightage && (
-                                    <div className="flex gap-2">
-                                        <AlertCircle color="#db3939" />
-                                        <FormMessage className="text-red-500 text-sm mt-1">
-                                            {
-                                                form.formState.errors
-                                                    .codingProblemsWeightage
-                                                    .message
-                                            }
-                                        </FormMessage>
-                                    </div>
-                                )}
+                                        <div className="flex gap-2">
+                                            <AlertCircle color="#db3939" />
+                                            <FormMessage className="text-red-500 text-sm mt-1">
+                                                {
+                                                    form.formState.errors
+                                                        .codingProblemsWeightage
+                                                        .message
+                                                }
+                                            </FormMessage>
+                                        </div>
+                                    )}
                                 {form.formState.errors.mcqsWeightage && (
                                     <div className="flex gap-2">
                                         <AlertCircle color="#db3939" />
@@ -682,45 +692,40 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                 <h2 className="font-semibold mb-4">
                                     Manage Proctoring Settings
                                 </h2>
-                                {[
-                                    {
-                                        label: 'Copy Paste',
-                                        name: 'canCopyPaste' as const,
-                                    },
-                                    {
-                                        label: 'Tab Change',
-                                        name: 'tabSwitch' as const,
-                                    },
-                                    {
-                                        label: 'Screen Exit',
-                                        name: 'screenExit' as const,
-                                    },
-                                    {
-                                        label: 'Eye Tracking',
-                                        name: 'eyeTracking' as const,
-                                    },
-                                ].map((option, index) => (
+                                {proctoringOptions.map((option, index) => (
                                     <FormField
                                         key={index}
                                         control={form.control}
                                         name={option.name}
                                         render={({ field }) => (
-                                            <FormItem className="">
-                                                <div className="flex items-center justify-between mb-4">
-                                                    <div>
-                                                        <FormLabel className="text-sm text-center font-normal text-gray-600">
+                                            <FormItem>
+                                                <div className="flex items-center justify-between mb-4 w-3/4">
+                                                    <div className="flex items-center justify-between space-x-2 w-1/3">
+                                                        <div>
+                                                            <FormLabel className="text-sm text-center font-normal text-gray-600">
                                                             {option.label}
                                                         </FormLabel>
+                                                        </div>
+                                                        <div className='mt-2'>
+                                                        <TooltipProvider>
+                                                            <Tooltip>
+                                                                <TooltipTrigger
+                                                                    onClick={(e) => e.preventDefault()}
+                                                                >
+                                                                    <Info className="text-gray-500 w-4 h-4 cursor-default" />
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>
+                                                                    <p className="text-sm max-w-xs">{option.tooltip}</p>
+                                                                </TooltipContent>
+                                                            </Tooltip>
+                                                        </TooltipProvider>
+                                                        </div>
                                                     </div>
                                                     <div>
                                                         <FormControl>
                                                             <ToggleSwitch
-                                                                initialChecked={
-                                                                    field.value as boolean
-                                                                }
-                                                                onToggle={
-                                                                    field.onChange
-                                                                }
+                                                                initialChecked={field.value as boolean}
+                                                                onToggle={field.onChange}
                                                             />
                                                         </FormControl>
                                                     </div>
@@ -771,7 +776,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                                             value={hour.toString()}
                                                                         >
                                                                             {hour >
-                                                                            1
+                                                                                1
                                                                                 ? `${hour} Hours`
                                                                                 : `${hour} Hour`}
                                                                         </SelectItem>
@@ -848,13 +853,12 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                     <Input
                                                         {...field}
                                                         type="number"
-                                                        className={`w-16 mr-2 no-spinners ${
-                                                            form.formState
+                                                        className={`w-16 mr-2 no-spinners ${form.formState
                                                                 .errors
                                                                 .passPercentage
                                                                 ? 'border-red-500 outline-red-500 text-red-500'
                                                                 : 'border-gray-300'
-                                                        }`}
+                                                            }`}
                                                         onChange={(e) => {
                                                             const value =
                                                                 e.target.value
@@ -862,37 +866,36 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                                 value === ''
                                                                     ? null
                                                                     : Number(
-                                                                          value
-                                                                      )
+                                                                        value
+                                                                    )
                                                             )
                                                         }}
                                                     />
                                                 </FormControl>
                                                 <div
-                                                    className={`text-md ${
-                                                        form.formState.errors
+                                                    className={`text-md ${form.formState.errors
                                                             .passPercentage
                                                             ? 'border-red-500 outline-red-500 text-red-500'
                                                             : 'border-gray-300'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     %
                                                 </div>
                                             </div>
                                             {form.formState.errors
                                                 .passPercentage && (
-                                                <div className="flex items-center gap-2 mt-1 text-red-500">
-                                                    <AlertCircle color="#db3939" />
-                                                    <FormMessage className="text-sm">
-                                                        {
-                                                            form.formState
-                                                                .errors
-                                                                .passPercentage
-                                                                .message
-                                                        }
-                                                    </FormMessage>
-                                                </div>
-                                            )}
+                                                    <div className="flex items-center gap-2 mt-1 text-red-500">
+                                                        <AlertCircle color="#db3939" />
+                                                        <FormMessage className="text-sm">
+                                                            {
+                                                                form.formState
+                                                                    .errors
+                                                                    .passPercentage
+                                                                    .message
+                                                            }
+                                                        </FormMessage>
+                                                    </div>
+                                                )}
                                         </FormItem>
                                     )}
                                 />

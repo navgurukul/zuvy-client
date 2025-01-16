@@ -23,9 +23,9 @@ export default function RootLayout({
         user && (user.rolesList.length === 0 ? 'student' : user.rolesList[0])
 
     const isAssessmentRouteClasses = (route: string) => {
-        const regex = /admin.*courses.*module.*chapters/
+        const adminRoutes = /admin.*courses.*module.*chapters/
 
-        if (regex.test(pathname || '')) {
+        if (adminRoutes.test(pathname || '')) {
             return 'overflow-hidden'
         }
         return ''
@@ -46,7 +46,7 @@ export default function RootLayout({
                 <div className={`${isAssessmentRouteClasses(pathname)}`}>
                     {!adminAssessmentPreviewRoute && <StudentNavbar />}
 
-                    <div className="pt-16 h-screen ">
+                    <div className={`${adminAssessmentPreviewRoute ? '' : 'pt-16'} h-screen`}>
                         <MaxWidthWrapper>{children}</MaxWidthWrapper>
                     </div>
                 </div>

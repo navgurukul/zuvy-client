@@ -42,8 +42,6 @@ function LoginPage({}: Props) {
             setCookie('redirectedUrl', JSON.stringify(btoa(redirectedUrl)))
         }
 
-        console.log('redirectedUrl', redirectedUrl)
-
         const sendGoogleUserData = async (token: any) => {
             try {
                 const resp = await apiMeraki.get(`/users/me`, {
@@ -124,8 +122,6 @@ function LoginPage({}: Props) {
             localStorage.setItem('loggedOut', String(false))
         }
     }, [router])
-
-    console.log('loginUrl', loginUrl)
 
     return (
         <>

@@ -10,6 +10,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
+import Image from 'next/image'
 
 const Assessment = ({
     assessmentShortInfo,
@@ -96,13 +97,20 @@ const Assessment = ({
     const isAssessmentStarted =
         assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.startedAt
 
+    const isPassed =
+        assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.isPassed
+    const marks = assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.marks
+    const percentage =
+        assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.percentage
+    const passPercentage = assessmentShortInfo?.passPercentage
+
     const isDisabled = !hasQuestions
 
     return (
-        <React.Fragment>
-            <div className="flex flex-col items-center justify-center px-4 py-8">
-                <div className="flex flex-col gap-4 text-left w-full max-w-2xl">
-                    <div className="flex items-center gap-4">
+        <div className="h-full">
+            <div className="flex flex-col items-center justify-center px-4 py-8 mt-20">
+                <div className="flex flex-col gap-4 text-left w-full max-w-lg">
+                    <div className="flex items-center justify-between gap-4 pr-10">
                         <h1 className="text-2xl font-bold text-gray-800 text-center">
                             {assessmentShortInfo?.ModuleAssessment?.title}
                         </h1>
@@ -214,25 +222,60 @@ const Assessment = ({
                             </span>
                         </p>
                     )}
-                </div>
-            </div>
-
-            <div className="mt-8 flex flex-col items-center justify-center">
-                {isAssessmentStarted ? (
-                    <>
-                        <Button
-                            onClick={handleViewResults}
-                            disabled={chapterContent.status === 'Pending'}
+                    {isAssessmentStarted && (
+                        <div
+                            className={`${
+                                isPassed
+                                    ? 'bg-green-100 border-green-500 h-[100px]'
+                                    : 'bg-red-100 border-red-500 h-[120px]'
+                            } flex justify-between mt-10 max-w-lg p-5 rounded-lg border`}
                         >
-                            View Results
-                        </Button>
-                        {isTimeOver && chapterContent.status === 'Pending' && (
+                            <div className="flex gap-3">
+                                <div className="mt-2">
+                                    <Image
+                                        src="/flag.svg"
+                                        alt="Empty State"
+                                        width={40}
+                                        height={40}
+                                    />
+                                </div>
+                                <div>
+                                    <p className="text-lg font-semibold">
+                                        Your Score: {percentage || 0}/100
+                                    </p>
+                                    <p>
+                                        {isPassed
+                                            ? 'Congratulations, you passed!'
+                                            : `You needed at least ${passPercentage} percentage to pass`}
+                                    </p>
+                                </div>
+                            </div>
+                            <Button
+                                variant="ghost"
+                                className={`${
+                                    isPassed
+                                        ? 'text-secondary hover:text-secondary'
+                                        : 'text-red-500 hover:text-red-500'
+                                } text-lg font-semibold`}
+                                onClick={handleViewResults}
+                                disabled={chapterContent.status === 'Pending'}
+                            >
+                                View Results
+                            </Button>
+                        </div>
+                    )}
+                    {isAssessmentStarted &&
+                        isTimeOver &&
+                        chapterContent.status === 'Pending' && (
                             <p className="text-red-500 mt-4">
                                 You have not submitted the assessment properly.
                             </p>
                         )}
-                    </>
-                ) : (
+                </div>
+            </div>
+
+            <div className="mt-8 flex flex-col items-center justify-center">
+                {!isAssessmentStarted && (
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -255,7 +298,7 @@ const Assessment = ({
                     </TooltipProvider>
                 )}
             </div>
-        </React.Fragment>
+        </div>
     )
 }
 

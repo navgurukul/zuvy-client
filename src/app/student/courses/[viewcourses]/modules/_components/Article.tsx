@@ -4,6 +4,7 @@ import extensions from '@/app/_components/editor/TiptapExtensions'
 import TiptapEditor from '@/app/_components/editor/TiptapEditor'
 import '@/app/_components/editor/Tiptap.css'
 import { Button } from '@/components/ui/button'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 function Article({
     content,
@@ -54,14 +55,17 @@ function Article({
     }, [status])
 
     return (
-        <>
+        <ScrollArea className='h-full'>   
+        <div className='mt-24 text-left'>
+            <h1 className='font-bold text-lg my-5'>{content?.title}</h1>
             <TiptapEditor editor={editor} />
             {!isCompleted && (
-                <div className="mt-2 text-end">
+                <div className="my-10 text-end">
                     <Button onClick={completeChapter}>Mark as Done</Button>
                 </div>
             )}
-        </>
+        </div>
+        </ScrollArea>
     )
 }
 

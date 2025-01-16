@@ -2,7 +2,7 @@
 import React, { useState, useCallback, useEffect } from 'react'
 
 import { api } from '@/utils/axios.config'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -114,13 +114,14 @@ function Quiz(props: Props) {
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
-                updateQuizChapterHandler()
-                getAllQuizQuestionHandler()
+       
             })
+           await updateQuizChapterHandler()
+           await getAllQuizQuestionHandler()
     }
 
     return (
-        <div>
+        <ScrollArea className="h-screen">
             {questions.length == 0 ? (
                 <div>
                     <h1 className="text-center font-semibold text-2xl">
@@ -142,7 +143,7 @@ function Quiz(props: Props) {
                 </div>
             ) : (
                 <div>
-                    <ScrollArea className="h-full w-full rounded-md">
+                    <div className="h-full w-full rounded-md mt-20">
                         <div className="flex flex-col justify-center items-center">
                             <div className="p-4 flex gap-y-4 flex-col items-start">
                                 <h1 className="text-xl font-semibold">
@@ -292,7 +293,7 @@ function Quiz(props: Props) {
                                 })}
                             </div>
                         </div>
-                    </ScrollArea>
+                    </div>
                     <div className="flex flex-col items-end">
                         <Button
                             disabled={!allQuestionsAnswered()}
@@ -304,7 +305,7 @@ function Quiz(props: Props) {
                     </div>
                 </div>
             )}
-        </div>
+        </ScrollArea>
     )
 }
 

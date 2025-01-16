@@ -17,31 +17,37 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { useRouter } from 'next/navigation'
-import { fetchPreviewAssessmentData } from '@/utils/admin'
+import { fetchPreviewData } from '@/utils/admin'
 
 const OpenEndedPreview = ({ params }: { params: any[] }) => {
-    const router = useRouter();
-    const [assessmentPreviewContent, setAssessmentPreviewContent] = useState<any>([]);
+    const router = useRouter()
+    const [assessmentPreviewContent, setAssessmentPreviewContent] =
+        useState<any>([])
 
     // Fetching assessment data
     useEffect(() => {
-        fetchPreviewAssessmentData(params, setAssessmentPreviewContent);
-    }, [params]);
+        fetchPreviewData(params, setAssessmentPreviewContent)
+    }, [params])
 
     // Zod schema for validation
     const formSchema = z.object({
-        answers: z.array(z.string().nonempty({ message: 'This question is required.' })),
-    });
+        answers: z.array(
+            z.string().nonempty({ message: 'This question is required.' })
+        ),
+    })
 
     // Initialize the form with react-hook-form and the Zod resolver
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
-    });
+    })
 
     return (
         <div className="px-4">
             <div className="flex items-center justify-between gap-2 mb-5">
-            <div className="flex items-center cursor-pointer" onClick={router.back}>
+                <div
+                    className="flex items-center cursor-pointer"
+                    onClick={router.back}
+                >
                     <ChevronLeft strokeWidth={2} size={24} />
                     <h1 className="font-extrabold">All Questions</h1>
                 </div>
@@ -50,35 +56,33 @@ const OpenEndedPreview = ({ params }: { params: any[] }) => {
             </div>
             <Separator />
             <Form {...form}>
-                <form
-                    className="flex flex-col items-center mt-10"
-                >
-                    {assessmentPreviewContent?.OpenEndedQuestions?.map((question:any, index:any) => (
-                        <FormField
-                            key={question.id}
-                            control={form.control}
-                            name={`answers.${index}`}
-                            render={({ field }) => (
-                                <FormItem className="flex flex-col items-start mb-10 w-full max-w-md">
-                                    <FormLabel>
-                                        {index + 1}.{' '}
-                                        {question.question}
-                                    </FormLabel>
-                                    <FormControl>
-                                        <Textarea
-                                            disabled
-                                            placeholder="Type your answer here..."
-                                            className="w-full"
-                                            value={field.value}
-                                            onChange={field.onChange}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    ))}
-
+                <form className="flex flex-col items-center mt-10">
+                    {assessmentPreviewContent?.OpenEndedQuestions?.map(
+                        (question: any, index: any) => (
+                            <FormField
+                                key={question.id}
+                                control={form.control}
+                                name={`answers.${index}`}
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-col items-start mb-10 w-full max-w-md">
+                                        <FormLabel>
+                                            {index + 1}. {question.question}
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Textarea
+                                                disabled
+                                                placeholder="Type your answer here..."
+                                                className="w-full"
+                                                value={field.value}
+                                                onChange={field.onChange}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        )
+                    )}
                 </form>
             </Form>
         </div>

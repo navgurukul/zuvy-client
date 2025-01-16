@@ -31,7 +31,7 @@ export default function EditProfile({}: Props) {
     },
   });
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+
   }
   return (
     <div className=' '>

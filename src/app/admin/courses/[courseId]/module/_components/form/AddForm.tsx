@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input'
 import FormSection from './FormSection'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import {
     Form,
     FormControl,
@@ -22,6 +22,9 @@ import {
     FormLabel,
     FormMessage,
 } from '@/components/ui/form'
+import { getChapterUpdateStatus, getFormPreviewStore } from '@/store/store'
+import { Eye } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 // import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 
 type AddFormProps = {
@@ -29,6 +32,7 @@ type AddFormProps = {
     content: any
     // fetchChapterContent: any
     moduleId: any
+    courseId: any
 }
 
 interface chapterDetails {
@@ -62,7 +66,12 @@ const AddForm: React.FC<AddFormProps> = ({
     content,
     // fetchChapterContent,
     moduleId,
+    courseId,
 }) => {
+    const router = useRouter()
+    const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
+    const { setFormPreviewContent } = getFormPreviewStore()
+    const [titles, setTitles] = useState(content?.title || '')
     // const heightClass = useResponsiveHeight()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -82,11 +91,12 @@ const AddForm: React.FC<AddFormProps> = ({
                     : [
                           {
                               //   id: 'initial-1',
+                              questionType: 'Multiple Choice',
                               id: 'new-1',
                               question: 'Question 1',
                               typeId: 1,
                               isRequired: true,
-                              options: ['Op1'],
+                              options: ['', ''],
                           },
                       ],
         },
@@ -106,11 +116,12 @@ const AddForm: React.FC<AddFormProps> = ({
                     : [
                           {
                               //   id: 'initial-1',
+                              questionType: 'Multiple Choice',
                               id: 'new-1',
                               question: 'Question 1',
                               typeId: 1,
                               isRequired: true,
-                              options: ['Op1'],
+                              options: ['', ''],
                           },
                       ],
         },
@@ -123,7 +134,7 @@ const AddForm: React.FC<AddFormProps> = ({
             questionType: 'Multiple Choice',
             typeId: 1,
             question: '',
-            options: [''],
+            options: ['', ''],
             isRequired: false,
             id: `new-${Date.now()}`,
         }
@@ -263,6 +274,7 @@ const AddForm: React.FC<AddFormProps> = ({
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
+            setIsChapterUpdated(!isChapterUpdated)
         } catch (error: any) {
             toast({
                 title: 'Failed',
@@ -274,16 +286,18 @@ const AddForm: React.FC<AddFormProps> = ({
         }
     }
 
+    function previewForm() {
+        if (content) {
+            setFormPreviewContent(content)
+            router.push(
+                `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/form/${content.topicId}/preview`
+            )
+        }
+    }
+
     return (
-        <ScrollArea
-            // className="h-[600px] lg:h-[600px] pr-4"
-            // className={`${heightClass} pr-4`}
-            type="hover"
-            style={{
-                scrollbarWidth: 'none', // Firefox
-                msOverflowStyle: 'none', // IE and Edge
-            }}
-        >
+        <ScrollArea className="h-dvh pr-4 pb-24" type="hover">
+            <ScrollBar className="h-dvh " orientation="vertical" />
             <div className="flex flex-col gap-y-8 mx-auto px-5 items-center justify-center w-1/2">
                 <Form {...form}>
                     <form
@@ -296,22 +310,52 @@ const AddForm: React.FC<AddFormProps> = ({
                             render={({ field }) => (
                                 <FormItem>
                                     <FormControl>
-                                        <div className="w-2/6 flex justify-center align-middle items-center relative">
-                                            <Input
-                                                required
-                                                {...field}
-                                                placeholder="Untitled Form"
-                                                className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
-                                                autoFocus
-                                            />
-                                            <Pencil
-                                                fill="true"
-                                                fillOpacity={0.4}
-                                                size={20}
-                                                className="absolute text-gray-100 pointer-events-none mt-1 right-5"
-                                            />
+                                        <div className="flex justify-between items-center">
+                                            <div className="w-2/6 flex justify-center align-middle items-center relative">
+                                                <Input
+                                                    required
+                                                    {...field}
+                                                    onChange={(e) => {
+                                                        setTitles(
+                                                            e.target.value
+                                                        )
+                                                        field.onChange(e)
+                                                    }}
+                                                    placeholder="Untitled Form"
+                                                    className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                                                    autoFocus
+                                                />
+                                                {!titles && (
+                                                    <Pencil
+                                                        fill="true"
+                                                        fillOpacity={0.4}
+                                                        size={20}
+                                                        className="absolute text-gray-100 pointer-events-none mt-2 right-3"
+                                                    />
+                                                )}
+                                            </div>
+                                            <div className="flex justify-start">
+                                                <Button
+                                                    type="submit"
+                                                    className="w-3/3"
+                                                >
+                                                    Save
+                                                </Button>
+                                            </div>
                                         </div>
                                     </FormControl>
+                                    <div className="flex items-center justify-between">
+                                        <div
+                                            id="previewForm"
+                                            onClick={previewForm}
+                                            className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer"
+                                        >
+                                            <Eye size={18} />
+                                            <h6 className="ml-1 text-sm">
+                                                Preview
+                                            </h6>
+                                        </div>
+                                    </div>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -328,7 +372,7 @@ const AddForm: React.FC<AddFormProps> = ({
                                         <Input
                                             {...field}
                                             className="w-[450px] px-3 py-2 border rounded-md"
-                                            placeholder="Placeholder"
+                                            placeholder="Add Description"
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -355,11 +399,6 @@ const AddForm: React.FC<AddFormProps> = ({
                                 className="gap-x-2 border-none hover:text-secondary hover:bg-popover"
                             >
                                 <Plus /> Add Question
-                            </Button>
-                        </div>
-                        <div className="flex justify-start">
-                            <Button type="submit" className="w-1/3">
-                                Save
                             </Button>
                         </div>
                     </form>

@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { XCircle } from 'lucide-react'
-import { cn, difficultyColor, ellipsis } from '@/lib/utils'
+import { cn, difficultyBgColor, difficultyColor, ellipsis } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { handleSaveChapter } from '@/utils/admin'
+import { getChapterUpdateStatus } from '@/store/store'
+import { Separator } from '@/components/ui/separator'
+import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
+import QuestionDescriptionModal from '../Assessment/QuestionDescriptionModal'
 
 const SelectedProblems = ({
     selectedQuestions,
@@ -13,27 +17,15 @@ const SelectedProblems = ({
     content,
     moduleId,
     chapterTitle,
+    tags
 }: {
     selectedQuestions: any
     setSelectedQuestions: any
     content: any
     moduleId: string
     chapterTitle: string
+    tags: any
 }) => {
-    const handleClick = () => {
-        handleSaveChapter(
-            moduleId,
-            content.id,
-            chapterTitle
-                ? {
-                      title: chapterTitle,
-                      codingQuestions: selectedQuestions[0]?.id,
-                  }
-                : {
-                      codingQuestions: selectedQuestions[0]?.id,
-                  }
-        )
-    }
 
     const handleRemoveLastQuestion = () => {
         setSelectedQuestions([])
@@ -42,80 +34,81 @@ const SelectedProblems = ({
             content.id,
             chapterTitle
                 ? {
-                      title: chapterTitle,
-                      codingQuestions: null,
-                  }
+                    title: chapterTitle,
+                    codingQuestions: null,
+                }
                 : {
-                      codingQuestions: selectedQuestions[0]?.id,
-                  }
+                    codingQuestions: selectedQuestions[0]?.id,
+                }
         )
     }
-    // async function handleSaveChapter() {
-    //     const response = await api.put(
-    //         `/Content/editChapterOfModule/${moduleId}?chapterId=${content.id}`,
-    //         chapterTitle
-    //             ? {
-    //                   title: chapterTitle,
-    //                   codingQuestions: selectedQuestions[0]?.id,
-    //               }
-    //             : {
-    //                   codingQuestions: selectedQuestions[0]?.id,
-    //               }
-    //     )
-    //     if (response) {
-    //         toast({
-    //             title: 'Success',
-    //             description: 'Chapter edited successfully',
-    //             className:
-    //                 'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
-    //         })
-    //     }
-    // }
 
     return (
-        <div className="ml-5 pl-5 border-l-2 text-start">
-            <h2 className="font-semibold mb-5">Selected Coding Problems</h2>
-            <div>
-                {selectedQuestions?.map((selectedQuestion: any, index: any) => (
-                    <div
-                        key={index}
-                        className="flex justify-between items-start mb-7"
-                    >
-                        <div>
-                            <div className="flex items-center gap-2">
-                                <h3 className="font-bold text-lg">
-                                    {selectedQuestion.title}
-                                </h3>
-                                <span
-                                    className={cn(
-                                        `font-semibold text-secondary`,
-                                        difficultyColor(
-                                            selectedQuestion.difficulty
-                                        )
-                                    )}
-                                >
-                                    {selectedQuestion.difficulty}
-                                </span>
-                            </div>
-                            <p className=" text-gray-600 mt-1">
-                                {ellipsis(selectedQuestion.description, 50)}
-                            </p>
-                            <Link
-                                href={''}
-                                className="text-sm font-semibold mt-1 text-secondary"
-                            >
-                                View Full Description
-                            </Link>
-                        </div>
-                        <XCircle
-                            className="text-destructive ml-5 cursor-pointer"
-                            size={20}
-                            onClick={handleRemoveLastQuestion}
-                        />
+        <div className="flex w-full">
+            <Separator orientation='vertical' className='w-0.5 h-96 mx-2' />
+            <div className="text-start w-full">
+                <h2 className="font-bold mb-5">Selected Coding Problems</h2>
+                {selectedQuestions?.length > 0 ? (
+                    <div className="w-full">
+                        {selectedQuestions?.map((selectedQuestion: any, index: any) => {
+                            const selectedTagName = tags?.filter(
+                                (tag: any) => tag.id == selectedQuestion?.tagId
+                            )
+                            return (
+                                <div key={selectedQuestion?.id}>
+                                    <div className="flex items-center gap-2 justify-between w-full">
+                                        <h3 className="font-bold text-lg">
+                                            {selectedQuestion.title}
+                                        </h3>
+                                        <div className='flex gap-2 items-center'>
+                                            <span className="text-sm text-[#518672] bg-[#DCE7E3] py-1 rounded-2xl px-2">
+                                                {selectedTagName[0]?.tagName}
+                                            </span>
+                                            <span
+                                                className={cn(
+                                                    `text-sm rounded-xl p-1 `,
+                                                    difficultyColor(
+                                                        selectedQuestion?.difficulty
+                                                    ), // Text color
+                                                    difficultyBgColor(
+                                                        selectedQuestion?.difficulty
+                                                    ) // Background color
+                                                )}
+                                            >
+                                                {selectedQuestion.difficulty}
+                                            </span>
+
+                                            <XCircle
+                                                className="text-destructive cursor-pointer"
+                                                size={20}
+                                                onClick={handleRemoveLastQuestion}
+                                            />
+                                        </div>
+                                    </div>
+                                    <p className=" text-gray-600 mt-1 mb-2">
+                                        {ellipsis(selectedQuestion.description, 60)}
+                                    </p>
+                                    <Dialog>
+                                        <DialogTrigger asChild>
+                                            <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer">
+                                                View Full Description
+                                            </p>
+                                        </DialogTrigger>
+                                        <DialogOverlay />
+                                        <QuestionDescriptionModal
+                                            question={selectedQuestion}
+                                            type="coding"
+                                        />
+                                    </Dialog>
+                                </div>
+                            )
+
+                        })}
                     </div>
-                ))}
-                {selectedQuestions?.length > 0 && (
-                    <Button onClick={handleClick}>Save</Button>
+                ) : (
+                    <div>
+                        <p className="text-gray-600 italic">No problems selected</p>
+                    </div>
                 )}
             </div>
         </div>

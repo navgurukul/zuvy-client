@@ -7,7 +7,7 @@ import {
     ResizablePanel,
     ResizableHandle,
 } from '@/components/ui/resizable'
-import { Code, Lock, Play, Upload } from 'lucide-react'
+import { ChevronLeft, Code, Lock, Play, Upload } from 'lucide-react'
 import { useLazyLoadedStudentData } from '@/store/store'
 import { api } from '@/utils/axios.config'
 import Editor from '@monaco-editor/react'
@@ -25,7 +25,18 @@ import {
 import SubmissionsList from '../_components/submissions-list'
 import { b64DecodeUnicode, b64EncodeUnicode } from '@/utils/base64'
 import { usePathname } from 'next/navigation'
-import { useParams } from 'next/navigation'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import { Spinner } from '@/components/ui/spinner'
 
 interface questionDetails {
     title: string
@@ -49,7 +60,6 @@ const IDE: React.FC<IDEProps> = ({
     selectedCodingOutsourseId,
 }) => {
     const pathname = usePathname()
-    const { viewcourses, moduleID, chapterID } = useParams()
     const [questionDetails, setQuestionDetails] = useState<questionDetails>({
         title: '',
         description: '',
@@ -67,6 +77,7 @@ const IDE: React.FC<IDEProps> = ({
     const [templates, setTemplates] = useState<any>([])
     const [examples, setExamples] = useState<any>([])
     const [isSubmitted, setIsSubmitted] = useState(false)
+    const [loading, setLoading] = useState(false)
     const router = useRouter()
     const { toast } = useToast()
 
@@ -111,6 +122,7 @@ const IDE: React.FC<IDEProps> = ({
         action: string
     ) => {
         e.preventDefault()
+        setLoading(true)
 
         if (admin) return
 
@@ -131,9 +143,6 @@ const IDE: React.FC<IDEProps> = ({
             )
             if (action === 'submit') {
                 setIsSubmitted(true)
-                await api.post(
-                    `tracking/updateChapterStatus/${viewcourses}/${moduleID}?chapterId=${chapterID}`
-                )
             }
             setResult(
                 response.data.data[0].stdOut ||
@@ -163,17 +172,19 @@ const IDE: React.FC<IDEProps> = ({
                 })
             }
             setCodeError('')
+            setLoading(false)
         } catch (error: any) {
+            setLoading(false)
             toast({
                 title: 'Failed',
                 description:
-                    error.response?.data?.message || 'An error occurred.',
+                    error.response?.data?.message || 'Network connection lost.',
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
             setCodeError(
                 error.response?.data?.data?.[0]?.stderr ||
-                    'Error occurred during submission.'
+                    'Error occurred during submission. Network connection lost.'
             )
         }
     }
@@ -212,32 +223,58 @@ const IDE: React.FC<IDEProps> = ({
             setCurrentCode(b64DecodeUnicode(templates?.[language]?.template))
         }
     }, [language])
-
+    //
     return (
         <div>
             <div className="flex justify-between mb-2">
                 <div>
-                    <Button variant="ghost" size="icon" onClick={handleBack}>
-                        <ArrowLeft className="h-5 w-5" />
-                    </Button>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                                <ArrowLeft className="h-5 w-5" />
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                    Are you absolutely sure?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This action cannot be undone. If you have
+                                    not submitted your solution, it will be
+                                    lost.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                    className="bg-red-500"
+                                    onClick={handleBack}
+                                >
+                                    Go Back
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                     <SubmissionsList questionId={params.editor} />
                 </div>
+
                 <div>
                     <Button
                         onClick={(e) => handleSubmit(e, 'run')}
                         size="sm"
                         className="mr-2"
-                        disabled={codePanel && isSubmitted}
+                        disabled={loading || (codePanel && isSubmitted)}
                     >
-                        <Play size={20} />
+                        {loading ? <Spinner /> : <Play size={20} />}
                         <span className="ml-2 text-lg font-bold">Run</span>
                     </Button>
                     <Button
                         onClick={(e) => handleSubmit(e, 'submit')}
                         size="sm"
-                        disabled={codePanel && isSubmitted}
+                        disabled={loading || (codePanel && isSubmitted)}
                     >
-                        <Upload size={20} />
+                        {loading ? <Spinner /> : <Upload size={20} />}
                         <span className="ml-2 text-lg font-bold">Submit</span>
                     </Button>
                 </div>
@@ -250,7 +287,7 @@ const IDE: React.FC<IDEProps> = ({
                 >
                     <ResizablePanel defaultSize={50}>
                         <div className="flex h-[90vh]">
-                            <div className="w-full max-w-12xl p-2  bg-muted text-left">
+                            <div className="w-full max-w-12xl p-2 bg-muted text-left">
                                 <div className="p-2">
                                     <h1 className="text-xl font-bold">
                                         {questionDetails?.title}
@@ -315,7 +352,7 @@ const IDE: React.FC<IDEProps> = ({
                         <ResizablePanelGroup direction="vertical">
                             <ResizablePanel defaultSize={70}>
                                 <div className="flex h-full">
-                                    <div className="w-full max-w-5xl bg-muted p-2">
+                                    <div className="w-full max-w-9xl bg-muted p-2">
                                         <form>
                                             <div>
                                                 <div className="flex justify-between p-2">
@@ -360,7 +397,7 @@ const IDE: React.FC<IDEProps> = ({
                                                     </Select>
                                                 </div>
                                                 <Editor
-                                                    height="52vh"
+                                                    height="90vh"
                                                     language={language}
                                                     theme="vs-dark"
                                                     value={currentCode}
@@ -369,6 +406,9 @@ const IDE: React.FC<IDEProps> = ({
                                                     }
                                                     className="p-2"
                                                     defaultValue="Please select a language above!"
+                                                    options={{
+                                                        wordWrap: 'on',
+                                                    }}
                                                 />
                                             </div>
                                         </form>
@@ -377,38 +417,86 @@ const IDE: React.FC<IDEProps> = ({
                             </ResizablePanel>
                             <ResizableHandle withHandle />
                             <ResizablePanel className="" defaultSize={40}>
-                                <div className="flex h-full">
-                                    <div className="w-full max-w-5xl bg-muted p-2 mx-2">
+                                <div className="flex h-full ">
+                                    <div className="w-full max-w-9xl bg-muted px-4 py-2">
                                         <div className="flex justify-between p-2 bg-gray-800 border-b border-gray-700">
                                             <p className="text-lg text-gray-300">
                                                 Output Window
                                             </p>
                                         </div>
-                                        <div className="h-full p-4 text-start text-gray-100 overflow-y-auto font-mono bg-gray-900 border border-gray-700 rounded-b-lg">
-                                            <p className="font-mono text-destructive">
-                                                {codeError && codeError}
-                                            </p>
-                                            {codeResult?.map(
-                                                (testCase: any, index: any) => (
-                                                    <div
-                                                        key={index}
-                                                        className="shadow-sm rounded-lg p-4 my-4 bg-gray-800 border border-gray-700"
-                                                    >
-                                                        {index < 2 ? (
-                                                            <>
-                                                                <h2 className="text-xl font-semibold mb-2 text-gray-300">
-                                                                    Test Case{' '}
-                                                                    {index + 1}
-                                                                </h2>
-                                                                <p className="text-gray-300">
-                                                                    <span className="font-medium text-gray-400">
-                                                                        Your
-                                                                        Output:
-                                                                    </span>
-                                                                    {testCase?.stdOut ||
-                                                                        testCase?.stdout}
-                                                                </p>
 
+                                        <div className="h-full p-4 text-start text-gray-100 overflow-y-auto font-mono bg-gray-900 border border-gray-700 rounded-b-lg">
+                                            {loading && (
+                                                <div className="flex justify-center items-center my-4">
+                                                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                                                    <span className="ml-2 text-lg text-gray-500">
+                                                        Processing...
+                                                    </span>
+                                                </div>
+                                            )}
+                                            <p className="font-mono text-destructive">
+                                                {!loading &&
+                                                    codeError &&
+                                                    codeError}
+                                            </p>
+                                            {!loading &&
+                                                codeResult?.map(
+                                                    (
+                                                        testCase: any,
+                                                        index: any
+                                                    ) => (
+                                                        <div
+                                                            key={index}
+                                                            className="shadow-sm rounded-lg p-4 my-4 bg-gray-800 border border-gray-700"
+                                                        >
+                                                            {index < 2 ? (
+                                                                <>
+                                                                    <h2 className="text-xl font-semibold mb-2 text-gray-300">
+                                                                        Test
+                                                                        Case{' '}
+                                                                        {index +
+                                                                            1}
+                                                                    </h2>
+                                                                    <p className="text-gray-300 whitespace-normal break-words">
+                                                                        <span className="font-medium text-gray-400">
+                                                                            Your
+                                                                            Output:
+                                                                        </span>
+                                                                        {testCase?.stdOut ||
+                                                                            testCase?.stdout}
+                                                                    </p>
+
+                                                                    <p
+                                                                        className={`text-gray-300 ${
+                                                                            testCase.status ===
+                                                                            'Accepted'
+                                                                                ? 'text-green-500'
+                                                                                : 'text-red-500'
+                                                                        }`}
+                                                                    >
+                                                                        Status:{' '}
+                                                                        {
+                                                                            testCase.status
+                                                                        }
+                                                                    </p>
+                                                                    <p
+                                                                        className={`text-gray-300`}
+                                                                    >
+                                                                        Memory:{' '}
+                                                                        {
+                                                                            testCase.memory
+                                                                        }
+                                                                    </p>
+                                                                    <p
+                                                                        className={`text-gray-300`}
+                                                                    >
+                                                                        Time:{' '}
+                                                                        {
+                                                                            testCase.time
+                                                                        }
+                                                                    </p>
+                                                                </>
+                                                            ) : (
                                                                 <p
                                                                     className={`text-gray-300 ${
                                                                         testCase.status ===
@@ -417,48 +505,17 @@ const IDE: React.FC<IDEProps> = ({
                                                                             : 'text-red-500'
                                                                     }`}
                                                                 >
-                                                                    Status:{' '}
+                                                                    Test Case{' '}
+                                                                    {index + 1}{' '}
+                                                                    status:{' '}
                                                                     {
                                                                         testCase.status
                                                                     }
                                                                 </p>
-                                                                <p
-                                                                    className={`text-gray-300`}
-                                                                >
-                                                                    Memory:{' '}
-                                                                    {
-                                                                        testCase.memory
-                                                                    }
-                                                                </p>
-                                                                <p
-                                                                    className={`text-gray-300`}
-                                                                >
-                                                                    Time:{' '}
-                                                                    {
-                                                                        testCase.time
-                                                                    }
-                                                                </p>
-                                                            </>
-                                                        ) : (
-                                                            <p
-                                                                className={`text-gray-300 ${
-                                                                    testCase.status ===
-                                                                    'Accepted'
-                                                                        ? 'text-green-500'
-                                                                        : 'text-red-500'
-                                                                }`}
-                                                            >
-                                                                Test Case{' '}
-                                                                {index + 1}{' '}
-                                                                status:{' '}
-                                                                {
-                                                                    testCase.status
-                                                                }
-                                                            </p>
-                                                        )}
-                                                    </div>
-                                                )
-                                            )}
+                                                            )}
+                                                        </div>
+                                                    )
+                                                )}
                                         </div>
                                     </div>
                                 </div>

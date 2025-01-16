@@ -248,6 +248,7 @@ const CodingProblems = () => {
             searchTerm,
             selectedOptions,
             difficulty,
+            setTotalCodingQuestion,
             // selectedDifficulty,
             debouncedSearch,
             isCodingDialogOpen,
@@ -256,35 +257,15 @@ const CodingProblems = () => {
             offset,
         ]
     )
-    console.log('Search Term:', searchTerm)
 
     useEffect(() => {
         getAllCodingQuestions(setAllCodingQuestions)
         fetchCodingQuestions(offset)
-        // filteredCodingQuestions(
-        //     offset,
-        //     setCodingQuestions,
-        //     difficulty,
-        //     selectedOptions,
-        //     selectedLanguage,
-        //     debouncedSearch,
-        //     position,
-        //     setLastPage,
-        //     setTotalPages,
-        //     setTotalCodingQuestion
-        // )
-        // filterQuestions(
-        //     setCodingQuestions,
-        //     selectedDifficulty,
-        //     selectedOptions,
-        //     selectedLanguage,
-        //     debouncedSearch,
-        //     'coding'
-        // )
     }, [
         searchTerm,
         selectedOptions,
         difficulty,
+        setTotalCodingQuestion,
         // selectedDifficulty,
         debouncedSearch,
         isCodingDialogOpen,

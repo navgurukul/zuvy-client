@@ -90,7 +90,7 @@ export function DataTablePagination<TData>({
         } else {
             fetchStudentData((currentPage - 1) * +position)
         }
-    }, [position])
+    }, [position, totalStudents, currentPage])
 
     return (
         <div className="flex items-center justify-end mt-2 px-2 gap-x-2">

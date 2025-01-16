@@ -43,7 +43,7 @@ const CodingQuestions = ({
 }) => {
     return (
         <ScrollArea className="h-3/5  w-full pr-5 pb-32 ">
-            <ScrollBar orientation="vertical" className="h-3/4" />
+            {/* <ScrollBar orientation="vertical" className="h-3/4" /> */}
             <div className="h-screen">
                 {questions.map((question: CodingQuestion) => {
                     const tag = tags?.find(
@@ -52,7 +52,7 @@ const CodingQuestions = ({
                     return (
                         <div
                             key={question.id}
-                            className="p-5 rounded-sm border-b border-gray-200 mb-4"
+                            className="py-5 pr-5 pl-2 rounded-sm border-b border-gray-200 mb-4"
                         >
                             <div className="flex justify-between text-start items-center w-full">
                                 <div className="w-full">

@@ -16,6 +16,7 @@ import {
     getModuleData,
     getCurrentChapterState,
     getTopicId,
+    getActiveChapter,
 } from '@/store/store'
 import { Spinner } from '@/components/ui/spinner'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -55,7 +56,8 @@ export default function Page({
     const [chapterId, setChapterId] = useState<number>(0)
     const [activeChapterTitle, setActiveChapterTitle] = useState('')
     const { currentChapter, setCurrentChapter } = getCurrentChapterState()
-    const [activeChapter, setActiveChapter] = useState(chapter_id)
+    // const [activeChapter, setActiveChapter] = useState(chapter_id)
+    const { activeChapter, setActiveChapter } = getActiveChapter(chapter_id)()
     const { topicId } = getTopicId()
     const [key, setKey] = useState(0)
     const [loading, setLoading] = useState(true)
@@ -99,8 +101,8 @@ export default function Page({
     )
 
     useEffect(() => {
-        if (chapterData.length > 0) {
-            fetchChapterContent(chapter_id, topicId)
+        if (chapterData.length > 0 && topicId != null) {
+            fetchChapterContent(activeChapter, topicId)
         } else {
             setActiveChapter(0)
             setChapterContent([])
@@ -114,8 +116,8 @@ export default function Page({
         fetchChapterContent,
         articleUpdateOnPreview,
         assignmentUpdateOnPreview,
-        ,
-        topicId,
+        // topicId,
+        // chapter_id,
     ])
 
     const renderChapterContent = () => {
@@ -140,6 +142,7 @@ export default function Page({
                             <AddVideo
                                 key={chapterId}
                                 moduleId={moduleID}
+                                courseId={courseId}
                                 content={chapterContent}
                                 fetchChapterContent={fetchChapterContent}
                             />
@@ -150,6 +153,7 @@ export default function Page({
                         <AddArticle
                             key={chapterId}
                             content={chapterContent}
+                            courseId={courseId}
                             articleUpdateOnPreview={articleUpdateOnPreview}
                             setArticleUpdateOnPreview={
                                 setArticleUpdateOnPreview
@@ -161,6 +165,7 @@ export default function Page({
                         <CodingChallenge
                             key={chapterId}
                             moduleId={moduleID}
+                            courseId={courseId}
                             content={chapterContent}
                             activeChapterTitle={activeChapterTitle}
                         />
@@ -171,7 +176,9 @@ export default function Page({
                             key={chapterId}
                             chapterId={chapterId}
                             moduleId={moduleID}
+                            courseId={courseId}
                             content={chapterContent}
+                            activeChapterTitle={activeChapterTitle}
                         />
                     )
                 case 5:
@@ -179,6 +186,7 @@ export default function Page({
                         <Assignment
                             key={chapterId}
                             content={chapterContent}
+                            courseId={courseId}
                             assignmentUpdateOnPreview={
                                 assignmentUpdateOnPreview
                             }
@@ -190,33 +198,25 @@ export default function Page({
                 case 6:
                     return (
                         <AddAssessment
-                            key={chapterId}
+                            key={Number(chapterID)}
                             chapterData={currentChapter}
                             content={chapterContent}
                             fetchChapterContent={fetchChapterContent}
                             moduleId={moduleID}
                             topicId={topicId}
+                            activeChapterTitle={activeChapterTitle}
                         />
                     )
                 case 7:
                     return (
-                        <ScrollArea
-                            // className="h-[600px] lg:h-[600px] pr-4"
-                            className={`${heightClass} pr-4`}
-                            type="hover"
-                            style={{
-                                scrollbarWidth: 'none', // Firefox
-                                msOverflowStyle: 'none', // IE and Edge
-                            }}
-                        >
-                            <AddForm
-                                key={chapterId}
-                                chapterData={currentChapter}
-                                content={chapterContent}
-                                // fetchChapterContent={fetchChapterContent}
-                                moduleId={moduleID}
-                            />
-                        </ScrollArea>
+                        <AddForm
+                            key={chapterId}
+                            chapterData={currentChapter}
+                            content={chapterContent}
+                            // fetchChapterContent={fetchChapterContent}
+                            moduleId={moduleID}
+                            courseId={courseId}
+                        />
                     )
                 default:
                     return <h1>Create New Chapter</h1>

@@ -16,6 +16,7 @@ import { DataTablePagination } from '@/app/_components/datatable/data-table-pagi
 import useDebounce from '@/hooks/useDebounce'
 import { Spinner } from '@/components/ui/spinner'
 import { toast } from '@/components/ui/use-toast'
+import ClassCardSkeleton from '../../_components/classCardSkeleton'
 
 type ClassType = 'active' | 'upcoming' | 'complete'
 
@@ -80,11 +81,13 @@ function Page({ params }: any) {
         async (offset: number) => {
             let baseUrl = `/classes/all/${params.courseId}?limit=${position}&offset=${offset}`
 
+            const lastUpdatedTab = localStorage.getItem('sessionTab')
+
             if (batchId) {
                 baseUrl += `&batchId=${batchId}`
             }
 
-            baseUrl += `&status=${activeTab}`
+            baseUrl += `&status=${lastUpdatedTab || activeTab}`
 
             if (debouncedSearch) {
                 baseUrl += `&searchTerm=${encodeURIComponent(debouncedSearch)}`
@@ -92,7 +95,11 @@ function Page({ params }: any) {
 
             try {
                 const res = await api.get(baseUrl)
-                setClasses(res.data.classes)
+                if (activeTab === res.data?.classes[0]?.status) {
+                    setClasses(res.data.classes)
+                } else {
+                    setClasses([])
+                }
                 setTotalStudents(res.data.total_items)
                 setPages(res.data.total_pages)
                 setLastPage(res.data.total_items)
@@ -113,7 +120,7 @@ function Page({ params }: any) {
                         setStudents(res.data.totalNumberOfStudents)
                     })
             } catch (error) {
-                console.log(error)
+                console.error(error)
             }
         }
 
@@ -138,7 +145,7 @@ function Page({ params }: any) {
                     }, delay)
                     timeouts.push(timeout)
                 } else {
-                    console.log('Start time is in the past for', item.time)
+                    console.error('Start time is in the past for', item.time)
                 }
             })
         }
@@ -162,7 +169,7 @@ function Page({ params }: any) {
                     setBootcampData(transformedData)
                 })
                 .catch((error) => {
-                    console.log('Error fetching data:', error)
+                    console.error('Error fetching data:', error)
                 })
         }
     }, [params.courseId])
@@ -206,7 +213,7 @@ function Page({ params }: any) {
                     </div>
                 </div>
             ) : (
-                <div>
+                <div className="">
                     <div className="relative flex text-start gap-6 my-6 w-[200px]">
                         <Combobox
                             data={bootcampData}
@@ -260,44 +267,74 @@ function Page({ params }: any) {
                     ) : (
                         <div>
                             {classes.length > 0 ? (
-                                <>
+                                activeTab === classes[0].status ? (
+                                    <>
+                                        <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
+                                            {classes.map(
+                                                (classData: any, index: any) =>
+                                                    activeTab ===
+                                                    classData.status ? (
+                                                        activeTab ===
+                                                        'completed' ? (
+                                                           <div  key={classData}>
+                                                             <RecordingCard
+                                                                classData={
+                                                                    classData
+                                                                }
+                                                               
+                                                                isAdmin
+                                                            />
+                                                           </div>
+                                                        ) : (
+                                                          <div key={classData}>
+                                                              <ClassCard
+                                                                classData={
+                                                                    classData
+                                                                }
+                                                    
+                                                                classType={
+                                                                    activeTab
+                                                                }
+                                                                getClasses={
+                                                                    getHandleAllClasses
+                                                                }
+                                                                activeTab={
+                                                                    activeTab
+                                                                }
+                                                                studentSide={
+                                                                    false
+                                                                }
+                                                            />
+                                                          </div>
+                                                        )
+                                                    ) : (
+                                                        <div key={classData}>
+                                                            <ClassCardSkeleton />
+                                                        </div>
+                                                    )
+                                            )}
+                                        </div>
+                                        <DataTablePagination
+                                            totalStudents={totalStudents}
+                                            position={position}
+                                            setPosition={setPosition}
+                                            pages={pages}
+                                            lastPage={lastPage}
+                                            currentPage={currentPage}
+                                            setCurrentPage={setCurrentPage}
+                                            fetchStudentData={
+                                                getHandleAllClasses
+                                            }
+                                            setOffset={setOffset}
+                                        />
+                                    </>
+                                ) : (
                                     <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
-                                        {classes.map(
-                                            (classData: any, index: any) =>
-                                                activeTab === 'completed' ? (
-                                                    <RecordingCard
-                                                        classData={classData}
-                                                        key={index}
-                                                        isAdmin
-                                                    />
-                                                ) : (
-                                                    <ClassCard
-                                                        classData={classData}
-                                                        key={index}
-                                                        classType={activeTab}
-                                                        getClasses={
-                                                            getHandleAllClasses
-                                                        }
-                                                        activeTab={activeTab}
-                                                        studentSide={false}
-                                                    />
-                                                )
-                                        )}
+                                        <ClassCardSkeleton />
                                     </div>
-                                    <DataTablePagination
-                                        totalStudents={totalStudents}
-                                        position={position}
-                                        setPosition={setPosition}
-                                        pages={pages}
-                                        lastPage={lastPage}
-                                        currentPage={currentPage}
-                                        setCurrentPage={setCurrentPage}
-                                        fetchStudentData={getHandleAllClasses}
-                                        setOffset={setOffset}
-                                    />
-                                </>
+                                )
                             ) : (
-                                <div className="w-full flex mb-10 items-center flex-col gap-y-3 justify-center absolute text-center mt-2">
+                                <div className="w- flex mb-10 items-center flex-col gap-y-3 justify-center text-center mt-2">
                                     <Image
                                         src={
                                             '/emptyStates/undraw_online_learning_re_qw08.svg'

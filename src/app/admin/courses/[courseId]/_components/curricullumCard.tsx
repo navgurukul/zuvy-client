@@ -72,7 +72,7 @@ const CurricullumCard = ({
                     : 0
             )
         } catch (error) {
-            console.log(error)
+            console.error(error)
         }
     }, [])
 

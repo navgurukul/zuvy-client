@@ -38,7 +38,12 @@ import {
 } from '@/components/ui/popover'
 import { Calendar } from '@/components/ui/calendar'
 import PreviewAssignment from './PreviewAssignment'
-
+import {
+    getChapterUpdateStatus,
+    getAssignmentPreviewStore,
+} from '@/store/store'
+import { Eye } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 interface ContentDetail {
     title: string
     description: string | null
@@ -57,12 +62,14 @@ interface Content {
 
 interface AssignmentProps {
     content: Content
+    courseId: any
     assignmentUpdateOnPreview: boolean
     setAssignmentUpdateOnPreview: React.Dispatch<React.SetStateAction<boolean>> // Correct type for setter
 }
 
 const AddAssignent = ({
     content,
+    courseId,
     assignmentUpdateOnPreview,
     setAssignmentUpdateOnPreview,
 }: AssignmentProps) => {
@@ -85,9 +92,7 @@ const AddAssignent = ({
     }
 
     const formSchema = z.object({
-        title: z.string().min(2, {
-            message: 'Title must be at least 2 characters.',
-        }),
+        title: z.string(),
         startDate: z.date({
             required_error: 'A start date is required.',
         }),
@@ -98,8 +103,11 @@ const AddAssignent = ({
         content,
     })
 
+    const router = useRouter()
     const [title, setTitle] = useState('')
     const [titles, setTitles] = useState('')
+    const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
+    const { setAssignmentPreviewContent } = getAssignmentPreviewStore()
 
     const form = useForm({
         resolver: zodResolver(formSchema),
@@ -120,6 +128,7 @@ const AddAssignent = ({
             )
             const contentDetails = response.data.contentDetails[0]
             setTitle(contentDetails.title)
+            setTitles(contentDetails.title)
             contentDetails &&
                 editor?.commands.setContent(contentDetails.content)
         } catch (error) {
@@ -155,6 +164,7 @@ const AddAssignent = ({
                 requestBody
             )
             setAssignmentUpdateOnPreview(!assignmentUpdateOnPreview)
+            setIsChapterUpdated(!isChapterUpdated)
             toast({
                 title: 'Success',
                 description: 'Assignment Chapter Edited Successfully',
@@ -178,34 +188,40 @@ const AddAssignent = ({
         getAssignmentContent()
     }, [content, editor])
 
+    function previewAssignment() {
+        if (content) {
+            setAssignmentPreviewContent(content)
+            router.push(
+                `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/assignment/${content.topicId}/preview`
+            )
+        }
+    }
+
     return (
-        <div>
-            {showPreview ? (
+        <div className="px-5">
+            {/* {showPreview ? (
                 <PreviewAssignment
                     content={content}
                     setShowPreview={setShowPreview}
                 />
-            ) : (
-                <>
-                    <div className="w-full ">
-                        <Form {...form}>
-                            <form
-                                id="myForm"
-                                onSubmit={form.handleSubmit(
-                                    editAssignmentContent
-                                )}
-                                className=" "
-                            >
-                                <FormField
-                                    control={form.control}
-                                    name="title"
-                                    render={({ field }) => (
-                                        <FormItem className="flex flex-col gap-0">
-                                            {' '}
-                                            <FormControl>
+            ) : ( */}
+            <>
+                <div className="w-full ">
+                    <Form {...form}>
+                        <form
+                            id="myForm"
+                            onSubmit={form.handleSubmit(editAssignmentContent)}
+                            className=" "
+                        >
+                            <FormField
+                                control={form.control}
+                                name="title"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-col gap-0">
+                                        <FormControl>
+                                            <div className="flex justify-between items-center">
                                                 <div className="w-2/6 flex justify-center align-middle items-center relative">
                                                     <Input
-                                                        required
                                                         {...field}
                                                         onChange={(e) => {
                                                             setTitles(
@@ -213,7 +229,7 @@ const AddAssignent = ({
                                                             )
                                                             field.onChange(e)
                                                         }}
-                                                        placeholder="Untitled Article"
+                                                        placeholder="Untitled Assignment"
                                                         className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
                                                         autoFocus
                                                     />
@@ -226,19 +242,7 @@ const AddAssignent = ({
                                                         />
                                                     )}
                                                 </div>
-                                            </FormControl>
-                                            {/* Button aligned below the input */}
-                                            <div className="flex items-center justify-between">
-                                                <Button
-                                                    variant={'ghost'}
-                                                    type="button"
-                                                    className="text-secondary w-[100px] h-[30px] gap-x-1"
-                                                    onClick={handlePreviewClick}
-                                                >
-                                                    <ArrowUpRightSquare />
-                                                    <h1>Preview</h1>
-                                                </Button>
-                                                <div className="flex justify-end ">
+                                                <div className="mt-5">
                                                     <Button
                                                         type="submit"
                                                         form="myForm"
@@ -247,80 +251,98 @@ const AddAssignent = ({
                                                     </Button>
                                                 </div>
                                             </div>
-                                            <FormMessage className="h-5" />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name="startDate"
-                                    render={({ field }) => (
-                                        <FormItem className="flex flex-col justify-start gap-x-2 gap-y-4 text-left">
-                                            <FormLabel className="m-0">
-                                                <span className="text-xl">
-                                                    Choose Deadline Date
-                                                </span>
-                                                <span className="text-red-500">
-                                                    *
-                                                </span>{' '}
-                                            </FormLabel>
-                                            <Popover>
-                                                <PopoverTrigger asChild>
-                                                    <FormControl>
-                                                        <Button
-                                                            variant={'outline'}
-                                                            className={`w-1/6  text-left font-normal ${
-                                                                !field.value &&
-                                                                'text-muted-foreground'
-                                                            }`}
-                                                        >
-                                                            {field.value
-                                                                ? format(
-                                                                      field.value,
-                                                                      'EEEE, MMMM d, yyyy'
-                                                                  )
-                                                                : 'Pick a date'}
-                                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                        </Button>
-                                                    </FormControl>
-                                                </PopoverTrigger>
-                                                <PopoverContent
-                                                    className="w-auto p-0"
-                                                    align="start"
+                                        </FormControl>
+                                        {/* Button aligned below the input */}
+                                        <div className="flex items-center justify-between">
+                                            {/* <Button
+                                                    variant={'ghost'}
+                                                    type="button"
+                                                    className="text-secondary w-[100px] h-[30px] gap-x-1"
+                                                    onClick={handlePreviewClick}
                                                 >
-                                                    <Calendar
-                                                        mode="single"
-                                                        selected={field.value}
-                                                        onSelect={
-                                                            field.onChange
-                                                        }
-                                                        disabled={(date: any) =>
-                                                            date <=
-                                                            addDays(
-                                                                new Date(),
-                                                                -1
-                                                            )
-                                                        } // Disable past dates
-                                                        initialFocus
-                                                    />
-                                                </PopoverContent>
-                                            </Popover>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </form>
-                        </Form>
+                                                    <ArrowUpRightSquare />
+                                                    <h1>Preview</h1>
+                                                </Button> */}
+                                            <div
+                                                id="previewAssignment"
+                                                onClick={previewAssignment}
+                                                className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer"
+                                            >
+                                                <Eye size={18} />
+                                                <h6 className="ml-1 text-sm">
+                                                    Preview
+                                                </h6>
+                                            </div>
+                                        </div>
+                                        <FormMessage className="h-5" />
+                                    </FormItem>
+                                )}
+                            />
 
-                        {/* )} */}
-                    </div>
-                    <div className="text-left mt-6">
-                        <TiptapToolbar editor={editor} />
-                        <TiptapEditor editor={editor} />
-                    </div>
-                </>
-            )}
+                            <FormField
+                                control={form.control}
+                                name="startDate"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-col justify-start gap-x-2 gap-y-4 text-left">
+                                        <FormLabel className="m-0">
+                                            <span className="text-xl">
+                                                Choose Deadline Date
+                                            </span>
+                                            <span className="text-red-500">
+                                                *
+                                            </span>{' '}
+                                        </FormLabel>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <FormControl>
+                                                    <Button
+                                                        variant={'outline'}
+                                                        className={`w-1/6  text-left font-normal ${
+                                                            !field.value &&
+                                                            'text-muted-foreground'
+                                                        }`}
+                                                    >
+                                                        {field.value
+                                                            ? format(
+                                                                  field.value,
+                                                                  'EEEE, MMMM d, yyyy'
+                                                              )
+                                                            : 'Pick a date'}
+                                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                    </Button>
+                                                </FormControl>
+                                            </PopoverTrigger>
+                                            <PopoverContent
+                                                className="w-auto p-0"
+                                                align="start"
+                                            >
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={field.value}
+                                                    onSelect={field.onChange}
+                                                    disabled={(date: any) =>
+                                                        date <=
+                                                        addDays(new Date(), -1)
+                                                    } // Disable past dates
+                                                    initialFocus
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </form>
+                    </Form>
+
+                    {/* )} */}
+                </div>
+                <div className="text-left mt-6">
+                    <TiptapToolbar editor={editor} />
+                    <TiptapEditor editor={editor} />
+                </div>
+            </>
+            {/* )} */}
         </div>
     )
 }

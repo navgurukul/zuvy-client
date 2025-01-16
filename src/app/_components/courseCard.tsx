@@ -57,7 +57,7 @@ function CourseCard({
             )
             setChapterId(response.data.trackingData[0].id)
         } catch (error) {
-            console.log(error)
+            console.error(error)
         }
     }, [])
 
