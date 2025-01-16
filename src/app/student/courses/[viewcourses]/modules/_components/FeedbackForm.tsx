@@ -61,10 +61,11 @@ const FeedbackForm = (props: Props) => {
             const res = await api.get(
                 `/tracking/getAllFormsWithStatus/${props.moduleId}?chapterId=${props.chapterId}`
             )
+            console.log('res', res)
             if (res.data && res.data.questions) {
                 setQuestions(res.data.questions)
                 setStatus('Not completed')
-            } else {
+            } else if (res.data && res.data.trackedData) {
                 setQuestions(res.data.trackedData)
                 setStatus('Completed')
             }
@@ -154,205 +155,361 @@ const FeedbackForm = (props: Props) => {
 
     return (
         <>
-           <ScrollArea className='h-screen'>
-           <div className="flex justify-center mt-24">
-                <div className="flex flex-col gap-5 text-left w-1/2">
-                    <h1 className="text-xl font-bold text-secondary-foreground">
-                        {props.content.title}
-                    </h1>
-                    <p className="text-lg">{props.content.description}</p>
-                    <div className="description bg-blue-100 p-5 rounded-lg">
-                        {status === 'Completed' ? (
-                            <p className="text-lg">
-                                You answers has been submitted..!
+            <ScrollArea className="h-screen">
+                <div className="flex justify-center mt-24">
+                    <div className="flex flex-col gap-5 text-left w-1/2">
+                        <h1 className="text-xl font-bold text-secondary-foreground">
+                            {props.content.title}
+                        </h1>
+                        <p className="text-lg">{props.content.description}</p>
+                        {questions.length === 0 ? (
+                            <p className="text-lg ">
+                                No video content has been added by the
+                                instructor.
                             </p>
                         ) : (
-                            <p className="text-lg">
-                                Note: Please do not share any personal and
-                                sensitive information in the responses. We will
-                                never ask for such information from you
-                            </p>
+                            <div className="description bg-blue-100 p-5 rounded-lg">
+                                {status === 'Completed' ? (
+                                    <p className="text-lg">
+                                        You answers has been submitted..!
+                                    </p>
+                                ) : (
+                                    <p className="text-lg">
+                                        Note: Please do not share any personal
+                                        and sensitive information in the
+                                        responses. We will never ask for such
+                                        information from you
+                                    </p>
+                                )}
+                            </div>
                         )}
-                    </div>
 
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)}>
-                            {questions?.map((item, index) => (
-                                <div
-                                    key={index}
-                                    className="space-y-3 text-start"
-                                >
-                                    {item.typeId === 1 && (
-                                        <div className="mt-6">
-                                            <div className="flex flex-row gap-x-2 font-semibold">
-                                                <p>{index + 1}.</p>
-                                                <p>{item.question}</p>
+                        <Form {...form}>
+                            <form onSubmit={form.handleSubmit(onSubmit)}>
+                                {questions?.map((item, index) => (
+                                    <div
+                                        key={index}
+                                        className="space-y-3 text-start"
+                                    >
+                                        {item.typeId === 1 && (
+                                            <div className="mt-6">
+                                                <div className="flex flex-row gap-x-2 font-semibold">
+                                                    <p>{index + 1}.</p>
+                                                    <p>{item.question}</p>
+                                                </div>
+                                                {status === 'Completed' ? (
+                                                    <div className="space-y-3 text-start mt-2 mb-10">
+                                                        <RadioGroup
+                                                            value={
+                                                                item
+                                                                    .formTrackingData[0]
+                                                                    .chosenOptions[0]
+                                                            }
+                                                        >
+                                                            {Object.keys(
+                                                                item.options
+                                                            ).map((option) => {
+                                                                const answer =
+                                                                    item
+                                                                        .formTrackingData[0]
+                                                                        .chosenOptions[0]
+                                                                return (
+                                                                    <div
+                                                                        key={
+                                                                            option
+                                                                        }
+                                                                        className={`flex space-x-2 mr-4 mt-1 p-3 ${
+                                                                            answer ==
+                                                                                option &&
+                                                                            'border border-gray-800 rounded-lg'
+                                                                        }`}
+                                                                    >
+                                                                        <div className="flex items-center w-full space-x-3 space-y-0">
+                                                                            <RadioGroupItem
+                                                                                value={
+                                                                                    option
+                                                                                }
+                                                                                checked={
+                                                                                    answer ==
+                                                                                    option
+                                                                                }
+                                                                                disabled
+                                                                            />
+                                                                            <label className="font-normal">
+                                                                                {
+                                                                                    item
+                                                                                        .options[
+                                                                                        option
+                                                                                    ]
+                                                                                }
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
+                                                                )
+                                                            })}
+                                                        </RadioGroup>
+                                                    </div>
+                                                ) : (
+                                                    <FormField
+                                                        control={form.control}
+                                                        name={`section.${index}.answer`}
+                                                        render={({ field }) => (
+                                                            <div className="space-y-3 text-start">
+                                                                <RadioGroup
+                                                                    onValueChange={
+                                                                        field.onChange
+                                                                    }
+                                                                    value={
+                                                                        field.value as string
+                                                                    }
+                                                                >
+                                                                    {Object.keys(
+                                                                        item.options
+                                                                    ).map(
+                                                                        (
+                                                                            optionKey
+                                                                        ) => (
+                                                                            <div
+                                                                                key={
+                                                                                    optionKey
+                                                                                }
+                                                                                className={`flex space-x-2 mr-4 mt-1 p-3 ${
+                                                                                    (field.value as string) ===
+                                                                                        optionKey &&
+                                                                                    `border border-secondary rounded-lg`
+                                                                                }`}
+                                                                            >
+                                                                                <div className="flex items-center w-full space-x-3 space-y-0">
+                                                                                    <RadioGroupItem
+                                                                                        value={
+                                                                                            optionKey
+                                                                                        }
+                                                                                    />
+                                                                                    <label className="font-normal">
+                                                                                        {
+                                                                                            item
+                                                                                                .options[
+                                                                                                optionKey
+                                                                                            ]
+                                                                                        }
+                                                                                    </label>
+                                                                                </div>
+                                                                            </div>
+                                                                        )
+                                                                    )}
+                                                                </RadioGroup>
+                                                            </div>
+                                                        )}
+                                                    />
+                                                )}
                                             </div>
-                                            {status === 'Completed' ? (
-                                                <div className="space-y-3 text-start mt-2 mb-10">
-                                                    <RadioGroup
-                                                        value={
-                                                            item
-                                                                .formTrackingData[0]
-                                                                .chosenOptions[0]
-                                                        }
-                                                    >
+                                        )}
+
+                                        {item.typeId === 2 && (
+                                            <div className="mt-6">
+                                                <div className="flex flex-row gap-x-2 font-semibold">
+                                                    <p>{index + 1}.</p>
+                                                    <p>{item.question}</p>
+                                                </div>
+                                                {status === 'Completed' ? (
+                                                    <div className="mt-2 mb-10">
                                                         {Object.keys(
                                                             item.options
                                                         ).map((option) => {
                                                             const answer =
                                                                 item
                                                                     .formTrackingData[0]
-                                                                    .chosenOptions[0]
+                                                                    .chosenOptions
+                                                            const optionNumber =
+                                                                Number(option)
                                                             return (
                                                                 <div
                                                                     key={option}
                                                                     className={`flex space-x-2 mr-4 mt-1 p-3 ${
-                                                                        answer ==
-                                                                            option &&
+                                                                        answer.includes(
+                                                                            optionNumber
+                                                                        ) &&
                                                                         'border border-gray-800 rounded-lg'
                                                                     }`}
                                                                 >
-                                                                    <div className="flex items-center w-full space-x-3 space-y-0">
-                                                                        <RadioGroupItem
-                                                                            value={
-                                                                                option
-                                                                            }
-                                                                            checked={
-                                                                                answer ==
-                                                                                option
-                                                                            }
-                                                                            disabled
-                                                                        />
-                                                                        <label className="font-normal">
-                                                                            {
-                                                                                item
-                                                                                    .options[
-                                                                                    option
-                                                                                ]
-                                                                            }
-                                                                        </label>
-                                                                    </div>
+                                                                    <Checkbox
+                                                                        checked={answer.includes(
+                                                                            optionNumber
+                                                                        )}
+                                                                        disabled
+                                                                        aria-label={
+                                                                            option
+                                                                        }
+                                                                        className={`translate-y-[2px] mr-1 ${
+                                                                            answer.includes(
+                                                                                optionNumber
+                                                                            ) &&
+                                                                            'bg-green-500'
+                                                                        }`}
+                                                                    />
+                                                                    {
+                                                                        item
+                                                                            .options[
+                                                                            option
+                                                                        ]
+                                                                    }
                                                                 </div>
                                                             )
                                                         })}
-                                                    </RadioGroup>
-                                                </div>
-                                            ) : (
-                                                <FormField
-                                                    control={form.control}
-                                                    name={`section.${index}.answer`}
-                                                    render={({ field }) => (
-                                                        <div className="space-y-3 text-start">
-                                                            <RadioGroup
-                                                                onValueChange={
-                                                                    field.onChange
+                                                    </div>
+                                                ) : (
+                                                    <div className="mt-2">
+                                                        {Object.keys(
+                                                            item.options
+                                                        ).map((optionKey) => (
+                                                            <FormField
+                                                                key={optionKey}
+                                                                control={
+                                                                    form.control
                                                                 }
-                                                                value={
-                                                                    field.value as string
-                                                                }
-                                                            >
-                                                                {Object.keys(
-                                                                    item.options
-                                                                ).map(
-                                                                    (
-                                                                        optionKey
-                                                                    ) => (
+                                                                name={`section.${index}.answer`}
+                                                                render={({
+                                                                    field,
+                                                                }) => {
+                                                                    const fieldValue =
+                                                                        (
+                                                                            Array.isArray(
+                                                                                field.value
+                                                                            )
+                                                                                ? field.value
+                                                                                : []
+                                                                        ) as string[] // Initialize with empty array if undefined
+                                                                    return (
                                                                         <div
-                                                                            key={
-                                                                                optionKey
-                                                                            }
                                                                             className={`flex space-x-2 mr-4 mt-1 p-3 ${
-                                                                                (field.value as string) ===
-                                                                                    optionKey &&
-                                                                                `border border-secondary rounded-lg`
+                                                                                fieldValue.includes(
+                                                                                    optionKey
+                                                                                ) &&
+                                                                                'border border-secondary rounded-lg'
                                                                             }`}
                                                                         >
-                                                                            <div className="flex items-center w-full space-x-3 space-y-0">
-                                                                                <RadioGroupItem
-                                                                                    value={
-                                                                                        optionKey
-                                                                                    }
-                                                                                />
-                                                                                <label className="font-normal">
+                                                                            <FormItem>
+                                                                                <FormControl>
+                                                                                    <Checkbox
+                                                                                        checked={fieldValue.includes(
+                                                                                            optionKey
+                                                                                        )}
+                                                                                        onCheckedChange={(
+                                                                                            checked
+                                                                                        ) => {
+                                                                                            const newValue =
+                                                                                                checked
+                                                                                                    ? [
+                                                                                                          ...fieldValue,
+                                                                                                          optionKey,
+                                                                                                      ]
+                                                                                                    : fieldValue.filter(
+                                                                                                          (
+                                                                                                              val
+                                                                                                          ) =>
+                                                                                                              val !==
+                                                                                                              optionKey
+                                                                                                      )
+                                                                                            field.onChange(
+                                                                                                newValue
+                                                                                            )
+                                                                                        }}
+                                                                                        aria-label={
+                                                                                            item
+                                                                                                .options[
+                                                                                                optionKey
+                                                                                            ]
+                                                                                        }
+                                                                                        className="translate-y-[2px] mr-1"
+                                                                                    />
+                                                                                </FormControl>
+                                                                                <FormLabel className="text-md font-light">
                                                                                     {
                                                                                         item
                                                                                             .options[
                                                                                             optionKey
                                                                                         ]
                                                                                     }
-                                                                                </label>
-                                                                            </div>
+                                                                                </FormLabel>
+                                                                                <FormMessage />
+                                                                            </FormItem>
                                                                         </div>
                                                                     )
-                                                                )}
-                                                            </RadioGroup>
-                                                        </div>
-                                                    )}
-                                                />
-                                            )}
-                                        </div>
-                                    )}
-
-                                    {item.typeId === 2 && (
-                                        <div className="mt-6">
-                                            <div className="flex flex-row gap-x-2 font-semibold">
-                                                <p>{index + 1}.</p>
-                                                <p>{item.question}</p>
+                                                                }}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                )}
                                             </div>
-                                            {status === 'Completed' ? (
-                                                <div className="mt-2 mb-10">
-                                                    {Object.keys(
-                                                        item.options
-                                                    ).map((option) => {
-                                                        const answer =
+                                        )}
+
+                                        {item.typeId === 3 && (
+                                            <div className="mt-6">
+                                                <div className="flex flex-row gap-x-2 font-semibold mb-3">
+                                                    <p>{index + 1}.</p>
+                                                    <p>{item.question}</p>
+                                                </div>
+                                                {status === 'Completed' ? (
+                                                    <p className="mt-2 mb-10">
+                                                        {
                                                             item
                                                                 .formTrackingData[0]
-                                                                .chosenOptions
-                                                        const optionNumber =
-                                                            Number(option)
-                                                        return (
-                                                            <div
-                                                                key={option}
-                                                                className={`flex space-x-2 mr-4 mt-1 p-3 ${
-                                                                    answer.includes(
-                                                                        optionNumber
-                                                                    ) &&
-                                                                    'border border-gray-800 rounded-lg'
-                                                                }`}
-                                                            >
-                                                                <Checkbox
-                                                                    checked={answer.includes(
-                                                                        optionNumber
-                                                                    )}
-                                                                    disabled
-                                                                    aria-label={
-                                                                        option
-                                                                    }
-                                                                    className={`translate-y-[2px] mr-1 ${
-                                                                        answer.includes(
-                                                                            optionNumber
-                                                                        ) &&
-                                                                        'bg-green-500'
-                                                                    }`}
-                                                                />
-                                                                {
-                                                                    item
-                                                                        .options[
-                                                                        option
-                                                                    ]
-                                                                }
-                                                            </div>
-                                                        )
-                                                    })}
+                                                                ?.answer
+                                                        }
+                                                    </p>
+                                                ) : (
+                                                    <FormField
+                                                        control={form.control}
+                                                        name={`section.${index}.answer`}
+                                                        render={({ field }) => (
+                                                            <FormItem>
+                                                                <FormControl>
+                                                                    <Textarea
+                                                                        {...field}
+                                                                        className="w-full h-[170px] px-3 py-2 border rounded-md" //w-[550px]
+                                                                        placeholder="Type your answer..."
+                                                                        value={
+                                                                            field.value as string
+                                                                        } // Ensured `value` is a string
+                                                                        onChange={(
+                                                                            e
+                                                                        ) =>
+                                                                            field.onChange(
+                                                                                e
+                                                                                    .target
+                                                                                    .value
+                                                                            )
+                                                                        } // Managed the change event
+                                                                    />
+                                                                </FormControl>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                    />
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {item.typeId === 4 && (
+                                            <div className="mt-6">
+                                                <div className="flex flex-row gap-x-2 font-semibold">
+                                                    <p>{index + 1}.</p>
+                                                    <p>{item.question}</p>
                                                 </div>
-                                            ) : (
-                                                <div className="mt-2">
-                                                    {Object.keys(
-                                                        item.options
-                                                    ).map((optionKey) => (
+                                                {status === 'Completed' ? (
+                                                    <div className="flex flex-row gap-x-1 mt-2 mb-10">
+                                                        <CalendarIcon className="h-4 w-4 opacity-50 m-1" />
+                                                        <p>
+                                                            {formatDate(
+                                                                item
+                                                                    .formTrackingData[0]
+                                                                    ?.answer
+                                                            )}
+                                                        </p>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex flex-row gap-x-2">
                                                         <FormField
-                                                            key={optionKey}
                                                             control={
                                                                 form.control
                                                             }
@@ -360,272 +517,132 @@ const FeedbackForm = (props: Props) => {
                                                             render={({
                                                                 field,
                                                             }) => {
-                                                                const fieldValue =
-                                                                    (
-                                                                        Array.isArray(
-                                                                            field.value
-                                                                        )
-                                                                            ? field.value
-                                                                            : []
-                                                                    ) as string[] // Initialize with empty array if undefined
+                                                                const dateValue =
+                                                                    field.value instanceof
+                                                                    Date
+                                                                        ? field.value
+                                                                        : new Date() // Ensure field.value is a Date object
+
                                                                 return (
-                                                                    <div
-                                                                        className={`flex space-x-2 mr-4 mt-1 p-3 ${
-                                                                            fieldValue.includes(
-                                                                                optionKey
-                                                                            ) &&
-                                                                            'border border-secondary rounded-lg'
-                                                                        }`}
-                                                                    >
+                                                                    <div className="flex item-start justify-start mt-2">
                                                                         <FormItem>
-                                                                            <FormControl>
-                                                                                <Checkbox
-                                                                                    checked={fieldValue.includes(
-                                                                                        optionKey
-                                                                                    )}
-                                                                                    onCheckedChange={(
-                                                                                        checked
-                                                                                    ) => {
-                                                                                        const newValue =
-                                                                                            checked
-                                                                                                ? [
-                                                                                                      ...fieldValue,
-                                                                                                      optionKey,
-                                                                                                  ]
-                                                                                                : fieldValue.filter(
-                                                                                                      (
-                                                                                                          val
-                                                                                                      ) =>
-                                                                                                          val !==
-                                                                                                          optionKey
-                                                                                                  )
-                                                                                        field.onChange(
-                                                                                            newValue
-                                                                                        )
-                                                                                    }}
-                                                                                    aria-label={
-                                                                                        item
-                                                                                            .options[
-                                                                                            optionKey
-                                                                                        ]
-                                                                                    }
-                                                                                    className="translate-y-[2px] mr-1"
-                                                                                />
-                                                                            </FormControl>
-                                                                            <FormLabel className="text-md font-light">
-                                                                                {
-                                                                                    item
-                                                                                        .options[
-                                                                                        optionKey
-                                                                                    ]
-                                                                                }
-                                                                            </FormLabel>
-                                                                            <FormMessage />
+                                                                            <Popover>
+                                                                                <PopoverTrigger
+                                                                                    asChild
+                                                                                >
+                                                                                    <FormControl>
+                                                                                        <Button
+                                                                                            variant={
+                                                                                                'outline'
+                                                                                            }
+                                                                                            className={`w-[230px] pl-3 text-left font-normal ${
+                                                                                                !dateValue &&
+                                                                                                'text-muted-foreground'
+                                                                                            }`}
+                                                                                        >
+                                                                                            {dateValue ? (
+                                                                                                format(
+                                                                                                    dateValue,
+                                                                                                    'PPP'
+                                                                                                )
+                                                                                            ) : (
+                                                                                                <span>
+                                                                                                    Pick
+                                                                                                    a
+                                                                                                    date
+                                                                                                </span>
+                                                                                            )}
+                                                                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                                                        </Button>
+                                                                                    </FormControl>
+                                                                                </PopoverTrigger>
+                                                                                <PopoverContent
+                                                                                    className="w-auto bg-popover rounded-lg shadow-md p-6 my-3"
+                                                                                    align="start"
+                                                                                >
+                                                                                    <Calendar
+                                                                                        mode="single"
+                                                                                        selected={
+                                                                                            dateValue
+                                                                                        }
+                                                                                        onSelect={(
+                                                                                            date
+                                                                                        ) => {
+                                                                                            if (
+                                                                                                date
+                                                                                            ) {
+                                                                                                field.onChange(
+                                                                                                    date
+                                                                                                )
+                                                                                            }
+                                                                                        }}
+                                                                                        initialFocus
+                                                                                    />
+                                                                                </PopoverContent>
+                                                                            </Popover>
                                                                         </FormItem>
                                                                     </div>
                                                                 )
                                                             }}
                                                         />
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-
-                                    {item.typeId === 3 && (
-                                        <div className="mt-6">
-                                            <div className="flex flex-row gap-x-2 font-semibold mb-3">
-                                                <p>{index + 1}.</p>
-                                                <p>{item.question}</p>
+                                                    </div>
+                                                )}
                                             </div>
-                                            {status === 'Completed' ? (
-                                                <p className="mt-2 mb-10">
-                                                    {
-                                                        item.formTrackingData[0]
-                                                            ?.answer
-                                                    }
-                                                </p>
-                                            ) : (
-                                                <FormField
-                                                    control={form.control}
-                                                    name={`section.${index}.answer`}
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormControl>
-                                                                <Textarea
-                                                                    {...field}
-                                                                    className="w-full h-[170px] px-3 py-2 border rounded-md" //w-[550px]
-                                                                    placeholder="Type your answer..."
-                                                                    value={
-                                                                        field.value as string
-                                                                    } // Ensured `value` is a string
-                                                                    onChange={(
-                                                                        e
-                                                                    ) =>
-                                                                        field.onChange(
-                                                                            e
-                                                                                .target
-                                                                                .value
-                                                                        )
-                                                                    } // Managed the change event
-                                                                />
-                                                            </FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                            )}
-                                        </div>
-                                    )}
+                                        )}
 
-                                    {item.typeId === 4 && (
-                                        <div className="mt-6">
-                                            <div className="flex flex-row gap-x-2 font-semibold">
-                                                <p>{index + 1}.</p>
-                                                <p>{item.question}</p>
-                                            </div>
-                                            {status === 'Completed' ? (
-                                                <div className="flex flex-row gap-x-1 mt-2 mb-10">
-                                                    <CalendarIcon className="h-4 w-4 opacity-50 m-1" />
-                                                    <p>
-                                                        {formatDate(
-                                                            item
-                                                                .formTrackingData[0]
-                                                                ?.answer
-                                                        )}
-                                                    </p>
+                                        {item.typeId === 5 && (
+                                            <div className="mt-6">
+                                                <div className="flex flex-row gap-x-2 font-semibold">
+                                                    <p>{index + 1}.</p>
+                                                    <p>{item.question}</p>
                                                 </div>
-                                            ) : (
-                                                <div className="flex flex-row gap-x-2">
+                                                {status === 'Completed' ? (
+                                                    <div className="flex flex-row gap-x-1 mt-2 mb-10">
+                                                        <Clock className="h-4 w-4 opacity-50 m-1" />
+                                                        <p>
+                                                            {
+                                                                item
+                                                                    .formTrackingData[0]
+                                                                    ?.answer
+                                                            }
+                                                        </p>
+                                                    </div>
+                                                ) : (
                                                     <FormField
                                                         control={form.control}
                                                         name={`section.${index}.answer`}
-                                                        render={({ field }) => {
-                                                            const dateValue =
-                                                                field.value instanceof
-                                                                Date
-                                                                    ? field.value
-                                                                    : new Date() // Ensure field.value is a Date object
-
-                                                            return (
-                                                                <div className="flex item-start justify-start mt-2">
-                                                                    <FormItem>
-                                                                        <Popover>
-                                                                            <PopoverTrigger
-                                                                                asChild
-                                                                            >
-                                                                                <FormControl>
-                                                                                    <Button
-                                                                                        variant={
-                                                                                            'outline'
-                                                                                        }
-                                                                                        className={`w-[230px] pl-3 text-left font-normal ${
-                                                                                            !dateValue &&
-                                                                                            'text-muted-foreground'
-                                                                                        }`}
-                                                                                    >
-                                                                                        {dateValue ? (
-                                                                                            format(
-                                                                                                dateValue,
-                                                                                                'PPP'
-                                                                                            )
-                                                                                        ) : (
-                                                                                            <span>
-                                                                                                Pick
-                                                                                                a
-                                                                                                date
-                                                                                            </span>
-                                                                                        )}
-                                                                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                                                    </Button>
-                                                                                </FormControl>
-                                                                            </PopoverTrigger>
-                                                                            <PopoverContent
-                                                                                className="w-auto bg-popover rounded-lg shadow-md p-6 my-3"
-                                                                                align="start"
-                                                                            >
-                                                                                <Calendar
-                                                                                    mode="single"
-                                                                                    selected={
-                                                                                        dateValue
-                                                                                    }
-                                                                                    onSelect={(
-                                                                                        date
-                                                                                    ) => {
-                                                                                        if (
-                                                                                            date
-                                                                                        ) {
-                                                                                            field.onChange(
-                                                                                                date
-                                                                                            )
-                                                                                        }
-                                                                                    }}
-                                                                                    initialFocus
-                                                                                />
-                                                                            </PopoverContent>
-                                                                        </Popover>
-                                                                    </FormItem>
-                                                                </div>
-                                                            )
-                                                        }}
+                                                        render={({ field }) => (
+                                                            <FormItem className="text-left flex flex-col w-[100px]">
+                                                                <FormControl>
+                                                                    <Input
+                                                                        placeholder="Time"
+                                                                        {...field}
+                                                                        type="time"
+                                                                        value={
+                                                                            field.value as string
+                                                                        }
+                                                                    />
+                                                                </FormControl>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )}
                                                     />
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-
-                                    {item.typeId === 5 && (
-                                        <div className="mt-6">
-                                            <div className="flex flex-row gap-x-2 font-semibold">
-                                                <p>{index + 1}.</p>
-                                                <p>{item.question}</p>
+                                                )}
                                             </div>
-                                            {status === 'Completed' ? (
-                                                <div className="flex flex-row gap-x-1 mt-2 mb-10">
-                                                    <Clock className="h-4 w-4 opacity-50 m-1" />
-                                                    <p>
-                                                        {
-                                                            item
-                                                                .formTrackingData[0]
-                                                                ?.answer
-                                                        }
-                                                    </p>
-                                                </div>
-                                            ) : (
-                                                <FormField
-                                                    control={form.control}
-                                                    name={`section.${index}.answer`}
-                                                    render={({ field }) => (
-                                                        <FormItem className="text-left flex flex-col w-[100px]">
-                                                            <FormControl>
-                                                                <Input
-                                                                    placeholder="Time"
-                                                                    {...field}
-                                                                    type="time"
-                                                                    value={
-                                                                        field.value as string
-                                                                    }
-                                                                />
-                                                            </FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                            )}
-                                        </div>
+                                        )}
+                                    </div>
+                                ))}
+                                {questions.length > 0 &&
+                                    status !== 'Completed' && (
+                                        <Button type="submit" className="mt-7">
+                                            Submit Responses
+                                        </Button>
                                     )}
-                                </div>
-                            ))}
-                            {status !== 'Completed' && (
-                                <Button type="submit" className="mt-7">
-                                    Submit Responses
-                                </Button>
-                            )}
-                        </form>
-                    </Form>
+                            </form>
+                        </Form>
+                    </div>
                 </div>
-            </div>
-           </ScrollArea>
+            </ScrollArea>
         </>
     )
 }

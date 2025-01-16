@@ -114,10 +114,9 @@ function Quiz(props: Props) {
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
-       
             })
-           await updateQuizChapterHandler()
-           await getAllQuizQuestionHandler()
+        await updateQuizChapterHandler()
+        await getAllQuizQuestionHandler()
     }
 
     return (
@@ -137,7 +136,7 @@ function Quiz(props: Props) {
                             />
                         </div>
                         <h2>
-                            No quiz questions have been added by the Intructor
+                            No quiz questions have been added by the Instructor
                         </h2>
                     </MaxWidthWrapper>
                 </div>

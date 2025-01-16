@@ -55,9 +55,10 @@ function ChapterContent() {
                 const response = await api.get(
                     `/tracking/getChapterDetailsWithStatus/${chapterId}`
                 )
-          
+                console.log('response gdhdhdh', response)
+
                 setActiveChapter(chapterId)
-             
+
                 setChapterId(response.data.trackingData.id)
                 setTopicId(response.data.trackingData.topicId)
                 setChapterContent(response.data.trackingData)
@@ -101,10 +102,10 @@ function ChapterContent() {
             const firstPending = response.data.trackingData.find(
                 (chapter: Chapter) => chapter.status === 'Pending'
             )
-   
+
             setTypeId(response?.data.moduleDetails[0]?.typeId)
             setProjectId(response?.data.moduleDetails[0]?.projectId)
-       
+
             fetchChapterContent(chapter_id)
             // }
         } catch (error) {
@@ -168,14 +169,14 @@ function ChapterContent() {
                     )
                 case 5:
                     return (
-                        <div className=''>
+                        <div className="">
                             <Assignment
-                            content={chapterContent}
-                            moduleId={+moduleID}
-                            projectId={projectId}
-                            bootcampId={+viewcourses}
-                            completeChapter={completeChapter}
-                        />
+                                content={chapterContent}
+                                moduleId={+moduleID}
+                                projectId={projectId}
+                                bootcampId={+viewcourses}
+                                completeChapter={completeChapter}
+                            />
                         </div>
                     )
                 case 6:

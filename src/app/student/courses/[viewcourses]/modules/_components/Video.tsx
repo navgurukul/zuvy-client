@@ -23,7 +23,7 @@ function Video({
                 />
             ))}
             {!content.links && (
-                <h1>There is no Video content has been created yet!</h1>
+                <h1>No video content has been added by the Instructor.</h1>
             )}
         </div>
     )
