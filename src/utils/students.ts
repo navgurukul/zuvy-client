@@ -270,3 +270,24 @@ export const decodeBase64 = (data: string) => {
     if (!data) return ''
     return Buffer.from(data, 'base64').toString('utf-8')
 }
+
+
+// --------------------------------------------
+
+// utils/formatParameter.ts
+export const formatParameter = (parameterType: string, parameterValue: any): string => {
+    switch (parameterType) {
+        case 'arrayOfnum':
+            return `[${parameterValue}]`; // Wrap in square brackets for arrays
+        case 'arrayOfStr':
+            return `[${parameterValue}]`; // Wrap in square brackets for arrays
+        case 'int':
+            return parameterValue; // Display numbers as-is
+        case 'float':
+            return parameterValue; // Display numbers as-is
+        case 'str':
+            return `"${parameterValue}"`; // Wrap strings in double quotes
+        default:
+            return parameterValue; // Fallback for unknown types
+    }
+};

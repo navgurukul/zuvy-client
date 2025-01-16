@@ -152,10 +152,10 @@ function Page({
 
     useEffect(() => {
         // Add event listeners for right-click and key presses
-        document.addEventListener('contextmenu', handleRightClick)
+        // document.addEventListener('contextmenu', handleRightClick)
         document.addEventListener('keydown', handleKeyDown)
         return () => {
-            document.removeEventListener('contextmenu', handleRightClick)
+            // document.removeEventListener('contextmenu', handleRightClick)
             document.removeEventListener('keydown', handleKeyDown)
         }
     }, [tabChangeInstance, fullScreenExitInstance])
