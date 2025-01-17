@@ -160,8 +160,6 @@ function Page({
         }
     }, [tabChangeInstance, fullScreenExitInstance])
 
-
-
     useEffect(() => {
         if (remainingTime === 0 && intervalId) {
             clearInterval(intervalId)
@@ -408,29 +406,41 @@ function Page({
         setIsFullScreen(true)
     }
 
-
+    console.log('assessmentData', assessmentData)
+    const isAssessmentStarted = assessmentData?.submission?.startedAt
 
     return (
         <React.Fragment>
             {!isFullScreen ? (
-                <>
-                    <div className="flex items-center justify-center gap-2">
-                        <div className="font-bold text-xl">
-                            <TimerDisplay remainingTime={remainingTime} />
+                isAssessmentStarted ? (
+                    <>
+                        <div className="flex justify-center mt-10">
+                            <h1>
+                                The question you're trying to attempt, is
+                                already done by you.
+                            </h1>
                         </div>
-                    </div>
-                    <Separator className="my-6" />
-                    <h1>
-                        Enter Full Screen to see the Questions. Warning: If you
-                        exit fullscreen, your test will get submitted
-                        automatically
-                    </h1>
-                    <div className="flex justify-center mt-10">
-                        <Button onClick={handleFullScreenRequest}>
-                            Enter Full Screen
-                        </Button>
-                    </div>
-                </>
+                    </>
+                ) : (
+                    <>
+                        <div className="flex items-center justify-center gap-2">
+                            <div className="font-bold text-xl">
+                                <TimerDisplay remainingTime={remainingTime} />
+                            </div>
+                        </div>
+                        <Separator className="my-6" />
+                        <h1>
+                            Enter Full Screen to see the Questions. Warning: If
+                            you exit fullscreen, your test will get submitted
+                            automatically
+                        </h1>
+                        <div className="flex justify-center mt-10">
+                            <Button onClick={handleFullScreenRequest}>
+                                Enter Full Screen
+                            </Button>
+                        </div>
+                    </>
+                )
             ) : (
                 <>
                     <div className="flex items-center justify-center gap-2">
@@ -502,8 +512,9 @@ function Page({
                                 <QuestionCard
                                     id={1}
                                     title="Quiz"
-                                    description={`${assessmentData.Quizzes || 0
-                                        } questions`}
+                                    description={`${
+                                        assessmentData.Quizzes || 0
+                                    } questions`}
                                     onSolveChallenge={() =>
                                         handleSolveChallenge('quiz')
                                     }
@@ -520,8 +531,9 @@ function Page({
                                 <QuestionCard
                                     id={1}
                                     title="Open-Ended Questions"
-                                    description={`${assessmentData.OpenEndedQuestions || 0
-                                        } questions`}
+                                    description={`${
+                                        assessmentData.OpenEndedQuestions || 0
+                                    } questions`}
                                     onSolveChallenge={() =>
                                         handleSolveChallenge('open-ended')
                                     }

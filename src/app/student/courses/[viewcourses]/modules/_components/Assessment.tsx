@@ -15,7 +15,7 @@ const Assessment = ({
     assessmentShortInfo,
     assessmentOutSourceId,
     submissionId,
-    chapterContent
+    chapterContent,
 }: {
     assessmentShortInfo: any
     assessmentOutSourceId: any
@@ -26,16 +26,18 @@ const Assessment = ({
     const testDuration = assessmentShortInfo.timeLimit
     const { viewcourses, moduleID } = useParams()
 
-    const [assessmentEndTime, setAssessmentEndTime] = useState<number | null>(null)
+    const [assessmentEndTime, setAssessmentEndTime] = useState<number | null>(
+        null
+    )
     const [isTimeOver, setIsTimeOver] = useState(false)
 
     useEffect(() => {
         // Calculate end time based on start time and duration
-        const startedAt = assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.startedAt
+        const startedAt =
+            assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.startedAt
         if (startedAt) {
             const startTime = new Date(startedAt).getTime()
             const endTime = startTime + testDuration * 1000
-
 
             // Check if the time is over
             const interval = setInterval(() => {
@@ -49,7 +51,6 @@ const Assessment = ({
 
             return () => clearInterval(interval)
         }
-        ;
     }, [assessmentShortInfo, testDuration])
 
     const handleStartAssessment = () => {
@@ -101,8 +102,9 @@ const Assessment = ({
 
     const isDisabled = !hasQuestions
 
-    const isDeadlineCrossed = assessmentShortInfo?.deadline? new Date(assessmentShortInfo?.deadline) < new Date() : false
-
+    const isDeadlineCrossed = assessmentShortInfo?.deadline
+        ? new Date(assessmentShortInfo?.deadline) < new Date()
+        : false
 
     return (
         <React.Fragment>
@@ -137,17 +139,17 @@ const Assessment = ({
                             )}
                             {assessmentShortInfo?.totalOpenEndedQuestions >
                                 0 && (
-                                    <div>
-                                        <h2 className="text-lg font-semibold text-secondary">
-                                            {
-                                                assessmentShortInfo?.totalOpenEndedQuestions
-                                            }
-                                        </h2>
-                                        <p className="text-sm text-gray-600">
-                                            Open-Ended
-                                        </p>
-                                    </div>
-                                )}
+                                <div>
+                                    <h2 className="text-lg font-semibold text-secondary">
+                                        {
+                                            assessmentShortInfo?.totalOpenEndedQuestions
+                                        }
+                                    </h2>
+                                    <p className="text-sm text-gray-600">
+                                        Open-Ended
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     ) : null}
 
@@ -217,7 +219,10 @@ const Assessment = ({
             <div className="mt-8 flex flex-col items-center justify-center">
                 {isAssessmentStarted ? (
                     <>
-                        <Button onClick={handleViewResults} disabled={chapterContent.status === 'Pending'}>
+                        <Button
+                            onClick={handleViewResults}
+                            disabled={chapterContent.status === 'Pending'}
+                        >
                             View Results
                         </Button>
                         {isTimeOver && chapterContent.status === 'Pending' && (
@@ -233,7 +238,9 @@ const Assessment = ({
                                 <div>
                                     <Button
                                         onClick={handleStartAssessment}
-                                        disabled={isDisabled || isDeadlineCrossed}
+                                        disabled={
+                                            isDisabled || isDeadlineCrossed
+                                        }
                                     >
                                         Start Assessment
                                     </Button>
@@ -247,7 +254,8 @@ const Assessment = ({
                             )}
                             {isDeadlineCrossed && (
                                 <TooltipContent>
-                                    You have missed the deadline to start the assessment
+                                    You have missed the deadline to start the
+                                    assessment
                                 </TooltipContent>
                             )}
                         </Tooltip>
@@ -259,7 +267,6 @@ const Assessment = ({
                         Deadline Crossed
                     </h3>
                 )}
-
             </div>
         </React.Fragment>
     )
