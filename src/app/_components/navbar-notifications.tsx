@@ -7,7 +7,7 @@ interface Notification {
     time: string;
     read: boolean;
 }
-
+//Replace the dummy with the live notifications from BE apis
 const NavbarNotifications = () => {
     const [showNotifications, setShowNotifications] = useState(false);
     const [notifications, setNotifications] = useState<Notification[]>([
