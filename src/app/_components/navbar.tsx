@@ -9,6 +9,7 @@ import { getUser } from '@/store/store'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { MobileNavbarRoutes } from './navbar-routes'
 import { useLazyLoadedStudentData } from '@/store/store'
+import NavbarNotifications from './navbar-notifications'
 //Test
 const Navbar = () => {
     const { studentData } = useLazyLoadedStudentData()
@@ -48,6 +49,7 @@ const Navbar = () => {
                     <div className="sm:items-center space-x-4 hidden md:flex">
                         {/* <Search /> */}
                         {/* <Bell /> */}
+                        <NavbarNotifications />
                         <Link href="/profile">
                             <Avatar>
                                 <AvatarImage
