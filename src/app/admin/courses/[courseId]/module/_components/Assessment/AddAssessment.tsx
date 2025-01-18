@@ -154,16 +154,21 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     }
 
     function previewAssessment() {
-        if (content.Quizzes.length > 0 || content.CodingQuestions.length > 0 || content.OpenEndedQuestions.length > 0) {
+        if (
+            content.Quizzes.length > 0 ||
+            content.CodingQuestions.length > 0 ||
+            content.OpenEndedQuestions.length > 0
+        ) {
             setAssessmentPreviewContent(content)
             router.push(
                 `/admin/courses/${content.bootcampId}/module/${content.moduleId}/chapter/${content.chapterId}/assessment/${topicId}/preview`
             )
-        }else{
+        } else {
             toast({
                 title: 'No questions to preview',
                 description: 'Please save the assessment first to preview.',
-                className: 'border border-red-500 text-red-500 text-left w-[90%]',
+                className:
+                    'border border-red-500 text-red-500 text-left w-[90%]',
             })
         }
     }
@@ -511,7 +516,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
 
                     {questionType !== 'settings' && (
                         <div>
-                            <ScrollArea className="h-96 ml-5 w-full pr-5">
+                            <ScrollArea className="h-96 ml-5 w-full pr-5 pb-32">
                                 <ScrollBar
                                     orientation="vertical"
                                     className="h-96"

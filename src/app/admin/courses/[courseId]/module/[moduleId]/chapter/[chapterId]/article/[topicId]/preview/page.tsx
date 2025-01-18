@@ -63,7 +63,7 @@ const PreviewArticle = ({ params }: { params: any }) => {
                 </div>
 
                 {/* Right Section: Editor */}
-                <div className="pt-20">
+                <div className="pt-20 w-[395%]">
                     <div className="flex flex-col items-start">
                         <h1 className="text-2xl font-semibold text-left">
                             {articlePreviewContent?.title

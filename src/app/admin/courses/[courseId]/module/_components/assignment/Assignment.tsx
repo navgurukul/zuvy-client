@@ -37,7 +37,6 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover'
 import { Calendar } from '@/components/ui/calendar'
-import PreviewAssignment from './PreviewAssignment'
 import {
     getChapterUpdateStatus,
     getAssignmentPreviewStore,
@@ -74,22 +73,6 @@ const AddAssignent = ({
     setAssignmentUpdateOnPreview,
 }: AssignmentProps) => {
     // misc
-
-    const [showPreview, setShowPreview] = useState<boolean>(false)
-    const handlePreviewClick = () => {
-        const editorContent = editor?.getText()
-        if (!editorContent || editorContent.trim() === '') {
-            toast({
-                title: 'No Questions',
-                description:
-                    'Please add at least one question to preview the quiz.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
-            })
-        } else {
-            setShowPreview(true)
-        }
-    }
 
     const formSchema = z.object({
         title: z.string(),
@@ -199,12 +182,6 @@ const AddAssignent = ({
 
     return (
         <div className="px-5">
-            {/* {showPreview ? (
-                <PreviewAssignment
-                    content={content}
-                    setShowPreview={setShowPreview}
-                />
-            ) : ( */}
             <>
                 <div className="w-full ">
                     <Form {...form}>
@@ -242,38 +219,30 @@ const AddAssignent = ({
                                                         />
                                                     )}
                                                 </div>
-                                                <div className="mt-5">
-                                                    <Button
-                                                        type="submit"
-                                                        form="myForm"
+                                                <div className="flex items-center justify-between">
+                                                    <div
+                                                        id="previewAssignment"
+                                                        onClick={
+                                                            previewAssignment
+                                                        }
+                                                        className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer  mt-5 mr-2"
                                                     >
-                                                        Save
-                                                    </Button>
+                                                        <Eye size={18} />
+                                                        <h6 className="ml-1 text-sm">
+                                                            Preview
+                                                        </h6>
+                                                    </div>
+                                                    <div className="mt-5">
+                                                        <Button
+                                                            type="submit"
+                                                            form="myForm"
+                                                        >
+                                                            Save
+                                                        </Button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </FormControl>
-                                        {/* Button aligned below the input */}
-                                        <div className="flex items-center justify-between">
-                                            {/* <Button
-                                                    variant={'ghost'}
-                                                    type="button"
-                                                    className="text-secondary w-[100px] h-[30px] gap-x-1"
-                                                    onClick={handlePreviewClick}
-                                                >
-                                                    <ArrowUpRightSquare />
-                                                    <h1>Preview</h1>
-                                                </Button> */}
-                                            <div
-                                                id="previewAssignment"
-                                                onClick={previewAssignment}
-                                                className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer"
-                                            >
-                                                <Eye size={18} />
-                                                <h6 className="ml-1 text-sm">
-                                                    Preview
-                                                </h6>
-                                            </div>
-                                        </div>
                                         <FormMessage className="h-5" />
                                     </FormItem>
                                 )}
@@ -334,15 +303,12 @@ const AddAssignent = ({
                             />
                         </form>
                     </Form>
-
-                    {/* )} */}
                 </div>
                 <div className="text-left mt-6">
                     <TiptapToolbar editor={editor} />
                     <TiptapEditor editor={editor} />
                 </div>
             </>
-            {/* )} */}
         </div>
     )
 }
