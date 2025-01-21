@@ -49,7 +49,7 @@ const Navbar = () => {
                     <div className="sm:items-center space-x-4 hidden md:flex">
                         {/* <Search /> */}
                         {/* <Bell /> */}
-                        <NavbarNotifications />
+                        {/* <NavbarNotifications /> */}
                         <Link href="/profile">
                             <Avatar>
                                 <AvatarImage
