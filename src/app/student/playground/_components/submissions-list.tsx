@@ -24,8 +24,10 @@ import { useEffect, useState } from 'react'
 
 export default function SubmissionsList({
     questionId,
+    admin,
 }: {
     questionId: string
+    admin: any
 }) {
     const [submissions, setSubmissions] = useState<any>([])
     const [loading, setLoading] = useState(false)
@@ -57,6 +59,7 @@ export default function SubmissionsList({
                     size="sm"
                     className="mr-2"
                     variant="outline"
+                    disabled={admin}
                 >
                     <List size={20} />
                     <span className="ml-2 text-lg font-bold">Submissions</span>
