@@ -7,6 +7,7 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import Image from 'next/image'
 import { error } from 'console'
 import { nullable } from 'zod'
 
@@ -103,131 +104,153 @@ const Assignments = ({ courseId, debouncedSearch }: Props) => {
         fetchData()
     }
 
+    console.log('assignmentData', assignmentData)
     return (
         <div className="">
-            {assignmentData?.map((data) => {
-                const moduleDataLength = data.moduleChapterData.length
+            {assignmentData?.length > 0 ? (
+                assignmentData?.map((data) => {
+                    const moduleDataLength = data.moduleChapterData.length
 
-                if (moduleDataLength > 0)
-                    return (
-                        <div className="my-3" key={data.id}>
-                            <div className="w-full flex flex-col gap-y-5">
-                                <h1 className="w-full text-[20px] text-left font-semibold">
-                                    Module: {data.name}
-                                </h1>
-                            </div>
+                    if (moduleDataLength > 0)
+                        return (
+                            <div className="my-3" key={data.id}>
+                                <div className="w-full flex flex-col gap-y-5">
+                                    <h1 className="w-full text-[20px] text-left font-semibold">
+                                        Module: {data.name}
+                                    </h1>
+                                </div>
 
-                            <div className="grid grid-cols-1 gap-8 mt-2 md:mt-4 md:grid-cols-2 lg:grid-cols-3">
-                                {data.moduleChapterData.map(
-                                    (moduleData: any) => {
-                                        const isDisabled =
-                                            moduleData.submitStudents === 0
-                                        const chapterId = moduleData.id
+                                <div className="grid grid-cols-1 gap-8 mt-2 md:mt-4 md:grid-cols-2 lg:grid-cols-3">
+                                    {data.moduleChapterData.map(
+                                        (moduleData: any) => {
+                                            const isDisabled =
+                                                moduleData.submitStudents === 0
+                                            const chapterId = moduleData.id
 
-                                        const submissionPercentage =
-                                            moduleData.submitStudents > 0
-                                                ? totalStudents /
-                                                  moduleData.submitStudents
-                                                : 0
-                                        return (
-                                            <div
-                                                className="relative lg:flex py-5 h-[120px] w-full shadow-[0_4px_4px_rgb(1,1,0,0.12)] my-4 rounded-md p-3"
-                                                key={moduleData.id}
-                                            >
-                                                {/* Icon at the top-right */}
-                                                <div className="absolute top-5 pr-3 right-2 group">
-                                                    <button
-                                                        className={`ml-2 cursor-pointer ${
-                                                            isDisabled
-                                                                ? 'text-gray-400'
-                                                                : 'text-gray-500 hover:text-gray-700'
-                                                        }`}
-                                                        onClick={
-                                                            isDisabled
-                                                                ? undefined
-                                                                : () =>
-                                                                      handleDownloadPdf(
-                                                                          Number(
-                                                                              chapterId
+                                            const submissionPercentage =
+                                                moduleData.submitStudents > 0
+                                                    ? totalStudents /
+                                                      moduleData.submitStudents
+                                                    : 0
+                                            return (
+                                                <div
+                                                    className="relative lg:flex py-5 h-[120px] w-full shadow-[0_4px_4px_rgb(1,1,0,0.12)] my-4 rounded-md p-3"
+                                                    key={moduleData.id}
+                                                >
+                                                    {/* Icon at the top-right */}
+                                                    <div className="absolute top-5 pr-3 right-2 group">
+                                                        <button
+                                                            className={`ml-2 cursor-pointer ${
+                                                                isDisabled
+                                                                    ? 'text-gray-400'
+                                                                    : 'text-gray-500 hover:text-gray-700'
+                                                            }`}
+                                                            onClick={
+                                                                isDisabled
+                                                                    ? undefined
+                                                                    : () =>
+                                                                          handleDownloadPdf(
+                                                                              Number(
+                                                                                  chapterId
+                                                                              )
                                                                           )
-                                                                      )
-                                                        }
-                                                        aria-label="Download full report"
-                                                        disabled={isDisabled} // Disable button
-                                                    >
-                                                        <ArrowDownToLine
-                                                            size={20}
-                                                        />
-                                                    </button>
-                                                    {/* Tooltip visible on hover */}
-                                                    {!isDisabled && (
-                                                        <div className="absolute right-0 mt-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
-                                                            Download full report
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                {/* Content */}
-                                                <div className="font-semibold pl-3 flex w-full flex-col justify-between">
-                                                    <h1 className="w-1/2 text-start">
-                                                        {moduleData.title}
-                                                    </h1>
-                                                    <h2 className="w-1/2 flex mt-2">
-                                                        <div className="text-start flex gap-x-2">
-                                                            <div className="flex items-center justify-center">
-                                                                <div
-                                                                    className={`w-2 h-2 rounded-full flex items-center justify-center ${
-                                                                        submissionPercentage >=
-                                                                        0.8
-                                                                            ? 'bg-green-300'
-                                                                            : submissionPercentage <=
-                                                                                  0.8 &&
-                                                                              submissionPercentage >=
-                                                                                  0.5
-                                                                            ? 'bg-yellow-300'
-                                                                            : 'bg-red-500'
-                                                                    }`}
-                                                                ></div>
-                                                            </div>
-                                                            <p>
-                                                                {
-                                                                    moduleData.submitStudents
-                                                                }
-                                                                /{totalStudents}
-                                                            </p>
-                                                            <h3 className="text-gray-400 font-semibold cursor-not-allowed">
-                                                                Submissions
-                                                            </h3>
-                                                        </div>
-                                                    </h2>
-
-                                                    {/* Fix View Submissions button to right bottom corner */}
-                                                    <div className="w-full flex justify-end">
-                                                        <Button
-                                                            variant={
-                                                                'secondary'
                                                             }
-                                                            className="flex items-center border-none hover:text-secondary hover:bg-popover"
+                                                            aria-label="Download full report"
+                                                            disabled={
+                                                                isDisabled
+                                                            } // Disable button
                                                         >
-                                                            <Link
-                                                                href={`/admin/courses/${courseId}/submissionAssignments/${moduleData.id}`}
-                                                            >
-                                                                View Submissions
-                                                            </Link>
-                                                            <ChevronRight
+                                                            <ArrowDownToLine
                                                                 size={20}
                                                             />
-                                                        </Button>
+                                                        </button>
+                                                        {/* Tooltip visible on hover */}
+                                                        {!isDisabled && (
+                                                            <div className="absolute right-0 mt-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
+                                                                Download full
+                                                                report
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Content */}
+                                                    <div className="font-semibold pl-3 flex w-full flex-col justify-between">
+                                                        <h1 className="w-1/2 text-start">
+                                                            {moduleData.title}
+                                                        </h1>
+                                                        <h2 className="w-1/2 flex mt-2">
+                                                            <div className="text-start flex gap-x-2">
+                                                                <div className="flex items-center justify-center">
+                                                                    <div
+                                                                        className={`w-2 h-2 rounded-full flex items-center justify-center ${
+                                                                            submissionPercentage >=
+                                                                            0.8
+                                                                                ? 'bg-green-300'
+                                                                                : submissionPercentage <=
+                                                                                      0.8 &&
+                                                                                  submissionPercentage >=
+                                                                                      0.5
+                                                                                ? 'bg-yellow-300'
+                                                                                : 'bg-red-500'
+                                                                        }`}
+                                                                    ></div>
+                                                                </div>
+                                                                <p>
+                                                                    {
+                                                                        moduleData.submitStudents
+                                                                    }
+                                                                    /
+                                                                    {
+                                                                        totalStudents
+                                                                    }
+                                                                </p>
+                                                                <h3 className="text-gray-400 font-semibold cursor-not-allowed">
+                                                                    Submissions
+                                                                </h3>
+                                                            </div>
+                                                        </h2>
+
+                                                        {/* Fix View Submissions button to right bottom corner */}
+                                                        <div className="w-full flex justify-end">
+                                                            <Button
+                                                                variant={
+                                                                    'secondary'
+                                                                }
+                                                                className="flex items-center border-none hover:text-secondary hover:bg-popover"
+                                                            >
+                                                                <Link
+                                                                    href={`/admin/courses/${courseId}/submissionAssignments/${moduleData.id}`}
+                                                                >
+                                                                    View
+                                                                    Submissions
+                                                                </Link>
+                                                                <ChevronRight
+                                                                    size={20}
+                                                                />
+                                                            </Button>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        )
-                                    }
-                                )}
+                                            )
+                                        }
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    )
-            })}
+                        )
+                })
+            ) : (
+                <div className="w-screen flex flex-col justify-center items-center h-4/5">
+                    <h1 className="text-center font-semibold ">
+                        No Assignment Found
+                    </h1>
+                    <Image
+                        src="/emptyStates/curriculum.svg"
+                        alt="No Assessment Found"
+                        width={400}
+                        height={400}
+                    />
+                </div>
+            )}
         </div>
     )
 }
