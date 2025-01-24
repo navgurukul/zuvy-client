@@ -8,8 +8,6 @@ import { addClassToCodeTags } from '@/utils/admin'
 
 // Define the type for the quiz result
 
-
-
 const QuizResults = ({
     params,
 }: {
@@ -17,7 +15,7 @@ const QuizResults = ({
 }) => {
     const [quizResults, setQuizResults] = useState<any>()
     const codeBlockClass =
-    'text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full';
+        'text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full'
 
     const router = useRouter()
 
@@ -39,8 +37,12 @@ const QuizResults = ({
     if (!quizResults?.mcqs.length) {
         return (
             <div>
-                <div onClick={() => router.back()} className="cursor-pointer flex justify-start">
-                    <ChevronLeft width={24} />Go Back
+                <div
+                    onClick={() => router.back()}
+                    className="cursor-pointer flex justify-start"
+                >
+                    <ChevronLeft width={24} />
+                    Go Back
                 </div>
                 No Quiz Questions In This Assessment
             </div>
@@ -59,25 +61,28 @@ const QuizResults = ({
                         <h1 className="font-extrabold">Quiz Results</h1>
                     </div>
                 </div>
-                {quizResults?.mcqs.map((result:any) => (
+                {quizResults?.mcqs.map((result: any, index: number) => (
                     <div
                         key={result.quizId}
                         className="mb-10 p-6 bg-white rounded-xl w-full max-w-lg mx-auto"
                     >
-                        <div className="mb-4 font-bold text-xl"   dangerouslySetInnerHTML={{
-                                                __html: addClassToCodeTags(
-                                                    result.question,
-                                                    codeBlockClass
-                                                ),
-                                            }} />
-                       
-                
+                        <div className="flex items-start gap-1 text-left">
+                            <span className="font-semibold">{index + 1}.</span>
+                            <p
+                                className="text-gray-800 mb-4 font-bold text-lg"
+                                dangerouslySetInnerHTML={{
+                                    __html: addClassToCodeTags(
+                                        result.question,
+                                        codeBlockClass
+                                    ),
+                                }}
+                            />
+                        </div>
                         <div className="space-y-4">
                             {Object.entries(result.options).map(
                                 ([key, value]) => {
                                     const isCorrect =
-                                        key ===
-                                        result.correctOption.toString()
+                                        key === result.correctOption.toString()
                                     const isChosen =
                                         key ===
                                         result?.submissionsData?.chosenOption?.toString()
@@ -98,16 +103,20 @@ const QuizResults = ({
                                         : 'border-gray-300'
 
                                     // Icon to display based on whether the option is correct, incorrect, or unselected
-                                    const icon = isChosen
-                                        ? isCorrect
-                                            ? <Check className="text-green-500" />
-                                            : <X className="text-red-500" />
-                                        : <Circle className="text-gray-400" />
+                                    const icon = isChosen ? (
+                                        isCorrect ? (
+                                            <Check className="text-green-500" />
+                                        ) : (
+                                            <X className="text-red-500" />
+                                        )
+                                    ) : (
+                                        <Circle className="text-gray-400" />
+                                    )
 
                                     return (
                                         <div
                                             key={key}
-                                            className={`p-4 rounded border ${bgColor} ${borderColor} ${textColor} flex items-center justify-between`}
+                                            className={`p-2 mx-4 rounded border ${bgColor} ${borderColor} ${textColor} flex items-center justify-between`}
                                         >
                                             <div className="flex items-center gap-2">
                                                 {icon}
@@ -121,11 +130,12 @@ const QuizResults = ({
                         <div className="mt-2 text-sm text-green-600 font-bold">
                             {/* if chosen incorrect answer show correct */}
                             {result.correctOption !==
-                            result?.submissionsData?.chosenOption && (
-                                `Correct Answer: ${Object.values(
-                                    result.options
-                                )[result.correctOption - 1]}`
-                            )}
+                                result?.submissionsData?.chosenOption &&
+                                `Correct Answer: ${
+                                    Object.values(result.options)[
+                                        result.correctOption - 1
+                                    ]
+                                }`}
                         </div>
                     </div>
                 ))}

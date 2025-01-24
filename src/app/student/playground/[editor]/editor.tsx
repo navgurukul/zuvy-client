@@ -256,7 +256,7 @@ const IDE: React.FC<IDEProps> = ({
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>
-                    <SubmissionsList questionId={params.editor} admin={admin} />
+                    {/* <SubmissionsList questionId={params.editor} admin={admin} /> */}
                 </div>
 
                 <div>
@@ -422,7 +422,7 @@ const IDE: React.FC<IDEProps> = ({
                             <ResizableHandle withHandle />
                             <ResizablePanel className="" defaultSize={40}>
                                 <div className="flex h-full ">
-                                    <div className="w-full max-w-9xl bg-muted px-4 py-2">
+                                    <div className="w-full max-w-9xl bg-muted px-4 pt-2 pb-10">
                                         <div className="flex justify-between p-2 bg-gray-800 border-b border-gray-700">
                                             <p className="text-lg text-gray-300">
                                                 Output Window

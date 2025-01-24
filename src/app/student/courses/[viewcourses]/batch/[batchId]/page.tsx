@@ -189,7 +189,7 @@ function Page({
                                 height={'50'}
                             />
                         </div>
-                        <div className="grow text-start">
+                        <div className="grow text-start lg:max-w-[790px]">
                             <p className="text-xl font-bold mb-2">
                                 {courseProgress?.bootcampTracking?.name}
                             </p>

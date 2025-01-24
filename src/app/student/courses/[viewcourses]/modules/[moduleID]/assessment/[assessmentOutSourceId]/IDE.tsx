@@ -454,7 +454,7 @@ const IDE: React.FC<IDEProps> = ({
                             <ResizableHandle withHandle />
                             <ResizablePanel className="" defaultSize={40}>
                                 <div className="flex h-full">
-                                    <div className="w-full max-w-9xl bg-muted p-2 mx-2">
+                                    <div className="w-full max-w-9xl bg-muted px-2 pt-2 pb-10 mx-2">
                                         <div className="flex justify-between p-2 bg-gray-800 border-b border-gray-700">
                                             <p className="text-lg text-gray-300">
                                                 Output Window
