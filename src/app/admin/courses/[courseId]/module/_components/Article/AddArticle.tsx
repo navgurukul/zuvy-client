@@ -23,8 +23,6 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Pencil } from 'lucide-react'
 // import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 import useResponsiveHeight from '@/hooks/useResponsiveHeight'
-import PreviewArticle from './PreviewArticle'
-import { ArrowUpRightSquare } from 'lucide-react'
 import { getChapterUpdateStatus, getArticlePreviewStore } from '@/store/store'
 import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -59,7 +57,6 @@ const AddArticle = ({
     const router = useRouter()
     // state
     const [title, setTitle] = useState('')
-    const [showPreview, setShowPreview] = useState<boolean>(false)
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const { setArticlePreviewContent } = getArticlePreviewStore()
 
@@ -81,21 +78,6 @@ const AddArticle = ({
         mode: 'onChange',
     })
 
-    // functions
-    const handlePreviewClick = () => {
-        const editorContent = editor?.getText()
-        if (!editorContent || editorContent.trim() === '') {
-            toast({
-                title: 'No Questions',
-                description:
-                    'Please add at least one question to preview the quiz.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
-            })
-        } else {
-            setShowPreview(true)
-        }
-    }
     const getArticleContent = async () => {
         try {
             const response = await api.get(
@@ -158,94 +140,73 @@ const AddArticle = ({
     return (
         <div className="px-5">
             <div className="w-full ">
-                {/* {showPreview ? (
-                    <PreviewArticle
-                        content={content}
-                        setShowPreview={setShowPreview}
-                    />
-                ) : ( */}
-                <>
-                    <Form {...form}>
-                        <form
-                            id="myForm"
-                            onSubmit={form.handleSubmit(editArticleContent)}
-                            className=""
-                        >
-                            <FormField
-                                control={form.control}
-                                name="title"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-col">
-                                        <FormControl>
-                                            <div className="flex justify-between items-center">
-                                                <div className="w-2/6 flex justify-center align-middle items-center relative">
-                                                    <Input
-                                                        {...field}
-                                                        onChange={(e) => {
-                                                            setTitle(
-                                                                e.target.value
-                                                            )
-                                                            field.onChange(e)
-                                                        }}
-                                                        placeholder="Untitled Article"
-                                                        className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
-                                                        autoFocus
+                <Form {...form}>
+                    <form
+                        id="myForm"
+                        onSubmit={form.handleSubmit(editArticleContent)}
+                        className=""
+                    >
+                        <FormField
+                            control={form.control}
+                            name="title"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                    <FormControl>
+                                        <div className="flex justify-between items-center">
+                                            <div className="w-2/6 flex justify-center align-middle items-center relative">
+                                                <Input
+                                                    {...field}
+                                                    onChange={(e) => {
+                                                        setTitle(e.target.value)
+                                                        field.onChange(e)
+                                                    }}
+                                                    placeholder="Untitled Article"
+                                                    className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                                                    autoFocus
+                                                />
+                                                {!title && ( // Show pencil icon only when the title is empty
+                                                    <Pencil
+                                                        fill="true"
+                                                        fillOpacity={0.4}
+                                                        size={20}
+                                                        className="absolute text-gray-100 pointer-events-none mt-1 right-5"
                                                     />
-                                                    {!title && ( // Show pencil icon only when the title is empty
-                                                        <Pencil
-                                                            fill="true"
-                                                            fillOpacity={0.4}
-                                                            size={20}
-                                                            className="absolute text-gray-100 pointer-events-none mt-1 right-5"
-                                                        />
-                                                    )}
-                                                </div>
-
-                                                <div className="flex justify-end mt-5  ">
-                                                    <Button
-                                                        type="submit"
-                                                        form="myForm"
-                                                    >
-                                                        Save
-                                                    </Button>
-                                                </div>
+                                                )}
                                             </div>
-                                        </FormControl>
-                                        <div className="flex items-center justify-between ">
-                                            {/* <Button
-                                                    variant={'ghost'}
-                                                    type="button"
-                                                    className="text-secondary w-[100px] h-[30px] gap-x-1"
-                                                    onClick={handlePreviewClick}
+
+                                            <div className="flex justify-end mt-5">
+                                                <div className="flex items-center justify-between mr-2">
+                                                    <div
+                                                        id="previewArticle"
+                                                        onClick={previewArticle}
+                                                        className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer"
+                                                    >
+                                                        <Eye size={18} />
+                                                        <h6 className="ml-1 text-sm">
+                                                            Preview
+                                                        </h6>
+                                                    </div>
+                                                </div>
+                                                <Button
+                                                    type="submit"
+                                                    form="myForm"
                                                 >
-                                                    <ArrowUpRightSquare />
-                                                    <h1>Preview</h1>
-                                                </Button> */}
-                                            <div
-                                                id="previewArticle"
-                                                onClick={previewArticle}
-                                                className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer"
-                                            >
-                                                <Eye size={18} />
-                                                <h6 className="ml-1 text-sm">
-                                                    Preview
-                                                </h6>
+                                                    Save
+                                                </Button>
                                             </div>
                                         </div>
+                                    </FormControl>
+                                    <FormMessage className="h-5" />
+                                </FormItem>
+                            )}
+                        />
+                    </form>
+                </Form>
 
-                                        <FormMessage className="h-5" />
-                                    </FormItem>
-                                )}
-                            />
-                        </form>
-                    </Form>
-
-                    <div className="text-left">
-                        <TiptapToolbar editor={editor} />
-                        <TiptapEditor editor={editor} />
-                    </div>
-                </>
-                {/* )} */}
+                <div className="text-left mt-5">
+                    <TiptapToolbar editor={editor} />
+                    <TiptapEditor editor={editor} />
+                </div>
             </div>
         </div>
     )

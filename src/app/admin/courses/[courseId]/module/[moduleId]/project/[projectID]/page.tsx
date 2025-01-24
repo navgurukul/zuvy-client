@@ -38,6 +38,9 @@ import { useEditor } from '@tiptap/react'
 import extensions from '@/app/_components/editor/TiptapExtensions'
 import { useParams } from 'next/navigation'
 import ProjectPreview from '../_components/ProjectPreview'
+import { Eye } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { getProjectPreviewStore } from '@/store/store'
 
 interface Project {
     id: number
@@ -55,8 +58,10 @@ interface ProjectData {
 }
 
 export default function Project() {
+    const router = useRouter()
+    const { setProjectPreviewContent } = getProjectPreviewStore()
     const [showPreview, setShowPreview] = useState<boolean>(false)
-    const { courseId, projectID } = useParams()
+    const { courseId, moduleId, projectID } = useParams()
     const editor = useEditor({
         extensions,
     })
@@ -164,6 +169,15 @@ export default function Project() {
         }
     }
 
+    function previewProject() {
+        if (projectData) {
+            setProjectPreviewContent(projectData)
+            router.push(
+                `/admin/courses/${courseId}/module/${moduleId}/project/${projectID}/preview`
+            )
+        }
+    }
+
     return (
         <>
             <BreadcrumbComponent crumbs={crumbs} />
@@ -187,23 +201,39 @@ export default function Project() {
                                         name="title"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel></FormLabel>
+                                                {/* <FormLabel></FormLabel> */}
                                                 <FormControl>
-                                                    <Input
-                                                        placeholder="Untitled Article"
-                                                        className="p-0 text-3xl w-2/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize"
-                                                        {...field}
-                                                        {...form.register(
-                                                            'title'
-                                                        )}
-                                                        onChange={(e) =>
-                                                            setTitle(
-                                                                e.target.value
-                                                            )
-                                                        }
-                                                    />
+                                                    <div className="flex justify-between items-center">
+                                                        <Input
+                                                            placeholder="Untitled Article"
+                                                            className="p-0 text-3xl w-2/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize"
+                                                            {...field}
+                                                            {...form.register(
+                                                                'title'
+                                                            )}
+                                                            onChange={(e) =>
+                                                                setTitle(
+                                                                    e.target
+                                                                        .value
+                                                                )
+                                                            }
+                                                        />
+                                                        <div
+                                                            id="previewProject"
+                                                            onClick={
+                                                                previewProject
+                                                            }
+                                                            className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer"
+                                                        >
+                                                            <Eye size={18} />
+                                                            <h6 className="ml-1 text-sm">
+                                                                Preview
+                                                            </h6>
+                                                        </div>
+                                                    </div>
                                                 </FormControl>
-                                                <Button
+
+                                                {/* <Button
                                                     variant={'ghost'}
                                                     type="button"
                                                     className=" text-secondary w-[100px] h-[30px] gap-x-1 "
@@ -213,7 +243,7 @@ export default function Project() {
                                                 >
                                                     <ArrowUpRightSquare />
                                                     <h1>Preview</h1>
-                                                </Button>
+                                                </Button> */}
                                                 <FormMessage className="h-5" />
                                             </FormItem>
                                         )}

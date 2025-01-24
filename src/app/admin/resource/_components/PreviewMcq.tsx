@@ -11,6 +11,7 @@ import DOMPurify from 'dompurify'
 import { AlertDialogHeader } from '@/components/ui/alert-dialog'
 import { AlertDialogTitle } from '@radix-ui/react-alert-dialog'
 import { addClassToCodeTags } from '@/utils/admin'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 type Props = {
     quizQuestionId: number
@@ -28,7 +29,7 @@ const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide, tagId }: Props) => {
     const [activeTab, setActiveTab] = useState<string | null>(null)
     const [codeSnippet, setCodeSnippet] = useState<any>()
     const codeBlockClass =
-    'text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full';
+        'text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full'
 
     useEffect(() => {
         if (quizData?.quizVariants?.length) {
@@ -94,81 +95,85 @@ const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide, tagId }: Props) => {
     const newTagName = tags.filter((tag: any) => tag.id == tagId)
 
     return (
-        <div className="w-full">
-            <DialogHeader className="">
-                <div className="flex gap-x-3 ">
-                    Question Preview{' '}
-                    <div className="flex gap-x-3 items-center">
-                        <span className="font-md text-[14px] bg-green-200 px-2  py-0.5 my-0.5 text-secondary rounded-md">
-                            {assesmentSide ? tagName : newTagName[0].tagName}
-                        </span>
-                        <span
-                            className={`font-normal text-[14px] px-2 py-0.5 my-0.5 rounded-md ${difficultyColor(
-                                difficulty as any
-                            )}`}
-                        >
-                            {difficulty}
-                        </span>
+        <ScrollArea className="max-h-[500px] pr-3">
+            <div className="w-full max-h-[500px]">
+                <DialogHeader className="">
+                    <div className="flex gap-x-3 ">
+                        Question Preview{' '}
+                        <div className="flex gap-x-3 items-center">
+                            <span className="font-md text-[14px] bg-green-200 px-2  py-0.5 my-0.5 text-secondary rounded-md">
+                                {assesmentSide
+                                    ? tagName
+                                    : newTagName[0].tagName}
+                            </span>
+                            <span
+                                className={`font-normal text-[14px] px-2 py-0.5 my-0.5 rounded-md ${difficultyColor(
+                                    difficulty as any
+                                )}`}
+                            >
+                                {difficulty}
+                            </span>
+                        </div>
                     </div>
-                </div>
-            </DialogHeader>
+                </DialogHeader>
 
-            <Tabs
-                value={activeTab as any}
-                className="w-full mt-5"
-                onValueChange={(value) => setActiveTab(value)}
-            >
-                <TabsList className="flex justify-start bg-white">
-                    {quizData.quizVariants.map((variant: any) => (
-                        <TabsTrigger
-                            key={variant.id}
-                            value={variant.id.toString()}
-                            onClick={() => handleTabChange(variant.id)}
-                            className={`px-4 py-2 rounded-none ${
-                                activeTab === variant.id.toString()
-                                    ? 'text-secondary border-b-2 border-secondary'
-                                    : 'text-gray-500'
-                            }`}
-                        >
-                            Variant {variant.variantNumber}
-                        </TabsTrigger>
-                    ))}
-                </TabsList>
-                <div className="w-full">
-                    {quizData.quizVariants.map(
-                        (variant: any, index: number) => (
-                            <TabsContent
+                <Tabs
+                    value={activeTab as any}
+                    className="w-full mt-5"
+                    onValueChange={(value) => setActiveTab(value)}
+                >
+                    <TabsList className="flex justify-start bg-white">
+                        {quizData.quizVariants.map((variant: any) => (
+                            <TabsTrigger
                                 key={variant.id}
                                 value={variant.id.toString()}
-                                className={`w-full  ${
+                                onClick={() => handleTabChange(variant.id)}
+                                className={`px-4 py-2 rounded-none ${
                                     activeTab === variant.id.toString()
-                                        ? 'block'
-                                        : 'hidden'
-                                } `}
+                                        ? 'text-secondary border-b-2 border-secondary'
+                                        : 'text-gray-500'
+                                }`}
                             >
-                                <div className="mb-4">
-                                    <div className="text-left flex  gap-2">
-                                        <span className="font-bold flex">
-                                            <h1>Q.</h1>
-                                        </span>
-                                        <div
-                                            className={` text-wrap h-96 ${
-                                                variant.question.includes(
-                                                    'pre'
-                                                ) && 'overflow-scroll'
-                                            } `}
-                                            dangerouslySetInnerHTML={{
-                                                __html: addClassToCodeTags(
-                                                    variant.question,
-                                                    codeBlockClass
-                                                ),
-                                            }}
-                                        />
-                                        {/* {variant.question} */}
-                                    </div>
-                                    <ul className="list-none pl-1">
-                                        {Object.entries(variant.options).map(
-                                            ([key, option], index) => (
+                                Variant {variant.variantNumber}
+                            </TabsTrigger>
+                        ))}
+                    </TabsList>
+                    <div className="w-full">
+                        {quizData.quizVariants.map(
+                            (variant: any, index: number) => (
+                                <TabsContent
+                                    key={variant.id}
+                                    value={variant.id.toString()}
+                                    className={`w-full  ${
+                                        activeTab === variant.id.toString()
+                                            ? 'block'
+                                            : 'hidden'
+                                    } `}
+                                >
+                                    <div className="mb-4">
+                                        <div className="text-left flex gap-2 mb-2">
+                                            <span className="font-bold flex">
+                                                <h1>Q.</h1>
+                                            </span>
+                                            <div
+                                                className={` text-wrap ${
+                                                    variant.question.includes(
+                                                        'pre'
+                                                    ) && 'overflow-scroll'
+                                                } `}
+                                                dangerouslySetInnerHTML={{
+                                                    __html: addClassToCodeTags(
+                                                        variant.question,
+                                                        codeBlockClass
+                                                    ),
+                                                }}
+                                            />
+                                            {/* {variant.question} */}
+                                        </div>
+                                        <ul className="list-none pl-1">
+                                            {Object.entries(
+                                                variant.options
+                                            ).map(([key, option], index) => (
                                                 <li
                                                     key={key}
                                                     className="mt-1 flex gap-x-2 items-center"
@@ -185,16 +190,16 @@ const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide, tagId }: Props) => {
                                                         }
                                                     />
                                                 </li>
-                                            )
-                                        )}
-                                    </ul>
-                                </div>
-                            </TabsContent>
-                        )
-                    )}
-                </div>
-            </Tabs>
-        </div>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </TabsContent>
+                            )
+                        )}
+                    </div>
+                </Tabs>
+            </div>
+        </ScrollArea>
     )
 }
 

@@ -256,7 +256,7 @@ const IDE: React.FC<IDEProps> = ({
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>
-                    <SubmissionsList questionId={params.editor} />
+                    <SubmissionsList questionId={params.editor} admin={admin} />
                 </div>
 
                 <div>
@@ -264,7 +264,9 @@ const IDE: React.FC<IDEProps> = ({
                         onClick={(e) => handleSubmit(e, 'run')}
                         size="sm"
                         className="mr-2"
-                        disabled={loading || (codePanel && isSubmitted)}
+                        disabled={
+                            admin || loading || (codePanel && isSubmitted)
+                        }
                     >
                         {loading ? <Spinner /> : <Play size={20} />}
                         <span className="ml-2 text-lg font-bold">Run</span>
@@ -272,7 +274,9 @@ const IDE: React.FC<IDEProps> = ({
                     <Button
                         onClick={(e) => handleSubmit(e, 'submit')}
                         size="sm"
-                        disabled={loading || (codePanel && isSubmitted)}
+                        disabled={
+                            admin || loading || (codePanel && isSubmitted)
+                        }
                     >
                         {loading ? <Spinner /> : <Upload size={20} />}
                         <span className="ml-2 text-lg font-bold">Submit</span>

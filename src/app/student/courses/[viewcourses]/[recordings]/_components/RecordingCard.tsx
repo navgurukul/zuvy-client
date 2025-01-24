@@ -152,18 +152,18 @@ function RecordingCard({
                 <Clapperboard size={40} className="text-yellow-dark mr-2" />
                 <div>
                     <p className="text-xl text-start">
-                    <TooltipProvider>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <h3 className="font-semibold">
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <h3 className="font-semibold">
                                         {ellipsis(classData.title, 30)}
-                                        </h3>
-                                    </TooltipTrigger>
-                                    <TooltipContent className="font-semibold">
-                                    {(classData.title)}
-                                    </TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>                        
+                                    </h3>
+                                </TooltipTrigger>
+                                <TooltipContent className="font-semibold">
+                                    {classData.title}
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
                     </p>
                     <div className="text-md flex font-semibold capitalize items-center">
                         <Moment format="D MMMM">{classData.startTime}</Moment>
@@ -186,9 +186,40 @@ function RecordingCard({
                 ) : (
                     <Sheet>
                         <div className="flex items-center">
-                            <SheetTrigger onClick={handleClassDetails}>
-                                Class Details
-                            </SheetTrigger>
+                            <TooltipProvider>
+                                <SheetTrigger
+                                    disabled={
+                                        isVideo === 'not found' ||
+                                        presentStudents === 0
+                                    }
+                                >
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <div className="inline-block">
+                                                <Button
+                                                    variant="ghost"
+                                                    className="flex gap-2 items-center"
+                                                    onClick={handleClassDetails}
+                                                    disabled={
+                                                        isVideo ===
+                                                            'not found' ||
+                                                        presentStudents === 0
+                                                    }
+                                                >
+                                                    Class Details
+                                                </Button>
+                                            </div>
+                                        </TooltipTrigger>
+                                        {(isVideo === 'not found' ||
+                                            presentStudents === 0) && (
+                                            <TooltipContent className="font-semibold">
+                                                Recording is not available and
+                                                present students are 0
+                                            </TooltipContent>
+                                        )}
+                                    </Tooltip>
+                                </SheetTrigger>
+                            </TooltipProvider>
                             <ChevronRight size={15} />
                         </div>
                         <SheetContent>

@@ -1,9 +1,7 @@
 'use client'
 
-import { PlusCircle, ExternalLink, Pencil } from 'lucide-react'
-import Link from 'next/link'
+import { PlusCircle, Pencil } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
-import { Separator } from '@/components/ui/separator'
 import { cn, difficultyBgColor, difficultyColor, ellipsis } from '@/lib/utils'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import CodingTopics from '@/app/admin/courses/[courseId]/module/_components/codingChallenge/CodingTopics'
@@ -18,10 +16,7 @@ import {
 } from '@/store/store'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import QuestionDescriptionModal from '../Assessment/QuestionDescriptionModal'
-import { ArrowUpRightSquare } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import PreviewCodingChallenge from './PreviewCodingChallenge'
-import { toast } from '@/components/ui/use-toast'
 import { handleSaveChapter } from '@/utils/admin'
 import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -111,23 +106,7 @@ function CodingChallenge({
         useState<string>('All Languages')
     const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([])
     const [chapterTitle, setChapterTitle] = useState<string>(activeChapterTitle)
-    const [showPreview, setShowPreview] = useState<boolean>(false)
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
-
-    const handlePreviewClick = () => {
-        if (selectedQuestions.length === 0) {
-            // Show toast if no questions are added
-            toast({
-                title: 'No Questions',
-                description:
-                    'Please add at least one question to preview the codiing question',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
-            })
-        } else {
-            setShowPreview(true)
-        }
-    }
 
     const handleSaveClick = () => {
         handleSaveChapter(
@@ -240,13 +219,6 @@ function CodingChallenge({
 
     return (
         <>
-            {/* {showPreview ? (
-                <PreviewCodingChallenge
-                    content={content}
-                    setShowPreview={setShowPreview}
-                    tags={tags}
-                />
-            ) : ( */}
             <div className="px-5">
                 {/* SearchBar component */}
                 <div className="flex flex-col items-start mb-15">
@@ -271,7 +243,15 @@ function CodingChallenge({
                                 />
                             )}
                         </div>
-                        <div>
+                        <div className="flex items-center justify-between">
+                            <div
+                                id="previewCodingChallenge"
+                                onClick={previewCodingChallenge}
+                                className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer mt-5 mr-2"
+                            >
+                                <Eye size={18} />
+                                <h6 className="ml-1 text-sm">Preview</h6>
+                            </div>
                             {selectedQuestions?.length > 0 && (
                                 <Button
                                     onClick={handleSaveClick}
@@ -280,25 +260,6 @@ function CodingChallenge({
                                     Save
                                 </Button>
                             )}
-                        </div>
-                    </div>
-                    <div className="mt-2">
-                        {/* <Button
-                                variant={'ghost'}
-                                type="button"
-                                className="text-secondary w-[100px] h-[30px] flex items-center gap-x-1"
-                                onClick={handlePreviewClick}
-                            >
-                                <ArrowUpRightSquare />
-                                <h1>Preview</h1>
-                            </Button> */}
-                        <div
-                            id="previewCodingChallenge"
-                            onClick={previewCodingChallenge}
-                            className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer"
-                        >
-                            <Eye size={18} />
-                            <h6 className="ml-1 text-sm">Preview</h6>
                         </div>
                     </div>
                 </div>
@@ -457,7 +418,6 @@ function CodingChallenge({
                     </div>
                 </div>
             </div>
-            {/* )} */}
         </>
     )
 }
