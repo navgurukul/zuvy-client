@@ -22,6 +22,7 @@ import { getStoreStudentDataNew } from '@/store/store'
 import useDebounce from '@/hooks/useDebounce'
 import { useStudentData } from '../(courseTabs)/students/components/useStudentData'
 import { fetchStudentsHandler } from '@/utils/admin'
+import { getCourseData } from '@/store/store'
 
 const AddStudentsModal = ({
     id,
@@ -47,6 +48,7 @@ const AddStudentsModal = ({
     // state and variables
     const [selectedOption, setSelectedOption] = useState('1')
     const [studentData, setStudentData] = useState<StudentDataState | any>({})
+    const { fetchCourseDetails } = getCourseData()
     const {
         setStudents,
         setTotalPages,
@@ -102,6 +104,7 @@ const AddStudentsModal = ({
                         setTotalStudents,
                         setCurrentPage,
                     })
+                    fetchCourseDetails(id)
                     setStudentData({ name: '', email: '' })
                 })
             } catch (error: any) {
@@ -122,8 +125,8 @@ const AddStudentsModal = ({
                     {message
                         ? 'New Batch'
                         : selectedOption === '2'
-                          ? 'Add Student'
-                          : 'Add Students'}
+                        ? 'Add Student'
+                        : 'Add Students'}
                 </DialogTitle>
                 <span>
                     {message

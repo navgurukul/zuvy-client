@@ -33,6 +33,14 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover'
+import { Clock } from 'lucide-react'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { ellipsis } from '@/lib/utils'
 
 type FormSectionProps = {
     item: any
@@ -237,17 +245,33 @@ const FormSection: React.FC<FormSectionProps> = ({
                             <FormLabel className="flex text-left text-md font-semibold mb-1">
                                 Question {index + 1}
                             </FormLabel>
-                            <FormField
-                                control={form.control}
-                                name={`questions.${index}.isRequired`}
-                                render={({ field }) => (
-                                    <Switch
-                                        // checked={field.value}
-                                        checked={questionData.isRequired}
-                                        onCheckedChange={field.onChange}
-                                    />
-                                )}
-                            />
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <div>
+                                            <FormField
+                                                control={form.control}
+                                                name={`questions.${index}.isRequired`}
+                                                render={({ field }) => (
+                                                    <Switch
+                                                        // checked={field.value}
+                                                        checked={
+                                                            questionData.isRequired
+                                                        }
+                                                        onCheckedChange={
+                                                            field.onChange
+                                                        }
+                                                    />
+                                                )}
+                                            />
+                                        </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent className="font-semibold">
+                                        Make the question as required by turning
+                                        it on
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
                         </div>
                         <FormControl>
                             <Input
@@ -268,10 +292,11 @@ const FormSection: React.FC<FormSectionProps> = ({
                                 <RadioGroupItem
                                     value={option}
                                     className="mt-5"
+                                    disabled={true}
                                 />
                             </RadioGroup>
                         ) : (
-                            <Checkbox className="mt-5" />
+                            <Checkbox className="mt-5" disabled={true} />
                         )}
                         <FormField
                             control={form.control}
@@ -381,12 +406,16 @@ const FormSection: React.FC<FormSectionProps> = ({
                     render={({ field }) => (
                         <FormItem>
                             <FormControl>
-                                <Input
-                                    {...field}
-                                    className="w-[100px] px-3 py-2 border rounded-md "
-                                    placeholder="Time Placeholder"
-                                    type="time"
-                                />
+                                <div className="relative flex items-center">
+                                    <Input
+                                        {...field}
+                                        className="w-[100px] px-3 py-2 border rounded-md "
+                                        placeholder="Time Placeholder"
+                                        type="time"
+                                        disabled={true}
+                                    />
+                                    <Clock className="absolute left-[55px] mt-2 h-5 w-5 text-gray-400" />
+                                </div>
                             </FormControl>
                             <FormMessage />
                         </FormItem>

@@ -692,6 +692,23 @@ export const convertSeconds = (seconds: number) => {
     }
 }
 
+// ----- Project Details ----------------
+
+export const fetchProjectDetails = async (
+    setProjectData: any,
+    projectID: any,
+    courseId: any
+) => {
+    try {
+        const response = await api.get(
+            `Content/project/${projectID}?bootcampId=${courseId}`
+        )
+        setProjectData(response.data)
+    } catch (error) {
+        console.error(error)
+    }
+}
+
 // --------------------------------------------
 // Preview Assessment Page functions:-
 
@@ -854,26 +871,27 @@ export const proctoringOptions = [
     {
         label: 'Screen Exit',
         name: 'screenExit' as const,
-        tooltip: 'Detects and logs any attempts to exit the exam screen, helping to identify potential cheating attempts.'
-    }
-];
+        tooltip:
+            'Detects and logs any attempts to exit the exam screen, helping to identify potential cheating attempts.',
+    },
+]
 
 // Calculate the time taken between start and submit times
 export const calculateTimeTaken = (start: string, submit: string): string => {
-    const startDate = new Date(start);
-    const submitDate = new Date(submit);
+    const startDate = new Date(start)
+    const submitDate = new Date(submit)
 
-    const diffInMilliseconds = submitDate.getTime() - startDate.getTime();
-    const hours = Math.floor(diffInMilliseconds / (1000 * 60 * 60));
-    const minutes = Math.floor((diffInMilliseconds % (1000 * 60 * 60)) / (1000 * 60));
+    const diffInMilliseconds = submitDate.getTime() - startDate.getTime()
+    const hours = Math.floor(diffInMilliseconds / (1000 * 60 * 60))
+    const minutes = Math.floor(
+        (diffInMilliseconds % (1000 * 60 * 60)) / (1000 * 60)
+    )
 
-    return `${hours}h & ${minutes}m`;
-};
+    return `${hours}h & ${minutes}m`
+}
 
-  
-  // Extract the submission date in YYYY-MM-DD format
-  export const getSubmissionDate = (submit: string): string => {
-    const submitDate = new Date(submit);
-    return submitDate.toISOString().split("T")[0];
-  };
-  
+// Extract the submission date in YYYY-MM-DD format
+export const getSubmissionDate = (submit: string): string => {
+    const submitDate = new Date(submit)
+    return submitDate.toISOString().split('T')[0]
+}

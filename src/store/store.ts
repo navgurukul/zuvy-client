@@ -222,6 +222,18 @@ export const getFormPreviewStore = create<formPreviewStore>((set) => ({
     },
 }))
 
+type projectPreviewStore = {
+    projectPreviewContent: any
+    setProjectPreviewContent: (newValue: any) => void
+}
+
+export const getProjectPreviewStore = create<projectPreviewStore>((set) => ({
+    projectPreviewContent: null,
+    setProjectPreviewContent: (newValue: any) => {
+        set({ projectPreviewContent: newValue })
+    },
+}))
+
 // ------------------------------
 // Define the type for the assessment store
 type assessmentStore = {

@@ -19,7 +19,6 @@ import {
     getQuizPreviewStore,
 } from '@/store/store'
 import { ArrowUpRightSquare, Pencil } from 'lucide-react'
-import QuizPreview from '@/app/admin/courses/[courseId]/module/_components/quiz/QuizPreview'
 import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
@@ -30,7 +29,6 @@ function Quiz(props: any) {
     const [addQuestion, setAddQuestion] = useState<quizData[]>([])
     const [questionId, setQuestionId] = useState()
     const { quizData, setStoreQuizData } = getAllQuizData()
-    const [showPreview, setShowPreview] = useState(false)
     const [quizTitle, setQuizTitle] = useState('')
     const [inputValue, setInputValue] = useState(props.activeChapterTitle)
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
@@ -95,20 +93,6 @@ function Quiz(props: any) {
             })
         }
     }
-    const handlePreviewClick = () => {
-        if (addQuestion.length === 0) {
-            // Show toast if no questions are added
-            toast({
-                title: 'No Questions',
-                description:
-                    'Please add at least one question to preview the quiz.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
-            })
-        } else {
-            setShowPreview(true)
-        }
-    }
 
     const handleSaveQuiz = () => {
         const selectedIds = addQuestion?.map((item) => item.id)
@@ -145,15 +129,12 @@ function Quiz(props: any) {
 
     return (
         <div>
-            {showPreview ? (
-                <QuizPreview setShowPreview={setShowPreview} />
-            ) : (
-                <div className="px-5">
-                    <div className="flex flex-row items-center justify-start gap-x-6 mb-10">
-                        <div className="w-full flex flex-col items-start gap-3">
-                            {/* Input Field */}
-                         <div className='flex justify-between items-center w-full'>
-                         <div className="w-full relative">
+            <div className="px-5">
+                <div className="flex flex-row items-center justify-start gap-x-6 mb-5">
+                    <div className="w-full flex flex-col items-start gap-3">
+                        {/* Input Field */}
+                        <div className="flex justify-between items-center w-full">
+                            <div className="w-full relative">
                                 <Input
                                     required
                                     onChange={(e) => {
@@ -173,7 +154,15 @@ function Quiz(props: any) {
                                     />
                                 )}
                             </div>
-                            <div>
+                            <div className="flex items-center justify-between">
+                                <div
+                                    id="previewQuiz"
+                                    onClick={previewQuiz}
+                                    className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer mt-5 mr-2"
+                                >
+                                    <Eye size={18} />
+                                    <h6 className="ml-1 text-sm">Preview</h6>
+                                </div>
                                 {addQuestion?.length > 0 && (
                                     <div className="mt-5">
                                         <Button
@@ -185,83 +174,58 @@ function Quiz(props: any) {
                                     </div>
                                 )}
                             </div>
-                         </div>
-
-                            {/* Preview Button */}
-                            {/* <Button
-                                variant={'ghost'}
-                                type="button"
-                                className="text-secondary w-[100px] h-[30px] gap-x-1"
-                                onClick={handlePreviewClick}
-                            >
-                                <ArrowUpRightSquare />
-                                <h1>Preview</h1>
-                            </Button> */}
-                            <div
-                                id="previewQuiz"
-                                onClick={previewQuiz}
-                                className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer"
-                            >
-                                <Eye size={18} />
-                                <h6 className="ml-1 text-sm">Preview</h6>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex">
-                        <QuizLibrary
-                            addQuestion={addQuestion}
-                            handleAddQuestion={handleAddQuestion}
-                            tags={tags}
-                        />
-                        <Separator
-                            orientation="vertical"
-                            className="mx-4 w-[2px] h-96 mt-36 rounded"
-                        />
-                        <div className="w-full">
-                            <div>
-                                <div className="flex flex-col items-center justify-between">
-                                    <div className="flex justify-between w-full mt-36">
-                                        <h2 className="text-left text-gray-700 w-full font-semibold">
-                                            Selected Question
-                                        </h2>
-
-                                    </div>
-                                    <div className="text-left w-full">
-                                        {addQuestion?.length === 0 && (
-                                            <h1 className="text-left italic">
-                                                No Selected Questions
-                                            </h1>
-                                        )}
-                                    </div>
-                                </div>
-                                <ScrollArea className="h-96 pr-3 pb-10">
-
-                                    {addQuestion?.map(
-                                        (
-                                            questions: quizData,
-                                            index: number
-                                        ) => (
-                                            <QuizModal
-                                                key={index}
-                                                tags={tags}
-                                                data={questions}
-                                                addQuestion={addQuestion}
-                                                removeQuestionById={
-                                                    removeQuestionById
-                                                }
-                                                saveQuizQuestionHandler={
-                                                    saveQuizQuestionHandler
-                                                }
-                                            />
-                                        )
-                                    )}
-                                </ScrollArea>
-                            </div>
                         </div>
                     </div>
                 </div>
-            )}
+
+                <div className="flex">
+                    <QuizLibrary
+                        addQuestion={addQuestion}
+                        handleAddQuestion={handleAddQuestion}
+                        tags={tags}
+                    />
+                    <Separator
+                        orientation="vertical"
+                        className="mx-4 w-[2px] h-96 mt-36 rounded"
+                    />
+                    <div className="w-full">
+                        <div>
+                            <div className="flex flex-col items-center justify-between">
+                                <div className="flex justify-between w-full mt-36">
+                                    <h2 className="text-left text-gray-700 w-full font-semibold">
+                                        Selected Question
+                                    </h2>
+                                </div>
+                                <div className="text-left w-full">
+                                    {addQuestion?.length === 0 && (
+                                        <h1 className="text-left italic">
+                                            No Selected Questions
+                                        </h1>
+                                    )}
+                                </div>
+                            </div>
+                            <ScrollArea className="h-96 pr-3 pb-10">
+                                {addQuestion?.map(
+                                    (questions: quizData, index: number) => (
+                                        <QuizModal
+                                            key={index}
+                                            tags={tags}
+                                            data={questions}
+                                            addQuestion={addQuestion}
+                                            removeQuestionById={
+                                                removeQuestionById
+                                            }
+                                            saveQuizQuestionHandler={
+                                                saveQuizQuestionHandler
+                                            }
+                                        />
+                                    )
+                                )}
+                            </ScrollArea>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     )
 }

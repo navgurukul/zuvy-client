@@ -18,6 +18,7 @@ import useDebounce from '@/hooks/useDebounce'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import VideoSubmission from './components/VideoSubmission'
+import Image from 'next/image'
 
 const Page = ({ params }: { params: any }) => {
     const [activeTab, setActiveTab] = useState('practice')
@@ -383,26 +384,48 @@ const Page = ({ params }: { params: any }) => {
                             })}
                         </div>
                     ) : (
-                        <div className="text-left font-semibold">
-                            No projects found
+                        <div className="w-screen flex flex-col justify-center items-center h-4/5">
+                            <h1 className="text-center font-semibold ">
+                                No Projects Found
+                            </h1>
+                            <Image
+                                src="/emptyStates/curriculum.svg"
+                                alt="No Video Found"
+                                width={400}
+                                height={400}
+                            />
                         </div>
                     ))}
                 {activeTab === 'form' && (
                     <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2 lg:grid-cols-3">
-                        {formData?.map((item: any) => {
-                            return item.moduleChapterData.map(
-                                (data: any, index: any) => (
-                                    <FormComponent
-                                        key={index}
-                                        moduleName={item.name}
-                                        moduleId={item.id}
-                                        bootcampId={item.bootcampId}
-                                        data={data}
-                                        totalStudents={totalStudents}
-                                    />
+                        {formData ? (
+                            formData?.map((item: any) => {
+                                return item.moduleChapterData.map(
+                                    (data: any, index: any) => (
+                                        <FormComponent
+                                            key={index}
+                                            moduleName={item.name}
+                                            moduleId={item.id}
+                                            bootcampId={item.bootcampId}
+                                            data={data}
+                                            totalStudents={totalStudents}
+                                        />
+                                    )
                                 )
-                            )
-                        })}
+                            })
+                        ) : (
+                            <div className="w-screen flex flex-col justify-center items-center h-4/5">
+                                <h1 className="text-center font-semibold ">
+                                    No Form Found
+                                </h1>
+                                <Image
+                                    src="/emptyStates/curriculum.svg"
+                                    alt="No Video Found"
+                                    width={400}
+                                    height={400}
+                                />
+                            </div>
+                        )}
                     </div>
                 )}
                 {activeTab === 'assignments' && (
