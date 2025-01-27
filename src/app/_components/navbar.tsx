@@ -50,6 +50,7 @@ const Navbar = () => {
                         {/* <Search /> */}
                         {/* <Bell /> */}
                         {/* <NavbarNotifications /> */}
+                        {rolesList === 'student' && <NavbarNotifications />}
                         <Link href="/profile">
                             <Avatar>
                                 <AvatarImage
