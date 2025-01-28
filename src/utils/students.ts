@@ -305,6 +305,41 @@ export async function getBatchDataNew(bootcampId: number) {
     return res.data
 }
 
+//notifications
+export const fetchNotifications = async (userId: number) => {
+    try {
+      const response = await api.get(`/notifications/${userId}`);
+      return response.data.data; 
+    } catch (error: any) {
+      console.error('Error fetching notifications:', error.response?.data || error.message);
+      throw error.response?.data || error.message; 
+    }
+  };
+  
+  export const markNotificationAsRead = async (notificationId: number) => {
+    try {
+      const response = await api.patch(`/notifications/${notificationId}/read`);
+      return response.data; 
+    } catch (error: any) {
+      console.error('Error marking notification as read:', error.response?.data || error.message);
+      throw error.response?.data || error.message;
+    }
+  };
+  
+  export const markAllNotificationsAsRead = async (notificationIds: number[]) => {
+    try {
+      const responses = await Promise.all(
+        notificationIds.map((id) => markNotificationAsRead(id))
+      );
+      return responses;
+    } catch (error: any) {
+      console.error('Error marking all notifications as read:', error.response?.data || error.message);
+      throw error.response?.data || error.message;
+    }
+  };
+
+
+
 // --------------------------------------------
 
 export const decodeBase64 = (data: string) => {
