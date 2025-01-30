@@ -26,7 +26,7 @@ interface questionDetails {
     examples: { input: number[]; output: number }
 }
 
-function IdePreview ({ params }: { params: any }) {
+function IdePreview({ params }: { params: any }) {
     const [questionDetails, setQuestionDetails] = useState<questionDetails>({
         title: '',
         description: '',
@@ -78,7 +78,9 @@ function IdePreview ({ params }: { params: any }) {
     const getQuestionDetails = async () => {
         try {
             await api
-                .get(`codingPlatform/get-coding-question/${params.codingQuestionId}`)
+                .get(
+                    `codingPlatform/get-coding-question/${params.codingQuestionId}`
+                )
                 .then((response) => {
                     setQuestionDetails(response?.data.data)
 
@@ -104,11 +106,13 @@ function IdePreview ({ params }: { params: any }) {
     return (
         <div>
             <div className="flex justify-between mb-5">
-            <div className="flex items-center cursor-pointer" onClick={router.back}>
+                <div
+                    className="flex items-center cursor-pointer"
+                    onClick={router.back}
+                >
                     <ChevronLeft strokeWidth={2} size={24} />
                     <h1 className="font-extrabold">All Questions</h1>
                 </div>
-          
             </div>
 
             {questionDetails && (
@@ -252,8 +256,7 @@ function IdePreview ({ params }: { params: any }) {
                                                 Output Window
                                             </p>
                                         </div>
-                                        <div className="h-full p-4 text-start text-gray-100 overflow-y-auto font-mono bg-gray-900 border border-gray-700 rounded-b-lg">
-                                        </div>
+                                        <div className="h-full p-4 text-start text-gray-100 overflow-y-auto font-mono bg-gray-900 border border-gray-700 rounded-b-lg"></div>
                                     </div>
                                 </div>
                             </ResizablePanel>

@@ -28,7 +28,7 @@ const QuizQuestions = ({
     questions,
     assessmentSubmitId,
     getSeperateQuizQuestions,
-    getAssessmentData
+    getAssessmentData,
 }: {
     onBack: () => void
     weightage?: any
@@ -47,7 +47,7 @@ const QuizQuestions = ({
 
     const codeBlockClass =
         'text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full'
-        'text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full'
+    ;('text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full')
 
     useEffect(() => {
         return () => {
@@ -70,7 +70,6 @@ const QuizQuestions = ({
 
     // Set default values based on submissionsData when the component mounts or questions change
     useEffect(() => {
-
         const defaultValues = {
             answers: questions?.data?.mcqs?.map((question: any) =>
                 question.submissionsData && question.submissionsData.length > 0
@@ -91,8 +90,8 @@ const QuizQuestions = ({
         // }))
 
         const quizSubmissionDto = data.answers.map((chosenOption, index) => {
-            const questionId = questions.data.mcqs[index].outsourseQuizzesId;
-        
+            const questionId = questions.data.mcqs[index].outsourseQuizzesId
+
             // If questionId is true, call the API
             if (questionId) {
                 return {
@@ -100,31 +99,33 @@ const QuizQuestions = ({
                     variantId: questions.data.mcqs[index].variantId,
                     attemptCount: 1,
                     chosenOption: Number(chosenOption),
-                };
+                }
             }
-        });
+        })
 
-         try {
-            const response = await api.patch(
-                `/submission/quiz/assessmentSubmissionId=${assessmentSubmitId}?assessmentOutsourseId=${params.assessmentOutSourceId}`,
-                { quizSubmissionDto }
-            )
+        try {
+            if (quizSubmissionDto) {
+                const response = await api.patch(
+                    `/submission/quiz/assessmentSubmissionId=${assessmentSubmitId}?assessmentOutsourseId=${params.assessmentOutSourceId}`,
+                    { quizSubmissionDto }
+                )
 
-            getAssessmentData()
+                getAssessmentData()
 
-            toast({
-                title: 'Success',
-                description: 'Quiz Submitted Successfully',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
-            })
+                toast({
+                    title: 'Success',
+                    description: 'Quiz Submitted Successfully',
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+                })
 
-            getSeperateQuizQuestions()
+                getSeperateQuizQuestions()
 
-            // Set the timeout and store the timeout ID
-            timeoutRef.current = setTimeout(() => {
-                onBack()
-            }, 3000)
+                // Set the timeout and store the timeout ID
+                timeoutRef.current = setTimeout(() => {
+                    onBack()
+                }, 3000)
+            }
         } catch (error: any) {
             toast({
                 title: 'Error',
