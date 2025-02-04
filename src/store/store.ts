@@ -949,6 +949,40 @@ export const getUser = create<UserState>()(
     )
 )
 
+// --------------------------------------------
+
+type editStudent = {
+    isStudent: number
+    setIsStudent: (newValue: number) => void
+}
+
+export const getEditStudent = create<editStudent>((set) => ({
+    isStudent: 0,
+    setIsStudent: (newValue: number) => {
+        set({ isStudent: newValue })
+    },
+}))
+
+type StudentInfo = {
+    email: string
+    name: string
+}
+
+type studentData = {
+    studentData: StudentInfo
+    setStudentData: (newValue: StudentInfo) => void
+}
+
+export const getStudentData = create<studentData>((set) => ({
+    studentData: {
+        email: '',
+        name: '',
+    },
+    setStudentData: (newValue: StudentInfo) => {
+        set({ studentData: newValue })
+    },
+}))
+
 // ---------------------------------------------
 type updateChapterList = {
     isChapterUpdated: boolean
