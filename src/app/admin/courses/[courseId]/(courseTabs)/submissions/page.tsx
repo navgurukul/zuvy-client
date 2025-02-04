@@ -261,7 +261,7 @@ const Page = ({ params }: { params: any }) => {
                                                     header: 'Email',
                                                     dataKey: 'userEmail',
                                                 },
-                                                // { header: 'Staatus', dataKey: 'status' },
+                                                // { header: 'Status', dataKey: 'status' },
                                             ]
 
                                             // Prepare rows for the table

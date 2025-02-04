@@ -36,7 +36,7 @@ const SubmissionComponent = (props: Props) => {
                 const columns = [
                     { header: 'Name', dataKey: 'name' },
                     { header: 'Email', dataKey: 'email' },
-                    { header: 'Staatus', dataKey: 'status' },
+                    { header: 'Status', dataKey: 'status' },
                 ]
 
                 // Prepare rows for the table
