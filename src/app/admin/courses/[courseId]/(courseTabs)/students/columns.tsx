@@ -315,7 +315,7 @@ export const columns: ColumnDef<Task>[] = [
                 <>
                     <div>
                         <AlertDialogDemo
-                            userId={userId}
+                            userId={[userId]}
                             bootcampId={bootcampId}
                             title="Are you absolutely sure?"
                             description="This action cannot be undone. This will permanently the student from the bootcamp"

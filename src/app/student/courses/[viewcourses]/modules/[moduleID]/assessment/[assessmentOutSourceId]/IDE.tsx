@@ -85,6 +85,7 @@ const IDE: React.FC<IDEProps> = ({
     const router = useRouter()
     const { toast } = useToast()
     const [loading, setLoading] = useState(false)
+    const [isSubmitted, setIsSubmitted] = useState(false)
 
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
@@ -148,6 +149,10 @@ const IDE: React.FC<IDEProps> = ({
             const allTestCasesPassed = response.data.data.every(
                 (testCase: any) => testCase.status === 'Accepted'
             )
+
+            if (action === 'submit') {
+                setIsSubmitted(true)
+            }
 
             if (allTestCasesPassed && action === 'submit') {
                 toast({
@@ -308,7 +313,7 @@ const IDE: React.FC<IDEProps> = ({
                     <Button
                         onClick={(e) => handleSubmit(e, 'submit')}
                         size="sm"
-                        disabled={loading} // Disable buttons during loading
+                        disabled={isSubmitted || loading}
                     >
                         {loading ? <Spinner /> : <Upload size={20} />}
                         <span className="ml-2 text-lg font-bold">Submit</span>
