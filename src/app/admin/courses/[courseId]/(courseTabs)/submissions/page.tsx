@@ -180,9 +180,9 @@ const Page = ({ params }: { params: any }) => {
                 <div className="relative w-full mr-2">
                     <Input
                         placeholder={`${
-                            activeTab === 'assessments'
-                                ? 'Search for Assessment By Name'
-                                : 'Search '
+                            activeTab === 'practice'
+                                ? 'Search for practice problems by name'
+                                : `Search for ${activeTab} by name`
                         }`}
                         className="lg:w-1/3 w-full my-6 input-with-icon pl-8"
                         value={search}
