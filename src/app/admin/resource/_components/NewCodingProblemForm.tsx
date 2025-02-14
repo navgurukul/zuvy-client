@@ -219,14 +219,6 @@ export default function NewCodingProblemForm({
                     })
                     return false;
                 }
-                if (value.includes(',')) {
-                    toast({
-                        title: "Invalid Integer Input",
-                        description: "Please use spaces to separate elements (e.g., 1 2 3)",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
-                    })
-                    return false;
-                }
                 break;
             }
             case 'float': {
@@ -236,14 +228,6 @@ export default function NewCodingProblemForm({
                         description: "Please use spaces to separate elements (e.g., 1.43 2.0 3.09)",
                         className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     })
-                    return false;
-                }
-                else if (isNaN(Number(value))) {
-                    toast({
-                        title: "Invalid Float Input",
-                        description: "Please enter a valid float (e.g., 3.14, -0.001)",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
-                    });
                     return false;
                 }
                 break;
