@@ -126,17 +126,17 @@ export const columns: ColumnDef<CodingQuestion>[] = [
                 <div className="mr-5 flex justify-end">
                     <Dialog>
                         <DialogTrigger asChild>
-                            <Eye className="cursor-pointer" />
+                            <button>
+                                <Eye className="cursor-pointer" />
+                            </button>
                         </DialogTrigger>
 
-                        <DialogOverlay>
-                            <DialogContent>
-                                <QuestionDescriptionModal
-                                    question={codingQuestion}
-                                    type="coding"
-                                />
-                            </DialogContent>
-                        </DialogOverlay>
+                        <DialogContent className="max-w-3xl">
+                            <QuestionDescriptionModal
+                                question={codingQuestion}
+                                type="coding"
+                            />
+                        </DialogContent>
                     </Dialog>
                 </div>
             )
