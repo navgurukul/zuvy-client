@@ -32,9 +32,15 @@ const FormSchema = z.object({
     link: z
         .string()
         .url({ message: 'Please enter a valid URL.' })
-        .refine((url) => url.includes('github') || url.includes('drive'), {
-            message: 'The link must contain "github" or "googleDrive".',
-        }),
+        .refine(
+            (url) =>
+                url.startsWith('https://github.com') ||
+                url.startsWith('https://drive.google.com'),
+            {
+                message:
+                    'The link must be from "https://github.com" or "https://drive.google.com".',
+            }
+        ),
 })
 
 const Assignments = ({
@@ -142,6 +148,7 @@ const Assignments = ({
                 })
                 completeChapter()
             })
+            await getProjectData()
     }
 
     const timestamp = deadlineDate
@@ -214,9 +221,22 @@ const Assignments = ({
                             </svg>
                         )}
                     </span>
-                    <span className=" text-[14px]">
-                        Deadline :- {formattedDate}
-                    </span>
+                    {!content.articleContent ||
+                    !content.articleContent.some((doc: any) =>
+                        doc.content.some(
+                            (paragraph: any) =>
+                                paragraph.content &&
+                                paragraph.content.some(
+                                    (item: any) => item.type === 'text'
+                                )
+                        )
+                    ) ? (
+                        ''
+                    ) : (
+                        <span className="text-[14px]">
+                            Deadline :- {formattedDate}
+                        </span>
+                    )}
                     <span className=" text-xl font-semibold">
                         {formattedSubmittedDate === 'Invalid Date' ? (
                             AssignmentStatus

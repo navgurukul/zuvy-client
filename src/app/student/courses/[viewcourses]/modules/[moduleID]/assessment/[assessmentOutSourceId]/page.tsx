@@ -10,7 +10,7 @@ import {
     updateProctoringData,
     getProctoringData,
 } from '@/utils/students'
-import { Clock, Fullscreen, Timer } from 'lucide-react'
+import { ChevronLeft, Clock, Fullscreen, Timer } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import QuizQuestions from './QuizQuestions'
 import OpenEndedQuestions from './OpenEndedQuestions'
@@ -25,6 +25,19 @@ import { getAssessmentStore } from '@/store/store'
 import TimerDisplay from './TimerDisplay'
 import { start } from 'repl'
 import { AlertProvider } from './ProctoringAlerts'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import PreventBackNavigation from '../../../_components/PreventBackNavigation'
+import WarnOnLeave from '../../../_components/WarnOnLeave'
 
 function Page({
     params,
@@ -54,6 +67,8 @@ function Page({
     const [selectedQuesType, setSelectedQuesType] = useState<
         'quiz' | 'open-ended' | 'coding'
     >('quiz')
+
+    const router = useRouter()
 
     const [isSolving, setIsSolving] = useState(false)
 
@@ -133,13 +148,14 @@ function Page({
     }
 
     useEffect(() => {
-        const endTime = startedAt + assessmentData.timeLimit * 1000
-
         // Fetch proctoring data
         if (assessmentSubmitId) {
             getProctoringData(assessmentSubmitId)
         }
+    }, [assessmentSubmitId])
 
+    useEffect(() => {
+        const endTime = startedAt + assessmentData.timeLimit * 1000
         // Start the timer
         startTimer(endTime)
 
@@ -192,17 +208,7 @@ function Page({
                 clearInterval(intervalIdRef.current)
             }
         }
-    }, [
-        isTabProctorOn,
-        isFullScreenProctorOn,
-        submitAssessment,
-        isCurrentPageSubmitAssessment,
-        assessmentSubmitId,
-        startedAt,
-        assessmentData,
-        handleVisibilityChange,
-        handleFullScreenChange,
-    ])
+    }, [isTabProctorOn, isFullScreenProctorOn])
 
     // useEffect(() => {
     //     // Add event listeners for right-click and key presses
@@ -265,7 +271,7 @@ function Page({
                 })
             } else {
                 console.log(id)
-          
+
                 setSelectedQuestionId(id)
                 setSelectedCodingOutsourseId(codingOutsourseId)
                 requestFullScreen(document.documentElement)
@@ -350,9 +356,9 @@ function Page({
             selectedQuesType === 'quiz' &&
             !assessmentData.IsQuizzSubmission &&
             assessmentData.hardMcqQuestions +
-                assessmentData.easyMcqQuestions +
-                assessmentData.mediumMcqQuestions >
-                0
+            assessmentData.easyMcqQuestions +
+            assessmentData.mediumMcqQuestions >
+            0
         ) {
             return (
                 <QuizQuestions
@@ -424,9 +430,11 @@ function Page({
 
                 completeChapter()
 
+                router.push(`/student/courses/${assessmentData.bootcampId}/modules/${assessmentData.moduleId}/chapters/${assessmentData.chapterId}`)
+
                 setTimeout(() => {
-                    window.close()
-                }, 4000)
+                    window.location.reload()
+                }, 3000)
             } catch (e) {
                 console.error(e)
             }
@@ -458,11 +466,14 @@ function Page({
         setIsFullScreen(true)
     }
 
+    console.log(assessmentData)
     return (
         <div
             onPaste={(e) => handleCopyPasteAttempt(e)}
             onCopy={(e) => handleCopyPasteAttempt(e)}
         >
+            <PreventBackNavigation />
+            <WarnOnLeave />
             <AlertProvider>
                 <div className="h-auto mb-24">
                     {!isFullScreen ? (
@@ -516,7 +527,7 @@ function Page({
                                         Hours{' '}
                                         {Math.floor(
                                             (assessmentData.timeLimit % 3600) /
-                                                60
+                                            60
                                         )}{' '}
                                         Minutes
                                     </p>
@@ -546,15 +557,15 @@ function Page({
                             </div>
                             {assessmentData?.codingQuestions?.length > 0 && (
                                 <div className="flex justify-center">
-                                    <div className="flex flex-col gap-5 w-1/2 text-left mt-10"> 
+                                    <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
                                         <h2 className="font-bold">
                                             Coding Challenges
                                         </h2>
                                         {assessmentData.codingQuestions?.map(
                                             (question: any) => (
                                                 <QuestionCard
-                                                    key={question.id}
-                                                    id={question.id}
+                                                    key={question.codingQuestionId}
+                                                    id={question.codingQuestionId}
                                                     easyCodingMark={
                                                         assessmentData.easyCodingMark
                                                     }
@@ -586,28 +597,27 @@ function Page({
                                 assessmentData.easyMcqQuestions +
                                 assessmentData.mediumMcqQuestions >
                                 0 && (
-                                <div className="flex justify-center">
-                                    <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
-                                        <h2 className="font-bold">MCQs</h2>
-                                        <QuestionCard
-                                            id={1}
-                                            title="Quiz"
-                                            weightage={
-                                                assessmentData.weightageMcqQuestions
-                                            }
-                                            description={`${
-                                                assessmentData.hardMcqQuestions +
+                                    <div className="flex justify-center">
+                                        <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
+                                            <h2 className="font-bold">MCQs</h2>
+                                            <QuestionCard
+                                                id={1}
+                                                title="Quiz"
+                                                weightage={
+                                                    assessmentData.weightageMcqQuestions
+                                                }
+                                                description={`${assessmentData.hardMcqQuestions +
                                                     assessmentData.easyMcqQuestions +
                                                     assessmentData.mediumMcqQuestions ||
-                                                0
-                                            } questions`}
-                                            onSolveChallenge={() =>
-                                                handleSolveChallenge('quiz')
-                                            }
-                                        />
+                                                    0
+                                                    } questions`}
+                                                onSolveChallenge={() =>
+                                                    handleSolveChallenge('quiz')
+                                                }
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                )}
                             {seperateOpenEndedQuestions.length > 0 && (
                                 <div className="flex justify-center">
                                     <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
@@ -617,10 +627,9 @@ function Page({
                                         <QuestionCard
                                             id={1}
                                             title="Open-Ended Questions"
-                                            description={`${
-                                                seperateOpenEndedQuestions.length ||
+                                            description={`${seperateOpenEndedQuestions.length ||
                                                 0
-                                            } questions`}
+                                                } questions`}
                                             onSolveChallenge={() =>
                                                 handleSolveChallenge(
                                                     'open-ended'
@@ -630,12 +639,35 @@ function Page({
                                     </div>
                                 </div>
                             )}
-                            <Button
-                                onClick={submitAssessment}
-                                disabled={disableSubmit}
-                            >
-                                Submit Assessment
-                            </Button>
+
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button
+                                        disabled={disableSubmit}
+                                    >
+                                        Submit Assessment
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>
+                                            Are you absolutely sure?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This action cannot be undone. This will submit your whole assessment.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction
+                                            className="bg-red-500"
+                                            onClick={submitAssessment}
+                                        >
+                                            Submit
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+
                         </div>
                     )}
                 </div>
