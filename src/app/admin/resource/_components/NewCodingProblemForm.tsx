@@ -219,6 +219,7 @@ export default function NewCodingProblemForm({
                     })
                     return false;
                 }
+                break;
             }
             case 'float': {
                 if (value.includes(',')) {
@@ -229,6 +230,7 @@ export default function NewCodingProblemForm({
                     })
                     return false;
                 }
+                break;
             }
             case 'bool': {
                 // Allow partial inputs like 't', 'tr', 'tru', etc.
