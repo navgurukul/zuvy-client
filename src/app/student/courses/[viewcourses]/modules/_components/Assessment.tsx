@@ -30,6 +30,7 @@ const Assessment = ({
     const [assessmentEndTime, setAssessmentEndTime] = useState<number | null>(
         null
     )
+
     const [isTimeOver, setIsTimeOver] = useState(false)
 
     useEffect(() => {
@@ -60,21 +61,23 @@ const Assessment = ({
 
             let newWindow: any
 
-            if (typeof window !== 'undefined') {
-                newWindow = window?.open(assessmentUrl, '_blank')
-            }
+            // if (typeof window !== 'undefined') {
+            //     newWindow = window?.open(assessmentUrl, '_blank')
+            // }
 
-            if (newWindow) {
-                newWindow.focus()
-            } else {
-                alert(
-                    'Failed to open the new window. Please allow pop-ups for this site.'
-                )
-            }
+            router.push(assessmentUrl)
+
+            // if (newWindow) {
+            //     newWindow.focus()
+            // } else {
+            //     alert(
+            //         'Failed to open the new window. Please allow pop-ups for this site.'
+            //     )
+            // }
             // Reload the browser after 3 seconds
-            setTimeout(() => {
-                window.location.reload()
-            }, 3000)
+            // setTimeout(() => {
+            //     window.location.reload()
+            // }, 3000)
         } catch (error) {
             console.error('Failed to start assessment:', error)
         }
@@ -171,39 +174,6 @@ const Assessment = ({
                                 </p>
                             )}
 
-                            <div>
-                                {/* <div className="flex items-center gap-2">
-                                    <AlertOctagon
-                                        size={16}
-                                        className="text-destructive"
-                                    />
-                                    <p>
-                                        Do not change tabs or assessment will
-                                        get submitted automatically.
-                                    </p>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <AlertOctagon
-                                        size={16}
-                                        className="text-destructive"
-                                    />
-                                    <p>
-                                        Do not close the browser during the
-                                        assessment or it will get submitted
-                                        automatically.
-                                    </p>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <AlertOctagon
-                                        size={16}
-                                        className="text-destructive"
-                                    />
-                                    <p>
-                                        MCQs & Open-ended Questions can be
-                                        submitted only once.
-                                    </p>
-                                </div> */}
-                            </div>
                         </div>
                     )}
                     {hasQuestions && (

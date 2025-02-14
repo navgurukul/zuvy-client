@@ -64,7 +64,7 @@ const QuizResults = ({
                 {quizResults?.mcqs.map((result: any, index: number) => (
                     <div
                         key={result.quizId}
-                        className="mb-10 p-6 bg-white rounded-xl w-full max-w-lg mx-auto"
+                        className=" p-6 bg-white rounded-xl w-full max-w-2xl mx-auto"
                     >
                         <div className="flex items-start gap-1 text-left">
                             <span className="font-semibold">{index + 1}.</span>

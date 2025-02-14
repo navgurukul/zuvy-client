@@ -196,8 +196,11 @@ function Page({
                             <div className="relative flex items-center justify-center group">
                                 {/* Percentage Text */}
 
-                                {/* Loader */}
-                                <Loader progress={courseProgress?.progress} />
+                                <div className="w-full flex items-start">
+                                    <Loader
+                                        progress={courseProgress?.progress}
+                                    />
+                                </div>
 
                                 {/* Circular Progress */}
                                 <div className="absolute -top-16 invisible group-hover:visible">

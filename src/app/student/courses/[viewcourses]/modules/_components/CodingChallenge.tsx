@@ -43,21 +43,12 @@ function CodingChallenge({
             const res = await api.get(
                 `/tracking/getQuizAndAssignmentWithStatus?chapterId=${content.id}`
             )
-            console.log(
-                'res.data.data.codingProblem',
-                res.data.data.codingProblem[0].id
-            )
             setCodingQuestions(res.data.data.codingProblem)
             setCodingQuestionId(res.data.data.codingProblem[0].id)
             setTagId(res.data.data.codingProblem[0].tagId)
         } catch (error) {
             if (codingQuestions.length == 0) {
-                toast({
-                    title: 'Error',
-                    description: 'No Questions Added By the Instructor',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                })
+                console.error('No questions Added by the instructor yet')
             } else {
                 toast({
                     title: 'Error',
