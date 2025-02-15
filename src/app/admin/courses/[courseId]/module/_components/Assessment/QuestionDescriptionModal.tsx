@@ -49,7 +49,7 @@ interface QuestionDescriptionModalProps {
 
 const QuestionDescriptionModal = ({ question, type, tagName }: QuestionDescriptionModalProps) => {
     return (
-        <DialogContent className="max-w-2xl p-6">
+        <div className="max-w-2xl p-6 ">
             <DialogHeader>
                 <DialogTitle className="text-xl font-bold">Coding Problem Preview
 
@@ -60,11 +60,11 @@ const QuestionDescriptionModal = ({ question, type, tagName }: QuestionDescripti
                     )}
 
                     <span
-                      className={cn(
-                        `text-[12px] text-[#518672] bg-[#DCE7E3] rounded-[100px] ml-2 py-1 px-[8px]`,
-                        difficultyColor(question.difficulty), // Text color
-                        difficultyBgColor(question.difficulty) // Background color
-                    )}
+                        className={cn(
+                            `text-[12px] text-[#518672] bg-[#DCE7E3] rounded-[100px] ml-2 py-1 px-[8px]`,
+                            difficultyColor(question.difficulty), // Text color
+                            difficultyBgColor(question.difficulty) // Background color
+                        )}
                     >
                         {question.difficulty}
                     </span>
@@ -73,17 +73,17 @@ const QuestionDescriptionModal = ({ question, type, tagName }: QuestionDescripti
 
             <div className="p-4 space-y-6 text-left">
                 {/* Render question description */}
-                    <ScrollArea className="h-96">
-                        <ScrollBar orientation="vertical" />
-                <div>
-                    <h4 className="font-semibold text-lg">Title and Description:</h4>
+                <ScrollArea className="h-96 pr-4">
+                    <ScrollBar orientation="vertical" />
+                    <div>
+                        <h4 className="font-semibold text-lg">Title and Description:</h4>
 
-                    <p className="text-gray-700">
-                        <span className="font-semibold text-lg">{question.title}: </span>{question.description}</p>
-                </div>
+                        <p className="text-gray-700">
+                            <span className="font-semibold text-lg">{question.title}: </span>{question.description}</p>
+                    </div>
 
-                {/* Conditional rendering based on question type */}
-                {type === 'coding' && 'testCases' in question && (
+                    {/* Conditional rendering based on question type */}
+                    {type === 'coding' && 'testCases' in question && (
                         <div>
                             {/* Problem Statement */}
                             <div>
@@ -119,7 +119,7 @@ const QuestionDescriptionModal = ({ question, type, tagName }: QuestionDescripti
                                 <h4 className="font-semibold text-lg mb-3">Output: <span className="font-light text-base">
                                     Minimum number of jumps to reach destination (-1 if impossible)
                                 </span></h4>
-                             
+                                
                             </div>
 
                             {/* Test Cases */}
@@ -128,29 +128,78 @@ const QuestionDescriptionModal = ({ question, type, tagName }: QuestionDescripti
                                 {question.testCases.map((testCase, index) => (
                                     <div key={testCase.id} className="px-4">
                                         <h5 className="font-semibold text-md">Example {index + 1}:</h5>
+
+                                        {/* Input */}
                                         <div className="mb-2">
                                             <strong>Input:</strong>
-                                            <ul className="ml-4 list-disc">
-                                                {testCase.inputs.map((input, idx) => (
-                                                    <li key={idx}>
-                                                        {input.parameterName} ({input.parameterType}):{' '}
-                                                        {input.parameterValue}
-                                                    </li>
-                                                ))}
-                                            </ul>
+                                            <pre className="ml-4 bg-gray-100 p-2 rounded-md text-sm whitespace-pre-wrap">
+                                                {testCase.inputs.map((input, idx) => {
+                                                    const { parameterType, parameterValue } = input;
+                                                    let formattedValue = "";
+                                                    console.log('parameterType i/p', parameterType)
+                                                    console.log('parameterValue', parameterValue)
+                                                    if (["str", "int", "float", "bool"].includes(parameterType)) {
+                                                        formattedValue = String(parameterValue);
+                                                    }
+                                                    else if (parameterType === "arrayOfnum") {
+                                                        formattedValue = `[${parameterValue.join(",")}]`;
+                                                    }
+                                                    // else if (parameterType === "arrayOfStr") {
+                                                    //     formattedValue = `[${parameterValue.map((item: any) => (typeof item === "string" ? `"${item}"` : item)).join(",")}]`;
+                                                    // }
+                                                    else if (parameterType === "arrayOfStr") {
+                                                        formattedValue = `[${parameterValue.map((arr: any[]) => `[${arr.map((item: any) => (typeof item === "string" ? `"${item}"` : item)).join(",")}]`).join(",")}]`;
+                                                    }
+                                                    else if (parameterType === "jsonType" && Array.isArray(parameterValue) && parameterValue.every(obj => typeof obj === "object")) {
+                                                        formattedValue = JSON.stringify(parameterValue, null, 2);
+                                                    }
+                                                    else if (parameterType === "jsonType" && typeof parameterValue === "object") {
+                                                        formattedValue = JSON.stringify(parameterValue, null, 2);
+                                                    }
+                                                    else {
+                                                        formattedValue = String(parameterValue);
+                                                    }
+
+                                                    return (
+                                                        <span key={idx} className="block">
+                                                            {formattedValue}
+                                                        </span>
+                                                    );
+                                                })}
+                                            </pre>
                                         </div>
+
+                                        {/* Output */}
                                         <div>
                                             <strong>Output:</strong>
-                                            <p className="ml-4 mb-4">
-                                                {testCase.expectedOutput.parameterType}: {testCase.expectedOutput.parameterValue}
-                                            </p>
+                                            <pre className="ml-4 bg-gray-100 p-2 rounded-md text-sm whitespace-pre-wrap">
+                                                {(() => {
+                                                    const { parameterType, parameterValue } = testCase.expectedOutput;
+                                                    console.log('parameterType o/p', parameterType)
+                                                    console.log('parameterValue', parameterValue)
+                                                    if (["str", "int", "float", "bool"].includes(parameterType))
+                                                        return String(parameterValue);
+                                                    if (parameterType === "arrayOfnum")
+                                                        return `[${parameterValue.join(",")}]`;
+                                                    // if (parameterType === "arrayOfStr")
+                                                    //     return `[${parameterValue.map((item: any) => (typeof item === "string" ? `"${item}"` : item)).join(",")}]`;
+                                                    if (parameterType === "arrayOfStr")
+                                                        return `[${parameterValue.map((arr: any[]) => `[${arr.map((item: any) => (typeof item === "string" ? `"${item}"` : item)).join(",")}]`).join(",")}]`;
+                                                    if (parameterType === "jsonType" && Array.isArray(parameterValue) && parameterValue.every(obj => typeof obj === "object"))
+                                                        return JSON.stringify(parameterValue, null, 2);
+                                                    if (parameterType === "jsonType" && typeof parameterValue === "object")
+                                                        return JSON.stringify(parameterValue, null, 2);
+
+                                                    return String(parameterValue);
+                                                })()}
+                                            </pre>
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         </div>
-                )}
-                    </ScrollArea>
+                    )}
+                </ScrollArea>
 
                 {type === 'mcq' && 'options' in question && (
                     <div>
@@ -170,7 +219,8 @@ const QuestionDescriptionModal = ({ question, type, tagName }: QuestionDescripti
                     </div>
                 )}
             </div>
-        </DialogContent>
+        </div>
+        // {/* </DialogContent> */ }
     );
 };
 
