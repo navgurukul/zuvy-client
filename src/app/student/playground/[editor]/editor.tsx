@@ -352,8 +352,6 @@ const IDE: React.FC<IDEProps> = ({
                                                             <span className="font-medium">
                                                                 Input {idx + 1}:
                                                             </span>{' '}
-                                                            {input.parameterName}{' '}
-                                                            ({input.parameterType}) ={' '}
                                                             {formatValue(input.parameterValue, input.parameterType)}
                                                         </p>
                                                     ))

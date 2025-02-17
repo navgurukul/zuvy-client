@@ -24,6 +24,7 @@ import {
     getActiveChapter,
     getCurrentModuleName,
     getChapterUpdateStatus,
+    getCourseData,
 } from '@/store/store'
 
 type Chapter = {
@@ -76,6 +77,7 @@ function Chapter() {
     const isChapterClickedRef = useRef(false)
     const [currentChapter, setCurrentChapter] = useState<any>([])
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
+    const { courseData } = getCourseData()
 
     const crumbs = [
         {
@@ -84,7 +86,7 @@ function Chapter() {
             isLast: false,
         },
         {
-            crumb: 'Curriculum',
+            crumb: `${courseData?.name}-Curriculum`,
             href: `/admin/courses/${courseId}/curriculum`,
             isLast: false,
         },

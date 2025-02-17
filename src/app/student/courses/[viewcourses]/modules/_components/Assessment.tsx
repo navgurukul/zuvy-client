@@ -211,7 +211,8 @@ const Assessment = ({
                                 </div>
                                 <div>
                                     <p className="text-lg font-semibold">
-                                        Your Score: {percentage || 0}/100
+                                    Your Score: {Math.trunc(percentage) || 0}/100
+
                                     </p>
                                     <p>
                                         {isPassed
