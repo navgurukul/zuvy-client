@@ -4,18 +4,12 @@ import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 import { CodingQuestion } from '@/utils/data/schema'
 import {
-    Edit,
-    Info,
     Pencil,
-    Star,
     Trash2,
-    ExternalLink,
     Eye,
 } from 'lucide-react'
 import {
     Dialog,
-    DialogContent,
-    DialogOverlay,
     DialogTrigger,
 } from '@/components/ui/dialog'
 import { DELETE_CODING_QUESTION_CONFIRMATION } from '@/utils/constant'
@@ -35,7 +29,6 @@ import {
     handleConfirm,
     handleDelete,
     handleDeleteModal,
-    getAllCodingQuestions,
     handleEditCodingQuestion,
     filteredCodingQuestions,
 } from '@/utils/admin'
@@ -130,13 +123,11 @@ export const columns: ColumnDef<CodingQuestion>[] = [
                                 <Eye className="cursor-pointer" />
                             </button>
                         </DialogTrigger>
-
-                        <DialogContent className="max-w-3xl">
                             <QuestionDescriptionModal
                                 question={codingQuestion}
                                 type="coding"
                             />
-                        </DialogContent>
+                    
                     </Dialog>
                 </div>
             )

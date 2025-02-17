@@ -49,6 +49,7 @@ interface QuestionDescriptionModalProps {
 
 const QuestionDescriptionModal = ({ question, type, tagName }: QuestionDescriptionModalProps) => {
     return (
+        <DialogContent className="max-w-2xl p-6">
         <div className="max-w-2xl p-6 ">
             <DialogHeader>
                 <DialogTitle className="text-xl font-bold">Coding Problem Preview
@@ -136,8 +137,6 @@ const QuestionDescriptionModal = ({ question, type, tagName }: QuestionDescripti
                                                 {testCase.inputs.map((input, idx) => {
                                                     const { parameterType, parameterValue } = input;
                                                     let formattedValue = "";
-                                                    console.log('parameterType i/p', parameterType)
-                                                    console.log('parameterValue', parameterValue)
                                                     if (["str", "int", "float", "bool"].includes(parameterType)) {
                                                         formattedValue = String(parameterValue);
                                                     }
@@ -148,7 +147,9 @@ const QuestionDescriptionModal = ({ question, type, tagName }: QuestionDescripti
                                                     //     formattedValue = `[${parameterValue.map((item: any) => (typeof item === "string" ? `"${item}"` : item)).join(",")}]`;
                                                     // }
                                                     else if (parameterType === "arrayOfStr") {
-                                                        formattedValue = `[${parameterValue.map((arr: any[]) => `[${arr.map((item: any) => (typeof item === "string" ? `"${item}"` : item)).join(",")}]`).join(",")}]`;
+                                                        if (!Array.isArray(parameterValue)) {
+                                                            formattedValue = `[${parameterValue.map((arr: any[]) => `[${arr.map((item: any) => (typeof item === "string" ? `"${item}"` : item)).join(",")}]`).join(",")}]`;
+                                                        }
                                                     }
                                                     else if (parameterType === "jsonType" && Array.isArray(parameterValue) && parameterValue.every(obj => typeof obj === "object")) {
                                                         formattedValue = JSON.stringify(parameterValue, null, 2);
@@ -175,16 +176,14 @@ const QuestionDescriptionModal = ({ question, type, tagName }: QuestionDescripti
                                             <pre className="ml-4 bg-gray-100 p-2 rounded-md text-sm whitespace-pre-wrap">
                                                 {(() => {
                                                     const { parameterType, parameterValue } = testCase.expectedOutput;
-                                                    console.log('parameterType o/p', parameterType)
-                                                    console.log('parameterValue', parameterValue)
                                                     if (["str", "int", "float", "bool"].includes(parameterType))
                                                         return String(parameterValue);
                                                     if (parameterType === "arrayOfnum")
                                                         return `[${parameterValue.join(",")}]`;
-                                                    // if (parameterType === "arrayOfStr")
-                                                    //     return `[${parameterValue.map((item: any) => (typeof item === "string" ? `"${item}"` : item)).join(",")}]`;
                                                     if (parameterType === "arrayOfStr")
-                                                        return `[${parameterValue.map((arr: any[]) => `[${arr.map((item: any) => (typeof item === "string" ? `"${item}"` : item)).join(",")}]`).join(",")}]`;
+                                                        if (!Array.isArray(parameterValue)) {
+                                                            return `[${parameterValue.map((arr: any[]) => `[${arr.map((item: any) => (typeof item === "string" ? `"${item}"` : item)).join(",")}]`).join(",")}]`;
+                                                        }
                                                     if (parameterType === "jsonType" && Array.isArray(parameterValue) && parameterValue.every(obj => typeof obj === "object"))
                                                         return JSON.stringify(parameterValue, null, 2);
                                                     if (parameterType === "jsonType" && typeof parameterValue === "object")
@@ -220,7 +219,7 @@ const QuestionDescriptionModal = ({ question, type, tagName }: QuestionDescripti
                 )}
             </div>
         </div>
-        // {/* </DialogContent> */ }
+        </DialogContent>
     );
 };
 
