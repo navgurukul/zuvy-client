@@ -31,6 +31,11 @@ const guestRoutes = [
         href: '/student/recordings',
         subtabs: [],
     },
+    {
+        label: 'Web Dev Environment',
+        href: '/student/webdevenv',
+        icon: Code,
+    },
     // {
     //     icon: Code,
     //     label: 'Coding Playground',
