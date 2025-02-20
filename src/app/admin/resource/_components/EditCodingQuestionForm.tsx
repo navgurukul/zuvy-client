@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import * as z from 'zod'
 import { useForm } from 'react-hook-form'
@@ -35,32 +35,257 @@ import { cleanUpValues, getAllCodingQuestions } from '@/utils/admin'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { create } from 'domain'
 
+const noSpecialCharacters = /^[a-zA-Z0-9\s]*$/
+
+const inputTypes = ['str', 'int', 'float', 'arrayOfnum', 'arrayOfStr', 'bool', 'jsonType'] as const
+const outputTypes = ['str', 'int', 'float', 'arrayOfnum', 'arrayOfStr', 'bool', 'jsonType'] as const
+
 const formSchema = z.object({
-    title: z.string().min(5),
-    problemStatement: z.string().min(10),
-    constraints: z.string().min(5),
+    title: z
+        .string()
+        .min(5, 'Title must be at least 5 characters long.')
+        .max(60, 'Title must be at most 60 characters long.')
+        .refine((value) => noSpecialCharacters.test(value), {
+            message: 'Title must not contain special characters.',
+        }),
+    problemStatement: z
+        .string()
+        .min(10, 'Problem statement must be at least 10 characters long.'),
+    constraints: z
+        .string()
+        .min(5, 'Constraints must be at least 5 characters long.'),
     difficulty: z.enum(['Easy', 'Medium', 'Hard'], {
         required_error: 'You need to select a Difficulty type.',
     }),
     topics: z.number().min(1, 'You need to select a Topic'),
-    inputFormat: z.enum(['str', 'int', 'float', 'arrayOfnum', 'arrayOfStr', 'bool'], {
-        required_error: 'You need to select an Input Format',
-    }),
-    outputFormat: z.enum(['str', 'int', 'float', 'arrayOfnum', 'arrayOfStr', 'bool'], {
-        required_error: 'You need to select an Output Format',
-    }),
     testCases: z.array(
         z.object({
-            id: z.any().optional(), // Optional ID
-            input: z.string().min(1),
-            output: z.string().min(1),
-            isExisting: z.boolean().optional(), // Disable existing test cases if question is used
+            inputs: z.array(
+                z.object({
+                    type: z.enum(inputTypes),
+                    value: z.string().min(1, 'Input cannot be empty.')
+                })
+            ),
+            output: z.object({
+                type: z.enum(outputTypes),
+                value: z.string().min(1, 'Output cannot be empty.')
+            })
         })
     ),
 })
 
+
 export default function EditCodingQuestionForm() {
-    const [testCases, setTestCases] = useState<any>([])
+    const [testCases, setTestCases] = useState([
+        {
+            id: 1,
+            inputs: [{ id: Date.now(), type: 'int', value: '' }],
+            output: { type: 'int', value: '' }
+        }
+    ])
+
+    let outputObjectRef = useRef('' as any);
+
+    const getAvailableInputTypes = (testCaseIndex: number) => {
+        const usedTypes = testCases[testCaseIndex].inputs.map(input => input.type);
+        return inputTypes.filter(type => !usedTypes.includes(type));
+    }
+
+    // Shared validation function for both inputs and outputs
+    const validateFieldValue = (value: string, type: string) => {
+        switch (type) {
+            case 'arrayOfStr':
+            case 'arrayOfnum': {
+                if (value.includes(' ')) {
+                    toast({
+                        title: "Invalid Format",
+                        description: "Please use commas to separate elements in an array (e.g., 1,2,3) or (e.g., hello,world)",
+                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
+                    });
+                    return false;
+                }
+                break;
+            }
+            case 'str': {
+                if (value.includes(',')) {
+                    toast({
+                        title: "Invalid Format",
+                        description: "Please use spaces to separate elements (e.g., hello world)",
+                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
+                    });
+                    return false;
+                }
+                break;
+            }
+            case 'int': {
+                if (value.includes(',')) {
+                    toast({
+                        title: "Invalid Integer Input",
+                        description: "Please use spaces to separate elements (e.g., 1 2 3)",
+                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
+                    })
+                    return false;
+                }
+                break;
+            }
+            case 'float': {
+                if (value.includes(',')) {
+                    toast({
+                        title: "Invalid Float Input",
+                        description: "Please use spaces to separate elements (e.g., 1.43 2.0 3.09)",
+                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
+                    })
+                    return false;
+                }
+                break;
+            }
+            case 'bool': {
+                // Allow partial inputs like 't', 'tr', 'tru', etc.
+                if (value && !/^(true|false)$/.test(value) && !/^(t(r(u(e)?)?)?|f(a(l(s(e)?)?)?)?)$/.test(value)) {
+                    toast({
+                        title: "Invalid Boolean Input",
+                        description: "Please enter either 'true' or 'false'",
+                        className: "fixed bottom-4 right-4 text-start border border-destructive max-w-sm px-6 py-5 box-border z-50",
+                    });
+                    return false;
+                }
+                break;
+            }
+        }
+        return true;
+    };
+
+    const validateOutputValue = (value: string, type: string): boolean => {
+        switch (type) {
+            case 'int': {
+                if (value.includes(' ')) {
+                    toast({
+                        title: "Invalid Output Format",
+                        description: "You can only add one integer as output",
+                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
+                    });
+                    return false;
+                }
+                if (!Number.isInteger(Number(value)) && value !== '') {
+                    toast({
+                        title: "Invalid Integer Output",
+                        description: "Please enter a valid integer value",
+                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
+                    });
+                    return false;
+                }
+                break;
+            }
+            case 'float': {
+                if (value.includes(' ')) {
+                    toast({
+                        title: "Invalid Output Format",
+                        description: "You can only add one float number as output",
+                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
+                    });
+                    return false;
+                }
+                if (isNaN(Number(value)) && value !== '') {
+                    toast({
+                        title: "Invalid Float Output",
+                        description: "Please enter a valid float value",
+                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
+                    });
+                    return false;
+                }
+                break;
+            }
+            case 'str': {
+                if (value.includes(' ')) {
+                    toast({
+                        title: "Invalid Output Format",
+                        description: "You can only add one string as output",
+                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
+                    });
+                    return false;
+                }
+                break;
+            }
+        }
+        return true;
+    };
+
+    const handleInputChange = (
+        e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>,
+        testCaseIndex: number,
+        inputIndex: number,
+        testCases: any[],
+        setTestCases: React.Dispatch<React.SetStateAction<any[]>>
+    ) => {
+        const newValue = e.target.value;
+        const inputType = testCases[testCaseIndex].inputs[inputIndex].type;
+
+        // Only validate the format, not the size
+        if (!validateFieldValue(newValue, inputType)) {
+            return;
+        }
+
+        const newTestCases = [...testCases];
+        newTestCases[testCaseIndex].inputs[inputIndex].value = newValue;
+        setTestCases(newTestCases);
+    };
+
+    const isTypeUsedInTestCase = (testCaseIndex: number, inputIndex: number, type: string) => {
+        return testCases[testCaseIndex].inputs.some((input, idx) =>
+            idx !== inputIndex && input.type === type
+        );
+    }
+
+    const handleAddInputType = (testCaseId: number) => {
+        // Only allow adding inputs to the first test case
+        if (testCaseId !== testCases[0].id) return;
+
+        const availableTypes = getAvailableInputTypes(0);
+        if (availableTypes.length === 0) {
+            toast({
+                title: "Cannot Add Input",
+                description: "All input types have been used in this test case.",
+                className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
+            });
+            return;
+        }
+
+        // Create new input for first test case and propagate to all test cases
+        const newInput = { id: Date.now(), type: availableTypes[0], value: '' };
+        setTestCases(prevTestCases =>
+            prevTestCases.map(testCase => ({
+                ...testCase,
+                inputs: [...testCase.inputs, { ...newInput, id: Date.now() + Math.random() }]
+            }))
+        );
+    };
+
+    const handleRemoveInput = (testCaseId: number, inputIndex: number) => {
+        // Only allow removing inputs from the first test case
+        if (testCaseId !== testCases[0].id) return;
+
+        // Remove the input at the specified index from all test cases
+        setTestCases(prevTestCases =>
+            prevTestCases.map(testCase => ({
+                ...testCase,
+                inputs: testCase.inputs.filter((_, idx) => idx !== inputIndex)
+            }))
+        );
+    };
+
+    const handleInputTypeChange = (testCaseIndex: number, inputIndex: number, newType: string) => {
+        if (testCaseIndex === 0) {
+            // For the first test case, update all test cases to maintain consistency
+            const newTestCases = testCases.map(tc => ({
+                ...tc,
+                inputs: tc.inputs.map((inp, idx) =>
+                    idx === inputIndex ? { ...inp, type: newType, value: '' } : inp
+                )
+            }));
+            setTestCases(newTestCases);
+        }
+    }
+
 
     const { tags } = getCodingQuestionTags()
     const { editCodingQuestionId, isQuestionUsed } =
@@ -78,38 +303,138 @@ export default function EditCodingQuestionForm() {
         return question.id === editCodingQuestionId
     })
 
+    const InputTypeSelect = ({ testCaseIndex, inputIndex, currentType }: {
+        testCaseIndex: number,
+        inputIndex: number,
+        currentType: string
+    }) => (
+        <Select
+            value={currentType}
+            onValueChange={(newType) => handleInputTypeChange(testCaseIndex, inputIndex, newType)}
+            disabled={testCaseIndex !== 0}
+        >
+            <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Input Type" />
+            </SelectTrigger>
+            <SelectContent>
+                {inputTypes.map(type => {
+                    const isUsed = isTypeUsedInTestCase(testCaseIndex, inputIndex, type);
+                    const isCurrentType = type === currentType;
+                    return (
+                        <SelectItem
+                            key={type}
+                            value={type}
+                            disabled={!isCurrentType && isUsed}
+                            className={!isCurrentType && isUsed ? "opacity-50 cursor-not-allowed" : ""}
+                        >
+                            {type} {!isCurrentType && isUsed && "(already used)"}
+                        </SelectItem>
+                    );
+                })}
+            </SelectContent>
+        </Select>
+    );
+
     const handleAddTestCase = () => {
-        setTestCases((prevTestCases: any) => [
-            ...prevTestCases,
-            { id: Date.now(), input: '', output: '', isExisting: false }, // Temporary ID
-        ])
-    }
+        setTestCases((prevTestCases) => {
+            if (prevTestCases.length === 0) {
+                // If no test case exists, add a default one
+                return [
+                    {
+                        id: Date.now(),
+                        inputs: [{ id: Date.now(), type: 'int', value: '' }], // Default input
+                        output: { type: 'int', value: '' }, // Default output
+                    },
+                ];
+            }
+
+            // Copy input fields from the first test case
+            const firstTestCase = prevTestCases[0];
+            const newTestCase = {
+                id: Date.now(),
+                inputs: firstTestCase.inputs.map((input) => ({
+                    id: Date.now() + Math.random(), // Unique ID
+                    type: input.type,
+                    value: input.type === 'jsonType' ? '' : '', // Initialize JSON inputs with empty string
+                })),
+                output: {
+                    type: firstTestCase.output.type,
+                    value: '',
+                },
+            };
+
+            return [...prevTestCases, newTestCase];
+        });
+    };
+
+
 
     const handleRemoveTestCase = (id: number) => {
-        // Only allow removing non-existing test cases when question is used
-        const testCase = testCases.find((tc: any) => tc.id === id)
-        if (isQuestionUsed && testCase?.isExisting) {
-            toast({
-                title: 'Cannot remove existing test case',
-                description:
-                    'This question is in use. You can only remove newly added test cases.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-            })
-            return
-        }
-
-        const updatedTestCases = testCases.filter(
-            (testCase: any) => testCase.id !== id
+        setTestCases(prevTestCases =>
+            prevTestCases.filter(testCase => testCase.id !== id)
         )
-        setTestCases(updatedTestCases)
-
-        // Sync the form state with updated test cases
-        form.reset({
-            ...form.getValues(),
-            testCases: updatedTestCases,
-        })
     }
+
+    const processInput = (input: string, format: string) => {
+        const cleanedInput = cleanUpValues(input);
+
+        const isValidNumber = (value: string) => !isNaN(Number(value));
+        const isValidFloat = (value: string) => !isNaN(parseFloat(value));
+
+        switch (format) {
+            case 'arrayOfnum': {
+                const values = cleanedInput.split(',');
+                if (!values.every(isValidNumber)) {
+                    return null;
+                }
+                return values.map(Number);
+            }
+            case 'arrayOfStr': {
+                return cleanedInput.split(',');
+            }
+            case 'int': {
+                const values = cleanedInput.split(' ');
+                if (!values.every(isValidNumber)) {
+                    return null;
+                }
+                return values.length === 1
+                    ? Number(values[0])
+                    : values.map(Number);
+            }
+            case 'float': {
+                const values = cleanedInput.split(' ');
+                if (!values.every(isValidFloat)) {
+                    return null;
+                }
+                return values.length === 1
+                    ? parseFloat(values[0])
+                    : values.map(Number);
+            }
+            case 'str': {
+                const values = cleanedInput.split(' ');
+                return values.length === 1 ? values[0] : values;
+            }
+            case 'bool':
+                if (cleanedInput === 'true' || cleanedInput === 'false') {
+                    return cleanedInput === 'true';
+                } else {
+                    return null;
+                }
+            case 'jsonType': {
+                try {
+                    const parsed = JSON.parse(input);
+                    outputObjectRef.current = parsed;
+                    return parsed;
+                } catch (e) {
+                    console.error('JSON parsing failed:', e);
+                    return null;
+                }
+            }
+
+            default:
+                return cleanedInput;
+        }
+    };
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -119,11 +444,6 @@ export default function EditCodingQuestionForm() {
             constraints: selectCodingQuestion[0]?.constraints || '',
             difficulty: selectCodingQuestion[0]?.difficulty || 'Easy',
             topics: selectCodingQuestion[0]?.tagId,
-            inputFormat:
-                selectCodingQuestion[0]?.testCases[0]?.inputs[0]?.parameterType,
-            outputFormat:
-                selectCodingQuestion[0]?.testCases[0]?.expectedOutput
-                    ?.parameterType,
             testCases:
                 selectCodingQuestion[0]?.testCases?.map((testCase: any) => ({
                     id: testCase.id, // Ensure this is correctly mapped
@@ -166,91 +486,163 @@ export default function EditCodingQuestionForm() {
     }
 
     useEffect(() => {
-        if (selectCodingQuestion) {
-            const existingTestCases = selectCodingQuestion[0]?.testCases?.map(
-                (testCase: any) => ({
+        if (selectCodingQuestion.length > 0) {
+            const question = selectCodingQuestion[0];
+
+            // Group inputs by type and combine values
+            const mappedTestCases = question.testCases.map((testCase: any) => {
+                // Group inputs by type
+                const groupedInputs = testCase.inputs.reduce((acc: any, input: any) => {
+                    if (!acc[input.parameterType]) {
+                        acc[input.parameterType] = [];
+                    }
+                    acc[input.parameterType].push(input.parameterValue);
+                    return acc;
+                }, {});
+
+                // Create combined inputs array
+                const combinedInputs = Object.entries(groupedInputs).map(([type, values]: [string, any]) => ({
+                    id: Date.now() + Math.random(),
+                    type,
+                    value: type === 'jsonType'
+                        ? JSON.stringify(values[0], null, 2)
+                        : type === 'int' || type === 'str' || type === 'float'
+                            ? values.join(' ') // Join multiple values with spaces
+                            : type === 'arrayOfnum' || type === 'arrayOfStr'
+                                ? values[0].join(',') // Join array elements with commas
+                                : String(values[0]) // Handle other types normally
+                }));
+
+                return {
                     id: testCase.id,
-                    input: testCase.inputs
-                        .map((input: any) => {
-                            let value = input.parameterValue
-                            if (Array.isArray(value)) {
-                                value = value.join(', ')
-                            }
-                            return value !== null && value !== undefined
-                                ? cleanUpValues(value.toString())
-                                : value
-                        })
-                        .join(' '),
-                    output:
-                        testCase.expectedOutput.parameterValue !== null &&
-                            testCase.expectedOutput.parameterValue !== undefined
-                            ? cleanUpValues(
-                                testCase.expectedOutput.parameterValue.toString()
-                            )
-                            : testCase.expectedOutput.parameterValue,
-                    isExisting: true, // Mark as existing test case
-                })
-            )
+                    inputs: combinedInputs,
+                    output: {
+                        type: testCase.expectedOutput.parameterType,
+                        value: testCase.expectedOutput.parameterType === 'jsonType'
+                            ? JSON.stringify(testCase.expectedOutput.parameterValue, null, 2)
+                            : testCase.expectedOutput.parameterType === 'arrayOfnum' || testCase.expectedOutput.parameterType === 'arrayOfStr'
+                                ? Array.isArray(testCase.expectedOutput.parameterValue)
+                                    ? testCase.expectedOutput.parameterValue.join(',')
+                                    : String(testCase.expectedOutput.parameterValue)
+                                : String(testCase.expectedOutput.parameterValue)
+                    }
+                };
+            });
 
-            setTestCases(existingTestCases)
+            // Set the test cases state
+            setTestCases(mappedTestCases);
+
+            // Reset the form with the mapped data
             form.reset({
-                title: selectCodingQuestion[0].title,
-                problemStatement: selectCodingQuestion[0].description,
-                constraints: selectCodingQuestion[0].constraints,
-                difficulty: selectCodingQuestion[0].difficulty,
-                topics: selectCodingQuestion[0].tagId,
-                testCases: existingTestCases,
-            })
+                title: question.title,
+                problemStatement: question.description,
+                constraints: question.constraints,
+                difficulty: question.difficulty,
+                topics: question.tagId,
+                testCases: mappedTestCases,
+            });
         }
-    }, [])
+    }, []);
 
-    const handleEditSubmit = (values: z.infer<typeof formSchema>) => {
-        const processInput = (input: string, format: string) => {
-            const cleanedInput = cleanUpValues(input)
 
-            const isValidNumber = (value: string) => !isNaN(Number(value))
-            const isValidFloat = (value: string) => !isNaN(parseFloat(value))
 
-            switch (format) {
-                case 'arrayOfnum': {
-                    const values = cleanedInput.split(',')
-                    if (!values.every(isValidNumber)) {
-                        return null
+    const validateTestCasesBeforeSubmit = (testCases: any[]) => {
+        const firstTestCase = testCases[0];
+
+        // Validate each test case against the first test case
+        for (let i = 1; i < testCases.length; i++) {
+            const currentTestCase = testCases[i];
+
+            // Check each input
+            for (let j = 0; j < currentTestCase.inputs.length; j++) {
+                const currentInput = currentTestCase.inputs[j];
+                const firstCaseInput = firstTestCase.inputs[j];
+
+                if (currentInput.type === 'jsonType') {
+                    try {
+                        const firstJson = JSON.parse(firstCaseInput.value);
+                        const currentJson = JSON.parse(currentInput.value);
+
+                        // Check if both are arrays
+                        if (Array.isArray(firstJson) && Array.isArray(currentJson)) {
+                            if (firstJson.length !== currentJson.length) {
+                                toast({
+                                    title: "JSON Array Size Mismatch",
+                                    description: `Test case ${i + 1} JSON array should have ${firstJson.length} elements to match the first test case`,
+                                    className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
+                                });
+                                return false;
+                            }
+                        }
+                    } catch (e) {
+                        toast({
+                            title: "Invalid JSON",
+                            description: `Invalid JSON in test case ${i + 1}`,
+                            className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
+                        });
+                        return false;
                     }
-                    return values.map(Number)
-                }
-                case 'arrayOfStr': {
-                    return cleanedInput.split(',')
-                }
-                case 'int': {
-                    const values = cleanedInput.split(' ')
-                    if (!values.every(isValidNumber)) {
-                        return null
+                } else if (['int', 'str', 'float'].includes(currentInput.type)) {
+                    const firstElements = firstCaseInput.value.trim().split(' ').filter(Boolean);
+                    const currentElements = currentInput.value.trim().split(' ').filter(Boolean);
+
+                    if (currentElements.length !== firstElements.length) {
+                        toast({
+                            title: "Input Size Mismatch",
+                            description: `Test case ${i + 1} ${currentInput.type} input should have ${firstElements.length} elements to match the first test case`,
+                            className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
+                        });
+                        return false;
                     }
-                    const number = Number(values.join(''))
-                    return number
-                }
-                case 'float': {
-                    if (!isValidFloat(cleanedInput)) {
-                        return null
+                } 
+            }
+
+            // Check output
+            if (currentTestCase.output.type === 'jsonType') {
+                try {
+                    const firstJson = JSON.parse(firstTestCase.output.value);
+                    const currentJson = JSON.parse(currentTestCase.output.value);
+
+                    if (Array.isArray(firstJson) && Array.isArray(currentJson)) {
+                        if (firstJson.length !== currentJson.length) {
+                            toast({
+                                title: "Output JSON Array Size Mismatch",
+                                description: `Test case ${i + 1} output JSON array should have ${firstJson.length} elements to match the first test case`,
+                                className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
+                            });
+                            return false;
+                        }
                     }
-                    return parseFloat(cleanedInput)
+                } catch (e) {
+                    toast({
+                        title: "Invalid Output JSON",
+                        description: `Invalid JSON in test case ${i + 1} output`,
+                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
+                    });
+                    return false;
                 }
-                case 'str':
-                    return cleanedInput
-                case 'bool':
-                    if (cleanedInput === 'true' || cleanedInput === 'false') {
-                        return cleanedInput
-                    } else {
-                        return null
-                    }
-                default:
-                    return cleanedInput
+            } else if (['int', 'str', 'float'].includes(currentTestCase.output.type)) {
+                const firstElements = firstTestCase.output.value.trim().split(' ').filter(Boolean);
+                const currentElements = currentTestCase.output.value.trim().split(' ').filter(Boolean);
+
+                if (currentElements.length !== firstElements.length) {
+                    toast({
+                        title: "Output Size Mismatch",
+                        description: `Test case ${i + 1} output should have ${firstElements.length} elements to match the first test case`,
+                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
+                    });
+                    return false;
+                }
             }
         }
 
-        const generateParameterName = (index: number) => {
-            return String.fromCharCode(97 + index) // a, b, c, etc.
+        return true;
+    };
+
+    const handleEditSubmit = (values: z.infer<typeof formSchema>) => {
+        // First validate test cases
+        if (!validateTestCasesBeforeSubmit(testCases)) {
+            return; // Stop submission if validation fails
         }
 
         const formattedData = {
@@ -259,97 +651,96 @@ export default function EditCodingQuestionForm() {
             difficulty: values.difficulty,
             tagId: values.topics,
             constraints: values.constraints,
-            testCases: values.testCases
-                ?.filter(
-                    (testCase: any) =>
-                        !testCase.id || !String(testCase.id).startsWith('temp_')
-                ) // Exclude temp IDs
-                .map((testCase: any) => {
-                    const processedInput = processInput(
-                        testCase.input,
-                        values.inputFormat
-                    )
+            testCases: testCases.map((testCase: any) => {
+                let parameterNameCounter = 0;
 
-                    if (processedInput === null) {
-                        return null
-                    }
+                // Group JSON inputs together
+                const jsonInputs = testCase.inputs
+                    .filter((input: any) => input.type === 'jsonType')
+                    .map((input: any) => {
+                        try {
+                            return JSON.parse(input.value);
+                        } catch (e) {
+                            console.error('JSON parsing failed:', e);
+                            return null;
+                        }
+                    })
+                    .filter(Boolean);
 
-                    let inputs
+                // Process non-JSON inputs
+                const otherInputs = testCase.inputs
+                    .filter((input: any) => input.type !== 'jsonType')
+                    .flatMap((input: any) => {
+                        const processedValue = processInput(input.value, input.type);
 
-                    if (
-                        Array.isArray(processedInput) &&
-                        (values.inputFormat === 'arrayOfnum' ||
-                            values.inputFormat === 'arrayOfStr')
-                    ) {
-                        inputs = [
-                            {
-                                parameterType: values.inputFormat,
-                                parameterValue: processedInput,
-                                parameterName: 'a',
-                            },
-                        ]
-                    } else {
-                        const inputValues = cleanUpValues(testCase.input)
-                            .trim()
-                            .split(' ')
-                            .filter(Boolean)
-                        inputs = inputValues.map((value, index) => ({
-                            parameterType: values.inputFormat,
-                            parameterValue: processInput(
-                                value,
-                                values.inputFormat
-                            ),
-                            parameterName: generateParameterName(index),
-                        }))
-                    }
+                        if (processedValue === null) {
+                            console.error('Processing returned null for:', input);
+                            return [];
+                        }
 
-                    const expectedOutput = processInput(
-                        testCase.output,
-                        values.outputFormat
-                    )
+                        if (input.type === 'arrayOfnum' || input.type === 'arrayOfStr') {
+                            return [{
+                                parameterType: input.type,
+                                parameterValue: processedValue,
+                                parameterName: String.fromCharCode(97 + parameterNameCounter++)
+                            }];
+                        }
 
-                    if (expectedOutput === null) {
-                        return null
-                    }
+                        const values = Array.isArray(processedValue) ? processedValue : [processedValue];
+                        return values.map(value => ({
+                            parameterType: input.type,
+                            parameterValue: value,
+                            parameterName: String.fromCharCode(97 + parameterNameCounter++)
+                        }));
+                    });
 
-                    return {
-                        id: testCase.id, // Include existing ID if present
-                        inputs,
-                        expectedOutput: {
-                            parameterType: values.outputFormat,
-                            parameterValue: expectedOutput,
+                // Combine all inputs
+                const finalInputs = jsonInputs.length > 0
+                    ? [
+                        {
+                            parameterType: 'jsonType',
+                            parameterValue: jsonInputs.length === 1 ? jsonInputs[0] : jsonInputs,
+                            parameterName: String.fromCharCode(97 + parameterNameCounter++)
                         },
+                        ...otherInputs
+                    ]
+                    : otherInputs;
+
+                // Process output
+                let processedOutput;
+                if (testCase.output.type === 'jsonType') {
+                    try {
+                        processedOutput = JSON.parse(testCase.output.value);
+                    } catch (e) {
+                        console.error('Output JSON parsing failed:', e);
+                        return null;
                     }
-                })
-                .filter(Boolean), // Remove null test cases
+                } else {
+                    if (testCase.output.type === 'arrayOfnum' || testCase.output.type === 'arrayOfStr') {
+                        processedOutput = testCase.output.value.split(',').map((item: any) => {
+                            const trimmedItem = item.trim();
+                            return testCase.output.type === 'arrayOfnum' ? Number(trimmedItem) : trimmedItem;
+                        });
+                    } else {
+                        processedOutput = processInput(testCase.output.value, testCase.output.type);
+                    }
+                }
+
+                return {
+                    inputs: finalInputs,
+                    expectedOutput: {
+                        parameterType: testCase.output.type,
+                        parameterValue: processedOutput
+                    },
+                };
+            }).filter(Boolean),
             updatedAt: new Date().toISOString(),
             content: {},
-        }
+        };
 
-        const hasInvalidTestCase = formattedData.testCases.some(
-            (testCase: any) => {
-                return (
-                    testCase?.inputs.some(
-                        (input: any) => input.parameterValue === null
-                    ) || testCase?.expectedOutput.parameterValue === null
-                )
-            }
-        )
-
-        if (hasInvalidTestCase || formattedData.testCases.length === 0) {
-            toast({
-                title: 'Please enter valid test cases.',
-                description:
-                    'Submission failed: One or more test cases have invalid inputs or outputs.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-            })
-            return
-        }
-
-        editCodingQuestion(formattedData) // Call the edit API
-        getAllCodingQuestions(setCodingQuestions)
-    }
+        editCodingQuestion(formattedData);
+        getAllCodingQuestions(setCodingQuestions);
+    };
 
     return (
         <main className="flex flex-col p-3 w-full items-center ">
@@ -370,7 +761,6 @@ export default function EditCodingQuestionForm() {
                 >
                     <FormField
                         control={form.control}
-                        disabled={isQuestionUsed}
                         name="title"
                         render={({ field }) => (
                             <FormItem className="text-left">
@@ -385,7 +775,6 @@ export default function EditCodingQuestionForm() {
 
                     <FormField
                         control={form.control}
-                        disabled={isQuestionUsed}
                         name="problemStatement"
                         render={({ field }) => (
                             <FormItem className="text-left">
@@ -404,7 +793,6 @@ export default function EditCodingQuestionForm() {
                     <FormField
                         control={form.control}
                         name="constraints"
-                        disabled={isQuestionUsed}
                         render={({ field }) => (
                             <FormItem className="text-left">
                                 <FormLabel>Constraints</FormLabel>
@@ -424,15 +812,12 @@ export default function EditCodingQuestionForm() {
                         name="difficulty"
                         render={({ field }) => (
                             <FormItem className="space-y-3">
-                                <div className="text-left w-full mb-2 ">
-                                    <FormLabel>Difficulty</FormLabel>
-                                </div>
+                                <FormLabel>Difficulty</FormLabel>
                                 <FormControl>
                                     <RadioGroup
                                         onValueChange={field.onChange}
                                         defaultValue={field.value}
                                         className="flex space-y-1"
-                                        disabled={isQuestionUsed}
                                     >
                                         <FormItem className="flex items-center space-x-3 space-y-0">
                                             <FormControl>
@@ -472,17 +857,6 @@ export default function EditCodingQuestionForm() {
                             <FormItem className="text-left w-full">
                                 <FormLabel>Topics</FormLabel>
                                 <Select
-                                    value={
-                                        tags.find(
-                                            (tag) => tag.id === field.value
-                                        )?.tagName ||
-                                        tags.find(
-                                            (tag) =>
-                                                tag.id ===
-                                                selectCodingQuestion[0]?.tagId
-                                        )?.tagName ||
-                                        ''
-                                    }
                                     onValueChange={(value) => {
                                         const selectedTag = tags.find(
                                             (tag: any) => tag?.tagName === value
@@ -491,20 +865,11 @@ export default function EditCodingQuestionForm() {
                                             field.onChange(selectedTag.id)
                                         }
                                     }}
-                                    disabled={isQuestionUsed}
+                                    value={tags.find((tag: any) => tag.id === field.value)?.tagName || ''}
                                 >
                                     <FormControl>
                                         <SelectTrigger>
-                                            <SelectValue
-                                                placeholder={
-                                                    tags.find(
-                                                        (tag) =>
-                                                            tag.id ===
-                                                            selectCodingQuestion[0]
-                                                                ?.tagId
-                                                    )?.tagName || 'Choose Topic'
-                                                }
-                                            />
+                                            <SelectValue placeholder="Choose Topic" />
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
@@ -523,178 +888,166 @@ export default function EditCodingQuestionForm() {
                         )}
                     />
 
-                    <h6 className="text-left text-sm font-semibold">
-                        {' '}
-                        Note: Max 20 test cases supported & a minimum of 2 test
-                        cases should be provided
-                    </h6>
-                    <div className="flex justify-between gap-2">
-                        <FormField
-                            control={form.control}
-                            name="inputFormat"
-                            render={({ field }) => (
-                                <FormItem className="text-left w-full">
-                                    <FormLabel>Input format</FormLabel>
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        defaultValue={String(field.value)}
-                                        disabled={isQuestionUsed}
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Choose Input Format" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            <SelectItem value="str">
-                                                String
-                                            </SelectItem>
-                                            <SelectItem value="int">
-                                                Number
-                                            </SelectItem>
-                                            <SelectItem value="float">
-                                                Float
-                                            </SelectItem>
-                                            <SelectItem value="arrayOfnum">
-                                                Array Of Numbers
-                                            </SelectItem>
-                                            <SelectItem value="arrayOfStr">
-                                                Array Of Strings
-                                            </SelectItem>
-                                            <SelectItem value="bool">
-                                                Boolean
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="outputFormat"
-                            render={({ field }) => (
-                                <FormItem className="text-left w-full">
-                                    <FormLabel>Output Format</FormLabel>
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        defaultValue={String(field.value)}
-                                        disabled={isQuestionUsed}
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Choose Output Format" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            <SelectItem value="str">
-                                                String
-                                            </SelectItem>
-                                            <SelectItem value="int">
-                                                Number
-                                            </SelectItem>
-                                            <SelectItem value="float">
-                                                Float
-                                            </SelectItem>
-                                            <SelectItem value="arrayOfnum">
-                                                Array Of Numbers
-                                            </SelectItem>
-                                            <SelectItem value="arrayOfStr">
-                                                Array Of Strings
-                                            </SelectItem>
-                                            <SelectItem value="bool">
-                                                Boolean
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
                     <div className="text-left">
                         <FormLabel>Test Cases</FormLabel>
-                        {testCases.map((testCase: any, index: number) => (
-                            <div
-                                key={testCase.id}
-                                className="flex items-center gap-2 mt-2"
-                            >
-                                <FormField
-                                    control={form.control}
-                                    name={`testCases.${index}.input`}
-                                    render={({ field }) => (
-                                        <FormItem className="text-left w-full">
-                                            <Input
-                                                placeholder="Input"
-                                                value={field.value}
-                                                onChange={field.onChange}
-                                                disabled={
-                                                    isQuestionUsed &&
-                                                    testCase.isExisting
-                                                }
-                                            />
-                                            <p className="text-sm text-gray-500 mt-1">
-                                                {form.watch('inputFormat') === 'arrayOfnum' || form.watch('inputFormat') === 'arrayOfStr'
-                                                    ? 'Max 1 array accepted (e.g., 1,2,3,4)'
-                                                    : form.watch('inputFormat') === 'bool'
-                                                        ? 'Enter true or false'
-                                                        : 'Enter values separated by spaces (e.g., 2 3 4)'}
-                                            </p>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                        {testCases.map((testCase, testCaseIndex) => (
+                            <div key={testCase.id} className="my-4 p-3 border rounded border-green-100 bg-green-50">
+                                {/* Input Section */}
+                                <div className="mb-4">
+                                    <h2 className='text-sm font-semibold mb-2'>Input</h2>
+                                    <div className="space-y-2">
+                                        {testCase.inputs.map((input, inputIndex) => (
+                                            <div key={input.id} className="flex flex-col gap-2">
+                                                <div className="flex items-center gap-2">
+                                                    <InputTypeSelect
+                                                        testCaseIndex={testCaseIndex}
+                                                        inputIndex={inputIndex}
+                                                        currentType={input.type}
+                                                    />
 
-                                <FormField
-                                    control={form.control}
-                                    name={`testCases.${index}.output`}
-                                    render={({ field }) => (
-                                        <FormItem className="text-left w-full">
+                                                    {input.type === 'jsonType' ? (
+                                                        <Textarea
+                                                            placeholder={`Input ${inputIndex + 1} (JSON)`}
+                                                            value={input.value} // Bind to the state
+                                                            onChange={(e) => handleInputChange(e, testCaseIndex, inputIndex, testCases, setTestCases)} // Handle changes
+                                                        />
+                                                    ) : (
+                                                        <Input
+                                                            placeholder={`Input ${inputIndex + 1}`}
+                                                            value={input.value}
+                                                            onChange={(e) => handleInputChange(e, testCaseIndex, inputIndex, testCases, setTestCases)}
+                                                        />
+                                                    )}
+
+                                                    {testCase.inputs.length > 1 && testCaseIndex === 0 && (
+                                                        <X
+                                                            className="cursor-pointer"
+                                                            onClick={() => handleRemoveInput(testCase.id, inputIndex)}
+                                                        />
+                                                    )}
+                                                </div>
+                                                <FormMessage className="text-destructive">
+                                                    {form.formState.errors?.testCases?.[testCaseIndex]?.inputs?.[inputIndex]?.value?.message}
+                                                </FormMessage>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {testCaseIndex === 0 && (
+                                    <Button
+                                        variant="outline"
+                                        type="button"
+                                        onClick={() => handleAddInputType(testCase.id)}
+                                        className="my-2"
+                                        disabled={testCase.inputs.length >= inputTypes.length}
+                                    >
+                                        <Plus size={16} className="mr-2" />
+                                        Add Input
+                                    </Button>
+                                )}
+
+                                {/* Output Section */}
+                                <div>
+                                    <h2 className='text-sm font-semibold mb-2'>Output</h2>
+                                    <div className="flex items-center gap-2">
+                                        <Select
+                                            value={testCase.output.type}
+                                            onValueChange={(newType) => {
+                                                if (testCaseIndex === 0) {
+                                                    const newTestCases = testCases.map(tc => ({
+                                                        ...tc,
+                                                        output: { ...tc.output, type: newType, value: '' }
+                                                    }));
+                                                    setTestCases(newTestCases);
+                                                }
+                                            }}
+                                            disabled={testCaseIndex !== 0}
+                                        >
+                                            <SelectTrigger className="w-[180px]">
+                                                <SelectValue placeholder="Output Type" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {outputTypes.map(type => (
+                                                    <SelectItem key={type} value={type}>
+                                                        {type}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+
+                                        {testCase.output.type === 'jsonType' ? (
+                                            <Textarea
+                                                required
+                                                placeholder="Output (JSON)"
+                                                value={testCase.output.value}
+                                                onChange={(e) => {
+                                                    const newValue = e.target.value;
+                                                    if (!validateFieldValue(newValue, testCase.output.type)) {
+                                                        return;
+                                                    }
+                                                    const newTestCases = [...testCases];
+                                                    newTestCases[testCaseIndex].output.value = newValue;
+                                                    setTestCases(newTestCases);
+                                                }}
+                                                className="flex-grow"
+                                            />
+                                        ) : (
                                             <Input
+                                                required
                                                 placeholder="Output"
-                                                value={field.value}
-                                                onChange={field.onChange}
-                                                disabled={
-                                                    isQuestionUsed &&
-                                                    testCase.isExisting
-                                                }
+                                                value={testCase.output.value}
+                                                onChange={(e) => {
+                                                    const newValue = e.target.value;
+                                                    // First check if it's a single value type (int, float, str)
+                                                    if (['int', 'float', 'str'].includes(testCase.output.type)) {
+                                                        if (!validateOutputValue(newValue, testCase.output.type)) {
+                                                            return;
+                                                        }
+                                                    }
+                                                    // Then check the general format
+                                                    else if (!validateFieldValue(newValue, testCase.output.type)) {
+                                                        return;
+                                                    }
+                                                    const newTestCases = [...testCases];
+                                                    newTestCases[testCaseIndex].output.value = newValue;
+                                                    setTestCases(newTestCases);
+                                                }}
+                                                className="flex-grow"
                                             />
-                                            <p className="text-sm text-gray-500 mt-1">
-                                                {form.watch('outputFormat') ===
-                                                    'arrayOfnum' ||
-                                                    form.watch('outputFormat') ===
-                                                    'arrayOfStr'
-                                                    ? 'Max 1 array accepted (e.g., 1,2,3,4)'
-                                                    : form.watch('outputFormat') === 'bool' ?
-                                                        'Enter true or false' :
-                                                        'Only one value accepted (e.g., 55)'}
-                                            </p>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                                        )}
+                                    </div>
+                                    <FormMessage className="text-destructive">
+                                        {form.formState.errors?.testCases?.[testCaseIndex]?.output?.value?.message}
+                                    </FormMessage>
+                                </div>
 
-                                {
-                                    <X
-                                        className="cursor-pointer"
-                                        onClick={() =>
-                                            handleRemoveTestCase(testCase.id)
-                                        }
-                                    />
-                                }
+                                {testCases.length > 1 && (
+                                    <Button
+                                        variant="ghost"
+                                        className="mt-4 text-destructive hover:text-destructive"
+                                        onClick={() => handleRemoveTestCase(testCase.id)}
+                                    >
+                                        <X size={16} className="mr-2" />
+                                        Remove Test Case
+                                    </Button>
+                                )}
                             </div>
                         ))}
+
+                        <Button
+                            variant="outline"
+                            type="button"
+                            className="mt-2"
+                            onClick={handleAddTestCase}
+                        >
+                            <Plus size={20} className="mr-2" />
+                            Add Test Case
+                        </Button>
                     </div>
 
                     <div className="flex justify-end gap-3">
-                        <Button
-                            variant={'outline'}
-                            type="button"
-                            onClick={handleAddTestCase}
-                        >
-                            <Plus size={15} />
-                            Add Test Case
-                        </Button>
+
                         <Button type="submit">Save</Button>
                     </div>
                 </form>

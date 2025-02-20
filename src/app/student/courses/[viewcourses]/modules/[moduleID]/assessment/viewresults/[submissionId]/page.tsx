@@ -174,7 +174,8 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                                             }
                                         </div>
                                         <h2 className="bg-[#DEDEDE] px-2 py-1 text-sm rounded-2xl font-semibold">
-                                            {` ${weightageCodingQuestions} Marks`}
+                                        {` ${Math.trunc(Number(weightageCodingQuestions))} Marks`}
+
                                         </h2>
                                     </div>
                                 </div>

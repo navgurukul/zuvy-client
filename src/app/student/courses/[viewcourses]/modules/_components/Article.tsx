@@ -35,7 +35,7 @@ function Article({
                     },
                     content: [
                         {
-                            text: 'No article added yet. Please come back later for some interesting article to learn from...',
+                            text: 'No article has been added yet. Please come back later for an interesting article to learn from...',
                             type: 'text',
                         },
                     ],
@@ -61,7 +61,24 @@ function Article({
             <TiptapEditor editor={editor} />
             {!isCompleted && (
                 <div className="my-10 text-end">
-                    <Button onClick={completeChapter}>Mark as Done</Button>
+                    <Button
+                            disabled={
+                                !content?.articleContent ||
+                                !content.articleContent.some((doc: any) =>
+                                    doc.content.some(
+                                        (paragraph: any) =>
+                                            paragraph.content &&
+                                            paragraph.content.some(
+                                                (item: any) =>
+                                                    item.type === 'text'
+                                            )
+                                    )
+                                )
+                            }
+                            onClick={completeChapter}
+                        >
+                            Mark as Done
+                        </Button>
                 </div>
             )}
         </div>
