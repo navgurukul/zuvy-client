@@ -19,6 +19,17 @@ import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
 import { useParams, useRouter } from 'next/navigation'
 import { addClassToCodeTags } from '@/utils/admin'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 
 // component
 const QuizQuestions = ({
@@ -28,7 +39,7 @@ const QuizQuestions = ({
     questions,
     assessmentSubmitId,
     getSeperateQuizQuestions,
-    getAssessmentData,
+    getAssessmentData
 }: {
     onBack: () => void
     weightage?: any
@@ -43,11 +54,11 @@ const QuizQuestions = ({
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
         undefined
     ) // Correct type
-    // Define the Zod schema for form validation
+   const [isDisabled, setIsDisabled] = useState(false)
 
     const codeBlockClass =
         'text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full'
-    ;('text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full')
+    'text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full'
 
     useEffect(() => {
         return () => {
@@ -70,6 +81,7 @@ const QuizQuestions = ({
 
     // Set default values based on submissionsData when the component mounts or questions change
     useEffect(() => {
+
         const defaultValues = {
             answers: questions?.data?.mcqs?.map((question: any) =>
                 question.submissionsData && question.submissionsData.length > 0
@@ -89,8 +101,10 @@ const QuizQuestions = ({
         //     chosenOption: Number(chosenOption),
         // }))
 
+        setIsDisabled(true)
+
         const quizSubmissionDto = data.answers.map((chosenOption, index) => {
-            const questionId = questions.data.mcqs[index].outsourseQuizzesId
+            const questionId = questions.data.mcqs[index].outsourseQuizzesId;
 
             // If questionId is true, call the API
             if (questionId) {
@@ -99,33 +113,31 @@ const QuizQuestions = ({
                     variantId: questions.data.mcqs[index].variantId,
                     attemptCount: 1,
                     chosenOption: Number(chosenOption),
-                }
+                };
             }
-        })
+        });
 
         try {
-            if (quizSubmissionDto) {
-                const response = await api.patch(
-                    `/submission/quiz/assessmentSubmissionId=${assessmentSubmitId}?assessmentOutsourseId=${params.assessmentOutSourceId}`,
-                    { quizSubmissionDto }
-                )
+            const response = await api.patch(
+                `/submission/quiz/assessmentSubmissionId=${assessmentSubmitId}?assessmentOutsourseId=${params.assessmentOutSourceId}`,
+                { quizSubmissionDto }
+            )
 
-                getAssessmentData()
+            getAssessmentData()
 
-                toast({
-                    title: 'Success',
-                    description: 'Quiz Submitted Successfully',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
-                })
+            toast({
+                title: 'Success',
+                description: 'Quiz Submitted Successfully',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+            })
 
-                getSeperateQuizQuestions()
+            getSeperateQuizQuestions()
 
-                // Set the timeout and store the timeout ID
-                timeoutRef.current = setTimeout(() => {
-                    onBack()
-                }, 3000)
-            }
+            // Set the timeout and store the timeout ID
+            timeoutRef.current = setTimeout(() => {
+                onBack()
+            }, 3000)
         } catch (error: any) {
             toast({
                 title: 'Error',
@@ -241,7 +253,7 @@ const QuizQuestions = ({
                                                                     {
                                                                         question
                                                                             .options[
-                                                                            key
+                                                                        key
                                                                         ]
                                                                     }
                                                                 </p>
@@ -258,10 +270,31 @@ const QuizQuestions = ({
                         }
                     )}
 
-                    {/* Submit Button */}
-                    <Button type="submit" className="mt-4">
-                        Submit Quiz
-                    </Button>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button type='button' className="mt-4">
+                                Submit Quiz
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                    Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This action cannot be undone. This will submit your whole assessment.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                    className="bg-red-500"
+                                    onClick={form.handleSubmit(onSubmit)}
+                                >
+                                        Submit
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </form>
             </Form>
         </div>

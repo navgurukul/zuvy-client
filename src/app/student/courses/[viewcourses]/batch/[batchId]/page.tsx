@@ -137,17 +137,9 @@ function Page({
                 const response = await api.get(
                     `/tracking/allModulesForStudents/${params.viewcourses}`
                 )
-                response.data.map((module: any) => {
-                    const modules = response.data.filter(
-                        (module: any) =>
-                            module.articlesCount +
-                                module.assignmentCount +
-                                module.codingProblemsCount +
-                                module.formCount >
-                            0
-                    )
-                    setModulesProgress(modules)
-                })
+             
+                    setModulesProgress(response.data)
+              
             } catch (error) {
                 console.error('Error getting modules progress', error)
             }
@@ -172,8 +164,6 @@ function Page({
         if (userID) getCourseProgress()
     }, [userID, params.viewcourses])
 
-    console.log('modulesProgress', modulesProgress)
-
     return (
         <MaxWidthWrapper>
             <BreadcrumbCmponent crumbs={crumbs} />
@@ -196,8 +186,11 @@ function Page({
                             <div className="relative flex items-center justify-center group">
                                 {/* Percentage Text */}
 
-                                {/* Loader */}
-                                <Loader progress={courseProgress?.progress} />
+                                <div className="w-full flex items-start">
+                                    <Loader
+                                        progress={courseProgress?.progress}
+                                    />
+                                </div>
 
                                 {/* Circular Progress */}
                                 <div className="absolute -top-16 invisible group-hover:visible">

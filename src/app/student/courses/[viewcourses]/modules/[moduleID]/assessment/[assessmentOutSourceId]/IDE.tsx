@@ -40,9 +40,24 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 
+interface Input {
+    parameterName: string
+    parameterType: string
+    parameterValue: [] | {}
+}
+
+interface TestCase {
+    inputs: Input[] | Record<string, unknown>
+    expectedOutput: {
+        parameterType: string
+        parameterValue: [] | {}
+    }
+}
+
 interface questionDetails {
     title: string
     description: string
+    constraints?: string
     examples: { input: number[]; output: number }
 }
 
@@ -73,6 +88,7 @@ const IDE: React.FC<IDEProps> = ({
             output: 0,
         },
     })
+    const [isDisabled, setIsDisabled] = useState(false)
     const [currentCode, setCurrentCode] = useState('')
     const [result, setResult] = useState('')
     const [codeResult, setCodeResult] = useState<any>([])
@@ -119,12 +135,37 @@ const IDE: React.FC<IDEProps> = ({
         return result
     }
 
+    const formatValue = (value: any, type: string): string => {
+        if (Array.isArray(value)) {
+            if (type === 'arrayOfNum') {
+                return `[${(value as number[]).join(', ')}]`
+            }
+            if (type === 'arrayOfStr') {
+                return `[${(value as string[])
+                    .map((v) => `"${v}"`)
+                    .join(', ')}]`
+            }
+            return `[${value.join(', ')}]`
+        }
+
+        switch (type) {
+            case 'int':
+            case 'float':
+                return value.toString()
+            case 'str':
+                return `"${value}"`
+            default:
+                return JSON.stringify(value)
+        }
+    }
+
     const handleSubmit = async (
         e: { preventDefault: () => void },
         action: string
     ) => {
         e.preventDefault()
         setLoading(true)
+        setIsDisabled(true)
 
         try {
             const response = await api.post(
@@ -163,16 +204,17 @@ const IDE: React.FC<IDEProps> = ({
                 getAssessmentData()
 
                 if (onBack) {
-                    console.log('onBack')
                     onBack()
                 }
             } else if (allTestCasesPassed && action === 'run') {
+                setIsDisabled(false)
                 toast({
                     title: `Test Cases Passed`,
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
             } else {
+                setIsDisabled(false)
                 toast({
                     title: 'Test Cases Failed',
                     className:
@@ -310,14 +352,39 @@ const IDE: React.FC<IDEProps> = ({
                         {loading ? <Spinner /> : <Play size={20} />}
                         <span className="ml-2 text-lg font-bold">Run</span>
                     </Button>
-                    <Button
-                        onClick={(e) => handleSubmit(e, 'submit')}
-                        size="sm"
-                        disabled={isSubmitted || loading}
-                    >
-                        {loading ? <Spinner /> : <Upload size={20} />}
-                        <span className="ml-2 text-lg font-bold">Submit</span>
-                    </Button>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button
+                                size="sm"
+                                disabled={loading} // Disable buttons during loading
+                            >
+                                {loading ? <Spinner /> : <Upload size={20} />}
+                                <span className="ml-2 text-lg font-bold">
+                                    Submit
+                                </span>
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                    Are you absolutely sure?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This action will submit your code.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                    className="bg-red-500"
+                                    onClick={(e) => handleSubmit(e, 'submit')}
+                                    disabled={isDisabled}
+                                >
+                                    Submit
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </div>
             </div>
 
@@ -334,56 +401,113 @@ const IDE: React.FC<IDEProps> = ({
                                         {questionDetails?.title}
                                     </h1>
                                     <p>{questionDetails?.description}</p>
+                                    <p className="mt-3">
+                                        <span className="font-bold">
+                                            Constraints:
+                                        </span>{' '}
+                                        {questionDetails?.constraints}
+                                    </p>
 
                                     {testCases
                                         ?.slice(0, 2)
-                                        .map((testCase: any, index: any) => (
-                                            <div
-                                                key={index}
-                                                className="bg-gray-200 shadow-sm rounded-lg p-4 my-4"
-                                            >
-                                                <h2 className="text-xl font-semibold mb-2">
-                                                    Test Case {index + 1}
-                                                </h2>
-                                                {testCase.inputs.map(
-                                                    (input: any, idx: any) => (
-                                                        <p
-                                                            key={idx}
-                                                            className="text-gray-700"
-                                                        >
-                                                            <span className="font-medium">
-                                                                Input {idx + 1}:
-                                                            </span>{' '}
-                                                            {
-                                                                input.parameterName
-                                                            }{' '}
-                                                            (
-                                                            {
-                                                                input.parameterType
-                                                            }
-                                                            ) ={' '}
-                                                            {
-                                                                input.parameterValue
-                                                            }
-                                                        </p>
+                                        .map(
+                                            (
+                                                testCase: TestCase,
+                                                index: number
+                                            ) => (
+                                                <div
+                                                    key={index}
+                                                    className="bg-gray-200 shadow-sm rounded-lg p-4 my-4"
+                                                >
+                                                    <h2 className="text-xl font-semibold mb-2">
+                                                        Test Case {index + 1}
+                                                    </h2>
+
+                                                    {/* Handle both array and object inputs */}
+                                                    {Array.isArray(
+                                                        testCase.inputs
                                                     )
-                                                )}
-                                                <p className="text-gray-700 mt-2">
-                                                    <span className="font-medium">
-                                                        Expected Output:
-                                                    </span>{' '}
-                                                    {
-                                                        testCase.expectedOutput
-                                                            .parameterType
-                                                    }{' '}
-                                                    ={' '}
-                                                    {
-                                                        testCase.expectedOutput
-                                                            .parameterValue
-                                                    }
-                                                </p>
-                                            </div>
-                                        ))}
+                                                        ? testCase.inputs.map(
+                                                              (
+                                                                  input: Input,
+                                                                  idx: number
+                                                              ) => (
+                                                                  <p
+                                                                      key={idx}
+                                                                      className="text-gray-700"
+                                                                  >
+                                                                      <span className="font-medium">
+                                                                          Input{' '}
+                                                                          {idx +
+                                                                              1}
+                                                                          :
+                                                                      </span>{' '}
+                                                                      {
+                                                                          input.parameterName
+                                                                      }{' '}
+                                                                      (
+                                                                      {
+                                                                          input.parameterType
+                                                                      }
+                                                                      ) ={' '}
+                                                                      {formatValue(
+                                                                          input.parameterValue,
+                                                                          input.parameterType
+                                                                      )}
+                                                                  </p>
+                                                              )
+                                                          )
+                                                        : Object.entries(
+                                                              testCase.inputs
+                                                          ).map(
+                                                              (
+                                                                  [key, value],
+                                                                  idx: number
+                                                              ) => (
+                                                                  <p
+                                                                      key={key}
+                                                                      className="text-gray-700"
+                                                                  >
+                                                                      <span className="font-medium">
+                                                                          Input{' '}
+                                                                          {idx +
+                                                                              1}
+                                                                          :
+                                                                      </span>{' '}
+                                                                      {key} ={' '}
+                                                                      {formatValue(
+                                                                          value,
+                                                                          typeof value ===
+                                                                              'number'
+                                                                              ? 'int'
+                                                                              : 'str'
+                                                                      )}
+                                                                  </p>
+                                                              )
+                                                          )}
+
+                                                    <p className="text-gray-700 mt-2">
+                                                        <span className="font-medium">
+                                                            Expected Output:
+                                                        </span>{' '}
+                                                        {
+                                                            testCase
+                                                                .expectedOutput
+                                                                .parameterType
+                                                        }{' '}
+                                                        {'='}{' '}
+                                                        {formatValue(
+                                                            testCase
+                                                                .expectedOutput
+                                                                .parameterValue,
+                                                            testCase
+                                                                .expectedOutput
+                                                                .parameterType
+                                                        )}
+                                                    </p>
+                                                </div>
+                                            )
+                                        )}
                                 </div>
                             </div>
                         </div>
