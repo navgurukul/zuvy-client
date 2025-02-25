@@ -251,7 +251,6 @@ function Page({
     ) => {
         setSelectedQuesType(type)
         setIsSolving(true)
-        console.log('hasdkfjksd')
         console.log(id)
         console.log(assessmentData)
 
@@ -466,7 +465,6 @@ function Page({
         setIsFullScreen(true)
     }
 
-    console.log(assessmentData)
     return (
         <div
             onPaste={(e) => handleCopyPasteAttempt(e)}
@@ -478,14 +476,14 @@ function Page({
                 <div className="h-auto mb-24">
                     {!isFullScreen ? (
                         <>
-                            <div className="flex items-center justify-center gap-2">
+                      <div className="fixed top-4 right-4 bg-white p-2 rounded-md shadow-md font-bold text-xl">
                                 <div className="font-bold text-xl">
                                     <TimerDisplay
                                         remainingTime={remainingTime}
                                     />
                                 </div>
                             </div>
-                            <Separator className="my-6" />
+                            {/* <Separator className="my-6" /> */}
                             <h1>
                                 Enter Full Screen to see the Questions. Warning:
                                 If you exit fullscreen, your test will get
@@ -499,14 +497,14 @@ function Page({
                         </>
                     ) : (
                         <div>
-                            <div className="flex items-center justify-center gap-2">
+                          <div className="fixed top-4 right-4 bg-white p-2 rounded-md shadow-md font-bold text-xl">
                                 <div className="font-bold text-xl">
                                     <TimerDisplay
                                         remainingTime={remainingTime}
                                     />
                                 </div>
                             </div>
-                            <Separator className="my-6" />
+                            {/* <Separator className="my-6" /> */}
                             <div className="flex justify-center">
                                 <div className="flex flex-col gap-5 w-1/2 text-left">
                                     <h2 className="font-bold">

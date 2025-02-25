@@ -105,17 +105,9 @@ export default function NewCodingProblemForm({
     const handleAddInputType = (testCaseId: number) => {
         // Only allow adding inputs to the first test case
         if (testCaseId !== testCases[0].id) return;
-
-        const availableTypes = getAvailableInputTypes(0);
-        if (availableTypes.length === 0) {
-            toast({
-                title: "Cannot Add Input",
-                description: "All input types have been used in this test case.",
-                className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
-            });
-            return;
-        }
-
+    
+        const availableTypes = getAvailableInputTypes(0); // Get all input types
+    
         // Create new input for first test case and propagate to all test cases
         const newInput = { id: Date.now(), type: availableTypes[0], value: '' };
         setTestCases(prevTestCases =>
@@ -200,40 +192,32 @@ export default function NewCodingProblemForm({
                 break;
             }
             case 'str': {
-                if (value.includes(',')) {
+                // Allow strings with spaces, treat the entire input as a single string
+                break;
+            }
+            case 'int': {
+                if (!Number.isInteger(Number(value)) && value !== '') {
                     toast({
-                        title: "Invalid Format",
-                        description: "Please use spaces to separate elements (e.g., hello world)",
+                        title: "Invalid Integer Input",
+                        description: "Please enter a valid integer value",
                         className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
                 }
                 break;
             }
-            case 'int': {
-                if (value.includes(',')) {
-                    toast({
-                        title: "Invalid Integer Input",
-                        description: "Please use spaces to separate elements (e.g., 1 2 3)",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
-                    })
-                    return false;
-                }
-                break;
-            }
             case 'float': {
-                if (value.includes(',')) {
+                if (isNaN(Number(value)) && value !== '') {
                     toast({
                         title: "Invalid Float Input",
-                        description: "Please use spaces to separate elements (e.g., 1.43 2.0 3.09)",
+                        description: "Please enter a valid float value",
                         className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
-                    })
+                    });
                     return false;
                 }
                 break;
             }
             case 'bool': {
-                // Allow partial inputs like 't', 'tr', 'tru', etc.
                 if (value && !/^(true|false)$/.test(value) && !/^(t(r(u(e)?)?)?|f(a(l(s(e)?)?)?)?)$/.test(value)) {
                     toast({
                         title: "Invalid Boolean Input",
@@ -247,6 +231,7 @@ export default function NewCodingProblemForm({
         }
         return true;
     };
+
     const handleInputChange = (
         e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>,
         testCaseIndex: number,
@@ -256,12 +241,12 @@ export default function NewCodingProblemForm({
     ) => {
         const newValue = e.target.value;
         const inputType = testCases[testCaseIndex].inputs[inputIndex].type;
-
+    
         // Only validate the format, not the size
         if (!validateFieldValue(newValue, inputType)) {
             return;
         }
-
+    
         const newTestCases = [...testCases];
         newTestCases[testCaseIndex].inputs[inputIndex].value = newValue;
         setTestCases(newTestCases);
@@ -294,10 +279,10 @@ export default function NewCodingProblemForm({
                         <SelectItem
                             key={type}
                             value={type}
-                            disabled={!isCurrentType && isUsed}
-                            className={!isCurrentType && isUsed ? "opacity-50 cursor-not-allowed" : ""}
+
+                            
                         >
-                            {type} {!isCurrentType && isUsed && "(already used)"}
+                            {type} {!isCurrentType && isUsed}
                         </SelectItem>
                     );
                 })}
@@ -346,10 +331,10 @@ export default function NewCodingProblemForm({
 
     const processInput = (input: string, format: string) => {
         const cleanedInput = cleanUpValues(input);
-
+    
         const isValidNumber = (value: string) => !isNaN(Number(value));
         const isValidFloat = (value: string) => !isNaN(parseFloat(value));
-
+    
         switch (format) {
             case 'arrayOfnum': {
                 const values = cleanedInput.split(',');
@@ -359,7 +344,7 @@ export default function NewCodingProblemForm({
                 return values.map(Number);
             }
             case 'arrayOfStr': {
-                return cleanedInput.split(',');
+                return cleanedInput.split(','); // Split by commas for arrays
             }
             case 'int': {
                 const values = cleanedInput.split(' ');
@@ -380,15 +365,16 @@ export default function NewCodingProblemForm({
                     : values.map(Number);
             }
             case 'str': {
-                const values = cleanedInput.split(' ');
-                return values.length === 1 ? values[0] : values;
+                // Treat the entire input as a single string, even if it contains spaces
+                return cleanedInput;
             }
-            case 'bool':
+            case 'bool': {
                 if (cleanedInput === 'true' || cleanedInput === 'false') {
                     return cleanedInput === 'true';
                 } else {
                     return null;
                 }
+            }
             case 'jsonType': {
                 try {
                     const parsed = JSON.parse(input);
@@ -399,7 +385,6 @@ export default function NewCodingProblemForm({
                     return null;
                 }
             }
-
             default:
                 return cleanedInput;
         }
@@ -407,21 +392,21 @@ export default function NewCodingProblemForm({
 
     const validateTestCasesBeforeSubmit = (testCases: any[]) => {
         const firstTestCase = testCases[0];
-
+    
         // Validate each test case against the first test case
         for (let i = 1; i < testCases.length; i++) {
             const currentTestCase = testCases[i];
-
+    
             // Check each input
             for (let j = 0; j < currentTestCase.inputs.length; j++) {
                 const currentInput = currentTestCase.inputs[j];
                 const firstCaseInput = firstTestCase.inputs[j];
-
+    
                 if (currentInput.type === 'jsonType') {
                     try {
                         const firstJson = JSON.parse(firstCaseInput.value);
                         const currentJson = JSON.parse(currentInput.value);
-
+    
                         // Check if both are arrays
                         if (Array.isArray(firstJson) && Array.isArray(currentJson)) {
                             if (firstJson.length !== currentJson.length) {
@@ -442,26 +427,24 @@ export default function NewCodingProblemForm({
                         return false;
                     }
                 } else if (['int', 'str', 'float'].includes(currentInput.type)) {
-                    const firstElements = firstCaseInput.value.trim().split(' ').filter(Boolean);
-                    const currentElements = currentInput.value.trim().split(' ').filter(Boolean);
-
-                    if (currentElements.length !== firstElements.length) {
+                    // No need to split by spaces, validate the entire input as-is
+                    if (currentInput.value.trim() === '') {
                         toast({
-                            title: "Input Size Mismatch",
-                            description: `Test case ${i + 1} ${currentInput.type} input should have ${firstElements.length} elements to match the first test case`,
+                            title: "Input Cannot Be Empty",
+                            description: `Test case ${i + 1} input cannot be empty`,
                             className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
                         });
                         return false;
                     }
-                } 
+                }
             }
-
+    
             // Check output
             if (currentTestCase.output.type === 'jsonType') {
                 try {
                     const firstJson = JSON.parse(firstTestCase.output.value);
                     const currentJson = JSON.parse(currentTestCase.output.value);
-
+    
                     if (Array.isArray(firstJson) && Array.isArray(currentJson)) {
                         if (firstJson.length !== currentJson.length) {
                             toast({
@@ -481,22 +464,21 @@ export default function NewCodingProblemForm({
                     return false;
                 }
             } else if (['int', 'str', 'float'].includes(currentTestCase.output.type)) {
-                const firstElements = firstTestCase.output.value.trim().split(' ').filter(Boolean);
-                const currentElements = currentTestCase.output.value.trim().split(' ').filter(Boolean);
-
-                if (currentElements.length !== firstElements.length) {
+                // No need to split by spaces, validate the entire output as-is
+                if (currentTestCase.output.value.trim() === '') {
                     toast({
-                        title: "Output Size Mismatch",
-                        description: `Test case ${i + 1} output should have ${firstElements.length} elements to match the first test case`,
+                        title: "Output Cannot Be Empty",
+                        description: `Test case ${i + 1} output cannot be empty`,
                         className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
                 }
             }
         }
-
+    
         return true;
-    };
+    }
+    
 
         const validateOutputValue = (value: string, type: string): boolean => {
         switch (type) {
