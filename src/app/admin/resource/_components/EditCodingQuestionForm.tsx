@@ -86,61 +86,40 @@ export default function EditCodingQuestionForm() {
 
     let outputObjectRef = useRef('' as any);
 
-    const getAvailableInputTypes = (testCaseIndex: number) => {
-        const usedTypes = testCases[testCaseIndex].inputs.map(input => input.type);
-        return inputTypes.filter(type => !usedTypes.includes(type));
-    }
-
     // Shared validation function for both inputs and outputs
     const validateFieldValue = (value: string, type: string) => {
         switch (type) {
             case 'arrayOfStr':
             case 'arrayOfnum': {
-                if (value.includes(' ')) {
-                    toast({
-                        title: "Invalid Format",
-                        description: "Please use commas to separate elements in an array (e.g., 1,2,3) or (e.g., hello,world)",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
-                    });
-                    return false;
-                }
                 break;
             }
             case 'str': {
-                if (value.includes(',')) {
-                    toast({
-                        title: "Invalid Format",
-                        description: "Please use spaces to separate elements (e.g., hello world)",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
-                    });
-                    return false;
-                }
+                // Allow strings with spaces, treat the entire input as a single string
                 break;
             }
             case 'int': {
-                if (value.includes(',')) {
+                if (!Number.isInteger(Number(value)) && value !== '') {
                     toast({
                         title: "Invalid Integer Input",
-                        description: "Please use spaces to separate elements (e.g., 1 2 3)",
+                        description: "Please enter a valid integer value",
                         className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
-                    })
+                    });
                     return false;
                 }
                 break;
             }
             case 'float': {
-                if (value.includes(',')) {
+                if (isNaN(Number(value)) && value !== '') {
                     toast({
                         title: "Invalid Float Input",
-                        description: "Please use spaces to separate elements (e.g., 1.43 2.0 3.09)",
+                        description: "Please enter a valid float value",
                         className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
-                    })
+                    });
                     return false;
                 }
                 break;
             }
             case 'bool': {
-                // Allow partial inputs like 't', 'tr', 'tru', etc.
                 if (value && !/^(true|false)$/.test(value) && !/^(t(r(u(e)?)?)?|f(a(l(s(e)?)?)?)?)$/.test(value)) {
                     toast({
                         title: "Invalid Boolean Input",
@@ -154,7 +133,7 @@ export default function EditCodingQuestionForm() {
         }
         return true;
     };
-
+    
     const validateOutputValue = (value: string, type: string): boolean => {
         switch (type) {
             case 'int': {
@@ -219,12 +198,12 @@ export default function EditCodingQuestionForm() {
     ) => {
         const newValue = e.target.value;
         const inputType = testCases[testCaseIndex].inputs[inputIndex].type;
-
+    
         // Only validate the format, not the size
         if (!validateFieldValue(newValue, inputType)) {
             return;
         }
-
+    
         const newTestCases = [...testCases];
         newTestCases[testCaseIndex].inputs[inputIndex].value = newValue;
         setTestCases(newTestCases);
@@ -236,11 +215,16 @@ export default function EditCodingQuestionForm() {
         );
     }
 
+    const getAvailableInputTypes = (testCaseIndex: number) => {
+        const usedTypes = testCases[testCaseIndex].inputs.map(input => input.type);
+        return inputTypes.filter(type => !usedTypes.includes(type));
+    };
+
     const handleAddInputType = (testCaseId: number) => {
         // Only allow adding inputs to the first test case
         if (testCaseId !== testCases[0].id) return;
-
-        const availableTypes = getAvailableInputTypes(0);
+    
+        const availableTypes = getAvailableInputTypes(0); // Get all input types
         if (availableTypes.length === 0) {
             toast({
                 title: "Cannot Add Input",
@@ -249,7 +233,7 @@ export default function EditCodingQuestionForm() {
             });
             return;
         }
-
+    
         // Create new input for first test case and propagate to all test cases
         const newInput = { id: Date.now(), type: availableTypes[0], value: '' };
         setTestCases(prevTestCases =>
@@ -317,20 +301,14 @@ export default function EditCodingQuestionForm() {
                 <SelectValue placeholder="Input Type" />
             </SelectTrigger>
             <SelectContent>
-                {inputTypes.map(type => {
-                    const isUsed = isTypeUsedInTestCase(testCaseIndex, inputIndex, type);
-                    const isCurrentType = type === currentType;
-                    return (
-                        <SelectItem
-                            key={type}
-                            value={type}
-                            disabled={!isCurrentType && isUsed}
-                            className={!isCurrentType && isUsed ? "opacity-50 cursor-not-allowed" : ""}
-                        >
-                            {type} {!isCurrentType && isUsed && "(already used)"}
-                        </SelectItem>
-                    );
-                })}
+                {inputTypes.map(type => (
+                    <SelectItem
+                        key={type}
+                        value={type}
+                    >
+                        {type}
+                    </SelectItem>
+                ))}
             </SelectContent>
         </Select>
     );
@@ -377,10 +355,10 @@ export default function EditCodingQuestionForm() {
 
     const processInput = (input: string, format: string) => {
         const cleanedInput = cleanUpValues(input);
-
+    
         const isValidNumber = (value: string) => !isNaN(Number(value));
         const isValidFloat = (value: string) => !isNaN(parseFloat(value));
-
+    
         switch (format) {
             case 'arrayOfnum': {
                 const values = cleanedInput.split(',');
@@ -390,7 +368,7 @@ export default function EditCodingQuestionForm() {
                 return values.map(Number);
             }
             case 'arrayOfStr': {
-                return cleanedInput.split(',');
+                return cleanedInput.split(','); // Split by commas for arrays
             }
             case 'int': {
                 const values = cleanedInput.split(' ');
@@ -411,15 +389,16 @@ export default function EditCodingQuestionForm() {
                     : values.map(Number);
             }
             case 'str': {
-                const values = cleanedInput.split(' ');
-                return values.length === 1 ? values[0] : values;
+                // Treat the entire input as a single string, even if it contains spaces
+                return cleanedInput;
             }
-            case 'bool':
+            case 'bool': {
                 if (cleanedInput === 'true' || cleanedInput === 'false') {
                     return cleanedInput === 'true';
                 } else {
                     return null;
                 }
+            }
             case 'jsonType': {
                 try {
                     const parsed = JSON.parse(input);
@@ -430,7 +409,6 @@ export default function EditCodingQuestionForm() {
                     return null;
                 }
             }
-
             default:
                 return cleanedInput;
         }
@@ -488,34 +466,25 @@ export default function EditCodingQuestionForm() {
     useEffect(() => {
         if (selectCodingQuestion.length > 0) {
             const question = selectCodingQuestion[0];
-
-            // Group inputs by type and combine values
+    
+            // Map test cases from API data
             const mappedTestCases = question.testCases.map((testCase: any) => {
-                // Group inputs by type
-                const groupedInputs = testCase.inputs.reduce((acc: any, input: any) => {
-                    if (!acc[input.parameterType]) {
-                        acc[input.parameterType] = [];
-                    }
-                    acc[input.parameterType].push(input.parameterValue);
-                    return acc;
-                }, {});
-
-                // Create combined inputs array
-                const combinedInputs = Object.entries(groupedInputs).map(([type, values]: [string, any]) => ({
-                    id: Date.now() + Math.random(),
-                    type,
-                    value: type === 'jsonType'
-                        ? JSON.stringify(values[0], null, 2)
-                        : type === 'int' || type === 'str' || type === 'float'
-                            ? values.join(' ') // Join multiple values with spaces
-                            : type === 'arrayOfnum' || type === 'arrayOfStr'
-                                ? values[0].join(',') // Join array elements with commas
-                                : String(values[0]) // Handle other types normally
+                // Map each input individually
+                const inputs = testCase.inputs.map((input: any) => ({
+                    id: Date.now() + Math.random(), // Unique ID
+                    type: input.parameterType,
+                    value: input.parameterType === 'jsonType'
+                        ? JSON.stringify(input.parameterValue, null, 2) // Handle JSON inputs
+                        : input.parameterType === 'arrayOfnum' || input.parameterType === 'arrayOfStr'
+                            ? Array.isArray(input.parameterValue)
+                                ? input.parameterValue.join(',') // Join array elements with commas
+                                : String(input.parameterValue)
+                            : String(input.parameterValue) // Handle other types normally
                 }));
-
+    
                 return {
                     id: testCase.id,
-                    inputs: combinedInputs,
+                    inputs,
                     output: {
                         type: testCase.expectedOutput.parameterType,
                         value: testCase.expectedOutput.parameterType === 'jsonType'
@@ -528,10 +497,10 @@ export default function EditCodingQuestionForm() {
                     }
                 };
             });
-
+    
             // Set the test cases state
             setTestCases(mappedTestCases);
-
+    
             // Reset the form with the mapped data
             form.reset({
                 title: question.title,
@@ -548,21 +517,21 @@ export default function EditCodingQuestionForm() {
 
     const validateTestCasesBeforeSubmit = (testCases: any[]) => {
         const firstTestCase = testCases[0];
-
+    
         // Validate each test case against the first test case
         for (let i = 1; i < testCases.length; i++) {
             const currentTestCase = testCases[i];
-
+    
             // Check each input
             for (let j = 0; j < currentTestCase.inputs.length; j++) {
                 const currentInput = currentTestCase.inputs[j];
                 const firstCaseInput = firstTestCase.inputs[j];
-
+    
                 if (currentInput.type === 'jsonType') {
                     try {
                         const firstJson = JSON.parse(firstCaseInput.value);
                         const currentJson = JSON.parse(currentInput.value);
-
+    
                         // Check if both are arrays
                         if (Array.isArray(firstJson) && Array.isArray(currentJson)) {
                             if (firstJson.length !== currentJson.length) {
@@ -583,26 +552,24 @@ export default function EditCodingQuestionForm() {
                         return false;
                     }
                 } else if (['int', 'str', 'float'].includes(currentInput.type)) {
-                    const firstElements = firstCaseInput.value.trim().split(' ').filter(Boolean);
-                    const currentElements = currentInput.value.trim().split(' ').filter(Boolean);
-
-                    if (currentElements.length !== firstElements.length) {
+                    // No need to split by spaces, validate the entire input as-is
+                    if (currentInput.value.trim() === '') {
                         toast({
-                            title: "Input Size Mismatch",
-                            description: `Test case ${i + 1} ${currentInput.type} input should have ${firstElements.length} elements to match the first test case`,
+                            title: "Input Cannot Be Empty",
+                            description: `Test case ${i + 1} input cannot be empty`,
                             className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
                         });
                         return false;
                     }
-                } 
+                }
             }
-
+    
             // Check output
             if (currentTestCase.output.type === 'jsonType') {
                 try {
                     const firstJson = JSON.parse(firstTestCase.output.value);
                     const currentJson = JSON.parse(currentTestCase.output.value);
-
+    
                     if (Array.isArray(firstJson) && Array.isArray(currentJson)) {
                         if (firstJson.length !== currentJson.length) {
                             toast({
@@ -622,20 +589,18 @@ export default function EditCodingQuestionForm() {
                     return false;
                 }
             } else if (['int', 'str', 'float'].includes(currentTestCase.output.type)) {
-                const firstElements = firstTestCase.output.value.trim().split(' ').filter(Boolean);
-                const currentElements = currentTestCase.output.value.trim().split(' ').filter(Boolean);
-
-                if (currentElements.length !== firstElements.length) {
+                // No need to split by spaces, validate the entire output as-is
+                if (currentTestCase.output.value.trim() === '') {
                     toast({
-                        title: "Output Size Mismatch",
-                        description: `Test case ${i + 1} output should have ${firstElements.length} elements to match the first test case`,
+                        title: "Output Cannot Be Empty",
+                        description: `Test case ${i + 1} output cannot be empty`,
                         className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
                 }
             }
         }
-
+    
         return true;
     };
 
