@@ -25,6 +25,7 @@ interface CurriculumItem {
     articlesCount: number
     typeId: number
     projectId: number
+    ChapterId: number
 }
 interface ModuleData {
     name: string
@@ -398,6 +399,7 @@ function Page() {
                                                         fetchCourseModules
                                                     }
                                                     projectId={item.projectId}
+                                                    chapterId={item.ChapterId}
                                                 />
                                             </div>
                                         </Reorder.Item>
