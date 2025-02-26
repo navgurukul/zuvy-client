@@ -94,7 +94,7 @@ const QuizQuestions = ({
             const quizSubmissionDto = data.answers.map((chosenOption, index) => {
                 const question = questions.data.mcqs[index];
                 return {
-                    questionId: question.quizId,
+                    questionId: question.outsourseQuizzesId,
                     variantId: question.variantId,
                     attemptCount: 1,
                     chosenOption: parseInt(chosenOption)
