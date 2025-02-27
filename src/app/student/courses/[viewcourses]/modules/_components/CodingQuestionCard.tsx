@@ -1,5 +1,10 @@
 import { cn, difficultyColor, statusColor } from '@/lib/utils'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import {
+    handleFullScreenChange,
+    handleVisibilityChange,
+    requestFullScreen,
+} from '@/utils/students'
 
 interface QuestionCardProps {
     id: number
@@ -23,6 +28,11 @@ function CodingQuestionCard({
     isSuccess,
     onSolveChallenge,
 }: QuestionCardProps) {
+    const handleSolveChallenge = (id: any) => {
+        onSolveChallenge(id)
+        // requestFullScreen(document.documentElement)
+    }
+
     return (
         <div
             key={id}
@@ -57,7 +67,7 @@ function CodingQuestionCard({
                 </span>
             </div>
             <div
-                onClick={() => onSolveChallenge(id)}
+                onClick={() => handleSolveChallenge(id)}
                 className="cursor-pointer mt-4 flex justify-end text-secondary font-bold"
             >
                 {isSuccess ? 'View Solution' : 'Solve Challenge'}

@@ -39,7 +39,7 @@ const QuizQuestions = ({
     questions,
     assessmentSubmitId,
     getSeperateQuizQuestions,
-    getAssessmentData
+    getAssessmentData,
 }: {
     onBack: () => void
     weightage?: any
@@ -54,11 +54,11 @@ const QuizQuestions = ({
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
         undefined
     ) // Correct type
-   const [isDisabled, setIsDisabled] = useState(false)
+    const [isDisabled, setIsDisabled] = useState(false)
 
     const codeBlockClass =
         'text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full'
-    'text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full'
+    ;('text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full')
 
     useEffect(() => {
         return () => {
@@ -81,7 +81,6 @@ const QuizQuestions = ({
 
     // Set default values based on submissionsData when the component mounts or questions change
     useEffect(() => {
-
         const defaultValues = {
             answers: questions?.data?.mcqs?.map((question: any) =>
                 question.submissionsData && question.submissionsData.length > 0
@@ -103,8 +102,10 @@ const QuizQuestions = ({
 
         setIsDisabled(true)
 
+        console.log('questions.data', questions.data)
         const quizSubmissionDto = data.answers.map((chosenOption, index) => {
-            const questionId = questions.data.mcqs[index].outsourseQuizzesId;
+            const questionId = questions.data.mcqs[index].outsourseQuizzesId
+            // console.log('questionId', questionId)
 
             // If questionId is true, call the API
             if (questionId) {
@@ -113,9 +114,9 @@ const QuizQuestions = ({
                     variantId: questions.data.mcqs[index].variantId,
                     attemptCount: 1,
                     chosenOption: Number(chosenOption),
-                };
+                }
             }
-        });
+        })
 
         try {
             const response = await api.patch(
@@ -253,7 +254,7 @@ const QuizQuestions = ({
                                                                     {
                                                                         question
                                                                             .options[
-                                                                        key
+                                                                            key
                                                                         ]
                                                                     }
                                                                 </p>
@@ -272,16 +273,18 @@ const QuizQuestions = ({
 
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button type='button' className="mt-4">
+                            <Button type="button" className="mt-4">
                                 Submit Quiz
                             </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
                                 <AlertDialogTitle>
-                                    Are you absolutely sure?</AlertDialogTitle>
+                                    Are you absolutely sure?
+                                </AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    This action cannot be undone. This will submit your whole assessment.
+                                    This action cannot be undone. This will
+                                    submit your whole assessment.
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
@@ -290,7 +293,7 @@ const QuizQuestions = ({
                                     className="bg-red-500"
                                     onClick={form.handleSubmit(onSubmit)}
                                 >
-                                        Submit
+                                    Submit
                                 </AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>
