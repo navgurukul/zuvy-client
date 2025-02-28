@@ -86,22 +86,18 @@ const QuizQuestions = ({
 
     const onSubmit = async (data: z.infer<typeof formSchema>) => {
         setIsDisabled(true)
-
-        console.log('questions:', questions)
     
         try {
             // Create submission data array with all answers
             const quizSubmissionDto = data.answers.map((chosenOption, index) => {
                 const question = questions.data.mcqs[index];
                 return {
-                    questionId: question.quizId,
+                    questionId: Number(question?.outsourseQuizzesId),
                     variantId: question.variantId,
                     attemptCount: 1,
                     chosenOption: parseInt(chosenOption)
                 };
             });
-    
-            console.log('Submitting data:', { quizSubmissionDto });
     
             // Make the API call with the properly structured data
             const response = await api.patch(
@@ -137,42 +133,61 @@ const QuizQuestions = ({
         return num % 1 === 0 ? num : parseFloat(num.toFixed(2))
     }
 
-    const getDifficultyWeightage = (difficulty: any) => {
-        let difficultyWeightage = 0
+    // const getDifficultyWeightage = (difficulty: any) => {
+    //     let difficultyWeightage = 0
 
-        switch (difficulty) {
-            case 'Easy':
-                difficultyWeightage = formatNumber(weightage.easyMcqMark)
-                break
-            case 'Medium':
-                difficultyWeightage = formatNumber(weightage.mediumMcqMark)
-                break
-            case 'Hard':
-                difficultyWeightage = formatNumber(weightage.hardMcqMark)
-                break
-            default:
-                difficultyWeightage = 0
-                break
-        }
+    //     switch (difficulty) {
+    //         case 'Easy':
+    //             difficultyWeightage = formatNumber(weightage.easyMcqMark)
+    //             break
+    //         case 'Medium':
+    //             difficultyWeightage = formatNumber(weightage.mediumMcqMark)
+    //             break
+    //         case 'Hard':
+    //             difficultyWeightage = formatNumber(weightage.hardMcqMark)
+    //             break
+    //         default:
+    //             difficultyWeightage = 0
+    //             break
+    //     }
 
-        return difficultyWeightage
-    }
+    //     return difficultyWeightage
+    // }
 
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between gap-2">
-                <div
-                    className="flex items-center cursor-pointer"
-                    onClick={onBack}
-                >
-                    <ChevronLeft strokeWidth={2} size={24} />
-                    <h1 className="font-extrabold text-lg ml-2">Back</h1>
-                </div>
-                <div className="font-bold text-xl">
+                 <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                            <ChevronLeft fontSize={24} />
+                        </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>
+                                Are you absolutely sure?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                            This action is irreversible. If your quiz hasn&apos;t been submitted, your selections will be lost.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                                className="bg-red-500"
+                                onClick={onBack}
+                            >
+                                Go Back
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+                <div className="fixed top-4 right-4 bg-white p-2 rounded-md shadow-md font-bold text-xl">
                     <TimerDisplay remainingTime={remainingTime} />
                 </div>
             </div>
-            <Separator />
+            {/* <Separator /> */}
 
             <Form {...form}>
                 <form
@@ -255,7 +270,7 @@ const QuizQuestions = ({
                                     Are you absolutely sure?
                                 </AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    This action cannot be undone. This will submit your whole assessment.
+                                    This action cannot be undone and you can submit the quiz only once.
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>

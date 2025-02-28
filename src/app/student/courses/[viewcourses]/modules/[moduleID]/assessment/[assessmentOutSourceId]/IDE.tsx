@@ -325,23 +325,6 @@ const IDE: React.FC<IDEProps> = ({
                     <TimerDisplay remainingTime={remainingTime} />
                 </div>
                 <div>
-                    {/* <Button
-                        onClick={(e) => handleSubmit(e, 'run')}
-                        size="sm"
-                        className="mr-2"
-                        disabled={loading}
-                    >
-                        <Play size={20} />
-                        <span className="ml-2 text-lg font-bold">Run</span>
-                    </Button>
-                    <Button
-                        onClick={(e) => handleSubmit(e, 'submit')}
-                        size="sm"
-                        disabled={loading}
-                    >
-                        <Upload size={20} />
-                        <span className="ml-2 text-lg font-bold">Submit</span>
-                    </Button> */}
 
                     <Button
                         onClick={(e) => handleSubmit(e, 'run')}

@@ -64,21 +64,6 @@ function AllQuestions({ params }: { params: any }) {
         )
     }
 
-    const shuffleQuestions = async () => {
-        const assessmentOutsourseId =
-            assessmentPreviewContent.CodingQuestions[0].assessmentOutsourseId
-        try {
-            const response = await api.get(
-                `Content/startAssessmentForStudent/assessmentOutsourseId=${assessmentOutsourseId}`
-            )
-            setAssessmentPreviewCodingContent(
-                response.data.data.codingQuestions
-            )
-        } catch (error) {
-            console.error(error)
-        }
-    }
-
     return (
         <div className="h-auto mb-24">
             <>
