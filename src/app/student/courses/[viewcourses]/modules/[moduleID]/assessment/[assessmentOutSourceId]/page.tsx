@@ -251,9 +251,6 @@ function Page({
     ) => {
         setSelectedQuesType(type)
         setIsSolving(true)
-        console.log('hasdkfjksd')
-        console.log(id)
-        console.log(assessmentData)
 
         if (type === 'coding' && id) {
             const action = await getCodingSubmissionsData(
@@ -270,8 +267,6 @@ function Page({
                     className: 'text-left capitalize',
                 })
             } else {
-                console.log(id)
-
                 setSelectedQuestionId(id)
                 setSelectedCodingOutsourseId(codingOutsourseId)
                 requestFullScreen(document.documentElement)
@@ -356,9 +351,9 @@ function Page({
             selectedQuesType === 'quiz' &&
             !assessmentData.IsQuizzSubmission &&
             assessmentData.hardMcqQuestions +
-            assessmentData.easyMcqQuestions +
-            assessmentData.mediumMcqQuestions >
-            0
+                assessmentData.easyMcqQuestions +
+                assessmentData.mediumMcqQuestions >
+                0
         ) {
             return (
                 <QuizQuestions
@@ -430,7 +425,9 @@ function Page({
 
                 completeChapter()
 
-                router.push(`/student/courses/${assessmentData.bootcampId}/modules/${assessmentData.moduleId}/chapters/${assessmentData.chapterId}`)
+                router.push(
+                    `/student/courses/${assessmentData.bootcampId}/modules/${assessmentData.moduleId}/chapters/${assessmentData.chapterId}`
+                )
 
                 setTimeout(() => {
                     window.location.reload()
@@ -466,7 +463,6 @@ function Page({
         setIsFullScreen(true)
     }
 
-    console.log(assessmentData)
     return (
         <div
             onPaste={(e) => handleCopyPasteAttempt(e)}
@@ -527,7 +523,7 @@ function Page({
                                         Hours{' '}
                                         {Math.floor(
                                             (assessmentData.timeLimit % 3600) /
-                                            60
+                                                60
                                         )}{' '}
                                         Minutes
                                     </p>
@@ -564,8 +560,12 @@ function Page({
                                         {assessmentData.codingQuestions?.map(
                                             (question: any) => (
                                                 <QuestionCard
-                                                    key={question.codingQuestionId}
-                                                    id={question.codingQuestionId}
+                                                    key={
+                                                        question.codingQuestionId
+                                                    }
+                                                    id={
+                                                        question.codingQuestionId
+                                                    }
                                                     easyCodingMark={
                                                         assessmentData.easyCodingMark
                                                     }
@@ -597,27 +597,28 @@ function Page({
                                 assessmentData.easyMcqQuestions +
                                 assessmentData.mediumMcqQuestions >
                                 0 && (
-                                    <div className="flex justify-center">
-                                        <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
-                                            <h2 className="font-bold">MCQs</h2>
-                                            <QuestionCard
-                                                id={1}
-                                                title="Quiz"
-                                                weightage={
-                                                    assessmentData.weightageMcqQuestions
-                                                }
-                                                description={`${assessmentData.hardMcqQuestions +
+                                <div className="flex justify-center">
+                                    <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
+                                        <h2 className="font-bold">MCQs</h2>
+                                        <QuestionCard
+                                            id={1}
+                                            title="Quiz"
+                                            weightage={
+                                                assessmentData.weightageMcqQuestions
+                                            }
+                                            description={`${
+                                                assessmentData.hardMcqQuestions +
                                                     assessmentData.easyMcqQuestions +
                                                     assessmentData.mediumMcqQuestions ||
-                                                    0
-                                                    } questions`}
-                                                onSolveChallenge={() =>
-                                                    handleSolveChallenge('quiz')
-                                                }
-                                            />
-                                        </div>
+                                                0
+                                            } questions`}
+                                            onSolveChallenge={() =>
+                                                handleSolveChallenge('quiz')
+                                            }
+                                        />
                                     </div>
-                                )}
+                                </div>
+                            )}
                             {seperateOpenEndedQuestions.length > 0 && (
                                 <div className="flex justify-center">
                                     <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
@@ -627,9 +628,10 @@ function Page({
                                         <QuestionCard
                                             id={1}
                                             title="Open-Ended Questions"
-                                            description={`${seperateOpenEndedQuestions.length ||
+                                            description={`${
+                                                seperateOpenEndedQuestions.length ||
                                                 0
-                                                } questions`}
+                                            } questions`}
                                             onSolveChallenge={() =>
                                                 handleSolveChallenge(
                                                     'open-ended'
@@ -642,22 +644,24 @@ function Page({
 
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                    <Button
-                                        disabled={disableSubmit}
-                                    >
+                                    <Button disabled={disableSubmit}>
                                         Submit Assessment
                                     </Button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
                                     <AlertDialogHeader>
                                         <AlertDialogTitle>
-                                            Are you absolutely sure?</AlertDialogTitle>
+                                            Are you absolutely sure?
+                                        </AlertDialogTitle>
                                         <AlertDialogDescription>
-                                            This action cannot be undone. This will submit your whole assessment.
+                                            This action cannot be undone. This
+                                            will submit your whole assessment.
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogCancel>
+                                            Cancel
+                                        </AlertDialogCancel>
                                         <AlertDialogAction
                                             className="bg-red-500"
                                             onClick={submitAssessment}
@@ -667,7 +671,6 @@ function Page({
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
                             </AlertDialog>
-
                         </div>
                     )}
                 </div>
