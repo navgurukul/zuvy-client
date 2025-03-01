@@ -7,6 +7,7 @@ import Link from 'next/link'
 import React, { useRef } from 'react'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import { toast } from 'react-toastify'
 
 type Props = {
     title: string
@@ -30,73 +31,113 @@ const AssesmentComponent = (props: Props) => {
             try {
                 const response = await api.get(apiUrl)
                 const assessments = response.data.submitedOutsourseAssessments
+                const requiredCodingScore =
+                    assessments[0]?.requiredCodingScore || null
+                const requiredMcqScore =
+                    assessments[0]?.requiredMCQScore || null
 
-                const doc = new jsPDF()
+                if (!Array.isArray(assessments) || assessments.length === 0) {
+                    toast.error('No data available to generate PDF.')
+                    return
+                }
 
-                // Title Styling
-                doc.setFontSize(18)
-                doc.setFont('Regular', 'normal')
-                doc.text(props.title, 14, 10)
+                const doc = new jsPDF({
+                    format: 'a4',
+                    orientation: 'landscape',
+                })
 
-                // Passed Percentage Styling
                 doc.setFontSize(14)
-                doc.setFont('Regular', 'normal')
-                doc.text('Passed Percentage: 70%', 14, 16) // Closer to the title
+                doc.setFont('helvetica', 'bold')
+                doc.text(`Assessment Report`, 10, 10)
 
-                // Add section title for students (closer to the table)
-                doc.setFontSize(15)
-                doc.setFont('Regular', 'normal')
-                doc.text('List of Students-:', 14, 23) // Closer to the table
+                doc.setFontSize(12)
+                doc.setFont('helvetica', 'normal')
+                doc.text(`Assessment Name: ${props.title}`, 10, 20)
+                doc.text(
+                    `Qualifying Criteria: ${response?.data.passPercentage}%`,
+                    10,
+                    26
+                )
+                requiredCodingScore &&
+                    doc.text(
+                        `Total Coding Score: ${requiredCodingScore}`,
+                        10,
+                        32
+                    )
+                requiredMcqScore &&
+                    doc.text(`Total MCQ Score: ${requiredMcqScore}`, 10, 38)
+                doc.text(
+                    `No of Students Attempted: ${assessments.length}`,
+                    10,
+                    44
+                )
 
-                // Define columns for the table
                 const columns = [
                     { header: 'Name', dataKey: 'name' },
                     { header: 'Email', dataKey: 'email' },
                     { header: 'Qualified', dataKey: 'qualified' },
                     { header: 'Percentage', dataKey: 'percentage' },
+                    ...(props.codingChallenges > 0
+                        ? [{ header: 'Coding Score', dataKey: 'codingScore' }]
+                        : []),
+                    ...(props.mcq > 0
+                        ? [{ header: 'MCQ Score', dataKey: 'mcqScore' }]
+                        : []),
+                    { header: 'Tab Changed', dataKey: 'tabChange' },
+                    { header: 'Copy Pasted', dataKey: 'copyPaste' },
                 ]
 
-                // Prepare rows for the table
-                const rows = assessments.map(
-                    (assessment: {
-                        name: any
-                        email: any
-                        isPassed: any
-                        percentage: number
-                    }) => ({
-                        name: assessment.name || 'N/A',
-                        email: assessment.email || 'N/A',
-                        qualified: assessment.isPassed ? 'Yes' : 'No',
-                        percentage: Math.floor(assessment.percentage) || 0,
-                    })
-                )
+                const rows = assessments.map((assessment: any) => ({
+                    name: assessment.name || 'N/A',
+                    email: assessment.email || 'N/A',
+                    qualified: assessment.isPassed ? 'Yes' : 'No',
+                    percentage: `${Math.floor(assessment.percentage) || 0}%`,
+                    codingScore:
+                        props.codingChallenges > 0
+                            ? assessment.codingScore || 0
+                            : undefined,
+                    mcqScore:
+                        props.mcq > 0 ? assessment.mcqScore || 0 : undefined,
+                    tabChange: assessment.tabChange || 0,
+                    copyPaste: assessment.copyPaste || 0,
+                }))
 
-                // Use autoTable to create the table in the PDF
                 autoTable(doc, {
                     head: [columns.map((col) => col.header)],
-                    body: rows.map(
-                        (row: {
-                            name: any
-                            email: any
-                            qualified: any
-                            percentage: any
-                        }) => [
-                            row.name,
-                            row.email,
-                            row.qualified,
-                            row.percentage,
-                        ]
+                    body: rows.map((row: any) =>
+                        columns.map((col) => row[col.dataKey])
                     ),
-                    startY: 25, // Start the table closer to the section title
+                    startY: 50,
                     margin: { horizontal: 10 },
-                    styles: { overflow: 'linebreak', halign: 'center' },
-                    headStyles: { fillColor: [22, 160, 133] },
+                    styles: {
+                        overflow: 'linebreak',
+                        halign: 'left',
+                        fontSize: 10,
+                        textColor: [0, 0, 0],
+                    },
+                    headStyles: {
+                        fillColor: [22, 160, 133],
+                        fontSize: 11,
+                        textColor: [255, 255, 255],
+                    },
                     theme: 'grid',
                 })
 
-                // Save the document
-                doc.save(`${props.title}.pdf`)
-            } catch (error) {}
+                const pageCount = doc.getNumberOfPages()
+                for (let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i)
+                    doc.setFontSize(10)
+                    doc.setFont('helvetica', 'normal')
+                    const pageText = `Page ${i} of ${pageCount}`
+                    const pageWidth = doc.internal.pageSize.width
+                    const pageHeight = doc.internal.pageSize.height
+                    doc.text(pageText, pageWidth - 30, pageHeight - 10)
+                }
+
+                doc.save(`${props.title}-Report.pdf`)
+            } catch (error) {
+                toast.error('Failed to download PDF. Please try again later.')
+            }
         }
 
         fetchData()
@@ -107,32 +148,31 @@ const AssesmentComponent = (props: Props) => {
         props.studentsSubmitted
     )
 
-    const isDisabled = props.studentsSubmitted === 0 // Disable if no submissions
+    const isDisabled = props.studentsSubmitted === 0
 
     return (
         <div
             ref={printRef}
-            className="lg:flex-row h-auto lg:h-[290px] sm:h-[360px] w-full shadow-lg my-5 rounded-lg p-4 lg:p-6 bg-white dark:bg-gray-800 transition-transform transform hover:shadow-xl"
+            className="lg:flex-row h-auto lg:h-[280px] sm:h-[360px] w-full shadow-lg my-5 rounded-lg p-4 lg:p-6 bg-white dark:bg-gray-800 transition-transform transform hover:shadow-xl"
         >
-            <div className="w-full justify-between pt-2 min-h-[250px] sm:min-h-[200px]">
+            <div className="w-full justify-between py-2 lg:mx-4 min-h-[250px] sm:min-h-[200px]">
                 <div className="flex items-center justify-between">
                     <h1 className="text-sm lg:text-base text-start font-medium text-gray-900 dark:text-white">
                         {props.title}
                     </h1>
-                    <div className={`relative group`}>
+                    <div className="relative group">
                         <button
-                            onClick={isDisabled ? undefined : handleDownloadPdf}
-                            className={`ml-2 ${
+                            className={`ml-2 cursor-pointer ${
                                 isDisabled
-                                    ? 'text-gray-400 cursor-no-drop'
-                                    : 'text-gray-500 hover:text-gray-700 cursor-pointer'
+                                    ? 'text-gray-400'
+                                    : 'text-gray-500 hover:text-gray-700'
                             }`}
+                            onClick={isDisabled ? undefined : handleDownloadPdf}
                             aria-label="Download full report"
-                            disabled={isDisabled} // Disable button
+                            disabled={isDisabled}
                         >
                             <ArrowDownToLine size={20} />
                         </button>
-
                         <div
                             className={`absolute right-0 bottom-full mb-2 hidden px-2 py-1 text-xs text-white bg-gray-800 rounded group-hover:block whitespace-nowrap ${
                                 isDisabled ? 'hidden' : 'block'
@@ -207,36 +247,23 @@ const AssesmentComponent = (props: Props) => {
                             Qualified
                         </p>
                     </div>
-                </div>
-            </div>
-            <div className="flex justify-end mt-auto">
-                {props.studentsSubmitted > 0 ? (
-                    <Link
-                        href={`/admin/courses/${props.bootcampId}/submissionAssesments/${props.id}`}
-                        className="w-full lg:w-auto"
-                    >
-                        <div className="flex justify-center items-center w-full lg:w-auto py-2 text-secondary font-bold rounded-md transition-all duration-300">
-                            <Button variant="ghost">
+                    <div className="flex justify-end mt-auto">
+                        <Link
+                            href={`/admin/courses/${props.bootcampId}/submissionAssesments/${props.id}`}
+                            className="w-full lg:w-auto"
+                        >
+                            <Button
+                                variant="ghost"
+                                className="flex justify-center items-center w-full lg:w-auto py-2 text-secondary font-bold rounded-md transition-all duration-300"
+                            >
                                 <h1 className="w-full text-center flex lg:text-right">
                                     View Submission
                                     <ChevronRight size={20} className="ml-2" />
                                 </h1>
                             </Button>
-                        </div>
-                    </Link>
-                ) : (
-                    <div className="flex justify-center cursor-no-drop items-center w-full lg:w-auto py-2 text-secondary font-bold rounded-md transition-all duration-300">
-                        <Button
-                            variant="ghost"
-                            disabled={props.studentsSubmitted === 0} // Disable button if no submissions
-                        >
-                            <h1 className="w-full text-center flex lg:text-right">
-                                View Submission
-                                <ChevronRight size={20} className="ml-2" />
-                            </h1>
-                        </Button>
+                        </Link>
                     </div>
-                )}
+                </div>
             </div>
         </div>
     )

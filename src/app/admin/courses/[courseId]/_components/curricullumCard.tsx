@@ -31,6 +31,7 @@ type Props = {
     typeId: number
     fetchCourseModules: () => void
     projectId: number
+    chapterId: number
 }
 
 const CurricullumCard = ({
@@ -49,6 +50,7 @@ const CurricullumCard = ({
     typeId,
     fetchCourseModules,
     projectId,
+    chapterId,
 }: Props) => {
     // states and variables
     const router = useRouter()
@@ -57,30 +59,6 @@ const CurricullumCard = ({
     const timeAllotedInWeeks = Math.ceil(timeAlloted / 604800)
 
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
-    const [chapterId, setChapterId] = useState<any>()
-
-    // functions
-
-    const getChapterId = useCallback(async () => {
-        try {
-            const response = await api.get(
-                `tracking/getAllChaptersWithStatus/${moduleId}`
-            )
-            setChapterId(
-                response.data.trackingData.length > 0
-                    ? response.data.trackingData[0].id
-                    : 0
-            )
-        } catch (error) {
-            console.error(error)
-        }
-    }, [])
-
-    useEffect(() => {
-        if (moduleId) {
-            getChapterId()
-        }
-    }, [moduleId, getChapterId])
 
     const handleDeleteModal = () => {
         setDeleteModalOpen(true)

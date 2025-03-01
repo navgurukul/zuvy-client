@@ -311,3 +311,15 @@ export const decodeBase64 = (data: string) => {
     if (!data) return ''
     return Buffer.from(data, 'base64').toString('utf-8')
 }
+
+// --------------------------------------------
+
+export const fetchCourseDetails = async (courseId: number, setCourseName:any) => {
+    try {
+        const response = await api.get(`/bootcamp/${courseId}`)
+        const data = response.data
+        setCourseName(data?.bootcamp?.name)
+    } catch (error) {
+        console.error('Error fetching course details:', error)
+    }
+}
