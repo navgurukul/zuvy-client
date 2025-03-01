@@ -5,10 +5,11 @@ import React, { useState, useEffect, useRef } from 'react'
 import * as esbuild from 'esbuild-wasm'
 import { unpkgPathPlugin } from './plugins/unpkgplugin'
 import { fetchPlugin } from './plugins/fetchPlugin'
+import CodeEditor from './_components/code-editor'
+import Preview from './_components/preview'
 
 const Page = () => {
     const ref = useRef<any>()
-    const iframe = useRef<any>()
 
     const [input, setInput] = useState('')
     const [code, setCode] = useState('')
@@ -37,28 +38,15 @@ const Page = () => {
                 global: 'window',
             },
         })
-        // setCode(result.outputFiles[0].text)
-        iframe.current.contentWindow.postMessage(
-            result.outputFiles[0].text,
-            '*'
-        )
+        setCode(result.outputFiles[0].text)
     }
 
-    const html = `
-    <html>
-    <head></head>
-     <body>
-          <div id="root"></div>
-       <script>
-          window.addEventListener("message" , (event) => {
-            eval(event.data)
-          },false)
-       </script>
-     </body>
-    </html>
-`
     return (
-        <div className="flex flex-col items-start gap-3 ">
+        <div className="flex flex-col  items-start gap-3 ">
+            <CodeEditor
+                onChange={(value: string) => setInput(value)}
+                initialValue="const a = 1;"
+            />
             <Textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -67,7 +55,7 @@ const Page = () => {
                 <Button onClick={onClick}>Submit</Button>
             </div>
             <pre className="text-start">{code}</pre>
-            <iframe ref={iframe} sandbox="allow-scripts" srcDoc={html} />
+            <Preview code={code} />
         </div>
     )
 }
