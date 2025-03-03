@@ -227,8 +227,8 @@ const IDE: React.FC<IDEProps> = ({
             // Trigger re-render for the output window
             setResult(
                 response.data.data[0].stdOut ||
-                    response.data.data[0].stdout ||
-                    'No Output Available'
+                response.data.data[0].stdout ||
+                'No Output Available'
             )
             setLoading(false)
         } catch (error: any) {
@@ -248,7 +248,7 @@ const IDE: React.FC<IDEProps> = ({
             })
             setCodeError(
                 error.response?.data?.data?.[0]?.stderr ||
-                    'Error occurred during submission. Network connection lost.'
+                'Error occurred during submission. Network connection lost.'
             )
         }
     }
@@ -392,104 +392,95 @@ const IDE: React.FC<IDEProps> = ({
                                     </p>
 
                                     {testCases
-                                        ?.slice(0, 2)
-                                        .map(
-                                            (
-                                                testCase: TestCase,
-                                                index: number
-                                            ) => (
-                                                <div
-                                                    key={index}
-                                                    className="bg-gray-200 shadow-sm rounded-lg p-4 my-4"
-                                                >
-                                                    <h2 className="text-xl font-semibold mb-2">
-                                                        Test Case {index + 1}
-                                                    </h2>
+                                        ?.slice(0, 2).map((testCase: TestCase, index: number) => (
+                                            <div
+                                                key={index}
+                                                className="bg-gray-200 shadow-sm rounded-lg p-4 my-4"
+                                            >
+                                                <h2 className="text-xl font-semibold mb-2">
+                                                    Test Case {index + 1}
+                                                </h2>
 
-                                                    {/* Handle both array and object inputs */}
-                                                    {Array.isArray(
-                                                        testCase.inputs
+                                                {/* Handle both array and object inputs */}
+                                                {Array.isArray(
+                                                    testCase.inputs
+                                                )
+                                                    ? testCase.inputs.map((input: Input, idx: number) => (
+                                                        <p
+                                                            key={idx}
+                                                            className="text-gray-700"
+                                                        >
+                                                            <span className="font-medium">
+                                                                Input{' '}
+                                                                {idx +
+                                                                    1}
+                                                                :
+                                                            </span>{' '}
+                                                            {
+                                                                input.parameterName
+                                                            }{' '}
+                                                            (
+                                                            {
+                                                                input.parameterType
+                                                            }
+                                                            ) ={' '}
+                                                            {formatValue(
+                                                                input.parameterValue,
+                                                                input.parameterType
+                                                            )}
+                                                        </p>
                                                     )
-                                                        ? testCase.inputs.map(
-                                                              (
-                                                                  input: Input,
-                                                                  idx: number
-                                                              ) => (
-                                                                  <p
-                                                                      key={idx}
-                                                                      className="text-gray-700"
-                                                                  >
-                                                                      <span className="font-medium">
-                                                                          Input{' '}
-                                                                          {idx +
-                                                                              1}
-                                                                          :
-                                                                      </span>{' '}
-                                                                      {
-                                                                          input.parameterName
-                                                                      }{' '}
-                                                                      (
-                                                                      {
-                                                                          input.parameterType
-                                                                      }
-                                                                      ) ={' '}
-                                                                      {formatValue(
-                                                                          input.parameterValue,
-                                                                          input.parameterType
-                                                                      )}
-                                                                  </p>
-                                                              )
-                                                          )
-                                                        : Object.entries(
-                                                              testCase.inputs
-                                                          ).map(
-                                                              (
-                                                                  [key, value],
-                                                                  idx: number
-                                                              ) => (
-                                                                  <p
-                                                                      key={key}
-                                                                      className="text-gray-700"
-                                                                  >
-                                                                      <span className="font-medium">
-                                                                          Input{' '}
-                                                                          {idx +
-                                                                              1}
-                                                                          :
-                                                                      </span>{' '}
-                                                                      {key} ={' '}
-                                                                      {formatValue(
-                                                                          value,
-                                                                          typeof value ===
-                                                                              'number'
-                                                                              ? 'int'
-                                                                              : 'str'
-                                                                      )}
-                                                                  </p>
-                                                              )
-                                                          )}
+                                                    )
+                                                    : Object.entries(
+                                                        testCase.inputs
+                                                    ).map(
+                                                        (
+                                                            [key, value],
+                                                            idx: number
+                                                        ) => (
+                                                            <p
+                                                                key={key}
+                                                                className="text-gray-700"
+                                                            >
+                                                                <span className="font-medium">
+                                                                    Input{' '}
+                                                                    {idx +
+                                                                        1}
+                                                                    :
+                                                                </span>{' '}
+                                                                {key} ={' '}
+                                                                {formatValue(
+                                                                    value,
+                                                                    typeof value ===
+                                                                        'number'
+                                                                        ? 'int'
+                                                                        : 'str'
+                                                                )}
+                                                            </p>
+                                                        )
+                                                    )}
 
-                                                    <p className="text-gray-700 mt-2">
-                                                        <span className="font-medium">
-                                                            Expected Output:
-                                                        </span>{' '}
-                                                        {
-                                                            testCase
-                                                                .expectedOutput
-                                                                .parameterType
-                                                        }{' '}
-                                                        {'='}{' '}
-                                                        {formatValue(
-                                                            testCase
-                                                                .expectedOutput
-                                                                .parameterValue,
-                                                            testCase
-                                                                .expectedOutput
-                                                                .parameterType
-                                                        )}
-                                                    </p>
-                                                </div>
-                                            )
+                                                <p className="text-gray-700 mt-2">
+                                                    <span className="font-medium">
+                                                        Expected Output:
+                                                    </span>{' '}
+                                                    {
+                                                        testCase
+                                                            .expectedOutput
+                                                            .parameterType
+                                                    }{' '}
+                                                    {'='}{' '}
+                                                    {formatValue(
+                                                        testCase
+                                                            .expectedOutput
+                                                            .parameterValue,
+                                                        testCase
+                                                            .expectedOutput
+                                                            .parameterType
+                                                    )}
+                                                </p>
+                                            </div>
+                                        )
                                         )}
                                 </div>
                             </div>
@@ -616,12 +607,11 @@ const IDE: React.FC<IDEProps> = ({
                                                                     </p>
 
                                                                     <p
-                                                                        className={`text-gray-300 ${
-                                                                            testCase.status ===
+                                                                        className={`text-gray-300 ${testCase.status ===
                                                                             'Accepted'
-                                                                                ? 'text-green-500'
-                                                                                : 'text-red-500'
-                                                                        }`}
+                                                                            ? 'text-green-500'
+                                                                            : 'text-red-500'
+                                                                            }`}
                                                                     >
                                                                         Status:{' '}
                                                                         {
@@ -647,12 +637,11 @@ const IDE: React.FC<IDEProps> = ({
                                                                 </>
                                                             ) : (
                                                                 <p
-                                                                    className={`text-gray-300 ${
-                                                                        testCase.status ===
+                                                                    className={`text-gray-300 ${testCase.status ===
                                                                         'Accepted'
-                                                                            ? 'text-green-500'
-                                                                            : 'text-red-500'
-                                                                    }`}
+                                                                        ? 'text-green-500'
+                                                                        : 'text-red-500'
+                                                                        }`}
                                                                 >
                                                                     Test Case{' '}
                                                                     {index + 1}{' '}
