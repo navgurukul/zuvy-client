@@ -89,6 +89,7 @@ const IDE: React.FC<IDEProps> = ({
         },
     })
     const [isDisabled, setIsDisabled] = useState(false)
+    const [isSubmitted, setIsSubmitted] = useState(false)
     const [currentCode, setCurrentCode] = useState('')
     const [result, setResult] = useState('')
     const [codeResult, setCodeResult] = useState<any>([])
@@ -191,6 +192,7 @@ const IDE: React.FC<IDEProps> = ({
 
             if (action === 'submit') {
                 setIsDisabled(true)
+                setIsSubmitted(true)
             }
             if (allTestCasesPassed && action === 'submit') {
                 toast({
@@ -287,7 +289,44 @@ const IDE: React.FC<IDEProps> = ({
                         <ChevronLeft fontSize={24} />
                     </Button>
                 </div> */}
-
+                {/* {isDisabled && ( */}
+                {/* <AlertDialog> */}
+                <AlertDialog open={isSubmitted} onOpenChange={setIsSubmitted}>
+                    {/* <AlertDialogTrigger asChild>
+                        <Button
+                            size="sm"
+                            disabled={loading} // Disable buttons during loading
+                        >
+                            {loading ? <Spinner /> : <Upload size={20} />}
+                            <span className="ml-2 text-lg font-bold">
+                                Submit
+                            </span>
+                        </Button>
+                    </AlertDialogTrigger> */}
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>
+                                Your code has been submitted!
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                                {/* Now you can check your or you can go back to
+                                    the other main page by clicking the arrow
+                                    but and the left top of the screen. */}
+                                By clicking on "Okay", you'll get redirected to
+                                the main page to attempt the other questions.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel
+                                // onClick={() => setIsSubmitted(false)}
+                                onClick={onBack}
+                            >
+                                Okay
+                            </AlertDialogCancel>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+                {/* )} */}
                 <AlertDialog>
                     <AlertDialogTrigger asChild>
                         <Button variant="ghost" size="icon">

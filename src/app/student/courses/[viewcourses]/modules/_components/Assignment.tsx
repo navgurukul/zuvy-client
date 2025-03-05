@@ -148,7 +148,7 @@ const Assignments = ({
                 })
                 completeChapter()
             })
-            await getProjectData()
+        await getProjectData()
     }
 
     const timestamp = deadlineDate
