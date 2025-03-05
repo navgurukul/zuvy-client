@@ -104,6 +104,8 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
 
     const router = useRouter()
 
+    const [isNewQuestionAdded, setIsNewQuestionAdded] = useState(false)
+
     const [selectCodingDifficultyCount, setSelectCodingDifficultyCount] =
         useState<Object>({})
     const [selectQuizDifficultyCount, setSelectQuizDifficultyCount] =
@@ -446,6 +448,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                     }
                                     selectedQuestions={selectedCodingQuestions}
                                     tags={tags}
+                                    setIsNewQuestionAdded={setIsNewQuestionAdded}
                                 />
                             )}
                             {questionType === 'mcq' && (
@@ -456,6 +459,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                     }
                                     selectedQuestions={selectedQuizQuestions}
                                     tags={tags}
+                                    setIsNewQuestionAdded={setIsNewQuestionAdded}
                                 />
                             )}
                             {questionType === 'open-ended' && (
@@ -503,6 +507,8 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                             selectQuizDifficultyCount
                                         }
                                         topicId={topicId}
+                                        isNewQuestionAdded={isNewQuestionAdded}
+                                        setIsNewQuestionAdded={setIsNewQuestionAdded}
                                     />
                                 </div>
                             )}
@@ -546,6 +552,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                         }
                                         questionType={questionType}
                                         tags={tags}
+                                        setIsNewQuestionAdded = {setIsNewQuestionAdded}
                                     />
                                 ) : (
                                     <h1 className="text-left italic">
@@ -556,31 +563,6 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                         </div>
                     )}
                 </div>
-
-                {/* <ScrollArea className="h-screen pb-28 w-full pr-5">
-                <ScrollBar orientation="vertical" className="h-auto" />
-                {questionType === 'settings' && (
-                    <SettingsAssessment
-                        selectedCodingQuesIds={selectedCodingQuesIds}
-                        selectedQuizQuesIds={selectedQuizQuesIds}
-                        selectedOpenEndedQuesIds={selectedOpenEndedQuesIds}
-                        selectedCodingQuesTagIds={selectedCodingQuesTagIds}
-                        selectedQuizQuesTagIds={selectedQuizQuesTagIds}
-                        content={content}
-                        fetchChapterContent={fetchChapterContent}
-                        chapterData={chapterData}
-                        chapterTitle={chapterTitle}
-                        saveSettings={saveSettings}
-                        setSaveSettings={setSaveSettings}
-                        setQuestionType={setQuestionType}
-                        selectCodingDifficultyCount={
-                            selectCodingDifficultyCount
-                        }
-                        selectQuizDifficultyCount={selectQuizDifficultyCount}
-                        topicId={topicId}
-                    />
-                )}
-            </ScrollArea> */}
             </div>
         </div>
     )
