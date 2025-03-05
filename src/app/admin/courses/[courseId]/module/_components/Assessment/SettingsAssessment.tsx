@@ -50,6 +50,8 @@ type SettingsAssessmentProps = {
     selectCodingDifficultyCount: any
     selectQuizDifficultyCount: any
     topicId: number
+    isNewQuestionAdded: boolean
+    setIsNewQuestionAdded: (value: boolean) => void
 }
 
 const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
@@ -67,6 +69,8 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     selectCodingDifficultyCount,
     selectQuizDifficultyCount,
     topicId,
+    isNewQuestionAdded,
+    setIsNewQuestionAdded,
 }) => {
     const { chapterID } = useParams()
     const codingMax = selectedCodingQuesIds.length
@@ -97,49 +101,43 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                 .number()
                 .min(0)
                 .max(selectCodingDifficultyCount.codingProblemsEasy || 0, {
-                    message: `Cannot exceed ${
-                        selectCodingDifficultyCount.codingProblemsEasy || 0
-                    }`,
+                    message: `Cannot exceed ${selectCodingDifficultyCount.codingProblemsEasy || 0
+                        }`,
                 }),
             codingProblemsMedium: z
                 .number()
                 .min(0)
                 .max(selectCodingDifficultyCount.codingProblemsMedium || 0, {
-                    message: `Cannot exceed ${
-                        selectCodingDifficultyCount.codingProblemsMedium || 0
-                    }`,
+                    message: `Cannot exceed ${selectCodingDifficultyCount.codingProblemsMedium || 0
+                        }`,
                 }),
             codingProblemsHard: z
                 .number()
                 .min(0)
                 .max(selectCodingDifficultyCount.codingProblemsHard || 0, {
-                    message: `Cannot exceed ${
-                        selectCodingDifficultyCount.codingProblemsHard || 0
-                    }`,
+                    message: `Cannot exceed ${selectCodingDifficultyCount.codingProblemsHard || 0
+                        }`,
                 }),
             mcqsEasy: z
                 .number()
                 .min(0)
                 .max(selectQuizDifficultyCount.mcqsEasy || 0, {
-                    message: `Cannot exceed ${
-                        selectQuizDifficultyCount.mcqsEasy || 0
-                    }`,
+                    message: `Cannot exceed ${selectQuizDifficultyCount.mcqsEasy || 0
+                        }`,
                 }),
             mcqsMedium: z
                 .number()
                 .min(0)
                 .max(selectQuizDifficultyCount.mcqsMedium || 0, {
-                    message: `Cannot exceed ${
-                        selectQuizDifficultyCount.mcqsMedium || 0
-                    }`,
+                    message: `Cannot exceed ${selectQuizDifficultyCount.mcqsMedium || 0
+                        }`,
                 }),
             mcqsHard: z
                 .number()
                 .min(0)
                 .max(selectQuizDifficultyCount.mcqsHard || 0, {
-                    message: `Cannot exceed ${
-                        selectQuizDifficultyCount.mcqsHard || 0
-                    }`,
+                    message: `Cannot exceed ${selectQuizDifficultyCount.mcqsHard || 0
+                        }`,
                 }),
             codingProblemsWeightage: z.number().min(0),
             mcqsWeightage: z.number().min(0),
@@ -242,6 +240,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
         value: string
     ) => {
         // Allow empty string, which will be handled by validation
+        setIsNewQuestionAdded(false);
         const numericValue: any = value === '' ? null : Number(value)
 
         // Update total questions state
@@ -317,13 +316,8 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
         }
     }, [totalQuestions, content])
 
-    // useEffect(()=>{
-    //     if(topicId && chapterID){
-    //         fetchChapterContent(chapterID, topicId);
-    //     }
-    // },[chapterID, topicId])
-
     async function onSubmit(values: any) {
+        setIsNewQuestionAdded(false);
         const timeLimit =
             Number(values.hour) * 3600 + Number(values.minute) * 60
         const data = {
@@ -372,6 +366,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
         }
     }
 
+    // Show Selections on page load as it is coming from the api:-
     useEffect(() => {
         form.reset({
             codingProblemsEasy: content?.easyCodingQuestions || 0,
@@ -384,14 +379,14 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                 codingMax > 0 && mcqMax > 0
                     ? content?.weightageCodingQuestions || 50
                     : codingMax > 0
-                    ? 100
-                    : 0,
+                        ? 100
+                        : 0,
             mcqsWeightage:
                 codingMax > 0 && mcqMax > 0
                     ? content?.weightageMcqQuestions || 50
                     : mcqMax > 0
-                    ? 100
-                    : 0,
+                        ? 100
+                        : 0,
             canCopyPaste: content?.canCopyPaste || false,
             tabSwitch: content?.canTabChange || false,
             screenExit: content?.canScreenExit || false,
@@ -404,7 +399,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                 : '15',
             passPercentage: content?.passPercentage || 70,
         })
-        // Apply disabling logic
+        // Apply weightage disabling logic
         if (codingMax === 0 && mcqMax === 0) {
             setCodingWeightageDisabled(true)
             setMcqsWeightageDisabled(true)
@@ -420,8 +415,52 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
         }
     }, [content])
 
+    // Remove randomization of questions if new questions are added:
+    useEffect(() => {
+        if (isNewQuestionAdded) {
+            form.setValue('codingProblemsEasy', selectCodingDifficultyCount?.codingProblemsEasy || 0)
+            form.setValue('codingProblemsMedium', selectCodingDifficultyCount?.codingProblemsMedium || 0)
+            form.setValue('codingProblemsHard', selectCodingDifficultyCount?.codingProblemsHard || 0)
+            setTotalSelectedCodingQues(codingMax)
+            form.setValue('mcqsEasy', selectQuizDifficultyCount?.mcqsEasy || 0)
+            form.setValue('mcqsMedium', selectQuizDifficultyCount?.mcqsMedium || 0)
+            form.setValue('mcqsHard', selectQuizDifficultyCount?.mcqsHard || 0)
+            setTotalSelectedQuizQues(mcqMax)
+            setTotalQuestions({
+                codingProblemsEasy: selectCodingDifficultyCount?.codingProblemsEasy || 0,
+                codingProblemsMedium: selectCodingDifficultyCount?.codingProblemsMedium || 0,
+                codingProblemsHard: selectCodingDifficultyCount?.codingProblemsHard || 0,
+                mcqsEasy: selectQuizDifficultyCount?.mcqsEasy || 0,
+                mcqsMedium: selectQuizDifficultyCount?.mcqsMedium || 0,
+                mcqsHard: selectQuizDifficultyCount?.mcqsHard || 0,
+            })
+              // Apply weightage disabling logic
+        if (codingMax === 0 && mcqMax === 0) {
+            setCodingWeightageDisabled(true)
+            setMcqsWeightageDisabled(true)
+            form.setValue('codingProblemsWeightage', 0)
+            form.setValue('mcqsWeightage', 0)
+        } else if (codingMax === 0 && mcqMax > 0) {
+            setCodingWeightageDisabled(true)
+            setMcqsWeightageDisabled(true)
+            form.setValue('codingProblemsWeightage', 0)
+            form.setValue('mcqsWeightage', 100)
+        } else if (mcqMax === 0 && codingMax > 0) {
+            setCodingWeightageDisabled(true)
+            setMcqsWeightageDisabled(true)
+            form.setValue('codingProblemsWeightage', 100)
+            form.setValue('mcqsWeightage', 0)
+        } else if (codingMax > 0 && mcqMax > 0) {
+            setCodingWeightageDisabled(false)
+            setMcqsWeightageDisabled(false)
+            form.setValue('codingProblemsWeightage', 50)
+            form.setValue('mcqsWeightage', 50)
+        }
+        }
+    }, [selectCodingDifficultyCount, selectQuizDifficultyCount])
+
     return (
-        <ScrollArea className="h-screen pb-24">
+        <ScrollArea className="h-screen pb-24 pr-10">
             <ScrollBar orientation="vertical" className="" />
             <main className="pb-6 w-full  bg-white text-left">
                 <div
@@ -500,7 +539,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                 render={({ field }) => {
                                                     const isError = Boolean(
                                                         form.formState.errors[
-                                                            field.name
+                                                        field.name
                                                         ]
                                                     )
                                                     return (
@@ -509,8 +548,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                                 <Input
                                                                     {...field}
                                                                     type="number"
-                                                                    className={`w-16 mr-2 no-spinners ${
-                                                                        form
+                                                                    className={`w-16 mr-2 no-spinners ${form
                                                                             .formState
                                                                             .errors[
                                                                             field
@@ -518,7 +556,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                                         ]
                                                                             ? 'border-red-500 outline-red-500 text-red-500'
                                                                             : 'border-gray-300'
-                                                                    }`}
+                                                                        }`}
                                                                     onChange={(
                                                                         e
                                                                     ) => {
@@ -530,6 +568,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                                         )
                                                                     }}
                                                                     onFocus={() => {
+                                                                        setIsNewQuestionAdded(false);
                                                                         setEditingFields(
                                                                             (
                                                                                 prev: any
@@ -541,6 +580,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                                         )
                                                                     }}
                                                                     onBlur={() => {
+                                                                        setIsNewQuestionAdded(false);
                                                                         setEditingFields(
                                                                             (
                                                                                 prev: any
@@ -565,62 +605,60 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                                                 'Medium',
                                                                                 'Hard',
                                                                             ][
-                                                                                idx
+                                                                            idx
                                                                             ]
                                                                         }{' '}
                                                                         question(s)
                                                                         out of{' '}
                                                                         {category.title ===
-                                                                        'Coding Problems'
+                                                                            'Coding Problems'
                                                                             ? (category.counts &&
-                                                                                  category
-                                                                                      .counts[
-                                                                                      `codingProblems${
-                                                                                          [
-                                                                                              'Easy',
-                                                                                              'Medium',
-                                                                                              'Hard',
-                                                                                          ][
-                                                                                              idx
-                                                                                          ]
-                                                                                      }`
-                                                                                  ]) ||
-                                                                              0
+                                                                                category
+                                                                                    .counts[
+                                                                                `codingProblems${[
+                                                                                    'Easy',
+                                                                                    'Medium',
+                                                                                    'Hard',
+                                                                                ][
+                                                                                idx
+                                                                                ]
+                                                                                }`
+                                                                                ]) ||
+                                                                            0
                                                                             : (category.mcqCounts &&
-                                                                                  category
-                                                                                      .mcqCounts[
-                                                                                      `${
-                                                                                          [
-                                                                                              'mcqsEasy',
-                                                                                              'mcqsMedium',
-                                                                                              'mcqsHard',
-                                                                                          ][
-                                                                                              idx
-                                                                                          ]
-                                                                                      }`
-                                                                                  ]) ||
-                                                                              0}
+                                                                                category
+                                                                                    .mcqCounts[
+                                                                                `${[
+                                                                                    'mcqsEasy',
+                                                                                    'mcqsMedium',
+                                                                                    'mcqsHard',
+                                                                                ][
+                                                                                idx
+                                                                                ]
+                                                                                }`
+                                                                                ]) ||
+                                                                            0}
                                                                     </FormLabel>
                                                                 )}
                                                                 {form.formState
                                                                     .errors[
                                                                     field.name
                                                                 ] && (
-                                                                    <div className="flex items-center gap-1 mt-1 text-red-500">
-                                                                        <AlertCircle color="#db3939" />
-                                                                        <FormMessage className="text-sm">
-                                                                            {
-                                                                                form
-                                                                                    .formState
-                                                                                    .errors[
-                                                                                    field
-                                                                                        .name
-                                                                                ]
-                                                                                    ?.message
-                                                                            }
-                                                                        </FormMessage>
-                                                                    </div>
-                                                                )}
+                                                                        <div className="flex items-center gap-1 mt-1 text-red-500">
+                                                                            <AlertCircle color="#db3939" />
+                                                                            <FormMessage className="text-sm">
+                                                                                {
+                                                                                    form
+                                                                                        .formState
+                                                                                        .errors[
+                                                                                        field
+                                                                                            .name
+                                                                                    ]
+                                                                                        ?.message
+                                                                                }
+                                                                            </FormMessage>
+                                                                        </div>
+                                                                    )}
                                                             </div>
                                                         </FormItem>
                                                     )
@@ -639,25 +677,23 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                             <span className="text-sm font-bold">
                                                 Coding:{' '}
                                             </span>
-                                            {`${
-                                                Number.isNaN(
-                                                    totalSelectedCodingQues
-                                                )
+                                            {`${Number.isNaN(
+                                                totalSelectedCodingQues
+                                            )
                                                     ? 0
-                                                    : totalSelectedCodingQues
-                                            } out of ${codingMax}`}
+                                                    : totalQuestions.codingProblemsEasy + totalQuestions.codingProblemsMedium + totalQuestions.codingProblemsHard
+                                                } out of ${codingMax}`}
                                         </p>
                                         <p className="text-sm ml-2">
                                             <span className="text-sm font-bold ">
                                                 Quiz:{' '}
                                             </span>
-                                            {`${
-                                                Number.isNaN(
-                                                    totalSelectedQuizQues
-                                                )
+                                            {`${Number.isNaN(
+                                                totalSelectedQuizQues
+                                            )
                                                     ? 0
-                                                    : totalSelectedQuizQues
-                                            } out of ${mcqMax}`}
+                                                    : totalQuestions.mcqsEasy + totalQuestions.mcqsMedium + totalQuestions.mcqsHard
+                                                } out of ${mcqMax}`}
                                         </p>
                                     </div>
                                 </div>
@@ -703,11 +739,10 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                         <Input
                                                             {...field}
                                                             type="number"
-                                                            className={`w-16 mr-2 no-spinners ${
-                                                                isError
+                                                            className={`w-16 mr-2 no-spinners ${isError
                                                                     ? 'border-red-500 outline-red-500 text-red-500'
                                                                     : 'border-gray-300'
-                                                            }`}
+                                                                }`}
                                                             disabled={
                                                                 category.disabled
                                                             }
@@ -722,11 +757,10 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                         />
                                                     </FormControl>
                                                     <FormLabel
-                                                        className={`text-sm ${
-                                                            isError
+                                                        className={`text-sm ${isError
                                                                 ? 'text-red-500'
                                                                 : 'text-gray-700'
-                                                        }`}
+                                                            }`}
                                                     >
                                                         {category.title}
                                                     </FormLabel>
@@ -738,17 +772,17 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                 {/* Display error messages if any */}
                                 {form.formState.errors
                                     .codingProblemsWeightage && (
-                                    <div className="flex gap-2">
-                                        <AlertCircle color="#db3939" />
-                                        <FormMessage className="text-red-500 text-sm mt-1">
-                                            {
-                                                form.formState.errors
-                                                    .codingProblemsWeightage
-                                                    .message
-                                            }
-                                        </FormMessage>
-                                    </div>
-                                )}
+                                        <div className="flex gap-2">
+                                            <AlertCircle color="#db3939" />
+                                            <FormMessage className="text-red-500 text-sm mt-1">
+                                                {
+                                                    form.formState.errors
+                                                        .codingProblemsWeightage
+                                                        .message
+                                                }
+                                            </FormMessage>
+                                        </div>
+                                    )}
                                 {form.formState.errors.mcqsWeightage && (
                                     <div className="flex gap-2">
                                         <AlertCircle color="#db3939" />
@@ -863,7 +897,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                                             value={hour.toString()}
                                                                         >
                                                                             {hour >
-                                                                            1
+                                                                                1
                                                                                 ? `${hour} Hours`
                                                                                 : `${hour} Hour`}
                                                                         </SelectItem>
@@ -940,13 +974,12 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                     <Input
                                                         {...field}
                                                         type="number"
-                                                        className={`w-16 mr-2 no-spinners ${
-                                                            form.formState
+                                                        className={`w-16 mr-2 no-spinners ${form.formState
                                                                 .errors
                                                                 .passPercentage
                                                                 ? 'border-red-500 outline-red-500 text-red-500'
                                                                 : 'border-gray-300'
-                                                        }`}
+                                                            }`}
                                                         onChange={(e) => {
                                                             const value =
                                                                 e.target.value
@@ -954,37 +987,36 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                                 value === ''
                                                                     ? null
                                                                     : Number(
-                                                                          value
-                                                                      )
+                                                                        value
+                                                                    )
                                                             )
                                                         }}
                                                     />
                                                 </FormControl>
                                                 <div
-                                                    className={`text-md ${
-                                                        form.formState.errors
+                                                    className={`text-md ${form.formState.errors
                                                             .passPercentage
                                                             ? 'border-red-500 outline-red-500 text-red-500'
                                                             : 'border-gray-300'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     %
                                                 </div>
                                             </div>
                                             {form.formState.errors
                                                 .passPercentage && (
-                                                <div className="flex items-center gap-2 mt-1 text-red-500">
-                                                    <AlertCircle color="#db3939" />
-                                                    <FormMessage className="text-sm">
-                                                        {
-                                                            form.formState
-                                                                .errors
-                                                                .passPercentage
-                                                                .message
-                                                        }
-                                                    </FormMessage>
-                                                </div>
-                                            )}
+                                                    <div className="flex items-center gap-2 mt-1 text-red-500">
+                                                        <AlertCircle color="#db3939" />
+                                                        <FormMessage className="text-sm">
+                                                            {
+                                                                form.formState
+                                                                    .errors
+                                                                    .passPercentage
+                                                                    .message
+                                                            }
+                                                        </FormMessage>
+                                                    </div>
+                                                )}
                                         </FormItem>
                                     )}
                                 />

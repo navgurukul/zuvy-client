@@ -29,12 +29,27 @@ const QuizQuestions = ({
     setSelectedQuestions,
     selectedQuestions,
     tags,
+    setIsNewQuestionAdded,
 }: {
     questions: MCQQuestion[]
     setSelectedQuestions: React.Dispatch<React.SetStateAction<MCQQuestion[]>>
     selectedQuestions: MCQQuestion[]
     tags: any
+    setIsNewQuestionAdded: React.Dispatch<React.SetStateAction<boolean>>
 }) => {
+
+    const handleQuestionSelection = (
+        question: MCQQuestion,
+        selectedQuestions: MCQQuestion[],
+        setSelectedQuestions: React.Dispatch<React.SetStateAction<MCQQuestion[]>>,
+        setIsNewQuestionAdded: React.Dispatch<React.SetStateAction<boolean>>
+      ) => {
+        if (!selectedQuestions.some((q) => q.id === question.id)) {
+          setSelectedQuestions([...selectedQuestions, question]);
+        }
+        setIsNewQuestionAdded(true);
+      };
+
     return (
         <ScrollArea className="h-[calc(100vh-200px)] pb-44  pr-4">
             {/* <ScrollBar orientation="vertical" className="h-dvh" /> */}
@@ -115,24 +130,14 @@ const QuizQuestions = ({
                                                 </svg>
                                             ) : (
                                                 <PlusCircle
-                                                    onClick={() => {
-                                                        if (
-                                                            !selectedQuestions.some(
-                                                                (
-                                                                    q: MCQQuestion
-                                                                ) =>
-                                                                    q.id ===
-                                                                    question.id
-                                                            )
-                                                        ) {
-                                                            setSelectedQuestions(
-                                                                [
-                                                                    ...selectedQuestions,
-                                                                    question,
-                                                                ]
-                                                            )
-                                                        }
-                                                    }}
+                                                onClick={() => {
+                                                    handleQuestionSelection(
+                                                      question,
+                                                      selectedQuestions,
+                                                      setSelectedQuestions,
+                                                      setIsNewQuestionAdded
+                                                    );
+                                                  }}
                                                     className="text-secondary cursor-pointer"
                                                     size={20}
                                                 />

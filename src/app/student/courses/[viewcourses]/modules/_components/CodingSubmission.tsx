@@ -28,6 +28,7 @@ interface TestCasesSubmission {
 
 interface CodingSubmissionData {
   status?: string
+  action?: string
   message?: string
   data?: {
     sourceCode: string

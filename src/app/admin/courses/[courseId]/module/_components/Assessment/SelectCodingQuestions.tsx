@@ -9,12 +9,25 @@ const SelectCodingQuestions = ({
     selectedQuestions,
     tags,
     type,
+    setIsNewQuestionAdded,
 }: {
     setSelectedQuestions: React.Dispatch<React.SetStateAction<any[]>>
     selectedQuestions: any[]
     tags: any
     type: string
+    setIsNewQuestionAdded: React.Dispatch<React.SetStateAction<boolean>>
 }) => {
+
+    const handleQuestionRemoval = (
+        question: { id: number; [key: string]: any }, // Assuming 'id' is a number, other properties can be anything
+        selectedQuestions: { id: number; [key: string]: any }[],
+        setSelectedQuestions: React.Dispatch<React.SetStateAction<{ id: number; [key: string]: any }[]>>,
+        setIsNewQuestionAdded: React.Dispatch<React.SetStateAction<boolean>>
+      ) => {
+        setSelectedQuestions(selectedQuestions.filter((q) => q.id !== question.id));
+        setIsNewQuestionAdded(true);
+      };
+
     return (
         <div className="w-full">
             {selectedQuestions.map((question: any) => {
@@ -63,13 +76,14 @@ const SelectCodingQuestions = ({
                                 </Dialog>
                             </div>
                             <X
-                                onClick={() =>
-                                    setSelectedQuestions(
-                                        selectedQuestions.filter(
-                                            (q: any) => q.id !== question.id
-                                        )
-                                    )
-                                }
+                              onClick={() => {
+                                handleQuestionRemoval(
+                                  question,
+                                  selectedQuestions,
+                                  setSelectedQuestions,
+                                  setIsNewQuestionAdded
+                                );
+                              }}
                                 className="text-[#A3A3A3] cursor-pointer ml-4"
                                 size={20}
                             />
