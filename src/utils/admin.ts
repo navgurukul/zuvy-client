@@ -898,16 +898,23 @@ export const getSubmissionDate = (submit: string): string => {
 
 export const getPlaceholder = (type: string) => {
     if (type === 'str') {
-      return 'Add Strings without Quotes';
+      return 'Add Strings without Quotes (e.g., hello world)';
     }
-    if (['arrayOfnum', 'arrayOfStr'].includes(type)) {
-        return `Add comma-separated values${type === 'arrayOfStr' ? ' (no quotes)' : ''} OR leave empty for empty array`;
-      }
-    if (['int', 'float'].includes(type)) {
-      return type === 'float' ? 'Add a float value' : 'Add a number';
+    if (type === 'arrayOfnum') {
+      return 'Add comma-separated numbers (no brackets, e.g., 23,56,78)';
+    }
+    if (type === 'arrayOfStr') {
+      return 'Add comma-separated words (no quotes/brackets, e.g., first, second)';
+    }
+    if (type === 'int') {
+      return 'Add a number (e.g., 42)';
+    }
+    if (type === 'float') {
+      return 'Add a float value (e.g., 3.14)';
     }
     if (type === 'bool') {
-      return 'Add true or false';
+      return 'Add true or false (e.g., true)';
     }
-    return 'Add Output';
+    return 'Add Input';
   };
+  
