@@ -76,7 +76,7 @@ function Page({
         null
     )
     const [remainingTime, setRemainingTime] = useState<number>(0)
-    const [assessmentData, setAssessmentData] = useState<any>({})
+    const [assessmentData, setAssessmentData] = useState<any>(null)
     const [seperateQuizQuestions, setSeperateQuizQuestions] = useState<any>()
     const [seperateOpenEndedQuestions, setSeperateOpenEndedQuestions] =
         useState<any>()
@@ -89,13 +89,13 @@ function Page({
 
     // Check if Proctoring is set on by admin for tab switching, copy paste, etc.
     const [isTabProctorOn, setIsTabProctorOn] = useState(
-        assessmentData.tabChange
+        assessmentData?.tabChange
     )
     const [isFullScreenProctorOn, setIsFullScreenProctorOn] = useState(
-        assessmentData.screenRecord
+        assessmentData?.screenRecord
     )
     const [isCopyPasteProctorOn, setIsCopyPasteProctorOn] = useState(
-        assessmentData.copyPaste
+        assessmentData?.copyPaste
     )
     const [isEyeTrackingProctorOn, setIsEyeTrackingProctorOn] = useState(null)
     const [startedAt, setStartedAt] = useState(
@@ -155,7 +155,7 @@ function Page({
     }, [assessmentSubmitId])
 
     useEffect(() => {
-        const endTime = startedAt + assessmentData.timeLimit * 1000
+        const endTime = startedAt + assessmentData?.timeLimit * 1000
         // Start the timer
         startTimer(endTime)
 
@@ -271,7 +271,7 @@ function Page({
                 setSelectedCodingOutsourseId(codingOutsourseId)
                 requestFullScreen(document.documentElement)
             }
-        } else if (type === 'quiz' && assessmentData.IsQuizzSubmission) {
+        } else if (type === 'quiz' && assessmentData?.IsQuizzSubmission) {
             toast({
                 title: 'Quiz Already Submitted',
                 description: 'You have already submitted the quiz',
@@ -346,13 +346,20 @@ function Page({
         getSeperateOpenEndedQuestions()
     }, [decodedParams.assessmentOutSourceId, isFullScreen])
 
+    useEffect(() => {
+        if (assessmentData) {
+            getSeperateQuizQuestions()
+            getSeperateOpenEndedQuestions()
+        }
+    }, [assessmentData])
+
     if (isSolving && isFullScreen) {
         if (
             selectedQuesType === 'quiz' &&
-            !assessmentData.IsQuizzSubmission &&
-            assessmentData.hardMcqQuestions +
-                assessmentData.easyMcqQuestions +
-                assessmentData.mediumMcqQuestions >
+            !assessmentData?.IsQuizzSubmission &&
+            assessmentData?.hardMcqQuestions +
+                assessmentData?.easyMcqQuestions +
+                assessmentData?.mediumMcqQuestions >
                 0
         ) {
             return (
@@ -426,7 +433,7 @@ function Page({
                 completeChapter()
 
                 router.push(
-                    `/student/courses/${assessmentData.bootcampId}/modules/${assessmentData.moduleId}/chapters/${assessmentData.chapterId}`
+                    `/student/courses/${assessmentData?.bootcampId}/modules/${assessmentData?.moduleId}/chapters/${assessmentData?.chapterId}`
                 )
 
                 setTimeout(() => {
@@ -474,14 +481,14 @@ function Page({
                 <div className="h-auto mb-24">
                     {!isFullScreen ? (
                         <>
-                            <div className="flex items-center justify-center gap-2">
+                            <div className="fixed top-4 right-4 bg-white p-2 rounded-md shadow-md font-bold text-xl">
                                 <div className="font-bold text-xl">
                                     <TimerDisplay
                                         remainingTime={remainingTime}
                                     />
                                 </div>
                             </div>
-                            <Separator className="my-6" />
+                            {/* <Separator className="my-6" /> */}
                             <h1>
                                 Enter Full Screen to see the Questions. Warning:
                                 If you exit fullscreen, your test will get
@@ -495,14 +502,14 @@ function Page({
                         </>
                     ) : (
                         <div>
-                            <div className="flex items-center justify-center gap-2">
+                            <div className="fixed top-4 right-4 bg-white p-2 rounded-md shadow-md font-bold text-xl">
                                 <div className="font-bold text-xl">
                                     <TimerDisplay
                                         remainingTime={remainingTime}
                                     />
                                 </div>
                             </div>
-                            <Separator className="my-6" />
+                            {/* <Separator className="my-6" /> */}
                             <div className="flex justify-center">
                                 <div className="flex flex-col gap-5 w-1/2 text-left">
                                     <h2 className="font-bold">
@@ -511,18 +518,18 @@ function Page({
                                     <p className="deadline flex items-center gap-2">
                                         <Clock size={18} />
                                         Deadline:{' '}
-                                        {assessmentData.deadline ||
+                                        {assessmentData?.deadline ||
                                             'No Deadline For This Assessment'}
                                     </p>
                                     <p className="testTime flex items-center gap-2">
                                         <Timer size={18} />
                                         Test Time:{' '}
                                         {Math.floor(
-                                            assessmentData.timeLimit / 3600
+                                            assessmentData?.timeLimit / 3600
                                         )}{' '}
                                         Hours{' '}
                                         {Math.floor(
-                                            (assessmentData.timeLimit % 3600) /
+                                            (assessmentData?.timeLimit % 3600) /
                                                 60
                                         )}{' '}
                                         Minutes
@@ -557,7 +564,7 @@ function Page({
                                         <h2 className="font-bold">
                                             Coding Challenges
                                         </h2>
-                                        {assessmentData.codingQuestions?.map(
+                                        {assessmentData?.codingQuestions?.map(
                                             (question: any) => (
                                                 <QuestionCard
                                                     key={
@@ -567,13 +574,13 @@ function Page({
                                                         question.codingQuestionId
                                                     }
                                                     easyCodingMark={
-                                                        assessmentData.easyCodingMark
+                                                        assessmentData?.easyCodingMark
                                                     }
                                                     mediumCodingMark={
-                                                        assessmentData.mediumCodingMark
+                                                        assessmentData?.mediumCodingMark
                                                     }
                                                     hardCodingMark={
-                                                        assessmentData.hardCodingMark
+                                                        assessmentData?.hardCodingMark
                                                     }
                                                     title={question.title}
                                                     description={
@@ -593,9 +600,9 @@ function Page({
                                     </div>
                                 </div>
                             )}
-                            {assessmentData.hardMcqQuestions +
-                                assessmentData.easyMcqQuestions +
-                                assessmentData.mediumMcqQuestions >
+                            {assessmentData?.hardMcqQuestions +
+                                assessmentData?.easyMcqQuestions +
+                                assessmentData?.mediumMcqQuestions >
                                 0 && (
                                 <div className="flex justify-center">
                                     <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
@@ -604,12 +611,12 @@ function Page({
                                             id={1}
                                             title="Quiz"
                                             weightage={
-                                                assessmentData.weightageMcqQuestions
+                                                assessmentData?.weightageMcqQuestions
                                             }
                                             description={`${
-                                                assessmentData.hardMcqQuestions +
-                                                    assessmentData.easyMcqQuestions +
-                                                    assessmentData.mediumMcqQuestions ||
+                                                assessmentData?.hardMcqQuestions +
+                                                    assessmentData?.easyMcqQuestions +
+                                                    assessmentData?.mediumMcqQuestions ||
                                                 0
                                             } questions`}
                                             onSolveChallenge={() =>

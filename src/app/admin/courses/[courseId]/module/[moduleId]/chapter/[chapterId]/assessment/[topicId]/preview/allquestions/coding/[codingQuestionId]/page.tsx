@@ -23,13 +23,31 @@ import { b64DecodeUnicode } from '@/utils/base64'
 interface questionDetails {
     title: string
     description: string
+    constraints: string
+    testCases: TestCase[]
     examples: { input: number[]; output: number }
+}
+
+interface Input {
+    parameterName: string
+    parameterType: string
+    parameterValue: [] | {}
+}
+
+interface TestCase {
+    inputs: Input[] | Record<string, unknown>
+    expectedOutput: {
+        parameterType: string
+        parameterValue: [] | {}
+    }
 }
 
 function IdePreview({ params }: { params: any }) {
     const [questionDetails, setQuestionDetails] = useState<questionDetails>({
         title: '',
         description: '',
+        constraints: '',
+        testCases: [],
         examples: {
             input: [],
             output: 0,
@@ -93,6 +111,30 @@ function IdePreview({ params }: { params: any }) {
         }
     }
 
+    const formatValue = (value: any, type: string): string => {
+        if (Array.isArray(value)) {
+            if (type === 'arrayOfNum') {
+                return `[${(value as number[]).join(', ')}]`
+            }
+            if (type === 'arrayOfStr') {
+                return `[${(value as string[])
+                    .map((v) => `"${v}"`)
+                    .join(', ')}]`
+            }
+            return `[${value.join(', ')}]`
+        }
+
+        switch (type) {
+            case 'int':
+            case 'float':
+                return value.toString()
+            case 'str':
+                return `"${value}"`
+            default:
+                return JSON.stringify(value)
+        }
+    }
+
     useEffect(() => {
         getQuestionDetails()
     }, [language])
@@ -121,67 +163,124 @@ function IdePreview({ params }: { params: any }) {
                     className="w-full max-w-12xl rounded-lg "
                 >
                     <ResizablePanel defaultSize={50}>
-                        <div className="flex h-[90vh]">
-                            <div className="w-full max-w-12xl p-2  bg-muted text-left">
-                                <div className="p-2">
-                                    <h1 className="text-xl font-bold">
-                                        {questionDetails?.title}
-                                    </h1>
-                                    <p>{questionDetails?.description}</p>
-
-                                    {testCases
-                                        ?.slice(0, 2)
-                                        .map((testCase: any, index: any) => (
-                                            <div
-                                                key={index}
-                                                className="bg-gray-200 shadow-sm rounded-lg p-4 my-4"
-                                            >
-                                                <h2 className="text-xl font-semibold mb-2">
-                                                    Test Case {index + 1}
-                                                </h2>
-                                                {testCase.inputs.map(
-                                                    (input: any, idx: any) => (
-                                                        <p
-                                                            key={idx}
-                                                            className="text-gray-700"
-                                                        >
-                                                            <span className="font-medium">
-                                                                Input {idx + 1}:
-                                                            </span>{' '}
-                                                            {
-                                                                input.parameterName
-                                                            }{' '}
-                                                            (
-                                                            {
-                                                                input.parameterType
-                                                            }
-                                                            ) ={' '}
-                                                            {
-                                                                input.parameterValue
-                                                            }
-                                                        </p>
-                                                    )
-                                                )}
-                                                <p className="text-gray-700 mt-2">
-                                                    <span className="font-medium">
-                                                        Expected Output:
-                                                    </span>{' '}
-                                                    {
-                                                        testCase.expectedOutput
-                                                            .parameterType
-                                                    }{' '}
-                                                    ={' '}
-                                                    {
-                                                        testCase.expectedOutput
-                                                            .parameterValue
-                                                    }
-                                                </p>
-                                            </div>
-                                        ))}
-                                </div>
-                            </div>
-                        </div>
-                    </ResizablePanel>
+                                          <div className="flex h-[90vh]">
+                                              <div className="w-full max-w-12xl p-2 bg-muted text-left">
+                                                  <div className="p-2">
+                                                      <h1 className="text-xl font-bold">
+                                                          {questionDetails?.title}
+                                                      </h1>
+                                                      <p>{questionDetails?.description}</p>
+                                                      <p className="mt-3">
+                                                          <span className="font-bold">
+                                                              Constraints:
+                                                          </span>{' '}
+                                                          {questionDetails?.constraints}
+                                                      </p>
+                  
+                                                      {testCases
+                                                          ?.slice(0, 2)
+                                                          .map(
+                                                              (
+                                                                  testCase: TestCase,
+                                                                  index: number
+                                                              ) => (
+                                                                  <div
+                                                                      key={index}
+                                                                      className="bg-gray-200 shadow-sm rounded-lg p-4 my-4"
+                                                                  >
+                                                                      <h2 className="text-xl font-semibold mb-2">
+                                                                          Test Case {index + 1}
+                                                                      </h2>
+                  
+                                                                      {/* Handle both array and object inputs */}
+                                                                      {Array.isArray(
+                                                                          testCase.inputs
+                                                                      )
+                                                                          ? testCase.inputs.map(
+                                                                                (
+                                                                                    input: Input,
+                                                                                    idx: number
+                                                                                ) => (
+                                                                                    <p
+                                                                                        key={idx}
+                                                                                        className="text-gray-700"
+                                                                                    >
+                                                                                        <span className="font-medium">
+                                                                                            Input{' '}
+                                                                                            {idx +
+                                                                                                1}
+                                                                                            :
+                                                                                        </span>{' '}
+                                                                                        {
+                                                                                            input.parameterName
+                                                                                        }{' '}
+                                                                                        (
+                                                                                        {
+                                                                                            input.parameterType
+                                                                                        }
+                                                                                        ) ={' '}
+                                                                                        {formatValue(
+                                                                                            input.parameterValue,
+                                                                                            input.parameterType
+                                                                                        )}
+                                                                                    </p>
+                                                                                )
+                                                                            )
+                                                                          : Object.entries(
+                                                                                testCase.inputs
+                                                                            ).map(
+                                                                                (
+                                                                                    [key, value],
+                                                                                    idx: number
+                                                                                ) => (
+                                                                                    <p
+                                                                                        key={key}
+                                                                                        className="text-gray-700"
+                                                                                    >
+                                                                                        <span className="font-medium">
+                                                                                            Input{' '}
+                                                                                            {idx +
+                                                                                                1}
+                                                                                            :
+                                                                                        </span>{' '}
+                                                                                        {key} ={' '}
+                                                                                        {formatValue(
+                                                                                            value,
+                                                                                            typeof value ===
+                                                                                                'number'
+                                                                                                ? 'int'
+                                                                                                : 'str'
+                                                                                        )}
+                                                                                    </p>
+                                                                                )
+                                                                            )}
+                  
+                                                                      <p className="text-gray-700 mt-2">
+                                                                          <span className="font-medium">
+                                                                              Expected Output:
+                                                                          </span>{' '}
+                                                                          {
+                                                                              testCase
+                                                                                  .expectedOutput
+                                                                                  .parameterType
+                                                                          }{' '}
+                                                                          {'='}{' '}
+                                                                          {formatValue(
+                                                                              testCase
+                                                                                  .expectedOutput
+                                                                                  .parameterValue,
+                                                                              testCase
+                                                                                  .expectedOutput
+                                                                                  .parameterType
+                                                                          )}
+                                                                      </p>
+                                                                  </div>
+                                                              )
+                                                          )}
+                                                  </div>
+                                              </div>
+                                          </div>
+                                      </ResizablePanel>
                     <ResizableHandle withHandle />
                     <ResizablePanel defaultSize={50}>
                         <ResizablePanelGroup direction="vertical">

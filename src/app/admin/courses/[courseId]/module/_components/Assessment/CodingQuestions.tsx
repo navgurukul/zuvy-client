@@ -35,12 +35,27 @@ const CodingQuestions = ({
     setSelectedQuestions,
     selectedQuestions,
     tags,
+    setIsNewQuestionAdded,
 }: {
     questions: CodingQuestion[]
     setSelectedQuestions: React.Dispatch<React.SetStateAction<CodingQuestion[]>>
     selectedQuestions: CodingQuestion[]
     tags: any
+    setIsNewQuestionAdded: React.Dispatch<React.SetStateAction<boolean>>
 }) => {
+
+    const handleCodingQuestionSelection = (
+        question: CodingQuestion,
+        selectedQuestions: CodingQuestion[],
+        setSelectedQuestions: React.Dispatch<React.SetStateAction<CodingQuestion[]>>,
+        setIsNewQuestionAdded: React.Dispatch<React.SetStateAction<boolean>>
+      ) => {
+        if (!selectedQuestions.some((q) => q.id === question.id)) {
+          setSelectedQuestions([...selectedQuestions, question]);
+        }
+        setIsNewQuestionAdded(true);
+      };
+
     return (
         <ScrollArea className="h-3/5  w-full pr-5 pb-32">
             {/* <ScrollBar orientation="vertical" className="h-3/4" /> */}
@@ -105,24 +120,14 @@ const CodingQuestions = ({
                                                     </svg>
                                                 ) : (
                                                     <PlusCircle
-                                                        onClick={() => {
-                                                            if (
-                                                                !selectedQuestions.some(
-                                                                    (
-                                                                        q: CodingQuestion
-                                                                    ) =>
-                                                                        q.id ===
-                                                                        question.id
-                                                                )
-                                                            ) {
-                                                                setSelectedQuestions(
-                                                                    [
-                                                                        ...selectedQuestions,
-                                                                        question,
-                                                                    ]
-                                                                )
-                                                            }
-                                                        }}
+                                                    onClick={() => {
+                                                        handleCodingQuestionSelection(
+                                                          question,
+                                                          selectedQuestions,
+                                                          setSelectedQuestions,
+                                                          setIsNewQuestionAdded
+                                                        );
+                                                      }}
                                                         className="text-secondary cursor-pointer"
                                                         size={20}
                                                     />

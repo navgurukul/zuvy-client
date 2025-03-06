@@ -7,7 +7,7 @@ import { api } from '@/utils/axios.config'
 import React, { useCallback, useEffect, useState, useRef } from 'react'
 import StudentChapterItem from '../../../_components/StudentChapterItem'
 import { useParams, usePathname } from 'next/navigation'
-import { getAssessmentShortInfo } from '@/utils/students'
+import { fetchCourseDetails, getAssessmentShortInfo } from '@/utils/students'
 import {
     getStudentChapterContentState,
     getStudentChaptersState,
@@ -47,6 +47,7 @@ function Chapters({ params }: any) {
     const scrollAreaRef = useRef<HTMLDivElement>(null)
     const activeChapterRef = useRef<HTMLDivElement | null>(null)
     const isInstructor = pathname?.includes('/instructor')
+    const [courseName, setCourseName] = useState('')
 
     const studentCrumbs = [
         {
@@ -55,7 +56,7 @@ function Chapters({ params }: any) {
             isLast: false,
         },
         {
-            crumb: 'Curriculum',
+            crumb: `${courseName}-Curriculum`,
             href: `/student/courses/${viewcourses}/batch/${paramBatchId}`,
             isLast: false,
         },
@@ -116,6 +117,10 @@ function Chapters({ params }: any) {
         }
     }, [activeChapter])
 
+    useEffect(() => {
+        fetchCourseDetails(Number(viewcourses), setCourseName)
+    }, [viewcourses])
+
     // async
     useEffect(() => {
         if (userID) {
@@ -173,7 +178,7 @@ function Chapters({ params }: any) {
                     className="h-full pr-4"
                     type="hover"
                     ref={scrollAreaRef}
-                    
+
                 >
                     {/* <ScrollBar className='h-dvh'/> */}
                     {chapters?.map((item: any, index: any) => {

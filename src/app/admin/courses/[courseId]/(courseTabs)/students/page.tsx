@@ -25,6 +25,7 @@ import useAttendanceData from './components/studentAttendanceAnalytics'
 import AttandanceRefreshComp from './components/AttandanceRefreshComp'
 import { ComboboxStudent } from './components/comboboxStudentDataTable'
 import { api } from '@/utils/axios.config'
+import AlertDialogDemo from './components/deleteModalNew'
 
 export type StudentData = {
     email: string
@@ -76,6 +77,8 @@ const Page = ({ params }: { params: any }) => {
         } catch (error: any) {}
     }, [params.courseId, limit, offset, setStudents])
 
+    const userIds = selectedRows.map((item: any) => item.userId)
+
     return (
         <div>
             <div>
@@ -88,14 +91,20 @@ const Page = ({ params }: { params: any }) => {
                     />
                     <div className="flex flex-col md:flex-row items-center gap-x-2 gap-y-4">
                         {selectedRows.length > 0 && (
-                            <ComboboxStudent
-                                batchData={newBatchData}
-                                bootcampId={
-                                    batchData && params.courseId
-                                }
-                                selectedRows={selectedRows}
-                                fetchStudentData={fetchStudentData}
-                            />
+                            <>
+                                <AlertDialogDemo
+                                    userId={userIds}
+                                    bootcampId={batchData && params.courseId}
+                                    title="Are you absolutely sure?"
+                                    description="This action cannot be undone. This will permanently the student from the bootcamp"
+                                />
+                                <ComboboxStudent
+                                    batchData={newBatchData}
+                                    bootcampId={batchData && params.courseId}
+                                    selectedRows={selectedRows}
+                                    fetchStudentData={fetchStudentData}
+                                />
+                            </>
                         )}
                         <Dialog>
                             <DialogTrigger asChild>

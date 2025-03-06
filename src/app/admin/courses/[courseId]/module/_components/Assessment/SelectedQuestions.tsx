@@ -13,6 +13,7 @@ const selectedQuestions = ({
     setSelectedOpenEndedQuestions,
     questionType,
     tags,
+    setIsNewQuestionAdded,
 }: {
     selectedCodingQuestions: any
     selectedQuizQuestions: any
@@ -22,6 +23,7 @@ const selectedQuestions = ({
     setSelectedOpenEndedQuestions: any
     questionType: string
     tags: any
+    setIsNewQuestionAdded: any
 }) => {
     return (
         <div className="">
@@ -32,6 +34,7 @@ const selectedQuestions = ({
                         setSelectedQuestions={setSelectedCodingQuestions}
                         tags={tags}
                         type={'coding'}
+                        setIsNewQuestionAdded={setIsNewQuestionAdded}
                     />
                 )}
                 {questionType === 'mcq' && (
@@ -40,6 +43,7 @@ const selectedQuestions = ({
                         setSelectedQuestions={setSelectedQuizQuestions}
                         tags={tags}
                         type={'mcq'}
+                        setIsNewQuestionAdded={setIsNewQuestionAdded}
                     />
                 )}
                 {questionType === 'open-ended' && (

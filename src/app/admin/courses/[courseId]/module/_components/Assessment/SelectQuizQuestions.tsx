@@ -25,13 +25,25 @@ const SelectQuizQuestions = ({
     setSelectedQuestions,
     selectedQuestions,
     tags,
-    type
+    type,
+    setIsNewQuestionAdded,
 }: {
     setSelectedQuestions: any
     selectedQuestions: any
     tags: any
     type:string
+    setIsNewQuestionAdded: any
 }) => {
+
+    const handleQuestionRemoval = (
+        question: { id: number }, // Assuming 'id' is a number, adjust as needed
+        selectedQuestions: { id: number }[], // Adjust type as needed
+        setSelectedQuestions: React.Dispatch<React.SetStateAction<{ id: number }[]>>, // Adjust type as needed
+        setIsNewQuestionAdded: React.Dispatch<React.SetStateAction<boolean>>
+      ) => {
+        setSelectedQuestions(selectedQuestions.filter((q) => q.id !== question.id));
+        setIsNewQuestionAdded(true);
+      };
 
     return (
         <>
@@ -99,13 +111,14 @@ const SelectQuizQuestions = ({
                                                 {question.difficulty}
                                             </span>
                                         <X
-                                            onClick={() =>
-                                                setSelectedQuestions(
-                                                    selectedQuestions.filter(
-                                                        (q: any) => q.id !== question.id
-                                                    )
-                                                )
-                                            }
+                                         onClick={() => {
+                                            handleQuestionRemoval(
+                                              question,
+                                              selectedQuestions,
+                                              setSelectedQuestions,
+                                              setIsNewQuestionAdded
+                                            );
+                                          }}
                                             className="text-[#A3A3A3] cursor-pointer ml-4"
                                             size={20}
                                         />

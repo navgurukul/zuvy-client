@@ -35,7 +35,7 @@ import { columns } from './columns'
 import {
     getDeleteStudentStore,
     getStoreStudentData,
-    useStudentData,
+    // useStudentData,
 } from '@/store/store'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import DeleteConfirmationModal from '../../_components/deleteModal'
@@ -48,6 +48,8 @@ import { DataTablePagination } from '@/app/_components/datatable/data-table-pagi
 import BreadcrumbCmponent from '@/app/_components/breadcrumbCmponent'
 import AddStudentsModal from '../../_components/addStudentsmodal'
 import { ComboboxStudent } from '../../(courseTabs)/students/components/comboboxStudentDataTable'
+import AlertDialogDemo from '../../(courseTabs)/students/components/deleteModalNew'
+import { useStudentData } from '../../(courseTabs)/students/components/useStudentData'
 
 const BatchesInfo = ({
     params,
@@ -57,7 +59,7 @@ const BatchesInfo = ({
     const router = useRouter()
     const param = useParams()
     const location = usePathname()
-
+    const { students, setStudents } = useStudentData(params.courseId)
     const { studentsData, setStoreStudentData } = getStoreStudentData()
     const [allBatches, setAllBatches] = useState<any>([])
     const [studentData, setStudentData] = useState<StudentData[]>([])
@@ -270,6 +272,7 @@ const BatchesInfo = ({
             await api.get(endpoint).then((response) => {
                 setStudentData(response.data.modifiedStudentInfo)
                 setStoreStudentData(response.data.modifiedStudentInfo)
+                setStudents(response.data.modifiedStudentInfo)
                 setLastPage(response.data.totalPages)
                 setPages(response.data.totalPages)
                 setTotalStudents(response.data.totalStudentsCount)
@@ -281,6 +284,7 @@ const BatchesInfo = ({
             position,
             setStudentData,
             setStoreStudentData,
+            setStudents,
             setLastPage,
             setPages,
             setTotalStudents,
@@ -295,6 +299,8 @@ const BatchesInfo = ({
     const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value)
     }
+
+    const userIds = selectedRows.map((item: any) => item.userId)
 
     return (
         <>
@@ -509,12 +515,21 @@ const BatchesInfo = ({
                     <div className="flex m-4">
                         <div className="flex items-center mx-4 text-sm">
                             {selectedRows.length > 0 && (
-                                <ComboboxStudent
-                                    batchData={allBatches}
-                                    bootcampId={params.courseId}
-                                    selectedRows={selectedRows}
-                                    fetchStudentData={fetchStudentData}
-                                />
+                                <>
+                                    <AlertDialogDemo
+                                        userId={userIds}
+                                        bootcampId={parseInt(params.courseId)}
+                                        title="Are you absolutely sure?"
+                                        description="This action cannot be undone. This will permanently the student from the bootcamp"
+                                        fetchStudentData={fetchStudentData}
+                                    />
+                                    <ComboboxStudent
+                                        batchData={allBatches}
+                                        bootcampId={params.courseId}
+                                        selectedRows={selectedRows}
+                                        fetchStudentData={fetchStudentData}
+                                    />
+                                </>
                             )}
                         </div>
                         <div className="flex items-center mx-4 text-sm">
@@ -667,7 +682,7 @@ const BatchesInfo = ({
                     <div>
                         <DataTable
                             columns={columns}
-                            data={studentsData}
+                            data={students}
                             setSelectedRows={setSelectedRows}
                         />
                         <DataTablePagination

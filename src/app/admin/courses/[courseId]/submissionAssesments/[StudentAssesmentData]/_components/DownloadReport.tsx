@@ -1,103 +1,185 @@
 'use client'
-
-import { calculateTimeTaken } from '@/utils/admin';
-import { api } from '@/utils/axios.config';
-import { format } from 'date-fns';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import { ArrowBigDownDash } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { calculateTimeTaken } from '@/utils/admin'
+import { api } from '@/utils/axios.config'
+import { format } from 'date-fns'
+import { color } from 'framer-motion'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
+import { ArrowBigDownDash } from 'lucide-react'
 
 const DownloadReport = ({ userInfo }: any) => {
-    const { userId, id } = userInfo;
-    const [reportData, setReportData] = useState<any>(null);
-    
-    const timeTaken: any = calculateTimeTaken(reportData?.startedAt || '0', reportData?.submitedAt || '0');
+    const { userId, id, title } = userInfo
 
     const formatDate = (dateString: string) => {
-        if (!dateString) return 'N/A';
+        if (!dateString) return 'N/A'
         try {
-            return format(new Date(dateString), 'MMMM dd, yyyy hh:mm a'); // Example: December 16, 2024 09:08 AM
+            return format(new Date(dateString), 'MMMM dd, yyyy hh:mm a')
         } catch {
-            return 'Invalid Date';
+            return 'Invalid Date'
         }
-    };
+    }
 
     async function fetchReportData() {
         try {
             const res = await api.get(
                 `/tracking/assessment/submissionId=${id}?studentId=${userId}`
-            );
-            setReportData(res.data);
+            )
+            generatePDF(res?.data)
         } catch (error) {
-            console.error('Error fetching report data:', error);
+            console.error('Error fetching report data:', error)
         }
     }
 
-    async function generatePDF() {
-        const doc = new jsPDF();
+    async function generatePDF(reportData: any) {
+        const doc = new jsPDF()
 
-        // Add Title
-        doc.setFontSize(16);
-        doc.text('Assessment Report', 10, 10);
+        // Add Assessment Summary at the Top
+        // Add "Zuvy Assessment Report" in bold and red
+        doc.setFont('helvetica', 'bold') // Set font to bold
+        doc.setTextColor(96, 144, 130) // Set text color to zuvy color
+        doc.setFontSize(16)
+        doc.text(`${title} Assessment Report`, 105, 10, { align: 'center' })
 
-        // Add User Info
-        doc.setFontSize(12);
-        doc.text(`Name: ${reportData.user?.name || 'N/A'}`, 10, 20);
-        doc.text(`Email: ${reportData.user?.email || 'N/A'}`, 10, 30);
-        doc.text(`Marks: ${reportData.marks || 0}`, 10, 40);
-        doc.text(`Percentage: ${reportData.percentage ? reportData?.percentage : 0}%`, 10, 50);
-        doc.text(`Passed: ${reportData.isPassed ? 'Yes' : 'No'}`, 10, 60);
+        // Reset font and color for subsequent text
+        doc.setFont('helvetica', 'normal') // Reset to normal font
+        doc.setFontSize(11)
+        doc.setTextColor(0, 0, 0)
+        doc.text(`Name: ${reportData.user?.name || 'N/A'}`, 15, 25)
+        doc.text(`Email: ${reportData.user?.email || 'N/A'}`, 15, 30)
+        doc.text(
+            `Submitted On: ${new Date(reportData.submitedAt).toLocaleString()}`,
+            15,
+            35
+        )
+        doc.text(
+            `Time Taken: ${calculateTimeTaken(
+                reportData.startedAt,
+                reportData.submitedAt
+            )}`,
+            15,
+            40
+        )
+        doc.text(`Total Marks: ${reportData.marks || 0}`, 15, 45)
+        doc.text(
+            `Percentage: ${Math.trunc(reportData.percentage || 0)}%`,
+            15,
+            50
+        )
 
-        // Prepare Submission Details
-        const tableBody = [
-            ['Submitted At', formatDate(reportData?.submitedAt) || 'N/A'],
-            ['Coding Questions Attempted', reportData.attemptedCodingQuestions || 0],
-            ['MCQs Attempted', reportData.attemptedMCQQuestions || 0],
-            ['Coding Score', reportData?.codingScore || 0],
-            ['MCQ Score', reportData?.mcqScore || 0],
-            ['Time Taken', timeTaken || 0],
-            ['Total Marks', `${reportData?.marks || 0} marks`],
-            [
-                'Proctoring',
-                !reportData?.submitedOutsourseAssessment?.canTabChange &&
-                !reportData?.submitedOutsourseAssessment?.canScreenExit
-                    ? 'No Proctoring Enabled By the Admin'
-                    : 'Proctoring Enabled',
-            ],
-        ];
-
-        // Add proctoring-specific rows only if proctoring is enabled
-        const isProctoringEnabled =
-            reportData?.submitedOutsourseAssessment?.canTabChange ||
-            reportData?.submitedOutsourseAssessment?.canScreenExit;
-
-        if (isProctoringEnabled) {
-            tableBody.push(
-                ['Copy Paste Done', `${reportData?.copyPaste || 0} times`],
-                ['Tab Change Done', `${reportData?.tabChange || 0} times`],
-                ['Screen Exit Done', `${reportData?.fullScreenExit || 0} times`]
-            );
-        }
-
-        // Add Submission Details to PDF
+        // Table for CopyPaste and TabChange
+        // Table for CopyPaste and TabChange
         autoTable(doc, {
-            startY: 70,
-            head: [['Field', 'Value']],
-            body: tableBody,
-        });
+            head: [['Proctoring Details', 'Count']],
+            body: [
+                ['Copy Paste', `${reportData.copyPaste || 0} times`],
+                ['Tab Change', `${reportData.tabChange || 0} times`],
+            ],
+            startY: 60,
+            theme: 'grid',
+            headStyles: {
+                fillColor: [96, 144, 130],
+                textColor: [255, 255, 255], // White text for contrast
+            },
+            bodyStyles: {
+                textColor: [0, 0, 0], // Black text for body cells
+            },
+            columnStyles: {
+                0: { cellWidth: 120 },
+                1: { cellWidth: 60 },
+            },
+        })
+
+        // Table for Coding Problems
+        autoTable(doc, {
+            head: [['Coding Details', 'Questions & Score']],
+            body: [
+                [
+                    'Coding Questions Attempted',
+                    `${reportData.attemptedCodingQuestions || 0} / ${
+                        reportData.codingQuestionCount || 0
+                    }`,
+                ],
+                [
+                    'Coding Score',
+                    `${reportData.codingScore || 0} / ${
+                        reportData.requiredCodingScore || 0
+                    }`,
+                ],
+            ],
+            theme: 'grid',
+            headStyles: {
+                fillColor: [96, 144, 130],
+                textColor: [255, 255, 255], // White text for contrast
+            },
+            bodyStyles: {
+                textColor: [0, 0, 0], // Black text for body cells
+            },
+            columnStyles: {
+                0: { cellWidth: 120 },
+                1: { cellWidth: 60 },
+            },
+        })
+
+        // Table for MCQs
+        autoTable(doc, {
+            head: [[`MCQ Details`, 'Score']],
+            body: [
+                [
+                    'MCQ Score',
+                    `${reportData.mcqScore || 0} / ${
+                        reportData.requiredMCQScore || 0
+                    }`,
+                ],
+            ],
+            theme: 'grid',
+            headStyles: {
+                fillColor: [96, 144, 130],
+                textColor: [255, 255, 255], // White text for contrast
+            },
+            bodyStyles: {
+                textColor: [0, 0, 0], // Black text for body cells
+            },
+            columnStyles: {
+                0: { cellWidth: 120 },
+                1: { cellWidth: 60 },
+            },
+        })
+
+        // Create an array to hold all rows for the table
+        const tableData = reportData.PracticeCode.map(
+            (practiceCode: any, index: any) => [
+                `Q${index + 1}. ${practiceCode.questionDetail.title}`,
+                practiceCode.status == 'Accepted'
+                    ? 'Correct Answer'
+                    : 'Wrong Answer',
+            ]
+        )
+
+        // Generate a single table with all rows
+        autoTable(doc, {
+            head: [['Coding Questions', 'Status']],
+            body: tableData,
+            theme: 'grid',
+            headStyles: {
+                fillColor: [96, 144, 130],
+                textColor: [255, 255, 255], // White text for contrast
+            },
+            bodyStyles: {
+                textColor: [0, 0, 0], // Black text for body cells
+            },
+            columnStyles: {
+                0: { cellWidth: 120 },
+                1: { cellWidth: 60 },
+            },
+        })
 
         // Save the PDF
-        doc.save('Assessment_Report.pdf');
+        doc.save(`${reportData.user?.name}_${title}.pdf`)
     }
 
-    function handleDownload() {
-        generatePDF();
+    async function handleDownload() {
+        await fetchReportData()
     }
-
-    useEffect(() => {
-        if (!reportData) fetchReportData();
-    }, []);
 
     return (
         <div className="flex items-center space-x-2">
@@ -105,11 +187,11 @@ const DownloadReport = ({ userInfo }: any) => {
                 onClick={handleDownload}
                 className="max-w-[500px] text-secondary font-medium flex items-center"
             >
-                <ArrowBigDownDash className="" />
+                <ArrowBigDownDash className="mr-2" />
                 Download Report
             </button>
         </div>
-    );
-};
+    )
+}
 
-export default DownloadReport;
+export default DownloadReport

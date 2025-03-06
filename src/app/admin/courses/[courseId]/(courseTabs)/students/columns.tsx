@@ -9,16 +9,13 @@ import { DataTableColumnHeader } from '../../../../../_components/datatable/data
 import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
 import { fetchStudentData } from '@/utils/students'
 import { Task } from '@/utils/data/schema'
-import {
-    getBatchData,
-    getDeleteStudentStore,
-    getStoreStudentData,
-} from '@/store/store'
+import { getBatchData, getEditStudent, getStudentData } from '@/store/store'
 import { getAttendanceColorClass } from '@/utils/students'
 import { ComboboxStudent } from './components/comboboxStudentDataTable'
 import { AlertDialogDemo } from './components/deleteModalNew'
 import { Checkbox } from '@/components/ui/checkbox'
 import EditModal from './components/editModal'
+import { Input } from '@/components/ui/input'
 
 export const columns: ColumnDef<Task>[] = [
     {
@@ -91,9 +88,31 @@ export const columns: ColumnDef<Task>[] = [
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Students Name" />
         ),
-        cell: ({ row }) => (
-            <div className="w-[150px]">{row.getValue('name')}</div>
-        ),
+        cell: ({ row }) => {
+            const { userId } = row.original
+            const { isStudent, setIsStudent } = getEditStudent()
+            const { studentData, setStudentData } = getStudentData()
+            const handleSingleStudent = (
+                e: React.ChangeEvent<HTMLInputElement>
+            ) => {
+                const { name, value } = e.target
+                setStudentData({ ...studentData, [name]: value })
+            }
+            return (
+                <>
+                    {isStudent === userId ? (
+                        <Input
+                            id="name"
+                            name="name"
+                            value={studentData.name}
+                            onChange={handleSingleStudent}
+                        />
+                    ) : (
+                        <div className="w-[150px]">{row.getValue('name')}</div>
+                    )}
+                </>
+            )
+        },
         enableSorting: true,
         enableHiding: true,
     },
@@ -103,15 +122,33 @@ export const columns: ColumnDef<Task>[] = [
             <DataTableColumnHeader column={column} title="Email" />
         ),
         cell: ({ row }) => {
-            // const label = labels.find((label) => label.value === row.original.label);
+            const { userId } = row.original
+            const { isStudent, setIsStudent } = getEditStudent()
+            const { studentData, setStudentData } = getStudentData()
+            const handleSingleStudent = (
+                e: React.ChangeEvent<HTMLInputElement>
+            ) => {
+                const { name, value } = e.target
+                setStudentData({ ...studentData, [name]: value })
+            }
 
             return (
-                <div className="flex space-x-2">
-                    {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
-                    <span className="max-w-[500px] truncate font-medium">
-                        {row.getValue('email')}
-                    </span>
-                </div>
+                <>
+                    {isStudent === userId ? (
+                        <Input
+                            id="email"
+                            name="email"
+                            value={studentData.email}
+                            onChange={handleSingleStudent}
+                        />
+                    ) : (
+                        <div className="flex space-x-2">
+                            <span className="max-w-[500px] truncate font-medium">
+                                {row.getValue('email')}
+                            </span>
+                        </div>
+                    )}
+                </>
             )
         },
     },
@@ -247,7 +284,7 @@ export const columns: ColumnDef<Task>[] = [
         },
     },
     {
-        id: 'actions',
+        id: 'actions1',
         // cell: ({ row }) => <DataTableRowActions row={row} />,
         cell: ({ row }) => {
             const student = row.original
@@ -268,7 +305,7 @@ export const columns: ColumnDef<Task>[] = [
         },
     },
     {
-        id: 'actions',
+        id: 'actions2',
         // cell: ({ row }) => <DataTableRowActions row={row} />,
         cell: ({ row }) => {
             const student = row.original
@@ -278,7 +315,7 @@ export const columns: ColumnDef<Task>[] = [
                 <>
                     <div>
                         <AlertDialogDemo
-                            userId={userId}
+                            userId={[userId]}
                             bootcampId={bootcampId}
                             title="Are you absolutely sure?"
                             description="This action cannot be undone. This will permanently the student from the bootcamp"

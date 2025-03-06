@@ -1,34 +1,17 @@
 import React, { useState } from 'react'
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import { Pencil } from 'lucide-react'
+import { Pencil, Check, X } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { fetchStudentsHandler } from '@/utils/admin'
 import { getStoreStudentDataNew } from '@/store/store'
-import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
+import { getEditStudent, getStudentData } from '@/store/store'
 
 interface AlertDialogProps {
     name: string
     email: string
     userId: number
     bootcampId: number
-}
-
-interface Student {
-    email: string
-    name: string
 }
 
 export const EditModal: React.FC<AlertDialogProps> = ({
@@ -48,16 +31,9 @@ export const EditModal: React.FC<AlertDialogProps> = ({
         search,
     } = getStoreStudentDataNew()
 
-    const [studentData, setStudentData] = useState<Student | any>({
-        email: email || '',
-        name: name || '',
-    })
     const [isOpen, setIsOpen] = useState(false)
-
-    const handleSingleStudent = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target
-        setStudentData({ ...studentData, [name]: value })
-    }
+    const { isStudent, setIsStudent } = getEditStudent()
+    const { studentData, setStudentData } = getStudentData()
 
     async function editStudentHandler(userId: any, bootcampId: any) {
         try {
@@ -70,6 +46,7 @@ export const EditModal: React.FC<AlertDialogProps> = ({
                         className:
                             'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
+                    setIsStudent(0)
                     fetchStudentsHandler({
                         courseId: bootcampId,
                         limit,
@@ -96,45 +73,41 @@ export const EditModal: React.FC<AlertDialogProps> = ({
     }
 
     return (
-        <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
-            <AlertDialogTrigger asChild>
-                <Button className="bg-white text-red-400">
-                    <Pencil />
-                </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>Edit Student Details</AlertDialogTitle>
-                </AlertDialogHeader>
-                <div className="">
-                    <div className="text-left">
-                        <Label htmlFor="name">Name</Label>
-                        <Input
-                            id="name"
-                            name="name"
-                            value={studentData.name}
-                            onChange={handleSingleStudent}
-                        />
-                        <Label htmlFor="email">Email</Label>
-                        <Input
-                            id="email"
-                            name="email"
-                            value={studentData.email}
-                            onChange={handleSingleStudent}
-                        />
-                    </div>
-                </div>
-                <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+        <>
+            {isOpen ? (
+                <div className="flex gap-1">
                     <Button
-                        className="gap-x-2"
+                        className="bg-white text-black-400"
                         onClick={() => editStudentHandler(userId, bootcampId)}
                     >
-                        Edit
+                        <Check />
                     </Button>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
+                    <Button
+                        className="bg-white text-black-400"
+                        onClick={() => {
+                            setIsOpen(false)
+                            setIsStudent(0)
+                        }}
+                    >
+                        <X />
+                    </Button>
+                </div>
+            ) : (
+                <Button
+                    className="bg-white text-red-400"
+                    onClick={() => {
+                        setIsOpen(true)
+                        setIsStudent(userId)
+                        setStudentData({
+                            email: email || '',
+                            name: name || '',
+                        })
+                    }}
+                >
+                    <Pencil />
+                </Button>
+            )}
+        </>
     )
 }
 
