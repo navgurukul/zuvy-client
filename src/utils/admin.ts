@@ -895,3 +895,19 @@ export const getSubmissionDate = (submit: string): string => {
     const submitDate = new Date(submit)
     return submitDate.toISOString().split('T')[0]
 }
+
+export const getPlaceholder = (type: string) => {
+    if (type === 'str') {
+      return 'Add Strings without Quotes';
+    }
+    if (['arrayOfnum', 'arrayOfStr'].includes(type)) {
+        return `Add comma-separated values${type === 'arrayOfStr' ? ' (no quotes)' : ''} OR leave empty for empty array`;
+      }
+    if (['int', 'float'].includes(type)) {
+      return type === 'float' ? 'Add a float value' : 'Add a number';
+    }
+    if (type === 'bool') {
+      return 'Add true or false';
+    }
+    return 'Add Output';
+  };
