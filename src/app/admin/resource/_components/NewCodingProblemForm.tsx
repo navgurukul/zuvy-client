@@ -57,12 +57,12 @@ const formSchema = z.object({
             inputs: z.array(
                 z.object({
                     type: z.enum(inputTypes),
-                    value: z.string().min(1, 'Input cannot be empty.')
+                    value: z.string()
                 })
             ),
             output: z.object({
                 type: z.enum(outputTypes),
-                value: z.string().min(1, 'Output cannot be empty.')
+                value: z.string()
             })
         })
     ),
@@ -154,14 +154,6 @@ export default function NewCodingProblemForm({
         switch (type) {
             case 'arrayOfStr':
             case 'arrayOfnum': {
-                if (value.includes(' ')) {
-                    toast({
-                        title: "Invalid Format",
-                        description: "Please use commas to separate elements in an array (e.g., 1,2,3) or (e.g., hello,world)",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
-                    });
-                    return false;
-                }
                 break;
             }
             case 'str': {
@@ -761,7 +753,8 @@ export default function NewCodingProblemForm({
                                                 />
                                                 {input.type === 'jsonType' && (
                                                     <Textarea
-                                                        placeholder={`Enter An Object/ Array/ Array of Objects/ Array of Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25}`}
+                                                        required
+                                                        placeholder={`(Enter with brackets) - Object/ Array/ Array of Objects/ 2D Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25} or [{"Name": "John}", {"Age": 25}] or {} or []`}
                                                         value={input.value}
                                                         onChange={(e) => handleInputChange(e, testCaseIndex, inputIndex, testCases, setTestCases)}
                                                         className="mt-2"
@@ -832,7 +825,8 @@ export default function NewCodingProblemForm({
 
                                         {testCase.output.type === 'jsonType' ? (
                                             <Textarea
-                                                placeholder={`Enter An Object/ Array/ Array of Objects/ Array of Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25}`}
+                                                required
+                                                placeholder={`(Enter with brackets) - Object/ Array/ Array of Objects/ 2D Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25} or [{"Name": "John}", {"Age": 25}] or {} or []`}
                                                 value={testCase.output.value}
                                                 onChange={(e) => {
                                                     const newValue = e.target.value;

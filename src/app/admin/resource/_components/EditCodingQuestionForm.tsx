@@ -67,12 +67,12 @@ const formSchema = z.object({
             inputs: z.array(
                 z.object({
                     type: z.enum(inputTypes),
-                    value: z.string().min(1, 'Input cannot be empty.')
+                    value: z.string()
                 })
             ),
             output: z.object({
                 type: z.enum(outputTypes),
-                value: z.string().min(1, 'Output cannot be empty.')
+                value: z.string()
             })
         })
     ),
@@ -828,7 +828,8 @@ export default function EditCodingQuestionForm() {
 
                                                     {input.type === 'jsonType' ? (
                                                         <Textarea
-                                                            placeholder={`Enter An Object/ Array/ Array of Objects/ Array of Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25}`}
+                                                            required
+                                                            placeholder={`(Enter with brackets) - Object/ Array/ Array of Objects/ 2D Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25} or [{"Name": "John}", {"Age": 25}] or {} or []`}
                                                             value={input.value} // Bind to the state
                                                             onChange={(e) => handleInputChange(e, testCaseIndex, inputIndex, testCases, setTestCases)} // Handle changes
                                                         />
@@ -899,7 +900,8 @@ export default function EditCodingQuestionForm() {
 
                                         {testCase.output.type === 'jsonType' ? (
                                             <Textarea
-                                                placeholder={`Enter An Object/ Array/ Array of Objects/ Array of Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25}`}
+                                                required
+                                                placeholder={`(Enter with brackets) - Object/ Array/ Array of Objects/ 2D Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25} or [{"Name": "John}", {"Age": 25}] or {} or []`}
                                                 value={testCase.output.value}
                                                 onChange={(e) => {
                                                     const newValue = e.target.value;
