@@ -1,10 +1,14 @@
+import { useEffect, useState } from 'react'
 import { cn, difficultyColor, statusColor } from '@/lib/utils'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
+import { api } from '@/utils/axios.config'
 import {
     handleFullScreenChange,
     handleVisibilityChange,
     requestFullScreen,
 } from '@/utils/students'
+import QuestionDescriptionModal from '@/app/admin/courses/[courseId]/module/_components/Assessment/QuestionDescriptionModal'
 
 interface QuestionCardProps {
     id: number
@@ -18,6 +22,16 @@ interface QuestionCardProps {
     onSolveChallenge: (id: number) => void
 }
 
+interface questionDetails {
+    id: any
+    title: string
+    description: string
+    difficulty: string
+    constraints?: string
+    testCases?: string
+    examples: { input: number[]; output: number }
+}
+
 function CodingQuestionCard({
     id,
     title,
@@ -28,10 +42,37 @@ function CodingQuestionCard({
     isSuccess,
     onSolveChallenge,
 }: QuestionCardProps) {
+    const [questionDetails, setQuestionDetails] = useState<questionDetails>({
+        title: '',
+        id: 0,
+        description: '',
+        examples: {
+            input: [],
+            output: 0,
+        },
+        difficulty: '',
+    })
+
     const handleSolveChallenge = (id: any) => {
         onSolveChallenge(id)
         // requestFullScreen(document.documentElement)
     }
+
+    const getQuestionDetails = async () => {
+        try {
+            await api
+                .get(`codingPlatform/get-coding-question/${id}`)
+                .then((response) => {
+                    setQuestionDetails(response?.data.data)
+                })
+        } catch (error) {
+            console.error('Error fetching courses:', error)
+        }
+    }
+
+    useEffect(() => {
+        getQuestionDetails()
+    }, [])
 
     return (
         <div
@@ -66,12 +107,27 @@ function CodingQuestionCard({
                     {status}
                 </span>
             </div>
-            <div
-                onClick={() => handleSolveChallenge(id)}
-                className="cursor-pointer mt-4 flex justify-end text-secondary font-bold"
-            >
-                {isSuccess ? 'View Solution' : 'Solve Challenge'}
-                <ChevronRight />
+            <div className="flex justify-between">
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <p className="cursor-pointer mt-4 flex justify-start text-secondary font-bold">
+                            View Full Description
+                        </p>
+                    </DialogTrigger>
+                    <DialogOverlay />
+                    <QuestionDescriptionModal
+                        question={questionDetails}
+                        type="coding"
+                        tagName={tagName}
+                    />
+                </Dialog>
+                <div
+                    onClick={() => handleSolveChallenge(id)}
+                    className="cursor-pointer mt-5 flex justify-end text-secondary font-bold"
+                >
+                    {isSuccess ? 'View Solution' : 'Solve Challenge'}
+                    <ChevronRight />
+                </div>
             </div>
         </div>
     )

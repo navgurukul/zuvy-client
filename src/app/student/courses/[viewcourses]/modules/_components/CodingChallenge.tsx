@@ -92,7 +92,7 @@ function CodingChallenge({
                 // ?studentId=62586`
             )
             setCodingQuestionResult(res.data.data)
-            setIsScuccess(res.data.isSuccess)
+            setIsScuccess(res.data.data.action === 'submit')
         } catch (error: any) {
             setIsScuccess(error.response.data.isSuccess)
         }
