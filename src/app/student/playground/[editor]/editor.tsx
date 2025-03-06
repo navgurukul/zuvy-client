@@ -132,16 +132,20 @@ const IDE: React.FC<IDEProps> = ({
     }
 
     const formatValue = (value: any, type: string): string => {
+        if (type === 'jsonType') {
+            return JSON.stringify(value, null, 2);
+        }
+    
         if (Array.isArray(value)) {
             if (type === 'arrayOfNum') {
-                return `[${(value as number[]).join(', ')}]`;
+                return `[${value.join(', ')}]`;
             }
             if (type === 'arrayOfStr') {
-                return `[${(value as string[]).map(v => `"${v}"`).join(', ')}]`;
+                return `[${value.map(v => `"${v}"`).join(', ')}]`;
             }
             return `[${value.join(', ')}]`;
         }
-
+    
         switch (type) {
             case 'int':
             case 'float':
@@ -152,6 +156,7 @@ const IDE: React.FC<IDEProps> = ({
                 return JSON.stringify(value);
         }
     };
+    
 
     const handleSubmit = async (
         e: { preventDefault: () => void },
@@ -248,7 +253,7 @@ const IDE: React.FC<IDEProps> = ({
 
     const handleBack = () => {
         if (codePanel) {
-            document.exitFullscreen()
+            document?.exitFullscreen()
         }
         router.back()
     }
@@ -370,8 +375,6 @@ const IDE: React.FC<IDEProps> = ({
                                                     <span className="font-medium">
                                                         Expected Output:
                                                     </span>{' '}
-                                                    {testCase.expectedOutput.parameterType}{' '}
-                                                    {'='}{' '}
                                                     {formatValue(testCase.expectedOutput.parameterValue, testCase.expectedOutput.parameterType)}
                                                 </p>
                                             </div>
