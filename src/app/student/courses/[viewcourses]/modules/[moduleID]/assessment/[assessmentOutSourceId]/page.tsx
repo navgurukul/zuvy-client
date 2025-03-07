@@ -502,6 +502,7 @@ function Page({
                         </>
                     ) : (
                         <div>
+                            <div className="bg-red-500 text-white p-2 rounded-md mb-5">If you exit fullscreen or click on browser back button, your test will get submitted automatically!</div>
                             <div className="fixed top-4 right-4 bg-white p-2 rounded-md shadow-md font-bold text-xl">
                                 <div className="font-bold text-xl">
                                     <TimerDisplay
