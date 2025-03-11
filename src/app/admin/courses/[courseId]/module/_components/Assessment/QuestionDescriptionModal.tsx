@@ -182,7 +182,7 @@ const QuestionDescriptionModal = ({ question, type, tagName }: QuestionDescripti
                                                         return `[${parameterValue.join(",")}]`;
                                                     if (parameterType === "arrayOfStr")
                                                         if (!Array.isArray(parameterValue)) {
-                                                            return `[${parameterValue.map((arr: any[]) => `[${arr.map((item: any) => (typeof item === "string" ? `"${item}"` : item)).join(",")}]`).join(",")}]`;
+                                                            return `[${parameterValue?.map((arr: any[]) => `[${arr.map((item: any) => (typeof item === "string" ? `"${item}"` : item)).join(",")}]`).join(",")}]`;
                                                         }
                                                     if (parameterType === "jsonType" && Array.isArray(parameterValue) && parameterValue.every(obj => typeof obj === "object"))
                                                         return JSON.stringify(parameterValue, null, 2);

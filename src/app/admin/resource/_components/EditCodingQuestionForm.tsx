@@ -30,7 +30,7 @@ import {
     getCodingQuestionTags,
     getEditCodingQuestionDialogs,
 } from '@/store/store'
-import { cleanUpValues, getAllCodingQuestions, getPlaceholder } from '@/utils/admin'
+import { cleanUpValues, getAllCodingQuestions, getPlaceholder, showSyntaxErrors } from '@/utils/admin'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { create } from 'domain'
 
@@ -89,6 +89,8 @@ export default function EditCodingQuestionForm() {
     ])
 
     let outputObjectRef = useRef('' as any);
+
+    const [hasSyntaxErrors, setHasSyntaxErrors] = useState(false);
 
     // Shared validation function for both inputs and outputs
     const validateFieldValue = (value: string, type: string) => {
@@ -387,14 +389,20 @@ export default function EditCodingQuestionForm() {
 
         switch (format) {
             case 'arrayOfnum': {
-                const values = cleanedInput.split(',');
+                const values = JSON.parse(input);
                 if (!values.every(isValidNumber)) {
                     return null;
                 }
                 return values.map(Number);
             }
             case 'arrayOfStr': {
-                return cleanedInput.split(','); // Split by commas for arrays
+                try {
+                    // Try to parse the JSON string
+                    return JSON.parse(input);
+                } catch (e) {
+                    console.error('Invalid JSON format for arrayOfStr:', input, e);
+                    return [];
+                }
             }
             case 'int': {
                 const values = cleanedInput.split(' ');
@@ -491,56 +499,55 @@ export default function EditCodingQuestionForm() {
 
     useEffect(() => {
         if (selectCodingQuestion.length > 0) {
-            const question = selectCodingQuestion[0];
-
-            // Map test cases from API data
-            const mappedTestCases = question.testCases.map((testCase: any) => {
-                // Map each input individually
-                const inputs = testCase.inputs.map((input: any) => ({
-                    id: Date.now() + Math.random(), // Unique ID
-                    type: input.parameterType,
-                    value: input.parameterType === 'jsonType'
-                        ? JSON.stringify(input.parameterValue, null, 2) // Handle JSON inputs
-                        : input.parameterType === 'arrayOfnum' || input.parameterType === 'arrayOfStr'
-                            ? Array.isArray(input.parameterValue)
-                                ? input.parameterValue.join(',') // Join array elements with commas
-                                : String(input.parameterValue)
-                            : String(input.parameterValue) // Handle other types normally
-                }));
-
-                return {
-                    id: testCase.id,
-                    inputs,
-                    output: {
-                        type: testCase.expectedOutput.parameterType,
-                        value: testCase.expectedOutput.parameterType === 'jsonType'
-                            ? JSON.stringify(testCase.expectedOutput.parameterValue, null, 2)
-                            : testCase.expectedOutput.parameterType === 'arrayOfnum' || testCase.expectedOutput.parameterType === 'arrayOfStr'
-                                ? Array.isArray(testCase.expectedOutput.parameterValue)
-                                    ? testCase.expectedOutput.parameterValue.join(',')
-                                    : String(testCase.expectedOutput.parameterValue)
-                                : String(testCase.expectedOutput.parameterValue)
-                    }
-                };
-            });
-
-            // Set the test cases state
-            setTestCases(mappedTestCases);
-
-            // Reset the form with the mapped data
-            form.reset({
-                title: question.title,
-                problemStatement: question.description,
-                constraints: question.constraints,
-                difficulty: question.difficulty,
-                topics: question.tagId,
-                testCases: mappedTestCases,
-            });
+          const question = selectCodingQuestion[0];
+          
+          const mappedTestCases = question.testCases.map((testCase: any) => ({
+            id: testCase.id,
+            inputs: testCase.inputs.map((input: any) => ({
+              id: Date.now() + Math.random(),
+              type: input.parameterType,
+              value: input.parameterType === 'jsonType'
+                ? JSON.stringify(input.parameterValue, null, 2)
+                : input.parameterType === 'arrayOfnum' || input.parameterType === 'arrayOfStr'
+                  ? Array.isArray(input.parameterValue)
+                    ? JSON.stringify(input.parameterValue) // This preserves quotes around strings
+                    : String(input.parameterValue)
+                  : String(input.parameterValue)
+            })),
+            output: {
+              type: testCase.expectedOutput.parameterType,
+              value: testCase.expectedOutput.parameterType === 'jsonType'
+                ? JSON.stringify(testCase.expectedOutput.parameterValue, null, 2)
+                : testCase.expectedOutput.parameterType === 'arrayOfnum' || testCase.expectedOutput.parameterType === 'arrayOfStr'
+                  ? Array.isArray(testCase.expectedOutput.parameterValue)
+                    ? JSON.stringify(testCase.expectedOutput.parameterValue)
+                    : String(testCase.expectedOutput.parameterValue)
+                  : String(testCase.expectedOutput.parameterValue)
+            }
+          }));
+      
+          setTestCases(mappedTestCases);
+          form.reset({
+            title: question.title,
+            problemStatement: question.description,
+            constraints: question.constraints,
+            difficulty: question.difficulty,
+            topics: question.tagId,
+            testCases: mappedTestCases,
+          });
         }
-    }, []);
+      }, []);
 
 
     const handleEditSubmit = (values: z.infer<typeof formSchema>) => {
+
+        let hasErrors =  showSyntaxErrors(testCases);
+
+        // If there are validation errors, return early and don't submit
+        if (hasErrors) {
+            return
+        }
+
         const formattedData = {
             title: values.title,
             description: values.problemStatement,
@@ -638,10 +645,16 @@ export default function EditCodingQuestionForm() {
                     if (!testCase.output.value || testCase.output.value.trim() === '') {
                         processedOutput = [];
                     } else {
-                        processedOutput = testCase.output.value.split(',').map((item: any) => {
-                            const trimmedItem = item.trim();
-                            return testCase.output.type === 'arrayOfnum' ? Number(trimmedItem) : trimmedItem;
-                        });
+                        try {
+                            processedOutput = JSON.parse(testCase.output.value);
+                        }
+                        catch (e) {
+                            toast({
+                                title: "Invalid Output Format",
+                                description: "Please enter a valid array format",
+                            })
+                      return null;
+                        }
                     }
                 } else {
                     processedOutput = processInput(testCase.output.value, testCase.output.type);
@@ -829,9 +842,10 @@ export default function EditCodingQuestionForm() {
                                                     {input.type === 'jsonType' ? (
                                                         <Textarea
                                                             required
-                                                            placeholder={`(Enter with brackets) - Object/ Array/ Array of Objects/ 2D Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25} or [{"Name": "John}", {"Age": 25}] or {} or []`}
-                                                            value={input.value} // Bind to the state
-                                                            onChange={(e) => handleInputChange(e, testCaseIndex, inputIndex, testCases, setTestCases)} // Handle changes
+                                                            placeholder={`(Enter with brackets) - Object/ Array/ Array of Objects/ 2D Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25} or [{"Name": "John"}, {"Age": 25}] or {} or []`}
+                                                            value={input.value} 
+                                                            onChange={(e) => handleInputChange(e, testCaseIndex, inputIndex, testCases, setTestCases)}
+                                                            className='overflow-auto'
                                                         />
                                                     ) : (
                                                         <Input
@@ -901,7 +915,7 @@ export default function EditCodingQuestionForm() {
                                         {testCase.output.type === 'jsonType' ? (
                                             <Textarea
                                                 required
-                                                placeholder={`(Enter with brackets) - Object/ Array/ Array of Objects/ 2D Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25} or [{"Name": "John}", {"Age": 25}] or {} or []`}
+                                                placeholder={`(Enter with brackets) - Object/ Array/ Array of Objects/ 2D Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25} or [{"Name": "John"}, {"Age": 25}] or {} or []`}
                                                 value={testCase.output.value}
                                                 onChange={(e) => {
                                                     const newValue = e.target.value;
@@ -912,7 +926,7 @@ export default function EditCodingQuestionForm() {
                                                     newTestCases[testCaseIndex].output.value = newValue;
                                                     setTestCases(newTestCases);
                                                 }}
-                                                className="flex-grow"
+                                                className='overflow-auto flex-grow'
                                             />
                                         ) : (
                                             <Input
