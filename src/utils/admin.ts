@@ -1,3 +1,4 @@
+import { set } from 'date-fns';
 import { difficultyColor } from '@/lib/utils'
 import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
@@ -898,23 +899,244 @@ export const getSubmissionDate = (submit: string): string => {
 
 export const getPlaceholder = (type: string) => {
     if (type === 'str') {
-      return 'Add Strings without Quotes (e.g., hello world)';
+        return 'Add Strings without Quotes (e.g., hello world)'
     }
     if (type === 'arrayOfnum') {
-      return 'Add comma-separated numbers (no brackets, e.g., 23,56,78)';
+        return 'Add arrays with brackets (e.g., [23,56,78])'
     }
     if (type === 'arrayOfStr') {
-      return 'Add comma-separated words (no quotes/brackets, e.g., first, second)';
+        return 'Arrays with brackets & double-quotes (e.g., ["first", "second"])'
     }
     if (type === 'int') {
-      return 'Add a number (e.g., 42)';
+        return 'Add a number (e.g., 42)'
     }
     if (type === 'float') {
-      return 'Add a float value (e.g., 3.14)';
+        return 'Add a float value (e.g., 3.14)'
     }
     if (type === 'bool') {
-      return 'Add true or false (e.g., true)';
+        return 'Add true or false (e.g., true)'
     }
-    return 'Add Input';
-  };
-  
+    return 'Add Input'
+}
+
+export function showSyntaxErrors(testCases: any) {
+    let hasErrors = false;
+
+    // Validate each test case
+    for (let index = 0; index < testCases.length; index++) {
+        const testCase = testCases[index];
+        
+        // Validate inputs
+        for (let inputIndex = 0; inputIndex < testCase.inputs.length; inputIndex++) {
+            const input = testCase.inputs[inputIndex];
+            
+            if (input.type === 'jsonType') {
+                try {
+                    JSON.parse(input.value);
+                } catch (e) {
+                    toast({
+                        title: `Invalid JSON Format`,
+                        description: `Test case ${index + 1}, input ${
+                            inputIndex + 1
+                        } has invalid JSON format.`,
+                        className:
+                            'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                    });
+                    hasErrors = true;
+                }
+            } else if (
+                input.type === 'int' &&
+                !Number.isInteger(Number(input.value)) &&
+                input.value !== ''
+            ) {
+                toast({
+                    title: `Invalid Integer Input`,
+                    description: `Test case ${index + 1}, input ${
+                        inputIndex + 1
+                    } must be a valid integer.`,
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                });
+                hasErrors = true;
+            } else if (input.type === 'float' && isNaN(Number(input.value)) && input.value !== '') {
+                toast({
+                    title: `Invalid Float Input`,
+                    description: `Test case ${index + 1}, input ${
+                        inputIndex + 1
+                    } must be a valid float.`,
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                });
+                hasErrors = true;
+            } else if (
+                input.type === 'bool' &&
+                !/^(true|false)$/i.test(input.value) &&
+                input.value !== ''
+            ) {
+                toast({
+                    title: `Invalid Boolean Input`,
+                    description: `Test case ${index + 1}, input ${
+                        inputIndex + 1
+                    } must be either 'true' or 'false'.`,
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                });
+                hasErrors = true;
+            } else if (
+                (input.type === 'arrayOfnum' || input.type === 'arrayOfStr') &&
+                input.value !== ''
+            ) {
+                try {
+                    const parsed = JSON.parse(input.value);
+                    if (!Array.isArray(parsed)) {
+                        toast({
+                            title: `Invalid Array Format`,
+                            description: `Test case ${index + 1}, input ${
+                                inputIndex + 1
+                            } must be a valid array.`,
+                            className:
+                                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                        });
+                        hasErrors = true;
+                    }
+                } catch (e) {
+                    toast({
+                        title: `Invalid Array Format`,
+                        description: `Test case ${index + 1}, input ${
+                            inputIndex + 1
+                        } has invalid array format.`,
+                        className:
+                            'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                    });
+                    hasErrors = true;
+                }
+            }
+        }
+
+        // Validate output
+        if (testCase.output.type === 'jsonType' && testCase.output.value !== '') {
+            try {
+                JSON.parse(testCase.output.value);
+            } catch (e) {
+                toast({
+                    title: `Invalid JSON Format`,
+                    description: `Test case ${
+                        index + 1
+                    } output has invalid JSON format.`,
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                });
+                hasErrors = true;
+            }
+        } else if (testCase.output.type === 'int' && testCase.output.value !== '') {
+            if (testCase.output.value.includes(' ')) {
+                toast({
+                    title: 'Invalid Output Format',
+                    description: `Test case ${
+                        index + 1
+                    } output can only have one integer value.`,
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                });
+                hasErrors = true;
+            } else if (!Number.isInteger(Number(testCase.output.value))) {
+                toast({
+                    title: `Invalid Integer Output`,
+                    description: `Test case ${
+                        index + 1
+                    } output must be a valid integer.`,
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                });
+                hasErrors = true;
+            }
+        } else if (testCase.output.type === 'float' && testCase.output.value !== '') {
+            if (testCase.output.value.includes(' ')) {
+                toast({
+                    title: 'Invalid Output Format',
+                    description: `Test case ${
+                        index + 1
+                    } output can only have one float value.`,
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                });
+                hasErrors = true;
+            } else if (isNaN(Number(testCase.output.value))) {
+                toast({
+                    title: `Invalid Float Output`,
+                    description: `Test case ${
+                        index + 1
+                    } output must be a valid float.`,
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                });
+                hasErrors = true;
+            }
+        } else if (
+            testCase.output.type === 'bool' &&
+            !/^(true|false)$/i.test(testCase.output.value) &&
+            testCase.output.value !== ''
+        ) {
+            toast({
+                title: `Invalid Boolean Output`,
+                description: `Test case ${
+                    index + 1
+                } output must be either 'true' or 'false'.`,
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+            });
+            hasErrors = true;
+        } else if (
+            (testCase.output.type === 'arrayOfnum' || testCase.output.type === 'arrayOfStr') &&
+            testCase.output.value !== ''
+        ) {
+            try {
+                const parsed = JSON.parse(testCase.output.value);
+                if (!Array.isArray(parsed)) {
+                    toast({
+                        title: `Invalid Array Format`,
+                        description: `Test case ${
+                            index + 1
+                        } output must be a valid array.`,
+                        className:
+                            'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                    });
+                    hasErrors = true;
+                }
+            } catch (e) {
+                toast({
+                    title: `Invalid Array Format`,
+                    description: `Test case ${
+                        index + 1
+                    } output has invalid array format.`,
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                });
+                hasErrors = true;
+            }
+        }
+    }
+
+    // Optional: Enforce minimum and maximum number of test cases
+    if (testCases.length < 1) {
+        toast({
+            title: 'Insufficient Test Cases',
+            description:
+                'Please add at least 3 test cases to ensure comprehensive testing.',
+            className:
+                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+        });
+        hasErrors = true;
+    } else if (testCases.length > 20) {
+        toast({
+            title: 'Too Many Test Cases',
+            description:
+                'Please limit the number of test cases to 20 or fewer.',
+            className:
+                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+        });
+        hasErrors = true;
+    }
+
+    return hasErrors;
+}

@@ -26,7 +26,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Plus, PlusCircleIcon, X } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
-import { cleanUpValues, getPlaceholder } from '@/utils/admin'
+import { cleanUpValues, getPlaceholder, showSyntaxErrors } from '@/utils/admin'
 import test from 'node:test'
 
 const noSpecialCharacters = /^[a-zA-Z0-9\s]*$/
@@ -94,6 +94,8 @@ export default function NewCodingProblemForm({
             output: { type: 'int', value: '' }
         }
     ])
+
+    const [hasSyntaxErrors, setHasSyntaxErrors] = useState(false);
 
     let outputObjectRef = useRef('' as any);
 
@@ -309,7 +311,6 @@ export default function NewCodingProblemForm({
                 case 'bool':
                     return false;
                 case 'jsonType':
-                    // We'll determine this later based on context
                     return null;
                 default:
                     return "";
@@ -323,14 +324,14 @@ export default function NewCodingProblemForm({
 
         switch (format) {
             case 'arrayOfnum': {
-                const values = cleanedInput.split(',');
+                const values = JSON.parse(input);
                 if (!values.every(isValidNumber)) {
                     return null;
                 }
                 return values.map(Number);
             }
             case 'arrayOfStr': {
-                return cleanedInput.split(','); // Split by commas for arrays
+                return JSON.parse(input);
             }
             case 'int': {
                 const values = cleanedInput.split(' ');
@@ -401,7 +402,7 @@ export default function NewCodingProblemForm({
                 if (value.includes(' ')) {
                     toast({
                         title: "Invalid Output Format",
-                        description: "You can only add one float number as output",
+                        description: "You can only add one float value as output",
                         className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
@@ -416,22 +417,18 @@ export default function NewCodingProblemForm({
                 }
                 break;
             }
-            case 'str': {
-                if (value.includes(' ')) {
-                    toast({
-                        title: "Invalid Output Format",
-                        description: "You can only add one string as output",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
-                    });
-                    return false;
-                }
-                break;
-            }
         }
         return true;
     };
 
     const handleSubmit = (values: z.infer<typeof formSchema>) => {
+
+      let hasErrors =  showSyntaxErrors(testCases);
+
+        // If there are validation errors, return early and don't submit
+        if (hasErrors) {
+            return
+        }
 
         const formattedData = {
             title: values.title,
@@ -531,10 +528,13 @@ export default function NewCodingProblemForm({
                     if (!testCase.output.value || testCase.output.value.trim() === '') {
                         processedOutput = [];
                     } else {
-                        processedOutput = testCase.output.value.split(',').map(item => {
-                            const trimmedItem = item.trim();
-                            return testCase.output.type === 'arrayOfnum' ? Number(trimmedItem) : trimmedItem;
-                        });
+                        try {
+                            processedOutput = JSON.parse(testCase.output.value);
+                        }
+                        catch (e) {
+                            console.error('JSON parsing failed:', e);
+                            return null;
+                        }
                     }
                 } else {
                     processedOutput = processInput(testCase.output.value, testCase.output.type);
@@ -553,25 +553,24 @@ export default function NewCodingProblemForm({
             content: {},
         };
 
-        // if (formattedData.testCases.some((tc: any) => tc.inputs.length === 0 || formattedData.testCases.length < 3 || formattedData.testCases.length > 20))
+        // Final check to ensure all test cases are valid
+        if (formattedData.testCases.length !== testCases.length) {
+            toast({
+                title: 'Invalid Test Cases',
+                description: 'Some test cases contain invalid data. Please correct them before submitting.',
+                className: 'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+            });
+            return;
+        }
 
-        // if (formattedData.testCases.some((tc: any) => tc.inputs.length < 5 || tc.inputs.length > 20)) {
-        //     toast({
-        //         title: 'Test Cases Required',
-        //         description: 'Add minimum 5 valid test cases or maximum of 20 valid test cases with proper input and output values.',
-        //         className: 'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-        //     });
-        //     return;
-        // }
-
-        createCodingQuestion(formattedData)
+        createCodingQuestion(formattedData);
         filteredCodingQuestions(
             setCodingQuestions,
             offset,
             position,
             difficulty,
             selectedOptions
-        )
+        );
     }
 
     async function createCodingQuestion(data: any) {
@@ -754,10 +753,10 @@ export default function NewCodingProblemForm({
                                                 {input.type === 'jsonType' && (
                                                     <Textarea
                                                         required
-                                                        placeholder={`(Enter with brackets) - Object/ Array/ Array of Objects/ 2D Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25} or [{"Name": "John}", {"Age": 25}] or {} or []`}
+                                                        placeholder={`(Enter with brackets) - Object/ Array/ Array of Objects/ 2D Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25} or [{"Name": "John"}, {"Age": 25}] or {} or []`}
                                                         value={input.value}
                                                         onChange={(e) => handleInputChange(e, testCaseIndex, inputIndex, testCases, setTestCases)}
-                                                        className="mt-2"
+                                                        className="mt-2 overflow-auto"
                                                     />
                                                 )}
 
@@ -826,7 +825,7 @@ export default function NewCodingProblemForm({
                                         {testCase.output.type === 'jsonType' ? (
                                             <Textarea
                                                 required
-                                                placeholder={`(Enter with brackets) - Object/ Array/ Array of Objects/ 2D Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25} or [{"Name": "John}", {"Age": 25}] or {} or []`}
+                                                placeholder={`(Enter with brackets) - Object/ Array/ Array of Objects/ 2D Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25} or [{"Name": "John"}, {"Age": 25}] or {} or []`}
                                                 value={testCase.output.value}
                                                 onChange={(e) => {
                                                     const newValue = e.target.value;
@@ -837,7 +836,7 @@ export default function NewCodingProblemForm({
                                                     newTestCases[testCaseIndex].output.value = newValue;
                                                     setTestCases(newTestCases);
                                                 }}
-                                                className="flex-grow"
+                                                className="flex-grow overflow-auto"
                                             />
                                         ) : (
                                             <Input

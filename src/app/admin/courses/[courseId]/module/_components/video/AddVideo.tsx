@@ -31,25 +31,47 @@ const getEmbedLink = (url: string) => {
     if (!url) return ''
     try {
         const urlObj = new URL(url) // Parse the URL
+
         if (url.includes('embed')) {
             return url
-        } else if (
-            urlObj.hostname.includes('youtube.com') &&
-            urlObj.searchParams.has('v')
-        ) {
-            // Convert long YouTube URL to embed format
-            return `https://www.youtube.com/embed/${urlObj.searchParams.get(
-                'v'
-            )}`
-        } else if (urlObj.hostname.includes('youtu.be')) {
-            // Convert short YouTube URL to embed format
+        } 
+        
+        // Handle YouTube URLs
+        if (urlObj.hostname.includes('youtube.com') && urlObj.searchParams.has('v')) {
+            return `https://www.youtube.com/embed/${urlObj.searchParams.get('v')}`
+        } 
+        
+        if (urlObj.hostname.includes('youtu.be')) {
             const videoId = urlObj.pathname.slice(1)
             return `https://www.youtube.com/embed/${videoId}`
         }
+
+        // Handle Google Drive Video URLs
+        if (urlObj.hostname.includes('drive.google.com')) {
+            const match = url.match(/\/file\/d\/([^/]+)/)
+            if (match && match[1]) {
+                return `https://drive.google.com/file/d/${match[1]}/preview`
+            }
+        }
+
+        // Handle Dailymotion Full & Shortened URLs
+        if (urlObj.hostname.includes('dailymotion.com')) {
+            const match = url.match(/video\/([^_/]+)/)
+            if (match && match[1]) {
+                return `https://geo.dailymotion.com/player.html?video=${match[1]}`
+            }
+        } 
+
+        if (urlObj.hostname.includes('dai.ly')) {
+            const videoId = urlObj.pathname.slice(1)
+            return `https://geo.dailymotion.com/player.html?video=${videoId}`
+        }
+
     } catch (error) {
-        console.error('Invalid URL:', url, error) // Log invalid URLs for debugging
+        console.error('Invalid URL:', url, error)
     }
-    return '' // Return empty string for invalid URLs
+
+    return '' // Return empty string for unsupported or invalid URLs
 }
 
 const isLinkValid = (link: string) => {
@@ -374,7 +396,7 @@ const AddVideo = ({
                                 type="submit"
                                 className=" flex flex-start  w-[450px]  text-white font-bold py-2 px-4 rounded"
                             >
-                                Embed Video
+                                Save
                             </Button>
                         </form>
                     </Form>
