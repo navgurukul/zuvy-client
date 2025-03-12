@@ -19,7 +19,7 @@ const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
         <div
             style={{
                 maxWidth: '100%',
-                maxHeight: '100%',
+                maxHeight: '80vh',
                 position: 'relative',
                 paddingTop: '56.25%',
             }}
