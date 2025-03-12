@@ -310,9 +310,13 @@ const AddVideo = ({
                                     </FormItem>
                                 )}
                             />
-                            <div className=" flex justify-between items-start relative text-red">
+
+                            <div className="flex justify-start items-start text-left text-xl font-semibold">
+                                Description
+                            </div>
+                            <div className="flex justify-start items-start relative text-red">
                                 {showVideoBox && (
-                                    <div className="flex items-start justify-center ">
+                                    <div className="flex items-start justify-start w-full">
                                         <VideoEmbed
                                             title={
                                                 content?.contentDetails?.[0]
@@ -337,7 +341,7 @@ const AddVideo = ({
                                 name="description"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className=" flex text-left text-xl font-semibold">
+                                        <FormLabel className="flex text-left text-xl font-semibold">
                                             Description
                                         </FormLabel>
                                         <FormControl>
@@ -372,9 +376,9 @@ const AddVideo = ({
                             />
                             <Button
                                 type="submit"
-                                className=" flex flex-start  w-[450px]  text-white font-bold py-2 px-4 rounded"
+                                className=" flex flex-start w-[450px]  text-white font-bold py-2 px-4 rounded"
                             >
-                                Embed Video
+                                Save
                             </Button>
                         </form>
                     </Form>

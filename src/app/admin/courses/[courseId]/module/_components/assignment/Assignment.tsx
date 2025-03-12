@@ -88,6 +88,7 @@ const AddAssignent = ({
 
     const router = useRouter()
     const [title, setTitle] = useState('')
+    const [deadline, setDeadline] = useState<any>()
     const [titles, setTitles] = useState('')
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const { setAssignmentPreviewContent } = getAssignmentPreviewStore()
@@ -96,10 +97,15 @@ const AddAssignent = ({
         resolver: zodResolver(formSchema),
         values: {
             title: title,
-            startDate: setHours(
-                setMinutes(setSeconds(setMilliseconds(new Date(), 0), 0), 0),
-                0
-            ),
+            startDate:
+                deadline ||
+                setHours(
+                    setMinutes(
+                        setSeconds(setMilliseconds(new Date(), 0), 0),
+                        0
+                    ),
+                    0
+                ),
         },
         mode: 'onChange',
     })
@@ -109,6 +115,7 @@ const AddAssignent = ({
             const response = await api.get(
                 `/Content/chapterDetailsById/${content.id}`
             )
+            setDeadline(response.data.completionDate)
             const contentDetails = response.data.contentDetails[0]
             setTitle(contentDetails.title)
             setTitles(contentDetails.title)

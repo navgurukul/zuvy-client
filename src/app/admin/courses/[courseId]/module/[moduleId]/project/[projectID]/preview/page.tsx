@@ -28,8 +28,6 @@ const ProjectPreview = () => {
     const timestamp = projectPreviewContent?.project[0].deadline
     const date = new Date(timestamp)
 
-    console.log('projectPreviewContent', projectPreviewContent)
-
     const options: any = {
         year: 'numeric',
         month: 'long',

@@ -13,6 +13,9 @@ interface QuestionCardProps {
     hardCodingMark?: number
     description: string
     tagId?: number
+    // assessmentOutsourseId?: number
+    assessmentSubmitId?: number
+    codingOutsourseId?: number
     codingQuestions?: boolean
     onSolveChallenge: (id: number) => void
 }
@@ -31,10 +34,13 @@ const QuestionCard = ({
     hardCodingMark,
     description,
     tagId,
+    assessmentSubmitId,
+    codingOutsourseId,
     codingQuestions,
     onSolveChallenge,
 }: QuestionCardProps) => {
     const [tag, setTag] = useState<Tag>()
+    const [action, setAction] = useState<string | null>(null)
 
     async function getAllTags() {
         const response = await api.get('Content/allTags')
@@ -59,6 +65,29 @@ const QuestionCard = ({
             return hardCodingMark
         }
     }
+
+    async function getCodingSubmissionsData(
+        codingOutsourseId: any,
+        assessmentSubmissionId: any,
+        questionId: any
+    ) {
+        try {
+            const res = await api.get(
+                `codingPlatform/submissions/questionId=${questionId}?assessmentSubmissionId=${assessmentSubmissionId}&codingOutsourseId=${codingOutsourseId}`
+            )
+            const action = res.data.data.action
+            setAction(action)
+        } catch (error) {
+            console.error('Error fetching coding submissions data:', error)
+            return null
+        }
+    }
+
+    useEffect(() => {
+        if (codingOutsourseId && assessmentSubmitId && id) {
+            getCodingSubmissionsData(codingOutsourseId, assessmentSubmitId, id)
+        }
+    }, [codingOutsourseId, assessmentSubmitId, id])
 
     return (
         <div className="my-5 p-6 bg-white rounded-xl shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F]">
@@ -91,13 +120,19 @@ const QuestionCard = ({
             </div>
             <div></div>
             <div className="text-secondary justify-end flex items-center">
-                <p
-                    className="cursor-pointer"
-                    onClick={() => onSolveChallenge(id)}
-                >
-                    Solve Challenge
-                </p>
-                <ChevronRight className="cursor-pointer" size={18} />
+                {action === 'submit' ? (
+                    <p className="italic opacity-60">Already Submitted</p>
+                ) : (
+                    <div className="text-secondary justify-end flex items-center">
+                        <p
+                            className="cursor-pointer"
+                            onClick={() => onSolveChallenge(id)}
+                        >
+                            Solve Challenge
+                        </p>
+                        <ChevronRight className="cursor-pointer" size={18} />
+                    </div>
+                )}
             </div>
         </div>
     )

@@ -79,20 +79,23 @@ function CodingQuestionCard({
             key={id}
             className={`container mx-auto rounded-xl shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F] overflow-hidden max-w-2xl min-h-52 mt-4 py-5`}
         >
-            <div className="flex justify-between">
-                <div className="font-bold text-xl my-2 truncate overflow-hidden whitespace-nowrap">
+            <div className="flex items-center justify-between gap-2">
+                <div className="flex-1 min-w-0 font-bold text-xl my-2 truncate overflow-hidden whitespace-nowrap">
                     {title}
                 </div>
-                <div
-                    className={cn(
-                        `font-semibold text-secondary my-2`,
-                        difficultyColor(difficulty)
-                    )}
-                >
-                    {difficulty}
+                <div className="flex items-center gap-4">
+                    <div
+                        className={cn(
+                            `font-semibold text-secondary my-2`,
+                            difficultyColor(difficulty)
+                        )}
+                    >
+                        {difficulty}
+                    </div>
+                    <h2 className="my-2 whitespace-nowrap">Topic: {tagName}</h2>
                 </div>
-                <h2 className="my-2">Topic: {tagName}</h2>
             </div>
+
             <div className="text-xl mt-2 text-start truncate overflow-hidden whitespace-nowrap">
                 Description: {description}
             </div>

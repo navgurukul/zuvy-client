@@ -776,7 +776,7 @@ export default function EditCodingQuestionForm() {
                         control={form.control}
                         name="difficulty"
                         render={({ field }) => (
-                            <FormItem className="space-y-3">
+                            <FormItem className="text-left">
                                 <FormLabel>Difficulty</FormLabel>
                                 <FormControl>
                                     <RadioGroup
