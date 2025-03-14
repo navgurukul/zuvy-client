@@ -152,6 +152,8 @@ function Page({ params }: { params: any }) {
                     toast({
                         title: res.data.status,
                         description: res.data.message,
+                        className:
+                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                 })
         } catch (error) {

@@ -333,10 +333,7 @@ const AddVideo = ({
                                 )}
                             />
 
-                            <div className="flex justify-start items-start text-left text-xl font-semibold">
-                                Description
-                            </div>
-                            <div className="flex justify-start items-start relative text-red">
+                            <div className="flex justify-start items-start">
                                 {showVideoBox && (
                                     <div className="flex items-start justify-start w-full">
                                         <VideoEmbed
@@ -348,11 +345,6 @@ const AddVideo = ({
                                                 content?.contentDetails?.[0]
                                                     ?.links?.[0] || ''
                                             )}
-                                        />
-                                        <X
-                                            className="text-destructive ml-2 cursor-pointer"
-                                            size={17}
-                                            onClick={handleClose}
                                         />
                                     </div>
                                 )}
