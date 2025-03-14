@@ -1,6 +1,5 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
-
 import * as z from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -31,7 +30,7 @@ import {
     getCodingQuestionTags,
     getEditCodingQuestionDialogs,
 } from '@/store/store'
-import { cleanUpValues, getAllCodingQuestions } from '@/utils/admin'
+import { cleanUpValues, getAllCodingQuestions, getPlaceholder, showSyntaxErrors } from '@/utils/admin'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { create } from 'domain'
 
@@ -39,6 +38,11 @@ const noSpecialCharacters = /^[a-zA-Z0-9\s]*$/
 
 const inputTypes = ['str', 'int', 'float', 'arrayOfnum', 'arrayOfStr', 'bool', 'jsonType'] as const
 const outputTypes = ['str', 'int', 'float', 'arrayOfnum', 'arrayOfStr', 'bool', 'jsonType'] as const
+
+function formatFloat(num: any) {
+    num = parseFloat(num);
+    return num % 1 === 0 ? num.toFixed(1) : num;
+}
 
 const formSchema = z.object({
     title: z
@@ -63,12 +67,12 @@ const formSchema = z.object({
             inputs: z.array(
                 z.object({
                     type: z.enum(inputTypes),
-                    value: z.string().min(1, 'Input cannot be empty.')
+                    value: z.string()
                 })
             ),
             output: z.object({
                 type: z.enum(outputTypes),
-                value: z.string().min(1, 'Output cannot be empty.')
+                value: z.string()
             })
         })
     ),
@@ -85,6 +89,8 @@ export default function EditCodingQuestionForm() {
     ])
 
     let outputObjectRef = useRef('' as any);
+
+    const [hasSyntaxErrors, setHasSyntaxErrors] = useState(false);
 
     // Shared validation function for both inputs and outputs
     const validateFieldValue = (value: string, type: string) => {
@@ -133,7 +139,7 @@ export default function EditCodingQuestionForm() {
         }
         return true;
     };
-    
+
     const validateOutputValue = (value: string, type: string): boolean => {
         switch (type) {
             case 'int': {
@@ -198,12 +204,12 @@ export default function EditCodingQuestionForm() {
     ) => {
         const newValue = e.target.value;
         const inputType = testCases[testCaseIndex].inputs[inputIndex].type;
-    
+
         // Only validate the format, not the size
         if (!validateFieldValue(newValue, inputType)) {
             return;
         }
-    
+
         const newTestCases = [...testCases];
         newTestCases[testCaseIndex].inputs[inputIndex].value = newValue;
         setTestCases(newTestCases);
@@ -223,7 +229,7 @@ export default function EditCodingQuestionForm() {
     const handleAddInputType = (testCaseId: number) => {
         // Only allow adding inputs to the first test case
         if (testCaseId !== testCases[0].id) return;
-    
+
         const availableTypes = getAvailableInputTypes(0); // Get all input types
         if (availableTypes.length === 0) {
             toast({
@@ -233,7 +239,7 @@ export default function EditCodingQuestionForm() {
             });
             return;
         }
-    
+
         // Create new input for first test case and propagate to all test cases
         const newInput = { id: Date.now(), type: availableTypes[0], value: '' };
         setTestCases(prevTestCases =>
@@ -354,21 +360,49 @@ export default function EditCodingQuestionForm() {
     }
 
     const processInput = (input: string, format: string) => {
+        // Handle empty input cases first with appropriate defaults
+        if (!input || input.trim() === '') {
+            switch (format) {
+                case 'arrayOfnum':
+                case 'arrayOfStr':
+                    return [];
+                case 'int':
+                    return 0;
+                case 'float':
+                    return 0.0;
+                case 'str':
+                    return "";
+                case 'bool':
+                    return false;
+                case 'jsonType':
+                    // We'll determine this later based on context
+                    return null;
+                default:
+                    return "";
+            }
+        }
+
         const cleanedInput = cleanUpValues(input);
-    
+
         const isValidNumber = (value: string) => !isNaN(Number(value));
         const isValidFloat = (value: string) => !isNaN(parseFloat(value));
-    
+
         switch (format) {
             case 'arrayOfnum': {
-                const values = cleanedInput.split(',');
+                const values = JSON.parse(input);
                 if (!values.every(isValidNumber)) {
                     return null;
                 }
                 return values.map(Number);
             }
             case 'arrayOfStr': {
-                return cleanedInput.split(','); // Split by commas for arrays
+                try {
+                    // Try to parse the JSON string
+                    return JSON.parse(input);
+                } catch (e) {
+                    console.error('Invalid JSON format for arrayOfStr:', input, e);
+                    return [];
+                }
             }
             case 'int': {
                 const values = cleanedInput.split(' ');
@@ -396,7 +430,7 @@ export default function EditCodingQuestionForm() {
                 if (cleanedInput === 'true' || cleanedInput === 'false') {
                     return cleanedInput === 'true';
                 } else {
-                    return null;
+                    return false; // Default to false for invalid booleans
                 }
             }
             case 'jsonType': {
@@ -465,149 +499,53 @@ export default function EditCodingQuestionForm() {
 
     useEffect(() => {
         if (selectCodingQuestion.length > 0) {
-            const question = selectCodingQuestion[0];
-    
-            // Map test cases from API data
-            const mappedTestCases = question.testCases.map((testCase: any) => {
-                // Map each input individually
-                const inputs = testCase.inputs.map((input: any) => ({
-                    id: Date.now() + Math.random(), // Unique ID
-                    type: input.parameterType,
-                    value: input.parameterType === 'jsonType'
-                        ? JSON.stringify(input.parameterValue, null, 2) // Handle JSON inputs
-                        : input.parameterType === 'arrayOfnum' || input.parameterType === 'arrayOfStr'
-                            ? Array.isArray(input.parameterValue)
-                                ? input.parameterValue.join(',') // Join array elements with commas
-                                : String(input.parameterValue)
-                            : String(input.parameterValue) // Handle other types normally
-                }));
-    
-                return {
-                    id: testCase.id,
-                    inputs,
-                    output: {
-                        type: testCase.expectedOutput.parameterType,
-                        value: testCase.expectedOutput.parameterType === 'jsonType'
-                            ? JSON.stringify(testCase.expectedOutput.parameterValue, null, 2)
-                            : testCase.expectedOutput.parameterType === 'arrayOfnum' || testCase.expectedOutput.parameterType === 'arrayOfStr'
-                                ? Array.isArray(testCase.expectedOutput.parameterValue)
-                                    ? testCase.expectedOutput.parameterValue.join(',')
-                                    : String(testCase.expectedOutput.parameterValue)
-                                : String(testCase.expectedOutput.parameterValue)
-                    }
-                };
-            });
-    
-            // Set the test cases state
-            setTestCases(mappedTestCases);
-    
-            // Reset the form with the mapped data
-            form.reset({
-                title: question.title,
-                problemStatement: question.description,
-                constraints: question.constraints,
-                difficulty: question.difficulty,
-                topics: question.tagId,
-                testCases: mappedTestCases,
-            });
-        }
-    }, []);
-
-
-
-    const validateTestCasesBeforeSubmit = (testCases: any[]) => {
-        const firstTestCase = testCases[0];
-    
-        // Validate each test case against the first test case
-        for (let i = 1; i < testCases.length; i++) {
-            const currentTestCase = testCases[i];
-    
-            // Check each input
-            for (let j = 0; j < currentTestCase.inputs.length; j++) {
-                const currentInput = currentTestCase.inputs[j];
-                const firstCaseInput = firstTestCase.inputs[j];
-    
-                if (currentInput.type === 'jsonType') {
-                    try {
-                        const firstJson = JSON.parse(firstCaseInput.value);
-                        const currentJson = JSON.parse(currentInput.value);
-    
-                        // Check if both are arrays
-                        if (Array.isArray(firstJson) && Array.isArray(currentJson)) {
-                            if (firstJson.length !== currentJson.length) {
-                                toast({
-                                    title: "JSON Array Size Mismatch",
-                                    description: `Test case ${i + 1} JSON array should have ${firstJson.length} elements to match the first test case`,
-                                    className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
-                                });
-                                return false;
-                            }
-                        }
-                    } catch (e) {
-                        toast({
-                            title: "Invalid JSON",
-                            description: `Invalid JSON in test case ${i + 1}`,
-                            className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
-                        });
-                        return false;
-                    }
-                } else if (['int', 'str', 'float'].includes(currentInput.type)) {
-                    // No need to split by spaces, validate the entire input as-is
-                    if (currentInput.value.trim() === '') {
-                        toast({
-                            title: "Input Cannot Be Empty",
-                            description: `Test case ${i + 1} input cannot be empty`,
-                            className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
-                        });
-                        return false;
-                    }
-                }
+          const question = selectCodingQuestion[0];
+          
+          const mappedTestCases = question.testCases.map((testCase: any) => ({
+            id: testCase.id,
+            inputs: testCase.inputs.map((input: any) => ({
+              id: Date.now() + Math.random(),
+              type: input.parameterType,
+              value: input.parameterType === 'jsonType'
+                ? JSON.stringify(input.parameterValue, null, 2)
+                : input.parameterType === 'arrayOfnum' || input.parameterType === 'arrayOfStr'
+                  ? Array.isArray(input.parameterValue)
+                    ? JSON.stringify(input.parameterValue) // This preserves quotes around strings
+                    : String(input.parameterValue)
+                  : String(input.parameterValue)
+            })),
+            output: {
+              type: testCase.expectedOutput.parameterType,
+              value: testCase.expectedOutput.parameterType === 'jsonType'
+                ? JSON.stringify(testCase.expectedOutput.parameterValue, null, 2)
+                : testCase.expectedOutput.parameterType === 'arrayOfnum' || testCase.expectedOutput.parameterType === 'arrayOfStr'
+                  ? Array.isArray(testCase.expectedOutput.parameterValue)
+                    ? JSON.stringify(testCase.expectedOutput.parameterValue)
+                    : String(testCase.expectedOutput.parameterValue)
+                  : String(testCase.expectedOutput.parameterValue)
             }
-    
-            // Check output
-            if (currentTestCase.output.type === 'jsonType') {
-                try {
-                    const firstJson = JSON.parse(firstTestCase.output.value);
-                    const currentJson = JSON.parse(currentTestCase.output.value);
-    
-                    if (Array.isArray(firstJson) && Array.isArray(currentJson)) {
-                        if (firstJson.length !== currentJson.length) {
-                            toast({
-                                title: "Output JSON Array Size Mismatch",
-                                description: `Test case ${i + 1} output JSON array should have ${firstJson.length} elements to match the first test case`,
-                                className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
-                            });
-                            return false;
-                        }
-                    }
-                } catch (e) {
-                    toast({
-                        title: "Invalid Output JSON",
-                        description: `Invalid JSON in test case ${i + 1} output`,
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
-                    });
-                    return false;
-                }
-            } else if (['int', 'str', 'float'].includes(currentTestCase.output.type)) {
-                // No need to split by spaces, validate the entire output as-is
-                if (currentTestCase.output.value.trim() === '') {
-                    toast({
-                        title: "Output Cannot Be Empty",
-                        description: `Test case ${i + 1} output cannot be empty`,
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
-                    });
-                    return false;
-                }
-            }
+          }));
+      
+          setTestCases(mappedTestCases);
+          form.reset({
+            title: question.title,
+            problemStatement: question.description,
+            constraints: question.constraints,
+            difficulty: question.difficulty,
+            topics: question.tagId,
+            testCases: mappedTestCases,
+          });
         }
-    
-        return true;
-    };
+      }, []);
+
 
     const handleEditSubmit = (values: z.infer<typeof formSchema>) => {
-        // First validate test cases
-        if (!validateTestCasesBeforeSubmit(testCases)) {
-            return; // Stop submission if validation fails
+
+        let hasErrors =  showSyntaxErrors(testCases);
+
+        // If there are validation errors, return early and don't submit
+        if (hasErrors) {
+            return
         }
 
         const formattedData = {
@@ -639,14 +577,34 @@ export default function EditCodingQuestionForm() {
                         const processedValue = processInput(input.value, input.type);
 
                         if (processedValue === null) {
-                            console.error('Processing returned null for:', input);
-                            return [];
+                            // For null values (invalid inputs), use appropriate defaults
+                            const defaultValue = input.type === 'arrayOfnum' || input.type === 'arrayOfStr'
+                                ? []
+                                : input.type === 'int'
+                                    ? 0
+                                    : input.type === 'float'
+                                        ? 0.0
+                                        : input.type === 'str'
+                                            ? ""
+                                            : false;
+
+                            return [{
+                                parameterType: input.type,
+                                parameterValue: defaultValue,
+                                parameterName: String.fromCharCode(97 + parameterNameCounter++)
+                            }];
                         }
 
                         if (input.type === 'arrayOfnum' || input.type === 'arrayOfStr') {
                             return [{
                                 parameterType: input.type,
                                 parameterValue: processedValue,
+                                parameterName: String.fromCharCode(97 + parameterNameCounter++)
+                            }];
+                        } else if (input.type === 'float') {
+                            return [{
+                                parameterType: input.type,
+                                parameterValue: formatFloat(processedValue),
                                 parameterName: String.fromCharCode(97 + parameterNameCounter++)
                             }];
                         }
@@ -680,15 +638,26 @@ export default function EditCodingQuestionForm() {
                         console.error('Output JSON parsing failed:', e);
                         return null;
                     }
-                } else {
-                    if (testCase.output.type === 'arrayOfnum' || testCase.output.type === 'arrayOfStr') {
-                        processedOutput = testCase.output.value.split(',').map((item: any) => {
-                            const trimmedItem = item.trim();
-                            return testCase.output.type === 'arrayOfnum' ? Number(trimmedItem) : trimmedItem;
-                        });
+                } else if (testCase.output.type === 'float') {
+                    processedOutput = formatFloat(testCase.output.value);
+                }
+                else if (testCase.output.type === 'arrayOfnum' || testCase.output.type === 'arrayOfStr') {
+                    if (!testCase.output.value || testCase.output.value.trim() === '') {
+                        processedOutput = [];
                     } else {
-                        processedOutput = processInput(testCase.output.value, testCase.output.type);
+                        try {
+                            processedOutput = JSON.parse(testCase.output.value);
+                        }
+                        catch (e) {
+                            toast({
+                                title: "Invalid Output Format",
+                                description: "Please enter a valid array format",
+                            })
+                      return null;
+                        }
                     }
+                } else {
+                    processedOutput = processInput(testCase.output.value, testCase.output.type);
                 }
 
                 return {
@@ -872,13 +841,15 @@ export default function EditCodingQuestionForm() {
 
                                                     {input.type === 'jsonType' ? (
                                                         <Textarea
-                                                            placeholder={`Input ${inputIndex + 1} (JSON)`}
-                                                            value={input.value} // Bind to the state
-                                                            onChange={(e) => handleInputChange(e, testCaseIndex, inputIndex, testCases, setTestCases)} // Handle changes
+                                                            required
+                                                            placeholder={`(Enter with brackets) - Object/ Array/ Array of Objects/ 2D Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25} or [{"Name": "John"}, {"Age": 25}] or {} or []`}
+                                                            value={input.value} 
+                                                            onChange={(e) => handleInputChange(e, testCaseIndex, inputIndex, testCases, setTestCases)}
+                                                            className='overflow-auto'
                                                         />
                                                     ) : (
                                                         <Input
-                                                            placeholder={`Input ${inputIndex + 1}`}
+                                                            placeholder={getPlaceholder(input.type)}
                                                             value={input.value}
                                                             onChange={(e) => handleInputChange(e, testCaseIndex, inputIndex, testCases, setTestCases)}
                                                         />
@@ -944,7 +915,7 @@ export default function EditCodingQuestionForm() {
                                         {testCase.output.type === 'jsonType' ? (
                                             <Textarea
                                                 required
-                                                placeholder="Output (JSON)"
+                                                placeholder={`(Enter with brackets) - Object/ Array/ Array of Objects/ 2D Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25} or [{"Name": "John"}, {"Age": 25}] or {} or []`}
                                                 value={testCase.output.value}
                                                 onChange={(e) => {
                                                     const newValue = e.target.value;
@@ -955,12 +926,11 @@ export default function EditCodingQuestionForm() {
                                                     newTestCases[testCaseIndex].output.value = newValue;
                                                     setTestCases(newTestCases);
                                                 }}
-                                                className="flex-grow"
+                                                className='overflow-auto flex-grow'
                                             />
                                         ) : (
                                             <Input
-                                                required
-                                                placeholder="Output"
+                                                placeholder={getPlaceholder(testCase.output.type)}
                                                 value={testCase.output.value}
                                                 onChange={(e) => {
                                                     const newValue = e.target.value;

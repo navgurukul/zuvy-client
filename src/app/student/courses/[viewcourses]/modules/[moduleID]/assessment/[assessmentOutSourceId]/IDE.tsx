@@ -136,14 +136,16 @@ const IDE: React.FC<IDEProps> = ({
     }
 
     const formatValue = (value: any, type: string): string => {
+        if (type === 'jsonType') {
+            return JSON.stringify(value, null, 2)
+        }
+
         if (Array.isArray(value)) {
             if (type === 'arrayOfNum') {
-                return `[${(value as number[]).join(', ')}]`
+                return `[${value.join(', ')}]`
             }
             if (type === 'arrayOfStr') {
-                return `[${(value as string[])
-                    .map((v) => `"${v}"`)
-                    .join(', ')}]`
+                return `[${value.map((v) => `"${v}"`).join(', ')}]`
             }
             return `[${value.join(', ')}]`
         }
@@ -453,11 +455,6 @@ const IDE: React.FC<IDEProps> = ({
                                                                       {
                                                                           input.parameterName
                                                                       }{' '}
-                                                                      (
-                                                                      {
-                                                                          input.parameterType
-                                                                      }
-                                                                      ) ={' '}
                                                                       {formatValue(
                                                                           input.parameterValue,
                                                                           input.parameterType
@@ -498,12 +495,6 @@ const IDE: React.FC<IDEProps> = ({
                                                         <span className="font-medium">
                                                             Expected Output:
                                                         </span>{' '}
-                                                        {
-                                                            testCase
-                                                                .expectedOutput
-                                                                .parameterType
-                                                        }{' '}
-                                                        {'='}{' '}
                                                         {formatValue(
                                                             testCase
                                                                 .expectedOutput

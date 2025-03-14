@@ -26,7 +26,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Plus, PlusCircleIcon, X } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
-import { cleanUpValues } from '@/utils/admin'
+import { cleanUpValues, getPlaceholder, showSyntaxErrors } from '@/utils/admin'
 import test from 'node:test'
 
 const noSpecialCharacters = /^[a-zA-Z0-9\s]*$/
@@ -57,12 +57,12 @@ const formSchema = z.object({
             inputs: z.array(
                 z.object({
                     type: z.enum(inputTypes),
-                    value: z.string().min(1, 'Input cannot be empty.')
+                    value: z.string()
                 })
             ),
             output: z.object({
                 type: z.enum(outputTypes),
-                value: z.string().min(1, 'Output cannot be empty.')
+                value: z.string()
             })
         })
     ),
@@ -95,7 +95,14 @@ export default function NewCodingProblemForm({
         }
     ])
 
+    const [hasSyntaxErrors, setHasSyntaxErrors] = useState(false);
+
     let outputObjectRef = useRef('' as any);
+
+    function formatFloat(num: any) {
+        num = parseFloat(num);
+        return num % 1 === 0 ? num.toFixed(1) : num;
+    }
 
     const getAvailableInputTypes = (testCaseIndex: number) => {
         const usedTypes = testCases[testCaseIndex].inputs.map(input => input.type);
@@ -105,9 +112,9 @@ export default function NewCodingProblemForm({
     const handleAddInputType = (testCaseId: number) => {
         // Only allow adding inputs to the first test case
         if (testCaseId !== testCases[0].id) return;
-    
+
         const availableTypes = getAvailableInputTypes(0); // Get all input types
-    
+
         // Create new input for first test case and propagate to all test cases
         const newInput = { id: Date.now(), type: availableTypes[0], value: '' };
         setTestCases(prevTestCases =>
@@ -144,55 +151,14 @@ export default function NewCodingProblemForm({
         }
     }
 
-    const validateInputSize = (value: string, type: string, inputIndex: number, testCaseIndex: number, testCases: any[]) => {
-        if (testCaseIndex === 0) return true;
-
-        const firstTestCase = testCases[0];
-        const firstTestCaseInput = firstTestCase.inputs[inputIndex];
-
-        if (!firstTestCaseInput.value.trim()) return true;
-
-        switch (type) {
-            case 'int':
-            case 'float':
-            case 'str': {
-                const currentValues = value.trim().split(' ').filter(Boolean);
-                const referenceValues = firstTestCaseInput.value.trim().split(' ').filter(Boolean);
-                return currentValues.length <= referenceValues.length;
-            }
-            case 'bool': {
-                return value === 'true' || value === 'false' || value === '';
-            }
-            case 'jsonType': {
-                try {
-                    JSON.parse(value);
-                    return true;
-                } catch (e) {
-                    return false;
-                }
-            }
-            default:
-                return true;
-        }
-    };
-
     // Shared validation function for both inputs and outputs
     const validateFieldValue = (value: string, type: string) => {
         switch (type) {
             case 'arrayOfStr':
             case 'arrayOfnum': {
-                if (value.includes(' ')) {
-                    toast({
-                        title: "Invalid Format",
-                        description: "Please use commas to separate elements in an array (e.g., 1,2,3) or (e.g., hello,world)",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
-                    });
-                    return false;
-                }
                 break;
             }
             case 'str': {
-                // Allow strings with spaces, treat the entire input as a single string
                 break;
             }
             case 'int': {
@@ -241,12 +207,12 @@ export default function NewCodingProblemForm({
     ) => {
         const newValue = e.target.value;
         const inputType = testCases[testCaseIndex].inputs[inputIndex].type;
-    
+
         // Only validate the format, not the size
         if (!validateFieldValue(newValue, inputType)) {
             return;
         }
-    
+
         const newTestCases = [...testCases];
         newTestCases[testCaseIndex].inputs[inputIndex].value = newValue;
         setTestCases(newTestCases);
@@ -280,7 +246,7 @@ export default function NewCodingProblemForm({
                             key={type}
                             value={type}
 
-                            
+
                         >
                             {type} {!isCurrentType && isUsed}
                         </SelectItem>
@@ -330,21 +296,42 @@ export default function NewCodingProblemForm({
     })
 
     const processInput = (input: string, format: string) => {
+        // Handle empty input cases first with appropriate defaults
+        if (!input || input.trim() === '') {
+            switch (format) {
+                case 'arrayOfnum':
+                case 'arrayOfStr':
+                    return [];
+                case 'int':
+                    return 0;
+                case 'float':
+                    return 0.0;
+                case 'str':
+                    return "";
+                case 'bool':
+                    return false;
+                case 'jsonType':
+                    return null;
+                default:
+                    return "";
+            }
+        }
+
         const cleanedInput = cleanUpValues(input);
-    
+
         const isValidNumber = (value: string) => !isNaN(Number(value));
         const isValidFloat = (value: string) => !isNaN(parseFloat(value));
-    
+
         switch (format) {
             case 'arrayOfnum': {
-                const values = cleanedInput.split(',');
+                const values = JSON.parse(input);
                 if (!values.every(isValidNumber)) {
                     return null;
                 }
                 return values.map(Number);
             }
             case 'arrayOfStr': {
-                return cleanedInput.split(','); // Split by commas for arrays
+                return JSON.parse(input);
             }
             case 'int': {
                 const values = cleanedInput.split(' ');
@@ -372,7 +359,7 @@ export default function NewCodingProblemForm({
                 if (cleanedInput === 'true' || cleanedInput === 'false') {
                     return cleanedInput === 'true';
                 } else {
-                    return null;
+                    return false; // Default to false for invalid booleans
                 }
             }
             case 'jsonType': {
@@ -390,97 +377,7 @@ export default function NewCodingProblemForm({
         }
     };
 
-    const validateTestCasesBeforeSubmit = (testCases: any[]) => {
-        const firstTestCase = testCases[0];
-    
-        // Validate each test case against the first test case
-        for (let i = 1; i < testCases.length; i++) {
-            const currentTestCase = testCases[i];
-    
-            // Check each input
-            for (let j = 0; j < currentTestCase.inputs.length; j++) {
-                const currentInput = currentTestCase.inputs[j];
-                const firstCaseInput = firstTestCase.inputs[j];
-    
-                if (currentInput.type === 'jsonType') {
-                    try {
-                        const firstJson = JSON.parse(firstCaseInput.value);
-                        const currentJson = JSON.parse(currentInput.value);
-    
-                        // Check if both are arrays
-                        if (Array.isArray(firstJson) && Array.isArray(currentJson)) {
-                            if (firstJson.length !== currentJson.length) {
-                                toast({
-                                    title: "JSON Array Size Mismatch",
-                                    description: `Test case ${i + 1} JSON array should have ${firstJson.length} elements to match the first test case`,
-                                    className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
-                                });
-                                return false;
-                            }
-                        }
-                    } catch (e) {
-                        toast({
-                            title: "Invalid JSON",
-                            description: `Invalid JSON in test case ${i + 1}`,
-                            className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
-                        });
-                        return false;
-                    }
-                } else if (['int', 'str', 'float'].includes(currentInput.type)) {
-                    // No need to split by spaces, validate the entire input as-is
-                    if (currentInput.value.trim() === '') {
-                        toast({
-                            title: "Input Cannot Be Empty",
-                            description: `Test case ${i + 1} input cannot be empty`,
-                            className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
-                        });
-                        return false;
-                    }
-                }
-            }
-    
-            // Check output
-            if (currentTestCase.output.type === 'jsonType') {
-                try {
-                    const firstJson = JSON.parse(firstTestCase.output.value);
-                    const currentJson = JSON.parse(currentTestCase.output.value);
-    
-                    if (Array.isArray(firstJson) && Array.isArray(currentJson)) {
-                        if (firstJson.length !== currentJson.length) {
-                            toast({
-                                title: "Output JSON Array Size Mismatch",
-                                description: `Test case ${i + 1} output JSON array should have ${firstJson.length} elements to match the first test case`,
-                                className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
-                            });
-                            return false;
-                        }
-                    }
-                } catch (e) {
-                    toast({
-                        title: "Invalid Output JSON",
-                        description: `Invalid JSON in test case ${i + 1} output`,
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
-                    });
-                    return false;
-                }
-            } else if (['int', 'str', 'float'].includes(currentTestCase.output.type)) {
-                // No need to split by spaces, validate the entire output as-is
-                if (currentTestCase.output.value.trim() === '') {
-                    toast({
-                        title: "Output Cannot Be Empty",
-                        description: `Test case ${i + 1} output cannot be empty`,
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
-                    });
-                    return false;
-                }
-            }
-        }
-    
-        return true;
-    }
-    
-
-        const validateOutputValue = (value: string, type: string): boolean => {
+    const validateOutputValue = (value: string, type: string): boolean => {
         switch (type) {
             case 'int': {
                 if (value.includes(' ')) {
@@ -505,7 +402,7 @@ export default function NewCodingProblemForm({
                 if (value.includes(' ')) {
                     toast({
                         title: "Invalid Output Format",
-                        description: "You can only add one float number as output",
+                        description: "You can only add one float value as output",
                         className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
@@ -520,26 +417,17 @@ export default function NewCodingProblemForm({
                 }
                 break;
             }
-            case 'str': {
-                if (value.includes(' ')) {
-                    toast({
-                        title: "Invalid Output Format",
-                        description: "You can only add one string as output",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
-                    });
-                    return false;
-                }
-                break;
-            }
         }
         return true;
     };
 
     const handleSubmit = (values: z.infer<typeof formSchema>) => {
 
-          // First validate test cases
-          if (!validateTestCasesBeforeSubmit(testCases)) {
-            return; // Stop submission if validation fails
+      let hasErrors =  showSyntaxErrors(testCases);
+
+        // If there are validation errors, return early and don't submit
+        if (hasErrors) {
+            return
         }
 
         const formattedData = {
@@ -571,14 +459,34 @@ export default function NewCodingProblemForm({
                         const processedValue = processInput(input.value, input.type);
 
                         if (processedValue === null) {
-                            console.error('Processing returned null for:', input);
-                            return [];
+                            // For null values (invalid inputs), use appropriate defaults
+                            const defaultValue = input.type === 'arrayOfnum' || input.type === 'arrayOfStr'
+                                ? []
+                                : input.type === 'int'
+                                    ? 0
+                                    : input.type === 'float'
+                                        ? 0.0
+                                        : input.type === 'str'
+                                            ? ""
+                                            : false;
+
+                            return [{
+                                parameterType: input.type,
+                                parameterValue: defaultValue,
+                                parameterName: String.fromCharCode(97 + parameterNameCounter++)
+                            }];
                         }
 
                         if (input.type === 'arrayOfnum' || input.type === 'arrayOfStr') {
                             return [{
                                 parameterType: input.type,
                                 parameterValue: processedValue,
+                                parameterName: String.fromCharCode(97 + parameterNameCounter++)
+                            }];
+                        } else if (input.type === 'float') {
+                            return [{
+                                parameterType: input.type,
+                                parameterValue: formatFloat(processedValue),
                                 parameterName: String.fromCharCode(97 + parameterNameCounter++)
                             }];
                         }
@@ -612,16 +520,24 @@ export default function NewCodingProblemForm({
                         console.error('Output JSON parsing failed:', e);
                         return null;
                     }
-                } else {
-                    // Process array types specifically
-                    if (testCase.output.type === 'arrayOfnum' || testCase.output.type === 'arrayOfStr') {
-                        processedOutput = testCase.output.value.split(',').map(item => {
-                            const trimmedItem = item.trim();
-                            return testCase.output.type === 'arrayOfnum' ? Number(trimmedItem) : trimmedItem;
-                        });
+                }
+                else if (testCase.output.type === 'float') {
+                    processedOutput = formatFloat(testCase.output.value);
+                }
+                else if (testCase.output.type === 'arrayOfnum' || testCase.output.type === 'arrayOfStr') {
+                    if (!testCase.output.value || testCase.output.value.trim() === '') {
+                        processedOutput = [];
                     } else {
-                        processedOutput = processInput(testCase.output.value, testCase.output.type);
+                        try {
+                            processedOutput = JSON.parse(testCase.output.value);
+                        }
+                        catch (e) {
+                            console.error('JSON parsing failed:', e);
+                            return null;
+                        }
                     }
+                } else {
+                    processedOutput = processInput(testCase.output.value, testCase.output.type);
                 }
 
                 return {
@@ -637,25 +553,24 @@ export default function NewCodingProblemForm({
             content: {},
         };
 
-        // if (formattedData.testCases.some((tc: any) => tc.inputs.length === 0 || formattedData.testCases.length < 3 || formattedData.testCases.length > 20))
-
-        if (formattedData.testCases.some((tc: any) => tc.inputs.length === 0)) {
+        // Final check to ensure all test cases are valid
+        if (formattedData.testCases.length !== testCases.length) {
             toast({
-                title: 'Test Cases Required',
-                description: 'Add minimum 3 valid test cases or maximum of 20 valid test cases with proper input and output values.',
+                title: 'Invalid Test Cases',
+                description: 'Some test cases contain invalid data. Please correct them before submitting.',
                 className: 'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             });
             return;
         }
 
-        createCodingQuestion(formattedData)
+        createCodingQuestion(formattedData);
         filteredCodingQuestions(
             setCodingQuestions,
             offset,
             position,
             difficulty,
             selectedOptions
-        )
+        );
     }
 
     async function createCodingQuestion(data: any) {
@@ -830,17 +745,18 @@ export default function NewCodingProblemForm({
                                                 />
 
                                                 <Input
-                                                    placeholder={`Input ${inputIndex + 1}`}
+                                                    placeholder={getPlaceholder(input.type)}
                                                     value={input.value}
                                                     onChange={(e) => handleInputChange(e, testCaseIndex, inputIndex, testCases, setTestCases)}
                                                     className={input.type === 'jsonType' ? 'hidden' : ''} // Hide regular input for JSON type
                                                 />
                                                 {input.type === 'jsonType' && (
                                                     <Textarea
-                                                        placeholder={`Input ${inputIndex + 1} (JSON)`}
+                                                        required
+                                                        placeholder={`(Enter with brackets) - Object/ Array/ Array of Objects/ 2D Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25} or [{"Name": "John"}, {"Age": 25}] or {} or []`}
                                                         value={input.value}
                                                         onChange={(e) => handleInputChange(e, testCaseIndex, inputIndex, testCases, setTestCases)}
-                                                        className="mt-2"
+                                                        className="mt-2 overflow-auto"
                                                     />
                                                 )}
 
@@ -908,7 +824,8 @@ export default function NewCodingProblemForm({
 
                                         {testCase.output.type === 'jsonType' ? (
                                             <Textarea
-                                                placeholder="Output (JSON)"
+                                                required
+                                                placeholder={`(Enter with brackets) - Object/ Array/ Array of Objects/ 2D Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25} or [{"Name": "John"}, {"Age": 25}] or {} or []`}
                                                 value={testCase.output.value}
                                                 onChange={(e) => {
                                                     const newValue = e.target.value;
@@ -919,11 +836,11 @@ export default function NewCodingProblemForm({
                                                     newTestCases[testCaseIndex].output.value = newValue;
                                                     setTestCases(newTestCases);
                                                 }}
-                                                className="flex-grow"
+                                                className="flex-grow overflow-auto"
                                             />
                                         ) : (
                                             <Input
-                                                placeholder="Output"
+                                                placeholder={getPlaceholder(testCase.output.type)}
                                                 value={testCase.output.value}
                                                 onChange={(e) => {
                                                     const newValue = e.target.value;
