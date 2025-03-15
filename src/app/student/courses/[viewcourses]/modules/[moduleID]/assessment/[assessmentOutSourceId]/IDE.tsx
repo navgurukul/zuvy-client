@@ -239,7 +239,6 @@ const IDE: React.FC<IDEProps> = ({
             ) {
                 setLoading(false)
                 setCodeResult(error.response?.data?.data)
-                console.log('codeResult', error.response?.data?.data)
             }
             toast({
                 title: 'Failed',
