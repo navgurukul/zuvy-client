@@ -214,12 +214,8 @@ const IDE: React.FC<IDEProps> = ({
             setCodeError('')
             setLoading(false)
         } catch (error: any) {
-            if (
-                error.response?.data?.data?.[0]?.stderr
-            ) {
                 setLoading(false)
                 setCodeResult(error.response?.data?.data)
-            }
             toast({
                 title: 'Failed',
                 description:
