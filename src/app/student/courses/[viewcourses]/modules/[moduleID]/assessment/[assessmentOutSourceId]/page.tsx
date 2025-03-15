@@ -266,8 +266,6 @@ function Page({
                 id
             )
 
-            // console.log('action in handleSolveChallenge', action)
-
             if (action === 'submit') {
                 // toast({
                 //     title: 'Coding Question Already Submitted',
@@ -479,11 +477,6 @@ function Page({
         setIsFullScreen(true)
     }
 
-    // console.log(
-    //     'assessmentData?.codingQuestions',
-    //     assessmentData?.codingQuestions
-    // )
-
     return (
         <div
             onPaste={(e) => handleCopyPasteAttempt(e)}
@@ -532,7 +525,7 @@ function Page({
                             <div className="flex justify-center">
                                 <div className="flex flex-col gap-5 w-1/2 text-left">
                                     <h2 className="font-bold">
-                                        Testing Your Knowledge jkhjk
+                                        Testing Your Knowledge
                                     </h2>
                                     <p className="deadline flex items-center gap-2">
                                         <Clock size={18} />

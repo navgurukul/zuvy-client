@@ -199,8 +199,6 @@ const Assessment = ({
                     {isAssessmentStarted &&
                         chapterContent.status === 'Pending' && (
                             <p className="text-md font-semibold text-red-500">
-                                {/* You cannot see your result as you press the back
-                                button without submitting the code */}
                                 You have not submitted the assessment properly.
                             </p>
                         )}
