@@ -319,7 +319,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                                     variant={
                                                                         'outline'
                                                                     }
-                                                                    className={`w-[230px]  text-left font-normal ${
+                                                                    className={`w-[230px] text-left font-normal ${
                                                                         !field.value &&
                                                                         'text-muted-foreground'
                                                                     }`}
@@ -334,7 +334,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                                 </Button>
                                                             </FormControl>
                                                         </DialogTrigger>
-                                                        <DialogClose asChild>
+                                                        <DialogClose>
                                                             <DialogContent className="w-auto p-4">
                                                                 <Calendar
                                                                     mode="single"

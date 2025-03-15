@@ -173,11 +173,14 @@ const Assessment = ({
                                     appear soon!
                                 </p>
                             )}
-
                         </div>
                     )}
                     {hasQuestions && (
-                        <p className="flex items-center gap-2 text-sm text-gray-700">
+                        <p
+                            className={`flex items-center gap-2 text-sm text-gray-700 ${
+                                isAssessmentStarted && 'mb-10'
+                            }`}
+                        >
                             <Timer size={18} className="text-gray-500" />
                             Test Time:{' '}
                             <span className="font-semibold">
@@ -192,13 +195,21 @@ const Assessment = ({
                             </span>
                         </p>
                     )}
+
+                    {isAssessmentStarted &&
+                        chapterContent.status === 'Pending' && (
+                            <p className="text-md font-semibold text-red-500">
+                                You have not submitted the assessment properly.
+                            </p>
+                        )}
+
                     {isAssessmentStarted && (
                         <div
                             className={`${
                                 isPassed
                                     ? 'bg-green-100 border-green-500 h-[100px]'
                                     : 'bg-red-100 border-red-500 h-[120px]'
-                            } flex justify-between mt-10 max-w-lg p-5 rounded-lg border`}
+                            } flex justify-between max-w-lg p-5 rounded-lg border`}
                         >
                             <div className="flex gap-3">
                                 <div className="mt-2">
@@ -211,8 +222,8 @@ const Assessment = ({
                                 </div>
                                 <div>
                                     <p className="text-lg font-semibold">
-                                    Your Score: {Math.trunc(percentage) || 0}/100
-
+                                        Your Score:{' '}
+                                        {Math.trunc(percentage) || 0}/100
                                     </p>
                                     <p>
                                         {isPassed
@@ -235,13 +246,13 @@ const Assessment = ({
                             </Button>
                         </div>
                     )}
-                    {isAssessmentStarted &&
+                    {/* {isAssessmentStarted &&
                         isTimeOver &&
                         chapterContent.status === 'Pending' && (
                             <p className="text-red-500 mt-4">
                                 You have not submitted the assessment properly.
                             </p>
-                        )}
+                        )} */}
                 </div>
             </div>
 

@@ -104,7 +104,6 @@ const Assignments = ({ courseId, debouncedSearch }: Props) => {
         fetchData()
     }
 
-    console.log('assignmentData', assignmentData)
     return (
         <div className="">
             {assignmentData?.length > 0 ? (

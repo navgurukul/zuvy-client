@@ -332,9 +332,10 @@ const AddVideo = ({
                                     </FormItem>
                                 )}
                             />
-                            <div className=" flex justify-between items-start relative text-red">
+
+                            <div className="flex justify-start items-start">
                                 {showVideoBox && (
-                                    <div className="flex items-start justify-center ">
+                                    <div className="flex items-start justify-start w-full">
                                         <VideoEmbed
                                             title={
                                                 content?.contentDetails?.[0]
@@ -345,11 +346,6 @@ const AddVideo = ({
                                                     ?.links?.[0] || ''
                                             )}
                                         />
-                                        <X
-                                            className="text-destructive ml-2 cursor-pointer"
-                                            size={17}
-                                            onClick={handleClose}
-                                        />
                                     </div>
                                 )}
                             </div>
@@ -359,7 +355,7 @@ const AddVideo = ({
                                 name="description"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className=" flex text-left text-xl font-semibold">
+                                        <FormLabel className="flex text-left text-xl font-semibold">
                                             Description
                                         </FormLabel>
                                         <FormControl>
@@ -394,7 +390,7 @@ const AddVideo = ({
                             />
                             <Button
                                 type="submit"
-                                className=" flex flex-start  w-[450px]  text-white font-bold py-2 px-4 rounded"
+                                className=" flex flex-start w-[450px]  text-white font-bold py-2 px-4 rounded"
                             >
                                 Save
                             </Button>

@@ -89,6 +89,7 @@ const IDE: React.FC<IDEProps> = ({
         },
     })
     const [isDisabled, setIsDisabled] = useState(false)
+    const [isSubmitted, setIsSubmitted] = useState(false)
     const [currentCode, setCurrentCode] = useState('')
     const [result, setResult] = useState('')
     const [codeResult, setCodeResult] = useState<any>([])
@@ -101,7 +102,6 @@ const IDE: React.FC<IDEProps> = ({
     const router = useRouter()
     const { toast } = useToast()
     const [loading, setLoading] = useState(false)
-    const [isSubmitted, setIsSubmitted] = useState(false)
 
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
@@ -137,9 +137,9 @@ const IDE: React.FC<IDEProps> = ({
 
     const formatValue = (value: any, type: string): string => {
         if (type === 'jsonType') {
-            return JSON.stringify(value, null, 2);
+            return JSON.stringify(value, null, 2)
         }
-    
+
         if (Array.isArray(value)) {
             if (type === 'arrayOfNum') {
                 return `[${value.join(', ')}]`;
@@ -167,7 +167,6 @@ const IDE: React.FC<IDEProps> = ({
     ) => {
         e.preventDefault()
         setLoading(true)
-        setIsDisabled(true)
 
         try {
             const response = await api.post(
@@ -194,34 +193,37 @@ const IDE: React.FC<IDEProps> = ({
             )
 
             if (action === 'submit') {
+                setIsDisabled(true)
                 setIsSubmitted(true)
-            }
-
-            if (allTestCasesPassed && action === 'submit') {
                 toast({
-                    title: `Test Cases Passed Solution submitted`,
+                    title: 'You have submitted the question. You can go back and do other questions',
                     className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+                        'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-start border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
+            }
+            if (allTestCasesPassed && action === 'submit') {
+                // toast({
+                //     title: `Test Cases Passed Solution submitted`,
+                //     className:
+                //         'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+                // })
                 getAssessmentData()
 
                 if (onBack) {
                     onBack()
                 }
             } else if (allTestCasesPassed && action === 'run') {
-                setIsDisabled(false)
                 toast({
                     title: `Test Cases Passed`,
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
-            } else {
-                setIsDisabled(false)
-                toast({
-                    title: 'Test Cases Failed',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                })
+                // } else {
+                //     toast({
+                //         title: 'Test Cases Failed',
+                //         className:
+                //             'text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                //     })
             }
 
             setCodeError('')
@@ -229,8 +231,8 @@ const IDE: React.FC<IDEProps> = ({
             // Trigger re-render for the output window
             setResult(
                 response.data.data[0].stdOut ||
-                response.data.data[0].stdout ||
-                'No Output Available'
+                    response.data.data[0].stdout ||
+                    'No Output Available'
             )
             setLoading(false)
         } catch (error: any) {
@@ -245,7 +247,7 @@ const IDE: React.FC<IDEProps> = ({
             })
             setCodeError(
                 error.response?.data?.data?.[0]?.stderr ||
-                'Error occurred during submission. Network connection lost.'
+                    'Error occurred during submission. Network connection lost.'
             )
         }
     }
@@ -284,11 +286,27 @@ const IDE: React.FC<IDEProps> = ({
     return (
         <div>
             <div className="flex justify-between mb-2">
-                {/* <div>
-                    <Button variant="ghost" size="icon" onClick={onBack}>
-                        <ChevronLeft fontSize={24} />
-                    </Button>
-                </div> */}
+                {/* <AlertDialog open={isSubmitted} onOpenChange={setIsSubmitted}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>
+                                Your code has been submitted!
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                                By clicking on Okay, you will get redirected to
+                                the main page to attempt the other questions.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel
+                                // onClick={() => setIsSubmitted(false)}
+                                onClick={onBack}
+                            >
+                                Okay
+                            </AlertDialogCancel>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog> */}
 
                 <AlertDialog>
                     <AlertDialogTrigger asChild>
@@ -322,17 +340,24 @@ const IDE: React.FC<IDEProps> = ({
                     <TimerDisplay remainingTime={remainingTime} />
                 </div>
                 <div>
-
                     <Button
                         onClick={(e) => handleSubmit(e, 'run')}
                         size="sm"
                         className="mr-2"
-                        disabled={loading} // Disable buttons during loading
+                        disabled={loading || isSubmitted} // Disable buttons during loading
                     >
                         {loading ? <Spinner /> : <Play size={20} />}
                         <span className="ml-2 text-lg font-bold">Run</span>
                     </Button>
-                    <AlertDialog>
+                    <Button
+                        onClick={(e) => handleSubmit(e, 'submit')}
+                        size="sm"
+                        disabled={loading || isSubmitted} // Disable buttons during loading
+                    >
+                        {loading ? <Spinner /> : <Upload size={20} />}
+                        <span className="ml-2 text-lg font-bold">Submit</span>
+                    </Button>
+                    {/* <AlertDialog>
                         <AlertDialogTrigger asChild>
                             <Button
                                 size="sm"
@@ -364,7 +389,7 @@ const IDE: React.FC<IDEProps> = ({
                                 </AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>
-                    </AlertDialog>
+                    </AlertDialog> */}
                 </div>
             </div>
 
@@ -389,14 +414,19 @@ const IDE: React.FC<IDEProps> = ({
                                     </p>
 
                                     {testCases
-                                        ?.slice(0, 2).map((testCase: TestCase, index: number) => (
-                                            <div
-                                                key={index}
-                                                className="bg-gray-200 shadow-sm rounded-lg p-4 my-4"
-                                            >
-                                                <h2 className="text-xl font-semibold mb-2">
-                                                    Test Case {index + 1}
-                                                </h2>
+                                        ?.slice(0, 2)
+                                        .map(
+                                            (
+                                                testCase: TestCase,
+                                                index: number
+                                            ) => (
+                                                <div
+                                                    key={index}
+                                                    className="bg-gray-200 shadow-sm rounded-lg p-4 my-4"
+                                                >
+                                                    <h2 className="text-xl font-semibold mb-2">
+                                                        Test Case {index + 1}
+                                                    </h2>
 
                                                 {/* Handle both array and object inputs */}
                                                 {Array.isArray(
@@ -663,11 +693,12 @@ const IDE: React.FC<IDEProps> = ({
                                                                     </p>
 
                                                                     <p
-                                                                        className={`text-gray-300 ${testCase.status ===
+                                                                        className={`text-gray-300 ${
+                                                                            testCase.status ===
                                                                             'Accepted'
-                                                                            ? 'text-green-500'
-                                                                            : 'text-red-500'
-                                                                            }`}
+                                                                                ? 'text-green-500'
+                                                                                : 'text-red-500'
+                                                                        }`}
                                                                     >
                                                                         Status:{' '}
                                                                         {
@@ -678,11 +709,12 @@ const IDE: React.FC<IDEProps> = ({
                                                                 </>
                                                             ) : (
                                                                 <p
-                                                                    className={`text-gray-300 ${testCase.status ===
+                                                                    className={`text-gray-300 ${
+                                                                        testCase.status ===
                                                                         'Accepted'
-                                                                        ? 'text-green-500'
-                                                                        : 'text-red-500'
-                                                                        }`}
+                                                                            ? 'text-green-500'
+                                                                            : 'text-red-500'
+                                                                    }`}
                                                                 >
                                                                     Test Case{' '}
                                                                     {index + 1}{' '}

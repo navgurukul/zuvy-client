@@ -148,7 +148,7 @@ const Assignments = ({
                 })
                 completeChapter()
             })
-            await getProjectData()
+        await getProjectData()
     }
 
     const timestamp = deadlineDate
@@ -282,11 +282,29 @@ const Assignments = ({
                                 </FormItem>
                             )}
                         />
-                        <div className="flex justify-end absolute top-0 right-0">
-                            <Button className="w-full mr-3" type="submit">
-                                Submit
-                            </Button>
-                        </div>
+
+                        {!content.articleContent ||
+                        !content.articleContent.some((doc: any) =>
+                            doc.content.some(
+                                (paragraph: any) =>
+                                    paragraph.content &&
+                                    paragraph.content.some(
+                                        (item: any) => item.type === 'text'
+                                    )
+                            )
+                        ) ? (
+                            <div className="flex justify-end absolute top-0 right-0">
+                                <Button className="w-full mr-3" type="submit" disabled={true}>
+                                    Submit
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className="flex justify-end absolute top-0 right-0">
+                                <Button className="w-full mr-3" type="submit">
+                                    Submit
+                                </Button>
+                            </div>
+                        )}
                     </form>
                 </Form>
             </div>

@@ -9,8 +9,10 @@ import TabItem from './TabItem'
 import { getCourseData } from '@/store/store'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { useParams } from 'next/navigation'
 
 function CourseLayout() {
+    const { courseId } = useParams()
     const { courseData } = getCourseData()
     // const [courseId, setCourseId] = useState<string>('')
 
@@ -51,14 +53,18 @@ function CourseLayout() {
             href: `/admin/courses/${courseData?.id}/submissions`,
         },
     ]
-
+ 
     useEffect(() => {
         const storedCourseId = localStorage.getItem('courseId')
-        if (storedCourseId) {
-            // setCourseId(storedCourseId)
-            getCourseData
-                .getState()
-                .fetchCourseDetails(parseInt(storedCourseId))
+        // if (courseId && storedCourseId) {
+        //     // setCourseId(storedCourseId)
+        //     getCourseData
+        //         .getState()
+        //         .fetchCourseDetails(parseInt(storedCourseId))
+        // }
+        if (courseId) {
+            const courseID = Array.isArray(courseId) ? courseId[0] : courseId
+            getCourseData.getState().fetchCourseDetails(parseInt(courseID))
         }
     }, [])
 

@@ -38,7 +38,7 @@ const QuizQuestions = ({
     questions,
     assessmentSubmitId,
     getSeperateQuizQuestions,
-    getAssessmentData
+    getAssessmentData,
 }: {
     onBack: () => void
     weightage?: any

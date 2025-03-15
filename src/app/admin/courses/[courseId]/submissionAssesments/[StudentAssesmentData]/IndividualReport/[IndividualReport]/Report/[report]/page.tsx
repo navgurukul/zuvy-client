@@ -238,8 +238,6 @@ const Page = ({ params }: { params: any }) => {
     }
     const formattedDate = date.toLocaleDateString('en-US', options2)
 
-    // console.log(proctoringData)
-
     return (
         <>
             {codingdata ? (
