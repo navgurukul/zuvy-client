@@ -235,11 +235,11 @@ const IDE: React.FC<IDEProps> = ({
             setLoading(false)
         } catch (error: any) {
             if (
-                error?.response?.data?.message.includes(
-                    'sourceCode should not be empty'
-                )
+                error.response?.data?.data?.[0]?.stderr
             ) {
                 setLoading(false)
+                setCodeResult(error.response?.data?.data)
+                console.log('codeResult', error.response?.data?.data)
             }
             toast({
                 title: 'Failed',
@@ -566,12 +566,60 @@ const IDE: React.FC<IDEProps> = ({
                                                     </span>
                                                 </div>
                                             )}
-                                            <p className="font-mono text-destructive">
+                                            <p>
                                                 {!loading &&
                                                     codeError &&
-                                                    codeError}
+                                                    codeResult?.map(
+                                                        (
+                                                            testCase: any,
+                                                            index: any
+                                                        ) => (
+                                                            <div
+                                                                key={index}
+                                                                className="shadow-sm rounded-lg p-4 my-4 bg-gray-800 border border-gray-700"
+                                                            >
+                                                                {(testCase.status !=='Accepted') && (
+                                                                    <>
+                                                                        <p>
+                                                                        <span className='text-yellow-200'>Your Output: </span>
+                                                                            {`${testCase?.stdOut}`}
+                                                                        </p>
+    
+                                                                        <p>
+                                                                        <span className='text-yellow-200'>compileOutput: </span>
+                                                                            {`${testCase?.compileOutput}`}
+                                                                        </p>
+    
+                                                                        <p>
+                                                                            <span className='text-yellow-200'>Error: </span>
+                                                                            <span className="font-mono text-destructive">{`${testCase?.stderr}`}</span>
+                                                                        </p>
+
+                                                                        <p className="font-mono text-destructive">
+                                                                        <span className='text-yellow-200'>Status: </span>
+                                                                            {
+                                                                                testCase.status
+                                                                            }
+                                                                        </p>
+    
+                                                                        <p>
+                                                                            <span className='text-yellow-200'>Input: </span><br />
+                                                                            {`${testCase?.stdin}`}
+                                                                        </p>
+    
+                                                                        <p>
+                                                                            <span className='text-yellow-200'>Expected Output: </span><br />
+                                                                            {`${testCase?.expectedOutput}`}
+                                                                        </p>
+    
+                                                                     
+                                                                    </>
+                                                                )}
+                                                            </div>
+                                                        )
+                                                    )}
                                             </p>
-                                            {!loading &&
+                                            {!loading && !codeError &&
                                                 codeResult?.map(
                                                     (
                                                         testCase: any,
@@ -581,7 +629,7 @@ const IDE: React.FC<IDEProps> = ({
                                                             key={index}
                                                             className="shadow-sm rounded-lg p-4 my-4 bg-gray-800 border border-gray-700"
                                                         >
-                                                            {index < 2 ? (
+                                                            {(testCase.status !=='Accepted') ? (
                                                                 <>
                                                                     <h2 className="text-xl font-semibold mb-2 text-gray-300">
                                                                         Test
@@ -589,13 +637,34 @@ const IDE: React.FC<IDEProps> = ({
                                                                         {index +
                                                                             1}
                                                                     </h2>
+                                                                    
+
                                                                     <p className="text-gray-300 whitespace-normal break-words">
-                                                                        <span className="font-medium text-gray-400">
+                                                                        <span className="text-yellow-200">
                                                                             Your
                                                                             Output:
                                                                         </span>
-                                                                        {testCase?.stdOut ||
-                                                                            testCase?.stdout}
+                                                                        {testCase?.stdOut}
+                                                                    </p>
+
+                                                                    <p>
+                                                                    <span className='text-yellow-200'>compileOutput: </span>
+                                                                        {`${testCase?.compileOutput}`}
+                                                                    </p>
+
+                                                                    <p>
+                                                                        <span className='text-yellow-200'>Error: </span>
+                                                                        {`${testCase?.stderr}`}
+                                                                    </p>
+
+                                                                    <p>
+                                                                        <span className='text-yellow-200'>Input: </span><br />
+                                                                        {`${testCase?.stdin}`}
+                                                                    </p>
+
+                                                                    <p>
+                                                                        <span className='text-yellow-200'>Expected Output: </span><br />
+                                                                        {`${testCase?.expectedOutput}`}
                                                                     </p>
 
                                                                     <p
@@ -610,22 +679,7 @@ const IDE: React.FC<IDEProps> = ({
                                                                             testCase.status
                                                                         }
                                                                     </p>
-                                                                    <p
-                                                                        className={`text-gray-300`}
-                                                                    >
-                                                                        Memory:{' '}
-                                                                        {
-                                                                            testCase.memory
-                                                                        }
-                                                                    </p>
-                                                                    <p
-                                                                        className={`text-gray-300`}
-                                                                    >
-                                                                        Time:{' '}
-                                                                        {
-                                                                            testCase.time
-                                                                        }
-                                                                    </p>
+                                                                 
                                                                 </>
                                                             ) : (
                                                                 <p
