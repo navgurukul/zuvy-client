@@ -17,7 +17,7 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { useRouter } from 'next/navigation'
-import { fetchPreviewData } from '@/utils/admin'
+import { addClassToCodeTags, fetchPreviewData } from '@/utils/admin'
 
 const McqPreview = ({ params }: { params: any[] }) => {
     const router = useRouter()
@@ -40,6 +40,8 @@ const McqPreview = ({ params }: { params: any[] }) => {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
     })
+    const codeBlockClass =
+        'text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full'
 
     return (
         <div>
@@ -67,12 +69,19 @@ const McqPreview = ({ params }: { params: any[] }) => {
                                 name={`answers.${index}`}
                                 render={({ field }) => (
                                     <FormItem className="flex flex-col items-start mb-10 w-full max-w-md">
-                                        <FormLabel className="text-[#4A4A4A] font-semibold text-md">
-                                            {index + 1}.{' '}
-                                            {
-                                                question?.quizVariants[0]
-                                                    ?.question
-                                            }
+                                        <FormLabel className="text-[#4A4A4A] flex space-x-2 font-semibold text-md">
+                                            <span>{index + 1}. </span>
+                                            <div
+                                                dangerouslySetInnerHTML={{
+                                                    __html: addClassToCodeTags(
+                                                        question
+                                                            ?.quizVariants[0]
+                                                            ?.question,
+                                                        codeBlockClass
+                                                    ),
+                                                }}
+                                            />
+                                            {}
                                         </FormLabel>
                                         <FormControl>
                                             <RadioGroup
