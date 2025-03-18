@@ -14,8 +14,8 @@ import {
     setMinutes,
     setSeconds,
     setMilliseconds,
+    parseISO,
 } from 'date-fns'
-
 import {
     Form,
     FormControl,
@@ -258,7 +258,10 @@ const AddAssignent = ({
                             <FormField
                                 control={form.control}
                                 name="startDate"
-                                render={({ field }) => (
+                                render={({ field }) => {
+                                    const d = field.value ? typeof field.value === "string" ? field.value.split(' ')[0] : field.value : null
+                                    let dateValue =  typeof field.value === "string" && d ? parseISO(d) : field.value;
+                                    return (
                                     <FormItem className="flex flex-col justify-start gap-x-2 gap-y-4 text-left">
                                         <FormLabel className="m-0">
                                             <span className="text-xl">
@@ -278,11 +281,9 @@ const AddAssignent = ({
                                                             'text-muted-foreground'
                                                         }`}
                                                     >
-                                                        {field.value
-                                                            ? format(
-                                                                  field.value,
-                                                                  'EEEE, MMMM d, yyyy'
-                                                              )
+                                                        {dateValue
+                                                            ? 
+                                                            format(dateValue, 'EEEE, MMMM d, yyyy')  
                                                             : 'Pick a date'}
                                                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                                     </Button>
@@ -306,7 +307,7 @@ const AddAssignent = ({
                                         </Popover>
                                         <FormMessage />
                                     </FormItem>
-                                )}
+                                )}}
                             />
                         </form>
                     </Form>
