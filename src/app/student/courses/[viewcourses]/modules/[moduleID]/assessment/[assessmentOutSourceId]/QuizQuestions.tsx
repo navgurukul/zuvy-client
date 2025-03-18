@@ -50,10 +50,13 @@ const QuizQuestions = ({
 }) => {
     const router = useRouter()
     const params = useParams()
-    const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+    const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+        undefined
+    )
     const [isDisabled, setIsDisabled] = useState(false)
 
-    const codeBlockClass = 'text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full'
+    const codeBlockClass =
+        'text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full'
 
     useEffect(() => {
         return () => {
@@ -86,49 +89,54 @@ const QuizQuestions = ({
 
     const onSubmit = async (data: z.infer<typeof formSchema>) => {
         setIsDisabled(true)
-    
+
         try {
             // Create submission data array with all answers
-            const quizSubmissionDto = data.answers.map((chosenOption, index) => {
-                const question = questions.data.mcqs[index];
-                return {
-                    questionId: Number(question?.outsourseQuizzesId),
-                    variantId: question.variantId,
-                    attemptCount: 1,
-                    chosenOption: parseInt(chosenOption)
-                };
-            });
-    
+            const quizSubmissionDto = data.answers.map(
+                (chosenOption, index) => {
+                    const question = questions.data.mcqs[index]
+                    return {
+                        questionId: Number(question?.outsourseQuizzesId),
+                        variantId: question.variantId,
+                        attemptCount: 1,
+                        chosenOption: parseInt(chosenOption),
+                    }
+                }
+            )
+
             // Make the API call with the properly structured data
             const response = await api.patch(
                 `/submission/quiz/assessmentSubmissionId=${assessmentSubmitId}?assessmentOutsourseId=${params.assessmentOutSourceId}`,
                 { quizSubmissionDto }
-            );
-    
-            getAssessmentData();
-    
+            )
+
+            getAssessmentData()
+
             toast({
                 title: 'Success',
                 description: 'Quiz Submitted Successfully',
-                className: 'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
-            });
-    
-            getSeperateQuizQuestions();
-    
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+            })
+
+            getSeperateQuizQuestions()
+
             timeoutRef.current = setTimeout(() => {
-                onBack();
-            }, 3000);
+                onBack()
+            }, 3000)
         } catch (error: any) {
-            setIsDisabled(false);
+            setIsDisabled(false)
             toast({
                 title: 'Error',
-                description: error?.response?.data?.message || 'An error occurred',
-                className: 'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                description:
+                    error?.response?.data?.message || 'An error occurred',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 variant: 'destructive',
-            });
+            })
         }
-    };
-    
+    }
+
     function formatNumber(num: number) {
         return num % 1 === 0 ? num : parseFloat(num.toFixed(2))
     }
@@ -157,7 +165,7 @@ const QuizQuestions = ({
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between gap-2">
-                 <AlertDialog>
+                <AlertDialog>
                     <AlertDialogTrigger asChild>
                         <Button variant="ghost" size="icon">
                             <ChevronLeft fontSize={24} />
@@ -169,7 +177,9 @@ const QuizQuestions = ({
                                 Are you absolutely sure?
                             </AlertDialogTitle>
                             <AlertDialogDescription>
-                            This action is irreversible. If your quiz hasn&apos;t been submitted, your selections will be lost.
+                                This action is irreversible. If your quiz
+                                hasn&apos;t been submitted, your selections will
+                                be lost.
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -205,8 +215,8 @@ const QuizQuestions = ({
                                     name={`answers.${index}`}
                                     render={({ field }) => (
                                         <FormItem className="flex flex-col items-start mb-10 w-full max-w-2xl">
-                                            <FormLabel className="text-lg font-semibold text-left">
-                                                {index + 1}.{' '}
+                                            <FormLabel className=" flex space-x-2 text-lg font-semibold text-left">
+                                                <span>{index + 1}. </span>
                                                 <span
                                                     className="text-gray-800"
                                                     dangerouslySetInnerHTML={{
@@ -221,7 +231,9 @@ const QuizQuestions = ({
                                             <FormControl>
                                                 <RadioGroup
                                                     value={field.value}
-                                                    onValueChange={field.onChange}
+                                                    onValueChange={
+                                                        field.onChange
+                                                    }
                                                     className="flex flex-col gap-3"
                                                 >
                                                     {Object.keys(
@@ -256,8 +268,8 @@ const QuizQuestions = ({
 
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button 
-                                type='button' 
+                            <Button
+                                type="button"
                                 className="mt-4"
                                 disabled={isDisabled}
                             >
@@ -270,7 +282,8 @@ const QuizQuestions = ({
                                     Are you absolutely sure?
                                 </AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    This action cannot be undone and you can submit the quiz only once.
+                                    This action cannot be undone and you can
+                                    submit the quiz only once.
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
