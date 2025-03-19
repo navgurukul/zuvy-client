@@ -54,6 +54,7 @@ const QuizQuestions = ({
         undefined
     )
     const [isDisabled, setIsDisabled] = useState(false)
+    const [isDialogOpen, setIsDialogOpen] = useState(false)
 
     const codeBlockClass =
         'text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full'
@@ -87,8 +88,26 @@ const QuizQuestions = ({
         form.reset(defaultValues)
     }, [questions, form])
 
+    const handleSubmitClick = async () => {
+        // Validate the form before opening the dialog
+        const isValid = await form.trigger();
+        if (isValid) {
+            setIsDialogOpen(true);
+        } else {
+            // Show toast notification for missing answers
+            toast({
+                title: 'Error',
+                description: 'Please answer all questions before submitting.',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                variant: 'destructive',
+            })
+        }
+    }
+
     const onSubmit = async (data: z.infer<typeof formSchema>) => {
         setIsDisabled(true)
+        setIsDialogOpen(false)
 
         try {
             // Create submission data array with all answers
@@ -136,31 +155,6 @@ const QuizQuestions = ({
             })
         }
     }
-
-    function formatNumber(num: number) {
-        return num % 1 === 0 ? num : parseFloat(num.toFixed(2))
-    }
-
-    // const getDifficultyWeightage = (difficulty: any) => {
-    //     let difficultyWeightage = 0
-
-    //     switch (difficulty) {
-    //         case 'Easy':
-    //             difficultyWeightage = formatNumber(weightage.easyMcqMark)
-    //             break
-    //         case 'Medium':
-    //             difficultyWeightage = formatNumber(weightage.mediumMcqMark)
-    //             break
-    //         case 'Hard':
-    //             difficultyWeightage = formatNumber(weightage.hardMcqMark)
-    //             break
-    //         default:
-    //             difficultyWeightage = 0
-    //             break
-    //     }
-
-    //     return difficultyWeightage
-    // }
 
     return (
         <div className="space-y-6">
@@ -266,16 +260,16 @@ const QuizQuestions = ({
                         )
                     )}
 
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button
-                                type="button"
-                                className="mt-4"
-                                disabled={isDisabled}
-                            >
-                                Submit Quiz
-                            </Button>
-                        </AlertDialogTrigger>
+                    <Button
+                        type="button"
+                        className="mt-4"
+                        disabled={isDisabled}
+                        onClick={handleSubmitClick}
+                    >
+                        Submit Quiz
+                    </Button>
+
+                    <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <AlertDialogContent>
                             <AlertDialogHeader>
                                 <AlertDialogTitle>
@@ -287,7 +281,9 @@ const QuizQuestions = ({
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogCancel onClick={() => setIsDialogOpen(false)}>
+                                    Cancel
+                                </AlertDialogCancel>
                                 <AlertDialogAction
                                     className="bg-red-500"
                                     onClick={form.handleSubmit(onSubmit)}
