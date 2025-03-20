@@ -115,7 +115,7 @@ function Chapters({ params }: any) {
                 scrollArea.scrollTop = elementOffset - 100 // Optional: slight offset from the top
             }
         }
-    }, [activeChapter])
+    }, [activeChapter, chapters])
 
     useEffect(() => {
         fetchCourseDetails(Number(viewcourses), setCourseName)
@@ -172,7 +172,7 @@ function Chapters({ params }: any) {
 
             <div className="flex flex-col h-screen">
                 <div className='mt-20 pb-2'><BreadcrumbComponent
-                    crumbs={isInstructor ? InstructorCrumbs : studentCrumbs}
+                        crumbs={isInstructor ? InstructorCrumbs : studentCrumbs}
                 /></div>
                 <ScrollArea
                     className="h-full pr-4"

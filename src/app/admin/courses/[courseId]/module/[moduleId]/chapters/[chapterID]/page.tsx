@@ -56,8 +56,8 @@ export default function Page({
     const [chapterId, setChapterId] = useState<number>(0)
     const [activeChapterTitle, setActiveChapterTitle] = useState('')
     const { currentChapter, setCurrentChapter } = getCurrentChapterState()
-    // const [activeChapter, setActiveChapter] = useState(chapter_id)
-    const { activeChapter, setActiveChapter } = getActiveChapter(chapter_id)()
+    const [activeChapter, setActiveChapter] = useState(chapter_id)
+    // const { activeChapter, setActiveChapter } = getActiveChapter(chapter_id)()
     const { topicId } = getTopicId()
     const [key, setKey] = useState(0)
     const [loading, setLoading] = useState(true)
@@ -102,7 +102,8 @@ export default function Page({
 
     useEffect(() => {
         if (chapterData.length > 0 && topicId != null) {
-            fetchChapterContent(activeChapter, topicId)
+            fetchChapterContent(chapter_id, topicId)
+            // fetchChapterContent(activeChapter, topicId)
         } else {
             setActiveChapter(0)
             setChapterContent([])

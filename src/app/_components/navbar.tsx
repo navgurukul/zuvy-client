@@ -19,7 +19,6 @@ const Navbar = () => {
 
     return (
         <nav className="bg-muted fixed top-0 left-0 right-0 z-40">
-            {/* <MaxWidthWrapper> */}
             <div className="flex items-center justify-between border-green-[#2f433a]">
                 <div className="flex items-center">
                     <Sheet>
