@@ -153,7 +153,7 @@ const AssesmentComponent = (props: Props) => {
     return (
         <div
             ref={printRef}
-            className="lg:flex-row h-auto lg:h-[280px] sm:h-[360px] w-full shadow-lg my-5 rounded-lg p-4 lg:p-6 bg-white dark:bg-gray-800 transition-transform transform hover:shadow-xl"
+            className=" relative lg:flex-row h-auto lg:h-[280px] sm:h-[360px] w-full shadow-lg my-5 rounded-lg p-4 lg:p-6 bg-white dark:bg-gray-800 transition-transform transform hover:shadow-xl"
         >
             <div className="w-full justify-between py-2 lg:mx-4 min-h-[250px] sm:min-h-[200px]">
                 <div className="flex items-center justify-between">
@@ -247,22 +247,22 @@ const AssesmentComponent = (props: Props) => {
                             Qualified
                         </p>
                     </div>
-                    <div className="flex justify-end mt-auto">
-                        <Link
-                            href={`/admin/courses/${props.bootcampId}/submissionAssesments/${props.id}`}
-                            className="w-full lg:w-auto"
+                </div>
+                <div className="flex flex-col  items-end absolute  justify-end bottom-4 right-0 ">
+                    <Link
+                        href={`/admin/courses/${props.bootcampId}/submissionAssesments/${props.id}`}
+                        className="w-full h-full lg:w-auto"
+                    >
+                        <Button
+                            variant="ghost"
+                            className="flex h-full justify-center items-center w-full lg:w-auto py-2 text-secondary font-bold rounded-md transition-all duration-300"
                         >
-                            <Button
-                                variant="ghost"
-                                className="flex justify-center items-center w-full lg:w-auto py-2 text-secondary font-bold rounded-md transition-all duration-300"
-                            >
-                                <h1 className="w-full text-center flex lg:text-right">
-                                    View Submission
-                                    <ChevronRight size={20} className="ml-2" />
-                                </h1>
-                            </Button>
-                        </Link>
-                    </div>
+                            <h1 className="w-full text-center flex lg:text-right">
+                                View Submission
+                                <ChevronRight size={20} className="ml-2" />
+                            </h1>
+                        </Button>
+                    </Link>
                 </div>
             </div>
         </div>

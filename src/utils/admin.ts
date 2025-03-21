@@ -1,4 +1,4 @@
-import { set } from 'date-fns';
+import { set } from 'date-fns'
 import { difficultyColor } from '@/lib/utils'
 import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
@@ -920,19 +920,23 @@ export const getPlaceholder = (type: string) => {
 }
 
 export function showSyntaxErrors(testCases: any) {
-    let hasErrors = false;
+    let hasErrors = false
 
     // Validate each test case
     for (let index = 0; index < testCases.length; index++) {
-        const testCase = testCases[index];
-        
+        const testCase = testCases[index]
+
         // Validate inputs
-        for (let inputIndex = 0; inputIndex < testCase.inputs.length; inputIndex++) {
-            const input = testCase.inputs[inputIndex];
-            
+        for (
+            let inputIndex = 0;
+            inputIndex < testCase.inputs.length;
+            inputIndex++
+        ) {
+            const input = testCase.inputs[inputIndex]
+
             if (input.type === 'jsonType') {
                 try {
-                    JSON.parse(input.value);
+                    JSON.parse(input.value)
                 } catch (e) {
                     toast({
                         title: `Invalid JSON Format`,
@@ -941,8 +945,8 @@ export function showSyntaxErrors(testCases: any) {
                         } has invalid JSON format.`,
                         className:
                             'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                    });
-                    hasErrors = true;
+                    })
+                    hasErrors = true
                 }
             } else if (
                 input.type === 'int' &&
@@ -956,9 +960,13 @@ export function showSyntaxErrors(testCases: any) {
                     } must be a valid integer.`,
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                });
-                hasErrors = true;
-            } else if (input.type === 'float' && isNaN(Number(input.value)) && input.value !== '') {
+                })
+                hasErrors = true
+            } else if (
+                input.type === 'float' &&
+                isNaN(Number(input.value)) &&
+                input.value !== ''
+            ) {
                 toast({
                     title: `Invalid Float Input`,
                     description: `Test case ${index + 1}, input ${
@@ -966,8 +974,8 @@ export function showSyntaxErrors(testCases: any) {
                     } must be a valid float.`,
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                });
-                hasErrors = true;
+                })
+                hasErrors = true
             } else if (
                 input.type === 'bool' &&
                 !/^(true|false)$/i.test(input.value) &&
@@ -980,14 +988,14 @@ export function showSyntaxErrors(testCases: any) {
                     } must be either 'true' or 'false'.`,
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                });
-                hasErrors = true;
+                })
+                hasErrors = true
             } else if (
                 (input.type === 'arrayOfnum' || input.type === 'arrayOfStr') &&
                 input.value !== ''
             ) {
                 try {
-                    const parsed = JSON.parse(input.value);
+                    const parsed = JSON.parse(input.value)
                     if (!Array.isArray(parsed)) {
                         toast({
                             title: `Invalid Array Format`,
@@ -996,8 +1004,8 @@ export function showSyntaxErrors(testCases: any) {
                             } must be a valid array.`,
                             className:
                                 'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                        });
-                        hasErrors = true;
+                        })
+                        hasErrors = true
                     }
                 } catch (e) {
                     toast({
@@ -1007,16 +1015,19 @@ export function showSyntaxErrors(testCases: any) {
                         } has invalid array format.`,
                         className:
                             'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                    });
-                    hasErrors = true;
+                    })
+                    hasErrors = true
                 }
             }
         }
 
         // Validate output
-        if (testCase.output.type === 'jsonType' && testCase.output.value !== '') {
+        if (
+            testCase.output.type === 'jsonType' &&
+            testCase.output.value !== ''
+        ) {
             try {
-                JSON.parse(testCase.output.value);
+                JSON.parse(testCase.output.value)
             } catch (e) {
                 toast({
                     title: `Invalid JSON Format`,
@@ -1025,10 +1036,13 @@ export function showSyntaxErrors(testCases: any) {
                     } output has invalid JSON format.`,
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                });
-                hasErrors = true;
+                })
+                hasErrors = true
             }
-        } else if (testCase.output.type === 'int' && testCase.output.value !== '') {
+        } else if (
+            testCase.output.type === 'int' &&
+            testCase.output.value !== ''
+        ) {
             if (testCase.output.value.includes(' ')) {
                 toast({
                     title: 'Invalid Output Format',
@@ -1037,8 +1051,8 @@ export function showSyntaxErrors(testCases: any) {
                     } output can only have one integer value.`,
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                });
-                hasErrors = true;
+                })
+                hasErrors = true
             } else if (!Number.isInteger(Number(testCase.output.value))) {
                 toast({
                     title: `Invalid Integer Output`,
@@ -1047,10 +1061,13 @@ export function showSyntaxErrors(testCases: any) {
                     } output must be a valid integer.`,
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                });
-                hasErrors = true;
+                })
+                hasErrors = true
             }
-        } else if (testCase.output.type === 'float' && testCase.output.value !== '') {
+        } else if (
+            testCase.output.type === 'float' &&
+            testCase.output.value !== ''
+        ) {
             if (testCase.output.value.includes(' ')) {
                 toast({
                     title: 'Invalid Output Format',
@@ -1059,8 +1076,8 @@ export function showSyntaxErrors(testCases: any) {
                     } output can only have one float value.`,
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                });
-                hasErrors = true;
+                })
+                hasErrors = true
             } else if (isNaN(Number(testCase.output.value))) {
                 toast({
                     title: `Invalid Float Output`,
@@ -1069,8 +1086,8 @@ export function showSyntaxErrors(testCases: any) {
                     } output must be a valid float.`,
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                });
-                hasErrors = true;
+                })
+                hasErrors = true
             }
         } else if (
             testCase.output.type === 'bool' &&
@@ -1084,14 +1101,15 @@ export function showSyntaxErrors(testCases: any) {
                 } output must be either 'true' or 'false'.`,
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-            });
-            hasErrors = true;
+            })
+            hasErrors = true
         } else if (
-            (testCase.output.type === 'arrayOfnum' || testCase.output.type === 'arrayOfStr') &&
+            (testCase.output.type === 'arrayOfnum' ||
+                testCase.output.type === 'arrayOfStr') &&
             testCase.output.value !== ''
         ) {
             try {
-                const parsed = JSON.parse(testCase.output.value);
+                const parsed = JSON.parse(testCase.output.value)
                 if (!Array.isArray(parsed)) {
                     toast({
                         title: `Invalid Array Format`,
@@ -1100,8 +1118,8 @@ export function showSyntaxErrors(testCases: any) {
                         } output must be a valid array.`,
                         className:
                             'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                    });
-                    hasErrors = true;
+                    })
+                    hasErrors = true
                 }
             } catch (e) {
                 toast({
@@ -1111,8 +1129,8 @@ export function showSyntaxErrors(testCases: any) {
                     } output has invalid array format.`,
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                });
-                hasErrors = true;
+                })
+                hasErrors = true
             }
         }
     }
@@ -1125,8 +1143,8 @@ export function showSyntaxErrors(testCases: any) {
                 'Please add at least 3 test cases to ensure comprehensive testing.',
             className:
                 'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-        });
-        hasErrors = true;
+        })
+        hasErrors = true
     } else if (testCases.length > 20) {
         toast({
             title: 'Too Many Test Cases',
@@ -1134,9 +1152,60 @@ export function showSyntaxErrors(testCases: any) {
                 'Please limit the number of test cases to 20 or fewer.',
             className:
                 'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-        });
-        hasErrors = true;
+        })
+        hasErrors = true
     }
 
-    return hasErrors;
+    return hasErrors
+}
+
+export const getEmbedLink = (url: string) => {
+    if (!url) return ''
+    try {
+        const urlObj = new URL(url) // Parse the URL
+
+        if (url.includes('embed')) {
+            return url
+        }
+
+        // Handle YouTube URLs
+        if (
+            urlObj.hostname.includes('youtube.com') &&
+            urlObj.searchParams.has('v')
+        ) {
+            return `https://www.youtube.com/embed/${urlObj.searchParams.get(
+                'v'
+            )}`
+        }
+
+        if (urlObj.hostname.includes('youtu.be')) {
+            const videoId = urlObj.pathname.slice(1)
+            return `https://www.youtube.com/embed/${videoId}`
+        }
+
+        // Handle Google Drive Video URLs
+        if (urlObj.hostname.includes('drive.google.com')) {
+            const match = url.match(/\/file\/d\/([^/]+)/)
+            if (match && match[1]) {
+                return `https://drive.google.com/file/d/${match[1]}/preview`
+            }
+        }
+
+        // Handle Dailymotion Full & Shortened URLs
+        if (urlObj.hostname.includes('dailymotion.com')) {
+            const match = url.match(/video\/([^_/]+)/)
+            if (match && match[1]) {
+                return `https://geo.dailymotion.com/player.html?video=${match[1]}`
+            }
+        }
+
+        if (urlObj.hostname.includes('dai.ly')) {
+            const videoId = urlObj.pathname.slice(1)
+            return `https://geo.dailymotion.com/player.html?video=${videoId}`
+        }
+    } catch (error) {
+        console.error('Invalid URL:', url, error)
+    }
+
+    return '' // Return empty string for unsupported or invalid URLs
 }
