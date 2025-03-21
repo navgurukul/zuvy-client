@@ -106,7 +106,6 @@ export function DataTablePagination<TData>({
                     <DropdownMenuSeparator />
                     <DropdownMenuRadioGroup
                         value={position}
-                        // onValueChange={setPosition}
                         onValueChange={(newPosition) => {
                             setPosition(newPosition)
                             // setCurrentPage(1) // Optional: Reset to first page on changing position
