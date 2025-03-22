@@ -131,7 +131,7 @@ const QuestionCard = ({
                             onClick={() => onSolveChallenge(id)}
                         >
                             {isQuizSubmitted ? (
-                                <p className="italic opacity-60">
+                                <p className="italic opacity-60 cursor-default">
                                     Already Submitted
                                 </p>
                             ) : (

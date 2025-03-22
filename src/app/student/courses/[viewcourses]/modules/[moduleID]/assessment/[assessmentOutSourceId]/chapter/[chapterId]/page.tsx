@@ -303,11 +303,11 @@ function Page({
                 requestFullScreen(document.documentElement)
             }
         } else if (type === 'quiz' && assessmentData?.IsQuizzSubmission) {
-            toast({
-                title: 'Quiz Already Submitted',
-                description: 'You have already submitted the quiz',
-                className: 'text-left capitalize',
-            })
+            // toast({
+            //     title: 'Quiz Already Submitted',
+            //     description: 'You have already submitted the quiz',
+            //     className: 'text-left capitalize',
+            // })
         } else if (
             type === 'open-ended' &&
             seperateOpenEndedQuestions[0]?.submissionsData.length > 0
