@@ -114,10 +114,9 @@ function Quiz(props: Props) {
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
-       
             })
-           await updateQuizChapterHandler()
-           await getAllQuizQuestionHandler()
+        await updateQuizChapterHandler()
+        await getAllQuizQuestionHandler()
     }
 
     return (
@@ -168,13 +167,13 @@ function Quiz(props: Props) {
                                     )
                                     return (
                                         <div key={question.id}>
-                                            <div className="flex items-center space-x-2">
-                                                <h1 className="font-semibold my-3">
+                                            <div className="flex text-left space-x-2">
+                                                <h1 className="font-semibold ">
                                                     {'Q'}
-                                                    {index + 1}
+                                                    {index + 1}.
                                                 </h1>
                                                 <span
-                                                    className=""
+                                                    className="mb-1.5"
                                                     dangerouslySetInnerHTML={{
                                                         __html: processedHtml,
                                                     }}
@@ -190,13 +189,13 @@ function Quiz(props: Props) {
                                                     ]) => (
                                                         <div
                                                             key={optionId}
-                                                            className="flex items-center gap-5"
+                                                            className="flex items-center "
                                                         >
                                                             <input
                                                                 type="radio"
                                                                 name={`question_${question.id}`}
                                                                 value={optionId}
-                                                                className="m-4 w-4 h-4 text-secondary focus:ring-secondary-500"
+                                                                className=" ml-8 w-3 h-3 text-secondary focus:ring-secondary-500"
                                                                 checked={
                                                                     question.status ===
                                                                         'pass' ||
@@ -259,7 +258,7 @@ function Quiz(props: Props) {
                                                                     key={
                                                                         optionId
                                                                     }
-                                                                    className="m-4 flex items-center"
+                                                                    className="m-2.5 flex items-center"
                                                                 >
                                                                     {String(
                                                                         optionText

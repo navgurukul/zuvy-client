@@ -33,8 +33,9 @@ function Page() {
 
     const fetchRecordings = useCallback(
         async (offset: number) => {
+            const offSet = Math.max(0, offset)
             try {
-                let baseUrl = `/student/Dashboard/classes?limit=${position}&offset=${offset}`
+                let baseUrl = `/student/Dashboard/classes?limit=${position}&offset=${offSet}`
 
                 if (debouncedSearch) {
                     baseUrl += `&searchTerm=${encodeURIComponent(
