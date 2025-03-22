@@ -18,7 +18,6 @@ interface QuestionCardProps {
     codingOutsourseId?: number
     codingQuestions?: boolean
     onSolveChallenge: (id: number) => void
-    isQuizSubmitted?: boolean
 }
 
 export type Tag = {
@@ -39,7 +38,6 @@ const QuestionCard = ({
     codingOutsourseId,
     codingQuestions,
     onSolveChallenge,
-    isQuizSubmitted,
 }: QuestionCardProps) => {
     const [tag, setTag] = useState<Tag>()
     const [action, setAction] = useState<string | null>(null)
@@ -130,13 +128,7 @@ const QuestionCard = ({
                             className="cursor-pointer"
                             onClick={() => onSolveChallenge(id)}
                         >
-                            {isQuizSubmitted ? (
-                                <p className="italic opacity-60">
-                                    Already Submitted
-                                </p>
-                            ) : (
-                                <p> Solve Challenge</p>
-                            )}
+                            Solve Challenge
                         </p>
                         <ChevronRight className="cursor-pointer" size={18} />
                     </div>
