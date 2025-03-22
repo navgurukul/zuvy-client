@@ -91,8 +91,8 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     const [totalSelectedCodingQues, setTotalSelectedCodingQues] = useState(0)
     const [totalSelectedQuizQues, setTotalSelectedQuizQues] = useState(0)
     const [editingFields, setEditingFields] = useState<any>({})
-    const hours = Array.from({ length: 6 }, (_, i) => i)
-    const minutes = [15, 30, 45]
+    const hours = Array.from({ length: 5 }, (_, i) => i + 1)
+    const minutes = [0, 15, 30, 45]
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
 
     const formSchema = z
@@ -387,10 +387,18 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                     : mcqMax > 0
                         ? 100
                         : 0,
-            canCopyPaste: content?.canCopyPaste || false,
-            tabSwitch: content?.canTabChange || false,
-            screenExit: content?.canScreenExit || false,
-            eyeTracking: content?.canEyeTrack || false,
+            canCopyPaste: content?.canCopyPaste !== null && content?.canCopyPaste !== undefined
+                ? content.canCopyPaste
+                : true,
+            tabSwitch: content?.canTabChange !== null && content?.canTabChange !== undefined
+                ? content.canTabChange
+                : true,
+            screenExit: content?.canScreenExit !== null && content?.canScreenExit !== undefined
+                ? content.canScreenExit
+                : true,
+            eyeTracking: content?.canEyeTrack !== null && content?.canEyeTrack !== undefined
+                ? content.canEyeTrack
+                : true,
             hour: content.timeLimit
                 ? String(Math.floor(content.timeLimit / 3600))
                 : '2',
@@ -434,28 +442,28 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                 mcqsMedium: selectQuizDifficultyCount?.mcqsMedium || 0,
                 mcqsHard: selectQuizDifficultyCount?.mcqsHard || 0,
             })
-              // Apply weightage disabling logic
-        if (codingMax === 0 && mcqMax === 0) {
-            setCodingWeightageDisabled(true)
-            setMcqsWeightageDisabled(true)
-            form.setValue('codingProblemsWeightage', 0)
-            form.setValue('mcqsWeightage', 0)
-        } else if (codingMax === 0 && mcqMax > 0) {
-            setCodingWeightageDisabled(true)
-            setMcqsWeightageDisabled(true)
-            form.setValue('codingProblemsWeightage', 0)
-            form.setValue('mcqsWeightage', 100)
-        } else if (mcqMax === 0 && codingMax > 0) {
-            setCodingWeightageDisabled(true)
-            setMcqsWeightageDisabled(true)
-            form.setValue('codingProblemsWeightage', 100)
-            form.setValue('mcqsWeightage', 0)
-        } else if (codingMax > 0 && mcqMax > 0) {
-            setCodingWeightageDisabled(false)
-            setMcqsWeightageDisabled(false)
-            form.setValue('codingProblemsWeightage', 50)
-            form.setValue('mcqsWeightage', 50)
-        }
+            // Apply weightage disabling logic
+            if (codingMax === 0 && mcqMax === 0) {
+                setCodingWeightageDisabled(true)
+                setMcqsWeightageDisabled(true)
+                form.setValue('codingProblemsWeightage', 0)
+                form.setValue('mcqsWeightage', 0)
+            } else if (codingMax === 0 && mcqMax > 0) {
+                setCodingWeightageDisabled(true)
+                setMcqsWeightageDisabled(true)
+                form.setValue('codingProblemsWeightage', 0)
+                form.setValue('mcqsWeightage', 100)
+            } else if (mcqMax === 0 && codingMax > 0) {
+                setCodingWeightageDisabled(true)
+                setMcqsWeightageDisabled(true)
+                form.setValue('codingProblemsWeightage', 100)
+                form.setValue('mcqsWeightage', 0)
+            } else if (codingMax > 0 && mcqMax > 0) {
+                setCodingWeightageDisabled(false)
+                setMcqsWeightageDisabled(false)
+                form.setValue('codingProblemsWeightage', 50)
+                form.setValue('mcqsWeightage', 50)
+            }
         }
     }, [selectCodingDifficultyCount, selectQuizDifficultyCount])
 
@@ -549,13 +557,13 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                                     {...field}
                                                                     type="number"
                                                                     className={`w-16 mr-2 no-spinners ${form
-                                                                            .formState
-                                                                            .errors[
-                                                                            field
-                                                                                .name
-                                                                        ]
-                                                                            ? 'border-red-500 outline-red-500 text-red-500'
-                                                                            : 'border-gray-300'
+                                                                        .formState
+                                                                        .errors[
+                                                                        field
+                                                                            .name
+                                                                    ]
+                                                                        ? 'border-red-500 outline-red-500 text-red-500'
+                                                                        : 'border-gray-300'
                                                                         }`}
                                                                     onChange={(
                                                                         e
@@ -680,8 +688,8 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                             {`${Number.isNaN(
                                                 totalSelectedCodingQues
                                             )
-                                                    ? 0
-                                                    : totalQuestions.codingProblemsEasy + totalQuestions.codingProblemsMedium + totalQuestions.codingProblemsHard
+                                                ? 0
+                                                : totalQuestions.codingProblemsEasy + totalQuestions.codingProblemsMedium + totalQuestions.codingProblemsHard
                                                 } out of ${codingMax}`}
                                         </p>
                                         <p className="text-sm ml-2">
@@ -691,8 +699,8 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                             {`${Number.isNaN(
                                                 totalSelectedQuizQues
                                             )
-                                                    ? 0
-                                                    : totalQuestions.mcqsEasy + totalQuestions.mcqsMedium + totalQuestions.mcqsHard
+                                                ? 0
+                                                : totalQuestions.mcqsEasy + totalQuestions.mcqsMedium + totalQuestions.mcqsHard
                                                 } out of ${mcqMax}`}
                                         </p>
                                     </div>
@@ -740,8 +748,8 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                             {...field}
                                                             type="number"
                                                             className={`w-16 mr-2 no-spinners ${isError
-                                                                    ? 'border-red-500 outline-red-500 text-red-500'
-                                                                    : 'border-gray-300'
+                                                                ? 'border-red-500 outline-red-500 text-red-500'
+                                                                : 'border-gray-300'
                                                                 }`}
                                                             disabled={
                                                                 category.disabled
@@ -758,8 +766,8 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                     </FormControl>
                                                     <FormLabel
                                                         className={`text-sm ${isError
-                                                                ? 'text-red-500'
-                                                                : 'text-gray-700'
+                                                            ? 'text-red-500'
+                                                            : 'text-gray-700'
                                                             }`}
                                                     >
                                                         {category.title}
@@ -808,7 +816,8 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                         name={option.name}
                                         render={({ field }) => (
                                             <FormItem>
-                                                <div className="flex items-center justify-between mb-4 w-3/4">
+                                                <div className={`flex items-center justify-between mb-4 w-3/4 ${option.name === 'screenExit' ? 'hidden' : ''
+                                                    }`}>
                                                     <div className="flex items-center justify-between space-x-2 w-1/3">
                                                         <div>
                                                             <FormLabel className="text-sm text-center font-normal text-gray-600">
@@ -841,13 +850,10 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                     <div>
                                                         <FormControl>
                                                             <ToggleSwitch
-                                                                initialChecked={
-                                                                    field.value as boolean
-                                                                }
-                                                                onToggle={
-                                                                    field.onChange
-                                                                }
+                                                                isChecked={field.value as boolean}
+                                                                onToggle={field.onChange}
                                                             />
+
                                                         </FormControl>
                                                     </div>
                                                 </div>
@@ -975,10 +981,10 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                         {...field}
                                                         type="number"
                                                         className={`w-16 mr-2 no-spinners ${form.formState
-                                                                .errors
-                                                                .passPercentage
-                                                                ? 'border-red-500 outline-red-500 text-red-500'
-                                                                : 'border-gray-300'
+                                                            .errors
+                                                            .passPercentage
+                                                            ? 'border-red-500 outline-red-500 text-red-500'
+                                                            : 'border-gray-300'
                                                             }`}
                                                         onChange={(e) => {
                                                             const value =
@@ -995,9 +1001,9 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                 </FormControl>
                                                 <div
                                                     className={`text-md ${form.formState.errors
-                                                            .passPercentage
-                                                            ? 'border-red-500 outline-red-500 text-red-500'
-                                                            : 'border-gray-300'
+                                                        .passPercentage
+                                                        ? 'border-red-500 outline-red-500 text-red-500'
+                                                        : 'border-gray-300'
                                                         }`}
                                                 >
                                                     %

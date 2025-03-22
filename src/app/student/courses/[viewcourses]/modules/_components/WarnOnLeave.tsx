@@ -11,7 +11,7 @@ const WarnOnLeave = () => {
       const warningMessage = 'This is a test. Please stay on the page until the test is complete.';
       event.preventDefault();
       event.returnValue = warningMessage;
-      return warningMessage; // Required for some browsers
+      return warningMessage;
     };
 
     const handleRouteChange = (url:any) => {

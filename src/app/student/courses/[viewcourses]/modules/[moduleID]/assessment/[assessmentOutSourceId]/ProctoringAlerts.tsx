@@ -36,7 +36,15 @@ const AlertIcon = () => (
 );
 
 
-export const AlertProvider = ({ children }: { children: React.ReactNode }) => {
+export const AlertProvider = ({ 
+  children, 
+  requestFullScreen,
+  setIsFullScreen 
+}: { 
+  children: React.ReactNode;
+  requestFullScreen: (element: Element) => void;
+  setIsFullScreen: (isFullScreen: boolean) => void;
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [alertContent, setAlertContent] = useState<AlertProps | null>(null);
 
@@ -45,9 +53,11 @@ export const AlertProvider = ({ children }: { children: React.ReactNode }) => {
     setIsOpen(true);
   };
 
-  const hideAlert:any = () => {
+  const hideAlert = () => {
     setIsOpen(false);
     setAlertContent(null);
+    requestFullScreen(document.documentElement);
+    setIsFullScreen(true);
   };
 
   React.useEffect(() => {
@@ -65,7 +75,7 @@ export const AlertProvider = ({ children }: { children: React.ReactNode }) => {
           <AlertDialogContent className="max-w-md rounded-lg p-0 overflow-hidden">
             <div className="flex flex-col items-center px-6 pt-8 pb-6 gap-4">
               <AlertIcon />
-              
+
               <AlertDialogTitle className="text-gray-800 text-xl font-semibold m-0">
                 {alertContent.title}
               </AlertDialogTitle>
@@ -82,15 +92,15 @@ export const AlertProvider = ({ children }: { children: React.ReactNode }) => {
             </div>
 
             <AlertDialogFooter className="flex justify-center p-6 pt-0 m-0">
-  <div className="flex-grow flex justify-center">
-    <Button 
-      onClick={hideAlert}
-      className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-8 py-2 rounded-md text-sm"
-    >
-      Return to Assessment
-    </Button>
-  </div>
-</AlertDialogFooter>
+              <div className="flex-grow flex justify-center">
+                <Button
+                  onClick={hideAlert}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-8 py-2 rounded-md text-sm"
+                >
+                  Return to Assessment
+                </Button>
+              </div>
+            </AlertDialogFooter>
 
           </AlertDialogContent>
         </AlertDialog>

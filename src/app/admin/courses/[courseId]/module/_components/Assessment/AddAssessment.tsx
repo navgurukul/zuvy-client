@@ -521,12 +521,9 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                     />
 
                     {questionType !== 'settings' && (
-                        <div>
-                            <ScrollArea className="h-96 ml-5 w-full pr-5 pb-32">
-                                <ScrollBar
-                                    orientation="vertical"
-                                    className="h-96"
-                                />
+                        <div className='h-screen'>
+                            <ScrollArea className="h-96 px-2 pb-4">
+                                <ScrollBar orientation="vertical" className="" />
 
                                 {selectedCodingQuesIds.length > 0 ||
                                 selectedQuizQuesIds.length > 0 ||
@@ -555,7 +552,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                         setIsNewQuestionAdded = {setIsNewQuestionAdded}
                                     />
                                 ) : (
-                                    <h1 className="text-left italic">
+                                    <h1 className="text-left italic pl-5">
                                         No Selected questions
                                     </h1>
                                 )}

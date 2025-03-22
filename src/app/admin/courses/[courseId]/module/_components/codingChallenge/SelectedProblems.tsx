@@ -45,7 +45,7 @@ const SelectedProblems = ({
 
     return (
         <div className="flex w-full">
-            <Separator orientation='vertical' className='w-0.5 h-96 mx-2' />
+            <Separator orientation='vertical' className='w-0.5 h-screen mx-2' />
             <div className="text-start w-full">
                 <h2 className="font-bold mb-5">Selected Coding Problems</h2>
                 {selectedQuestions?.length > 0 ? (

@@ -18,19 +18,19 @@ import {
     AlertCircle,
 } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
-import QuizQuestions from './QuizQuestions'
-import OpenEndedQuestions from './OpenEndedQuestions'
+import QuizQuestions from '@/app/student/courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/QuizQuestions'
+import OpenEndedQuestions from '@/app/student/courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/OpenEndedQuestions'
 import IDE from '@/app/student/courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/IDE'
 import { api } from '@/utils/axios.config'
-import QuestionCard from './QuestionCard'
+import QuestionCard from '@/app/student/courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/QuestionCard'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/components/ui/use-toast'
 import { useParams, usePathname } from 'next/navigation'
 import { useRouter } from 'next/navigation'
 import { getAssessmentStore } from '@/store/store'
-import TimerDisplay from './TimerDisplay'
+import TimerDisplay from '@/app/student/courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/TimerDisplay'
 import { start } from 'repl'
-import { AlertProvider } from './ProctoringAlerts'
+import { AlertProvider } from '@/app/student/courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/ProctoringAlerts'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -42,8 +42,9 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import PreventBackNavigation from '../../../_components/PreventBackNavigation'
-import WarnOnLeave from '../../../_components/WarnOnLeave'
+import PreventBackNavigation from '@/app/student/courses/[viewcourses]/modules/_components/PreventBackNavigation'
+import WarnOnLeave from '@/app/student/courses/[viewcourses]/modules/_components/WarnOnLeave'
+import Loader from '@/app/student/courses/_components/Loader'
 
 function Page({
     params,
@@ -52,11 +53,13 @@ function Page({
         assessmentOutSourceId: string
         moduleID: string
         viewcourses: string
+        chapterId: string
     }
 }) {
     const [isFullScreen, setIsFullScreen] = useState(false)
     const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null)
     const [disableSubmit, setDisableSubmit] = useState(false)
+    const [loading, setLoading] = useState(true)
 
     const decodedParams = {
         assessmentOutSourceId: parseInt(
@@ -113,7 +116,7 @@ function Page({
     function isCurrentPageSubmitAssessment() {
         return (
             pathname ===
-            `/student/courses/${params.viewcourses}/modules/${params.moduleID}/assessment/${params.assessmentOutSourceId}`
+            `/student/courses/${params.viewcourses}/modules/${params.moduleID}/assessment/${params.assessmentOutSourceId}/chapter/${params.chapterId}`
         )
     }
 
@@ -151,6 +154,27 @@ function Page({
                 }
             }
         }, 1000)
+    }
+
+    async function getAssessmentSubmissionsData(
+    ) {
+        const startPageUrl = `/student/courses/${params.viewcourses}/modules/${params.moduleID}/chapters/${params.chapterId}`
+        try {
+
+            const res = await api.get(
+                `Content/students/assessmentId=${decodedParams.assessmentOutSourceId}?moduleId=${params.moduleID}&bootcampId=${params.viewcourses}&chapterId=${params.chapterId}`
+            )
+
+            if (res.data.submitedOutsourseAssessments.length > 0 && res.data.submitedOutsourseAssessments[0].submitedAt) {
+                router.push(startPageUrl)
+            } else {
+                getAssessmentData()
+            }
+
+        } catch (error) {
+            console.error('Error fetching coding submissions data:', error)
+            return null
+        }
     }
 
     useEffect(() => {
@@ -319,6 +343,7 @@ function Page({
             setIsEyeTrackingProctorOn(res?.data.data.canEyeTrack)
             setAssessmentSubmitId(res?.data.data.submission.id)
             setChapterId(res?.data.data.chapterId)
+            setLoading(false)
         } catch (e) {
             console.error(e)
         }
@@ -346,9 +371,7 @@ function Page({
     }
 
     useEffect(() => {
-        if (isFullScreen) {
-            getAssessmentData()
-        }
+        // getAssessmentData()
         getSeperateQuizQuestions()
         getSeperateOpenEndedQuestions()
     }, [decodedParams.assessmentOutSourceId, isFullScreen])
@@ -360,14 +383,18 @@ function Page({
         }
     }, [assessmentData])
 
+    useEffect(() => {
+        getAssessmentSubmissionsData()
+    }, [])
+
     if (isSolving && isFullScreen) {
         if (
             selectedQuesType === 'quiz' &&
             !assessmentData?.IsQuizzSubmission &&
             assessmentData?.hardMcqQuestions +
-                assessmentData?.easyMcqQuestions +
-                assessmentData?.mediumMcqQuestions >
-                0
+            assessmentData?.easyMcqQuestions +
+            assessmentData?.mediumMcqQuestions >
+            0
         ) {
             return (
                 <QuizQuestions
@@ -484,18 +511,21 @@ function Page({
         >
             <PreventBackNavigation />
             <WarnOnLeave />
-            <AlertProvider>
+            <AlertProvider requestFullScreen={handleFullScreenRequest} setIsFullScreen={setIsFullScreen}>
                 <div className="h-auto mb-24">
                     {!isFullScreen ? (
                         <>
-                            <div className="fixed top-4 right-4 bg-white p-2 rounded-md shadow-md font-bold text-xl">
+                           {
+                            loading ? (<Loader/>): (
+                                <>
+                                <div className="fixed top-4 right-4 bg-white p-2 rounded-md shadow-md font-bold text-xl">
                                 <div className="font-bold text-xl">
                                     <TimerDisplay
                                         remainingTime={remainingTime}
                                     />
                                 </div>
                             </div>
-                            {/* <Separator className="my-6" /> */}
+                      
                             <h1>
                                 Enter Full Screen to see the Questions. Warning:
                                 If you exit fullscreen, your test will get
@@ -506,14 +536,12 @@ function Page({
                                     Enter Full Screen
                                 </Button>
                             </div>
+                                </>
+                            )
+                        }
                         </>
                     ) : (
                         <div>
-                            <div className="bg-yellow/90 p-2 rounded-md mb-5">
-                                If you exit fullscreen or click on browser back
-                                button, your test will get submitted
-                                automatically!
-                            </div>
                             <div className="fixed top-4 right-4 bg-white p-2 rounded-md shadow-md font-bold text-xl">
                                 <div className="font-bold text-xl">
                                     <TimerDisplay
@@ -542,7 +570,7 @@ function Page({
                                         Hours{' '}
                                         {Math.floor(
                                             (assessmentData?.timeLimit % 3600) /
-                                                60
+                                            60
                                         )}{' '}
                                         Minutes
                                     </p>
@@ -615,7 +643,7 @@ function Page({
                                                         question.codingOutsourseId
                                                     }
                                                     codingQuestions={true}
-                                                    onSolveChallenge={(id) =>
+                                                    onSolveChallenge={(id:any) =>
                                                         handleSolveChallenge(
                                                             'coding',
                                                             id,
@@ -633,28 +661,31 @@ function Page({
                                 assessmentData?.easyMcqQuestions +
                                 assessmentData?.mediumMcqQuestions >
                                 0 && (
-                                <div className="flex justify-center">
-                                    <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
-                                        <h2 className="font-bold">MCQs</h2>
-                                        <QuestionCard
-                                            id={1}
-                                            title="Quiz"
-                                            weightage={
-                                                assessmentData?.weightageMcqQuestions
-                                            }
-                                            description={`${
-                                                assessmentData?.hardMcqQuestions +
+                                    <div className="flex justify-center">
+                                        <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
+                                            <h2 className="font-bold">MCQs</h2>
+                                            <QuestionCard
+                                                id={1}
+                                                title="Quiz"
+                                                weightage={
+                                                    assessmentData?.weightageMcqQuestions
+                                                }
+                                                description={`${assessmentData?.hardMcqQuestions +
                                                     assessmentData?.easyMcqQuestions +
                                                     assessmentData?.mediumMcqQuestions ||
-                                                0
-                                            } questions`}
-                                            onSolveChallenge={() =>
-                                                handleSolveChallenge('quiz')
-                                            }
-                                        />
+                                                    0
+                                                    } questions`}
+                                                onSolveChallenge={() =>
+                                                    handleSolveChallenge('quiz')
+                                                }
+
+                                                isQuizSubmitted={
+                                                    assessmentData?.IsQuizzSubmission
+                                                }
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                )}
                             {seperateOpenEndedQuestions.length > 0 && (
                                 <div className="flex justify-center">
                                     <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
@@ -664,10 +695,9 @@ function Page({
                                         <QuestionCard
                                             id={1}
                                             title="Open-Ended Questions"
-                                            description={`${
-                                                seperateOpenEndedQuestions.length ||
+                                            description={`${seperateOpenEndedQuestions.length ||
                                                 0
-                                            } questions`}
+                                                } questions`}
                                             onSolveChallenge={() =>
                                                 handleSolveChallenge(
                                                     'open-ended'
