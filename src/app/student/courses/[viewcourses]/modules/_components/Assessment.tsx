@@ -57,7 +57,7 @@ const Assessment = ({
 
     const handleStartAssessment = () => {
         try {
-            const assessmentUrl = `/student/courses/${viewcourses}/modules/${moduleID}/assessment/${assessmentOutSourceId}`
+             const assessmentUrl = `/student/courses/${viewcourses}/modules/${moduleID}/assessment/${assessmentOutSourceId}/chapter/${chapterContent.id}`
 
             let newWindow: any
 

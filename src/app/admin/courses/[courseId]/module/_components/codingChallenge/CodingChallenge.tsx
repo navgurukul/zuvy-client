@@ -284,7 +284,7 @@ function CodingChallenge({
                         </h1>
                         {/* <ScrollArea className="h-dvh pr-4"> */}
                         <div className="">
-                            <ScrollArea className="h-screen pb-96">
+                            <ScrollArea className="h-screen pb-80">
                                 {filteredQuestions?.map((question: any) => {
                                     const selectedTagName = tags?.filter(
                                         (tag: any) => tag.id == question.tagId
