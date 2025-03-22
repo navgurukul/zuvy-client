@@ -637,6 +637,9 @@ function Page({
                                     <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
                                         <h2 className="font-bold">MCQs</h2>
                                         <QuestionCard
+                                            isQuizSubmitted={
+                                                assessmentData?.IsQuizzSubmission
+                                            }
                                             id={1}
                                             title="Quiz"
                                             weightage={
