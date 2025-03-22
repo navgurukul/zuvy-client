@@ -83,7 +83,7 @@ export function DataTablePagination<TData>({
 
     useEffect(() => {
         const totalPages = Math.ceil(totalStudents / +position)
-        if (currentPage > totalPages) {
+        if (totalPages > 0 && currentPage > totalPages) {
             setCurrentPage(totalPages) // Reset current page to last valid page if it exceeds total pages
             setOffset((totalPages - 1) * +position)
             fetchStudentData((totalPages - 1) * +position)
@@ -106,7 +106,6 @@ export function DataTablePagination<TData>({
                     <DropdownMenuSeparator />
                     <DropdownMenuRadioGroup
                         value={position}
-                        // onValueChange={setPosition}
                         onValueChange={(newPosition) => {
                             setPosition(newPosition)
                             // setCurrentPage(1) // Optional: Reset to first page on changing position
