@@ -996,4 +996,18 @@ export const getChapterUpdateStatus = create<updateChapterList>((set) => ({
     },
 }))
 
+type codingChapterIsSubmitted = {
+    isCodingChapterSubmitted: boolean
+    setIsCodingChapterSubmitted: (newValue: boolean) => void
+}
+
+export const getCodingChapterIsSubmitted = create<codingChapterIsSubmitted>(
+    (set) => ({
+        isCodingChapterSubmitted: false,
+        setIsCodingChapterSubmitted: (newValue: boolean) => {
+            set({ isCodingChapterSubmitted: newValue })
+        },
+    })
+)
+
 // ------------------------- User ------------------------
