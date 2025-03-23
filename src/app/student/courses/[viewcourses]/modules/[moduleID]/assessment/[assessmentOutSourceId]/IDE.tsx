@@ -446,9 +446,6 @@ const IDE: React.FC<IDEProps> = ({
                                                                     1}
                                                                 :
                                                             </span>{' '}
-                                                            {
-                                                                input.parameterName
-                                                            }
                                                            {' '}
                                                             {formatValue(
                                                                 input.parameterValue,
