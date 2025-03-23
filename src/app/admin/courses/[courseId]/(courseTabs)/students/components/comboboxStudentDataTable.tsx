@@ -26,12 +26,16 @@ export function ComboboxStudent({
     userId,
     bootcampId,
     batchId,
+    selectedRows,
+    fetchStudentData,
 }: {
     batchData: any
-    batchName: any
-    userId: any
+    batchName?: any
+    userId?: any
     bootcampId: any
-    batchId: any
+    batchId?: any
+    selectedRows?: any[]
+    fetchStudentData?: any
 }) {
     const [open, setOpen] = React.useState(false)
     const [value, setValue] = React.useState('')
@@ -44,6 +48,7 @@ export function ComboboxStudent({
         setDisplayBatchName(batchName || 'Unassigned')
         setValue(batchId)
     }, [batchName, batchId])
+
     const handleSelectBatchChange = async (
         currentValue: any,
         value: any,
@@ -82,6 +87,42 @@ export function ComboboxStudent({
         }
     }
 
+    const selected = selectedRows?.map((item) => {
+        return {
+            name: item.name,
+            email: item.email,
+        }
+    })
+
+    const handleAssignBatch = async (currentValue: any) => {
+        const [batchId, label] = currentValue.split('-')
+        const courseId = bootcampId
+        try {
+            await api
+                .post(`/bootcamp/students/${bootcampId}?batch_id=${batchId}`, {
+                    students: selected,
+                })
+                .then((res) => {
+                    toast({
+                        title: res.data.status,
+                        description: res.data.message,
+                        className:
+                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+                    })
+                    fetchStudentData && fetchStudentData()
+                })
+        } catch (error: any) {
+            if (error.response.data.message === 'Batch is full')
+                setBatchisFull(true)
+            toast({
+                title: 'Error',
+                description: error.response.data.message,
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+            })
+        }
+    }
+
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
@@ -89,9 +130,9 @@ export function ComboboxStudent({
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className="w-[200px] justify-between capitalize"
+                    className="w-[200px] justify-between"
                 >
-                    {displaybatchName}
+                    {userId ? displaybatchName : 'Select a Batch'}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
@@ -105,14 +146,16 @@ export function ComboboxStudent({
                                 key={batch.value}
                                 disabled={value == batch.value && !batchisFull}
                                 value={`${batch.value}-${batch.label}`}
-                                onSelect={(currentValue) =>
-                                    handleSelectBatchChange(
-                                        currentValue,
-                                        value,
-                                        setValue,
-                                        setOpen
-                                    )
-                                }
+                                onSelect={(currentValue) => {
+                                    selectedRows
+                                        ? handleAssignBatch(currentValue)
+                                        : handleSelectBatchChange(
+                                              currentValue,
+                                              value,
+                                              setValue,
+                                              setOpen
+                                          )
+                                }}
                             >
                                 <Check
                                     className={cn(

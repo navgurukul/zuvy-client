@@ -15,13 +15,14 @@ import { Trash2 } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { fetchStudentsHandler } from '@/utils/admin'
-import { getStoreStudentDataNew } from '@/store/store'
+import { getStoreStudentDataNew, getStoreStudentData } from '@/store/store'
 
 interface AlertDialogProps {
     title: string
     description: string
-    userId: number
+    userId: any
     bootcampId: number
+    fetchStudentData?: any
 }
 
 export const AlertDialogDemo: React.FC<AlertDialogProps> = ({
@@ -29,6 +30,7 @@ export const AlertDialogDemo: React.FC<AlertDialogProps> = ({
     description,
     userId,
     bootcampId,
+    fetchStudentData,
 }) => {
     const {
         setStudents,
@@ -43,13 +45,16 @@ export const AlertDialogDemo: React.FC<AlertDialogProps> = ({
 
     async function deleteStudentHandler(userId: any, bootcampId: any) {
         try {
-            await api.delete(`/student/${userId}/${bootcampId}`).then((res) => {
+            let url = `/student/{userId}/${bootcampId}?`
+            url += 'userId=' + userId.join('&userId=')
+            await api.delete(url).then((res) => {
                 toast({
-                    title: res.data.status,
+                    title: 'User Deleted Successfully!',
                     description: res.data.message,
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
+                fetchStudentData && fetchStudentData()
                 fetchStudentsHandler({
                     courseId: bootcampId,
                     limit,

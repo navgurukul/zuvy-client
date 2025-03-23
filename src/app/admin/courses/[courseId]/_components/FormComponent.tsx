@@ -41,24 +41,33 @@ const FormComponent = (props: Props) => {
                     </div>
                 </div>
                 <div className="flex items-center ml-auto">
-                    <Link
-                        // href={`/admin/courses/117/submissionForm/15`}
-                        // href={`/admin/courses/${props.bootcampId}/submissionForm/${props.data.id}`}
-                        href={{
-                            pathname: `/admin/courses/${props.bootcampId}/submissionForm/${props.data.id}`,
-                            query: {
-                                moduleId: props.moduleId,
-                            },
-                        }}
-                    >
-                        <Button
-                            variant={'secondary'}
-                            className="flex items-center border-none hover:text-secondary hover:bg-popover"
+                    {props.data.submitStudents > 0 ? (
+                        <Link
+                            href={{
+                                pathname: `/admin/courses/${props.bootcampId}/submissionForm/${props.data.id}`,
+                                query: {
+                                    moduleId: props.moduleId,
+                                },
+                            }}
                         >
-                            View Submissions
-                            <ChevronRight size={20} />
-                        </Button>
-                    </Link>
+                            <div className="flex items-center text-secondary hover:bg-popover">
+                                <Button variant="ghost">
+                                    View Submissions
+                                    <ChevronRight size={20} />
+                                </Button>
+                            </div>
+                        </Link>
+                    ) : (
+                        <div className="flex items-center cursor-no-drop text-secondary hover:bg-popover">
+                            <Button
+                                variant="ghost"
+                                disabled={props.data.submitStudents === 0}
+                            >
+                                View Submissions
+                                <ChevronRight size={20} />
+                            </Button>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

@@ -98,7 +98,7 @@ function Page({
                 setBootcampData(response.data)
             })
             .catch((error) => {
-                console.log('Error fetching bootcamp data:', error)
+                console.error('Error fetching bootcamp data:', error)
             })
     }, [params.viewcourses])
 
@@ -111,17 +111,19 @@ function Page({
                     upcomingClasses={upcomingClasses}
                 />
             </div>
-            <DataTablePagination
-                totalStudents={totalStudents}
-                position={position}
-                setPosition={setPosition}
-                pages={pages}
-                lastPage={lastPage}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                fetchStudentData={fetchRecordings}
-                setOffset={setOffset}
-            />
+            {totalStudents && (
+                <DataTablePagination
+                    totalStudents={totalStudents}
+                    position={position}
+                    setPosition={setPosition}
+                    pages={pages}
+                    lastPage={lastPage}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    fetchStudentData={fetchRecordings}
+                    setOffset={setOffset}
+                />
+            )}
         </>
     )
 }

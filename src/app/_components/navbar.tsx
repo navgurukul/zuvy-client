@@ -4,16 +4,21 @@ import Image from 'next/image'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import Sidebar from './sidebar'
 import { Bell, Menu, Search } from 'lucide-react'
+import { getUser } from '@/store/store'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { MobileNavbarRoutes } from './navbar-routes'
 import { useLazyLoadedStudentData } from '@/store/store'
-
+import NavbarNotifications from './navbar-notifications'
+//Test
 const Navbar = () => {
     const { studentData } = useLazyLoadedStudentData()
+    const { user, setUser } = getUser()
+    const rolesList =
+        user && (user.rolesList.length === 0 ? 'student' : user.rolesList[0])
+
     return (
-        <nav className="bg-muted">
-            {/* <MaxWidthWrapper> */}
+        <nav className="bg-muted fixed top-0 left-0 right-0 z-40">
             <div className="flex items-center justify-between border-green-[#2f433a]">
                 <div className="flex items-center">
                     <Sheet>
@@ -29,7 +34,7 @@ const Navbar = () => {
                             <Sidebar />
                         </SheetContent>
                     </Sheet>
-                    <Link href={'/'} className="flex z-40 ">
+                    <Link href={`/${rolesList}`} className="flex z-40 ">
                         <Image
                             src={'/logo.PNG'}
                             alt="logo"
@@ -43,6 +48,7 @@ const Navbar = () => {
                     <div className="sm:items-center space-x-4 hidden md:flex">
                         {/* <Search /> */}
                         {/* <Bell /> */}
+                        {/* {rolesList === 'student' && <NavbarNotifications />} */}
                         <Link href="/profile">
                             <Avatar>
                                 <AvatarImage

@@ -25,12 +25,14 @@ const OpenEndedQuestions = ({
     questions,
     assessmentSubmitId,
     getSeperateOpenEndedQuestions,
+    getAssessmentData
 }: {
     onBack: () => void
     remainingTime: number
     questions: any[]
     assessmentSubmitId: number
     getSeperateOpenEndedQuestions: () => void
+    getAssessmentData: () => void
 }) => {
     const router = useRouter()
 
@@ -68,6 +70,9 @@ const OpenEndedQuestions = ({
                 `/submission/openended/assessmentSubmissionId=${assessmentSubmitId}`,
                 { openEndedQuestionSubmissionDto }
             )
+
+            getAssessmentData()
+
             toast({
                 title: 'Success',
                 description: 'Open-ended questions submitted successfully',

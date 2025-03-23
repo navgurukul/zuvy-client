@@ -53,11 +53,9 @@ const moduleSchema = z.object({
     name: z
         .string()
         .min(2, { message: 'Module Name must be at least 2 characters.' }),
-    description: z
-        .string()
-        .min(2, {
-            message: 'Module Description must be at least 2 characters.',
-        }),
+    description: z.string().min(2, {
+        message: 'Module Description must be at least 2 characters.',
+    }),
     months: z.number().min(0, { message: 'Months Should not be empty.' }),
     weeks: z.number().min(0, { message: 'Weeks Should not be empty.' }),
     days: z.number().min(0, { message: 'Days Should not be empty.' }),
@@ -150,9 +148,9 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                         )}
                                     />
                                 </div>
-                                <div>
+                                <div className="mt-2">
                                     <Label
-                                        className="m-2 "
+                                        className="mx-2 "
                                         htmlFor="learning-material"
                                     >
                                         Learning Material
@@ -186,8 +184,8 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                     />
                                 </div>
 
-                                <div>
-                                    <Label className="mx-2 " htmlFor="project">
+                                <div className="mt-2">
+                                    <Label className="mx-2" htmlFor="project">
                                         Project
                                     </Label>
                                 </div>

@@ -16,6 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from '@/components/ui/use-toast'
 import { getProctoringDataStore } from '@/store/store'
 import { Check, CheckCircle, User, X, XCircle } from 'lucide-react'
+import { calculateTimeTaken } from '@/utils/admin'
 
 type User = {
     name: string
@@ -130,6 +131,8 @@ const Page = ({ params }: { params: any }) => {
     const [codingdata, setCodingData] = useState<CodingQuestion[]>([])
     const [username, setUsername] = useState<string>('')
     const [moduleId, setmoduleId] = useState<number>(0)
+    const [proctoringData, setProctoringData] = useState<any>()
+    const [timeTaken, setTimeTaken] = useState<string>('')
     const [loading, setLoading] = useState<boolean>(true)
     const [totalQuestions, setTotalQuestion] = useState({
         totalCodingQuestion: 0,
@@ -161,8 +164,6 @@ const Page = ({ params }: { params: any }) => {
         },
         {
             crumb: username,
-
-            href: '',
             isLast: true,
         },
     ]
@@ -183,6 +184,11 @@ const Page = ({ params }: { params: any }) => {
                     `/tracking/assessment/submissionId=${params.report}?studentId=${params.IndividualReport}`
                 )
                 .then((res) => {
+                    const timeTaken = calculateTimeTaken(
+                        res?.data?.startedAt,
+                        res?.data?.submitedAt
+                    )
+                    setTimeTaken(timeTaken)
                     setCodingData(res?.data?.PracticeCode)
                     setUsername(res?.data?.user?.name)
                     setmoduleId(
@@ -193,6 +199,19 @@ const Page = ({ params }: { params: any }) => {
                         totalCodingQuestion: res?.data?.codingQuestionCount,
                         totalMcqQuestion: res?.data?.mcqQuestionCount,
                         totalOpenEnded: res?.data?.openEndedQuestionCount,
+                    })
+                    setProctoringData({
+                        canEyeTrack:
+                            res?.data?.submitedOutsourseAssessment?.canEyeTrack,
+                        canTabChange:
+                            res?.data?.submitedOutsourseAssessment
+                                ?.canTabChange,
+                        canScreenExit:
+                            res?.data?.submitedOutsourseAssessment
+                                ?.canScreenExit,
+                        canCopyPaste:
+                            res?.data?.submitedOutsourseAssessment
+                                ?.canCopyPaste,
                     })
                 })
         } catch (error) {
@@ -251,13 +270,23 @@ const Page = ({ params }: { params: any }) => {
                                             </span>
                                         </div>
 
-                                        <div className="flex gap-x-1 items-center">
-                                            <span className="font-normal text-[15px] text-gray-700 dark:text-gray-300">
-                                                Submitted On
-                                            </span>
-                                            <span className="font-normal text-[15px] text-gray-900 dark:text-white">
-                                                {formattedDate}
-                                            </span>
+                                        <div>
+                                            <div className="flex gap-x-1">
+                                                <span className="font-normal text-[15px] text-gray-700 dark:text-gray-300">
+                                                    Submitted On
+                                                </span>
+                                                <span className="font-normal text-[15px] text-gray-900 dark:text-white">
+                                                    {formattedDate}
+                                                </span>
+                                            </div>
+                                            <div className="flex gap-x-1">
+                                                <span className="font-normal text-[15px] text-gray-700 dark:text-gray-300">
+                                                    Time Taken:
+                                                </span>
+                                                <span className="font-normal text-[15px] text-gray-900 dark:text-white">
+                                                    {timeTaken}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -285,16 +314,25 @@ const Page = ({ params }: { params: any }) => {
                         totalScore={100}
                         copyPaste={assesmentData?.copyPaste}
                         tabchanges={assesmentData?.tabChange}
+                        fullScreenExit={assesmentData?.fullScreenExit}
+                        eyeMomentCount={assesmentData?.eyeMomentCount}
                         embeddedSearch={assesmentData?.embeddedGoogleSearch}
                         submissionType={assesmentData?.typeOfsubmission}
-                        totalCodingScore={assesmentData?.requiredCodingScore}
+                        totalCodingScore={
+                            assesmentData?.submitedOutsourseAssessment
+                                .weightageCodingQuestions
+                        }
                         codingScore={assesmentData?.codingScore}
                         mcqScore={assesmentData?.mcqScore}
-                        totalMcqScore={assesmentData?.requiredMCQScore}
+                        totalMcqScore={
+                            assesmentData?.submitedOutsourseAssessment
+                                .weightageMcqQuestions
+                        }
                         openEndedScore={assesmentData?.openEndedScore}
                         totalOpenEndedScore={
                             assesmentData?.requiredOpenEndedScore
                         }
+                        proctoringData={proctoringData}
                     />
                 ) : (
                     <div className="flex gap-x-20  ">
@@ -335,7 +373,9 @@ const Page = ({ params }: { params: any }) => {
                                                     assesmentData?.tabChange
                                                 }
                                                 totalCodingScore={
-                                                    assesmentData?.requiredCodingScore
+                                                    assesmentData
+                                                        ?.submitedOutsourseAssessment
+                                                        .weightageCodingQuestions
                                                 }
                                                 codingScore={
                                                     assesmentData?.codingScore
@@ -352,7 +392,12 @@ const Page = ({ params }: { params: any }) => {
                             )}
 
                             {/* Quiz Submission */}
-                            {assesmentData?.mcqQuestionCount > 0 && (
+                            {(assesmentData?.submitedOutsourseAssessment
+                                ?.easyMcqQuestions ||
+                                assesmentData?.submitedOutsourseAssessment
+                                    ?.mediumMcqQuestions ||
+                                assesmentData?.submitedOutsourseAssessment
+                                    ?.hardMcqQuestions > 0) && (
                                 <div className="w-full">
                                     <h1 className="text-left font-semibold">
                                         MCQs
@@ -376,7 +421,9 @@ const Page = ({ params }: { params: any }) => {
                                             }
                                             mcqScore={assesmentData?.mcqScore}
                                             totalMcqScore={
-                                                assesmentData?.requiredMCQScore
+                                                assesmentData
+                                                    ?.submitedOutsourseAssessment
+                                                    .weightageMcqQuestions
                                             }
                                         />
                                     ) : (

@@ -33,6 +33,7 @@ import {
     AlertDialogAction,
     AlertDialogContent,
 } from '@/components/ui/alert-dialog'
+import { ellipsis } from '@/lib/utils'
 
 function ClassCard({
     classData,
@@ -113,7 +114,7 @@ function ClassCard({
                                 <Tooltip>
                                     <TooltipTrigger asChild>
                                         <h3 className="font-semibold">
-                                            {classData.title}
+                                            {ellipsis(classData.title, 30)}
                                         </h3>
                                     </TooltipTrigger>
                                     <TooltipContent className="font-semibold">
@@ -209,67 +210,63 @@ function ClassCard({
                         </Link>
                     </Button>
                 </div>
-                {!studentSide &&
-                    classType !== 'ongoing' &&
-                    classType !== 'upcoming' && (
-                        <div className="absolute top-4  flex gap-2 right-4">
-                            <AlertDialog
-                                open={isDialogOpen}
-                                onOpenChange={setIsDialogOpen}
-                            >
-                                <TooltipProvider>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <AlertDialogTrigger asChild>
-                                                <Edit
-                                                    size={18}
-                                                    className="text-secondary"
-                                                />
-                                            </AlertDialogTrigger>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p>Edit Session</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
-
-                                <AlertDialogContent>
-                                    <AlertDialogAction className="w-2 h-2 bg-white text-black ">
-                                        X
-                                    </AlertDialogAction>
-                                    <EditSessionDialog
-                                        meetingId={classData.meetingId}
-                                        initialData={{
-                                            sessionTitle: classData.title,
-                                            description: classData.description,
-                                            startTime: classData.startTime,
-                                            endTime: classData.endTime,
-                                        }}
-                                        getClasses={getClasses}
-                                        open={isDialogOpen}
-                                        onClose={handleCloseDialog}
-                                        setIsDialogOpen={setIsDialogOpen}
-                                    />
-                                </AlertDialogContent>
-                            </AlertDialog>
+                {!studentSide && classType !== 'ongoing' && (
+                    <div className="absolute top-4  flex gap-2 right-4">
+                        <AlertDialog
+                            open={isDialogOpen}
+                            onOpenChange={setIsDialogOpen}
+                        >
                             <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <Trash2Icon
-                                            size={18}
-                                            className="text-destructive"
-                                            onClick={() =>
-                                                setDeleteModalOpen(true)
-                                            }
-                                        />
+                                        <AlertDialogTrigger asChild>
+                                            <Edit
+                                                size={18}
+                                                className="text-secondary"
+                                            />
+                                        </AlertDialogTrigger>
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                        <p>Delete Session</p>
+                                        <p>Edit Session</p>
                                     </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
-                        </div>
-                    )}
+
+                            <AlertDialogContent>
+                                <AlertDialogAction className="w-2 h-2 bg-white text-black ">
+                                    X
+                                </AlertDialogAction>
+                                <EditSessionDialog
+                                    meetingId={classData.meetingId}
+                                    initialData={{
+                                        sessionTitle: classData.title,
+                                        description: classData.description,
+                                        startTime: classData.startTime,
+                                        endTime: classData.endTime,
+                                    }}
+                                    getClasses={getClasses}
+                                    open={isDialogOpen}
+                                    onClose={handleCloseDialog}
+                                    setIsDialogOpen={setIsDialogOpen}
+                                />
+                            </AlertDialogContent>
+                        </AlertDialog>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Trash2Icon
+                                        size={18}
+                                        className="text-destructive"
+                                        onClick={() => setDeleteModalOpen(true)}
+                                    />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Delete Session</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    </div>
+                )}
             </Card>
 
             <DeleteConfirmationModal

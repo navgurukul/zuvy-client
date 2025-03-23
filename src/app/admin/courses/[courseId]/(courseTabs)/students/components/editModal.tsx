@@ -1,0 +1,114 @@
+import React, { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Pencil, Check, X } from 'lucide-react'
+import { api } from '@/utils/axios.config'
+import { toast } from '@/components/ui/use-toast'
+import { fetchStudentsHandler } from '@/utils/admin'
+import { getStoreStudentDataNew } from '@/store/store'
+import { getEditStudent, getStudentData } from '@/store/store'
+
+interface AlertDialogProps {
+    name: string
+    email: string
+    userId: number
+    bootcampId: number
+}
+
+export const EditModal: React.FC<AlertDialogProps> = ({
+    name,
+    email,
+    userId,
+    bootcampId,
+}) => {
+    const {
+        setStudents,
+        setTotalPages,
+        setLoading,
+        offset,
+        setTotalStudents,
+        setCurrentPage,
+        limit,
+        search,
+    } = getStoreStudentDataNew()
+
+    const [isOpen, setIsOpen] = useState(false)
+    const { isStudent, setIsStudent } = getEditStudent()
+    const { studentData, setStudentData } = getStudentData()
+
+    async function editStudentHandler(userId: any, bootcampId: any) {
+        try {
+            await api
+                .patch(`/bootcamp/updateUserDetails/${userId}`, studentData)
+                .then((res) => {
+                    toast({
+                        title: res.data.status,
+                        description: res.data.message,
+                        className:
+                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+                    })
+                    setIsStudent(0)
+                    fetchStudentsHandler({
+                        courseId: bootcampId,
+                        limit,
+                        offset,
+                        searchTerm: search,
+                        setLoading,
+                        setStudents,
+                        setTotalPages,
+                        setTotalStudents,
+                        setCurrentPage,
+                    })
+                    setIsOpen(false)
+                })
+        } catch (error: any) {
+            toast({
+                title: 'Failed',
+                description:
+                    error.response?.data?.message || 'An error occurred.',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+            })
+            setIsOpen(false)
+        }
+    }
+
+    return (
+        <>
+            {isOpen ? (
+                <div className="flex gap-1">
+                    <Button
+                        className="bg-white text-black-400"
+                        onClick={() => editStudentHandler(userId, bootcampId)}
+                    >
+                        <Check />
+                    </Button>
+                    <Button
+                        className="bg-white text-black-400"
+                        onClick={() => {
+                            setIsOpen(false)
+                            setIsStudent(0)
+                        }}
+                    >
+                        <X />
+                    </Button>
+                </div>
+            ) : (
+                <Button
+                    className="bg-white text-red-400"
+                    onClick={() => {
+                        setIsOpen(true)
+                        setIsStudent(userId)
+                        setStudentData({
+                            email: email || '',
+                            name: name || '',
+                        })
+                    }}
+                >
+                    <Pencil />
+                </Button>
+            )}
+        </>
+    )
+}
+
+export default EditModal

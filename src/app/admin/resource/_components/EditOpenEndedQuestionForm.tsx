@@ -163,10 +163,21 @@ function EditOpenEndedQuestionForm({
                                 <FormItem className="text-left w-full">
                                     <FormLabel>Topics</FormLabel>
                                     <Select
+                                        value={
+                                            tags.find(
+                                                (tag) => tag.id === field.value
+                                            )?.tagName ||
+                                            tags.find(
+                                                (tag) =>
+                                                    tag.id ===
+                                                    selectedQuestion[0]?.tagId
+                                            )?.tagName ||
+                                            ''
+                                        }
                                         onValueChange={(value) => {
                                             const selectedTag = tags.find(
                                                 (tag: any) =>
-                                                    tag.tagName === value
+                                                    tag?.tagName === value
                                             )
                                             if (selectedTag) {
                                                 field.onChange(selectedTag.id)
@@ -181,8 +192,9 @@ function EditOpenEndedQuestionForm({
                                                             (tag) =>
                                                                 tag.id ===
                                                                 selectedQuestion[0]
-                                                                    .tagId
-                                                        )?.tagName || ''
+                                                                    ?.tagId
+                                                        )?.tagName ||
+                                                        'Choose Topic'
                                                     }
                                                 />
                                             </SelectTrigger>
@@ -191,9 +203,9 @@ function EditOpenEndedQuestionForm({
                                             {tags.map((tag: any) => (
                                                 <SelectItem
                                                     key={tag.id}
-                                                    value={tag.tagName}
+                                                    value={tag?.tagName}
                                                 >
-                                                    {tag.tagName}
+                                                    {tag?.tagName}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>

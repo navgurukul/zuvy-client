@@ -1,12 +1,21 @@
 import React from 'react'
 import { PlusCircle } from 'lucide-react'
-import Link from 'next/link'
-import { cn, difficultyColor, ellipsis } from '@/lib/utils'
+import { cn, difficultyBgColor, difficultyColor, ellipsis } from '@/lib/utils'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
+import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
+import QuestionDescriptionModal from './QuestionDescriptionModal'
 
-interface Example {
-    input: number[]
-    output: number[]
+interface TestCase {
+    id: number
+    inputs: {
+        parameterName: string
+        parameterType: string
+        parameterValue: any
+    }[]
+    expectedOutput: {
+        parameterType: string
+        parameterValue: any
+    }
 }
 
 interface CodingQuestion {
@@ -14,110 +23,140 @@ interface CodingQuestion {
     title: string
     description: string
     difficulty: string
-    tags: number
+    tagId: number
     constraints: string
-    authorId: number
-    inputBase64: string | null
-    examples: Example[]
-    testCases: Example[]
+    testCases: TestCase[]
     expectedOutput: number[]
-    solution: string
     createdAt: string
-    updatedAt: string
 }
 
 const CodingQuestions = ({
     questions,
     setSelectedQuestions,
     selectedQuestions,
+    tags,
+    setIsNewQuestionAdded,
 }: {
     questions: CodingQuestion[]
     setSelectedQuestions: React.Dispatch<React.SetStateAction<CodingQuestion[]>>
     selectedQuestions: CodingQuestion[]
+    tags: any
+    setIsNewQuestionAdded: React.Dispatch<React.SetStateAction<boolean>>
 }) => {
+
+    const handleCodingQuestionSelection = (
+        question: CodingQuestion,
+        selectedQuestions: CodingQuestion[],
+        setSelectedQuestions: React.Dispatch<React.SetStateAction<CodingQuestion[]>>,
+        setIsNewQuestionAdded: React.Dispatch<React.SetStateAction<boolean>>
+      ) => {
+        if (!selectedQuestions.some((q) => q.id === question.id)) {
+          setSelectedQuestions([...selectedQuestions, question]);
+        }
+        setIsNewQuestionAdded(true);
+      };
+
     return (
-        <ScrollArea className="h-dvh pr-4">
-            <ScrollBar orientation="vertical" />
-            {questions.map((question: CodingQuestion) => (
-                <div
-                    key={question.id}
-                    className={`p-5 rounded-sm border border-gray-200 mb-4 ${
-                        selectedQuestions.some(
-                            (q: CodingQuestion) => q.id === question.id
-                        )
-                            ? 'bg-gray-100'
-                            : ''
-                    }`}
-                >
-                    <div className="flex justify-between text-start items-center">
-                        <div>
-                            <div className="flex items-center gap-2">
-                                <h2 className="font-bold text-lg">
-                                    {question.title}
-                                </h2>
-                                <span
-                                    className={cn(
-                                        `font-semibold text-secondary`,
-                                        difficultyColor(question.difficulty)
-                                    )}
-                                >
-                                    {question.difficulty}
-                                </span>
+        <ScrollArea className="h-3/5  w-full pr-5 pb-32">
+            {/* <ScrollBar orientation="vertical" className="h-3/4" /> */}
+            <div className="h-screen">
+                {questions.map((question: CodingQuestion) => {
+                    const tag = tags?.find(
+                        (tag: any) => tag?.id === question?.tagId
+                    )
+                    return (
+                        <div
+                            key={question.id}
+                            className="py-5 pr-5 pl-2 rounded-sm border-b border-gray-200 mb-4"
+                        >
+                            <div className="flex justify-between text-start items-center w-full">
+                                <div className="w-full">
+                                    <div className="flex items-center justify-between w-full">
+                                        <h2 className="font-bold">
+                                            {ellipsis(question.title, 30)}
+                                        </h2>
+                                        <div className="flex gap-2 ml-auto">
+                                            {tag && (
+                                                <span className="text-sm text-[#518672] bg-[#DCE7E3] rounded-full px-2">
+                                                    {tag?.tagName}
+                                                </span>
+                                            )}
+                                            <span
+                                                className={cn(
+                                                    `text-sm rounded-full px-2`,
+                                                    difficultyColor(
+                                                        question.difficulty
+                                                    ),
+                                                    difficultyBgColor(
+                                                        question.difficulty
+                                                    )
+                                                )}
+                                            >
+                                                {question.difficulty}
+                                            </span>
+                                            <div className="flex">
+                                                {selectedQuestions.some(
+                                                    (q: CodingQuestion) =>
+                                                        q.id === question.id
+                                                ) ? (
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        width="20"
+                                                        height="20"
+                                                        viewBox="0 0 24 24"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        strokeWidth="2"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        className="lucide lucide-circle-check"
+                                                    >
+                                                        <circle
+                                                            cx="12"
+                                                            cy="12"
+                                                            r="10"
+                                                        />
+                                                        <path d="m9 12 2 2 4-4" />
+                                                    </svg>
+                                                ) : (
+                                                    <PlusCircle
+                                                    onClick={() => {
+                                                        handleCodingQuestionSelection(
+                                                          question,
+                                                          selectedQuestions,
+                                                          setSelectedQuestions,
+                                                          setIsNewQuestionAdded
+                                                        );
+                                                      }}
+                                                        className="text-secondary cursor-pointer"
+                                                        size={20}
+                                                    />
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p className="text-[#4A4A4A] mt-1 font-[14px]">
+                                        {ellipsis(question.description, 45)}
+                                    </p>
+                                    <Dialog>
+                                        <DialogTrigger asChild>
+                                            <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer">
+                                                View Full Description
+                                            </p>
+                                        </DialogTrigger>
+                                        <DialogOverlay />
+                                        <QuestionDescriptionModal
+                                            question={question}
+                                            type="coding"
+                                            tagName={tag?.tagName}
+                                        />
+                                    </Dialog>
+                                </div>
                             </div>
-                            <div className="w-full">
-                                <p className="text-gray-600 mt-1">
-                                    {ellipsis(question.description, 60)}
-                                </p>
-                            </div>
-                            <Link
-                                href=""
-                                className="font-semibold text-sm mt-2 text-secondary"
-                            >
-                                View Full Description
-                            </Link>
                         </div>
-                        <div className="flex">
-                            {selectedQuestions.some(
-                                (q: CodingQuestion) => q.id === question.id
-                            ) ? (
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className="lucide lucide-circle-check"
-                                >
-                                    <circle cx="12" cy="12" r="10" />
-                                    <path d="m9 12 2 2 4-4" />
-                                </svg>
-                            ) : (
-                                <PlusCircle
-                                    onClick={() => {
-                                        if (
-                                            !selectedQuestions.some(
-                                                (q: CodingQuestion) =>
-                                                    q.id === question.id
-                                            )
-                                        ) {
-                                            setSelectedQuestions([
-                                                ...selectedQuestions,
-                                                question,
-                                            ])
-                                        }
-                                    }}
-                                    className="text-secondary cursor-pointer"
-                                    size={20}
-                                />
-                            )}
-                        </div>
-                    </div>
-                </div>
-            ))}
+                    )
+                })}
+            </div>
         </ScrollArea>
     )
 }

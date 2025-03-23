@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ChevronLeft, Timer } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Button } from '@/components/ui/button'
@@ -17,24 +17,47 @@ import {
 } from '@/components/ui/form'
 import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
-import { useRouter } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
+import { addClassToCodeTags } from '@/utils/admin'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 
 const QuizQuestions = ({
     onBack,
+    weightage,
     remainingTime,
     questions,
     assessmentSubmitId,
     getSeperateQuizQuestions,
+    getAssessmentData,
 }: {
     onBack: () => void
+    weightage?: any
     remainingTime: number
-    questions: any[]
+    questions: any
     assessmentSubmitId: number
     getSeperateQuizQuestions: () => void
+    getAssessmentData: () => void
 }) => {
     const router = useRouter()
-    const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined) // Correct type
-    // Define the Zod schema for form validation
+    const params = useParams()
+    const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+        undefined
+    )
+    const [isDisabled, setIsDisabled] = useState(false)
+    const [isDialogOpen, setIsDialogOpen] = useState(false)
+
+    const codeBlockClass =
+        'text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full'
 
     useEffect(() => {
         return () => {
@@ -44,22 +67,19 @@ const QuizQuestions = ({
         }
     }, [])
 
-
     const formSchema = z.object({
         answers: z.array(
             z.string().nonempty({ message: 'This question is required.' })
         ),
     })
 
-    // Initialize the form with react-hook-form and the Zod resolver
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
     })
 
-    // Set default values based on submissionsData when the component mounts or questions change
     useEffect(() => {
         const defaultValues = {
-            answers: questions.map((question) =>
+            answers: questions?.data?.mcqs?.map((question: any) =>
                 question.submissionsData && question.submissionsData.length > 0
                     ? question.submissionsData[0].chosenOption.toString()
                     : ''
@@ -68,19 +88,49 @@ const QuizQuestions = ({
         form.reset(defaultValues)
     }, [questions, form])
 
-    // Handle form submission
+    const handleSubmitClick = async () => {
+        // Validate the form before opening the dialog
+        const isValid = await form.trigger();
+        if (isValid) {
+            setIsDialogOpen(true);
+        } else {
+            // Show toast notification for missing answers
+            toast({
+                title: 'Error',
+                description: 'Please answer all questions before submitting.',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                variant: 'destructive',
+            })
+        }
+    }
+
     const onSubmit = async (data: z.infer<typeof formSchema>) => {
-        const quizSubmissionDto = data.answers.map((chosenOption, index) => ({
-            questionId: questions[index].id,
-            attemptCount: 1,
-            chosenOption: Number(chosenOption),
-        }))
+        setIsDisabled(true)
+        setIsDialogOpen(false)
 
         try {
+            // Create submission data array with all answers
+            const quizSubmissionDto = data.answers.map(
+                (chosenOption, index) => {
+                    const question = questions.data.mcqs[index]
+                    return {
+                        questionId: Number(question?.outsourseQuizzesId),
+                        variantId: question.variantId,
+                        attemptCount: 1,
+                        chosenOption: parseInt(chosenOption),
+                    }
+                }
+            )
+
+            // Make the API call with the properly structured data
             const response = await api.patch(
-                `/submission/quiz/assessmentSubmissionId=${assessmentSubmitId}`,
+                `/submission/quiz/assessmentSubmissionId=${assessmentSubmitId}?assessmentOutsourseId=${params.assessmentOutSourceId}`,
                 { quizSubmissionDto }
             )
+
+            getAssessmentData()
+
             toast({
                 title: 'Success',
                 description: 'Quiz Submitted Successfully',
@@ -90,87 +140,160 @@ const QuizQuestions = ({
 
             getSeperateQuizQuestions()
 
-               // Set the timeout and store the timeout ID
-               timeoutRef.current = setTimeout(() => {
+            timeoutRef.current = setTimeout(() => {
                 onBack()
             }, 3000)
         } catch (error: any) {
+            setIsDisabled(false)
             toast({
                 title: 'Error',
                 description:
                     error?.response?.data?.message || 'An error occurred',
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-
                 variant: 'destructive',
             })
         }
     }
 
     return (
-        <div>
+        <div className="space-y-6">
             <div className="flex items-center justify-between gap-2">
-                <div
-                    className="flex items-center cursor-pointer"
-                    onClick={onBack}
-                >
-                    <ChevronLeft strokeWidth={2} size={24} />
-                    <h1 className="font-extrabold"></h1>
-                </div>
-                <div className="font-bold text-xl">
+                <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                            <ChevronLeft fontSize={24} />
+                        </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>
+                                Are you absolutely sure?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This action is irreversible. If your quiz
+                                hasn&apos;t been submitted, your selections will
+                                be lost.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                                className="bg-red-500"
+                                onClick={onBack}
+                            >
+                                Go Back
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+                <div className="fixed top-4 right-4 bg-white p-2 rounded-md shadow-md font-bold text-xl">
                     <TimerDisplay remainingTime={remainingTime} />
                 </div>
-                <div></div>
             </div>
-            <Separator />
+            {/* <Separator /> */}
+
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
-                    className="flex flex-col items-center mt-10"
+                    className="flex flex-col items-center gap-6 mt-10"
                 >
-                    {questions.map((question, index) => (
-                        <FormField
-                            key={question.id}
-                            control={form.control}
-                            name={`answers.${index}`}
-                            render={({ field }) => (
-                                <FormItem className="flex flex-col items-start mb-10 w-full max-w-md">
-                                    <FormLabel>
-                                        {index + 1}. {question.Quiz.question}
-                                    </FormLabel>
-                                    <FormControl>
-                                        <RadioGroup
-                                            value={field.value}
-                                            onValueChange={field.onChange}
-                                        >
-                                            {Object.keys(
-                                                question.Quiz.options
-                                            ).map((key) => (
-                                                <div
-                                                    key={key}
-                                                    className="flex items-center gap-2 mb-2"
+                    {questions?.data?.mcqs?.map(
+                        (question: any, index: number) => (
+                            <div
+                                key={question.id}
+                                className="w-full max-w-2xl border text-left border-gray-200 rounded-lg p-4 shadow-sm"
+                            >
+                                <FormField
+                                    control={form.control}
+                                    name={`answers.${index}`}
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col items-start mb-10 w-full max-w-2xl">
+                                            <FormLabel className=" flex space-x-2 text-lg font-semibold text-left">
+                                                <span>{index + 1}. </span>
+                                                <span
+                                                    className="text-gray-800"
+                                                    dangerouslySetInnerHTML={{
+                                                        __html: addClassToCodeTags(
+                                                            question.question,
+                                                            codeBlockClass
+                                                        ),
+                                                    }}
+                                                />
+                                            </FormLabel>
+
+                                            <FormControl>
+                                                <RadioGroup
+                                                    value={field.value}
+                                                    onValueChange={
+                                                        field.onChange
+                                                    }
+                                                    className="flex flex-col gap-3"
                                                 >
-                                                    <RadioGroupItem
-                                                        value={key}
-                                                    />
-                                                    <p>
-                                                        {
-                                                            question.Quiz
-                                                                .options[key]
-                                                        }
-                                                    </p>
-                                                </div>
-                                            ))}
-                                        </RadioGroup>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    ))}
-                    <Button type="submit" className="mt-10">
+                                                    {Object.keys(
+                                                        question.options
+                                                    ).map((key) => (
+                                                        <div
+                                                            key={key}
+                                                            className="flex items-center gap-2"
+                                                        >
+                                                            <RadioGroupItem
+                                                                value={key}
+                                                            />
+                                                            <p className="text-gray-700">
+                                                                {
+                                                                    question
+                                                                        .options[
+                                                                        key
+                                                                    ]
+                                                                }
+                                                            </p>
+                                                        </div>
+                                                    ))}
+                                                </RadioGroup>
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+                        )
+                    )}
+
+                    <Button
+                        type="button"
+                        className="mt-4"
+                        disabled={isDisabled}
+                        onClick={handleSubmitClick}
+                    >
                         Submit Quiz
                     </Button>
+
+                    <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                    Are you absolutely sure?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This action cannot be undone and you can
+                                    submit the quiz only once.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel onClick={() => setIsDialogOpen(false)}>
+                                    Cancel
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                    className="bg-red-500"
+                                    onClick={form.handleSubmit(onSubmit)}
+                                    disabled={isDisabled}
+                                >
+                                    Submit
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </form>
             </Form>
         </div>

@@ -10,6 +10,7 @@ interface DeleteConfirmationModalProps {
     isOpen: boolean
     onClose: () => void
     onConfirm: () => void
+    modalTitle?: string
     modalText?: string
     buttonText?: string
     input: boolean
@@ -22,6 +23,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
     isOpen,
     onClose,
     onConfirm,
+    modalTitle,
     modalText,
     buttonText,
     input,
@@ -83,7 +85,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                         leaveFrom="opacity-100"
                         leaveTo="opacity-0"
                     >
-                        <Dialog.Overlay className="fixed inset-0 bg-gray-300 bg-opacity-30 transition-opacity" />
+                        <Dialog.Overlay className="fixed inset-0 bg-gray-100 bg-opacity-10 transition-opacity" />
                     </Transition.Child>
 
                     {/* This element is to trick the browser into centering the modal contents. */}
@@ -112,7 +114,8 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                     >
                                         {input
                                             ? 'Delete Batch'
-                                            : 'Permanent Deletion'}
+                                            : modalTitle ||
+                                              'Permanent Deletion'}
                                     </Dialog.Title>
                                     <div className="mt-2">
                                         <p className="text-sm text-gray-700 my-2 ">
@@ -149,7 +152,9 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                     className=" p-2 inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4  bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
                                     onClick={onClose}
                                 >
-                                    {input ? 'Cancel' : 'Cancel'}
+                                    {modalTitle
+                                        ? 'Keep the Question'
+                                        : 'Cancel'}
                                 </Button>
                                 {loading ? (
                                     <Button variant={'destructive'} disabled>

@@ -12,9 +12,12 @@ import {
     BookOpenCheck,
 } from 'lucide-react'
 import DeleteConfirmationModal from '../../_components/deleteModal'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { DELETE_CHAPTER_CONFIRMATION } from '@/utils/constant'
 import { toast } from '@/components/ui/use-toast'
+import { useParams, useRouter } from 'next/navigation'
+import { getTopicId } from '@/store/store'
+
 
 function ChapterItem({
     title,
@@ -22,21 +25,30 @@ function ChapterItem({
     topicName,
     chapterId,
     activeChapter,
-    fetchChapterContent,
+    setActiveChapter,
     fetchChapters,
     moduleId,
+    activeChapterRef,
+    isChapterClickedRef,
+    chapterData,
 }: {
     title: string
     topicId: number
     topicName: string
     chapterId: number
     activeChapter: number
-    fetchChapterContent: (chapterId: number) => void
+    setActiveChapter: any
     fetchChapters: () => void
     moduleId: string
+    activeChapterRef: any
+    isChapterClickedRef: any
+    chapterData: any
 }) {
     // states and variables
+    const { courseId } = useParams()
+    const router = useRouter()
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
+    const { setTopicId } = getTopicId()
 
     // functions
     const setTopicIcon = () => {
@@ -64,6 +76,16 @@ function ChapterItem({
             : 'text-black hover:bg-secondary/20'
     }
 
+    const handleClick = () => {
+        setActiveChapter(chapterId) // Set the active chapter in the parent component
+        if (topicId) {
+            setTopicId(topicId)
+        }
+        router.push(
+            `/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterId}`
+        )
+    }
+
     const handleDeleteChapter = async () => {
         try {
             await api
@@ -78,6 +100,11 @@ function ChapterItem({
                             'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     fetchChapters()
+                    if (chapterId === activeChapter) {
+                        router.push(
+                            `/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterData[0].chapterId}`
+                        )
+                    }
                 })
                 .catch((error) => {
                     toast({
@@ -96,15 +123,16 @@ function ChapterItem({
         setDeleteModalOpen(true)
     }
 
+
     return (
-        <div>
+        <div ref={chapterId === activeChapter ? activeChapterRef : null}>
             <div
                 className={cn(
                     'flex rounded-md p-3  my-1 cursor-pointer justify-between items-center',
                     setActiveChapterItem()
                 )}
                 onClick={() => {
-                    fetchChapterContent(chapterId)
+                    handleClick()
                 }}
             >
                 <div className="flex gap-2 capitalize">
@@ -120,7 +148,6 @@ function ChapterItem({
                         className="hover:text-destructive cursor-pointer"
                         size={15}
                     />
-                    <GripVertical size={15} />
                 </div>
             </div>
             <DeleteConfirmationModal

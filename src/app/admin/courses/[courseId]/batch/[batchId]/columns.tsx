@@ -12,36 +12,43 @@ import {
     getBatchData,
     getDeleteStudentStore,
     getStoreStudentData,
+    getEditStudent,
+    getStudentData,
 } from '@/store/store'
 import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
+import AlertDialogDemo from '../../(courseTabs)/students/components/deleteModalNew'
+import EditModal from '../../(courseTabs)/students/components/editModal'
+import { Input } from '@/components/ui/input'
 
 export const columns: ColumnDef<Task>[] = [
-    // {
-    //     id: 'select',
-    //     header: ({ table }) => (
-    //         <Checkbox
-    //             checked={
-    //                 table.getIsAllPageRowsSelected() ||
-    //                 (table.getIsSomePageRowsSelected() && 'indeterminate')
-    //             }
-    //             onCheckedChange={(value) =>
-    //                 table.toggleAllPageRowsSelected(!!value)
-    //             }
-    //             aria-label="Select all"
-    //             className="translate-y-[2px]"
-    //         />
-    //     ),
-    //     cell: ({ row }) => (
-    //         <Checkbox
-    //             checked={row.getIsSelected()}
-    //             onCheckedChange={(value) => row.toggleSelected(!!value)}
-    //             aria-label="Select row"
-    //             className="translate-y-[2px]"
-    //         />
-    //     ),
-    // enableSorting: false,
-    // enableHiding: false,
-    // },
+    {
+        id: 'select',
+        header: ({ table }) => (
+            <div className="ml-5">
+                <Checkbox
+                    checked={
+                        table.getIsAllPageRowsSelected() ||
+                        (table.getIsSomePageRowsSelected() && 'indeterminate')
+                    }
+                    onCheckedChange={(value) =>
+                        table.toggleAllPageRowsSelected(!!value)
+                    }
+                    aria-label="Select all"
+                    className="translate-y-[2px]"
+                />
+            </div>
+        ),
+        cell: ({ row }) => (
+            <Checkbox
+                checked={row.getIsSelected()}
+                onCheckedChange={(value) => row.toggleSelected(!!value)}
+                aria-label="Select row"
+                className="translate-y-[2px]"
+            />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+    },
     {
         accessorKey: 'profilePicture',
         header: ({ column }) => (
@@ -81,9 +88,31 @@ export const columns: ColumnDef<Task>[] = [
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Students Name" />
         ),
-        cell: ({ row }) => (
-            <div className="w-[180px] text-start">{row.getValue('name')}</div>
-        ),
+        cell: ({ row }) => {
+            const { userId } = row.original
+            const { isStudent, setIsStudent } = getEditStudent()
+            const { studentData, setStudentData } = getStudentData()
+            const handleSingleStudent = (
+                e: React.ChangeEvent<HTMLInputElement>
+            ) => {
+                const { name, value } = e.target
+                setStudentData({ ...studentData, [name]: value })
+            }
+            return (
+                <>
+                    {isStudent === userId ? (
+                        <Input
+                            id="name"
+                            name="name"
+                            value={studentData.name}
+                            onChange={handleSingleStudent}
+                        />
+                    ) : (
+                        <div className="w-[150px]">{row.getValue('name')}</div>
+                    )}
+                </>
+            )
+        },
         enableSorting: true,
         enableHiding: true,
     },
@@ -93,15 +122,32 @@ export const columns: ColumnDef<Task>[] = [
             <DataTableColumnHeader column={column} title="Email" />
         ),
         cell: ({ row }) => {
-            // const label = labels.find((label) => label.value === row.original.label);
-
+            const { userId } = row.original
+            const { isStudent, setIsStudent } = getEditStudent()
+            const { studentData, setStudentData } = getStudentData()
+            const handleSingleStudent = (
+                e: React.ChangeEvent<HTMLInputElement>
+            ) => {
+                const { name, value } = e.target
+                setStudentData({ ...studentData, [name]: value })
+            }
             return (
-                <div className="flex space-x-2">
-                    {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
-                    <span className="max-w-[500px] truncate">
-                        {row.getValue('email')}
-                    </span>
-                </div>
+                <>
+                    {isStudent === userId ? (
+                        <Input
+                            id="email"
+                            name="email"
+                            value={studentData.email}
+                            onChange={handleSingleStudent}
+                        />
+                    ) : (
+                        <div className="flex space-x-2">
+                            <span className="max-w-[500px] truncate font-medium">
+                                {row.getValue('email')}
+                            </span>
+                        </div>
+                    )}
+                </>
             )
         },
     },
@@ -214,44 +260,46 @@ export const columns: ColumnDef<Task>[] = [
             )
         },
     },
-    // {
-    //     id: 'actions',
-    //     // cell: ({ row }) => <DataTableRowActions row={row} />,
-    //     cell: ({ row }) => {
-    //         const student = row.original
-    //         const { userId, bootcampId } = student
-    //         // const { onDeleteHandler } = GetdataHandler(bootcampId);
-    //         const { setDeleteModalOpen, isDeleteModalOpen } =
-    //             getDeleteStudentStore()
-    //         const { setStoreStudentData } = getStoreStudentData()
+    {
+        id: 'actions1',
+        // cell: ({ row }) => <DataTableRowActions row={row} />,
+        cell: ({ row }) => {
+            const student = row.original
+            const { userId, bootcampId, name, email } = student
 
-    //         return (
-    //             <>
-    //                 <Trash2
-    //                     onClick={() => setDeleteModalOpen(true)}
-    //                     className="text-destructive cursor-pointer"
-    //                     size={20}
-    //                 />
-    //                 <DeleteConfirmationModal
-    //                     isOpen={isDeleteModalOpen}
-    //                     onClose={() => setDeleteModalOpen(false)}
-    //                     onConfirm={() => {
-    //                         deleteStudentHandler(
-    //                             userId,
-    //                             bootcampId,
-    //                             setDeleteModalOpen,
-    //                             setStoreStudentData
-    //                         )
-    //                     }}
-    //                     modalText="This action cannot be undone. This will permanently delete the
-    //           student from this bootcamp"
-    //                     buttonText="Delete Student"
-    //                     input={false}
-    //                     modalText2=""
-    //                     batchName=""
-    //                 />
-    //             </>
-    //         )
-    //     },
-    // },
+            return (
+                <>
+                    <div>
+                        <EditModal
+                            userId={userId}
+                            bootcampId={bootcampId}
+                            name={name}
+                            email={email}
+                        />
+                    </div>
+                </>
+            )
+        },
+    },
+    {
+        id: 'actions2',
+        // cell: ({ row }) => <DataTableRowActions row={row} />,
+        cell: ({ row }) => {
+            const student = row.original
+            const { userId, bootcampId } = student
+
+            return (
+                <>
+                    <div>
+                        <AlertDialogDemo
+                            userId={[userId]}
+                            bootcampId={bootcampId}
+                            title="Are you absolutely sure?"
+                            description="This action cannot be undone. This will permanently the student from the bootcamp"
+                        />
+                    </div>
+                </>
+            )
+        },
+    },
 ]

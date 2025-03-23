@@ -96,7 +96,6 @@ const formSchema = z
 
 const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
     const [isLoading, setIsLoading] = useState<boolean>(false)
-
     const [isOpen, setIsOpen] = useState(false)
     const [formIsOpen, setFormIsOpen] = useState<boolean>(false)
     // const { batchValueData } = setStoreBatchValue()
@@ -320,7 +319,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                                     variant={
                                                                         'outline'
                                                                     }
-                                                                    className={`w-[230px]  text-left font-normal ${
+                                                                    className={`w-[230px] text-left font-normal ${
                                                                         !field.value &&
                                                                         'text-muted-foreground'
                                                                     }`}
@@ -335,38 +334,42 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                                 </Button>
                                                             </FormControl>
                                                         </DialogTrigger>
-                                                        <DialogContent className="w-auto p-4">
-                                                            <Calendar
-                                                                mode="single"
-                                                                selected={
-                                                                    field.value ||
-                                                                    new Date()
-                                                                }
-                                                                onSelect={(
-                                                                    date
-                                                                ) => {
-                                                                    if (date) {
-                                                                        field.onChange(
-                                                                            date
-                                                                        )
-                                                                    } else {
-                                                                        field.onChange(
-                                                                            new Date()
-                                                                        ) // Handle case where selected date is undefined
+                                                        <DialogClose>
+                                                            <DialogContent className="w-auto p-4">
+                                                                <Calendar
+                                                                    mode="single"
+                                                                    selected={
+                                                                        field.value ||
+                                                                        new Date()
                                                                     }
-                                                                }}
-                                                                disabled={(
-                                                                    date: any
-                                                                ) =>
-                                                                    date <=
-                                                                    addDays(
-                                                                        new Date(),
-                                                                        -1
-                                                                    )
-                                                                } // Disable past dates
-                                                                initialFocus
-                                                            />
-                                                        </DialogContent>
+                                                                    onSelect={(
+                                                                        date
+                                                                    ) => {
+                                                                        if (
+                                                                            date
+                                                                        ) {
+                                                                            field.onChange(
+                                                                                date
+                                                                            )
+                                                                        } else {
+                                                                            field.onChange(
+                                                                                new Date()
+                                                                            ) // Handle case where selected date is undefined
+                                                                        }
+                                                                    }}
+                                                                    disabled={(
+                                                                        date: any
+                                                                    ) =>
+                                                                        date <=
+                                                                        addDays(
+                                                                            new Date(),
+                                                                            -1
+                                                                        )
+                                                                    } // Disable past dates
+                                                                    initialFocus
+                                                                />
+                                                            </DialogContent>
+                                                        </DialogClose>
                                                     </Dialog>
                                                     <FormMessage />
                                                 </FormItem>
@@ -460,53 +463,55 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                                 </Button>
                                                             </FormControl>
                                                         </DialogTrigger>
-                                                        <DialogContent className="w-[300px] p-0">
-                                                            <Command>
-                                                                <CommandInput placeholder="Search batch..." />
-                                                                <CommandEmpty>
-                                                                    No batch
-                                                                    found.
-                                                                </CommandEmpty>
-                                                                <CommandGroup>
-                                                                    {props.bootcampData.map(
-                                                                        (
-                                                                            bootcamp
-                                                                        ) => (
-                                                                            <CommandItem
-                                                                                value={
-                                                                                    bootcamp.value
-                                                                                }
-                                                                                key={
-                                                                                    bootcamp.value
-                                                                                }
-                                                                                onSelect={() => {
-                                                                                    form.setValue(
-                                                                                        'batch',
+                                                        <DialogClose asChild>
+                                                            <DialogContent className="w-[300px] p-0">
+                                                                <Command>
+                                                                    <CommandInput placeholder="Search batch..." />
+                                                                    <CommandEmpty>
+                                                                        No batch
+                                                                        found.
+                                                                    </CommandEmpty>
+                                                                    <CommandGroup>
+                                                                        {props.bootcampData.map(
+                                                                            (
+                                                                                bootcamp
+                                                                            ) => (
+                                                                                <CommandItem
+                                                                                    value={
                                                                                         bootcamp.value
-                                                                                    )
-                                                                                    form.clearErrors(
-                                                                                        'batch'
-                                                                                    )
-                                                                                }}
-                                                                            >
-                                                                                <Check
-                                                                                    className={cn(
-                                                                                        'mr-2 h-4 w-4',
-                                                                                        bootcamp.value ===
-                                                                                            field.value
-                                                                                            ? 'opacity-100'
-                                                                                            : 'opacity-0'
-                                                                                    )}
-                                                                                />
-                                                                                {
-                                                                                    bootcamp.label
-                                                                                }
-                                                                            </CommandItem>
-                                                                        )
-                                                                    )}
-                                                                </CommandGroup>
-                                                            </Command>
-                                                        </DialogContent>
+                                                                                    }
+                                                                                    key={
+                                                                                        bootcamp.value
+                                                                                    }
+                                                                                    onSelect={() => {
+                                                                                        form.setValue(
+                                                                                            'batch',
+                                                                                            bootcamp.value
+                                                                                        )
+                                                                                        form.clearErrors(
+                                                                                            'batch'
+                                                                                        )
+                                                                                    }}
+                                                                                >
+                                                                                    <Check
+                                                                                        className={cn(
+                                                                                            'mr-2 h-4 w-4',
+                                                                                            bootcamp.value ===
+                                                                                                field.value
+                                                                                                ? 'opacity-100'
+                                                                                                : 'opacity-0'
+                                                                                        )}
+                                                                                    />
+                                                                                    {
+                                                                                        bootcamp.label
+                                                                                    }
+                                                                                </CommandItem>
+                                                                            )
+                                                                        )}
+                                                                    </CommandGroup>
+                                                                </Command>
+                                                            </DialogContent>
+                                                        </DialogClose>
                                                     </Dialog>
                                                     <FormMessage />
                                                 </FormItem>

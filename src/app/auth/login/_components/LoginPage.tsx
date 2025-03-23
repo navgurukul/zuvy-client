@@ -10,6 +10,7 @@ import './styles/login.css'
 import { toast } from '@/components/ui/use-toast'
 import Link from 'next/link'
 import { apiMeraki } from '@/utils/axios.config'
+import { getUser } from '@/store/store'
 
 type Props = {}
 
@@ -25,13 +26,21 @@ function LoginPage({}: Props) {
     const loginUrl = process.env.NEXT_PUBLIC_ZUVY_LOGIN_URL
 
     const [loading, setLoading] = useState(true)
-
+    const { user, setUser } = getUser()
     const router = useRouter()
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search)
         const tokenVal = urlParams.get('token')
         const loggedOutToken = urlParams.get('loggedOutToken')
+
+        let redirectedUrl = localStorage.getItem('redirectedUrl')
+        if (window.location.href.includes('route')) {
+            const route = urlParams.get('route')
+            redirectedUrl = route ?? ''
+            localStorage.setItem('redirectedUrl', redirectedUrl)
+            setCookie('redirectedUrl', JSON.stringify(btoa(redirectedUrl)))
+        }
 
         const sendGoogleUserData = async (token: any) => {
             try {
@@ -41,6 +50,8 @@ function LoginPage({}: Props) {
                         Authorization: token,
                     },
                 })
+
+                setUser(resp.data.user)
 
                 if (resp.data.user) {
                     toast({
@@ -59,15 +70,24 @@ function LoginPage({}: Props) {
                         JSON.stringify(btoa('student'))
                     )
 
-                    return router.push('/student')
+                    if (redirectedUrl) {
+                        return router.push(redirectedUrl)
+                    } else {
+                        return router.push('student')
+                    }
                 } else if (resp.data.user.rolesList[0]) {
                     const userRole = resp.data.user.rolesList[0]
                     setCookie(
                         'secure_typeuser',
                         JSON.stringify(btoa(resp.data.user.rolesList[0]))
                     )
-                    if (userRole === 'admin')
+                    if (redirectedUrl) {
+                        return router.push(redirectedUrl)
+                    } else if (userRole === 'admin') {
                         return router.push('/admin/courses')
+                    } else if (userRole === 'instructor') {
+                        return router.push('/instructor')
+                    }
 
                     return router.push(`/${resp.data.user.rolesList[0]}`)
                 }
@@ -96,6 +116,7 @@ function LoginPage({}: Props) {
 
         if (!localStorage.getItem('token')) {
             localStorage.setItem('token', '')
+            // setCookie('redirectedUrl', JSON.stringify(btoa('')))
         }
         if (!localStorage.getItem('loggedOut')) {
             localStorage.setItem('loggedOut', String(false))
