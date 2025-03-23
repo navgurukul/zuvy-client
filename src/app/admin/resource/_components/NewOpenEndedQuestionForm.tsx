@@ -40,13 +40,21 @@ const formSchema = z.object({
 function NewOpenEndedQuestionForm({
     tags,
     setIsDialogOpen,
-    getAllOpenEndedQuestions,
+    filteredOpenEndedQuestions,
     setOpenEndedQuestions,
+    selectedOptions,
+    difficulty,
+    offset,
+    position
 }: {
     tags: any
     setIsDialogOpen: any
-    getAllOpenEndedQuestions: any
     setOpenEndedQuestions: any
+    filteredOpenEndedQuestions: any
+    selectedOptions?:any,
+    difficulty?:any,
+    offset?:number,
+    position?:String
 }) {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -91,7 +99,7 @@ function NewOpenEndedQuestionForm({
             difficulty: values.difficulty,
         }
         createOpenEndedQuestion(formattedData)
-        getAllOpenEndedQuestions(setOpenEndedQuestions)
+        filteredOpenEndedQuestions(setOpenEndedQuestions ,offset,position, difficulty,selectedOptions)
     }
 
     return (
@@ -157,7 +165,7 @@ function NewOpenEndedQuestionForm({
                                         onValueChange={(value) => {
                                             const selectedTag = tags.find(
                                                 (tag: any) =>
-                                                    tag.tagName === value
+                                                    tag?.tagName === value
                                             )
                                             if (selectedTag) {
                                                 field.onChange(selectedTag.id)
@@ -173,9 +181,9 @@ function NewOpenEndedQuestionForm({
                                             {tags.map((tag: any) => (
                                                 <SelectItem
                                                     key={tag.id}
-                                                    value={tag.tagName}
+                                                    value={tag?.tagName}
                                                 >
-                                                    {tag.tagName}
+                                                    {tag?.tagName}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>

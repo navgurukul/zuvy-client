@@ -62,6 +62,12 @@ const guestRoutes = [
 const teacherRoutes = [
     {
         icon: List,
+        label: 'Classes',
+        href: '/instructor',
+        subtabs: [],
+    },
+    {
+        icon: BookOpen,
         label: 'Courses',
         href: '/instructor/courses',
         subtabs: [],
@@ -72,18 +78,18 @@ const teacherRoutes = [
         href: '/instructor/recording',
         subtabs: [],
     },
-    {
-        icon: BookOpen,
-        label: 'Curricullum',
-        href: '/instructor/curricullum',
-        subtabs: [],
-    },
-    {
-        icon: BarChart,
-        label: 'Analytics',
-        href: '/instructor/analytics',
-        subtabs: [],
-    },
+    // {
+    //     icon: BookOpen,
+    //     label: 'Curricullum',
+    //     href: '/instructor/curricullum',
+    //     subtabs: [],
+    // },
+    // {
+    //     icon: BarChart,
+    //     label: 'Analytics',
+    //     href: '/instructor/analytics',
+    //     subtabs: [],
+    // },
 ]
 
 const adminRoutes = [

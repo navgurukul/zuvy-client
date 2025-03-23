@@ -1,3 +1,4 @@
+import React, { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import {
     DropdownMenu,
@@ -53,13 +54,16 @@ export function DataTablePagination<TData>({
         setOffset(0)
     }
     const nextPageHandler = () => {
+        const newOffset = currentPage * +position
         setCurrentPage((prevState: number) => prevState + 1)
-        setOffset((prevState: number) => prevState + +position)
+        setOffset(newOffset)
     }
 
     const prevPageHandler = () => {
+        const newOffset = Math.max(0, (currentPage - 2) * +position)
         setCurrentPage((prevState: number) => prevState - 1)
-        setOffset((prevState: number) => Math.max(0, prevState - +position))
+        // setOffset((prevState: number) => Math.max(0, prevState - +position))
+        setOffset(newOffset)
     }
 
     const previousDisabledHandler = () => {
@@ -77,6 +81,17 @@ export function DataTablePagination<TData>({
         }
     }
 
+    useEffect(() => {
+        const totalPages = Math.ceil(totalStudents / +position)
+        if (totalPages > 0 && currentPage > totalPages) {
+            setCurrentPage(totalPages) // Reset current page to last valid page if it exceeds total pages
+            setOffset((totalPages - 1) * +position)
+            fetchStudentData((totalPages - 1) * +position)
+        } else {
+            fetchStudentData((currentPage - 1) * +position)
+        }
+    }, [position, totalStudents, currentPage])
+
     return (
         <div className="flex items-center justify-end mt-2 px-2 gap-x-2">
             <p className="text-sm font-medium">Items Per Page</p>
@@ -91,7 +106,10 @@ export function DataTablePagination<TData>({
                     <DropdownMenuSeparator />
                     <DropdownMenuRadioGroup
                         value={position}
-                        onValueChange={setPosition}
+                        onValueChange={(newPosition) => {
+                            setPosition(newPosition)
+                            // setCurrentPage(1) // Optional: Reset to first page on changing position
+                        }}
                     >
                         {ROWS_PER_PAGE.map((rows) => {
                             return (

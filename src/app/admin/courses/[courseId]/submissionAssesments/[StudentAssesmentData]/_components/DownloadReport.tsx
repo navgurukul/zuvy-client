@@ -31,29 +31,40 @@ const DownloadReport = ({ userInfo }: any) => {
     }
 
     async function generatePDF(reportData: any) {
-        const doc = new jsPDF();
+        const doc = new jsPDF()
 
         // Add Assessment Summary at the Top
         // Add "Zuvy Assessment Report" in bold and red
-        doc.setFont('helvetica', 'bold'); // Set font to bold
-        doc.setTextColor(96, 144, 130); // Set text color to zuvy color
-        doc.setFontSize(16);
-        doc.text(`${title} Assessment Report`, 105, 10, { align: 'center' });
+        doc.setFont('helvetica', 'bold') // Set font to bold
+        doc.setTextColor(96, 144, 130) // Set text color to zuvy color
+        doc.setFontSize(16)
+        doc.text(`${title} Assessment Report`, 105, 10, { align: 'center' })
 
         // Reset font and color for subsequent text
-        doc.setFont('helvetica', 'normal'); // Reset to normal font
-        doc.setFontSize(11);
-        doc.setTextColor(0, 0, 0);
-        doc.text(`Name: ${reportData.user?.name || 'N/A'}`, 15, 25);
-        doc.text(`Email: ${reportData.user?.email || 'N/A'}`, 15, 30);
-        doc.text(`Submitted On: ${new Date(reportData.submitedAt).toLocaleString()}`, 15, 35);
+        doc.setFont('helvetica', 'normal') // Reset to normal font
+        doc.setFontSize(11)
+        doc.setTextColor(0, 0, 0)
+        doc.text(`Name: ${reportData.user?.name || 'N/A'}`, 15, 25)
+        doc.text(`Email: ${reportData.user?.email || 'N/A'}`, 15, 30)
         doc.text(
-            `Time Taken: ${calculateTimeTaken(reportData.startedAt, reportData.submitedAt)}`,
+            `Submitted On: ${new Date(reportData.submitedAt).toLocaleString()}`,
+            15,
+            35
+        )
+        doc.text(
+            `Time Taken: ${calculateTimeTaken(
+                reportData.startedAt,
+                reportData.submitedAt
+            )}`,
             15,
             40
-        );
-        doc.text(`Total Marks: ${reportData.marks || 0}`, 15, 45);
-        doc.text(`Percentage: ${Math.trunc(reportData.percentage || 0)}%`, 15, 50);
+        )
+        doc.text(`Total Marks: ${reportData.marks || 0}`, 15, 45)
+        doc.text(
+            `Percentage: ${Math.trunc(reportData.percentage || 0)}%`,
+            15,
+            50
+        )
 
         // Table for CopyPaste and TabChange
         // Table for CopyPaste and TabChange
@@ -76,7 +87,7 @@ const DownloadReport = ({ userInfo }: any) => {
                 0: { cellWidth: 120 },
                 1: { cellWidth: 60 },
             },
-        });
+        })
 
         // Table for Coding Problems
         autoTable(doc, {
@@ -84,11 +95,15 @@ const DownloadReport = ({ userInfo }: any) => {
             body: [
                 [
                     'Coding Questions Attempted',
-                    `${reportData.attemptedCodingQuestions || 0} / ${reportData.codingQuestionCount || 0}`,
+                    `${reportData.attemptedCodingQuestions || 0} / ${
+                        reportData.codingQuestionCount || 0
+                    }`,
                 ],
                 [
                     'Coding Score',
-                    `${reportData.codingScore || 0} / ${reportData.requiredCodingScore || 0}`,
+                    `${reportData.codingScore || 0} / ${
+                        reportData.requiredCodingScore || 0
+                    }`,
                 ],
             ],
             theme: 'grid',
@@ -103,7 +118,7 @@ const DownloadReport = ({ userInfo }: any) => {
                 0: { cellWidth: 120 },
                 1: { cellWidth: 60 },
             },
-        });
+        })
 
         // Table for MCQs
         autoTable(doc, {
@@ -111,7 +126,9 @@ const DownloadReport = ({ userInfo }: any) => {
             body: [
                 [
                     'MCQ Score',
-                    `${reportData.mcqScore || 0} / ${reportData.requiredMCQScore || 0}`,
+                    `${reportData.mcqScore || 0} / ${
+                        reportData.requiredMCQScore || 0
+                    }`,
                 ],
             ],
             theme: 'grid',
@@ -126,13 +143,17 @@ const DownloadReport = ({ userInfo }: any) => {
                 0: { cellWidth: 120 },
                 1: { cellWidth: 60 },
             },
-        });
+        })
 
         // Create an array to hold all rows for the table
-        const tableData = reportData.PracticeCode.map((practiceCode: any, index: any) => [
-            `Q${index + 1}. ${practiceCode.questionDetail.title}`,
-            practiceCode.status == 'Accepted' ? 'Correct Answer' : 'Wrong Answer',
-        ]);
+        const tableData = reportData.PracticeCode.map(
+            (practiceCode: any, index: any) => [
+                `Q${index + 1}. ${practiceCode.questionDetail.title}`,
+                practiceCode.status == 'Accepted'
+                    ? 'Correct Answer'
+                    : 'Wrong Answer',
+            ]
+        )
 
         // Generate a single table with all rows
         autoTable(doc, {
@@ -150,14 +171,11 @@ const DownloadReport = ({ userInfo }: any) => {
                 0: { cellWidth: 120 },
                 1: { cellWidth: 60 },
             },
-        });
-
-
+        })
 
         // Save the PDF
-        doc.save(`${reportData.user?.name}_${title}.pdf`);
+        doc.save(`${reportData.user?.name}_${title}.pdf`)
     }
-
 
     async function handleDownload() {
         await fetchReportData()

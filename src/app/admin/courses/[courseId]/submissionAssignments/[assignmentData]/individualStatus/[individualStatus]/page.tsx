@@ -91,7 +91,7 @@ const Page = ({ params }: any) => {
 
                         setAssignmentTItle(data.title)
                     } else {
-                        console.log('Incomplete data received')
+                        console.error('Incomplete data received')
                     }
                 } else {
                     throw new Error('No data found')
@@ -174,10 +174,10 @@ const Page = ({ params }: any) => {
                             </Avatar>
                             <div>
                                 <h1 className="text-left font-semibold text-lg">
+                                    Submission Report by :{' '}
                                     {individualStudentData
                                         ? individualStudentData?.user?.name
                                         : ''}{' '}
-                                    : Submission Report
                                 </h1>
                                 <h1 className="text-left font-semibold text-lg">
                                     Email:{' '}
@@ -189,59 +189,41 @@ const Page = ({ params }: any) => {
                         </div>
                     </div>
                 </div>
-                <div>
+                <div className="px-10 mx-8">
                     <h1 className="text-left font-semibold text-[20px]">
                         Overview
                     </h1>
                     <div>
                         <h1 className="text-left font-semibold">
-                            Title:- {assignmentTitle}
+                            Title: {assignmentTitle}
                         </h1>
                         <div className="flex flex-col ">
-                            <h1 className="text-left font-semibold">
-                                Assignment Description
+                            <div className="my-2 flex flex-col gap-y-2 text-left ">
+                                <div className="flex gap-x-3">
+                                    <h1 className="font-semibold">
+                                        Status: {individualStudentData?.status}
+                                    </h1>
+                                </div>
+                                <h1 className="text-left font-semibold">
+                                    Completed At: {formattedDate}
+                                </h1>
+                            </div>
+                            <div className="text-left flex font-semibold gap-x-2">
+                                <h1>Assignment Link:</h1>
+                                <Link
+                                    target="_blank"
+                                    className="hover:text-blue-400 hover:underline "
+                                    href={url}
+                                >
+                                    {url}
+                                </Link>
+                            </div>
+                            <h1 className="text-left my-2 font-semibold">
+                                Assignment Description:
                             </h1>
-                            <div className="w-2/3 ">
+                            <div className="w-2/3 pb-5">
                                 {editor && <TiptapEditor editor={editor} />}
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="text-left flex font-semibold gap-x-2">
-                    <h1>Assignment Link:-</h1>
-                    <Link
-                        target="_blank"
-                        className="hover:text-blue-400 hover:underline "
-                        href={url}
-                    >
-                        Project Link
-                    </Link>
-                </div>
-
-                <div className="my-5 flex flex-col gap-y-3 text-left ">
-                    <h1 className="text-left font-semibold">
-                        Completed At: {formattedDate}
-                    </h1>
-
-                    <div>
-                        <div
-                            className="flex gap-x-3
-                                "
-                        >
-                            <h1 className="text-left font-semibold capitalize ">
-                                {/* "{index + 1}. {question}" */}
-                            </h1>
-                            <h1
-                                className={`text-left font-semibold capitalize `}
-                            >
-                                {/* {difficulty} */}
-                            </h1>
-                        </div>
-                        <div className="flex gap-x-3">
-                            <h1 className="font-semibold">
-                                Status: {individualStudentData?.status}
-                            </h1>
                         </div>
                     </div>
                 </div>

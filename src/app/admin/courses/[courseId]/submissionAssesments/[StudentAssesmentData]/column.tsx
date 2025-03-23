@@ -6,7 +6,8 @@ import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-co
 
 import { Task } from '@/utils/data/schema'
 import Link from 'next/link'
-import { FileText } from 'lucide-react'
+import { DownloadIcon, FileText } from 'lucide-react'
+import { calculateTimeTaken, getSubmissionDate } from '@/utils/admin'
 import DownloadReport from './_components/DownloadReport'
 
 export const columns: ColumnDef<Task>[] = [
@@ -80,6 +81,44 @@ export const columns: ColumnDef<Task>[] = [
             )
         },
     },
+    {
+        accessorKey: 'time taken',
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Time Taken" />
+        ),
+        cell: ({ row }) => {
+            const startedAt = row.original.startedAt
+            const submitedAt = row.original.submitedAt
+
+            const timeTaken:any = calculateTimeTaken(startedAt, submitedAt);
+
+            return (
+                <div className="flex space-x-2">
+                    <span className="max-w-[500px] truncate font-medium">
+                        {timeTaken}
+                    </span>
+                </div>
+            )
+        },
+    },
+    {
+        accessorKey: 'submission date',
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Submission Date" />
+        ),
+        cell: ({ row }) => {
+            const submitedAt = row.original.submitedAt
+            const submissionDate = getSubmissionDate(submitedAt);
+
+            return (
+                <div className="flex space-x-2">
+                    <span className="max-w-[500px] truncate font-medium">
+                        {submissionDate}
+                    </span>
+                </div>
+            )
+        },
+    },
 
     {
         accessorKey: 'isPassed',
@@ -108,15 +147,14 @@ export const columns: ColumnDef<Task>[] = [
         header: ({ column }) => (
             <DataTableColumnHeader
                 column={column}
-                title="Percentage Obtained"
+                title="% Obtained"
             />
         ),
         cell: ({ row }) => {
-            // const isChecked = row.original.isChecked
             const percentage = row.original.percentage
             return (
-                <div className="flex items-center">
-                    <span className=" mx-6 font-semibold w-full flex ">
+                <div className="flex space-x-2">
+                    <span className="font-semibold">
                         {Math.floor(percentage)}%
                     </span>
                 </div>
@@ -127,7 +165,6 @@ export const columns: ColumnDef<Task>[] = [
         id: 'actions',
         cell: ({ row }) => {
             const { bootcampId, newId, userId, id } = row.original
-            // console.log(row.original)
             return (
                 <div className="flex space-x-2">
                     <Link
@@ -144,7 +181,10 @@ export const columns: ColumnDef<Task>[] = [
     {
         id: 'actions',
         cell: ({ row }) => {
-            return <DownloadReport userInfo={row.original} />
+  
+            return (
+               <DownloadReport userInfo={row.original} />
+            )
         },
     },
 ]

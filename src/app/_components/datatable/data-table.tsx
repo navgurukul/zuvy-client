@@ -1,6 +1,6 @@
 'use client'
 
-import * as React from 'react'
+import React, { useEffect } from 'react'
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -27,15 +27,33 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import { getBatchData } from '@/store/store'
+import McqDeleteVaiarntComp from '@/app/admin/resource/_components/McqDeleteComponent'
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
+    setSelectedRows?: any
+    mcqSide?: boolean
+    assignStudents?: string
+}
+
+type StudentData = {
+    email: string
+    name: string
+    userId: number
+    bootcampId: number
+    batchName: string
+    batchId: number
+    progress: number
+    profilePicture: string
 }
 
 export function DataTable<TData, TValue>({
     columns,
     data,
+    setSelectedRows,
+    mcqSide,
+    assignStudents,
 }: DataTableProps<TData, TValue>) {
     const [rowSelection, setRowSelection] = React.useState({})
 
@@ -64,13 +82,33 @@ export function DataTable<TData, TValue>({
         getFacetedRowModel: getFacetedRowModel(),
         getFacetedUniqueValues: getFacetedUniqueValues(),
     })
+    const logSelectedRows = () => {
+        const selectedRows = table.getSelectedRowModel().rows
+        return selectedRows
+    }
+    useEffect(() => {
+        const selectedRows = table
+            .getSelectedRowModel()
+            .rows.map((row) => row.original)
+        setSelectedRows && setSelectedRows(selectedRows)
+    }, [table.getSelectedRowModel().rows])
 
     return (
-        <div className="space-y-4">
-            <DataTableToolbar table={table} />
+        <div className="space-y-4 relative">
+            {!assignStudents && (
+                <div className="flex flex-col justify-end items-end absolute top-[-111px] right-[130px] ">
+                    {mcqSide && (
+                        <McqDeleteVaiarntComp
+                            table={table}
+                            logSelectedRows={logSelectedRows}
+                        />
+                    )}
+                </div>
+            )}
+            {!assignStudents && <DataTableToolbar table={table} />}
             <div className="rounded-md border">
                 <Table>
-                    <TableHeader>
+                    <TableHeader className={assignStudents && 'hidden'}>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => {

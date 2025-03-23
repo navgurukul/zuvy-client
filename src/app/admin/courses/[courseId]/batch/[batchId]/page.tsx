@@ -35,7 +35,7 @@ import { columns } from './columns'
 import {
     getDeleteStudentStore,
     getStoreStudentData,
-    useStudentData,
+    // useStudentData,
 } from '@/store/store'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import DeleteConfirmationModal from '../../_components/deleteModal'
@@ -47,6 +47,9 @@ import { Spinner } from '@/components/ui/spinner'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import BreadcrumbCmponent from '@/app/_components/breadcrumbCmponent'
 import AddStudentsModal from '../../_components/addStudentsmodal'
+import { ComboboxStudent } from '../../(courseTabs)/students/components/comboboxStudentDataTable'
+import AlertDialogDemo from '../../(courseTabs)/students/components/deleteModalNew'
+import { useStudentData } from '../../(courseTabs)/students/components/useStudentData'
 
 const BatchesInfo = ({
     params,
@@ -56,8 +59,9 @@ const BatchesInfo = ({
     const router = useRouter()
     const param = useParams()
     const location = usePathname()
-
+    const { students, setStudents } = useStudentData(params.courseId)
     const { studentsData, setStoreStudentData } = getStoreStudentData()
+    const [allBatches, setAllBatches] = useState<any>([])
     const [studentData, setStudentData] = useState<StudentData[]>([])
     const [bootcamp, setBootcamp] = useState<any>([])
     const [search, setSearch] = useState('')
@@ -73,6 +77,7 @@ const BatchesInfo = ({
     const [error, setError] = useState(true)
     const debouncedValue = useDebounce(search, 1000)
     const [loading, setLoading] = useState(true)
+    const [selectedRows, setSelectedRows] = useState<StudentData[]>([])
 
     const crumbs = [
         {
@@ -143,6 +148,28 @@ const BatchesInfo = ({
     const { formState } = form
     const isValid = formState.isValid
 
+    const fetchBatches = useCallback(
+        async (courseId: any) => {
+            try {
+                const response = await api.get(`/bootcamp/batches/${courseId}`)
+                const batchData = response.data.data?.map((data: any) => {
+                    return {
+                        value: data.id,
+                        label: data.name,
+                    }
+                })
+                setAllBatches(batchData)
+            } catch (error) {
+                console.error('Error fetching batches', error)
+            }
+        },
+        [params.courseId]
+    )
+
+    useEffect(() => {
+        fetchBatches(params.courseId)
+    }, [params.courseId])
+
     const fetchInstructorInfo = useCallback(
         async (batchId: string) => {
             if (batchId) {
@@ -152,7 +179,7 @@ const BatchesInfo = ({
                     setInstructorInfo(batchData)
                 } catch (error: any) {
                     router.push('/not-found')
-                    console.log(
+                    console.error(
                         'Error fetching instructor info:',
                         error.message
                     )
@@ -245,6 +272,7 @@ const BatchesInfo = ({
             await api.get(endpoint).then((response) => {
                 setStudentData(response.data.modifiedStudentInfo)
                 setStoreStudentData(response.data.modifiedStudentInfo)
+                setStudents(response.data.modifiedStudentInfo)
                 setLastPage(response.data.totalPages)
                 setPages(response.data.totalPages)
                 setTotalStudents(response.data.totalStudentsCount)
@@ -256,6 +284,7 @@ const BatchesInfo = ({
             position,
             setStudentData,
             setStoreStudentData,
+            setStudents,
             setLastPage,
             setPages,
             setTotalStudents,
@@ -270,6 +299,9 @@ const BatchesInfo = ({
     const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value)
     }
+
+    const userIds = selectedRows.map((item: any) => item.userId)
+
     return (
         <>
             <BreadcrumbCmponent crumbs={crumbs} />
@@ -482,6 +514,25 @@ const BatchesInfo = ({
                     </div>
                     <div className="flex m-4">
                         <div className="flex items-center mx-4 text-sm">
+                            {selectedRows.length > 0 && (
+                                <>
+                                    <AlertDialogDemo
+                                        userId={userIds}
+                                        bootcampId={parseInt(params.courseId)}
+                                        title="Are you absolutely sure?"
+                                        description="This action cannot be undone. This will permanently the student from the bootcamp"
+                                        fetchStudentData={fetchStudentData}
+                                    />
+                                    <ComboboxStudent
+                                        batchData={allBatches}
+                                        bootcampId={params.courseId}
+                                        selectedRows={selectedRows}
+                                        fetchStudentData={fetchStudentData}
+                                    />
+                                </>
+                            )}
+                        </div>
+                        <div className="flex items-center mx-4 text-sm">
                             <Dialog>
                                 <DialogTrigger asChild>
                                     <button
@@ -590,7 +641,7 @@ const BatchesInfo = ({
                             ></Trash2>
                             <span
                                 onClick={() => setDeleteModalOpen(true)}
-                                className=" cursor-pointer ml-2"
+                                className=" cursor-pointer ml-1"
                             >
                                 Delete
                             </span>
@@ -629,7 +680,11 @@ const BatchesInfo = ({
                     </div>
                 ) : (
                     <div>
-                        <DataTable columns={columns} data={studentsData} />
+                        <DataTable
+                            columns={columns}
+                            data={students}
+                            setSelectedRows={setSelectedRows}
+                        />
                         <DataTablePagination
                             totalStudents={totalStudents}
                             position={position}

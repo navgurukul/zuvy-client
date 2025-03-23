@@ -26,6 +26,7 @@ import { format } from 'date-fns'
 import { api } from '@/utils/axios.config'
 import { formatDate } from '@/lib/utils'
 import { toast } from '@/components/ui/use-toast'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 const formSchema = z.object({
     section: z.array(
@@ -153,7 +154,8 @@ const FeedbackForm = (props: Props) => {
 
     return (
         <>
-            <div className="flex justify-center">
+           <ScrollArea className='h-screen'>
+           <div className="flex justify-center mt-24">
                 <div className="flex flex-col gap-5 text-left w-1/2">
                     <h1 className="text-xl font-bold text-secondary-foreground">
                         {props.content.title}
@@ -208,7 +210,7 @@ const FeedbackForm = (props: Props) => {
                                                                     className={`flex space-x-2 mr-4 mt-1 p-3 ${
                                                                         answer ==
                                                                             option &&
-                                                                        'border border-gray-800 border-2 rounded-lg'
+                                                                        'border border-gray-800 rounded-lg'
                                                                     }`}
                                                                 >
                                                                     <div className="flex items-center w-full space-x-3 space-y-0">
@@ -263,7 +265,7 @@ const FeedbackForm = (props: Props) => {
                                                                             className={`flex space-x-2 mr-4 mt-1 p-3 ${
                                                                                 (field.value as string) ===
                                                                                     optionKey &&
-                                                                                `border border-secondary border-2 rounded-lg`
+                                                                                `border border-secondary rounded-lg`
                                                                             }`}
                                                                         >
                                                                             <div className="flex items-center w-full space-x-3 space-y-0">
@@ -316,7 +318,7 @@ const FeedbackForm = (props: Props) => {
                                                                     answer.includes(
                                                                         optionNumber
                                                                     ) &&
-                                                                    'border border-gray-800 border-2 rounded-lg'
+                                                                    'border border-gray-800 rounded-lg'
                                                                 }`}
                                                             >
                                                                 <Checkbox
@@ -372,7 +374,7 @@ const FeedbackForm = (props: Props) => {
                                                                             fieldValue.includes(
                                                                                 optionKey
                                                                             ) &&
-                                                                            'border border-secondary border-2 rounded-lg'
+                                                                            'border border-secondary rounded-lg'
                                                                         }`}
                                                                     >
                                                                         <FormItem>
@@ -623,6 +625,7 @@ const FeedbackForm = (props: Props) => {
                     </Form>
                 </div>
             </div>
+           </ScrollArea>
         </>
     )
 }

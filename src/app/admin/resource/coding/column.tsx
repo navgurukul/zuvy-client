@@ -3,14 +3,25 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 import { CodingQuestion } from '@/utils/data/schema'
-import { Edit, Pencil, Trash2 } from 'lucide-react'
-
+import {
+    Pencil,
+    Trash2,
+    Eye,
+} from 'lucide-react'
+import {
+    Dialog,
+    DialogTrigger,
+} from '@/components/ui/dialog'
 import { DELETE_CODING_QUESTION_CONFIRMATION } from '@/utils/constant'
 import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
 import {
     getDeleteCodingQuestion,
     getEditCodingQuestionDialogs,
     getcodingQuestionState,
+    getSelectedOptions,
+    getDifficulty,
+    getOffset,
+    getPosition,
 } from '@/store/store'
 import { cn, difficultyColor } from '@/lib/utils'
 
@@ -18,9 +29,10 @@ import {
     handleConfirm,
     handleDelete,
     handleDeleteModal,
-    getAllCodingQuestions,
     handleEditCodingQuestion,
+    filteredCodingQuestions,
 } from '@/utils/admin'
+import QuestionDescriptionModal from '../../courses/[courseId]/module/_components/Assessment/QuestionDescriptionModal'
 
 export const columns: ColumnDef<CodingQuestion>[] = [
     {
@@ -32,16 +44,22 @@ export const columns: ColumnDef<CodingQuestion>[] = [
             const codingQuestion = row.original
 
             return (
-                <div className="flex items-center">{codingQuestion.title}</div>
+                <span className="text-start w-full flex ">
+                    {codingQuestion.title}
+                </span>
             )
         },
         enableSorting: false,
-        enableHiding: false,
+        enableHiding: true,
     },
     {
         accessorKey: 'difficulty',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Difficulty" />
+            <DataTableColumnHeader
+                className="flex justify-end ml-28"
+                column={column}
+                title="Difficulty"
+            />
         ),
         cell: ({ row }) => {
             const codingQuestion = row.original
@@ -49,33 +67,71 @@ export const columns: ColumnDef<CodingQuestion>[] = [
             return (
                 <div
                     className={cn(
-                        `flex items-center font-semibold text-secondary`,
+                        `flex items-center justify-end  ml-24 font-semibold text-secondary`,
                         difficultyColor(codingQuestion.difficulty)
                     )}
                 >
-                    {codingQuestion.difficulty}
+                    <span className="text-left mr-10 w-4">
+                        {codingQuestion.difficulty}
+                    </span>
                 </div>
             )
         },
         enableSorting: false,
-        enableHiding: false,
+        enableHiding: true,
     },
     {
         accessorKey: 'usage',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Usage" />
+            <DataTableColumnHeader
+                className="flex justify-end"
+                column={column}
+                title="Usage"
+            />
         ),
         cell: ({ row }) => {
             const codingQuestion = row.original
 
             return (
-                <div className="flex items-center">
-                    {codingQuestion?.usage ? codingQuestion?.usage + ' times' : 0 + ' times'}
+                <div className="flex items-center justify-end">
+                    {codingQuestion?.usage
+                        ? codingQuestion?.usage + ' times'
+                        : 0 + ' times'}
                 </div>
             )
         },
         enableSorting: true,
         enableHiding: true,
+    },
+    {
+        id: 'actions1',
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                className="text-[17px]  flex justify-end ml-4"
+                column={column}
+                title="Preview"
+            />
+        ),
+        cell: ({ row }) => {
+            const codingQuestion = row.original
+
+            return (
+                <div className="mr-5 flex justify-end">
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <button>
+                                <Eye className="cursor-pointer" />
+                            </button>
+                        </DialogTrigger>
+                            <QuestionDescriptionModal
+                                question={codingQuestion}
+                                type="coding"
+                            />
+                    
+                    </Dialog>
+                </div>
+            )
+        },
     },
     {
         id: 'actions',
@@ -93,26 +149,32 @@ export const columns: ColumnDef<CodingQuestion>[] = [
                 setEditCodingQuestionId,
                 isCodingEditDialogOpen,
                 setIsCodingEditDialogOpen,
+                setIsQuestionUsed,
             } = getEditCodingQuestionDialogs()
 
             const { codingQuestions, setCodingQuestions } =
                 getcodingQuestionState()
+            const { selectedOptions, setSelectedOptions } = getSelectedOptions()
+            const { difficulty, setDifficulty } = getDifficulty()
+            const { offset, setOffset } = getOffset()
+            const { position, setPosition } = getPosition()
 
             return (
                 <>
                     <div className="flex">
-                                <Pencil
-                                    className="cursor-pointer mr-5"
-                                    size={20}
-                                    onClick={() => {
-                                        handleEditCodingQuestion(
-                                            codingQuestion,
-                                            setIsCodingEditDialogOpen,
-                                            setEditCodingQuestionId
-                                        )
-                                    }}
-                                />
-                    
+                        <Pencil
+                            className="cursor-pointer mr-5"
+                            size={20}
+                            onClick={() => {
+                                handleEditCodingQuestion(
+                                    codingQuestion,
+                                    setIsCodingEditDialogOpen,
+                                    setEditCodingQuestionId,
+                                    setIsQuestionUsed
+                                )
+                            }}
+                        />
+
                         <Trash2
                             onClick={(e) => {
                                 e.stopPropagation()
@@ -133,8 +195,12 @@ export const columns: ColumnDef<CodingQuestion>[] = [
                                     handleDelete,
                                     setDeleteModalOpen,
                                     deleteCodingQuestionId,
-                                    getAllCodingQuestions,
-                                    setCodingQuestions
+                                    filteredCodingQuestions,
+                                    setCodingQuestions,
+                                    selectedOptions,
+                                    difficulty,
+                                    offset,
+                                    position
                                 )
                             }}
                             modalText={DELETE_CODING_QUESTION_CONFIRMATION}

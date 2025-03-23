@@ -10,12 +10,13 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
+import Image from 'next/image'
 
 const Assessment = ({
     assessmentShortInfo,
     assessmentOutSourceId,
     submissionId,
-    chapterContent
+    chapterContent,
 }: {
     assessmentShortInfo: any
     assessmentOutSourceId: any
@@ -26,16 +27,19 @@ const Assessment = ({
     const testDuration = assessmentShortInfo.timeLimit
     const { viewcourses, moduleID } = useParams()
 
-    const [assessmentEndTime, setAssessmentEndTime] = useState<number | null>(null)
+    const [assessmentEndTime, setAssessmentEndTime] = useState<number | null>(
+        null
+    )
+
     const [isTimeOver, setIsTimeOver] = useState(false)
 
     useEffect(() => {
         // Calculate end time based on start time and duration
-        const startedAt = assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.startedAt
+        const startedAt =
+            assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.startedAt
         if (startedAt) {
             const startTime = new Date(startedAt).getTime()
             const endTime = startTime + testDuration * 1000
-
 
             // Check if the time is over
             const interval = setInterval(() => {
@@ -49,34 +53,31 @@ const Assessment = ({
 
             return () => clearInterval(interval)
         }
-        ;
     }, [assessmentShortInfo, testDuration])
 
     const handleStartAssessment = () => {
         try {
-            const assessmentUrl = `/student/courses/${viewcourses}/modules/${moduleID}/assessment/${assessmentOutSourceId}`
-
-            const startTime = Date.now()
-            const endTime = startTime + testDuration * 1000
-            localStorage.setItem('endTime', endTime.toString())
+             const assessmentUrl = `/student/courses/${viewcourses}/modules/${moduleID}/assessment/${assessmentShortInfo?.assessmentId}/chapter/${chapterContent.id}`
 
             let newWindow: any
 
-            if (typeof window !== 'undefined') {
-                newWindow = window?.open(assessmentUrl, '_blank')
-            }
+            // if (typeof window !== 'undefined') {
+            //     newWindow = window?.open(assessmentUrl, '_blank')
+            // }
 
-            if (newWindow) {
-                newWindow.focus()
-            } else {
-                alert(
-                    'Failed to open the new window. Please allow pop-ups for this site.'
-                )
-            }
+            router.push(assessmentUrl)
+
+            // if (newWindow) {
+            //     newWindow.focus()
+            // } else {
+            //     alert(
+            //         'Failed to open the new window. Please allow pop-ups for this site.'
+            //     )
+            // }
             // Reload the browser after 3 seconds
-            setTimeout(() => {
-                window.location.reload()
-            }, 3000)
+            // setTimeout(() => {
+            //     window.location.reload()
+            // }, 3000)
         } catch (error) {
             console.error('Failed to start assessment:', error)
         }
@@ -99,26 +100,40 @@ const Assessment = ({
     const isAssessmentStarted =
         assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.startedAt
 
+    const isPassed =
+        assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.isPassed
+    const marks = assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.marks
+    const percentage =
+        assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.percentage
+    const passPercentage = assessmentShortInfo?.passPercentage
+
     const isDisabled = !hasQuestions
 
     const isDeadlineCrossed = assessmentShortInfo?.deadline? new Date(assessmentShortInfo?.deadline) < new Date() : false
 
 
     return (
-        <React.Fragment>
-            <div className="flex flex-col items-center justify-center px-4 py-8">
-                <div className="flex flex-col gap-4 text-left w-full max-w-2xl">
-                    <h1 className="text-2xl font-bold text-gray-800">
-                        {assessmentShortInfo?.ModuleAssessment?.title}
-                    </h1>
+        <div className="h-full">
+            <div className="flex flex-col items-center justify-center px-4 py-8 mt-20">
+                <div className="flex flex-col gap-4 text-left w-full max-w-lg">
+                    <div className="flex items-center justify-between gap-4 pr-10">
+                        <h1 className="text-2xl font-bold text-gray-800 text-center">
+                            {assessmentShortInfo?.ModuleAssessment?.title}
+                        </h1>
+                        <h2 className="bg-[#DEDEDE] px-2 py-1 text-sm rounded-2xl font-semibold">
+                            Total Marks:{' '}
+                            {assessmentShortInfo?.weightageMcqQuestions +
+                                assessmentShortInfo?.weightageCodingQuestions}
+                        </h2>
+                    </div>
                     {hasQuestions ? (
                         <div className="flex gap-6">
                             {assessmentShortInfo?.totalCodingQuestions > 0 && (
                                 <div>
                                     <h2 className="text-lg font-semibold text-secondary">
-                                        {
-                                            assessmentShortInfo?.totalCodingQuestions
-                                        }
+                                        {assessmentShortInfo?.easyCodingQuestions +
+                                            assessmentShortInfo?.mediumCodingQuestions +
+                                            assessmentShortInfo?.hardCodingQuestions}
                                     </h2>
                                     <p className="text-sm text-gray-600">
                                         Coding Challenges
@@ -128,7 +143,9 @@ const Assessment = ({
                             {assessmentShortInfo?.totalQuizzes > 0 && (
                                 <div>
                                     <h2 className="text-lg font-semibold text-secondary">
-                                        {assessmentShortInfo?.totalQuizzes}
+                                        {assessmentShortInfo?.easyMcqQuestions +
+                                            assessmentShortInfo?.mediumMcqQuestions +
+                                            assessmentShortInfo?.hardMcqQuestions}
                                     </h2>
                                     <p className="text-sm text-gray-600">
                                         MCQs
@@ -159,44 +176,14 @@ const Assessment = ({
                                     appear soon!
                                 </p>
                             )}
-
-                            <div>
-                                <div className="flex items-center gap-2">
-                                    <AlertOctagon
-                                        size={16}
-                                        className="text-destructive"
-                                    />
-                                    <p>
-                                        Do not change tabs or assessment will
-                                        get submitted automatically.
-                                    </p>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <AlertOctagon
-                                        size={16}
-                                        className="text-destructive"
-                                    />
-                                    <p>
-                                        Do not close the browser during the
-                                        assessment or it will get submitted
-                                        automatically.
-                                    </p>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <AlertOctagon
-                                        size={16}
-                                        className="text-destructive"
-                                    />
-                                    <p>
-                                        MCQs & Open-ended Questions can be
-                                        submitted only once.
-                                    </p>
-                                </div>
-                            </div>
                         </div>
                     )}
                     {hasQuestions && (
-                        <p className="flex items-center gap-2 text-sm text-gray-700">
+                        <p
+                            className={`flex items-center gap-2 text-sm text-gray-700 ${
+                                isAssessmentStarted && 'mb-10'
+                            }`}
+                        >
                             <Timer size={18} className="text-gray-500" />
                             Test Time:{' '}
                             <span className="font-semibold">
@@ -211,22 +198,69 @@ const Assessment = ({
                             </span>
                         </p>
                     )}
+
+                    {isAssessmentStarted &&
+                        chapterContent.status === 'Pending' && (
+                            <p className="text-md font-semibold text-red-500">
+                                You have not submitted the assessment properly.
+                            </p>
+                        )}
+
+                    {isAssessmentStarted && (
+                        <div
+                            className={`${
+                                isPassed
+                                    ? 'bg-green-100 border-green-500 h-[100px]'
+                                    : 'bg-red-100 border-red-500 h-[120px]'
+                            } flex justify-between max-w-lg p-5 rounded-lg border`}
+                        >
+                            <div className="flex gap-3">
+                                <div className="mt-2">
+                                    <Image
+                                        src="/flag.svg"
+                                        alt="Empty State"
+                                        width={40}
+                                        height={40}
+                                    />
+                                </div>
+                                <div>
+                                    <p className="text-lg font-semibold">
+                                        Your Score:{' '}
+                                        {Math.trunc(percentage) || 0}/100
+                                    </p>
+                                    <p>
+                                        {isPassed
+                                            ? 'Congratulations, you passed!'
+                                            : `You needed at least ${passPercentage} percentage to pass`}
+                                    </p>
+                                </div>
+                            </div>
+                            <Button
+                                variant="ghost"
+                                className={`${
+                                    isPassed
+                                        ? 'text-secondary hover:text-secondary'
+                                        : 'text-red-500 hover:text-red-500'
+                                } text-lg font-semibold`}
+                                onClick={handleViewResults}
+                                disabled={chapterContent.status === 'Pending'}
+                            >
+                                View Results
+                            </Button>
+                        </div>
+                    )}
+                    {/* {isAssessmentStarted &&
+                        isTimeOver &&
+                        chapterContent.status === 'Pending' && (
+                            <p className="text-red-500 mt-4">
+                                You have not submitted the assessment properly.
+                            </p>
+                        )} */}
                 </div>
             </div>
 
             <div className="mt-8 flex flex-col items-center justify-center">
-                {isAssessmentStarted ? (
-                    <>
-                        <Button onClick={handleViewResults} disabled={chapterContent.status === 'Pending'}>
-                            View Results
-                        </Button>
-                        {isTimeOver && chapterContent.status === 'Pending' && (
-                            <p className="text-red-500 mt-4">
-                                You have not submitted the assessment properly.
-                            </p>
-                        )}
-                    </>
-                ) : (
+                {!isAssessmentStarted && (
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -261,7 +295,7 @@ const Assessment = ({
                 )}
 
             </div>
-        </React.Fragment>
+        </div>
     )
 }
 

@@ -1,15 +1,8 @@
 'use client'
-import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
+
 import React, { useState, useEffect, useCallback } from 'react'
 import { api } from '@/utils/axios.config'
 import { useLazyLoadedStudentData } from '@/store/store'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 // import UpcomingClasses from './_components/UpcomingClasses'
 import BreadcrumbCmponent from '@/app/_components/breadcrumbCmponent'
 
@@ -39,9 +32,6 @@ function Page({
 }: {
     params: { viewcourses: string; moduleID: string }
 }) {
-    const [upcomingClasses, setUpcomingClasses] = useState([])
-    const [ongoingClasses, setOngoingClasses] = useState([])
-    const [completedClasses, setCompletedClasses] = useState([])
     const { studentData } = useLazyLoadedStudentData()
     const [bootcampData, setBootcampData] = useState({} as BootcampData)
     const userID = studentData?.id && studentData?.id
@@ -66,7 +56,7 @@ function Page({
                 setBootcampData(response.data)
             })
             .catch((error) => {
-                console.log('Error fetching bootcamp data:', error)
+                console.error('Error fetching bootcamp data:', error)
             })
     }, [params.viewcourses])
 

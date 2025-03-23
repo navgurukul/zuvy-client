@@ -5,7 +5,7 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Plus } from 'lucide-react'
+import { Pencil, Plus } from 'lucide-react'
 
 // Internal imports
 import { Button } from '@/components/ui/button'
@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input'
 import FormSection from './FormSection'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import {
     Form,
     FormControl,
@@ -21,12 +22,17 @@ import {
     FormLabel,
     FormMessage,
 } from '@/components/ui/form'
+import { getChapterUpdateStatus, getFormPreviewStore } from '@/store/store'
+import { Eye } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+// import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 
 type AddFormProps = {
     chapterData: any
     content: any
-    fetchChapterContent: (chapterId: number) => void
+    // fetchChapterContent: any
     moduleId: any
+    courseId: any
 }
 
 interface chapterDetails {
@@ -58,16 +64,22 @@ const formSchema = z.object({
 const AddForm: React.FC<AddFormProps> = ({
     chapterData,
     content,
-    fetchChapterContent,
+    // fetchChapterContent,
     moduleId,
+    courseId,
 }) => {
+    const router = useRouter()
+    const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
+    const { setFormPreviewContent } = getFormPreviewStore()
+    const [titles, setTitles] = useState(content?.title || '')
+    // const heightClass = useResponsiveHeight()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             title: content?.title ?? '',
             description: content?.description ?? '',
             questions:
-                content.formQuestionDetails.length > 0
+                content.formQuestionDetails?.length > 0
                     ? content.formQuestionDetails.map((q: any) => ({
                           id: q.id.toString(),
                           question: q.question,
@@ -79,11 +91,12 @@ const AddForm: React.FC<AddFormProps> = ({
                     : [
                           {
                               //   id: 'initial-1',
+                              questionType: 'Multiple Choice',
                               id: 'new-1',
                               question: 'Question 1',
                               typeId: 1,
                               isRequired: true,
-                              options: ['Op1'],
+                              options: ['', ''],
                           },
                       ],
         },
@@ -91,7 +104,7 @@ const AddForm: React.FC<AddFormProps> = ({
             title: content?.title ?? '',
             description: content?.description ?? '',
             questions:
-                content.formQuestionDetails.length > 0
+                content.formQuestionDetails?.length > 0
                     ? content.formQuestionDetails.map((q: any) => ({
                           id: q.id.toString(),
                           question: q.question,
@@ -103,11 +116,12 @@ const AddForm: React.FC<AddFormProps> = ({
                     : [
                           {
                               //   id: 'initial-1',
+                              questionType: 'Multiple Choice',
                               id: 'new-1',
                               question: 'Question 1',
                               typeId: 1,
                               isRequired: true,
-                              options: ['Op1'],
+                              options: ['', ''],
                           },
                       ],
         },
@@ -120,7 +134,7 @@ const AddForm: React.FC<AddFormProps> = ({
             questionType: 'Multiple Choice',
             typeId: 1,
             question: '',
-            options: [''],
+            options: ['', ''],
             isRequired: false,
             id: `new-${Date.now()}`,
         }
@@ -260,6 +274,7 @@ const AddForm: React.FC<AddFormProps> = ({
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
+            setIsChapterUpdated(!isChapterUpdated)
         } catch (error: any) {
             toast({
                 title: 'Failed',
@@ -271,78 +286,125 @@ const AddForm: React.FC<AddFormProps> = ({
         }
     }
 
+    function previewForm() {
+        if (content) {
+            setFormPreviewContent(content)
+            router.push(
+                `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/form/${content.topicId}/preview`
+            )
+        }
+    }
+
     return (
-        <div className="flex flex-col gap-y-8 mx-auto px-5 items-center justify-center w-1/2">
-            <Form {...form}>
-                <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="w-full items-left justify-left flex flex-col space-y-8"
-                >
-                    <FormField
-                        control={form.control}
-                        name="title"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormControl>
-                                    <Input
-                                        {...field}
-                                        placeholder="Untitled Form"
-                                        className="p-0 text-3xl w-full text-left font-semibold outline-none border-none focus:ring-0"
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="description"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel className="flex text-left text-md font-semibold mb-1">
-                                    Description
-                                </FormLabel>
-                                <FormControl>
-                                    <Input
-                                        {...field}
-                                        className="w-[450px] px-3 py-2 border rounded-md"
-                                        placeholder="Placeholder"
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    {questions.map((item, index) => (
-                        <FormSection
-                            key={item.id || `form-section-${index}`}
-                            item={item}
-                            index={index}
-                            form={form}
-                            deleteQuestion={deleteQuestion}
-                            formData={questions}
+        <ScrollArea className="h-dvh pr-4 pb-24" type="hover">
+            <ScrollBar className="h-dvh " orientation="vertical" />
+            <div className="flex flex-col gap-y-8 mx-auto px-5 items-center justify-center w-1/2">
+                <Form {...form}>
+                    <form
+                        onSubmit={form.handleSubmit(onSubmit)}
+                        className="w-full items-left justify-left flex flex-col space-y-8"
+                    >
+                        <FormField
+                            control={form.control}
+                            name="title"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormControl>
+                                        <div className="flex justify-between items-center">
+                                            <div className="w-2/6 flex justify-center align-middle items-center relative">
+                                                <Input
+                                                    required
+                                                    {...field}
+                                                    onChange={(e) => {
+                                                        setTitles(
+                                                            e.target.value
+                                                        )
+                                                        field.onChange(e)
+                                                    }}
+                                                    placeholder="Untitled Form"
+                                                    className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                                                    autoFocus
+                                                />
+                                                {!titles && (
+                                                    <Pencil
+                                                        fill="true"
+                                                        fillOpacity={0.4}
+                                                        size={20}
+                                                        className="absolute text-gray-100 pointer-events-none mt-2 right-3"
+                                                    />
+                                                )}
+                                            </div>
+                                            <div className="flex justify-start">
+                                                <Button
+                                                    type="submit"
+                                                    className="w-3/3"
+                                                >
+                                                    Save
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </FormControl>
+                                    <div className="flex items-center justify-between">
+                                        <div
+                                            id="previewForm"
+                                            onClick={previewForm}
+                                            className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer"
+                                        >
+                                            <Eye size={18} />
+                                            <h6 className="ml-1 text-sm">
+                                                Preview
+                                            </h6>
+                                        </div>
+                                    </div>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
                         />
-                    ))}
+                        <FormField
+                            control={form.control}
+                            name="description"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="flex text-left text-md font-semibold mb-1">
+                                        Description
+                                    </FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            {...field}
+                                            className="w-[450px] px-3 py-2 border rounded-md"
+                                            placeholder="Add Description"
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
 
-                    <div className="flex justify-start">
-                        <Button
-                            variant={'secondary'}
-                            type="button"
-                            onClick={addQuestion}
-                            className="gap-x-2 border-none hover:text-secondary hover:bg-popover"
-                        >
-                            <Plus /> Add Question
-                        </Button>
-                    </div>
-                    <div className="flex justify-start">
-                        <Button type="submit" className="w-1/3">
-                            Save
-                        </Button>
-                    </div>
-                </form>
-            </Form>
-        </div>
+                        {questions.map((item, index) => (
+                            <FormSection
+                                key={item.id || `form-section-${index}`}
+                                item={item}
+                                index={index}
+                                form={form}
+                                deleteQuestion={deleteQuestion}
+                                formData={questions}
+                            />
+                        ))}
+
+                        <div className="flex justify-start">
+                            <Button
+                                variant={'secondary'}
+                                type="button"
+                                onClick={addQuestion}
+                                className="gap-x-2 border-none hover:text-secondary hover:bg-popover"
+                            >
+                                <Plus /> Add Question
+                            </Button>
+                        </div>
+                    </form>
+                </Form>
+            </div>
+        </ScrollArea>
     )
 }
 

@@ -24,7 +24,6 @@ type Props = {
     projectId: number
     moduleId: number
     bootcampId: number
-    completeChapter: () => void
 }
 const FormSchema = z.object({
     link: z
@@ -35,12 +34,7 @@ const FormSchema = z.object({
         }),
 })
 
-const Projects = ({
-    projectId,
-    moduleId,
-    bootcampId,
-    completeChapter,
-}: Props) => {
+const Projects = ({ projectId, moduleId, bootcampId }: Props) => {
     const [projectData, setProjectData] = useState<any>(null)
     const [status, setStatus] = useState<string>('')
     const [title, setTitle] = useState<string>('')
@@ -87,7 +81,7 @@ const Projects = ({
                     ?.updatedAt
             )
         } catch (error: any) {
-            console.log(error.message)
+            console.error(error.message)
         }
     }, [moduleId, projectId, editor])
 
@@ -133,7 +127,6 @@ const Projects = ({
                     description: 'Project Link Submitted SuccesFully',
                 })
                 fetchProjectDetails()
-                completeChapter()
             })
     }
 
@@ -237,7 +230,11 @@ const Projects = ({
                         )}
                     />
                     <div className="flex justify-end">
-                        <Button className="w-1/6" type="submit">
+                        <Button
+                            className="w-1/6"
+                            type="submit"
+                            disabled={status === 'Pending' ? false : true}
+                        >
                             Submit
                         </Button>
                     </div>

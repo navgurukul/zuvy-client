@@ -8,9 +8,14 @@ import {
     getdeleteOpenEndedQuestion,
     getopenEndedQuestionstate,
     getEditOpenEndedDialogs,
+    getSelectedOpenEndedOptions,
+    getOpenEndedDifficulty,
+    getOffset,
+    getPosition,
 } from '@/store/store'
 import {
     deleteOpenEndedQuestion,
+    filteredOpenEndedQuestions,
     getAllOpenEndedQuestions,
     handleConfirm,
     handleDeleteModal,
@@ -44,7 +49,7 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
             )
         },
         enableSorting: false,
-        enableHiding: false,
+        enableHiding: true,
     },
     {
         accessorKey: 'difficulty',
@@ -66,11 +71,35 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
             )
         },
         enableSorting: false,
-        enableHiding: false,
+        enableHiding: true,
+    },
+    {
+        accessorKey: 'usage',
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                className="text-center"
+                column={column}
+                title="Usage"
+            />
+        ),
+        cell: ({ row }: { row: any }) => {
+            const usage = row.original.usage
+
+            return <div className="mr-7 font-semibold">{usage}</div>
+        },
+        enableSorting: false,
+        enableHiding: true,
     },
 
     {
         id: 'actions',
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                className="text-center"
+                column={column}
+                title=""
+            />
+        ),
         accessorKey: 'Actions',
         cell: ({ row }) => {
             const openEndedQuestion = row.original
@@ -88,10 +117,15 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
             } = getEditOpenEndedDialogs()
             const { openEndedQuestions, setOpenEndedQuestions } =
                 getopenEndedQuestionstate()
+            const { selectedOptions, setSelectedOptions } =
+                getSelectedOpenEndedOptions()
+            const { difficulty, setDifficulty } = getOpenEndedDifficulty()
+            const { offset, setOffset } = getOffset()
+            const { position, setPosition } = getPosition()
 
             return (
                 <>
-                    <div className="flex">
+                    <div className="flex justify-end">
                         <Dialog
                             onOpenChange={setIsOpenEndDialogOpen}
                             open={isOpenEndDialogOpen}
@@ -152,8 +186,13 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
                                     deleteOpenEndedQuestion,
                                     setDeleteModalOpen,
                                     deleteOpenEndedQuestionId,
-                                    getAllOpenEndedQuestions,
-                                    setOpenEndedQuestions
+
+                                    filteredOpenEndedQuestions,
+                                    setOpenEndedQuestions,
+                                    selectedOptions,
+                                    difficulty,
+                                    offset,
+                                    position
                                 )
                             }}
                             modalText={DELETE_OPEN_ENDED_QUESTION_CONFIRMATION}
@@ -165,6 +204,6 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
             )
         },
         enableSorting: false,
-        enableHiding: false,
+        enableHiding: true,
     },
 ]

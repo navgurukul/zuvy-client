@@ -19,7 +19,13 @@ import TiptapEditor from '@/app/_components/editor/TiptapEditor'
 import TiptapToolbar from '@/app/_components/editor/TiptapToolbar'
 import extensions from '@/app/_components/editor/TiptapExtensions'
 import '@/app/_components/editor/Tiptap.css'
-
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Pencil } from 'lucide-react'
+// import useResponsiveHeight from '@/hooks/useResponsiveHeight'
+import useResponsiveHeight from '@/hooks/useResponsiveHeight'
+import { getChapterUpdateStatus, getArticlePreviewStore } from '@/store/store'
+import { Eye } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 interface ContentDetail {
     title: string
     description: string | null
@@ -36,14 +42,27 @@ interface Content {
     contentDetails: ContentDetail[]
 }
 
-const AddArticle = ({ content }: { content: any }) => {
+const AddArticle = ({
+    content,
+    courseId,
+    articleUpdateOnPreview,
+    setArticleUpdateOnPreview,
+}: {
+    content: any
+    courseId: any
+    articleUpdateOnPreview: any
+    setArticleUpdateOnPreview: any
+}) => {
+    const heightClass = useResponsiveHeight()
+    const router = useRouter()
     // state
     const [title, setTitle] = useState('')
+    const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
+    const { setArticlePreviewContent } = getArticlePreviewStore()
+
     // misc
     const formSchema = z.object({
-        title: z.string().min(2, {
-            message: 'Title must be at least 2 characters.',
-        }),
+        title: z.string(),
     })
 
     const editor = useEditor({
@@ -59,12 +78,12 @@ const AddArticle = ({ content }: { content: any }) => {
         mode: 'onChange',
     })
 
-    // functions
     const getArticleContent = async () => {
         try {
             const response = await api.get(
                 `/Content/chapterDetailsById/${content.id}`
             )
+            // setArticleUpdateOnPreview(!articleUpdateOnPreview)
             setTitle(response.data.title)
             editor?.commands.setContent(response.data.contentDetails[0].content)
         } catch (error) {
@@ -84,6 +103,8 @@ const AddArticle = ({ content }: { content: any }) => {
                 `/Content/editChapterOfModule/${content.moduleId}?chapterId=${content.id}`,
                 data
             )
+            setArticleUpdateOnPreview(!articleUpdateOnPreview)
+            setIsChapterUpdated(!isChapterUpdated)
             toast({
                 title: 'Success',
                 description: 'Article Chapter Edited Successfully',
@@ -107,31 +128,73 @@ const AddArticle = ({ content }: { content: any }) => {
         getArticleContent()
     }, [content, editor])
 
+    function previewArticle() {
+        if (content) {
+            setArticlePreviewContent(content)
+            router.push(
+                `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/article/${content.topicId}/preview`
+            )
+        }
+    }
+
     return (
-        <div>
+        <div className="px-5">
             <div className="w-full ">
                 <Form {...form}>
                     <form
                         id="myForm"
                         onSubmit={form.handleSubmit(editArticleContent)}
-                        className="space-y-8 mb-10"
+                        className=""
                     >
                         <FormField
                             control={form.control}
                             name="title"
                             render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel></FormLabel>
+                                <FormItem className="flex flex-col">
                                     <FormControl>
-                                        <Input
-                                            placeholder="Untitled Article"
-                                            className="p-0 text-3xl w-2/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize"
-                                            {...field}
-                                            {...form.register('title')}
-                                            onChange={(e) =>
-                                                setTitle(e.target.value)
-                                            }
-                                        />
+                                        <div className="flex justify-between items-center">
+                                            <div className="w-2/6 flex justify-center align-middle items-center relative">
+                                                <Input
+                                                    {...field}
+                                                    onChange={(e) => {
+                                                        setTitle(e.target.value)
+                                                        field.onChange(e)
+                                                    }}
+                                                    placeholder="Untitled Article"
+                                                    className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                                                    autoFocus
+                                                />
+                                                {!title && ( // Show pencil icon only when the title is empty
+                                                    <Pencil
+                                                        fill="true"
+                                                        fillOpacity={0.4}
+                                                        size={20}
+                                                        className="absolute text-gray-100 pointer-events-none mt-1 right-5"
+                                                    />
+                                                )}
+                                            </div>
+
+                                            <div className="flex justify-end mt-5">
+                                                <div className="flex items-center justify-between mr-2">
+                                                    <div
+                                                        id="previewArticle"
+                                                        onClick={previewArticle}
+                                                        className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer"
+                                                    >
+                                                        <Eye size={18} />
+                                                        <h6 className="ml-1 text-sm">
+                                                            Preview
+                                                        </h6>
+                                                    </div>
+                                                </div>
+                                                <Button
+                                                    type="submit"
+                                                    form="myForm"
+                                                >
+                                                    Save
+                                                </Button>
+                                            </div>
+                                        </div>
                                     </FormControl>
                                     <FormMessage className="h-5" />
                                 </FormItem>
@@ -139,15 +202,11 @@ const AddArticle = ({ content }: { content: any }) => {
                         />
                     </form>
                 </Form>
-            </div>
-            <div className="text-left">
-                <TiptapToolbar editor={editor} />
-                <TiptapEditor editor={editor} />
-            </div>
-            <div className="flex justify-end mt-5">
-                <Button type="submit" form="myForm">
-                    Save
-                </Button>
+
+                <div className="text-left mt-5">
+                    <TiptapToolbar editor={editor} />
+                    <TiptapEditor editor={editor} />
+                </div>
             </div>
         </div>
     )
