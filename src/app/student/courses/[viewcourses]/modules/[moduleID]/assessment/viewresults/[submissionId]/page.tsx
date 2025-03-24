@@ -197,7 +197,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                                 </div>
                                 <p className="text-xl mt-2 text-start">
                                     Score:{' '}
-                                    {` ${Math.trunc(Number(weightageCodingQuestions))} / 100`}
+                                    { codingQuestion.status === 'Accepted' ? ` ${Math.trunc(Number(weightageCodingQuestions))} / 100` : '0 / 100'}
                                 </p>
                                 <div
                                     onClick={() =>
