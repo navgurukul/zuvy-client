@@ -804,39 +804,6 @@ export function transformQuizzes(data: any): { quizzes: any[] } {
     return { quizzes: Object.values(quizzesMap) }
 }
 
-export const addClassToCodeTags: any = (
-    htmlString: string,
-    codeBlockClass: string
-) => {
-    // Find the positions of the first <code> and the last </code>
-    const firstCodeIndex = htmlString.indexOf('<code')
-    const lastCodeIndex = htmlString.lastIndexOf('</code>')
-
-    if (
-        firstCodeIndex === -1 ||
-        lastCodeIndex === -1 ||
-        lastCodeIndex < firstCodeIndex
-    ) {
-        // If no valid code blocks are found, return the string unchanged
-        return htmlString
-    }
-
-    // Split the content into three parts
-    const beforeCode = htmlString.substring(0, firstCodeIndex) // Everything before the first <code>
-    const codeContent = htmlString.substring(firstCodeIndex, lastCodeIndex + 7) // From the first <code> to the last </code>
-    const afterCode = htmlString.substring(lastCodeIndex + 7) // Everything after the last </code>
-
-    // Wrap the codeContent with <pre> and the given class
-    const styledCodeBlock = `
-        <pre class="${codeBlockClass}">
-            ${codeContent}
-        </pre>
-    `
-
-    // Combine the parts back together
-    return `${beforeCode}${styledCodeBlock}${afterCode}`
-}
-
 export async function handleSaveChapter(
     moduleId: string,
     contentId: number,
@@ -876,20 +843,6 @@ export const proctoringOptions = [
             'Detects and logs any attempts to exit the exam screen, helping to identify potential cheating attempts.',
     },
 ]
-
-// Calculate the time taken between start and submit times
-export const calculateTimeTaken = (start: string, submit: string): string => {
-    const startDate = new Date(start)
-    const submitDate = new Date(submit)
-
-    const diffInMilliseconds = submitDate.getTime() - startDate.getTime()
-    const hours = Math.floor(diffInMilliseconds / (1000 * 60 * 60))
-    const minutes = Math.floor(
-        (diffInMilliseconds % (1000 * 60 * 60)) / (1000 * 60)
-    )
-
-    return `${hours}h & ${minutes}m`
-}
 
 // Extract the submission date in YYYY-MM-DD format
 export const getSubmissionDate = (submit: string): string => {
@@ -1208,4 +1161,48 @@ export const getEmbedLink = (url: string) => {
     }
 
     return '' // Return empty string for unsupported or invalid URLs
+}
+
+export const calculateTimeTaken = (start: string, submit: string): string => {
+    const startDate = new Date(start)
+    const submitDate = new Date(submit)
+    const diffInMilliseconds = submitDate.getTime() - startDate.getTime()
+    const hours = Math.floor(diffInMilliseconds / (1000 * 60 * 60))
+    const minutes = Math.floor(
+        (diffInMilliseconds % (1000 * 60 * 60)) / (1000 * 60)
+    )
+    return `${hours}h & ${minutes}m`
+}
+
+export const addClassToCodeTags: any = (
+    htmlString: string,
+    codeBlockClass: string
+) => {
+    // Find the positions of the first <code> and the last </code>
+    const firstCodeIndex = htmlString.indexOf('<code')
+    const lastCodeIndex = htmlString.lastIndexOf('</code>')
+
+    if (
+        firstCodeIndex === -1 ||
+        lastCodeIndex === -1 ||
+        lastCodeIndex < firstCodeIndex
+    ) {
+        // If no valid code blocks are found, return the string unchanged
+        return htmlString
+    }
+
+    // Split the content into three parts
+    const beforeCode = htmlString.substring(0, firstCodeIndex) // Everything before the first <code>
+    const codeContent = htmlString.substring(firstCodeIndex, lastCodeIndex + 7) // From the first <code> to the last </code>
+    const afterCode = htmlString.substring(lastCodeIndex + 7) // Everything after the last </code>
+
+    // Wrap the codeContent with <pre> and the given class
+    const styledCodeBlock = `
+        <pre class="${codeBlockClass}">
+            ${codeContent}
+        </pre>
+    `
+
+    // Combine the parts back together
+    return `${beforeCode}${styledCodeBlock}${afterCode}`
 }

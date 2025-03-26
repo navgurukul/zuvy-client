@@ -190,7 +190,6 @@ export async function handleVisibilityChange(
             await updateProctoringData(assessmentSubmitId, newTabChangeInstance, copyPaste, fullScreenExit, eyeMomentCount);
 
             if (newTabChangeInstance > 3) {
-                console.log('Tab change detected:', newTabChangeInstance);
                 if (isCurrentPageSubmitAssessment()) {
                     submitAssessment();
                     return showProctoringAlert({
