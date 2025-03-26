@@ -103,11 +103,11 @@ const IDE: React.FC<IDEProps> = ({
     const admin = pathname?.includes('/admin')
 
     const editorLanguages = [
-        { lang: 'java', id: 91 },
-        { lang: 'python', id: 71 },
-        { lang: 'javascript', id: 93 },
-        { lang: 'cpp', id: 52 },
-        { lang: 'c', id: 48 },
+        { lang: 'java', id: 96 },
+        { lang: 'python', id: 100 },
+        { lang: 'javascript', id: 102 },
+        { lang: 'cpp', id: 105 },
+        { lang: 'c', id: 104 },
     ]
 
     const handleLanguageChange = (lang: string) => {

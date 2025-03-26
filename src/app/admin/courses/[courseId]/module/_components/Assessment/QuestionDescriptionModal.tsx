@@ -179,7 +179,9 @@ const QuestionDescriptionModal = ({ question, type, tagName }: QuestionDescripti
                                                     if (["str", "int", "float", "bool"].includes(parameterType))
                                                         return String(parameterValue);
                                                     if (parameterType === "arrayOfnum")
-                                                        return `[${parameterValue.join(",")}]`;
+                                                        if (Array.isArray(parameterValue)) {
+                                                            return `[${parameterValue.join(",")}]`;
+                                                        }
                                                     if (parameterType === "arrayOfStr")
                                                         if (!Array.isArray(parameterValue)) {
                                                             return `[${parameterValue?.map((arr: any[]) => `[${arr.map((item: any) => (typeof item === "string" ? `"${item}"` : item)).join(",")}]`).join(",")}]`;

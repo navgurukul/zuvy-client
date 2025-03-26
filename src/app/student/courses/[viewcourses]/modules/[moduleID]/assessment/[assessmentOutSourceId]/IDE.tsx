@@ -87,6 +87,7 @@ const IDE: React.FC<IDEProps> = ({
             input: [],
             output: 0,
         },
+        constraints: "",
     })
     const [isDisabled, setIsDisabled] = useState(false)
     const [isSubmitted, setIsSubmitted] = useState(false)
@@ -107,17 +108,18 @@ const IDE: React.FC<IDEProps> = ({
     const userID = studentData?.id && studentData?.id
 
     const editorLanguages = [
-        { lang: 'java', id: 91 },
-        { lang: 'python', id: 71 },
-        { lang: 'javascript', id: 93 },
-        { lang: 'cpp', id: 52 },
-        { lang: 'c', id: 48 },
+        { lang: 'java', id: 96 },
+        { lang: 'python', id: 100 },
+        { lang: 'javascript', id: 102 },
+        { lang: 'cpp', id: 105 },
+        { lang: 'c', id: 104 },
     ]
 
     const handleLanguageChange = (lang: string) => {
         setLanguage(lang)
         const langID = getDataFromField(editorLanguages, lang, 'lang', 'id')
         setLanguageId(langID)
+
     }
 
     const getDataFromField = (
@@ -255,6 +257,7 @@ const IDE: React.FC<IDEProps> = ({
     function handleEditorChange(value: any) {
         setCurrentCode(value)
     }
+
     const getQuestionDetails = async () => {
         try {
             await api
@@ -443,9 +446,6 @@ const IDE: React.FC<IDEProps> = ({
                                                                     1}
                                                                 :
                                                             </span>{' '}
-                                                            {
-                                                                input.parameterName
-                                                            }
                                                            {' '}
                                                             {formatValue(
                                                                 input.parameterValue,

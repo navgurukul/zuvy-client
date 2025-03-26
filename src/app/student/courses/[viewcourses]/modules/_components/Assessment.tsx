@@ -57,7 +57,7 @@ const Assessment = ({
 
     const handleStartAssessment = () => {
         try {
-             const assessmentUrl = `/student/courses/${viewcourses}/modules/${moduleID}/assessment/${assessmentOutSourceId}/chapter/${chapterContent.id}`
+             const assessmentUrl = `/student/courses/${viewcourses}/modules/${moduleID}/assessment/${assessmentShortInfo?.assessmentId}/chapter/${chapterContent.id}`
 
             let newWindow: any
 
@@ -109,6 +109,9 @@ const Assessment = ({
 
     const isDisabled = !hasQuestions
 
+    const isDeadlineCrossed = assessmentShortInfo?.deadline? new Date(assessmentShortInfo?.deadline) < new Date() : false
+
+
     return (
         <div className="h-full">
             <div className="flex flex-col items-center justify-center px-4 py-8 mt-20">
@@ -151,17 +154,17 @@ const Assessment = ({
                             )}
                             {assessmentShortInfo?.totalOpenEndedQuestions >
                                 0 && (
-                                <div>
-                                    <h2 className="text-lg font-semibold text-secondary">
-                                        {
-                                            assessmentShortInfo?.totalOpenEndedQuestions
-                                        }
-                                    </h2>
-                                    <p className="text-sm text-gray-600">
-                                        Open-Ended
-                                    </p>
-                                </div>
-                            )}
+                                    <div>
+                                        <h2 className="text-lg font-semibold text-secondary">
+                                            {
+                                                assessmentShortInfo?.totalOpenEndedQuestions
+                                            }
+                                        </h2>
+                                        <p className="text-sm text-gray-600">
+                                            Open-Ended
+                                        </p>
+                                    </div>
+                                )}
                         </div>
                     ) : null}
 
@@ -264,7 +267,7 @@ const Assessment = ({
                                 <div>
                                     <Button
                                         onClick={handleStartAssessment}
-                                        disabled={isDisabled}
+                                        disabled={isDisabled || isDeadlineCrossed}
                                     >
                                         Start Assessment
                                     </Button>
@@ -276,9 +279,21 @@ const Assessment = ({
                                     appear soon!
                                 </TooltipContent>
                             )}
+                            {isDeadlineCrossed && (
+                                <TooltipContent>
+                                    You have missed the deadline to start the assessment
+                                </TooltipContent>
+                            )}
                         </Tooltip>
                     </TooltipProvider>
                 )}
+
+                {isDeadlineCrossed && (
+                    <h3 className="text-red-500 text-md mt-4">
+                        Deadline Crossed
+                    </h3>
+                )}
+
             </div>
         </div>
     )
