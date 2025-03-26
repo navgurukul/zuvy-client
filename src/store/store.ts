@@ -996,4 +996,15 @@ export const getChapterUpdateStatus = create<updateChapterList>((set) => ({
     },
 }))
 
+type isRowUnSelectedType = {
+    isRowUnSelected: boolean
+    setIsRowUnSelected: (newValue: boolean) => void
+}
+
+export const getIsRowSelected = create<isRowUnSelectedType>((set) => ({
+    isRowUnSelected: false,
+    setIsRowUnSelected: (newValue: boolean) => {
+        set({ isRowUnSelected: newValue })
+    },
+}))
 // ------------------------- User ------------------------
