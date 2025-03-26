@@ -45,13 +45,16 @@ function formatFloat(num: any) {
 }
 
 const formSchema = z.object({
-    title: z
-        .string()
-        .min(5, 'Title must be at least 5 characters long.')
-        .max(60, 'Title must be at most 60 characters long.')
-        .refine((value) => noSpecialCharacters.test(value), {
-            message: 'Title must not contain special characters.',
-        }),
+  title: z
+          .string()
+          .min(5, 'Title must be at least 5 characters long.')
+          .max(60, 'Title must be at most 60 characters long.')
+          .refine((value) => noSpecialCharacters.test(value), {
+              message: 'Title must not contain special characters.',
+          })
+          .refine((value) => !/^\d/.test(value), {
+              message: 'Title must not start with a number.',
+          }),
     problemStatement: z
         .string()
         .min(10, 'Problem statement must be at least 10 characters long.'),

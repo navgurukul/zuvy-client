@@ -41,6 +41,9 @@ const formSchema = z.object({
         .max(60, 'Title must be at most 60 characters long.')
         .refine((value) => noSpecialCharacters.test(value), {
             message: 'Title must not contain special characters.',
+        })
+        .refine((value) => !/^\d/.test(value), {
+            message: 'Title must not start with a number.',
         }),
     problemStatement: z
         .string()
@@ -67,6 +70,7 @@ const formSchema = z.object({
         })
     ),
 })
+
 
 export default function NewCodingProblemForm({
     tags,
