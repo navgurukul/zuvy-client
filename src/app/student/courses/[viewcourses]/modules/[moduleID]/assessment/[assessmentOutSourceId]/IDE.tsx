@@ -39,7 +39,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-
+import { X } from "lucide-react"
 interface Input {
     parameterName: string
     parameterType: string
@@ -79,6 +79,8 @@ const IDE: React.FC<IDEProps> = ({
     getAssessmentData,
 }) => {
     const pathname = usePathname()
+    const router = useRouter()
+    const { toast } = useToast()
     const { viewcourses, moduleID, chapterID } = useParams()
     const [questionDetails, setQuestionDetails] = useState<questionDetails>({
         title: '',
@@ -100,9 +102,9 @@ const IDE: React.FC<IDEProps> = ({
     const [testCases, setTestCases] = useState<any>([])
     const [templates, setTemplates] = useState<any>([])
     const [examples, setExamples] = useState<any>([])
-    const router = useRouter()
-    const { toast } = useToast()
     const [loading, setLoading] = useState(false)
+    const [isOpen, setIsOpen] = useState(false)
+    const [modalType, setModalType] = useState<"success" | "error">("success")
 
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
@@ -151,7 +153,7 @@ const IDE: React.FC<IDEProps> = ({
             }
             return `[${value.join(', ')}]`;
         }
-    
+
         switch (type) {
             case 'int':
             case 'float':
@@ -162,7 +164,7 @@ const IDE: React.FC<IDEProps> = ({
                 return JSON.stringify(value);
         }
     };
-    
+
     const handleSubmit = async (
         e: { preventDefault: () => void },
         action: string
@@ -197,22 +199,29 @@ const IDE: React.FC<IDEProps> = ({
             if (action === 'submit') {
                 setIsDisabled(true)
                 setIsSubmitted(true)
-                toast({
-                    title: 'You have submitted the question. You can go back and do other questions',
-                    className:
-                        'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-start border border-secondary max-w-sm px-6 py-5 box-border z-50',
-                })
-            }
-            if (allTestCasesPassed && action === 'submit') {
+                setIsOpen(true)
+            
                 // toast({
-                //     title: `Test Cases Passed Solution submitted`,
+                //     title: 'You have submitted the question. You can go back and do other questions',
                 //     className:
-                //         'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+                //         'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-start border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 // })
-                getAssessmentData()
 
-                if (onBack) {
-                    onBack()
+            
+                if (allTestCasesPassed) {
+                    setModalType('success')
+                    // toast({
+                    //     title: `Test Cases Passed Solution submitted`,
+                    //     className:
+                    //         'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+                    // })
+                    getAssessmentData()
+
+                    // if (onBack) {
+                    //     onBack()
+                    // }
+                }else {
+                    setModalType('error')
                 }
             } else if (allTestCasesPassed && action === 'run') {
                 toast({
@@ -220,12 +229,12 @@ const IDE: React.FC<IDEProps> = ({
                     className:
                         'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
-                // } else {
-                //     toast({
-                //         title: 'Test Cases Failed',
-                //         className:
-                //             'text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                //     })
+            } else {
+                toast({
+                    title: 'Test Cases Failed',
+                    className:
+                        'text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                })
             }
 
             setCodeError('')
@@ -237,9 +246,14 @@ const IDE: React.FC<IDEProps> = ({
                     'No Output Available'
             )
             setLoading(false)
+
+            const closeTimeout = setTimeout(() => {
+                setIsOpen(false)
+            }, 7000) 
+            return () => clearTimeout(closeTimeout) 
         } catch (error: any) {
-                setLoading(false)
-                setCodeResult(error.response?.data?.data)
+            setLoading(false)
+            setCodeResult(error.response?.data?.data)
             toast({
                 title: 'Failed',
                 description:
@@ -289,28 +303,6 @@ const IDE: React.FC<IDEProps> = ({
     return (
         <div>
             <div className="flex justify-between mb-2">
-                {/* <AlertDialog open={isSubmitted} onOpenChange={setIsSubmitted}>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>
-                                Your code has been submitted!
-                            </AlertDialogTitle>
-                            <AlertDialogDescription>
-                                By clicking on Okay, you will get redirected to
-                                the main page to attempt the other questions.
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel
-                                // onClick={() => setIsSubmitted(false)}
-                                onClick={onBack}
-                            >
-                                Okay
-                            </AlertDialogCancel>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog> */}
-
                 <AlertDialog>
                     <AlertDialogTrigger asChild>
                         <Button variant="ghost" size="icon">
@@ -336,6 +328,35 @@ const IDE: React.FC<IDEProps> = ({
                                 Go Back
                             </AlertDialogAction>
                         </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+
+                <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+                    <AlertDialogContent className="max-w-[350px]">
+                        <button 
+                            className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+                            onClick={() => setIsOpen(false)}
+                        >
+                            <X size={18} />
+                        </button>
+                        <AlertDialogHeader>
+                            {modalType === "success" ? (
+                                <>
+                                    <AlertDialogTitle>🎉 Test Cases Passed!</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        You have submitted the question. You can go back and do other questions
+                                    </AlertDialogDescription>
+                                </>
+                            ) : (
+                                <>
+                                {/* ⚠️ */}
+                                    <AlertDialogTitle>❌ Test Cases Failed</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        You have submitted the question. You can go back and do other questions
+                                    </AlertDialogDescription>
+                                </>
+                            )}
+                        </AlertDialogHeader>
                     </AlertDialogContent>
                 </AlertDialog>
 
@@ -431,73 +452,73 @@ const IDE: React.FC<IDEProps> = ({
                                                         Test Case {index + 1}
                                                     </h2>
 
-                                                {/* Handle both array and object inputs */}
-                                                {Array.isArray(
-                                                    testCase.inputs
-                                                )
-                                                    ? testCase.inputs.map((input: Input, idx: number) => (
-                                                        <p
-                                                            key={idx}
-                                                            className="text-gray-700"
-                                                        >
-                                                            <span className="font-medium">
-                                                                Input{' '}
-                                                                {idx +
-                                                                    1}
-                                                                :
-                                                            </span>{' '}
-                                                           {' '}
-                                                            {formatValue(
-                                                                input.parameterValue,
-                                                                input.parameterType
-                                                            )}
-                                                        </p>
-                                                    )
-                                                    )
-                                                    : Object.entries(
+                                                    {/* Handle both array and object inputs */}
+                                                    {Array.isArray(
                                                         testCase.inputs
-                                                    ).map(
-                                                        (
-                                                            [key, value],
-                                                            idx: number
-                                                        ) => (
-                                                            <p
-                                                                key={key}
-                                                                className="text-gray-700"
-                                                            >
-                                                                <span className="font-medium">
-                                                                    Input{' '}
-                                                                    {idx +
-                                                                        1}
-                                                                    :
-                                                                </span>{' '}
-                                                                {key} ={' '}
-                                                                {formatValue(
-                                                                    value,
-                                                                    typeof value ===
-                                                                        'number'
-                                                                        ? 'int'
-                                                                        : 'str'
-                                                                )}
-                                                            </p>
-                                                        )
-                                                    )}
+                                                    )
+                                                    ? testCase.inputs.map((input: Input, idx: number) => (
+                                                                  <p
+                                                                      key={idx}
+                                                                      className="text-gray-700"
+                                                                  >
+                                                                      <span className="font-medium">
+                                                                          Input{' '}
+                                                                          {idx +
+                                                                              1}
+                                                                          :
+                                                                      </span>{' '}
+                                                                        {' '}
+                                                                      {formatValue(
+                                                                          input.parameterValue,
+                                                                          input.parameterType
+                                                                      )}
+                                                                  </p>
+                                                              )
+                                                          )
+                                                        : Object.entries(
+                                                              testCase.inputs
+                                                          ).map(
+                                                              (
+                                                                  [key, value],
+                                                                  idx: number
+                                                              ) => (
+                                                                  <p
+                                                                      key={key}
+                                                                      className="text-gray-700"
+                                                                  >
+                                                                      <span className="font-medium">
+                                                                          Input{' '}
+                                                                          {idx +
+                                                                              1}
+                                                                          :
+                                                                      </span>{' '}
+                                                                      {key} ={' '}
+                                                                      {formatValue(
+                                                                          value,
+                                                                          typeof value ===
+                                                                              'number'
+                                                                              ? 'int'
+                                                                              : 'str'
+                                                                      )}
+                                                                  </p>
+                                                              )
+                                                          )}
 
-                                                <p className="text-gray-700 mt-2">
-                                                    <span className="font-medium">
-                                                        Expected Output:
-                                                    </span>{' '}
-                                                    {formatValue(
-                                                        testCase
-                                                            .expectedOutput
-                                                            .parameterValue,
-                                                        testCase
-                                                            .expectedOutput
-                                                            .parameterType
-                                                    )}
-                                                </p>
-                                            </div>
-                                        )
+                                                    <p className="text-gray-700 mt-2">
+                                                        <span className="font-medium">
+                                                            Expected Output:
+                                                        </span>{' '}
+                                                        {formatValue(
+                                                            testCase
+                                                                .expectedOutput
+                                                                .parameterValue,
+                                                            testCase
+                                                                .expectedOutput
+                                                                .parameterType
+                                                        )}
+                                                    </p>
+                                                </div>
+                                            )
                                         )}
                                 </div>
                             </div>
@@ -609,12 +630,12 @@ const IDE: React.FC<IDEProps> = ({
                                                                         <span className='text-yellow-200'>Your Output: </span>
                                                                             {`${testCase?.stdOut}`}
                                                                         </p>
-    
+
                                                                         <p>
                                                                         <span className='text-yellow-200'>compileOutput: </span>
                                                                             {`${testCase?.compileOutput}`}
                                                                         </p>
-    
+
                                                                         <p>
                                                                             <span className='text-yellow-200'>Error: </span>
                                                                             <span className="font-mono text-destructive">{`${testCase?.stderr}`}</span>
@@ -626,12 +647,12 @@ const IDE: React.FC<IDEProps> = ({
                                                                                 testCase.status
                                                                             }
                                                                         </p>
-    
+
                                                                         <p>
                                                                             <span className='text-yellow-200'>Input: </span><br />
                                                                             {`${testCase?.stdin}`}
                                                                         </p>
-    
+
                                                                         <p>
                                                                             <span className='text-yellow-200'>Expected Output: </span><br />
                                                                             {`${testCase?.expectedOutput}`}

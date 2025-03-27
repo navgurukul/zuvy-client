@@ -143,6 +143,15 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
             return (
                 <>
                     <SectionHeading title="Coding Challenges" />
+                    {
+                        viewResultsData.PracticeCode.length === 0 && (
+                            <div className="mx-auto max-w-2xl">
+                                <p className="text-start font-semibold text-red-500">
+                                    You did not attempt any problem.
+                                </p>
+                            </div>
+                        )
+                    }
                     {viewResultsData.PracticeCode.map((codingQuestion: any) => {
                         const weightageCodingQuestions =
                             getCodingQuestionWeightage(
