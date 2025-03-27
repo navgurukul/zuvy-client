@@ -60,6 +60,8 @@ function Page({
     const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null)
     const [disableSubmit, setDisableSubmit] = useState(false)
     const [loading, setLoading] = useState(true)
+    const [ runCodeLanguageId, setRunCodeLanguageId] = useState<any>(0)
+    const  [runSourceCode, setRunSourceCode] = useState<string>('')
 
     const decodedParams = {
         assessmentOutSourceId: parseInt(
@@ -266,7 +268,9 @@ function Page({
             const res = await api.get(
                 `codingPlatform/submissions/questionId=${questionId}?assessmentSubmissionId=${assessmentSubmissionId}&codingOutsourseId=${codingOutsourseId}`
             )
-            const action = res.data.data.action
+            const action = res?.data?.data?.action
+            setRunCodeLanguageId(res?.data?.data?.languageId || 0)
+            setRunSourceCode(res?.data?.data?.sourceCode || null)
             return action
         } catch (error) {
             console.error('Error fetching coding submissions data:', error)
@@ -435,6 +439,8 @@ function Page({
                     assessmentSubmitId={assessmentSubmitId}
                     selectedCodingOutsourseId={selectedCodingOutsourseId}
                     getAssessmentData={getAssessmentData}
+                    runCodeLanguageId={runCodeLanguageId}
+                    runSourceCode={runSourceCode}
                 />
             )
         }
@@ -443,6 +449,13 @@ function Page({
     async function submitAssessment() {
         setDisableSubmit(true)
         if (assessmentSubmitId) {
+           setTimeout(()=>{
+             if (document.fullscreenElement) {
+                document.exitFullscreen()
+                setIsFullScreen(false)
+            }
+           },500)
+
             const { tabChange, copyPaste, fullScreenExit, eyeMomentCount } =
                 await getProctoringData(assessmentSubmitId)
 
@@ -469,10 +482,6 @@ function Page({
                 router.push(
                     `/student/courses/${assessmentData?.bootcampId}/modules/${assessmentData?.moduleId}/chapters/${assessmentData?.chapterId}`
                 )
-
-                setTimeout(() => {
-                    window.location.reload()
-                }, 3000)
             } catch (e) {
                 console.error(e)
             }
