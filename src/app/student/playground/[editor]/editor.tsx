@@ -84,7 +84,7 @@ const IDE: React.FC<IDEProps> = ({
     })
     const [currentCode, setCurrentCode] = useState('')
     const [result, setResult] = useState('')
-    const [languageId, setLanguageId] = useState(93)
+    const [languageId, setLanguageId] = useState(0)
     const [codeError, setCodeError] = useState('')
     const [language, setLanguage] = useState('')
     const [testCases, setTestCases] = useState<any>([])
@@ -253,12 +253,12 @@ const IDE: React.FC<IDEProps> = ({
             await api
                 .get(`codingPlatform/submissions/questionId=${params.editor}`)
                 .then((response) => {
-                    setLanguageId(response?.data.data.languageId)
+                    setLanguageId(response?.data?.data?.languageId)
                     setCurrentCode(b64DecodeUnicode(response?.data.data.sourceCode))
                     setLanguage(editorLanguages.find(lang => lang.id === response?.data.data.languageId)?.lang || '')
                 })
         } catch (error) {
-            console.error('Error fetching courses:', error)
+            console?.error('Error fetching courses:', error)
         }
     }
     
@@ -266,10 +266,12 @@ const IDE: React.FC<IDEProps> = ({
     useEffect(() => {
         getQuestionDetails()
         getSubmissionDetails()
-    }, [language, params.editor])
+    }, [ params.editor])
 
     const handleBack = () => {
-            // document?.exitFullscreen()
+            if(document.fullscreenElement){
+                document.exitFullscreen()
+            }
         router.back()
     }
 
