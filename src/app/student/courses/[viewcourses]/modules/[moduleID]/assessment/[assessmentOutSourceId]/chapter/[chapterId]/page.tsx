@@ -532,9 +532,37 @@ function Page({
                                 submitted automatically
                             </h1>
                             <div className="flex justify-center mt-10">
-                                <Button onClick={handleFullScreenRequest}>
+                                {/* <Button onClick={handleFullScreenRequest}>
                                     Enter Full Screen
-                                </Button>
+                                </Button> */}
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                    <Button>
+                                                Enter Full Screen
+                                            </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>
+                                                Are you absolutely sure?
+                                            </AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                You must stay in full-screen mode during the test. 
+                                                <strong> No tab switching, window changes, or exiting full-screen. </strong> 
+                                                Violations may lead to warnings or auto-submission.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction
+                                                className="bg-red-500"
+                                                onClick={handleFullScreenRequest}
+                                            >
+                                                Proceed
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
                             </div>
                                 </>
                             )
