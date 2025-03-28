@@ -156,21 +156,27 @@ function Page({
         }, 1000)
     }
 
-    async function getAssessmentSubmissionsData(
-    ) {
+    async function getAssessmentSubmissionsData() {
         const startPageUrl = `/student/courses/${params.viewcourses}/modules/${params.moduleID}/chapters/${params.chapterId}`
         try {
-
             const res = await api.get(
                 `Content/students/assessmentId=${decodedParams.assessmentOutSourceId}?moduleId=${params.moduleID}&bootcampId=${params.viewcourses}&chapterId=${params.chapterId}`
             )
 
-            if (res.data.submitedOutsourseAssessments.length > 0 && res.data.submitedOutsourseAssessments[0].submitedAt) {
+            if (
+                res.data.submitedOutsourseAssessments.length > 0 &&
+                res.data.submitedOutsourseAssessments[0].submitedAt
+            ) {
                 router.push(startPageUrl)
-            } else {
+            }else if (
+                res.data.submitedOutsourseAssessments.length > 0 &&
+                res.data.submitedOutsourseAssessments[0].startedAt
+            ) {
                 getAssessmentData()
             }
-
+            // else {
+            //     getAssessmentData()
+            // }
         } catch (error) {
             console.error('Error fetching coding submissions data:', error)
             return null
@@ -343,7 +349,7 @@ function Page({
             setIsEyeTrackingProctorOn(res?.data.data.canEyeTrack)
             setAssessmentSubmitId(res?.data.data.submission.id)
             setChapterId(res?.data.data.chapterId)
-            setLoading(false)
+            // setLoading(false)
         } catch (e) {
             console.error(e)
         }
@@ -371,7 +377,9 @@ function Page({
     }
 
     useEffect(() => {
-        // getAssessmentData()
+        if (isFullScreen) {
+            getAssessmentData()
+        }
         getSeperateQuizQuestions()
         getSeperateOpenEndedQuestions()
     }, [decodedParams.assessmentOutSourceId, isFullScreen])
@@ -513,10 +521,10 @@ function Page({
             <WarnOnLeave />
             <AlertProvider requestFullScreen={handleFullScreenRequest} setIsFullScreen={setIsFullScreen}>
                 <div className="h-auto mb-24">
-                    {!isFullScreen ? (
+                    {!isFullScreen && !remainingTime ? (
                         <>
-                           {
-                            loading ? (<Loader/>): (
+                           {/* {
+                            loading ? (<Loader/>): ( */}
                                 <>
                                 <div className="fixed top-4 right-4 bg-white p-2 rounded-md shadow-md font-bold text-xl">
                                 <div className="font-bold text-xl">
@@ -565,8 +573,7 @@ function Page({
                                 </AlertDialog>
                             </div>
                                 </>
-                            )
-                        }
+                            {/* )} */}
                         </>
                     ) : (
                         <div>
