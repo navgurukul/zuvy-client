@@ -299,12 +299,14 @@ const Page = ({ params }: { params: any }) => {
                 {codingdata ? (
                     <OverviewComponent
                         totalCodingChallenges={
-                            assesmentData?.attemptedCodingQuestions
+                            assesmentData?.submitedOutsourseAssessment
+                                .totalCodingQuestions
                         }
                         correctedCodingChallenges={9}
                         correctedMcqs={9}
                         totalCorrectedMcqs={
-                            assesmentData?.attemptedMCQQuestions
+                            assesmentData?.submitedOutsourseAssessment
+                                .totalMcqQuestions
                         }
                         openEndedCorrect={1}
                         totalOpenEnded={
