@@ -68,7 +68,7 @@ function RecordingCard({
     async function handleClassDetails() {
         try {
             const response = await api.get(
-                `/classes/analytics/${classData?.meetingId}`
+                `/classes/analytics/${classData?.id}`
             )
             setDisplayAttendance(response.data)
         } catch (err) {
@@ -145,6 +145,10 @@ function RecordingCard({
             })
         }
     }
+
+        useEffect(()=>{
+            console.log('completedClasses', classData)
+        }, [classData])
 
     return (
         <Card className="w-full p-6">
