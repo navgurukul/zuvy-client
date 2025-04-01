@@ -146,10 +146,6 @@ function RecordingCard({
         }
     }
 
-        useEffect(()=>{
-            console.log('completedClasses', classData)
-        }, [classData])
-
     return (
         <Card className="w-full p-6">
             <div className="flex justify-start">

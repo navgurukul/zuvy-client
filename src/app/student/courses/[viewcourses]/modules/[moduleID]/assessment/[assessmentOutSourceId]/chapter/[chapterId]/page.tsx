@@ -59,7 +59,6 @@ function Page({
     const [isFullScreen, setIsFullScreen] = useState(false)
     const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null)
     const [disableSubmit, setDisableSubmit] = useState(false)
-    const [loading, setLoading] = useState(true)
     const [ runCodeLanguageId, setRunCodeLanguageId] = useState<any>(0)
     const  [runSourceCode, setRunSourceCode] = useState<string>('')
 
@@ -158,21 +157,27 @@ function Page({
         }, 1000)
     }
 
-    async function getAssessmentSubmissionsData(
-    ) {
+    async function getAssessmentSubmissionsData() {
         const startPageUrl = `/student/courses/${params.viewcourses}/modules/${params.moduleID}/chapters/${params.chapterId}`
         try {
-
             const res = await api.get(
                 `Content/students/assessmentId=${decodedParams.assessmentOutSourceId}?moduleId=${params.moduleID}&bootcampId=${params.viewcourses}&chapterId=${params.chapterId}`
             )
 
-            if (res.data.submitedOutsourseAssessments.length > 0 && res.data.submitedOutsourseAssessments[0].submitedAt) {
+            if (
+                res.data.submitedOutsourseAssessments.length > 0 &&
+                res.data.submitedOutsourseAssessments[0].submitedAt
+            ) {
                 router.push(startPageUrl)
-            } else {
+            }else if (
+                res.data.submitedOutsourseAssessments.length > 0 &&
+                res.data.submitedOutsourseAssessments[0].startedAt
+            ) {
                 getAssessmentData()
             }
-
+            // else {
+            //     getAssessmentData()
+            // }
         } catch (error) {
             console.error('Error fetching coding submissions data:', error)
             return null
@@ -347,7 +352,6 @@ function Page({
             setIsEyeTrackingProctorOn(res?.data.data.canEyeTrack)
             setAssessmentSubmitId(res?.data.data.submission.id)
             setChapterId(res?.data.data.chapterId)
-            setLoading(false)
         } catch (e) {
             console.error(e)
         }
@@ -375,7 +379,9 @@ function Page({
     }
 
     useEffect(() => {
-        // getAssessmentData()
+        if (isFullScreen) {
+            getAssessmentData()
+        }
         getSeperateQuizQuestions()
         getSeperateOpenEndedQuestions()
     }, [decodedParams.assessmentOutSourceId, isFullScreen])
@@ -449,13 +455,14 @@ function Page({
     async function submitAssessment() {
         setDisableSubmit(true)
         if (assessmentSubmitId) {
-           setTimeout(()=>{
-             if (document.fullscreenElement) {
-                document.exitFullscreen()
-                setIsFullScreen(false)
-            }
-           },500)
-
+            setTimeout(()=>{
+              if (document.fullscreenElement) {
+                 document.exitFullscreen()
+                 setIsFullScreen(false)
+             }
+            },500)
+        }
+        if (assessmentSubmitId) {
             const { tabChange, copyPaste, fullScreenExit, eyeMomentCount } =
                 await getProctoringData(assessmentSubmitId)
 
@@ -522,12 +529,10 @@ function Page({
             <WarnOnLeave />
             <AlertProvider requestFullScreen={handleFullScreenRequest} setIsFullScreen={setIsFullScreen}>
                 <div className="h-auto mb-24">
-                    {!isFullScreen ? (
+                    {!isFullScreen && !remainingTime ? (
                         <>
-                           {
-                            loading ? (<Loader/>): (
-                                <>
-                                <div className="fixed top-4 right-4 bg-white p-2 rounded-md shadow-md font-bold text-xl">
+                            <>
+                            <div className="fixed top-4 right-4 bg-white p-2 rounded-md shadow-md font-bold text-xl">
                                 <div className="font-bold text-xl">
                                     <TimerDisplay
                                         remainingTime={remainingTime}
@@ -541,13 +546,34 @@ function Page({
                                 submitted automatically
                             </h1>
                             <div className="flex justify-center mt-10">
-                                <Button onClick={handleFullScreenRequest}>
-                                    Enter Full Screen
-                                </Button>
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button>
+                                            Enter Full Screen
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogDescription>
+                                                You must stay in full-screen mode during the test. 
+                                                <strong> No tab switching, window changes, or exiting full-screen. </strong> 
+                                                The above violations may lead to auto-submission.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction
+                                                className="bg-red-500"
+                                                onClick={handleFullScreenRequest}
+                                            >
+                                                Proceed
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
                             </div>
                                 </>
-                            )
-                        }
+                            {/* )} */}
                         </>
                     ) : (
                         <div>
