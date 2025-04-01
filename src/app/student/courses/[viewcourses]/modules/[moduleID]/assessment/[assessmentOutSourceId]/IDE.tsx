@@ -68,6 +68,8 @@ interface IDEProps {
     assessmentSubmitId?: number
     selectedCodingOutsourseId?: number
     getAssessmentData?: any
+    runCodeLanguageId?: number
+    runSourceCode?: string
 }
 
 const IDE: React.FC<IDEProps> = ({
@@ -77,6 +79,8 @@ const IDE: React.FC<IDEProps> = ({
     assessmentSubmitId,
     selectedCodingOutsourseId,
     getAssessmentData,
+    runCodeLanguageId,
+    runSourceCode
 }) => {
     const pathname = usePathname()
     const router = useRouter()
@@ -96,9 +100,9 @@ const IDE: React.FC<IDEProps> = ({
     const [currentCode, setCurrentCode] = useState('')
     const [result, setResult] = useState('')
     const [codeResult, setCodeResult] = useState<any>([])
-    const [languageId, setLanguageId] = useState(93)
+    const [languageId, setLanguageId] = useState(runCodeLanguageId)
     const [codeError, setCodeError] = useState('')
-    const [language, setLanguage] = useState('')
+
     const [testCases, setTestCases] = useState<any>([])
     const [templates, setTemplates] = useState<any>([])
     const [examples, setExamples] = useState<any>([])
@@ -116,6 +120,8 @@ const IDE: React.FC<IDEProps> = ({
         { lang: 'cpp', id: 105 },
         { lang: 'c', id: 104 },
     ]
+
+    const [language, setLanguage] = useState(runCodeLanguageId ? editorLanguages.find(lang => lang.id === runCodeLanguageId)?.lang || '' : '')
 
     const handleLanguageChange = (lang: string) => {
         setLanguage(lang)
@@ -242,8 +248,8 @@ const IDE: React.FC<IDEProps> = ({
             // Trigger re-render for the output window
             setResult(
                 response.data.data[0].stdOut ||
-                    response.data.data[0].stdout ||
-                    'No Output Available'
+                response.data.data[0].stdout ||
+                'No Output Available'
             )
             setLoading(false)
 
@@ -263,7 +269,7 @@ const IDE: React.FC<IDEProps> = ({
             })
             setCodeError(
                 error.response?.data?.data?.[0]?.stderr ||
-                    'Error occurred during submission. Network connection lost.'
+                'Error occurred during submission. Network connection lost.'
             )
         }
     }
@@ -299,6 +305,17 @@ const IDE: React.FC<IDEProps> = ({
             setCurrentCode(b64DecodeUnicode(templates?.[language]?.template))
         }
     }, [language])
+
+    useEffect(() => {
+        if (runCodeLanguageId && runSourceCode) {
+            const selectedLanguage = editorLanguages.find(lang => lang.id === runCodeLanguageId)
+            if (selectedLanguage) {
+                setLanguage(selectedLanguage.lang)
+                setLanguageId(runCodeLanguageId)
+                setCurrentCode(b64DecodeUnicode(runSourceCode))
+            }
+        }
+    }, [runCodeLanguageId, runSourceCode])
 
     return (
         <div>
@@ -381,39 +398,6 @@ const IDE: React.FC<IDEProps> = ({
                         {loading ? <Spinner /> : <Upload size={20} />}
                         <span className="ml-2 text-lg font-bold">Submit</span>
                     </Button>
-                    {/* <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button
-                                size="sm"
-                                disabled={loading} // Disable buttons during loading
-                            >
-                                {loading ? <Spinner /> : <Upload size={20} />}
-                                <span className="ml-2 text-lg font-bold">
-                                    Submit
-                                </span>
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                    Are you absolutely sure?
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    This action will submit your code.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                    className="bg-red-500"
-                                    onClick={(e) => handleSubmit(e, 'submit')}
-                                    disabled={isDisabled}
-                                >
-                                    Submit
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog> */}
                 </div>
             </div>
 
@@ -456,53 +440,53 @@ const IDE: React.FC<IDEProps> = ({
                                                     {Array.isArray(
                                                         testCase.inputs
                                                     )
-                                                    ? testCase.inputs.map((input: Input, idx: number) => (
-                                                                  <p
-                                                                      key={idx}
-                                                                      className="text-gray-700"
-                                                                  >
-                                                                      <span className="font-medium">
-                                                                          Input{' '}
-                                                                          {idx +
-                                                                              1}
-                                                                          :
-                                                                      </span>{' '}
-                                                                        {' '}
-                                                                      {formatValue(
-                                                                          input.parameterValue,
-                                                                          input.parameterType
-                                                                      )}
-                                                                  </p>
-                                                              )
-                                                          )
+                                                        ? testCase.inputs.map((input: Input, idx: number) => (
+                                                            <p
+                                                                key={idx}
+                                                                className="text-gray-700"
+                                                            >
+                                                                <span className="font-medium">
+                                                                    Input{' '}
+                                                                    {idx +
+                                                                        1}
+                                                                    :
+                                                                </span>{' '}
+                                                                {' '}
+                                                                {formatValue(
+                                                                    input.parameterValue,
+                                                                    input.parameterType
+                                                                )}
+                                                            </p>
+                                                        )
+                                                        )
                                                         : Object.entries(
-                                                              testCase.inputs
-                                                          ).map(
-                                                              (
-                                                                  [key, value],
-                                                                  idx: number
-                                                              ) => (
-                                                                  <p
-                                                                      key={key}
-                                                                      className="text-gray-700"
-                                                                  >
-                                                                      <span className="font-medium">
-                                                                          Input{' '}
-                                                                          {idx +
-                                                                              1}
-                                                                          :
-                                                                      </span>{' '}
-                                                                      {key} ={' '}
-                                                                      {formatValue(
-                                                                          value,
-                                                                          typeof value ===
-                                                                              'number'
-                                                                              ? 'int'
-                                                                              : 'str'
-                                                                      )}
-                                                                  </p>
-                                                              )
-                                                          )}
+                                                            testCase.inputs
+                                                        ).map(
+                                                            (
+                                                                [key, value],
+                                                                idx: number
+                                                            ) => (
+                                                                <p
+                                                                    key={key}
+                                                                    className="text-gray-700"
+                                                                >
+                                                                    <span className="font-medium">
+                                                                        Input{' '}
+                                                                        {idx +
+                                                                            1}
+                                                                        :
+                                                                    </span>{' '}
+                                                                    {key} ={' '}
+                                                                    {formatValue(
+                                                                        value,
+                                                                        typeof value ===
+                                                                            'number'
+                                                                            ? 'int'
+                                                                            : 'str'
+                                                                    )}
+                                                                </p>
+                                                            )
+                                                        )}
 
                                                     <p className="text-gray-700 mt-2">
                                                         <span className="font-medium">
@@ -582,7 +566,7 @@ const IDE: React.FC<IDEProps> = ({
                                                         handleEditorChange
                                                     }
                                                     className="p-2"
-                                                    defaultValue="Please Select a language above! "
+                                                    defaultValue={language || "Please Select a language above!"}
                                                     options={{
                                                         wordWrap: 'on',
                                                     }}
@@ -624,41 +608,42 @@ const IDE: React.FC<IDEProps> = ({
                                                                 key={index}
                                                                 className="shadow-sm rounded-lg p-4 my-4 bg-gray-800 border border-gray-700"
                                                             >
-                                                                {(testCase.status !=='Accepted') && (
+                                                                {(testCase.status !== 'Accepted') && (
                                                                     <>
                                                                         <p>
-                                                                        <span className='text-yellow-200'>Your Output: </span>
+                                                                            <span className='text-yellow-200'>Your Output: </span>
                                                                             {`${testCase?.stdOut}`}
                                                                         </p>
 
                                                                         <p>
-                                                                        <span className='text-yellow-200'>compileOutput: </span>
+                                                                            <span className='text-yellow-200'>compileOutput: </span>
                                                                             {`${testCase?.compileOutput}`}
                                                                         </p>
 
                                                                         <p>
                                                                             <span className='text-yellow-200'>Error: </span>
-                                                                            <span className="font-mono text-destructive">{`${testCase?.stderr}`}</span>
+                                                                            <span className="font-mono text-destructive">{`${testCase?.stdErr || 'No error'}`}</span>
                                                                         </p>
 
-                                                                        <p className="font-mono text-destructive">
-                                                                        <span className='text-yellow-200'>Status: </span>
-                                                                            {
+                                                                        <p>
+                                                                            <span className='text-yellow-200'>Status: </span>
+                                                                            <span className="font-mono text-destructive">    {
                                                                                 testCase.status
-                                                                            }
+                                                                            }</span>
+
                                                                         </p>
 
                                                                         <p>
                                                                             <span className='text-yellow-200'>Input: </span><br />
-                                                                            {`${testCase?.stdin}`}
+                                                                            {`${testCase?.stdIn || 'No input'}`}
                                                                         </p>
 
                                                                         <p>
                                                                             <span className='text-yellow-200'>Expected Output: </span><br />
-                                                                            {`${testCase?.expectedOutput}`}
+                                                                            {`${testCase?.expectedOutput || 'No expected output'}`}
                                                                         </p>
-    
-                                                                     
+
+
                                                                     </>
                                                                 )}
                                                             </div>
@@ -675,7 +660,7 @@ const IDE: React.FC<IDEProps> = ({
                                                             key={index}
                                                             className="shadow-sm rounded-lg p-4 my-4 bg-gray-800 border border-gray-700"
                                                         >
-                                                            {(testCase.status !=='Accepted') ? (
+                                                            {(testCase.status !== 'Accepted') ? (
                                                                 <>
                                                                     <h2 className="text-xl font-semibold mb-2 text-gray-300">
                                                                         Test
@@ -683,59 +668,55 @@ const IDE: React.FC<IDEProps> = ({
                                                                         {index +
                                                                             1}
                                                                     </h2>
-                                                                    
+
 
                                                                     <p className="text-gray-300 whitespace-normal break-words">
                                                                         <span className="text-yellow-200">
                                                                             Your
                                                                             Output:
                                                                         </span>
-                                                                        {testCase?.stdOut}
+                                                                        {`${testCase?.stdOut}`}
                                                                     </p>
 
                                                                     <p>
-                                                                    <span className='text-yellow-200'>compileOutput: </span>
+                                                                        <span className='text-yellow-200'>compileOutput: </span>
                                                                         {`${testCase?.compileOutput}`}
                                                                     </p>
 
                                                                     <p>
                                                                         <span className='text-yellow-200'>Error: </span>
-                                                                        {`${testCase?.stderr}`}
+                                                                        {`${testCase?.stdErr || 'No error'}`}
                                                                     </p>
 
                                                                     <p>
                                                                         <span className='text-yellow-200'>Input: </span><br />
-                                                                        {`${testCase?.stdin}`}
+                                                                        {`${testCase?.stdIn || 'No input'}`}
                                                                     </p>
 
                                                                     <p>
                                                                         <span className='text-yellow-200'>Expected Output: </span><br />
-                                                                        {`${testCase?.expectedOutput}`}
+                                                                        {`${testCase?.expectedOutput || 'No expected output'}`}
                                                                     </p>
 
-                                                                    <p
-                                                                        className={`text-gray-300 ${
-                                                                            testCase.status ===
+                                                                    <p> <span className='text-yellow-200'> Status:{' '}</span>
+
+                                                                        <span className={`text-gray-300 ${testCase.status ===
                                                                             'Accepted'
-                                                                                ? 'text-green-500'
-                                                                                : 'text-red-500'
-                                                                        }`}
-                                                                    >
-                                                                        Status:{' '}
-                                                                        {
-                                                                            testCase.status
-                                                                        }
+                                                                            ? 'text-green-500'
+                                                                            : 'text-red-500'
+                                                                            }`}>{
+                                                                                testCase.status
+                                                                            }</span>
                                                                     </p>
-                                                                 
+
                                                                 </>
                                                             ) : (
                                                                 <p
-                                                                    className={`text-gray-300 ${
-                                                                        testCase.status ===
+                                                                    className={`text-gray-300 ${testCase.status ===
                                                                         'Accepted'
-                                                                            ? 'text-green-500'
-                                                                            : 'text-red-500'
-                                                                    }`}
+                                                                        ? 'text-green-500'
+                                                                        : 'text-red-500'
+                                                                        }`}
                                                                 >
                                                                     Test Case{' '}
                                                                     {index + 1}{' '}

@@ -1,9 +1,9 @@
 import { b64DecodeUnicode } from '@/utils/base64'
+
 const TestCaseResults = ({ testCases }: any) => {
     return (
         <div className="w-full space-y-4">
             {testCases.map((testCase: any, index: number) => {
-                // const decodedString = b64DecodeUnicode(testCase.stdout)
                 return (
                     <div
                         key={index}
@@ -24,6 +24,7 @@ const TestCaseResults = ({ testCases }: any) => {
                             </span>
                         </div>
 
+                        {/* Inputs Section */}
                         <div className="mt-4">
                             <h3 className="font-semibold text-lg text-gray-600">
                                 Inputs:
@@ -36,19 +37,21 @@ const TestCaseResults = ({ testCases }: any) => {
                                                 {input.parameterName} (
                                                 {input.parameterType})
                                             </span>
-                                            : {input.parameterValue}
+                                            :
+                                            <span className="bg-gray-100 p-1 rounded-md">
+                                                {JSON.stringify(
+                                                    input.parameterValue
+                                                )}
+                                            </span>
                                         </li>
                                     )
                                 )}
                             </ul>
                         </div>
 
+                        {/* Expected Output */}
                         <div className="mt-4">
-                            <h1 className="font-semibold">
-                                Students output: {testCase.stdout}
-                            </h1>
-
-                            <div className="flex justify-center items-center gap-x-2 ">
+                            <div className="flex justify-center items-center gap-x-2">
                                 <h3 className="font-semibold text-lg text-gray-600">
                                     Expected Output:
                                 </h3>
@@ -61,10 +64,19 @@ const TestCaseResults = ({ testCases }: any) => {
                                     </span>
                                     :{' '}
                                     <span className="font-semibold text-gray-600">
-                                        {
+                                        {testCase.testCases.expectedOutput
+                                            .parameterType === 'arrayOfnum' ? (
+                                            <span className="bg-gray-100 p-1 rounded-md">
+                                                {JSON.stringify(
+                                                    testCase.testCases
+                                                        .expectedOutput
+                                                        .parameterValue
+                                                )}
+                                            </span>
+                                        ) : (
                                             testCase.testCases.expectedOutput
                                                 .parameterValue
-                                        }
+                                        )}
                                     </span>
                                 </p>
                             </div>

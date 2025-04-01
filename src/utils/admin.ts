@@ -847,6 +847,8 @@ export const proctoringOptions = [
 // Extract the submission date in YYYY-MM-DD format
 export const getSubmissionDate = (submit: string): string => {
     const submitDate = new Date(submit)
+    submitDate.setSeconds(submitDate.getSeconds() + 19800)
+
     return submitDate.toISOString().split('T')[0]
 }
 

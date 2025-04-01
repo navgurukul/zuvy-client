@@ -188,10 +188,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                                         </h2>
                                     </div>
                                 </div>
-                                <div className="text-xl mt-2 text-start">
-                                    Description:{' '}
-                                    {codingQuestion.questionDetail.description}
-                                </div>
+
                                 <div className="text-xl mt-2 text-start">
                                     Status:{' '}
                                     <span
@@ -206,7 +203,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                                 </div>
                                 <p className="text-xl mt-2 text-start">
                                     Score:{' '}
-                                    { codingQuestion.status === 'Accepted' ? ` ${Math.trunc(Number(weightageCodingQuestions))} / 100` : '0 / 100'}
+                                    { codingQuestion.status === 'Accepted' ? ` ${Math.trunc(Number(weightageCodingQuestions))} / ${Math.trunc(Number(weightageCodingQuestions))}` : `0 / ${Math.trunc(Number(weightageCodingQuestions))}`}
                                 </p>
                                 <div
                                     onClick={() =>
@@ -262,10 +259,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                                 </h2>
                             </div>
                         </div>
-                        <p className="text-xl mt-2 text-start">
-                            Attempted {viewResultsData.attemptedMCQQuestions}/
-                            {totalMcqQuestions}
-                        </p>
+
                         <p className="text-xl mt-2 text-start">
                             Score: {Math.trunc(viewResultsData.mcqScore)}/
                             {weightageMcqQuestions}

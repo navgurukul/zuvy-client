@@ -75,7 +75,7 @@ const Page = ({ params }: any) => {
                     ...assessment,
                     bootcampId: data.bootcampId,
                     newId: data.id,
-                    title: data.ModuleAssessment.title
+                    title: data.ModuleAssessment.title,
                 })
             )
             setDataTableAssessments(updatedAssessments)
