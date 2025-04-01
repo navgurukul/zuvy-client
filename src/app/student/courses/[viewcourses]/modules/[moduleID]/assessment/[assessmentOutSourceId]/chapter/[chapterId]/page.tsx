@@ -59,7 +59,6 @@ function Page({
     const [isFullScreen, setIsFullScreen] = useState(false)
     const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null)
     const [disableSubmit, setDisableSubmit] = useState(false)
-    const [loading, setLoading] = useState(true)
 
     const decodedParams = {
         assessmentOutSourceId: parseInt(
@@ -349,7 +348,6 @@ function Page({
             setIsEyeTrackingProctorOn(res?.data.data.canEyeTrack)
             setAssessmentSubmitId(res?.data.data.submission.id)
             setChapterId(res?.data.data.chapterId)
-            // setLoading(false)
         } catch (e) {
             console.error(e)
         }
@@ -451,6 +449,14 @@ function Page({
     async function submitAssessment() {
         setDisableSubmit(true)
         if (assessmentSubmitId) {
+            setTimeout(()=>{
+              if (document.fullscreenElement) {
+                 document.exitFullscreen()
+                 setIsFullScreen(false)
+             }
+            },500)
+        }
+        if (assessmentSubmitId) {
             const { tabChange, copyPaste, fullScreenExit, eyeMomentCount } =
                 await getProctoringData(assessmentSubmitId)
 
@@ -478,9 +484,6 @@ function Page({
                     `/student/courses/${assessmentData?.bootcampId}/modules/${assessmentData?.moduleId}/chapters/${assessmentData?.chapterId}`
                 )
 
-                setTimeout(() => {
-                    window.location.reload()
-                }, 3000)
             } catch (e) {
                 console.error(e)
             }
@@ -523,10 +526,8 @@ function Page({
                 <div className="h-auto mb-24">
                     {!isFullScreen && !remainingTime ? (
                         <>
-                           {/* {
-                            loading ? (<Loader/>): ( */}
-                                <>
-                                <div className="fixed top-4 right-4 bg-white p-2 rounded-md shadow-md font-bold text-xl">
+                            <>
+                            <div className="fixed top-4 right-4 bg-white p-2 rounded-md shadow-md font-bold text-xl">
                                 <div className="font-bold text-xl">
                                     <TimerDisplay
                                         remainingTime={remainingTime}
@@ -540,24 +541,18 @@ function Page({
                                 submitted automatically
                             </h1>
                             <div className="flex justify-center mt-10">
-                                {/* <Button onClick={handleFullScreenRequest}>
-                                    Enter Full Screen
-                                </Button> */}
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
-                                    <Button>
-                                                Enter Full Screen
-                                            </Button>
+                                        <Button>
+                                            Enter Full Screen
+                                        </Button>
                                     </AlertDialogTrigger>
                                     <AlertDialogContent>
                                         <AlertDialogHeader>
-                                            <AlertDialogTitle>
-                                                Are you absolutely sure?
-                                            </AlertDialogTitle>
                                             <AlertDialogDescription>
                                                 You must stay in full-screen mode during the test. 
                                                 <strong> No tab switching, window changes, or exiting full-screen. </strong> 
-                                                Violations may lead to warnings or auto-submission.
+                                                The above violations may lead to auto-submission.
                                             </AlertDialogDescription>
                                         </AlertDialogHeader>
                                         <AlertDialogFooter>
