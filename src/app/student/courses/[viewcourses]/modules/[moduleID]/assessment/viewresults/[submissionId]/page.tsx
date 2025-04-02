@@ -143,15 +143,20 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
             return (
                 <>
                     <SectionHeading title="Coding Challenges" />
-                    {
-                        viewResultsData.PracticeCode.length === 0 && (
-                            <div className="mx-auto max-w-2xl">
-                                <p className="text-start font-semibold text-red-500">
-                                    You did not attempt any problem.
-                                </p>
-                            </div>
-                        )
-                    }
+                    {viewResultsData.PracticeCode.length === 0 && (
+                        <div className="flex flex-col items-center justify-center text-center">
+                            <h1 className="text-lg mb-3">
+                                No Assessment Found
+                            </h1>
+                            <Image
+                                src="/no-data.svg"
+                                alt="No Assessment Found"
+                                width={180}
+                                height={180}
+                                className="mx-auto" // Centers the image horizontally
+                            />
+                        </div>
+                    )}
                     {viewResultsData.PracticeCode.map((codingQuestion: any) => {
                         const weightageCodingQuestions =
                             getCodingQuestionWeightage(
@@ -203,7 +208,15 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                                 </div>
                                 <p className="text-xl mt-2 text-start">
                                     Score:{' '}
-                                    { codingQuestion.status === 'Accepted' ? ` ${Math.trunc(Number(weightageCodingQuestions))} / ${Math.trunc(Number(weightageCodingQuestions))}` : `0 / ${Math.trunc(Number(weightageCodingQuestions))}`}
+                                    {codingQuestion.status === 'Accepted'
+                                        ? ` ${Math.trunc(
+                                              Number(weightageCodingQuestions)
+                                          )} / ${Math.trunc(
+                                              Number(weightageCodingQuestions)
+                                          )}`
+                                        : `0 / ${Math.trunc(
+                                              Number(weightageCodingQuestions)
+                                          )}`}
                                 </p>
                                 <div
                                     onClick={() =>
