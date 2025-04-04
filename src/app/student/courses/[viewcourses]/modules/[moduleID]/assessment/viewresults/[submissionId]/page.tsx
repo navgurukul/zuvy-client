@@ -150,6 +150,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                             </h1>
                             <Image
                                 src="/no-data.svg"
+                                // src="/taken_mshk.svg"
                                 alt="No Assessment Found"
                                 width={180}
                                 height={180}

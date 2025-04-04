@@ -93,6 +93,7 @@ function CodingChallenge({
             )
             setCodingQuestionResult(res.data.data)
             setIsScuccess(res.data.data.action === 'submit')
+            completeChapter()
         } catch (error: any) {
             setIsScuccess(error?.response?.data?.isSuccess)
         }
