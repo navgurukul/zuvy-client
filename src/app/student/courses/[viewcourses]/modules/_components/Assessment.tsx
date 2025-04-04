@@ -57,27 +57,8 @@ const Assessment = ({
 
     const handleStartAssessment = () => {
         try {
-             const assessmentUrl = `/student/courses/${viewcourses}/modules/${moduleID}/assessment/${assessmentShortInfo?.assessmentId}/chapter/${chapterContent.id}`
-
-            let newWindow: any
-
-            // if (typeof window !== 'undefined') {
-            //     newWindow = window?.open(assessmentUrl, '_blank')
-            // }
-
+            const assessmentUrl = `/student/courses/${viewcourses}/modules/${moduleID}/assessment/${assessmentShortInfo?.assessmentId}/chapter/${chapterContent.id}`
             router.push(assessmentUrl)
-
-            // if (newWindow) {
-            //     newWindow.focus()
-            // } else {
-            //     alert(
-            //         'Failed to open the new window. Please allow pop-ups for this site.'
-            //     )
-            // }
-            // Reload the browser after 3 seconds
-            // setTimeout(() => {
-            //     window.location.reload()
-            // }, 3000)
         } catch (error) {
             console.error('Failed to start assessment:', error)
         }
