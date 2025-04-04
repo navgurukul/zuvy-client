@@ -59,8 +59,8 @@ function Page({
     const [isFullScreen, setIsFullScreen] = useState(false)
     const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null)
     const [disableSubmit, setDisableSubmit] = useState(false)
-    const [ runCodeLanguageId, setRunCodeLanguageId] = useState<any>(0)
-    const  [runSourceCode, setRunSourceCode] = useState<string>('')
+    const [runCodeLanguageId, setRunCodeLanguageId] = useState<any>(0)
+    const [runSourceCode, setRunSourceCode] = useState<string>('')
 
     const decodedParams = {
         assessmentOutSourceId: parseInt(
@@ -169,7 +169,7 @@ function Page({
                 res.data.submitedOutsourseAssessments[0].submitedAt
             ) {
                 router.push(startPageUrl)
-            }else if (
+            } else if (
                 res.data.submitedOutsourseAssessments.length > 0 &&
                 res.data.submitedOutsourseAssessments[0].startedAt
             ) {
@@ -342,6 +342,7 @@ function Page({
             const res = await api.get(
                 `/Content/startAssessmentForStudent/assessmentOutsourseId=${decodedParams.assessmentOutSourceId}`
             )
+            setIsFullScreen(true)
             setAssessmentData(res?.data?.data)
             setStartedAt(
                 new Date(res?.data?.data.submission?.startedAt).getTime()
