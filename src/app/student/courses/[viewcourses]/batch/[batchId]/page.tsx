@@ -20,7 +20,10 @@ import ClassCard from '@/app/admin/courses/[courseId]/_components/classCard'
 import CourseCard from '@/app/_components/courseCard'
 import BreadcrumbCmponent from '@/app/_components/breadcrumbCmponent'
 import SubmissionCard from '@/app/admin/courses/[courseId]/_components/SubmissionCard'
+import { getResponseStudent } from '@/store/store'
 import { progress } from 'framer-motion'
+import { all } from 'lowlight'
+import { useRouter } from 'next/navigation'
 interface CourseProgress {
     status: string
     progress: number
@@ -47,6 +50,8 @@ function Page({
     params: { viewcourses: string; batchId: number; moduleID: string }
 }) {
     const { studentData } = useLazyLoadedStudentData()
+    const { isStudentResponse, setIsStudentResponse } = getResponseStudent()
+    const router = useRouter()
     const userID = studentData?.id && studentData?.id
     const [modulesProgress, setModulesProgress] = useState([])
     const [courseProgress, setCourseProgress] = useState<CourseProgress | null>(
@@ -61,6 +66,7 @@ function Page({
     const [lateAssignments, setLateAssignments] = useState([])
     const [isCourseStarted, setIsCourseStarted] = useState(false)
     const [progres, setProgres] = useState<number>()
+    const [isStudentEnrolled, setIStudentEnrolled] = useState(false)
 
     const [attendenceData, setAttendenceData] = useState<any[]>([])
     // const [completedClasses, setCompletedClasses] = useState([])
@@ -78,6 +84,10 @@ function Page({
         const response = await api.get(
             `/student/Dashboard/classes/?batch_id=${params.batchId}`
         )
+        setIsStudentResponse(response.data.message)
+        if (isStudentResponse == 'not enrolled in any course.') {
+            setIStudentEnrolled(!isStudentEnrolled)
+        }
         if (Array.isArray(response.data.data)) {
             setIsCourseStarted(false)
         } else {
@@ -137,9 +147,8 @@ function Page({
                 const response = await api.get(
                     `/tracking/allModulesForStudents/${params.viewcourses}`
                 )
-             
-                    setModulesProgress(response.data)
-              
+
+                setModulesProgress(response.data)
             } catch (error) {
                 console.error('Error getting modules progress', error)
             }
@@ -164,6 +173,13 @@ function Page({
         if (userID) getCourseProgress()
     }, [userID, params.viewcourses])
 
+    useEffect(() => {
+        // window.location.reload()
+        console.log('hi')
+        if (isStudentResponse == 'not enrolled in any course.') {
+            router.push('/student')
+        }
+    }, [router, isStudentResponse])
     return (
         <MaxWidthWrapper>
             <BreadcrumbCmponent crumbs={crumbs} />
@@ -370,7 +386,7 @@ function Page({
                 </div>
 
                 <div className="gap-y-3 flex flex-col">
-                    <div className="flex flex-start">
+                    {/* <div className="flex flex-start">
                         <h1 className="text-lg p-1 font-semibold">
                             Instructor
                         </h1>
@@ -410,7 +426,7 @@ function Page({
                                 </p>
                             </div>
                         )}
-                    </div>
+                    </div> */}
                     <div className="flex flex-col flex-start mt-5">
                         <div className="w-full">
                             {lateAssignments && (

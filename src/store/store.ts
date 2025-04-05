@@ -996,4 +996,16 @@ export const getChapterUpdateStatus = create<updateChapterList>((set) => ({
     },
 }))
 
+type responseStudent = {
+    isStudentResponse: any
+    setIsStudentResponse: (newValue: any) => void
+}
+
+export const getResponseStudent = create<responseStudent>((set) => ({
+    isStudentResponse: 0,
+    setIsStudentResponse: (newValue: any) => {
+        set({ isStudentResponse: newValue })
+    },
+}))
+
 // ------------------------- User ------------------------

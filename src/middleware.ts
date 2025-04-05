@@ -25,6 +25,7 @@ export function middleware(request: NextRequest) {
                 path.includes('/instructor/course')
             ) {
                 const redirectUrl = new URL('/', request.url)
+
                 redirectUrl.searchParams.set('route', request.nextUrl.pathname)
                 return NextResponse.redirect(redirectUrl)
             } else {
