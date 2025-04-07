@@ -253,7 +253,7 @@ const Page: React.FC<pageProps> = () => {
 
                 <div className=" flex flex-col items-center justify-center mt-6">
                     <div className="container  mx-auto p-1">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-10">
                             {flag ? (
                                 <div className="animate-pulse flex gap-8">
                                     {[...Array(3)].map((_, index) => (
