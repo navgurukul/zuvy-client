@@ -13,6 +13,15 @@ import { Reorder } from 'framer-motion'
 import { toast } from '@/components/ui/use-toast'
 import { Spinner } from '@/components/ui/spinner'
 import EditModuleDialog from '../../_components/EditModuleDialog'
+import {
+    AlertDialog,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { X } from "lucide-react"
+
 interface CurriculumItem {
     id: number
     name: string
@@ -43,6 +52,8 @@ function Page() {
     const [editMode, setEditMode] = useState(false)
     const [moduleId, setModuleId] = useState(0)
     const [isOpen, setIsOpen] = useState(false)
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [message, setMessage] = useState("")
     const [isEditOpen, setIsEditOpen] = useState(false)
     const [selectedModuleData, setSelectedModuleData] =
         useState<ModuleData | null>(null)
@@ -191,14 +202,24 @@ function Page() {
                 { moduleDto }
             )
                 .then((res) => {
-                    toast({
-                        title: 'Success',
-                        description: 'Module Edited Successfully',
-                        className:
-                            'text-start capitalize border border-secondary',
-                    })
+                    console.log('res.data.message',res)
+                    if(res.data.message === "Modified successfully") {
+                        toast({
+                            title: 'Success',
+                            description: 'Module Edited Successfully',
+                            className:
+                                'text-start capitalize border border-secondary',
+                        })
+                    }else {
+                        setMessage(res.data[0].message)
+                        setIsModalOpen(true)
+                    }
                     fetchCourseModules()
                     setIsEditOpen(false)
+                    const closeTimeout = setTimeout(() => {
+                        setIsModalOpen(false)
+                    }, 7000) 
+                    return () => clearTimeout(closeTimeout) 
                 })
                 .catch((error) => {
                     toast({
@@ -300,6 +321,8 @@ function Page() {
     const handleReorderModules = async (newOrderModules: any) => {
         handleReorder(newOrderModules)
     }
+
+    console.log('message', message)
     return (
         <div className="w-full ">
             <div className=" w-full flex justify-end pr-4 ">
@@ -324,6 +347,23 @@ function Page() {
                     </Dialog>
                 </div>
             </div>
+
+            <AlertDialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                <AlertDialogContent className="max-w-[350px]">
+                    <button 
+                        className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+                        onClick={() => setIsModalOpen(false)}
+                    >
+                        <X size={18} />
+                    </button>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Changes Not Permitted</AlertDialogTitle>
+                        <AlertDialogDescription>
+                           {message}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                </AlertDialogContent>
+            </AlertDialog>
 
             {isEditOpen && (
                 <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
