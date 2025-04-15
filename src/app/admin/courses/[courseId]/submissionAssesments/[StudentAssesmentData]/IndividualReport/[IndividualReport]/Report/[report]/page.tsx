@@ -239,9 +239,6 @@ const Page = ({ params }: { params: any }) => {
     }
     const formattedDate = date.toLocaleDateString('en-US', options2)
 
-    console.log('codingdata', codingdata)
-    console.log('assesmentData ^^^', assesmentData)
-
     return (
         <>
             {codingdata ? (
