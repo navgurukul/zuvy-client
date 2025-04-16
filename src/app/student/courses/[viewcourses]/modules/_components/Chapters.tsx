@@ -7,7 +7,7 @@ import { api } from '@/utils/axios.config'
 import React, { useCallback, useEffect, useState, useRef } from 'react'
 import StudentChapterItem from '../../../_components/StudentChapterItem'
 import { useParams, usePathname } from 'next/navigation'
-import { fetchCourseDetails, getAssessmentShortInfo } from '@/utils/students'
+import { fetchChapters, fetchCourseDetails, getAssessmentShortInfo } from '@/utils/students'
 import {
     getStudentChapterContentState,
     getStudentChaptersState,
@@ -83,20 +83,6 @@ function Chapters({ params }: any) {
         },
     ]
 
-    // func [viewcourses]   [courseId]
-    const fetchChapters = useCallback(async () => {
-        try {
-            const response = await api.get(
-                `tracking/getAllChaptersWithStatus/${moduleID}`
-            )
-            setChapters(response.data.trackingData)
-            // setProjectId(response?.data.moduleDetails[0]?.projectId)
-        } catch (error) {
-            console.error(error)
-        }
-    }, [])
-
-
     useEffect(() => {
         if (activeChapterRef.current && scrollAreaRef.current) {
             // Get the current scroll area
@@ -124,12 +110,12 @@ function Chapters({ params }: any) {
     // async
     useEffect(() => {
         if (userID) {
-            fetchChapters()
+            fetchChapters(moduleID, setChapters)
         }
     }, [userID, fetchChapters])
 
     useEffect(() => {
-        if (chapters.length > 0) {
+        if (chapters?.length > 0) {
             setChapterId(chapter_id)
             setActiveChapter(chapter_id)
         }
@@ -142,7 +128,7 @@ function Chapters({ params }: any) {
             )
             setModuleName(response.data.moduleDetails[0].name)
         } catch (error) {
-            console.error(error)
+            console?.error(error)
         }
     }, [])
 

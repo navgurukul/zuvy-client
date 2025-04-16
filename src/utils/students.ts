@@ -295,7 +295,7 @@ export async function getAssessmentShortInfo(
         if (res.data.submitedOutsourseAssessments.length > 0) {
             setSubmissionId(res.data.submitedOutsourseAssessments[0].id)
         }
-    } catch (e) {
+    } catch (e:any) {
         console.error(e)
     }
 }
@@ -323,3 +323,18 @@ export const fetchCourseDetails = async (courseId: number, setCourseName:any) =>
         console.error('Error fetching course details:', error)
     }
 }
+
+// --------------------------------------------
+
+export const fetchChapters = async (moduleID:any, setChapters:any) => {
+    try {
+        const response = await api.get(
+            `tracking/getAllChaptersWithStatus/${moduleID}`
+        )
+        setChapters(response.data.trackingData)
+        // setProjectId(response?.data.moduleDetails[0]?.projectId)
+    } catch (error) {
+        console.error(error)
+    }
+}
+

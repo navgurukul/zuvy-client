@@ -456,14 +456,6 @@ function Page({
     async function submitAssessment() {
         setDisableSubmit(true)
         if (assessmentSubmitId) {
-            setTimeout(()=>{
-              if (document.fullscreenElement) {
-                 document.exitFullscreen()
-                 setIsFullScreen(false)
-             }
-            },500)
-        }
-        if (assessmentSubmitId) {
             const { tabChange, copyPaste, fullScreenExit, eyeMomentCount } =
                 await getProctoringData(assessmentSubmitId)
 
@@ -490,6 +482,10 @@ function Page({
                 router.push(
                     `/student/courses/${assessmentData?.bootcampId}/modules/${assessmentData?.moduleId}/chapters/${assessmentData?.chapterId}`
                 )
+                const channel = new BroadcastChannel('assessment_channel');
+                channel.postMessage('assessment_submitted');
+                channel.close();
+                setTimeout(()=> window.close(), 2000);
             } catch (e) {
                 console.error(e)
             }
@@ -526,8 +522,6 @@ function Page({
             onPaste={(e) => handleCopyPasteAttempt(e)}
             onCopy={(e) => handleCopyPasteAttempt(e)}
         >
-            <PreventBackNavigation />
-            <WarnOnLeave />
             <AlertProvider requestFullScreen={handleFullScreenRequest} setIsFullScreen={setIsFullScreen}>
                 <div className="h-auto mb-24">
                     {!isFullScreen && !remainingTime ? (
