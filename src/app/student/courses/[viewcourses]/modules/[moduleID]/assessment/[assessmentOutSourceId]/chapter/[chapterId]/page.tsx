@@ -408,6 +408,10 @@ function Page({
             0
         ) {
             return (
+                <>
+                <PreventBackNavigation />
+                <WarnOnLeave />
+                <AlertProvider requestFullScreen={handleFullScreenRequest} setIsFullScreen={setIsFullScreen}>
                 <QuizQuestions
                     onBack={handleBack}
                     weightage={assessmentData}
@@ -417,12 +421,18 @@ function Page({
                     getSeperateQuizQuestions={getSeperateQuizQuestions}
                     getAssessmentData={getAssessmentData}
                 />
+                </AlertProvider>
+                </>
             )
         } else if (
             selectedQuesType === 'open-ended' &&
             !(seperateOpenEndedQuestions[0]?.submissionsData.length > 0)
         ) {
             return (
+                <>
+                <PreventBackNavigation />
+                <WarnOnLeave />
+                <AlertProvider requestFullScreen={handleFullScreenRequest} setIsFullScreen={setIsFullScreen}>
                 <OpenEndedQuestions
                     onBack={handleBack}
                     remainingTime={remainingTime}
@@ -433,12 +443,18 @@ function Page({
                     }
                     getAssessmentData={getAssessmentData}
                 />
+                </AlertProvider>
+                </>
             )
         } else if (
             selectedQuesType === 'coding' &&
             selectedQuestionId !== null
         ) {
             return (
+                <>
+                <PreventBackNavigation />
+                <WarnOnLeave />
+                <AlertProvider requestFullScreen={handleFullScreenRequest} setIsFullScreen={setIsFullScreen}>
                 <IDE
                     params={{ editor: String(selectedQuestionId) }}
                     onBack={handleBack}
@@ -449,6 +465,8 @@ function Page({
                     runCodeLanguageId={runCodeLanguageId}
                     runSourceCode={runSourceCode}
                 />
+                </AlertProvider>
+                </>
             )
         }
     }
@@ -511,7 +529,7 @@ function Page({
         }
     }
 
-    const handleFullScreenRequest = () => {
+    function handleFullScreenRequest() {
         const element = document.documentElement
         requestFullScreen(element)
         setIsFullScreen(true)
@@ -522,6 +540,8 @@ function Page({
             onPaste={(e) => handleCopyPasteAttempt(e)}
             onCopy={(e) => handleCopyPasteAttempt(e)}
         >
+            <PreventBackNavigation />
+             <WarnOnLeave />
             <AlertProvider requestFullScreen={handleFullScreenRequest} setIsFullScreen={setIsFullScreen}>
                 <div className="h-auto mb-24">
                     {!isFullScreen && !remainingTime ? (

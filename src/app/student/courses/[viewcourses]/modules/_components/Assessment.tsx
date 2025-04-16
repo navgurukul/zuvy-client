@@ -84,7 +84,7 @@ const Assessment = ({
 
         try {
             const assessmentUrl = `/student/courses/${viewcourses}/modules/${moduleID}/assessment/${assessmentShortInfo?.assessmentId}/chapter/${chapterContent.id}`;
-            window.open(assessmentUrl, '_blank');
+            window.open(assessmentUrl, '_blank')?.focus();
         } catch (error) {
             console.error('Failed to start assessment:', error);
             setIsStartingAssessment(false); // Re-enable button in case of error
