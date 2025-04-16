@@ -11,17 +11,25 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip'
 import Image from 'next/image'
+import { fetchChapters, getAssessmentShortInfo } from '@/utils/students'
+import { getStudentChaptersState } from '@/store/store'
 
 const Assessment = ({
     assessmentShortInfo,
     assessmentOutSourceId,
     submissionId,
     chapterContent,
+    setAssessmentShortInfo,
+    setAssessmentOutSourceId,
+    setSubmissionId
 }: {
     assessmentShortInfo: any
     assessmentOutSourceId: any
     submissionId: any
     chapterContent: any
+    setAssessmentShortInfo: any
+    setAssessmentOutSourceId: any
+    setSubmissionId: any
 }) => {
     const router = useRouter()
     const testDuration = assessmentShortInfo.timeLimit
@@ -31,10 +39,77 @@ const Assessment = ({
         null
     )
 
+    const {chapters, setChapters} = getStudentChaptersState();
+
     const [isTimeOver, setIsTimeOver] = useState(false)
+
+    const hasQuestions =
+        assessmentShortInfo?.totalCodingQuestions > 0 ||
+        assessmentShortInfo?.totalQuizzes > 0 ||
+        assessmentShortInfo?.totalOpenEndedQuestions > 0
+
+    // const isAssessmentStarted =
+    //     assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.startedAt
+    // let isSubmitedAt = 
+    //     assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.submitedAt || null;
+
+    const [isAssessmentStarted, setIsAssessmentStarted] = useState<boolean>(false)
+    const [isSubmitedAt, setIsSubmitedAt] = useState<boolean>(false)
+
+    const [isStartingAssessment, setIsStartingAssessment] = useState(false);
+
+    const isPassed =
+        assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.isPassed
+    const marks = assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.marks
+    const percentage =
+        assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.percentage
+    const passPercentage = assessmentShortInfo?.passPercentage
+
+    const isDisabled = !hasQuestions
+
+    const isDeadlineCrossed = assessmentShortInfo?.deadline ? new Date(assessmentShortInfo?.deadline) < new Date() : false
+
+    const handleStartAssessment = () => {
+        setIsStartingAssessment(true); // Disable the button immediately
+
+        getAssessmentShortInfo(
+            chapterContent?.assessmentId,
+            moduleID,
+            viewcourses,
+            chapterContent.id,
+            setAssessmentShortInfo,
+            setAssessmentOutSourceId,
+            setSubmissionId
+        );
+
+        try {
+            const assessmentUrl = `/student/courses/${viewcourses}/modules/${moduleID}/assessment/${assessmentShortInfo?.assessmentId}/chapter/${chapterContent.id}`;
+            window.open(assessmentUrl, '_blank');
+        } catch (error) {
+            console.error('Failed to start assessment:', error);
+            setIsStartingAssessment(false); // Re-enable button in case of error
+        }
+    };
+
+
+    const handleViewResults = () => {
+        try {
+            const resultsUrl = `/student/courses/${viewcourses}/modules/${moduleID}/assessment/viewresults/${submissionId}`
+            router.push(resultsUrl)
+        } catch (error) {
+            console.error('Failed to view results:', error)
+        }
+    }
 
     useEffect(() => {
         // Calculate end time based on start time and duration
+        setIsAssessmentStarted(
+            !!assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.startedAt);
+
+        setIsSubmitedAt(
+            !!assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.submitedAt
+        )
+
         const startedAt =
             assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.startedAt
         if (startedAt) {
@@ -55,43 +130,34 @@ const Assessment = ({
         }
     }, [assessmentShortInfo, testDuration])
 
-    const handleStartAssessment = () => {
-        try {
-            const assessmentUrl = `/student/courses/${viewcourses}/modules/${moduleID}/assessment/${assessmentShortInfo?.assessmentId}/chapter/${chapterContent.id}`
-            router.push(assessmentUrl)
-        } catch (error) {
-            console.error('Failed to start assessment:', error)
-        }
-    }
+    useEffect(() => {
+        const channel = new BroadcastChannel('assessment_channel');
 
-    const handleViewResults = () => {
-        try {
-            const resultsUrl = `/student/courses/${viewcourses}/modules/${moduleID}/assessment/viewresults/${submissionId}`
-            router.push(resultsUrl)
-        } catch (error) {
-            console.error('Failed to view results:', error)
-        }
-    }
+        channel.onmessage = (event) => {
+            if (event.data === 'assessment_submitted') {
+                // Update zustand state manually if needed
+                getAssessmentShortInfo(
+                    chapterContent?.assessmentId,
+                    moduleID,
+                    viewcourses,
+                    chapterContent.id,
+                    setAssessmentShortInfo,
+                    setAssessmentOutSourceId,
+                    setSubmissionId
+                );
 
-    const hasQuestions =
-        assessmentShortInfo?.totalCodingQuestions > 0 ||
-        assessmentShortInfo?.totalQuizzes > 0 ||
-        assessmentShortInfo?.totalOpenEndedQuestions > 0
+                fetchChapters(moduleID, setChapters);
 
-    const isAssessmentStarted =
-        assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.startedAt
+                if (document.fullscreenElement) {
+                    document.exitFullscreen()
+            }
+            }
+        };
 
-    const isPassed =
-        assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.isPassed
-    const marks = assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.marks
-    const percentage =
-        assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.percentage
-    const passPercentage = assessmentShortInfo?.passPercentage
-
-    const isDisabled = !hasQuestions
-
-    const isDeadlineCrossed = assessmentShortInfo?.deadline? new Date(assessmentShortInfo?.deadline) < new Date() : false
-
+        return () => {
+            channel.close();
+        };
+    }, []);
 
     return (
         <div className="h-full">
@@ -161,9 +227,8 @@ const Assessment = ({
                     )}
                     {hasQuestions && (
                         <p
-                            className={`flex items-center gap-2 text-sm text-gray-700 ${
-                                isAssessmentStarted && 'mb-10'
-                            }`}
+                            className={`flex items-center gap-2 text-sm text-gray-700 ${isAssessmentStarted && 'mb-10'
+                                }`}
                         >
                             <Timer size={18} className="text-gray-500" />
                             Test Time:{' '}
@@ -181,19 +246,18 @@ const Assessment = ({
                     )}
 
                     {isAssessmentStarted &&
-                        chapterContent.status === 'Pending' && (
+                        chapterContent.status === 'Pending' && !isSubmitedAt && (
                             <p className="text-md font-semibold text-red-500">
                                 You have not submitted the assessment properly.
                             </p>
                         )}
 
-                    {isAssessmentStarted && (
+                    {isAssessmentStarted && isSubmitedAt && (
                         <div
-                            className={`${
-                                isPassed
-                                    ? 'bg-green-100 border-green-500 h-[100px]'
-                                    : 'bg-red-100 border-red-500 h-[120px]'
-                            } flex justify-between max-w-lg p-5 rounded-lg border`}
+                            className={`${isPassed
+                                ? 'bg-green-100 border-green-500 h-[100px]'
+                                : 'bg-red-100 border-red-500 h-[120px]'
+                                } flex justify-between max-w-lg p-5 rounded-lg border`}
                         >
                             <div className="flex gap-3">
                                 <div className="mt-2">
@@ -218,13 +282,12 @@ const Assessment = ({
                             </div>
                             <Button
                                 variant="ghost"
-                                className={`${
-                                    isPassed
-                                        ? 'text-secondary hover:text-secondary'
-                                        : 'text-red-500 hover:text-red-500'
-                                } text-lg font-semibold`}
+                                className={`${isPassed
+                                    ? 'text-secondary hover:text-secondary'
+                                    : 'text-red-500 hover:text-red-500'
+                                    } text-lg font-semibold`}
                                 onClick={handleViewResults}
-                                disabled={chapterContent.status === 'Pending'}
+                                disabled={chapterContent.status === 'Pending' && !isSubmitedAt}
                             >
                                 View Results
                             </Button>
@@ -248,10 +311,17 @@ const Assessment = ({
                                 <div>
                                     <Button
                                         onClick={handleStartAssessment}
-                                        disabled={isDisabled || isDeadlineCrossed}
+                                        disabled={
+                                            isDisabled ||
+                                            isDeadlineCrossed ||
+                                            isAssessmentStarted ||
+                                            isStartingAssessment ||
+                                            isSubmitedAt
+                                        }
                                     >
                                         Start Assessment
                                     </Button>
+
                                 </div>
                             </TooltipTrigger>
                             {isDisabled && (
