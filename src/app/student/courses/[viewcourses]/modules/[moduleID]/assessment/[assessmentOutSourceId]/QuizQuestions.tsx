@@ -158,8 +158,6 @@ const QuizQuestions = ({
         }
     }
 
-    console.log('questions', questions)
-
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between gap-2">
@@ -208,54 +206,44 @@ const QuizQuestions = ({
                                 key={question.id}
                                 className="w-full max-w-2xl border text-left border-gray-200 rounded-lg p-4 shadow-sm"
                             >
+                                <div className="flex justify-between">
+                                    <p className="font-semibold">
+                                        Question {index + 1}.
+                                    </p>
+                                    <div className="flex items-center justify-between gap-2">
+                                        <div
+                                            className={cn(
+                                                'font-semibold text-secondary my-2',
+                                                difficultyColor(question.difficulty)
+                                            )}
+                                        >
+                                            {question.difficulty}
+                                        </div>
+                                        <h2 className="bg-[#DEDEDE] px-2 py-1 text-sm rounded-2xl font-semibold">
+                                            {` ${Math.trunc(
+                                                Number(question.mark)
+                                            )} Marks`}
+                                        </h2>
+                                    </div>
+                                </div> 
                                 <FormField
                                     control={form.control}
                                     name={`answers.${index}`}
                                     render={({ field }) => (
                                         <FormItem className="flex flex-col items-start mb-10 w-full max-w-2xl">
                                             <FormLabel>
-                                            <div className="flex justify-between">
-                                                <p className="font-semibold">
-                                                    Question {index + 1}.
-                                                </p>
-                                                {/* <p
-                                                    className="text-gray-800 mb-4 font-bold text-lg"
-                                                    dangerouslySetInnerHTML={{
-                                                        __html: addClassToCodeTags(
-                                                            result.question,
-                                                            codeBlockClass
-                                                        ),
-                                                    }}
-                                                /> */}
-                                                <div className="flex items-center justify-between gap-2">
-                                                    <div
-                                                        className={cn(
-                                                            'font-semibold text-secondary my-2',
-                                                            difficultyColor(question.difficulty)
-                                                        )}
-                                                    >
-                                                        {question.difficulty}
-                                                    </div>
-                                                    <h2 className="bg-[#DEDEDE] px-2 py-1 text-sm rounded-2xl font-semibold">
-                                                        {` ${Math.trunc(
-                                                            Number(question.mark)
-                                                        )} Marks`}
-                                                    </h2>
-                                                </div>
-                                            </div> 
                                                 <div  className=" flex space-x-2 text-lg font-semibold text-left">
-                                                {/* <span>{index + 1}. </span> */}
-                                                <span
-                                                    className="text-gray-800"
-                                                    dangerouslySetInnerHTML={{
-                                                        __html: addClassToCodeTags(
-                                                            question.question,
-                                                            codeBlockClass
-                                                        ),
-                                                    }}
-                                                />
+                                                    {/* <span>{index + 1}. </span> */}
+                                                    <span
+                                                        className="text-gray-800"
+                                                        dangerouslySetInnerHTML={{
+                                                            __html: addClassToCodeTags(
+                                                                question.question,
+                                                                codeBlockClass
+                                                            ),
+                                                        }}
+                                                    />
                                                 </div> 
-
                                             </FormLabel>
 
                                             <FormControl>
