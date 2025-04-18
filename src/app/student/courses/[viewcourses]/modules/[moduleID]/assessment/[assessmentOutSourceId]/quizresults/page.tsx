@@ -50,6 +50,7 @@ const QuizResults = ({
         )
     }
 
+    console.log(quizResults)
     return (
         <React.Fragment>
             <div className="container mx-auto">
@@ -91,9 +92,16 @@ const QuizResults = ({
                                     {result.difficulty}
                                 </div>
                                 <h2 className="bg-[#DEDEDE] px-2 py-1 text-sm rounded-2xl font-semibold">
-                                    {` ${Math.trunc(
-                                        Number(result.mark)
-                                    )} Marks`}
+                                    {result.correctOption ==
+                                    result.submissionsData.chosenOption
+                                        ? ` ${Math.trunc(
+                                              Number(result.mark)
+                                          )}/${Math.trunc(
+                                              Number(result.mark)
+                                          )} Marks`
+                                        : ` 0/${Math.trunc(
+                                              Number(result.mark)
+                                          )} Marks`}
                                 </h2>
                             </div>
                         </div>

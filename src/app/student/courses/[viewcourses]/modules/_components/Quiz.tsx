@@ -295,7 +295,7 @@ function Quiz(props: Props) {
                     </div>
                     <div className="flex flex-col items-end">
                         <Button
-                            disabled={!allQuestionsAnswered()}
+                            // disabled={!allQuestionsAnswered()}
                             onClick={handleSubmit}
                             className="flex w-1/6 flex-col"
                         >

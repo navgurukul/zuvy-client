@@ -32,7 +32,6 @@ import {
 } from '@/components/ui/alert-dialog'
 import { cn, difficultyColor } from '@/lib/utils'
 
-
 const QuizQuestions = ({
     onBack,
     weightage,
@@ -92,9 +91,9 @@ const QuizQuestions = ({
 
     const handleSubmitClick = async () => {
         // Validate the form before opening the dialog
-        const isValid = await form.trigger();
+        const isValid = await form.trigger()
         if (isValid) {
-            setIsDialogOpen(true);
+            setIsDialogOpen(true)
         } else {
             // Show toast notification for missing answers
             toast({
@@ -213,49 +212,45 @@ const QuizQuestions = ({
                                     name={`answers.${index}`}
                                     render={({ field }) => (
                                         <FormItem className="flex flex-col items-start mb-10 w-full max-w-2xl">
-                                            <FormLabel>
-                                            <div className="flex justify-between">
-                                                <p className="font-semibold">
-                                                    Question {index + 1}.
-                                                </p>
-                                                {/* <p
-                                                    className="text-gray-800 mb-4 font-bold text-lg"
-                                                    dangerouslySetInnerHTML={{
-                                                        __html: addClassToCodeTags(
-                                                            result.question,
-                                                            codeBlockClass
-                                                        ),
-                                                    }}
-                                                /> */}
-                                                <div className="flex items-center justify-between gap-2">
-                                                    <div
-                                                        className={cn(
-                                                            'font-semibold text-secondary my-2',
-                                                            difficultyColor(question.difficulty)
-                                                        )}
-                                                    >
-                                                        {question.difficulty}
+                                            <FormLabel className="w-full my-2">
+                                                <div className="flex justify-between w-full items-center">
+                                                    <p className="font-semibold">
+                                                        Question {index + 1}.
+                                                    </p>
+                                                    <div className="flex items-center justify-between gap-2">
+                                                        <div
+                                                            className={cn(
+                                                                'font-semibold text-secondary my-2',
+                                                                difficultyColor(
+                                                                    question.difficulty
+                                                                )
+                                                            )}
+                                                        >
+                                                            {
+                                                                question.difficulty
+                                                            }
+                                                        </div>
+                                                        <h2 className="bg-[#DEDEDE] px-2 py-1 text-sm rounded-2xl font-semibold">
+                                                            {` ${Math.trunc(
+                                                                Number(
+                                                                    question.mark
+                                                                )
+                                                            )} Marks`}
+                                                        </h2>
                                                     </div>
-                                                    <h2 className="bg-[#DEDEDE] px-2 py-1 text-sm rounded-2xl font-semibold">
-                                                        {` ${Math.trunc(
-                                                            Number(question.mark)
-                                                        )} Marks`}
-                                                    </h2>
                                                 </div>
-                                            </div> 
-                                                <div  className=" flex space-x-2 text-lg font-semibold text-left">
-                                                {/* <span>{index + 1}. </span> */}
-                                                <span
-                                                    className="text-gray-800"
-                                                    dangerouslySetInnerHTML={{
-                                                        __html: addClassToCodeTags(
-                                                            question.question,
-                                                            codeBlockClass
-                                                        ),
-                                                    }}
-                                                />
-                                                </div> 
-
+                                                <div className=" flex space-x-2 text-lg font-semibold text-left">
+                                                    {/* <span>{index + 1}. </span> */}
+                                                    <span
+                                                        className="text-gray-800"
+                                                        dangerouslySetInnerHTML={{
+                                                            __html: addClassToCodeTags(
+                                                                question.question,
+                                                                codeBlockClass
+                                                            ),
+                                                        }}
+                                                    />
+                                                </div>
                                             </FormLabel>
 
                                             <FormControl>
@@ -305,7 +300,10 @@ const QuizQuestions = ({
                         Submit Quiz
                     </Button>
 
-                    <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <AlertDialog
+                        open={isDialogOpen}
+                        onOpenChange={setIsDialogOpen}
+                    >
                         <AlertDialogContent>
                             <AlertDialogHeader>
                                 <AlertDialogTitle>
@@ -317,7 +315,9 @@ const QuizQuestions = ({
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                                <AlertDialogCancel onClick={() => setIsDialogOpen(false)}>
+                                <AlertDialogCancel
+                                    onClick={() => setIsDialogOpen(false)}
+                                >
                                     Cancel
                                 </AlertDialogCancel>
                                 <AlertDialogAction

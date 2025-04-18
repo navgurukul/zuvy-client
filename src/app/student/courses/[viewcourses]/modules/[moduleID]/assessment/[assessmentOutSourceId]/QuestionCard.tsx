@@ -39,7 +39,7 @@ const QuestionCard = ({
     codingOutsourseId,
     codingQuestions,
     onSolveChallenge,
-    isQuizSubmitted
+    isQuizSubmitted,
 }: QuestionCardProps) => {
     const [tag, setTag] = useState<Tag>()
     const [action, setAction] = useState<string | null>(null)

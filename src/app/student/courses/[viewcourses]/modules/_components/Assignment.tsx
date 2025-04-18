@@ -35,10 +35,12 @@ const FormSchema = z.object({
         .refine(
             (url) =>
                 url.startsWith('https://github.com') ||
-                url.startsWith('https://drive.google.com'),
+                url.startsWith('https://drive.google.com') ||
+                url.startsWith('https://docs.google.com/document') ||
+                url.startsWith('https://docs.google.com/spreadsheets'),
             {
                 message:
-                    'The link must be from "https://github.com" or "https://drive.google.com".',
+                    'Only links from Google Drive, Docs, Sheets, or GitHub are allowed.',
             }
         ),
 })
@@ -294,7 +296,11 @@ const Assignments = ({
                             )
                         ) ? (
                             <div className="flex justify-end absolute top-0 right-0">
-                                <Button className="w-full mr-3" type="submit" disabled={true}>
+                                <Button
+                                    className="w-full mr-3"
+                                    type="submit"
+                                    disabled={true}
+                                >
                                     Submit
                                 </Button>
                             </div>

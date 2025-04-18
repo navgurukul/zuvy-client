@@ -353,7 +353,7 @@ const Page = ({ params }: { params: any }) => {
                     {codingdata ? (
                         <>
                             {/* Coding Submission */}
-                            {codingdata.length > 0 && (
+                            {codingdata.length > 0 ? (
                                 <div className="w-full">
                                     <h1 className="text-left font-semibold">
                                         Coding Challenges
@@ -391,6 +391,11 @@ const Page = ({ params }: { params: any }) => {
                                         </p>
                                     )}
                                 </div>
+                            ) : (
+                                <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg  transition-transform transform hover:shadow-xl">
+                                    This student has not submitted any coding
+                                    question.
+                                </p>
                             )}
 
                             {/* Quiz Submission */}
