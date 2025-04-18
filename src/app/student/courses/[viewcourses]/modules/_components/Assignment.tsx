@@ -35,10 +35,12 @@ const FormSchema = z.object({
         .refine(
             (url) =>
                 url.startsWith('https://github.com') ||
-                url.startsWith('https://drive.google.com'),
+                url.startsWith('https://drive.google.com') ||
+                url.startsWith('https://docs.google.com/document') ||
+                url.startsWith('https://docs.google.com/spreadsheets'),
             {
                 message:
-                    'The link must be from "https://github.com" or "https://drive.google.com".',
+                    'Only links from Google Drive, Docs, Sheets, or GitHub are allowed.',
             }
         ),
 })
@@ -107,24 +109,6 @@ const Assignments = ({
     useEffect(() => {
         form.setValue('link', projectData?.projectUrl)
     }, [form, projectData])
-
-    const updateIcon = (link: string) => {
-        if (link.includes('github')) {
-            setIcon(<Github className="mr-2 h-4 w-4" />)
-        } else if (link.includes('drive')) {
-            setIcon(
-                <Image
-                    src={googleDriveLogo}
-                    alt="Google Drive"
-                    width={16}
-                    height={16}
-                    className="mr-2"
-                />
-            )
-        } else {
-            setIcon(<Link className="mr-2 h-4 w-4" />)
-        }
-    }
 
     async function onSubmit(data: z.infer<typeof FormSchema>) {
         ///tracking/updateQuizAndAssignmentStatus/8/31?chapterId=1212
@@ -267,13 +251,11 @@ const Assignments = ({
                                 <FormItem>
                                     <FormControl>
                                         <div className="flex items-center">
-                                            {icon}
                                             <Input
                                                 placeholder="Paste your Assignment Link Here"
                                                 {...field}
                                                 onChange={(e) => {
                                                     field.onChange(e)
-                                                    updateIcon(e.target.value)
                                                 }}
                                             />
                                         </div>
@@ -294,7 +276,11 @@ const Assignments = ({
                             )
                         ) ? (
                             <div className="flex justify-end absolute top-0 right-0">
-                                <Button className="w-full mr-3" type="submit" disabled={true}>
+                                <Button
+                                    className="w-full mr-3"
+                                    type="submit"
+                                    disabled={true}
+                                >
                                     Submit
                                 </Button>
                             </div>
