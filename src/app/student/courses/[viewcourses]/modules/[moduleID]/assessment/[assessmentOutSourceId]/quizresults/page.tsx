@@ -91,7 +91,7 @@ const QuizResults = ({
                                     {result.difficulty}
                                 </div>
                                 <h2 className="bg-[#DEDEDE] px-2 py-1 text-sm rounded-2xl font-semibold">
-                                    {` ${Math.trunc(
+                                    {` ${result.submissionsData?.status === "passed" ? Number(result.mark) : 0}/${Math.trunc(
                                         Number(result.mark)
                                     )} Marks`}
                                 </h2>
