@@ -1007,4 +1007,23 @@ export const getIsRowSelected = create<isRowUnSelectedType>((set) => ({
         set({ isRowUnSelected: newValue })
     },
 }))
+
+interface ModuleData {
+    moduleName: string[]
+}
+
+interface ModuleStore {
+    moduleData: ModuleData
+    setModuleData: (newValue: ModuleData) => void
+}
+
+export const getModuleDataNew = create<ModuleStore>((set) => ({
+    moduleData: {
+        moduleName: [''],
+    },
+    setModuleData: (newValue: ModuleData) => {
+        set({ moduleData: newValue })
+    },
+}))
+
 // ------------------------- User ------------------------
