@@ -223,6 +223,7 @@ const Page = ({ params }: { params: any }) => {
                         message={true}
                         id={courseData?.id || 0}
                         batch={false}
+                        batchData={batchData ? batchData?.length > 0 : false}
                         batchId={0}
                     />
                 </Dialog>
