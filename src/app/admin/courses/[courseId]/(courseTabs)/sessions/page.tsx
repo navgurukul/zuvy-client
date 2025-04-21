@@ -266,7 +266,7 @@ function Page({ params }: any) {
                         </div>
                     ) : (
                         <div>
-                            {classes.length > 0 ? (
+                            {classes.length > 0 && (
                                 activeTab === classes[0].status ? (
                                     <>
                                         <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
@@ -333,7 +333,8 @@ function Page({ params }: any) {
                                         <ClassCardSkeleton />
                                     </div>
                                 )
-                            ) : (
+                            )}
+                            {classes.length === 0 &&  (
                                 <div className="w- flex mb-10 items-center flex-col gap-y-3 justify-center text-center mt-2">
                                     <Image
                                         src={
