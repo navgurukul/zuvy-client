@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { cn, difficultyColor } from '@/lib/utils'
 import { ChevronRight } from 'lucide-react'
 import { api } from '@/utils/axios.config'
+import { ellipsis } from '@/lib/utils'
 
 interface QuestionCardProps {
     id: number
@@ -19,6 +20,7 @@ interface QuestionCardProps {
     codingQuestions?: boolean
     onSolveChallenge: (id: number) => void
     isQuizSubmitted?: boolean
+    isMobile?: boolean
 }
 
 export type Tag = {
@@ -39,7 +41,8 @@ const QuestionCard = ({
     codingOutsourseId,
     codingQuestions,
     onSolveChallenge,
-    isQuizSubmitted
+    isQuizSubmitted,
+    isMobile,
 }: QuestionCardProps) => {
     const [tag, setTag] = useState<Tag>()
     const [action, setAction] = useState<string | null>(null)
@@ -94,7 +97,9 @@ const QuestionCard = ({
     return (
         <div className="my-5 p-6 bg-white rounded-xl shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F]">
             <div className="flex justify-between">
-                <h2 className="capitalize">{title}</h2>
+                <h2 className="capitalize">
+                    {isMobile ? ellipsis(title, 30) : title}
+                </h2>
                 <div>
                     {title !== 'Open-Ended Questions' && (
                         <h2 className="bg-[#DEDEDE] px-2 py-1 mb-2 text-sm rounded-2xl font-semibold">

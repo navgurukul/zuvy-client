@@ -7,7 +7,14 @@ import { api } from '@/utils/axios.config'
 import React, { useCallback, useEffect, useState, useRef } from 'react'
 import StudentChapterItem from '../../../_components/StudentChapterItem'
 import { useParams, usePathname } from 'next/navigation'
-import { fetchChapters, fetchCourseDetails, getAssessmentShortInfo } from '@/utils/students'
+import { getModuleDataNew } from '@/store/store'
+import {
+    fetchChapters,
+    fetchCourseDetails,
+    getAssessmentShortInfo,
+} from '@/utils/students'
+import useWindowSize from '@/hooks/useHeightWidth'
+
 import {
     getStudentChapterContentState,
     getStudentChaptersState,
@@ -28,6 +35,9 @@ function Chapters({ params }: any) {
     const pathname = usePathname()
     const { studentData } = useLazyLoadedStudentData()
     const { paramBatchId } = getParamBatchId()
+    const { width } = useWindowSize()
+    const { setModuleData } = getModuleDataNew()
+
     const { moduleName, setModuleName } = getModuleName()
     const userID = studentData?.id && studentData?.id
     const { viewcourses, moduleID, chapterID } = useParams()
@@ -48,6 +58,7 @@ function Chapters({ params }: any) {
     const activeChapterRef = useRef<HTMLDivElement | null>(null)
     const isInstructor = pathname?.includes('/instructor')
     const [courseName, setCourseName] = useState('')
+    const isMobile = width < 768
 
     const studentCrumbs = [
         {
@@ -127,6 +138,9 @@ function Chapters({ params }: any) {
                 `tracking/getAllChaptersWithStatus/${moduleID}`
             )
             setModuleName(response.data.moduleDetails[0].name)
+            setModuleData({
+                moduleName: response.data.trackingData,
+            })
         } catch (error) {
             console?.error(error)
         }
@@ -154,40 +168,46 @@ function Chapters({ params }: any) {
     }, [topicId, chapterId])
 
     return (
-        <div className="flex flex-col h-full">
-
-            <div className="flex flex-col h-screen">
-                <div className='mt-20 pb-2'><BreadcrumbComponent
-                        crumbs={isInstructor ? InstructorCrumbs : studentCrumbs}
-                /></div>
-                <ScrollArea
-                    className="h-full pr-4"
-                    type="hover"
-                    ref={scrollAreaRef}
-
-                >
-                    {/* <ScrollBar className='h-dvh'/> */}
-                    {chapters?.map((item: any, index: any) => {
-                        const isLastItem = index === chapters.length - 1
-
-                        return (
-                            <StudentChapterItem
-                                key={item.id}
-                                chapterId={item.id}
-                                title={item.title}
-                                topicId={item.topicId}
-                                activeChapter={activeChapter}
-                                setActiveChapter={setActiveChapter}
-                                status={item.status}
-                                viewcourses={viewcourses}
-                                moduleID={moduleID}
-                                activeChapterRef={activeChapterRef}
+        <>
+            {!isMobile && (
+                <div className="flex flex-col h-full">
+                    <div className="flex flex-col h-screen">
+                        <div className="mt-20 pb-2">
+                            <BreadcrumbComponent
+                                crumbs={
+                                    isInstructor
+                                        ? InstructorCrumbs
+                                        : studentCrumbs
+                                }
                             />
-                        )
-                    })}
-                </ScrollArea>
-            </div>
-        </div>
+                        </div>
+
+                        <ScrollArea
+                            className="h-full pr-4"
+                            type="hover"
+                            ref={scrollAreaRef}
+                        >
+                            {chapters?.map((item: any, index: any) => {
+                                return (
+                                    <StudentChapterItem
+                                        key={item.id}
+                                        chapterId={item.id}
+                                        title={item.title}
+                                        topicId={item.topicId}
+                                        activeChapter={activeChapter}
+                                        setActiveChapter={setActiveChapter}
+                                        status={item.status}
+                                        viewcourses={viewcourses}
+                                        moduleID={moduleID}
+                                        activeChapterRef={activeChapterRef}
+                                    />
+                                )
+                            })}
+                        </ScrollArea>
+                    </div>
+                </div>
+            )}
+        </>
     )
 }
 

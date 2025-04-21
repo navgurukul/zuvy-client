@@ -41,7 +41,6 @@ type QuizDetails = {
     Quiz: Quiz
 }
 
-
 const Page = ({ params }: { params: paramsType }) => {
     const { proctoringData, fetchProctoringData } = getProctoringDataStore()
     const [bootcampData, setBootcampData] = useState<any>()
@@ -49,7 +48,7 @@ const Page = ({ params }: { params: paramsType }) => {
     const [quizQuestionDetails, setQuizQuiestionDetails] = useState<any>()
     const [loading, setLoading] = useState<boolean>(true)
     const codeBlockClass =
-        'text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full';
+        'text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full'
 
     const crumbs = [
         {
@@ -166,80 +165,102 @@ const Page = ({ params }: { params: paramsType }) => {
                 <h1 className="text-left font-semibold text-[20px]">
                     Overview
                 </h1>
-             
+
                 <div>
-                    {quizQuestionDetails?.mcqs?.map((quizDetail: any, index: any) => {
-                        const { submissionsData } = quizDetail
-                        const chosenOption = submissionsData?.chosenOption
+                    {quizQuestionDetails?.mcqs?.map(
+                        (quizDetail: any, index: number) => {
+                            const { submissionsData } = quizDetail
+                            const chosenOption = submissionsData?.chosenOption
+                            const isAttempted =
+                                chosenOption !== null &&
+                                chosenOption !== undefined
 
+                            return (
+                                <div
+                                    key={quizDetail.variantId}
+                                    className="flex flex-col items-start gap-y-4 mb-6"
+                                >
+                                    {/* Question */}
+                                    <div className="flex flex-row gap-x-2 my-3">
+                                        <p className="font-semibold">
+                                            Q{index + 1}.
+                                        </p>
+                                        <div
+                                            className="font-semibold"
+                                            dangerouslySetInnerHTML={{
+                                                __html: addClassToCodeTags(
+                                                    quizDetail.question,
+                                                    codeBlockClass
+                                                ),
+                                            }}
+                                        />
+                                    </div>
 
-                        return (
-                            <div
-                                key={quizDetail.id}
-                                className="flex items-start flex-col gap-y-4 "
-                            >
-                                <div className="flex flex-row gap-x-2 my-3">
-                                    <p className="font-semibold">
-                                        Q{index + 1}.
-                                    </p>
-                                    <div
-                                        className='font-semibold'
-                                        dangerouslySetInnerHTML={{
-                                            __html: addClassToCodeTags(
-                                                quizDetail.question,
-                                                codeBlockClass
-                                            ),
-                                        }} />
-                                </div>
-                                {Object.entries(quizDetail.options).map(
-                                    ([key, option], index) => {
-                                        const isCorrect =
-                                            parseInt(key) === quizDetail.correctOption
-                                        const isChosen =
-                                            parseInt(key) === chosenOption
-                                        const textColor = isChosen
-                                            ? isCorrect
-                                                ? 'green'
-                                                : 'red'
-                                            : 'black'
+                                    {/* Options */}
+                                    {Object.entries(quizDetail.options).map(
+                                        ([key, option], idx) => {
+                                            const optionKey = parseInt(key)
+                                            const isCorrect =
+                                                optionKey ===
+                                                quizDetail.correctOption
+                                            const isChosen =
+                                                optionKey === chosenOption
 
-                                        return (
-                                            <div key={key} className="w-full">
+                                            const showChecked =
+                                                isCorrect || isChosen
+
+                                            const textColor = isCorrect
+                                                ? 'text-green-600'
+                                                : isChosen && !isCorrect
+                                                ? 'text-red-500'
+                                                : 'text-black'
+
+                                            return (
                                                 <div
-                                                    className="flex   items-center w-full justify-start "
-                                                    style={{ color: textColor }}
+                                                    key={key}
+                                                    className="w-full"
                                                 >
-                                                    <p className="text-primary  font-semibold">
-                                                        {index + 1}.
-                                                    </p>
-                                                    <div className="flex flex-row space-x-5 w-full m-2">
-                                                        <div className="w-1/2 flex flex-row items-center gap-x-3 ">
-                                                            <input
-                                                                type="radio"
-                                                                name={`question-${quizDetail.id}`}
-                                                                value={key}
-                                                                checked={
-                                                                    isCorrect
-                                                                }
-                                                                readOnly={
-                                                                    isCorrect
-                                                                }
-                                                                disabled={
-                                                                    isCorrect
-                                                                }
-                                                                className=""
-                                                            />
-                                                            {option as any}
+                                                    <div
+                                                        className={`flex items-center w-full justify-start ${textColor}`}
+                                                    >
+                                                        <p className="text-primary font-semibold">
+                                                            {idx + 1}.
+                                                        </p>
+                                                        <div className="flex flex-row space-x-5 w-full m-2">
+                                                            <div className="w-1/2 flex flex-row items-center gap-x-3">
+                                                                <input
+                                                                    type="radio"
+                                                                    name={`question-${quizDetail.variantId}-${index}`}
+                                                                    value={key}
+                                                                    checked={
+                                                                        showChecked
+                                                                    }
+                                                                    readOnly
+                                                                    disabled
+                                                                />
+                                                                <span className="break-words">
+                                                                    {
+                                                                        option as string
+                                                                    }
+                                                                </span>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        )
-                                    }
-                                )}
-                            </div>
-                        )
-                    })}
+                                            )
+                                        }
+                                    )}
+
+                                    {/* Not Answered Label */}
+                                    {!isAttempted && (
+                                        <p className="text-muted-foreground text-sm font-medium ml-8">
+                                            Not Answered
+                                        </p>
+                                    )}
+                                </div>
+                            )
+                        }
+                    )}
                 </div>
             </MaxWidthWrapper>
         </>

@@ -45,6 +45,7 @@ import {
 import PreventBackNavigation from '@/app/student/courses/[viewcourses]/modules/_components/PreventBackNavigation'
 import WarnOnLeave from '@/app/student/courses/[viewcourses]/modules/_components/WarnOnLeave'
 import Loader from '@/app/student/courses/_components/Loader'
+import useWindowSize from '@/hooks/useHeightWidth'
 
 function Page({
     params,
@@ -58,6 +59,9 @@ function Page({
 }) {
     const [isFullScreen, setIsFullScreen] = useState(false)
     const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null)
+    const { width } = useWindowSize()
+    const isMobile = width < 768
+
     const [disableSubmit, setDisableSubmit] = useState(false)
     const [runCodeLanguageId, setRunCodeLanguageId] = useState<any>(0)
     const [runSourceCode, setRunSourceCode] = useState<string>('')
@@ -403,25 +407,28 @@ function Page({
             selectedQuesType === 'quiz' &&
             !assessmentData?.IsQuizzSubmission &&
             assessmentData?.hardMcqQuestions +
-            assessmentData?.easyMcqQuestions +
-            assessmentData?.mediumMcqQuestions >
-            0
+                assessmentData?.easyMcqQuestions +
+                assessmentData?.mediumMcqQuestions >
+                0
         ) {
             return (
                 <>
-                <PreventBackNavigation />
-                <WarnOnLeave />
-                <AlertProvider requestFullScreen={handleFullScreenRequest} setIsFullScreen={setIsFullScreen}>
-                <QuizQuestions
-                    onBack={handleBack}
-                    weightage={assessmentData}
-                    remainingTime={remainingTime}
-                    questions={seperateQuizQuestions}
-                    assessmentSubmitId={assessmentSubmitId}
-                    getSeperateQuizQuestions={getSeperateQuizQuestions}
-                    getAssessmentData={getAssessmentData}
-                />
-                </AlertProvider>
+                    <PreventBackNavigation />
+                    <WarnOnLeave />
+                    <AlertProvider
+                        requestFullScreen={handleFullScreenRequest}
+                        setIsFullScreen={setIsFullScreen}
+                    >
+                        <QuizQuestions
+                            onBack={handleBack}
+                            weightage={assessmentData}
+                            remainingTime={remainingTime}
+                            questions={seperateQuizQuestions}
+                            assessmentSubmitId={assessmentSubmitId}
+                            getSeperateQuizQuestions={getSeperateQuizQuestions}
+                            getAssessmentData={getAssessmentData}
+                        />
+                    </AlertProvider>
                 </>
             )
         } else if (
@@ -430,20 +437,23 @@ function Page({
         ) {
             return (
                 <>
-                <PreventBackNavigation />
-                <WarnOnLeave />
-                <AlertProvider requestFullScreen={handleFullScreenRequest} setIsFullScreen={setIsFullScreen}>
-                <OpenEndedQuestions
-                    onBack={handleBack}
-                    remainingTime={remainingTime}
-                    questions={seperateOpenEndedQuestions}
-                    assessmentSubmitId={assessmentSubmitId}
-                    getSeperateOpenEndedQuestions={
-                        getSeperateOpenEndedQuestions
-                    }
-                    getAssessmentData={getAssessmentData}
-                />
-                </AlertProvider>
+                    <PreventBackNavigation />
+                    <WarnOnLeave />
+                    <AlertProvider
+                        requestFullScreen={handleFullScreenRequest}
+                        setIsFullScreen={setIsFullScreen}
+                    >
+                        <OpenEndedQuestions
+                            onBack={handleBack}
+                            remainingTime={remainingTime}
+                            questions={seperateOpenEndedQuestions}
+                            assessmentSubmitId={assessmentSubmitId}
+                            getSeperateOpenEndedQuestions={
+                                getSeperateOpenEndedQuestions
+                            }
+                            getAssessmentData={getAssessmentData}
+                        />
+                    </AlertProvider>
                 </>
             )
         } else if (
@@ -452,20 +462,25 @@ function Page({
         ) {
             return (
                 <>
-                <PreventBackNavigation />
-                <WarnOnLeave />
-                <AlertProvider requestFullScreen={handleFullScreenRequest} setIsFullScreen={setIsFullScreen}>
-                <IDE
-                    params={{ editor: String(selectedQuestionId) }}
-                    onBack={handleBack}
-                    remainingTime={remainingTime}
-                    assessmentSubmitId={assessmentSubmitId}
-                    selectedCodingOutsourseId={selectedCodingOutsourseId}
-                    getAssessmentData={getAssessmentData}
-                    runCodeLanguageId={runCodeLanguageId}
-                    runSourceCode={runSourceCode}
-                />
-                </AlertProvider>
+                    <PreventBackNavigation />
+                    <WarnOnLeave />
+                    <AlertProvider
+                        requestFullScreen={handleFullScreenRequest}
+                        setIsFullScreen={setIsFullScreen}
+                    >
+                        <IDE
+                            params={{ editor: String(selectedQuestionId) }}
+                            onBack={handleBack}
+                            remainingTime={remainingTime}
+                            assessmentSubmitId={assessmentSubmitId}
+                            selectedCodingOutsourseId={
+                                selectedCodingOutsourseId
+                            }
+                            getAssessmentData={getAssessmentData}
+                            runCodeLanguageId={runCodeLanguageId}
+                            runSourceCode={runSourceCode}
+                        />
+                    </AlertProvider>
                 </>
             )
         }
@@ -500,10 +515,10 @@ function Page({
                 router.push(
                     `/student/courses/${assessmentData?.bootcampId}/modules/${assessmentData?.moduleId}/chapters/${assessmentData?.chapterId}`
                 )
-                const channel = new BroadcastChannel('assessment_channel');
-                channel.postMessage('assessment_submitted');
-                channel.close();
-                setTimeout(()=> window.close(), 2000);
+                const channel = new BroadcastChannel('assessment_channel')
+                channel.postMessage('assessment_submitted')
+                channel.close()
+                setTimeout(() => window.close(), 2000)
             } catch (e) {
                 console.error(e)
             }
@@ -541,55 +556,73 @@ function Page({
             onCopy={(e) => handleCopyPasteAttempt(e)}
         >
             <PreventBackNavigation />
-             <WarnOnLeave />
-            <AlertProvider requestFullScreen={handleFullScreenRequest} setIsFullScreen={setIsFullScreen}>
-                <div className="h-auto mb-24">
+            <WarnOnLeave />
+            <AlertProvider
+                requestFullScreen={handleFullScreenRequest}
+                setIsFullScreen={setIsFullScreen}
+            >
+                <div className="h-screen mb-24">
                     {!isFullScreen && !remainingTime ? (
-                        <>
+                        <div
+                            className={`${
+                                isMobile
+                                    ? 'h-full flex flex-col items-center justify-center'
+                                    : ''
+                            }`}
+                        >
                             <>
-                            <div className="fixed top-4 right-4 bg-white p-2 rounded-md shadow-md font-bold text-xl">
-                                <div className="font-bold text-xl">
-                                    <TimerDisplay
-                                        remainingTime={remainingTime}
-                                    />
+                                <div className="fixed top-4 right-4 bg-white p-2 rounded-md shadow-md font-bold text-xl">
+                                    <div className="font-bold text-xl">
+                                        <TimerDisplay
+                                            remainingTime={remainingTime}
+                                        />
+                                    </div>
                                 </div>
-                            </div>
-                      
-                            <h1>
-                                Enter Full Screen to see the Questions. Warning:
-                                If you exit fullscreen, your test will get
-                                submitted automatically
-                            </h1>
-                            <div className="flex justify-center mt-10">
-                                <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                        <Button>
-                                            Enter Full Screen
-                                        </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                            <AlertDialogDescription>
-                                                You must stay in full-screen mode during the test. 
-                                                <strong> No tab switching, window changes, or exiting full-screen. </strong> 
-                                                The above violations may lead to auto-submission.
-                                            </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction
-                                                className="bg-red-500"
-                                                onClick={handleFullScreenRequest}
-                                            >
-                                                Proceed
-                                            </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-                            </div>
-                                </>
+
+                                <h1>
+                                    Enter Full Screen to see the Questions.
+                                    Warning: If you exit fullscreen, your test
+                                    will get submitted automatically
+                                </h1>
+                                <div className="flex justify-center mt-10">
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button>Enter Full Screen</Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogDescription>
+                                                    You must stay in full-screen
+                                                    mode during the test.
+                                                    <strong>
+                                                        {' '}
+                                                        No tab switching, window
+                                                        changes, or exiting
+                                                        full-screen.{' '}
+                                                    </strong>
+                                                    The above violations may
+                                                    lead to auto-submission.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>
+                                                    Cancel
+                                                </AlertDialogCancel>
+                                                <AlertDialogAction
+                                                    className="bg-red-500"
+                                                    onClick={
+                                                        handleFullScreenRequest
+                                                    }
+                                                >
+                                                    Proceed
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                                </div>
+                            </>
                             {/* )} */}
-                        </>
+                        </div>
                     ) : (
                         <div>
                             <div className="fixed top-4 right-4 bg-white p-2 rounded-md shadow-md font-bold text-xl">
@@ -601,17 +634,23 @@ function Page({
                             </div>
                             {/* <Separator className="my-6" /> */}
                             <div className="flex justify-center">
-                                <div className="flex flex-col gap-5 w-1/2 text-left">
-                                    <h2 className="font-bold">
+                                <div
+                                    className={`${
+                                        isMobile
+                                            ? 'w-full space-y-4'
+                                            : 'flex flex-col gap-5 w-1/2 text-left mt-10'
+                                    } `}
+                                >
+                                    <h2 className="font-bold text-left">
                                         Testing Your Knowledge
                                     </h2>
-                                    <p className="deadline flex items-center gap-2">
+                                    <p className="deadline flex items-center text-left gap-2">
                                         <Clock size={18} />
                                         Deadline:{' '}
                                         {assessmentData?.deadline ||
                                             'No Deadline For This Assessment'}
                                     </p>
-                                    <p className="testTime flex items-center gap-2">
+                                    <p className="testTime flex items-center text-left gap-2">
                                         <Timer size={18} />
                                         Test Time:{' '}
                                         {Math.floor(
@@ -620,11 +659,11 @@ function Page({
                                         Hours{' '}
                                         {Math.floor(
                                             (assessmentData?.timeLimit % 3600) /
-                                            60
+                                                60
                                         )}{' '}
                                         Minutes
                                     </p>
-                                    <p className="description">
+                                    <p className="description text-left">
                                         Timer has started. Questions will
                                         disappear if you exit full screen. All
                                         the problems i.e. coding challenges,
@@ -632,16 +671,16 @@ function Page({
                                         completed all at once
                                     </p>
 
-                                    <h1 className="font-bold">
+                                    <h1 className="font-bold text-left">
                                         Proctoring Rules
                                     </h1>
-                                    <p>
+                                    <p className="text-left">
                                         To ensure fair assessments, the
                                         assessments are proctored are proctored
                                         for the following cases below. Please
                                         avoid violating the rules:
                                     </p>
-                                    <ul className="list-disc ml-5">
+                                    <ul className="list-disc ml-5 text-left">
                                         <li>Copy and pasting</li>
                                         <li>Tab switching</li>
                                         <li>Assessment screen exit</li>
@@ -649,14 +688,20 @@ function Page({
                                 </div>
                             </div>
                             {assessmentData?.codingQuestions?.length > 0 && (
-                                <div className="flex justify-center">
-                                    <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
-                                        <h2 className="font-bold">
+                                <div className="flex justify-center ">
+                                    <div
+                                        className={`${
+                                            isMobile
+                                                ? 'w-full mt-5'
+                                                : 'flex flex-col gap-5 w-1/2 text-left mt-10'
+                                        } `}
+                                    >
+                                        <h2 className="font-bold text-left">
                                             Coding Challenges
                                         </h2>
-                                        <div className="flex gap-2">
+                                        <div className="flex gap-2  mt-2 ">
                                             <AlertCircle />
-                                            <h2>
+                                            <h2 className="text-left ">
                                                 You may run your code multiple
                                                 times after making changes, but
                                                 you are allowed to submit it
@@ -666,6 +711,7 @@ function Page({
                                         {assessmentData?.codingQuestions?.map(
                                             (question: any) => (
                                                 <QuestionCard
+                                                    isMobile={isMobile}
                                                     key={
                                                         question.codingQuestionId
                                                     }
@@ -693,7 +739,9 @@ function Page({
                                                         question.codingOutsourseId
                                                     }
                                                     codingQuestions={true}
-                                                    onSolveChallenge={(id:any) =>
+                                                    onSolveChallenge={(
+                                                        id: any
+                                                    ) =>
                                                         handleSolveChallenge(
                                                             'coding',
                                                             id,
@@ -711,43 +759,58 @@ function Page({
                                 assessmentData?.easyMcqQuestions +
                                 assessmentData?.mediumMcqQuestions >
                                 0 && (
-                                    <div className="flex justify-center">
-                                        <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
-                                            <h2 className="font-bold">MCQs</h2>
-                                            <QuestionCard
-                                                id={1}
-                                                title="Quiz"
-                                                weightage={
-                                                    assessmentData?.weightageMcqQuestions
-                                                }
-                                                description={`${assessmentData?.hardMcqQuestions +
+                                <div className="flex justify-center">
+                                    <div
+                                        className={`${
+                                            isMobile
+                                                ? 'w-full'
+                                                : 'flex flex-col gap-5 w-1/2 text-left mt-10'
+                                        } `}
+                                    >
+                                        <h2 className="font-bold text-left">
+                                            MCQs
+                                        </h2>
+                                        <QuestionCard
+                                            id={1}
+                                            title="Quiz"
+                                            weightage={
+                                                assessmentData?.weightageMcqQuestions
+                                            }
+                                            description={`${
+                                                assessmentData?.hardMcqQuestions +
                                                     assessmentData?.easyMcqQuestions +
                                                     assessmentData?.mediumMcqQuestions ||
-                                                    0
-                                                    } questions`}
-                                                onSolveChallenge={() =>
-                                                    handleSolveChallenge('quiz')
-                                                }
-
-                                                isQuizSubmitted={
-                                                    assessmentData?.IsQuizzSubmission
-                                                }
-                                            />
-                                        </div>
+                                                0
+                                            } questions`}
+                                            onSolveChallenge={() =>
+                                                handleSolveChallenge('quiz')
+                                            }
+                                            isQuizSubmitted={
+                                                assessmentData?.IsQuizzSubmission
+                                            }
+                                        />
                                     </div>
-                                )}
+                                </div>
+                            )}
                             {seperateOpenEndedQuestions.length > 0 && (
                                 <div className="flex justify-center">
-                                    <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
+                                    <div
+                                        className={`${
+                                            isMobile
+                                                ? 'w-full'
+                                                : 'flex flex-col gap-5 w-1/2 text-left mt-10'
+                                        } `}
+                                    >
                                         <h2 className="font-bold">
                                             Open-Ended Questions
                                         </h2>
                                         <QuestionCard
                                             id={1}
                                             title="Open-Ended Questions"
-                                            description={`${seperateOpenEndedQuestions.length ||
+                                            description={`${
+                                                seperateOpenEndedQuestions.length ||
                                                 0
-                                                } questions`}
+                                            } questions`}
                                             onSolveChallenge={() =>
                                                 handleSolveChallenge(
                                                     'open-ended'

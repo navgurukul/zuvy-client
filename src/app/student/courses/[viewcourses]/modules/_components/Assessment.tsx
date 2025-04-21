@@ -12,7 +12,8 @@ import {
 } from '@/components/ui/tooltip'
 import Image from 'next/image'
 import { fetchChapters, getAssessmentShortInfo } from '@/utils/students'
-import { getStudentChaptersState } from '@/store/store'
+import { getModuleDataNew, getStudentChaptersState } from '@/store/store'
+import useWindowSize from '@/hooks/useHeightWidth'
 
 const Assessment = ({
     assessmentShortInfo,
@@ -21,7 +22,7 @@ const Assessment = ({
     chapterContent,
     setAssessmentShortInfo,
     setAssessmentOutSourceId,
-    setSubmissionId
+    setSubmissionId,
 }: {
     assessmentShortInfo: any
     assessmentOutSourceId: any
@@ -38,10 +39,12 @@ const Assessment = ({
     const [assessmentEndTime, setAssessmentEndTime] = useState<number | null>(
         null
     )
+    const { width } = useWindowSize()
 
-    const {chapters, setChapters} = getStudentChaptersState();
+    const { chapters, setChapters } = getStudentChaptersState()
 
     const [isTimeOver, setIsTimeOver] = useState(false)
+    const isMobile = width < 768
 
     const hasQuestions =
         assessmentShortInfo?.totalCodingQuestions > 0 ||
@@ -50,13 +53,14 @@ const Assessment = ({
 
     // const isAssessmentStarted =
     //     assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.startedAt
-    // let isSubmitedAt = 
+    // let isSubmitedAt =
     //     assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.submitedAt || null;
 
-    const [isAssessmentStarted, setIsAssessmentStarted] = useState<boolean>(false)
+    const [isAssessmentStarted, setIsAssessmentStarted] =
+        useState<boolean>(false)
     const [isSubmitedAt, setIsSubmitedAt] = useState<boolean>(false)
 
-    const [isStartingAssessment, setIsStartingAssessment] = useState(false);
+    const [isStartingAssessment, setIsStartingAssessment] = useState(false)
 
     const isPassed =
         assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.isPassed
@@ -67,10 +71,12 @@ const Assessment = ({
 
     const isDisabled = !hasQuestions
 
-    const isDeadlineCrossed = assessmentShortInfo?.deadline ? new Date(assessmentShortInfo?.deadline) < new Date() : false
+    const isDeadlineCrossed = assessmentShortInfo?.deadline
+        ? new Date(assessmentShortInfo?.deadline) < new Date()
+        : false
 
     const handleStartAssessment = () => {
-        setIsStartingAssessment(true); // Disable the button immediately
+        setIsStartingAssessment(true) // Disable the button immediately
 
         getAssessmentShortInfo(
             chapterContent?.assessmentId,
@@ -80,17 +86,16 @@ const Assessment = ({
             setAssessmentShortInfo,
             setAssessmentOutSourceId,
             setSubmissionId
-        );
+        )
 
         try {
-            const assessmentUrl = `/student/courses/${viewcourses}/modules/${moduleID}/assessment/${assessmentShortInfo?.assessmentId}/chapter/${chapterContent.id}`;
-            window.open(assessmentUrl, '_blank')?.focus();
+            const assessmentUrl = `/student/courses/${viewcourses}/modules/${moduleID}/assessment/${assessmentShortInfo?.assessmentId}/chapter/${chapterContent.id}`
+            window.open(assessmentUrl, '_blank')?.focus()
         } catch (error) {
-            console.error('Failed to start assessment:', error);
-            setIsStartingAssessment(false); // Re-enable button in case of error
+            console.error('Failed to start assessment:', error)
+            setIsStartingAssessment(false) // Re-enable button in case of error
         }
-    };
-
+    }
 
     const handleViewResults = () => {
         try {
@@ -104,7 +109,8 @@ const Assessment = ({
     useEffect(() => {
         // Calculate end time based on start time and duration
         setIsAssessmentStarted(
-            !!assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.startedAt);
+            !!assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.startedAt
+        )
 
         setIsSubmitedAt(
             !!assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.submitedAt
@@ -131,7 +137,7 @@ const Assessment = ({
     }, [assessmentShortInfo, testDuration])
 
     useEffect(() => {
-        const channel = new BroadcastChannel('assessment_channel');
+        const channel = new BroadcastChannel('assessment_channel')
 
         channel.onmessage = (event) => {
             if (event.data === 'assessment_submitted') {
@@ -144,25 +150,25 @@ const Assessment = ({
                     setAssessmentShortInfo,
                     setAssessmentOutSourceId,
                     setSubmissionId
-                );
+                )
 
-                fetchChapters(moduleID, setChapters);
+                fetchChapters(moduleID, setChapters)
 
                 if (document.fullscreenElement) {
                     document.exitFullscreen()
+                }
             }
-            }
-        };
+        }
 
         return () => {
-            channel.close();
-        };
-    }, []);
+            channel.close()
+        }
+    }, [])
 
     return (
         <div className="h-full">
-            <div className="flex flex-col items-center justify-center px-4 py-8 mt-20">
-                <div className="flex flex-col gap-4 text-left w-full max-w-lg">
+            <div className="flex flex-col items-center justify-center px-0 py-8 mt-20 md:px-4 ">
+                <div className="flex flex-col gap-x-4 gap-y-1 text-left w-full max-w-lg">
                     <div className="flex items-center justify-between gap-4 pr-10">
                         <h1 className="text-2xl font-bold text-gray-800 text-center">
                             {assessmentShortInfo?.ModuleAssessment?.title}
@@ -201,17 +207,17 @@ const Assessment = ({
                             )}
                             {assessmentShortInfo?.totalOpenEndedQuestions >
                                 0 && (
-                                    <div>
-                                        <h2 className="text-lg font-semibold text-secondary">
-                                            {
-                                                assessmentShortInfo?.totalOpenEndedQuestions
-                                            }
-                                        </h2>
-                                        <p className="text-sm text-gray-600">
-                                            Open-Ended
-                                        </p>
-                                    </div>
-                                )}
+                                <div>
+                                    <h2 className="text-lg font-semibold text-secondary">
+                                        {
+                                            assessmentShortInfo?.totalOpenEndedQuestions
+                                        }
+                                    </h2>
+                                    <p className="text-sm text-gray-600">
+                                        Open-Ended
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     ) : null}
 
@@ -227,8 +233,9 @@ const Assessment = ({
                     )}
                     {hasQuestions && (
                         <p
-                            className={`flex items-center gap-2 text-sm text-gray-700 ${isAssessmentStarted && 'mb-10'
-                                }`}
+                            className={`flex items-center gap-x-1 gap-y-2 text-sm text-gray-700 ${
+                                isAssessmentStarted && 'mb-10'
+                            }`}
                         >
                             <Timer size={18} className="text-gray-500" />
                             Test Time:{' '}
@@ -246,51 +253,61 @@ const Assessment = ({
                     )}
 
                     {isAssessmentStarted &&
-                        chapterContent.status === 'Pending' && !isSubmitedAt && (
+                        chapterContent.status === 'Pending' &&
+                        !isSubmitedAt && (
                             <p className="text-md font-semibold text-red-500">
                                 You have not submitted the assessment properly.
                             </p>
                         )}
 
                     {isAssessmentStarted && isSubmitedAt && (
-                        <div
-                            className={`${isPassed
-                                ? 'bg-green-100 border-green-500 h-[100px]'
-                                : 'bg-red-100 border-red-500 h-[120px]'
+                        <div className={`md:mr-0 mr-10 `}>
+                            <div
+                                className={`${
+                                    isPassed
+                                        ? 'bg-green-100 border-green-500'
+                                        : 'bg-red-100 border-red-500 '
                                 } flex justify-between max-w-lg p-5 rounded-lg border`}
-                        >
-                            <div className="flex gap-3">
-                                <div className="mt-2">
-                                    <Image
-                                        src="/flag.svg"
-                                        alt="Empty State"
-                                        width={40}
-                                        height={40}
-                                    />
+                            >
+                                <div className="flex gap-3">
+                                    <div className="mt-2">
+                                        <Image
+                                            src="/flag.svg"
+                                            alt="Empty State"
+                                            width={40}
+                                            height={40}
+                                        />
+                                    </div>
+                                    <div className="md:text-lg  text-sm">
+                                        <p className=" font-semibold bg-#DEDEDE">
+                                            Your Score:{' '}
+                                            {Math.trunc(percentage) || 0}/100
+                                        </p>
+                                        <p>
+                                            {isPassed
+                                                ? 'Congratulations, you passed!'
+                                                : `You needed at least ${passPercentage} percentage to pass`}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-lg font-semibold">
-                                        Your Score:{' '}
-                                        {Math.trunc(percentage) || 0}/100
-                                    </p>
-                                    <p>
-                                        {isPassed
-                                            ? 'Congratulations, you passed!'
-                                            : `You needed at least ${passPercentage} percentage to pass`}
-                                    </p>
+                                <div className="">
+                                    <Button
+                                        variant="ghost"
+                                        className={`${
+                                            isPassed
+                                                ? 'text-secondary hover:text-secondary'
+                                                : 'text-red-500 hover:text-red-500'
+                                        }  font-semibold md:text-lg text-sm `}
+                                        onClick={handleViewResults}
+                                        disabled={
+                                            chapterContent.status ===
+                                                'Pending' && !isSubmitedAt
+                                        }
+                                    >
+                                        View Results
+                                    </Button>
                                 </div>
                             </div>
-                            <Button
-                                variant="ghost"
-                                className={`${isPassed
-                                    ? 'text-secondary hover:text-secondary'
-                                    : 'text-red-500 hover:text-red-500'
-                                    } text-lg font-semibold`}
-                                onClick={handleViewResults}
-                                disabled={chapterContent.status === 'Pending' && !isSubmitedAt}
-                            >
-                                View Results
-                            </Button>
                         </div>
                     )}
                     {/* {isAssessmentStarted &&
@@ -308,9 +325,10 @@ const Assessment = ({
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <div>
+                                <div className="">
                                     <Button
                                         onClick={handleStartAssessment}
+                                        className=" "
                                         disabled={
                                             isDisabled ||
                                             isDeadlineCrossed ||
@@ -321,7 +339,6 @@ const Assessment = ({
                                     >
                                         Start Assessment
                                     </Button>
-
                                 </div>
                             </TooltipTrigger>
                             {isDisabled && (
@@ -332,7 +349,8 @@ const Assessment = ({
                             )}
                             {isDeadlineCrossed && (
                                 <TooltipContent>
-                                    You have missed the deadline to start the assessment
+                                    You have missed the deadline to start the
+                                    assessment
                                 </TooltipContent>
                             )}
                         </Tooltip>
@@ -344,7 +362,6 @@ const Assessment = ({
                         Deadline Crossed
                     </h3>
                 )}
-
             </div>
         </div>
     )
