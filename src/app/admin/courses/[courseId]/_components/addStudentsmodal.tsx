@@ -30,12 +30,14 @@ const AddStudentsModal = ({
     batch,
     batchId,
     fetchBatchesData,
+    batchData
 }: {
     id: number
     message: boolean
     batch: boolean
     batchId: any
     fetchBatchesData?: any
+    batchData?: boolean
 }) => {
     // misc
     interface Student {
@@ -130,7 +132,7 @@ const AddStudentsModal = ({
                 </DialogTitle>
                 <span>
                     {message
-                        ? 'All the students are assigned to batches. Please add new students to create new batches'
+                        ? batchData ? 'All the students are assigned to batches. Please add new students to create new batches' : 'Please add student(s) to create New Batches'
                         : ''}
                 </span>
             </DialogHeader>
