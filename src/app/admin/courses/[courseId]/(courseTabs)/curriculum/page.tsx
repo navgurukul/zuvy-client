@@ -202,7 +202,6 @@ function Page() {
                 { moduleDto }
             )
                 .then((res) => {
-                    console.log('res.data.message',res)
                     if(res.data.message === "Modified successfully") {
                         toast({
                             title: 'Success',
@@ -322,7 +321,6 @@ function Page() {
         handleReorder(newOrderModules)
     }
 
-    console.log('message', message)
     return (
         <div className="w-full ">
             <div className=" w-full flex justify-end pr-4 ">

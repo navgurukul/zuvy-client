@@ -2,6 +2,13 @@ import React from 'react'
 import { PlusCircle } from 'lucide-react'
 import { cn, difficultyBgColor, difficultyColor, ellipsis } from '@/lib/utils'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
+import {
+    Dialog,
+    DialogContent,
+    DialogOverlay,
+    DialogTrigger,
+} from '@/components/ui/dialog'
+import PreviewOpenEnded from '@/app/admin/resource/_components/PreviewOpenEnded'
 
 interface OpenEndedQuestion {
     id: number
@@ -67,9 +74,20 @@ const OpenEndedQuestions = ({
                                 <p className="text-[#4A4A4A] mt-1 font-[14px]">
                                     {ellipsis(question?.question, 45)}
                                 </p>
-                                <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer">
-                                    View Full Description
-                                </p>
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                        <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer">
+                                            View Full Description
+                                        </p>
+                                    </DialogTrigger>
+                                    {/* <DialogOverlay /> */}
+                                    <DialogContent>
+                                        <PreviewOpenEnded
+                                            question={question}
+                                            tag={tag}
+                                        />
+                                    </DialogContent>
+                                </Dialog>
                             </div>
                             <div className="flex">
                                 {selectedQuestions.some(
