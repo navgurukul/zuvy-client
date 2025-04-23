@@ -2,13 +2,18 @@
 
 import axios, { AxiosRequestConfig } from 'axios'
 
-const mainUrl = process.env.NEXT_PUBLIC_MAIN_URL
+let mainUrl = process.env.NEXT_PUBLIC_MAIN_URL
 // const mainUrl = "http://zuvy.navgurukul.org/"
 const apiURL = process.env.NEXT_PUBLIC_API_URL
 const localUrl = process.env.NEXT_PUBLIC_LOCAL_URL
+const env_name = process.env.NODE_ENV
 
 let headers: AxiosRequestConfig['headers'] = {
     'Content-Type': 'application/json',
+}
+
+if (process.env.NEXT_PUBLIC_ENV_NAME === 'STAGE') {
+    mainUrl = 'https://stage.api.zuvy.org'
 }
 
 const api = axios.create({
