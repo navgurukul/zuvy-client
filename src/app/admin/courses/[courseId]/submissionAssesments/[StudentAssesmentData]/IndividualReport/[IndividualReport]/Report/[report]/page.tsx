@@ -184,7 +184,6 @@ const Page = ({ params }: { params: any }) => {
                     `/tracking/assessment/submissionId=${params.report}?studentId=${params.IndividualReport}`
                 )
                 .then((res) => {
-                    // console.log('res', res)
                     const timeTaken = calculateTimeTaken(
                         res?.data?.startedAt,
                         res?.data?.submitedAt
