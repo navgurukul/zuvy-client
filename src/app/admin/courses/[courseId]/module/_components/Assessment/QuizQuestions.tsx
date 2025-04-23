@@ -150,8 +150,6 @@ const QuizQuestions = ({
                                         {ellipsis(question.question, 60)}
                                     </p>
                                 </div>
-                                {/* <Dialog> */}
-                                {/* <DialogTrigger asChild> */}
                                 <Dialog>
                                     <DialogTrigger asChild>
                                         <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer">
@@ -166,18 +164,7 @@ const QuizQuestions = ({
                                             assesmentSide={true}
                                         />
                                     </DialogContent>
-                                </Dialog>{' '}
-                                {/* <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer">
-                                    View Full Description
-                                </p> */}
-                                {/* </DialogTrigger> */}
-                                {/* <DialogOverlay /> */}
-                                {/* <QuestionDescriptionModal
-                                    question={question}
-                                    type="mcq"
-                                    tagName={tag?.tagName}
-                                /> */}
-                                {/* </Dialog> */}
+                                </Dialog>
                             </div>
                         </div>
                     </div>
