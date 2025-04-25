@@ -91,6 +91,7 @@ const Page = ({ params }: { params: paramsType }) => {
                     setCodingSubmissionData(res?.data)
                     setDecodedString(res?.data?.data.sourceCode)
                     setTestCases(res?.data?.data.TestCasesSubmission)
+                    console.log(res?.data)
                 })
         } catch (error) {
             toast({
