@@ -402,6 +402,32 @@ function Page({
         getAssessmentSubmissionsData()
     }, [])
 
+    useEffect(() => {
+
+        const navEntries = performance.getEntriesByType("navigation") as PerformanceNavigationTiming[];
+        const navType = navEntries[0]?.type;
+      
+        if (navType === "reload") {
+          toast({
+            title: "Page Reloaded",
+            description: "The page has been reloaded.",
+            className: "text-left capitalize",
+          })
+        }
+
+        const handleTabClose = () => {
+          const channel = new BroadcastChannel('assessment_channel');
+          channel.postMessage('assessment_tab_closed');
+          channel.close();
+        };
+    
+        window.addEventListener('beforeunload', handleTabClose);
+    
+        return () => {
+          window.removeEventListener('beforeunload', handleTabClose);
+        };
+      }, []);
+
     if (isSolving && isFullScreen) {
         if (
             selectedQuesType === 'quiz' &&
@@ -549,6 +575,9 @@ function Page({
         requestFullScreen(element)
         setIsFullScreen(true)
     }
+
+
+    
 
     return (
         <div

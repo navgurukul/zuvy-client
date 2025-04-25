@@ -7,47 +7,112 @@ const TestCaseResults = ({ testCases }: any) => {
                 return (
                     <div
                         key={index}
-                        className="p-6 mb-4 border border-gray-300 rounded-lg shadow-md bg-white"
+                        className="p-6 mt-5 mb-4 border border-gray-300 rounded-lg shadow-md bg-white"
                     >
                         <div className="flex items-center justify-between">
                             <h2 className="font-semibold text-xl text-gray-700">
                                 Test Case {index + 1}
                             </h2>
                             <span
-                                className={`px-3 py-1 rounded-full text-sm font-medium ${
-                                    testCase.status === 'Accepted'
-                                        ? 'bg-green-100 text-green-800'
-                                        : 'bg-red-100 text-red-800'
-                                }`}
+                                className={`px-3 py-1 rounded-full text-sm font-medium ${testCase.status === 'Accepted'
+                                    ? 'bg-green-100 text-green-800'
+                                    : 'bg-red-100 text-red-800'
+                                    }`}
                             >
                                 {testCase.status}
                             </span>
                         </div>
 
                         {/* Inputs Section */}
-                        <div className="mt-4">
+                        <div className="mt-4 flex justify-center">
                             <h3 className="font-semibold text-lg text-gray-600">
                                 Inputs:
                             </h3>
-                            <ul className="list-disc list-inside pl-4 text-gray-800">
+                            <p className="list-disc list-inside pl-2 text-gray-800">
                                 {testCase.testCases.inputs.map(
                                     (input: any, i: number) => (
-                                        <li key={i} className="my-1">
-                                            <span className="font-medium text-gray-600">
-                                                {input.parameterName} (
-                                                {input.parameterType})
-                                            </span>
-                                            :
+                                        <p key={i} className="my-1">
+
                                             <span className="bg-gray-100 p-1 rounded-md">
                                                 {JSON.stringify(
                                                     input.parameterValue
                                                 )}
                                             </span>
-                                        </li>
+                                        </p>
                                     )
                                 )}
-                            </ul>
+                            </p>
                         </div>
+
+                        {/* Your Output Section */}
+                        <div className="mt-4 flex justify-center font-semibold text-lg text-gray-600">
+                            <h3>
+                            {testCase.stderr === null && 'Your Output:'}
+                            </h3>
+                            <p className='ml-2'>
+                                {testCase.stderr === null && (
+                                    Array.isArray(testCase.stdout) || testCase.stdout === 'jsonType' ? (
+                                        <span className="bg-gray-100 p-1 rounded-md">
+                                            {JSON.stringify(testCase.stdout)}
+                                        </span>
+                                    ) : (
+                                        <span className="bg-gray-100 p-1 rounded-md">
+                                            {testCase.stdout === null ? 'null' : testCase.stdout}
+                                        </span>
+                                    )
+                                )}
+                            </p>
+                        </div>
+
+                        {/* Error Output Section */}
+                        {testCase.status !== 'Accepted' && (
+                            <div className="mt-4 flex justify-center font-semibold text-lg text-gray-600">
+                                <h3>
+                                    Error Output:
+                                </h3>
+                                <p className='ml-2'>
+                                    {Array.isArray(testCase.stderr) || testCase.stderr === 'jsonType' ? (
+                                        <span className="bg-gray-100 p-1 rounded-md">
+                                            {JSON.stringify(testCase.stderr)}
+                                        </span>
+                                    ) : (
+                                        <span className="bg-gray-100 p-1 rounded-md">
+                                            {testCase.stderr === null
+                                                ? 'null' : testCase.stderr}
+                                        </span>
+                                    )}
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Time Complexity Section show testCase.time and testCase.memory*/}
+                        <div className="mt-4 flex justify-center font-semibold text-lg text-gray-600">
+                           {
+                                testCase.status === 'Accepted' && (
+                                    <>
+                                        <h3>
+                                            Time:
+                                        </h3>
+                                        <p className='ml-2'>
+                                            {testCase.time}
+                                        </p>
+                                    </>
+                                )
+                           }
+                        </div>
+                        <div className="mt-4 flex justify-center font-semibold text-lg text-gray-600">
+                          {testCase.status === 'Accepted' && (
+                              <>
+                              <h3>
+                              Memory:
+                          </h3>
+                          <p className='ml-2'>
+                              {testCase.memory}
+                          </p>
+                          </>
+                          )}
+                        </div>
+
 
                         {/* Expected Output */}
                         <div className="mt-4">
@@ -57,15 +122,10 @@ const TestCaseResults = ({ testCases }: any) => {
                                 </h3>
                                 <p className="text-gray-800">
                                     <span className="font-semibold text-gray-600">
-                                        {
-                                            testCase.testCases.expectedOutput
-                                                .parameterType
-                                        }
-                                    </span>
-                                    :{' '}
-                                    <span className="font-semibold text-gray-600">
                                         {testCase.testCases.expectedOutput
-                                            .parameterType === 'arrayOfnum' ? (
+                                            .parameterType === 'arrayOfnum' ||
+                                            testCase.testCases.expectedOutput
+                                                .parameterType === 'jsonType' ? (
                                             <span className="bg-gray-100 p-1 rounded-md">
                                                 {JSON.stringify(
                                                     testCase.testCases

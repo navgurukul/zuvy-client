@@ -13,6 +13,7 @@ import {
 import Image from 'next/image'
 import { fetchChapters, getAssessmentShortInfo } from '@/utils/students'
 import { getModuleDataNew, getStudentChaptersState } from '@/store/store'
+import { toast } from '@/components/ui/use-toast'
 import useWindowSize from '@/hooks/useHeightWidth'
 
 const Assessment = ({
@@ -137,11 +138,10 @@ const Assessment = ({
     }, [assessmentShortInfo, testDuration])
 
     useEffect(() => {
-        const channel = new BroadcastChannel('assessment_channel')
-
+        const channel = new BroadcastChannel('assessment_channel');
+    
         channel.onmessage = (event) => {
             if (event.data === 'assessment_submitted') {
-                // Update zustand state manually if needed
                 getAssessmentShortInfo(
                     chapterContent?.assessmentId,
                     moduleID,
@@ -150,20 +150,31 @@ const Assessment = ({
                     setAssessmentShortInfo,
                     setAssessmentOutSourceId,
                     setSubmissionId
-                )
-
-                fetchChapters(moduleID, setChapters)
-
+                );
+    
+                fetchChapters(moduleID, setChapters);
+    
                 if (document.fullscreenElement) {
-                    document.exitFullscreen()
+                    document.exitFullscreen();
                 }
             }
-        }
-
+    
+            if (event.data === 'assessment_tab_closed') {
+                console.warn('Assessment tab was closed before submission');
+                toast({
+                    title: 'Assessment Tab Closed',
+                    description: 'You closed the assessment before submitting.',
+                    className: 'text-left capitalize',
+                    variant: 'destructive',
+                });
+            }
+        };
+    
         return () => {
-            channel.close()
-        }
-    }, [])
+            channel.close();
+        };
+    }, []);
+    
 
     return (
         <div className="h-full">

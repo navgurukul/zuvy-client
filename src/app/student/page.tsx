@@ -33,7 +33,7 @@ function Page() {
                 <div>
                     <Heading />
                     {/* <Alert className="text-start bg-accent-foreground ">
-        <PartyPopper className="h-4 w-4" color="#082f49" strokeWidth={2.5} />
+        <PartyPopper className="h-4 w-4" color="#082f49" strokeWidth={2.5} />`
         <AlertTitle className="text-primary">Congratulations!</AlertTitle>
         <AlertDescription>
           Welcome to Zuvy. You are on route to becoming a star programmer. Happy

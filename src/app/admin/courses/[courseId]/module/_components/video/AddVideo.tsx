@@ -252,13 +252,22 @@ const AddVideo = ({
     }
 
     function previewVideo() {
-        if (content) {
+        if (content?.contentDetails[0]?.links) {
             setVideoPreviewContent(content)
             router.push(
                 `/admin/courses/${courseId}/module/${moduleId}/chapter/${content.id}/video/${content.topicId}/preview`
             )
         }
-    }
+        else {
+            toast({
+                title: 'No Video Uploaded',
+                description: 'Please Save the chapter to preview.',
+                className:
+                    'border border-red-500 text-red-500 text-left w-[90%] capitalize',
+            })
+        }
+    } 
+
 
     return (
         <ScrollArea
@@ -309,7 +318,7 @@ const AddVideo = ({
                                                         fillOpacity={0.4}
                                                         size={20}
                                                         className="absolute text-gray-100 pointer-events-none top-1/2 right-3 -translate-y-1/2"
-                                                        // Adjusted right positioning
+                                                    // Adjusted right positioning
                                                     />
                                                 )}
                                             </div>
