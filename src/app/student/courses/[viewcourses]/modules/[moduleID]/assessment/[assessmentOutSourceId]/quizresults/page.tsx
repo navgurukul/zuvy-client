@@ -164,15 +164,18 @@ const QuizResults = ({
                                 }
                             )}
                         </div>
-                        <div className="mt-2 text-sm text-green-600 font-bold">
+                        <div className="mt-2 text-sm text-gray-600 font-semibold text-left ml-4">
                             {/* if chosen incorrect answer show correct */}
-                            {result.correctOption !==
+                            {/* {result.correctOption !==
                                 result?.submissionsData?.chosenOption &&
                                 `Correct Answer: ${
                                     Object.values(result.options)[
                                         result.correctOption - 1
                                     ]
-                                }`}
+                                }`} */}
+                            {!result?.submissionsData && (
+                                <div>Not Answered</div>
+                            )}
                         </div>
                     </div>
                 ))}

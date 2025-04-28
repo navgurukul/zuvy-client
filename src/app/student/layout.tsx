@@ -163,10 +163,9 @@ export default function RootLayout({
                                                             >
                                                                 <span className="text-secondary flex items-center rounded-md gap-2 ">
                                                                     <Menu />{' '}
-                                                                    Chapter
                                                                     {ellipsis(
                                                                         activeChapter?.title,
-                                                                        4
+                                                                        20
                                                                     )}{' '}
                                                                     of{' '}
                                                                     {
@@ -212,7 +211,10 @@ export default function RootLayout({
                                                 <ScrollArea className="h-72 w-full">
                                                     <div className="w-full">
                                                         {moduleData.moduleName.map(
-                                                            (chapter: any) => {
+                                                            (
+                                                                chapter: any,
+                                                                index
+                                                            ) => {
                                                                 let status =
                                                                     chapter.status
 
