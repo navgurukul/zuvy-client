@@ -299,14 +299,12 @@ const Page = ({ params }: { params: any }) => {
                 {codingdata ? (
                     <OverviewComponent
                         totalCodingChallenges={
-                            assesmentData?.submitedOutsourseAssessment
-                                .totalCodingQuestions
+                            assesmentData?.submitedOutsourseAssessment?.totalCodingQuestions
                         }
                         correctedCodingChallenges={9}
                         correctedMcqs={9}
                         totalCorrectedMcqs={
-                            assesmentData?.submitedOutsourseAssessment
-                                .totalMcqQuestions
+                            assesmentData?.submitedOutsourseAssessment?.totalMcqQuestions
                         }
                         openEndedCorrect={1}
                         totalOpenEnded={
@@ -321,14 +319,12 @@ const Page = ({ params }: { params: any }) => {
                         embeddedSearch={assesmentData?.embeddedGoogleSearch}
                         submissionType={assesmentData?.typeOfsubmission}
                         totalCodingScore={
-                            assesmentData?.submitedOutsourseAssessment
-                                .weightageCodingQuestions
+                            assesmentData?.submitedOutsourseAssessment?.weightageCodingQuestions
                         }
                         codingScore={assesmentData?.codingScore}
                         mcqScore={assesmentData?.mcqScore}
                         totalMcqScore={
-                            assesmentData?.submitedOutsourseAssessment
-                                .weightageMcqQuestions
+                            assesmentData?.submitedOutsourseAssessment?.weightageMcqQuestions
                         }
                         openEndedScore={assesmentData?.openEndedScore}
                         totalOpenEndedScore={
@@ -349,9 +345,10 @@ const Page = ({ params }: { params: any }) => {
                     </div>
                 )}
 
-                <div className="flex gap-20 mt-4 ">
+                <div className="grid grid-cols-2 gap-20 mt-4 ">
                     {codingdata ? (
                         <>
+
                             {/* Coding Submission */}
                             {codingdata && codingdata.length === 0 ? (
                                 <div className='w-full'>
@@ -364,20 +361,26 @@ const Page = ({ params }: { params: any }) => {
                                 </div>
                             ) : (
                                 codingdata.map((data) => (
-                                    <IndividualStudentAssesment
-                                        key={data.id}
-                                        data={data}
-                                        params={params}
-                                        type="codingSubmission"
-                                        codingOutsourseId={data.codingOutsourseId}
-                                        copyPaste={assesmentData?.copyPaste}
-                                        tabchanges={assesmentData?.tabChange}
-                                        totalCodingScore={
-                                            assesmentData?.submitedOutsourseAssessment
-                                                .weightageCodingQuestions
-                                        }
-                                        codingScore={assesmentData?.codingScore}
-                                    />
+                                    <>
+                                  <div>
+                                  <h1 className="text-left font-semibold">
+                                            Coding Question
+                                        </h1>
+                                        <IndividualStudentAssesment
+                                            key={data.id}
+                                            data={data}
+                                            params={params}
+                                            type="codingSubmission"
+                                            codingOutsourseId={data.codingOutsourseId}
+                                            copyPaste={assesmentData?.copyPaste}
+                                            tabchanges={assesmentData?.tabChange}
+                                            totalCodingScore={
+                                                assesmentData?.submitedOutsourseAssessment?.weightageCodingQuestions
+                                            }
+                                            codingScore={assesmentData?.codingScore}
+                                        />
+                                  </div>
+                                    </>
                                 ))
                             )}
 
@@ -388,7 +391,7 @@ const Page = ({ params }: { params: any }) => {
                                     ?.mediumMcqQuestions ||
                                 assesmentData?.submitedOutsourseAssessment
                                     ?.hardMcqQuestions > 0) && (
-                                    <div className="w-screen pl-5">
+                                    <div className="w-full pl-5">
                                         <h1 className="text-left font-semibold">
                                             MCQs
                                         </h1>

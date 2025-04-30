@@ -170,12 +170,12 @@ function Page({
 
             if (
                 res.data.submitedOutsourseAssessments.length > 0 &&
-                res.data.submitedOutsourseAssessments[0].submitedAt
+                res.data.submitedOutsourseAssessments[0].submitedAt && res?.data?.submitedOutsourseAssessments[0].reattemptApproved === false
             ) {
                 router.push(startPageUrl)
             } else if (
                 res.data.submitedOutsourseAssessments.length > 0 &&
-                res.data.submitedOutsourseAssessments[0].startedAt
+                res.data.submitedOutsourseAssessments[0].startedAt && res?.data?.submitedOutsourseAssessments[0].reattemptApproved === false
             ) {
                 getAssessmentData()
             }

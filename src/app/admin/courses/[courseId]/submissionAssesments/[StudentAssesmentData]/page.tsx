@@ -13,6 +13,7 @@ import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Skeleton } from '@/components/ui/skeleton'
 import useDebounce from '@/hooks/useDebounce'
+import { getIsReattemptApproved } from '@/store/store'
 
 type Props = {}
 
@@ -20,6 +21,8 @@ const Page = ({ params }: any) => {
     const [assesmentData, setAssessmentData] = useState<any>()
     const [searchStudentAssessment, setSearchStudentAssessment] =
         useState<any>('')
+    
+    const {isReattemptApproved} = getIsReattemptApproved()
 
     const debouncedSearch = useDebounce(searchStudentAssessment, 400)
 
@@ -97,7 +100,7 @@ const Page = ({ params }: any) => {
         }
 
         fetchData()
-    }, [getStudentAssesmentDataHandler, getBootcampHandler])
+    }, [isReattemptApproved, getStudentAssesmentDataHandler, getBootcampHandler])
 
     return (
         <>
