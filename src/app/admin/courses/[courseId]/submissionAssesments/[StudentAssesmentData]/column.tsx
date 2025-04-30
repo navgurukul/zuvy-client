@@ -91,7 +91,13 @@ export const columns: ColumnDef<Task>[] = [
             const startedAt = row.original.startedAt
             const submitedAt = row.original.submitedAt
 
-            const timeTaken:any = calculateTimeTaken(startedAt, submitedAt);
+            let timeTaken;
+
+            if(!submitedAt){
+                timeTaken = 'NA'
+            }else{
+                timeTaken = calculateTimeTaken(startedAt, submitedAt);
+            }
 
             return (
                 <div className="flex space-x-2">
