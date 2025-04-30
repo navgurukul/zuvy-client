@@ -368,7 +368,7 @@ const Assessment = ({
                         )
                     }
 
-                    {reattemptRequested && !reattemptApproved && (isTimeOver || isSubmitedAt) && (
+                    {reattemptRequested && !reattemptApproved && (
                         <div className="flex flex-col items-center justify-center w-full p-5 mb-5 bg-white border rounded-lg shadow-sm">
                             <h2 className="text-lg font-semibold text-gray-800">
                                 Your re-attempt request has been sent.
