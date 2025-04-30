@@ -309,7 +309,7 @@ const Assessment = ({
                     )}
 
                     {(isAssessmentStarted &&
-                        !reattemptRequested && !reattemptApproved || (isTimeOver && isAssessmentStarted &&
+                        !reattemptRequested && !reattemptApproved || (isAssessmentStarted &&
                             !reattemptRequested && !reattemptApproved)) && (
                             <>
                                 <div className="flex flex-col items-center justify-center w-full p-5 mb-5 bg-white border rounded-lg shadow-sm">
@@ -358,14 +358,14 @@ const Assessment = ({
                         )
                     }
 
-                    {!reattemptRequested && !reattemptApproved && isAssessmentStarted &&
+                    {/* {!reattemptRequested && !reattemptApproved && isAssessmentStarted &&
                         chapterContent.status === 'Pending' &&
                         !isSubmitedAt && !isTimeOver && (
                             <p className="text-md font-semibold text-red-400">
                                 You have not submitted the assessment properly. You will get the option to apply for Re-Attempt once the deadline is crossed.
                             </p>
                         )
-                    }
+                    } */}
 
                     {reattemptRequested && !reattemptApproved && (isTimeOver || isSubmitedAt) && (
                         <div className="flex flex-col items-center justify-center w-full p-5 mb-5 bg-white border rounded-lg shadow-sm">
