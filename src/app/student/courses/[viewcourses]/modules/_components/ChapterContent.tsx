@@ -65,7 +65,7 @@ function ChapterContent() {
                     setLoading(false) // Set loading to false after the delay
                 }, 2000)
             } catch (error) {
-                console.error('Error fetching chapter content:', error)
+                console?.error('Error fetching chapter content:', error)
             }
         },
         [userID]

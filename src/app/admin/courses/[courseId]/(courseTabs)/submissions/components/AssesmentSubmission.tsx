@@ -56,7 +56,7 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                                                         assessment.totalCodingQuestions
                                                     }
                                                     mcq={
-                                                        assessment.totalQuizzes
+                                                        assessment.totalMcqQuestions
                                                     }
                                                     openEnded={
                                                         assessment.totalOpenEndedQuestions

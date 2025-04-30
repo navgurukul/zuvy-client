@@ -66,7 +66,7 @@ const Page = ({ params }: { params: any }) => {
 
             setTotalStudents(res.data.totalStudents)
         } catch (error) {
-            console.error('Error fetching assessments:', error)
+            console?.error('Error fetching assessments:', error)
         }
     }, [params.courseId, debouncedSearch])
 
