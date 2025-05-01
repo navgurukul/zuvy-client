@@ -114,7 +114,6 @@ export default function RootLayout({
         if (width <= 430) return 'mt-[34rem]'
         return 'mt-[24rem]'
     }
-
     return (
         <div className="h-screen ">
             {user.email.length == 0 ? (
@@ -161,19 +160,20 @@ export default function RootLayout({
                                                                 }
                                                                 className="bg-[#DCE7E3] "
                                                             >
-                                                                <span className="text-secondary flex items-center rounded-md gap-2 ">
+                                                                <div className="text-secondary flex items-center rounded-md gap-2 text-md ">
                                                                     <Menu />{' '}
-                                                                    {ellipsis(
-                                                                        activeChapter?.title,
-                                                                        20
-                                                                    )}{' '}
+                                                                    Chapter{' '}
+                                                                    <span className="">
+                                                                        {currentIndex +
+                                                                            1}
+                                                                    </span>
                                                                     of{' '}
                                                                     {
                                                                         moduleData
                                                                             .moduleName
                                                                             .length
                                                                     }
-                                                                </span>
+                                                                </div>
                                                             </Button>
                                                         </div>
                                                     </PopoverTrigger>
