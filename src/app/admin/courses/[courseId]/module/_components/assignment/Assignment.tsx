@@ -71,7 +71,7 @@ const AddAssignent = ({
     courseId,
     assignmentUpdateOnPreview,
     setAssignmentUpdateOnPreview,
-}: AssignmentProps) => {
+}: any) => {
     // misc
 
     const formSchema = z.object({
@@ -179,15 +179,22 @@ const AddAssignent = ({
     }, [content, editor])
 
     function previewAssignment() {
-        if (content) {
+        if (content?.contentDetails[0]?.content?.length > 0) {
             setAssignmentPreviewContent(content)
             router.push(
                 `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/assignment/${content.topicId}/preview`
             )
+        } else {
+            return toast({
+                title: 'Cannot Preview',
+                description: 'Nothing to Preview please save some content',
+                className:
+                    'border border-red-500 text-red-500 text-left w-[90%] capitalize',
+            })
         }
     }
 
-return (
+    return (
         <div className="px-5">
             <>
                 <div className="w-full ">
@@ -259,57 +266,70 @@ return (
                                 control={form.control}
                                 name="startDate"
                                 render={({ field }) => {
-                                    const d = field.value ? typeof field.value === "string" ? field.value.split(' ')[0] : field.value : null
-                                    let dateValue =  typeof field.value === "string" && d ? parseISO(d) : field.value;
+                                    const d = field.value
+                                        ? typeof field.value === 'string'
+                                            ? field.value.split(' ')[0]
+                                            : field.value
+                                        : null
+                                    let dateValue =
+                                        typeof field.value === 'string' && d
+                                            ? parseISO(d)
+                                            : field.value
                                     return (
-                                    <FormItem className="flex flex-col justify-start gap-x-2 gap-y-4 text-left">
-                                        <FormLabel className="m-0">
-                                            <span className="text-xl">
-                                                Choose Deadline Date
-                                            </span>
-                                            <span className="text-red-500">
-                                                *
-                                            </span>{' '}
-                                        </FormLabel>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <FormControl>
-                                                    <Button
-                                                        variant={'outline'}
-                                                        className={`w-1/6  text-left font-normal ${
-                                                            !field.value &&
-                                                            'text-muted-foreground'
-                                                        }`}
-                                                    >
-                                                        {dateValue
-                                                            ? format(
-                                                                  dateValue,
-                                                                  'EEEE, MMMM d, yyyy'
-                                                              )
-                                                            : 'Pick a date'}
-                                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                    </Button>
-                                                </FormControl>
-                                            </PopoverTrigger>
-                                            <PopoverContent
-                                                className="w-auto p-0"
-                                                align="start"
-                                            >
-                                                <Calendar
-                                                    mode="single"
-                                                    selected={field.value}
-                                                    onSelect={field.onChange}
-                                                    disabled={(date: any) =>
-                                                        date <=
-                                                        addDays(new Date(), -1)
-                                                    } // Disable past dates
-                                                    initialFocus
-                                                />
-                                            </PopoverContent>
-                                        </Popover>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}}
+                                        <FormItem className="flex flex-col justify-start gap-x-2 gap-y-4 text-left">
+                                            <FormLabel className="m-0">
+                                                <span className="text-xl">
+                                                    Choose Deadline Date
+                                                </span>
+                                                <span className="text-red-500">
+                                                    *
+                                                </span>{' '}
+                                            </FormLabel>
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <FormControl>
+                                                        <Button
+                                                            variant={'outline'}
+                                                            className={`w-1/6  text-left font-normal ${
+                                                                !field.value &&
+                                                                'text-muted-foreground'
+                                                            }`}
+                                                        >
+                                                            {dateValue
+                                                                ? format(
+                                                                      dateValue,
+                                                                      'EEEE, MMMM d, yyyy'
+                                                                  )
+                                                                : 'Pick a date'}
+                                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                        </Button>
+                                                    </FormControl>
+                                                </PopoverTrigger>
+                                                <PopoverContent
+                                                    className="w-auto p-0"
+                                                    align="start"
+                                                >
+                                                    <Calendar
+                                                        mode="single"
+                                                        selected={field.value}
+                                                        onSelect={
+                                                            field.onChange
+                                                        }
+                                                        disabled={(date: any) =>
+                                                            date <=
+                                                            addDays(
+                                                                new Date(),
+                                                                -1
+                                                            )
+                                                        } // Disable past dates
+                                                        initialFocus
+                                                    />
+                                                </PopoverContent>
+                                            </Popover>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )
+                                }}
                             />
                         </form>
                     </Form>

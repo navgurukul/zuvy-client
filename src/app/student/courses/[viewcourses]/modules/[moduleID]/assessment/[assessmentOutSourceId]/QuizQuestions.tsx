@@ -168,11 +168,11 @@ const QuizQuestions = ({
         <div className="space-y-6">
             {
                 <AlertDialog open={isAlertModal}>
-                    <AlertDialogTrigger asChild>
+                    {/* <AlertDialogTrigger asChild>
                         <Button variant="ghost" size="icon">
                             <ChevronLeft fontSize={24} />
                         </Button>
-                    </AlertDialogTrigger>
+                    </AlertDialogTrigger> */}
                     <AlertDialogContent>
                         <AlertDialogHeader>
                             <AlertDialogTitle>
