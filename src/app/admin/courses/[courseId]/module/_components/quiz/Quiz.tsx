@@ -119,13 +119,22 @@ function Quiz(props: any) {
     }, [getAllSavedQuizQuestion])
 
     function previewQuiz() {
-        if (props.content) {
+        if (props.content.quizQuestionDetails.length > 0) {
             setQuizPreviewContent(props.content)
             router.push(
                 `/admin/courses/${props.courseId}/module/${props.moduleId}/chapter/${props.chapterId}/quiz/${props.content.topicId}/preview`
             )
+        } else {
+            return toast({
+                title: 'No Question saved yet',
+                description: 'Please Save the chapter to preview.',
+                className:
+                    'border border-red-500 text-red-500 text-left w-[90%] capitalize',
+            })
         }
     }
+
+    console.log(props.content)
 
     return (
         <div>

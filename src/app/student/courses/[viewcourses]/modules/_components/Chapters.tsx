@@ -169,6 +169,11 @@ function Chapters({ params }: any) {
 
     return (
         <>
+            <div className="block lg:hidden mt-20 pb-2">
+                <BreadcrumbComponent
+                    crumbs={isInstructor ? InstructorCrumbs : studentCrumbs}
+                />
+            </div>
             {!isMobile && (
                 <div className="flex flex-col h-full">
                     <div className="flex flex-col h-screen">

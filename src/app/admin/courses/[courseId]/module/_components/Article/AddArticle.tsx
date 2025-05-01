@@ -129,11 +129,18 @@ const AddArticle = ({
     }, [content, editor])
 
     function previewArticle() {
-        if (content) {
+        if (content?.contentDetails[0]?.content?.length > 0) {
             setArticlePreviewContent(content)
             router.push(
                 `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/article/${content.topicId}/preview`
             )
+        } else {
+            return toast({
+                title: 'Cannot Preview',
+                description: 'Nothing to Preview please save some content',
+                className:
+                    'border border-red-500 text-red-500 text-left w-[90%] capitalize',
+            })
         }
     }
 
