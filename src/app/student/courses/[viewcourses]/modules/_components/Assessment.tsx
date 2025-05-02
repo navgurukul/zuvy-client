@@ -135,7 +135,7 @@ const Assessment = ({
 
     async function requestReattempt() {
         try {
-            const response = api.post(
+            const response = await api.post(
                 `/student/assessment/request-reattempt?assessmentSubmissionId=${submissionId}&userId=${assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.userId}`
             )
             setReattemptRequested(true)
@@ -223,7 +223,16 @@ const Assessment = ({
             }
 
             if (event.data === 'assessment_tab_closed') {
-                console.warn('Assessment tab was closed before submission')
+                console.warn('Assessment tab was closed before submission');
+                getAssessmentShortInfo(
+                    chapterContent?.assessmentId,
+                    moduleID,
+                    viewcourses,
+                    chapterContent.id,
+                    setAssessmentShortInfo,
+                    setAssessmentOutSourceId,
+                    setSubmissionId
+                )
                 toast({
                     title: 'Assessment Tab Closed',
                     description: 'You closed the assessment before submitting.',
@@ -399,9 +408,7 @@ const Assessment = ({
                         </>
                     )}
 
-                    {!reattemptRequested &&
-                        !reattemptApproved &&
-                        isAssessmentStarted &&
+                    {/* {!reattemptRequested && !reattemptApproved && isAssessmentStarted &&
                         chapterContent.status === 'Pending' &&
                         !isSubmitedAt &&
                         !isTimeOver && (
@@ -410,7 +417,8 @@ const Assessment = ({
                                 You will get the option to apply for Re-Attempt
                                 once the deadline is crossed.
                             </p>
-                        )}
+                        )
+                    } */}
 
                     {reattemptRequested && !reattemptApproved && (
                         <div className="flex flex-col items-center justify-center w-full p-5 mb-5 bg-white border rounded-lg shadow-sm">

@@ -94,7 +94,7 @@ export const columns: ColumnDef<Task>[] = [
             let timeTaken;
 
             if(!submitedAt){
-                timeTaken = 'NA'
+                timeTaken = 'N/A'
             }else{
                 timeTaken = calculateTimeTaken(startedAt, submitedAt);
             }
@@ -115,7 +115,13 @@ export const columns: ColumnDef<Task>[] = [
         ),
         cell: ({ row }) => {
             const submitedAt = row.original.submitedAt
-            const submissionDate = getSubmissionDate(submitedAt);
+            let submissionDate;
+
+            if(!submitedAt){
+                 submissionDate = 'N/A';
+            }else{
+                 submissionDate = getSubmissionDate(submitedAt);
+            }
 
             return (
                 <div className="flex space-x-2">

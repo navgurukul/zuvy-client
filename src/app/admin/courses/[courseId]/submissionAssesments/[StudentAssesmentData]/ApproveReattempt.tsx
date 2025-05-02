@@ -1,7 +1,6 @@
 'use client'
 
 import { api } from "@/utils/axios.config"
-
 import {
     Dialog,
     DialogOverlay,
@@ -9,76 +8,85 @@ import {
     DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
-    DialogFooter,
-    DialogClose,
 } from '@/components/ui/dialog'
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Check } from 'lucide-react';
+import { Check } from 'lucide-react'
 import { getIsReattemptApproved } from "@/store/store"
 
-
 const ApproveReattempt = ({ data }: { data: any }) => {
-
     const [reattemptRequested, setReattemptRequested] = useState(data?.reattemptRequested)
     const [reattemptApproved, setReattemptApproved] = useState(data?.reattemptApproved)
-    const {setIsReattemptApproved} = getIsReattemptApproved()
+    const { setIsReattemptApproved } = getIsReattemptApproved()
 
     const [confirmationOpen, setConfirmationOpen] = useState(false)
+    const [apiSuccess, setApiSuccess] = useState<boolean | null>(null)
+    const [buttonDisabled, setButtonDisabled] = useState(false)
 
     async function handleApproveReattempt() {
         try {
-           if(reattemptRequested && !reattemptApproved) {
-            const res = await api.post(`admin/assessment/approve-reattempt?assessmentSubmissionId=${data?.id}`)
-            .then(() => setTimeout(() => {
-                setConfirmationOpen(false)
+            if (reattemptRequested && !reattemptApproved) {
+                setButtonDisabled(true) // disable the button
+                const res = await api.post(`admin/assessment/approve-reattempt?assessmentSubmissionId=${data?.id}`)
+
+                // Only if API succeeds:
                 setReattemptApproved(true)
                 setIsReattemptApproved(true)
+                setApiSuccess(true)
             }
-                , 2000))
-            }
-
         } catch (error) {
-            console?.error('Error approving reattempt:', error)
+            console.error("Error approving reattempt:", error)
+            setApiSuccess(false)
+        } finally {
+            setConfirmationOpen(true)
+
+            // Auto-close dialog after 2 seconds
             setTimeout(() => {
                 setConfirmationOpen(false)
-            }
-                , 2000)
+                setButtonDisabled(false) // re-enable the button
+            }, 2000)
         }
     }
 
     return (
         <>
-            <Dialog open={confirmationOpen} onOpenChange={setConfirmationOpen}>
+            <Dialog open={confirmationOpen}>
                 {(!reattemptRequested || reattemptApproved) ? (
-                    <div
-                            className="w-14 text-secondary font-bold opacity-50 cursor-not-allowed"
-                        >
-                            Approve Re-attempt
-                        </div>
-                    ) : (
-                        <DialogTrigger asChild>
-                        <div
-                            className="w-14 text-secondary font-bold cursor-pointer"
-                            onClick={handleApproveReattempt}
-                        >
-                            Approve Re-attempt
-                        </div>
-                </DialogTrigger>
-                    )}
-                <DialogOverlay />
-                <DialogContent className="w-[30rem] h-[13rem] [&>button]:hidden" onPointerDownOutside={(e) => setConfirmationOpen(false)}>
-
-                    <DialogHeader>
-                        <DialogTitle className="text-lg font-bold text-gray-800 w-full flex items-center justify-center flex-col gap-y-5">
-                            <Check size={30} className="bg-[#7CB342] text-white mr-2 " />
-                            <p className="mb-5">Re-attempt Request Approved </p>                                               </DialogTitle>
-                        <DialogDescription className="text-md text-gray-600 w-full text-center">
-                            The assessment has been reset. A confirmation has been sent to the student’s registered email id                                                </DialogDescription>
-                    </DialogHeader>
-                    <div className="flex justify-end mt-4">
+                    <div className="w-14 text-secondary font-bold opacity-50 cursor-not-allowed">
+                        Approve Re-attempt
                     </div>
+                ) : (
+                    <div
+                        className={`w-14 text-secondary font-bold ${buttonDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                        onClick={!buttonDisabled ? handleApproveReattempt : undefined}
+                    >
+                        Approve Re-attempt
+                    </div>
+                )}
+
+                <DialogOverlay />
+
+                <DialogContent
+                    className="w-[26rem] p-6 rounded-2xl shadow-xl"
+                    // onPointerDownOutside={() => setConfirmationOpen(false)}
+                >
+                    <DialogHeader className="space-y-4">
+                        <DialogTitle className="text-lg font-bold text-gray-800 flex flex-col items-center text-center">
+                            {apiSuccess === true ? (
+                                <>
+                                    <Check size={30} className="bg-[#7CB342] text-white rounded-full p-1" />
+                                    <p className="mt-4">Re-attempt Request Approved</p>
+                                </>
+                            ) : (
+                                <p className="text-red-500">Failed to Approve Re-attempt</p>
+                            )}
+                        </DialogTitle>
+
+                        <DialogDescription className="text-sm text-gray-600 text-center">
+                            {apiSuccess === true
+                                ? "The assessment has been reset. A confirmation has been sent to the student’s registered email ID."
+                                : "Something went wrong while approving the re-attempt. Please try again."}
+                        </DialogDescription>
+                    </DialogHeader>
                 </DialogContent>
             </Dialog>
         </>
