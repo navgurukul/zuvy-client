@@ -39,12 +39,14 @@ export default function RootLayout({
     children: React.ReactNode
 }) {
     // Get the current path
+    const router = useRouter()
+    const [isCourseEnrolled, setIsCourseEnrolled] = useState(false)
+
     const pathname = usePathname()
     const { width } = useWindowSize()
     const { moduleData } = getModuleDataNew()
     const [open, setOpen] = useState(false)
     const segments = pathname.split('/')
-    const router = useRouter()
 
     let couseId = segments[3]
     let moduleId = segments[5]
