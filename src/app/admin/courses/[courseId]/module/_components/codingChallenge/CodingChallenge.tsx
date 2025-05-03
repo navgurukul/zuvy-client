@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button'
 import { handleSaveChapter } from '@/utils/admin'
 import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { toast } from '@/components/ui/use-toast'
 
 interface Example {
     input: number[]
@@ -209,13 +210,22 @@ function CodingChallenge({
     }, [content])
 
     function previewCodingChallenge() {
-        if (content) {
+        if (content?.codingQuestionDetails.length > 0) {
             setCodingPreviewContent(content)
             router.push(
                 `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/coding/${content.topicId}/preview`
             )
+        } else {
+            return toast({
+                title: 'Cannot Preview',
+                description: 'Nothing to Preview please save coding question',
+                className:
+                    'border border-red-500 text-red-500 text-left w-[90%] capitalize',
+            })
         }
     }
+
+    console.log(content.codingQuestionDetails)
 
     return (
         <>

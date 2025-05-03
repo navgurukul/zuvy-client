@@ -1008,6 +1008,19 @@ export const getIsRowSelected = create<isRowUnSelectedType>((set) => ({
     },
 }))
 
+// ---------------------------------------------
+type isReattemptApprovedType = {
+    isReattemptApproved: boolean
+    setIsReattemptApproved: (newValue: boolean) => void
+}
+
+export const getIsReattemptApproved = create<isReattemptApprovedType>((set) => ({
+    isReattemptApproved: false,
+    setIsReattemptApproved: (newValue: boolean) => {
+        set({ isReattemptApproved: newValue })
+    },
+}))
+
 interface ModuleData {
     moduleName: string[]
 }

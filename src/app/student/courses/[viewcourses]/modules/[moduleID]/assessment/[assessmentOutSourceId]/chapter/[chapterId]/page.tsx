@@ -170,12 +170,12 @@ function Page({
 
             if (
                 res.data.submitedOutsourseAssessments.length > 0 &&
-                res.data.submitedOutsourseAssessments[0].submitedAt
+                res.data.submitedOutsourseAssessments[0].submitedAt && res?.data?.submitedOutsourseAssessments[0].reattemptApproved === false
             ) {
                 router.push(startPageUrl)
             } else if (
                 res.data.submitedOutsourseAssessments.length > 0 &&
-                res.data.submitedOutsourseAssessments[0].startedAt
+                res.data.submitedOutsourseAssessments[0].startedAt && res?.data?.submitedOutsourseAssessments[0].reattemptApproved === false
             ) {
                 getAssessmentData()
             }
@@ -341,10 +341,10 @@ function Page({
         setSelectedQuestionId(null)
     }
 
-    async function getAssessmentData() {
+    async function getAssessmentData(isNewStart: boolean = false) {
         try {
             const res = await api.get(
-                `/Content/startAssessmentForStudent/assessmentOutsourseId=${decodedParams.assessmentOutSourceId}`
+                `/Content/startAssessmentForStudent/assessmentOutsourseId=${decodedParams.assessmentOutSourceId}/newStart=${isNewStart}`
             )
             setIsFullScreen(true)
             setAssessmentData(res?.data?.data)
@@ -401,6 +401,32 @@ function Page({
     useEffect(() => {
         getAssessmentSubmissionsData()
     }, [])
+
+    useEffect(() => {
+
+        const navEntries = performance.getEntriesByType("navigation") as PerformanceNavigationTiming[];
+        const navType = navEntries[0]?.type;
+      
+        if (navType === "reload") {
+          toast({
+            title: "Page Reloaded",
+            description: "The page has been reloaded.",
+            className: "text-left capitalize",
+          })
+        }
+
+        const handleTabClose = () => {
+          const channel = new BroadcastChannel('assessment_channel');
+          channel.postMessage('assessment_tab_closed');
+          channel.close();
+        };
+    
+        window.addEventListener('beforeunload', handleTabClose);
+    
+        return () => {
+          window.removeEventListener('beforeunload', handleTabClose);
+        };
+      }, []);
 
     if (isSolving && isFullScreen) {
         if (
@@ -550,6 +576,9 @@ function Page({
         setIsFullScreen(true)
     }
 
+
+    
+
     return (
         <div
             onPaste={(e) => handleCopyPasteAttempt(e)}
@@ -611,7 +640,8 @@ function Page({
                                                 <AlertDialogAction
                                                     className="bg-red-500"
                                                     onClick={
-                                                        handleFullScreenRequest
+                                                        ()=>{handleFullScreenRequest;
+                                                            getAssessmentData(true)}
                                                     }
                                                 >
                                                     Proceed
@@ -823,7 +853,7 @@ function Page({
 
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                    <Button disabled={disableSubmit}>
+                                    <Button disabled={disableSubmit || assessmentData?.totalMcqQuestions > 0 && assessmentData?.IsQuizzSubmission === false}>
                                         Submit Assessment
                                     </Button>
                                 </AlertDialogTrigger>
