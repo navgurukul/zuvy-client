@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from "react"
 import { api } from "@/utils/axios.config"
 import {
     Dialog,
@@ -9,7 +10,6 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog'
-import { useState } from "react"
 import { Check } from 'lucide-react'
 import { getIsReattemptApproved } from "@/store/store"
 
@@ -25,7 +25,7 @@ const ApproveReattempt = ({ data }: { data: any }) => {
     async function handleApproveReattempt() {
         try {
             if (reattemptRequested && !reattemptApproved) {
-                setButtonDisabled(true) // disable the button
+                setButtonDisabled(true)
                 const res = await api.post(`admin/assessment/approve-reattempt?assessmentSubmissionId=${data?.id}`)
 
                 // Only if API succeeds:
@@ -38,36 +38,36 @@ const ApproveReattempt = ({ data }: { data: any }) => {
             setApiSuccess(false)
         } finally {
             setConfirmationOpen(true)
-
-            // Auto-close dialog after 2 seconds
             setTimeout(() => {
                 setConfirmationOpen(false)
-                setButtonDisabled(false) // re-enable the button
+                setButtonDisabled(false)
             }, 2000)
         }
     }
 
     return (
         <>
-            <Dialog open={confirmationOpen}>
-                {(!reattemptRequested || reattemptApproved) ? (
-                    <div className="w-14 text-secondary font-bold opacity-50 cursor-not-allowed">
-                        Approve Re-attempt
-                    </div>
-                ) : (
-                    <div
-                        className={`w-14 text-secondary font-bold ${buttonDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                        onClick={!buttonDisabled ? handleApproveReattempt : undefined}
-                    >
-                        Approve Re-attempt
-                    </div>
-                )}
+            {/* Approve Re-attempt Button (outside Dialog) */}
+            {(!reattemptRequested || reattemptApproved) ? (
+                <div className="w-14 text-secondary font-bold opacity-50 cursor-not-allowed">
+                    Approve Re-attempt
+                </div>
+            ) : (
+                <div
+                    className={`w-14 text-secondary font-bold ${buttonDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                    onClick={!buttonDisabled ? handleApproveReattempt : undefined}
+                >
+                    Approve Re-attempt
+                </div>
+            )}
 
+            {/* Dialog for confirmation feedback */}
+            <Dialog open={confirmationOpen}>
                 <DialogOverlay />
 
                 <DialogContent
                     className="w-[26rem] p-6 rounded-2xl shadow-xl"
-                    // onPointerDownOutside={() => setConfirmationOpen(false)}
+                    onPointerDownOutside={() => setConfirmationOpen(false)}
                 >
                     <DialogHeader className="space-y-4">
                         <DialogTitle className="text-lg font-bold text-gray-800 flex flex-col items-center text-center">
