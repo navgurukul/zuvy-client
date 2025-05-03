@@ -63,7 +63,6 @@ const Page = ({ params }: { params: any }) => {
             label: data.name,
         }
     })
-
     const fetchStudentData = useCallback(async () => {
         try {
             await api
@@ -93,6 +92,7 @@ const Page = ({ params }: { params: any }) => {
                         {selectedRows.length > 0 && (
                             <>
                                 <AlertDialogDemo
+                                    setSelectedRows={setSelectedRows}
                                     userId={userIds}
                                     bootcampId={batchData && params.courseId}
                                     title="Are you absolutely sure?"

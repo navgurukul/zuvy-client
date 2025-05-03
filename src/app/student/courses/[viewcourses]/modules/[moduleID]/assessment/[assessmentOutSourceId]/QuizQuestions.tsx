@@ -30,6 +30,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
+import { cn, difficultyColor } from '@/lib/utils'
 
 const QuizQuestions = ({
     onBack,
@@ -55,6 +56,7 @@ const QuizQuestions = ({
     )
     const [isDisabled, setIsDisabled] = useState(false)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const [isAlertModal, setIsAlertModal] = useState(false)
 
     const codeBlockClass =
         'text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full'
@@ -68,9 +70,7 @@ const QuizQuestions = ({
     }, [])
 
     const formSchema = z.object({
-        answers: z.array(
-            z.string().nonempty({ message: 'This question is required.' })
-        ),
+        answers: z.array(z.string().optional()),
     })
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -90,9 +90,9 @@ const QuizQuestions = ({
 
     const handleSubmitClick = async () => {
         // Validate the form before opening the dialog
-        const isValid = await form.trigger();
+        const isValid = await form.trigger()
         if (isValid) {
-            setIsDialogOpen(true);
+            setIsDialogOpen(true)
         } else {
             // Show toast notification for missing answers
             toast({
@@ -111,8 +111,8 @@ const QuizQuestions = ({
 
         try {
             // Create submission data array with all answers
-            const quizSubmissionDto = data.answers.map(
-                (chosenOption, index) => {
+            const quizSubmissionData = data.answers.map(
+                (chosenOption: any, index) => {
                     const question = questions.data.mcqs[index]
                     return {
                         questionId: Number(question?.outsourseQuizzesId),
@@ -122,27 +122,35 @@ const QuizQuestions = ({
                     }
                 }
             )
+            const quizSubmissionDto = quizSubmissionData.filter(
+                (quizData) => quizData.chosenOption == quizData.chosenOption
+            )
+            if (quizSubmissionDto.length === 0) {
+                setIsAlertModal(true)
+                return
+            } else {
+                const response = await api.patch(
+                    `/submission/quiz/assessmentSubmissionId=${assessmentSubmitId}?assessmentOutsourseId=${params.assessmentOutSourceId}`,
+                    { quizSubmissionDto }
+                )
+
+                getAssessmentData()
+
+                toast({
+                    title: 'Success',
+                    description: 'Quiz Submitted Successfully',
+                    className:
+                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+                })
+
+                getSeperateQuizQuestions()
+
+                timeoutRef.current = setTimeout(() => {
+                    onBack()
+                }, 3000)
+            }
 
             // Make the API call with the properly structured data
-            const response = await api.patch(
-                `/submission/quiz/assessmentSubmissionId=${assessmentSubmitId}?assessmentOutsourseId=${params.assessmentOutSourceId}`,
-                { quizSubmissionDto }
-            )
-
-            getAssessmentData()
-
-            toast({
-                title: 'Success',
-                description: 'Quiz Submitted Successfully',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
-            })
-
-            getSeperateQuizQuestions()
-
-            timeoutRef.current = setTimeout(() => {
-                onBack()
-            }, 3000)
         } catch (error: any) {
             setIsDisabled(false)
             toast({
@@ -158,6 +166,29 @@ const QuizQuestions = ({
 
     return (
         <div className="space-y-6">
+            {
+                <AlertDialog open={isAlertModal}>
+                    {/* <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                            <ChevronLeft fontSize={24} />
+                        </Button>
+                    </AlertDialogTrigger> */}
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>
+                                Cannot Submit Select atleast one question
+                            </AlertDialogTitle>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel
+                                onClick={() => setIsAlertModal(false)}
+                            >
+                                Cancel
+                            </AlertDialogCancel>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            }
             <div className="flex items-center justify-between gap-2">
                 <AlertDialog>
                     <AlertDialogTrigger asChild>
@@ -204,22 +235,46 @@ const QuizQuestions = ({
                                 key={question.id}
                                 className="w-full max-w-2xl border text-left border-gray-200 rounded-lg p-4 shadow-sm"
                             >
+                                <div className="flex justify-between">
+                                    <p className="font-semibold">
+                                        Question {index + 1}.
+                                    </p>
+                                    <div className="flex items-center justify-between gap-2">
+                                        <div
+                                            className={cn(
+                                                'font-semibold text-secondary my-2',
+                                                difficultyColor(
+                                                    question.difficulty
+                                                )
+                                            )}
+                                        >
+                                            {question.difficulty}
+                                        </div>
+                                        <h2 className="bg-[#DEDEDE] px-2 py-1 text-sm rounded-2xl font-semibold">
+                                            {` ${Math.trunc(
+                                                Number(question.mark)
+                                            )} Marks`}
+                                        </h2>
+                                    </div>
+                                </div>
                                 <FormField
                                     control={form.control}
                                     name={`answers.${index}`}
                                     render={({ field }) => (
                                         <FormItem className="flex flex-col items-start mb-10 w-full max-w-2xl">
-                                            <FormLabel className=" flex space-x-2 text-lg font-semibold text-left">
-                                                <span>{index + 1}. </span>
-                                                <span
-                                                    className="text-gray-800"
-                                                    dangerouslySetInnerHTML={{
-                                                        __html: addClassToCodeTags(
-                                                            question.question,
-                                                            codeBlockClass
-                                                        ),
-                                                    }}
-                                                />
+                                            <FormLabel>
+                                                <div className=" flex space-x-2 text-lg font-semibold text-left">
+                                                    {/* <span>{index + 1}. </span> */}
+                                                    <span
+                                                        className="text-gray-800"
+                                                        dangerouslySetInnerHTML={{
+                                                            __html: addClassToCodeTags(
+                                                                question.question,
+                                                                codeBlockClass
+                                                            ),
+                                                        }}
+                                                    />
+                                                </div>
                                             </FormLabel>
 
                                             <FormControl>
@@ -263,13 +318,15 @@ const QuizQuestions = ({
                     <Button
                         type="button"
                         className="mt-4"
-                        disabled={isDisabled}
                         onClick={handleSubmitClick}
                     >
                         Submit Quiz
                     </Button>
 
-                    <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <AlertDialog
+                        open={isDialogOpen}
+                        onOpenChange={setIsDialogOpen}
+                    >
                         <AlertDialogContent>
                             <AlertDialogHeader>
                                 <AlertDialogTitle>
@@ -281,13 +338,14 @@ const QuizQuestions = ({
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                                <AlertDialogCancel onClick={() => setIsDialogOpen(false)}>
+                                <AlertDialogCancel
+                                    onClick={() => setIsDialogOpen(false)}
+                                >
                                     Cancel
                                 </AlertDialogCancel>
                                 <AlertDialogAction
                                     className="bg-red-500"
                                     onClick={form.handleSubmit(onSubmit)}
-                                    disabled={isDisabled}
                                 >
                                     Submit
                                 </AlertDialogAction>

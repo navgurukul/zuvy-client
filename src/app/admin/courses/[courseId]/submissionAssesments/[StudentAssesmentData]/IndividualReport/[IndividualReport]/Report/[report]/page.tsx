@@ -80,10 +80,10 @@ type StudentAssessment = {
 }
 type newDataType =
     | {
-          openEndedSubmission: OpenEndedSubmission[]
-          quizSubmission: QuizSubmission[]
-          codingSubmission: CodingSubmission[]
-      }
+        openEndedSubmission: OpenEndedSubmission[]
+        quizSubmission: QuizSubmission[]
+        codingSubmission: CodingSubmission[]
+    }
     | any
 
 interface Example {
@@ -158,7 +158,7 @@ const Page = ({ params }: { params: any }) => {
             isLast: false,
         },
         {
-            crumb: `Assesment for Module ${moduleId}`,
+            crumb: assesmentData?.submitedOutsourseAssessment?.chapterName,
             href: `/admin/courses/${params.courseId}/submissionAssesments/${params.StudentAssesmentData}`,
             isLast: false,
         },
@@ -299,12 +299,12 @@ const Page = ({ params }: { params: any }) => {
                 {codingdata ? (
                     <OverviewComponent
                         totalCodingChallenges={
-                            assesmentData?.attemptedCodingQuestions
+                            assesmentData?.submitedOutsourseAssessment?.totalCodingQuestions
                         }
                         correctedCodingChallenges={9}
                         correctedMcqs={9}
                         totalCorrectedMcqs={
-                            assesmentData?.attemptedMCQQuestions
+                            assesmentData?.submitedOutsourseAssessment?.totalMcqQuestions
                         }
                         openEndedCorrect={1}
                         totalOpenEnded={
@@ -319,14 +319,12 @@ const Page = ({ params }: { params: any }) => {
                         embeddedSearch={assesmentData?.embeddedGoogleSearch}
                         submissionType={assesmentData?.typeOfsubmission}
                         totalCodingScore={
-                            assesmentData?.submitedOutsourseAssessment
-                                .weightageCodingQuestions
+                            assesmentData?.submitedOutsourseAssessment?.weightageCodingQuestions
                         }
                         codingScore={assesmentData?.codingScore}
                         mcqScore={assesmentData?.mcqScore}
                         totalMcqScore={
-                            assesmentData?.submitedOutsourseAssessment
-                                .weightageMcqQuestions
+                            assesmentData?.submitedOutsourseAssessment?.weightageMcqQuestions
                         }
                         openEndedScore={assesmentData?.openEndedScore}
                         totalOpenEndedScore={
@@ -347,48 +345,43 @@ const Page = ({ params }: { params: any }) => {
                     </div>
                 )}
 
-                <div className="grid grid-cols-1 gap-20 mt-4 md:mt-8 md:grid-cols-2">
+                <div className="grid grid-cols-2 gap-20 mt-4 ">
                     {codingdata ? (
                         <>
+
                             {/* Coding Submission */}
-                            {codingdata.length > 0 && (
-                                <div className="w-full">
+                            {codingdata && codingdata.length === 0 ? (
+                                <div className='w-full'>
                                     <h1 className="text-left font-semibold">
-                                        Coding Challenges
+                                        Coding Questions
                                     </h1>
-                                    {codingdata.length > 0 ? (
-                                        codingdata.map((data) => (
-                                            <IndividualStudentAssesment
-                                                key={data.id}
-                                                data={data}
-                                                params={params}
-                                                type="codingSubmission"
-                                                codingOutsourseId={
-                                                    data.codingOutsourseId
-                                                }
-                                                copyPaste={
-                                                    assesmentData?.copyPaste
-                                                }
-                                                tabchanges={
-                                                    assesmentData?.tabChange
-                                                }
-                                                totalCodingScore={
-                                                    assesmentData
-                                                        ?.submitedOutsourseAssessment
-                                                        .weightageCodingQuestions
-                                                }
-                                                codingScore={
-                                                    assesmentData?.codingScore
-                                                }
-                                            />
-                                        ))
-                                    ) : (
-                                        <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg  transition-transform transform hover:shadow-xl">
-                                            This student has not submitted any
-                                            coding question.
-                                        </p>
-                                    )}
+                                    <p className="text-center py-20 font-semibold w-5/6 h-1/2 shadow-lg transition-transform transform hover:shadow-xl">
+                                        This student has not submitted any coding question.
+                                    </p>
                                 </div>
+                            ) : (
+                                codingdata.map((data) => (
+                                    <>
+                                  <div>
+                                  <h1 className="text-left font-semibold">
+                                            Coding Question
+                                        </h1>
+                                        <IndividualStudentAssesment
+                                            key={data.id}
+                                            data={data}
+                                            params={params}
+                                            type="codingSubmission"
+                                            codingOutsourseId={data.codingOutsourseId}
+                                            copyPaste={assesmentData?.copyPaste}
+                                            tabchanges={assesmentData?.tabChange}
+                                            totalCodingScore={
+                                                assesmentData?.submitedOutsourseAssessment?.weightageCodingQuestions
+                                            }
+                                            codingScore={assesmentData?.codingScore}
+                                        />
+                                  </div>
+                                    </>
+                                ))
                             )}
 
                             {/* Quiz Submission */}
@@ -398,42 +391,43 @@ const Page = ({ params }: { params: any }) => {
                                     ?.mediumMcqQuestions ||
                                 assesmentData?.submitedOutsourseAssessment
                                     ?.hardMcqQuestions > 0) && (
-                                <div className="w-full">
-                                    <h1 className="text-left font-semibold">
-                                        MCQs
-                                    </h1>
-                                    {assesmentData?.mcqQuestionCount === 0 &&
-                                    assesmentData?.attemptedMCQQuestions ===
-                                        0 ? (
-                                        <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg  transition-transform transform hover:shadow-xl">
-                                            There are no quiz questions in this
-                                            assessment.
-                                        </p>
-                                    ) : assesmentData?.attemptedMCQQuestions >=
-                                      1 ? (
-                                        <IndividualStudentAssesment
-                                            data={[]}
-                                            params={params}
-                                            type="quizSubmission"
-                                            copyPaste={assesmentData?.copyPaste}
-                                            tabchanges={
-                                                assesmentData?.tabChange
-                                            }
-                                            mcqScore={assesmentData?.mcqScore}
-                                            totalMcqScore={
-                                                assesmentData
-                                                    ?.submitedOutsourseAssessment
-                                                    .weightageMcqQuestions
-                                            }
-                                        />
-                                    ) : (
-                                        <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg  transition-transform transform hover:shadow-xl">
-                                            This student has not submitted any
-                                            quiz question.
-                                        </p>
-                                    )}
-                                </div>
-                            )}
+                                    <div className="w-full pl-5">
+                                        <h1 className="text-left font-semibold">
+                                            MCQs
+                                        </h1>
+                                        {assesmentData?.mcqQuestionCount === 0 &&
+                                            assesmentData?.attemptedMCQQuestions ===
+                                            0 ? (
+                                            <>
+                                                <p className="text-center py-20 font-semibold w-full h-1/2 shadow-lg transition-transform transform hover:shadow-xl">
+                                                    This student has not submitted any quiz question.
+                                                </p>
+                                            </>
+                                        ) : assesmentData?.attemptedMCQQuestions >=
+                                            1 ? (
+                                            <IndividualStudentAssesment
+                                                data={[]}
+                                                params={params}
+                                                type="quizSubmission"
+                                                copyPaste={assesmentData?.copyPaste}
+                                                tabchanges={
+                                                    assesmentData?.tabChange
+                                                }
+                                                mcqScore={assesmentData?.mcqScore}
+                                                totalMcqScore={
+                                                    assesmentData
+                                                        ?.submitedOutsourseAssessment
+                                                        .weightageMcqQuestions
+                                                }
+                                            />
+                                        ) : (
+                                            <p className="text-center py-20 font-semibold h-1/2 w-4/5 shadow-lg  transition-transform transform hover:shadow-xl">
+                                                This student has not submitted any
+                                                quiz question.
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
 
                             {/* Open Ended Submission */}
                             {assesmentData?.openEndedQuestionCount > 0 && (
@@ -443,14 +437,14 @@ const Page = ({ params }: { params: any }) => {
                                     </h1>
                                     {assesmentData?.openEndedQuestionCount ===
                                         0 &&
-                                    assesmentData?.attemptedOpenEndedQuestions ===
+                                        assesmentData?.attemptedOpenEndedQuestions ===
                                         0 ? (
                                         <p className="text-center py-20 font-semibold h-[100px] w-4/5 shadow-lg  transition-transform transform hover:shadow-xl">
                                             There are no open-ended questions in
                                             this assessment.
                                         </p>
                                     ) : assesmentData?.attemptedOpenEndedQuestions >=
-                                      1 ? (
+                                        1 ? (
                                         <IndividualStudentAssesment
                                             data={[]}
                                             params={params}

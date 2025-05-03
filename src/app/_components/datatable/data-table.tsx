@@ -26,7 +26,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
-import { getBatchData } from '@/store/store'
+import { getBatchData, getIsRowSelected } from '@/store/store'
 import McqDeleteVaiarntComp from '@/app/admin/resource/_components/McqDeleteComponent'
 
 interface DataTableProps<TData, TValue> {
@@ -56,6 +56,7 @@ export function DataTable<TData, TValue>({
     assignStudents,
 }: DataTableProps<TData, TValue>) {
     const [rowSelection, setRowSelection] = React.useState({})
+    const { isRowUnSelected, setIsRowUnSelected } = getIsRowSelected()
 
     const [columnVisibility, setColumnVisibility] =
         React.useState<VisibilityState>({})
@@ -92,11 +93,15 @@ export function DataTable<TData, TValue>({
             .rows.map((row) => row.original)
         setSelectedRows && setSelectedRows(selectedRows)
     }, [table.getSelectedRowModel().rows])
+    useEffect(() => {
+        table.toggleAllRowsSelected(false)
+        setIsRowUnSelected(false) // Reset the state after unselecting
+    }, [isRowUnSelected])
 
     return (
         <div className="space-y-4 relative">
             {!assignStudents && (
-                <div className="flex flex-col justify-end items-end absolute top-[-111px] right-[130px] ">
+                <div className="flex flex-col justify-end items-end absolute top-[-111px] right-[250px] ">
                     {mcqSide && (
                         <McqDeleteVaiarntComp
                             table={table}

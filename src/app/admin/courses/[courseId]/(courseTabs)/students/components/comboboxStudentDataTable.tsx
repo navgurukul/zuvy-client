@@ -132,7 +132,9 @@ export function ComboboxStudent({
                     aria-expanded={open}
                     className="w-[200px] justify-between"
                 >
-                    {userId ? displaybatchName : 'Select a Batch'}
+                    <span className="truncate max-w-[200px] text-left">
+                        {userId ? displaybatchName : 'Select a Batch'}
+                    </span>
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>

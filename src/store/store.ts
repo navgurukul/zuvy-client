@@ -996,4 +996,47 @@ export const getChapterUpdateStatus = create<updateChapterList>((set) => ({
     },
 }))
 
+type isRowUnSelectedType = {
+    isRowUnSelected: boolean
+    setIsRowUnSelected: (newValue: boolean) => void
+}
+
+export const getIsRowSelected = create<isRowUnSelectedType>((set) => ({
+    isRowUnSelected: false,
+    setIsRowUnSelected: (newValue: boolean) => {
+        set({ isRowUnSelected: newValue })
+    },
+}))
+
+// ---------------------------------------------
+type isReattemptApprovedType = {
+    isReattemptApproved: boolean
+    setIsReattemptApproved: (newValue: boolean) => void
+}
+
+export const getIsReattemptApproved = create<isReattemptApprovedType>((set) => ({
+    isReattemptApproved: false,
+    setIsReattemptApproved: (newValue: boolean) => {
+        set({ isReattemptApproved: newValue })
+    },
+}))
+
+interface ModuleData {
+    moduleName: string[]
+}
+
+interface ModuleStore {
+    moduleData: ModuleData
+    setModuleData: (newValue: ModuleData) => void
+}
+
+export const getModuleDataNew = create<ModuleStore>((set) => ({
+    moduleData: {
+        moduleName: [''],
+    },
+    setModuleData: (newValue: ModuleData) => {
+        set({ moduleData: newValue })
+    },
+}))
+
 // ------------------------- User ------------------------

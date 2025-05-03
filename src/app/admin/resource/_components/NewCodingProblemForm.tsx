@@ -69,7 +69,7 @@ const formSchema = z.object({
             })
         })
     ),
-});
+})
 
 
 export default function NewCodingProblemForm({
@@ -656,7 +656,7 @@ export default function NewCodingProblemForm({
                         control={form.control}
                         name="difficulty"
                         render={({ field }) => (
-                            <FormItem className="space-y-3">
+                            <FormItem className="space-y-3 text-left">
                                 <FormLabel>Difficulty</FormLabel>
                                 <FormControl>
                                     <RadioGroup

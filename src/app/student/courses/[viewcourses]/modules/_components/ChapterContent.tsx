@@ -65,14 +65,14 @@ function ChapterContent() {
                     setLoading(false) // Set loading to false after the delay
                 }, 2000)
             } catch (error) {
-                console.error('Error fetching chapter content:', error)
+                console?.error('Error fetching chapter content:', error)
             }
         },
         [userID]
     )
 
     useEffect(() => {
-        if (chapters.length > 0) {
+        if (chapters?.length > 0) {
             // fetchChapterContent(chapters[0]?.id)
             fetchChapterContent(chapter_id)
         }
@@ -185,6 +185,9 @@ function ChapterContent() {
                             assessmentOutSourceId={assessmentOutSourceId}
                             submissionId={submissionId}
                             chapterContent={chapterContent}
+                            setAssessmentShortInfo={setAssessmentShortInfo}
+                            setAssessmentOutSourceId={setAssessmentOutSourceId}
+                            setSubmissionId={setSubmissionId}
                         />
                     )
                 case 7:

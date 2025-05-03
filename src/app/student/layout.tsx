@@ -2,14 +2,36 @@
 
 import StudentNavbar from '@/app/_components/navbar'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
-import { usePathname, useRouter } from 'next/navigation'
+import { useParams, usePathname, useRouter } from 'next/navigation'
 import UnauthorizedUser from '@/components/UnauthorizedUser'
-import { getUser } from '@/store/store'
+import { getModuleDataNew, getUser } from '@/store/store'
 import { Spinner } from '@/components/ui/spinner'
 import '../globals.css'
-import { useEffect, useState } from 'react'
-import { api } from '@/utils/axios.config'
-import Notenrolled from '@/components/NotEnrolled'
+import useWindowSize from '@/hooks/useHeightWidth'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+    BookOpenText,
+    SquareCode,
+    FileQuestion,
+    PencilLine,
+    StickyNote,
+    Video,
+    BookOpenCheck,
+    CheckCircle,
+    X,
+} from 'lucide-react'
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover'
+import { Check, Menu } from 'lucide-react'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import Link from 'next/link'
+import { useState } from 'react'
+import { ellipsis } from '@/lib/utils'
 
 export default function RootLayout({
     children,
@@ -21,10 +43,26 @@ export default function RootLayout({
     const [isCourseEnrolled, setIsCourseEnrolled] = useState(false)
 
     const pathname = usePathname()
+    const { width } = useWindowSize()
+    const { moduleData } = getModuleDataNew()
+    const [open, setOpen] = useState(false)
+    const segments = pathname.split('/')
+
+    let couseId = segments[3]
+    let moduleId = segments[5]
+    let chapterId = segments[7]
+
+    const isMobile = width < 768
+
     const isAssessmentRoute =
         pathname?.includes('/student/courses') &&
         pathname?.includes('/modules') &&
         pathname?.includes('/assessment')
+
+    const isChapterPage =
+        pathname?.includes('/student/courses') &&
+        pathname?.includes('/modules/') &&
+        pathname?.includes('/chapters/')
     const { user, setUser } = getUser()
     const rolesList =
         user && (user.rolesList.length === 0 ? 'student' : user.rolesList[0])
@@ -33,43 +71,201 @@ export default function RootLayout({
         /\/(chapters|viewresults|quizresults|codingresults|openendedresults|assessment)/.test(
             pathname
         )
-    useEffect(() => {
-        const link = window.location.href
-        const match = link.match(/\/courses\/(\d+)\//)
 
-        if (match) {
-            const courseId = match[1]
-            console.log(courseId) // Output: 508
-            const fetchBootcampById = async () => {
-                await api.get(`/student`).then((res) => {
-                    const matchedData = res.data.some(
-                        (bootcamp: any) => bootcamp.id == courseId
-                    )
-                    if (!matchedData) setIsCourseEnrolled(true)
-                })
-            }
-            fetchBootcampById()
-            // setTimeout(() => {
-            //     window.location.reload()
-            // }, 1000)
+    const setTopicIcon = (topicId: any) => {
+        switch (topicId) {
+            case 1:
+                return <Video className="" />
+            case 2:
+                return <BookOpenText />
+            case 3:
+                return <SquareCode />
+            case 4:
+                return <FileQuestion />
+            case 5:
+                return <PencilLine />
+            case 6:
+                return <BookOpenCheck />
+            default:
+                return <StickyNote />
         }
-    }, [])
+    }
+    const activeChapter: any = moduleData?.moduleName.find(
+        (chapter: any) => chapter?.id == chapterId
+    )
+    const currentIndex = moduleData?.moduleName.findIndex(
+        (chapter: any) => chapter?.id === activeChapter?.id
+    )
 
+    const prevChapter: any =
+        currentIndex > 0 ? moduleData.moduleName[currentIndex - 1] : null
+    const nextChapter: any =
+        currentIndex < moduleData.moduleName.length - 1
+            ? moduleData.moduleName[currentIndex + 1]
+            : null
+
+    const goToChapter = (chapterId: any) => {
+        router.push(
+            `/student/courses/${couseId}/modules/${moduleId}/chapters/${chapterId}`
+        )
+    }
+    const getMarginTop = (width: number) => {
+        if (width <= 390) return 'mt-[29rem]'
+        if (width <= 412) return 'mt-[33rem]'
+        if (width <= 414) return 'mt-[32rem]'
+        if (width <= 430) return 'mt-[34rem]'
+        return 'mt-[24rem]'
+    }
     return (
-        <div className="h-screen">
-            {isCourseEnrolled ? (
-                <Notenrolled />
-            ) : user.email.length == 0 ? (
+        <div className="h-screen ">
+            {user.email.length == 0 ? (
                 <div className="flex items-center justify-center h-[680px]">
                     <Spinner className="text-secondary" />
                 </div>
             ) : user && user.rolesList.length !== 0 ? (
                 <UnauthorizedUser rolesList={rolesList} path={'Student'} />
             ) : (
-                <div className="h-screen">
+                <div className={`h-screen ${isMobile ? '' : ''} `}>
                     <div>{!isAssessmentRoute && <StudentNavbar />}</div>
-                    <div className={`${isChapterRoute ? 'px-2' : 'pt-20'}`}>
-                        {children}
+                    <div className={` ${isChapterRoute ? 'px-2' : 'pt-20'} `}>
+                        <div className="relative">
+                            {children}
+                            <div className="absolute bottom-0 w-full left-0">
+                                {isMobile && isChapterPage && (
+                                    <div className=" ">
+                                        <Popover
+                                            open={open}
+                                            onOpenChange={setOpen}
+                                        >
+                                            {!open && (
+                                                <div
+                                                    className={`flex justify-between p-4 `}
+                                                >
+                                                    <Button
+                                                        onClick={() =>
+                                                            prevChapter &&
+                                                            goToChapter(
+                                                                prevChapter.id
+                                                            )
+                                                        }
+                                                        className="text-secondary"
+                                                        disabled={!prevChapter}
+                                                        variant={'ghost'}
+                                                    >
+                                                        Back
+                                                    </Button>
+                                                    <PopoverTrigger asChild>
+                                                        <div className="flex">
+                                                            <Button
+                                                                variant={
+                                                                    'ghost'
+                                                                }
+                                                                className="bg-[#DCE7E3] "
+                                                            >
+                                                                <div className="text-secondary flex items-center rounded-md gap-2 text-md ">
+                                                                    <Menu />{' '}
+                                                                    Chapter{' '}
+                                                                    <span className="">
+                                                                        {currentIndex +
+                                                                            1}
+                                                                    </span>
+                                                                    of{' '}
+                                                                    {
+                                                                        moduleData
+                                                                            .moduleName
+                                                                            .length
+                                                                    }
+                                                                </div>
+                                                            </Button>
+                                                        </div>
+                                                    </PopoverTrigger>
+                                                    <Button
+                                                        onClick={() =>
+                                                            nextChapter &&
+                                                            goToChapter(
+                                                                nextChapter.id
+                                                            )
+                                                        }
+                                                        className="text-secondary"
+                                                        disabled={!nextChapter}
+                                                        variant={'ghost'}
+                                                    >
+                                                        Next
+                                                    </Button>
+                                                </div>
+                                            )}
+                                            <PopoverContent
+                                                side="top"
+                                                className={`w-screen ${
+                                                    open
+                                                        ? getMarginTop(width)
+                                                        : ''
+                                                }`}
+                                            >
+                                                <Label className="flex justify-between font-bold text-[1rem] px-4 py-2 ">
+                                                    Module Chapters
+                                                    <X
+                                                        onClick={() =>
+                                                            setOpen(false)
+                                                        }
+                                                    />
+                                                </Label>
+                                                <ScrollArea className="h-72 w-full">
+                                                    <div className="w-full">
+                                                        {moduleData.moduleName.map(
+                                                            (
+                                                                chapter: any,
+                                                                index
+                                                            ) => {
+                                                                let status =
+                                                                    chapter.status
+
+                                                                return (
+                                                                    <div
+                                                                        key={
+                                                                            chapter
+                                                                        }
+                                                                        className={`flex h-12 rounded-md w-full py-2 justify-between ${
+                                                                            chapterId ==
+                                                                            chapter.id
+                                                                                ? 'bg-[#DCE7E3]'
+                                                                                : ''
+                                                                        }  `}
+                                                                    >
+                                                                        <div className="flex gap-2 text-[14px] px-4 py-1  ">
+                                                                            {setTopicIcon(
+                                                                                chapter.topicId
+                                                                            )}
+                                                                            <Link
+                                                                                href={`/student/courses/${couseId}/modules/${moduleId}/chapters/${chapter.id}`}
+                                                                            >
+                                                                                {
+                                                                                    chapter.title
+                                                                                }
+                                                                            </Link>
+                                                                        </div>
+                                                                        <span>
+                                                                            {status ===
+                                                                            'Completed' ? (
+                                                                                <div className="px-4 py-1">
+                                                                                    <CheckCircle className="  rounded-full " />
+                                                                                </div>
+                                                                            ) : (
+                                                                                ''
+                                                                            )}
+                                                                        </span>
+                                                                    </div>
+                                                                )
+                                                            }
+                                                        )}
+                                                    </div>
+                                                </ScrollArea>
+                                            </PopoverContent>
+                                        </Popover>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

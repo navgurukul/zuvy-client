@@ -88,6 +88,24 @@ const formSchema = z
         message: 'Start Time cannot be after end Time',
         path: ['endTime'],
     })
+    .refine((data) => {
+        // Check if selected date is today
+        const isToday = new Date(data.startDate).toDateString() === new Date().toDateString();
+        
+        if (isToday) {
+            const now = new Date();
+            const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            
+            // If today, start time should be in the future
+            return data.startTime > currentTime;
+        }
+        
+        // If not today, any time is valid
+        return true;
+    }, {
+        message: 'Start time cannot be in the past',
+        path: ['startTime'],
+    })
     .refine((data) => data.totalClasses >= data.daysOfWeek.length, {
         message:
             'Total Classes must be at least equal to the number of selected days of week.',
@@ -252,6 +270,17 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
         }
     }
 
+    // Add these at the component level (inside the function)
+    const isToday = useMemo(() => {
+        const selectedDate = form.watch('startDate');
+        return selectedDate && selectedDate.toDateString() === new Date().toDateString();
+    }, [form.watch('startDate')]);
+
+    const currentTimeString = useMemo(() => {
+        const now = new Date();
+        return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    }, []);
+
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
@@ -391,7 +420,15 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                             <Input
                                                                 type="time"
                                                                 {...field}
-                                                                className="w-full "
+                                                                className="w-full"
+                                                                min={isToday ? currentTimeString : undefined}
+                                                                onChange={(e) => {
+                                                                    field.onChange(e.target.value);
+                                                                    // When start time changes, validate end time if needed
+                                                                    if (form.getValues('endTime') && e.target.value > form.getValues('endTime')) {
+                                                                        form.setValue('endTime', e.target.value);
+                                                                    }
+                                                                }}
                                                             />
                                                         </FormControl>
                                                         <FormMessage />

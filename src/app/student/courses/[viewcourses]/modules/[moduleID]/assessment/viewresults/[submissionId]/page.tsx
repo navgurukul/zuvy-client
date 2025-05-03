@@ -143,6 +143,21 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
             return (
                 <>
                     <SectionHeading title="Coding Challenges" />
+                    {viewResultsData.PracticeCode.length === 0 && (
+                        <div className="flex flex-col items-center justify-center text-center">
+                            <h1 className="text-lg mb-3">
+                                No Assessment Found
+                            </h1>
+                            <Image
+                                src="/no-data.svg"
+                                // src="/taken_mshk.svg"
+                                alt="No Assessment Found"
+                                width={180}
+                                height={180}
+                                className="mx-auto" // Centers the image horizontally
+                            />
+                        </div>
+                    )}
                     {viewResultsData.PracticeCode.map((codingQuestion: any) => {
                         const weightageCodingQuestions =
                             getCodingQuestionWeightage(
@@ -179,10 +194,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                                         </h2>
                                     </div>
                                 </div>
-                                <div className="text-xl mt-2 text-start">
-                                    Description:{' '}
-                                    {codingQuestion.questionDetail.description}
-                                </div>
+
                                 <div className="text-xl mt-2 text-start">
                                     Status:{' '}
                                     <span
@@ -197,7 +209,15 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                                 </div>
                                 <p className="text-xl mt-2 text-start">
                                     Score:{' '}
-                                    { codingQuestion.status === 'Accepted' ? ` ${Math.trunc(Number(weightageCodingQuestions))} / 100` : '0 / 100'}
+                                    {codingQuestion.status === 'Accepted'
+                                        ? ` ${Math.trunc(
+                                              Number(weightageCodingQuestions)
+                                          )} / ${Math.trunc(
+                                              Number(weightageCodingQuestions)
+                                          )}`
+                                        : `0 / ${Math.trunc(
+                                              Number(weightageCodingQuestions)
+                                          )}`}
                                 </p>
                                 <div
                                     onClick={() =>
@@ -253,10 +273,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                                 </h2>
                             </div>
                         </div>
-                        <p className="text-xl mt-2 text-start">
-                            Attempted {viewResultsData.attemptedMCQQuestions}/
-                            {totalMcqQuestions}
-                        </p>
+
                         <p className="text-xl mt-2 text-start">
                             Score: {Math.trunc(viewResultsData.mcqScore)}/
                             {weightageMcqQuestions}

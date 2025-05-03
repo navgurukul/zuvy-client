@@ -223,6 +223,7 @@ const Page = ({ params }: { params: any }) => {
                         message={true}
                         id={courseData?.id || 0}
                         batch={false}
+                        batchData={batchData ? batchData?.length > 0 : false}
                         batchId={0}
                     />
                 </Dialog>
@@ -276,16 +277,14 @@ const Page = ({ params }: { params: any }) => {
                                                 {selectedRows.length}
                                             </h1>
                                             <div className="flex justify-between w-full pt-2">
-                                                <DialogClose asChild>
-                                                    <Button
-                                                        className="w-3/2 bg-muted text-muted-foreground"
-                                                        // type="submit"
-                                                        // disabled={!form.formState.isValid}
-                                                        onClick={() => setAssignStudents('')}
-                                                    >
-                                                        Back
-                                                    </Button>
-                                                </DialogClose>
+                                                <Button
+                                                    className="w-3/2 bg-muted text-muted-foreground"
+                                                    onClick={() =>
+                                                        setAssignStudents('')
+                                                    }
+                                                >
+                                                    Back
+                                                </Button>
                                                 <DialogClose asChild>
                                                     <Button
                                                         className="w-3/2"
@@ -439,7 +438,6 @@ const Page = ({ params }: { params: any }) => {
                                                                 'manually'
                                                             )
                                                         }
-                                                        // type="submit"
                                                         disabled={
                                                             !form.formState
                                                                 .isValid

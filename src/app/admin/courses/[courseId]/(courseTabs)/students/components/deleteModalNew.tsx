@@ -15,7 +15,11 @@ import { Trash2 } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { fetchStudentsHandler } from '@/utils/admin'
-import { getStoreStudentDataNew, getStoreStudentData } from '@/store/store'
+import {
+    getStoreStudentDataNew,
+    getStoreStudentData,
+    getIsRowSelected,
+} from '@/store/store'
 
 interface AlertDialogProps {
     title: string
@@ -23,6 +27,7 @@ interface AlertDialogProps {
     userId: any
     bootcampId: number
     fetchStudentData?: any
+    setSelectedRows?: any
 }
 
 export const AlertDialogDemo: React.FC<AlertDialogProps> = ({
@@ -31,7 +36,9 @@ export const AlertDialogDemo: React.FC<AlertDialogProps> = ({
     userId,
     bootcampId,
     fetchStudentData,
+    setSelectedRows,
 }) => {
+    const { isRowUnSelected, setIsRowUnSelected } = getIsRowSelected()
     const {
         setStudents,
         setTotalPages,
@@ -66,6 +73,8 @@ export const AlertDialogDemo: React.FC<AlertDialogProps> = ({
                     setTotalStudents,
                     setCurrentPage,
                 })
+                setSelectedRows([])
+                setIsRowUnSelected(!isRowUnSelected)
             })
         } catch (error: any) {
             toast({

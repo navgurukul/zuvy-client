@@ -32,6 +32,7 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import EditOpenEndedQuestionForm from '../_components/EditOpenEndedQuestionForm'
+import PreviewOpenEnded from '../_components/PreviewOpenEnded'
 
 export const columns: ColumnDef<OpenEndedQuestion>[] = [
     {
@@ -90,7 +91,36 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
         enableSorting: false,
         enableHiding: true,
     },
+    {
+        id: 'actions1',
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                className="text-[17px]  flex justify-end ml-4"
+                column={column}
+                title="Preview"
+            />
+        ),
+        cell: ({ row }) => {
+            const question = row.original
 
+            console.log('question', question)
+
+            return (
+                <div className="mr-5 flex justify-end">
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <button>
+                                <Eye className="cursor-pointer" />
+                            </button>
+                        </DialogTrigger>
+                        <DialogContent className="w-full">
+                            <PreviewOpenEnded question={question} />
+                        </DialogContent>
+                    </Dialog>
+                </div>
+            )
+        },
+    },
     {
         id: 'actions',
         header: ({ column }) => (

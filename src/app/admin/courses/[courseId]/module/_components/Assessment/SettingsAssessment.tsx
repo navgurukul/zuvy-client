@@ -493,9 +493,28 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                 Manage Settings
                             </h1>
                             {/* Section 6: Submit button */}
-                            <Button type="submit" className="w-1/5 mr-3">
-                                Save Settings
-                            </Button>
+                            {
+                                codingMax === 0 && mcqMax === 0 ? (
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild> 
+                                            <div className="w-1/5 mr-3">          
+                                                <Button type="submit" className="w-full" disabled={codingMax === 0 && mcqMax === 0}>
+                                                    Save Settings
+                                                </Button>
+                                                </div>
+                                            </TooltipTrigger>
+                                            <TooltipContent className="font-semibold">
+                                                Add questions
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                ):(
+                                    <Button type="submit" className="w-1/5 mr-3">
+                                        Save Settings
+                                    </Button>
+                                )
+                            }
                         </div>
 
                         {/* Section 1: Choose number of questions */}
@@ -718,7 +737,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                     Total from both categories should be 100%
                                 </p>
                                 {[
-                                    {
+                                    { 
                                         title: 'Coding Problems',
                                         field: 'codingProblemsWeightage',
                                         disabled: codingWeightageDisabled,

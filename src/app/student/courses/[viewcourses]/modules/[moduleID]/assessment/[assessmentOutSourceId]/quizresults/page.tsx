@@ -5,6 +5,8 @@ import React, { useEffect, useState } from 'react'
 import { ChevronLeft, Check, X, Circle } from 'lucide-react' // Import Circle icon
 import { useRouter } from 'next/navigation'
 import { addClassToCodeTags } from '@/utils/admin'
+import { cn, difficultyColor } from '@/lib/utils'
+import useWindowSize from '@/hooks/useHeightWidth'
 
 // Define the type for the quiz result
 
@@ -14,6 +16,8 @@ const QuizResults = ({
     params: { assessmentOutSourceId: string }
 }) => {
     const [quizResults, setQuizResults] = useState<any>()
+    const { width } = useWindowSize()
+    const isMobile = width < 768
     const codeBlockClass =
         'text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full'
 
@@ -51,7 +55,7 @@ const QuizResults = ({
 
     return (
         <React.Fragment>
-            <div className="container mx-auto">
+            <div className=" mx-auto">
                 <div className="flex items-center justify-between gap-2 mb-6">
                     <div
                         onClick={() => router.back()}
@@ -66,8 +70,41 @@ const QuizResults = ({
                         key={result.quizId}
                         className=" p-6 bg-white rounded-xl w-full max-w-2xl mx-auto"
                     >
+                        {/* <div className="flex justify-end"> */}
+                        <div className="flex justify-between">
+                            <span className="font-semibold">
+                                Question {index + 1}.
+                            </span>
+                            {/* <p
+                                className="text-gray-800 mb-4 font-bold text-lg"
+                                dangerouslySetInnerHTML={{
+                                    __html: addClassToCodeTags(
+                                        result.question,
+                                        codeBlockClass
+                                    ),
+                                }}
+                            /> */}
+                            <div className="flex items-center justify-between gap-2">
+                                <div
+                                    className={cn(
+                                        'font-semibold text-secondary my-2',
+                                        difficultyColor(result.difficulty)
+                                    )}
+                                >
+                                    {result.difficulty}
+                                </div>
+                                <h2 className="bg-[#DEDEDE] px-2 py-1 text-sm rounded-2xl font-semibold">
+                                    {` ${
+                                        result.submissionsData?.status ===
+                                        'passed'
+                                            ? Number(result.mark)
+                                            : 0
+                                    }/${Math.trunc(Number(result.mark))} Marks`}
+                                </h2>
+                            </div>
+                        </div>
                         <div className="flex items-start gap-1 text-left">
-                            <span className="font-semibold">{index + 1}.</span>
+                            {/* <span className="font-semibold">{index + 1}.</span> */}
                             <p
                                 className="text-gray-800 mb-4 font-bold text-lg"
                                 dangerouslySetInnerHTML={{
@@ -118,7 +155,7 @@ const QuizResults = ({
                                             key={key}
                                             className={`p-2 mx-4 rounded border ${bgColor} ${borderColor} ${textColor} flex items-center justify-between`}
                                         >
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center text-left gap-2">
                                                 {icon}
                                                 <span>{value as any}</span>
                                             </div>
@@ -127,15 +164,18 @@ const QuizResults = ({
                                 }
                             )}
                         </div>
-                        <div className="mt-2 text-sm text-green-600 font-bold">
+                        <div className="mt-2 text-sm text-gray-600 font-semibold text-left ml-4">
                             {/* if chosen incorrect answer show correct */}
-                            {result.correctOption !==
+                            {/* {result.correctOption !==
                                 result?.submissionsData?.chosenOption &&
                                 `Correct Answer: ${
                                     Object.values(result.options)[
                                         result.correctOption - 1
                                     ]
-                                }`}
+                                }`} */}
+                            {!result?.submissionsData && (
+                                <div>Not Answered</div>
+                            )}
                         </div>
                     </div>
                 ))}

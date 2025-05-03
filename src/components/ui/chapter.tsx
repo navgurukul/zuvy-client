@@ -58,6 +58,9 @@ function Chapter() {
         ? Number(chapterID[0])
         : Number(chapterID)
     const moduleID = Array.isArray(moduleId) ? moduleId[0] : moduleId
+    const courseID = Array.isArray(courseId)
+        ? parseInt(courseId[0])
+        : parseInt(courseId)
     const { chapterData, setChapterData } = getChapterDataState()
     const { chapterContent, setChapterContent } = getChapterContentState()
     const [chapterId, setChapterId] = useState<number>(0)
@@ -77,7 +80,7 @@ function Chapter() {
     const isChapterClickedRef = useRef(false)
     const [currentChapter, setCurrentChapter] = useState<any>([])
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
-    const { courseData } = getCourseData()
+    const { courseData, fetchCourseDetails } = getCourseData()
 
     const crumbs = [
         {
@@ -95,6 +98,10 @@ function Chapter() {
             isLast: true,
         },
     ]
+
+    useEffect(() => {
+        if (courseData?.name === "") fetchCourseDetails(courseID)
+    }, [courseData])
 
     const fetchChapters = useCallback(async () => {
         try {
