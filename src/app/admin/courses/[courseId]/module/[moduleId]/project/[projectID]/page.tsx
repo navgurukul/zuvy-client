@@ -41,6 +41,8 @@ import ProjectPreview from '../_components/ProjectPreview'
 import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { getProjectPreviewStore } from '@/store/store'
+import { RichTextEditor } from '@/components/RichTextEditor'
+// import RichTextEditor from '@/components/RichTextEditor'
 
 interface Project {
     id: number
@@ -62,6 +64,7 @@ export default function Project() {
     const { setProjectPreviewContent } = getProjectPreviewStore()
     const [showPreview, setShowPreview] = useState<boolean>(false)
     const { courseId, moduleId, projectID } = useParams()
+    const [initialContent, setInitialContent] = useState()
     const editor = useEditor({
         extensions,
     })
@@ -106,6 +109,10 @@ export default function Project() {
         mode: 'onChange',
     })
 
+    useEffect(() => {
+        console.log('editor', editor)
+    }, [editor])
+
     const fetchProjectDetails = async () => {
         try {
             const response = await api.get(
@@ -116,6 +123,9 @@ export default function Project() {
             const projectDescription =
                 response.data.project[0].instruction.description
             editor?.commands.setContent(projectDescription)
+            const content = response.data.project[0].instruction.description
+            setInitialContent(JSON.parse(content))
+            console.log('response.data', response.data)
         } catch (error) {
             console.error(error)
         }
@@ -145,9 +155,16 @@ export default function Project() {
 
         try {
             const projectContent = [editor?.getJSON()]
+            console.log('projectContent', projectContent)
+            console.log('typeof initialContent', initialContent)
+            const initialContentString = initialContent
+                ? JSON.stringify(initialContent)
+                : ''
+            console.log('initialContentString', initialContentString)
             await api.patch(`/Content/updateProjects/${projectID}`, {
                 title,
-                instruction: { description: projectContent },
+                // instruction: { description: projectContent },
+                instruction: { description: initialContentString },
                 isLock: projectData?.project[0].isLock,
                 deadline: deadlineDate,
             })
@@ -320,6 +337,10 @@ export default function Project() {
                 <div className="text-left">
                     <TiptapToolbar editor={editor} />
                     <TiptapEditor editor={editor} />
+                    <RichTextEditor
+                        initialContent={initialContent}
+                        setInitialContent={setInitialContent}
+                    />
                 </div>
                 <div className="flex justify-end mt-5">
                     <Button type="submit" form="myForm">

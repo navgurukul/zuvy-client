@@ -4,7 +4,7 @@ import { Karla } from 'next/font/google'
 
 import { cn } from '@/lib/utils'
 import { Toaster } from '@/components/ui/toaster'
-
+import '@remirror/styles/all.css';
 import './globals.css'
 
 const karla = Karla({ subsets: ['latin'] })
