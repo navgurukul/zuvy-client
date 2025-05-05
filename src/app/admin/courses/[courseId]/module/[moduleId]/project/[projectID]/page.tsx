@@ -335,8 +335,8 @@ export default function Project() {
                     )}
                 </div>
                 <div className="text-left">
-                    <TiptapToolbar editor={editor} />
-                    <TiptapEditor editor={editor} />
+                    {/* <TiptapToolbar editor={editor} />
+                    <TiptapEditor editor={editor} /> */}
                     <RichTextEditor
                         initialContent={initialContent}
                         setInitialContent={setInitialContent}

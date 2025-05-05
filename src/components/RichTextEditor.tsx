@@ -820,14 +820,6 @@ import React, { useCallback, useState, useRef, useEffect } from 'react'
 import type { RemirrorJSON } from 'remirror'
 import { OnChangeJSON } from '@remirror/react'
 import { WysiwygEditor } from '@remirror/react-editors/wysiwyg'
-// import {
-//   useCommands,
-// //   ComponentItem,
-//   useActive,
-//   useAttrs,
-//   FloatingToolbar,
-//   CommandButton
-// } from '@remirror/react';
 import {
     useCommands,
     // ComponentItem,
@@ -835,8 +827,10 @@ import {
     useAttrs,
     // FloatingToolbar,
 } from '@remirror/react'
-// import { FloatingToolbar } from '@remirror/react-editors/wysiwyg';
+// import { FloatingToolbar } from '@remirror/react-editors/wysiwyg'
 import { Image, Upload, Camera } from 'lucide-react'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
+// import { MenuBar } from '@remirror/react';
 
 const STORAGE_KEY = 'remirror-editor-content'
 
@@ -900,8 +894,34 @@ const TextEditor: React.FC<MyEditorProps> = ({ onChange, initialContent }) => {
     //     }),
     // ]
 
+    const [editorKey, setEditorKey] = useState(0)
+
+    // Force editor to re-render when initialContent changes
+    useEffect(() => {
+        if (initialContent) {
+            setEditorKey((prevKey) => prevKey + 1)
+        }
+    }, [initialContent])
+
     console.log('initialContent in TextEditor', initialContent)
 
+    const customExtensions = [
+        () => ({
+            name: 'custom-toolbar',
+            addToolbarButtons: () => [
+                {
+                    id: 'image-upload',
+                    component: ImageUploadButton,
+                    active: () => false,
+                    enabled: () => true,
+                },
+            ],
+        }),
+    ]
+
+    // useEffect(() => {
+    //     console.log('initialContent in TextEditor in UseEffect', initialContent)
+    // }, [initialContent])
     return (
         // <WysiwygEditor
         //   initialContent={initialContent}
@@ -911,13 +931,27 @@ const TextEditor: React.FC<MyEditorProps> = ({ onChange, initialContent }) => {
         //   className="p-4 border rounded-md min-h-[300px]"
         // />
         <WysiwygEditor
+            key={editorKey}
             placeholder="Start typing..."
             initialContent={initialContent}
+            // extensions={customExtensions}
             // className="p-4 border rounded-md"
         >
             {/* <ImageUploadButton /> */}
-            <div className="sticky top-0 z-10 bg-white pb-2">
+            {/* <div className="sticky top-0 z-10 bg-white pb-2">
                 <ImageUploadButton />
+            </div> */}
+            {/* <div className="bg-gray-50 border-b p-2 flex items-center">
+                <ImageUploadButton />
+            </div> */}
+            {/* <MenuBar>
+                <ImageUploadButton />
+            </MenuBar> */}
+            <div className="bg-gray-50 border-b p-2 flex items-center">
+                <div className="mr-4">
+                    <ImageUploadButton />
+                </div>
+                {/* You can add more toolbar buttons here */}
             </div>
             <OnChangeJSON onChange={onChange} />
 
@@ -958,10 +992,21 @@ export const RichTextEditor = ({
 
     return (
         <div className="w-full">
-            <TextEditor
-                onChange={handleEditorChange}
-                initialContent={initialContent}
-            />
+            <ScrollArea
+                // className={`${heightClass} pr-4`}
+
+                className="h-96 pr-8 "
+                type="hover"
+                style={{
+                    scrollbarWidth: 'none', // Firefox
+                    msOverflowStyle: 'none', // IE and Edge
+                }}
+            >
+                <TextEditor
+                    onChange={handleEditorChange}
+                    initialContent={initialContent}
+                />
+            </ScrollArea>
         </div>
     )
 }

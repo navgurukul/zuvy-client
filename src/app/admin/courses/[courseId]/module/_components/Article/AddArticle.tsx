@@ -26,6 +26,7 @@ import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 import { getChapterUpdateStatus, getArticlePreviewStore } from '@/store/store'
 import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { RichTextEditor } from '@/components/RichTextEditor'
 interface ContentDetail {
     title: string
     description: string | null
@@ -59,6 +60,7 @@ const AddArticle = ({
     const [title, setTitle] = useState('')
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const { setArticlePreviewContent } = getArticlePreviewStore()
+    const [initialContent, setInitialContent] = useState()
 
     // misc
     const formSchema = z.object({
@@ -86,6 +88,8 @@ const AddArticle = ({
             // setArticleUpdateOnPreview(!articleUpdateOnPreview)
             setTitle(response.data.title)
             editor?.commands.setContent(response.data.contentDetails[0].content)
+            const data = response.data.contentDetails[0].content
+            setInitialContent(JSON.parse(data))
         } catch (error) {
             console.error('Error fetching article content:', error)
         }
@@ -94,9 +98,14 @@ const AddArticle = ({
     const editArticleContent = async () => {
         try {
             const articleContent = [editor?.getJSON()]
+            const initialContentString = initialContent
+                ? [JSON.stringify(initialContent)]
+                : ''
+            console.log('initialContentString', initialContentString)
             const data = {
                 title,
-                articleContent,
+                // articleContent,
+                articleContent: initialContentString,
             }
 
             await api.put(
@@ -204,8 +213,12 @@ const AddArticle = ({
                 </Form>
 
                 <div className="text-left mt-5">
-                    <TiptapToolbar editor={editor} />
-                    <TiptapEditor editor={editor} />
+                    {/* <TiptapToolbar editor={editor} />
+                    <TiptapEditor editor={editor} /> */}
+                    <RichTextEditor
+                        initialContent={initialContent}
+                        setInitialContent={setInitialContent}
+                    />
                 </div>
             </div>
         </div>
