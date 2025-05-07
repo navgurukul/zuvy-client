@@ -26,7 +26,10 @@ import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 import { getChapterUpdateStatus, getArticlePreviewStore } from '@/store/store'
 import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { RichTextEditor } from '@/components/RichTextEditor'
+// import { RichTextEditor } from '@/components/RichTextEditor'
+import { RemirrorTextEditor } from '@/components/WysiwygEditor'
+// import RichTextEditor from '@/components/RichTextEditor'
+
 interface ContentDetail {
     title: string
     description: string | null
@@ -215,7 +218,11 @@ const AddArticle = ({
                 <div className="text-left mt-5">
                     {/* <TiptapToolbar editor={editor} />
                     <TiptapEditor editor={editor} /> */}
-                    <RichTextEditor
+                    {/* <RichTextEditor
+                        initialContent={initialContent}
+                        setInitialContent={setInitialContent}
+                    /> */}
+                    <RemirrorTextEditor
                         initialContent={initialContent}
                         setInitialContent={setInitialContent}
                     />

@@ -41,7 +41,9 @@ import ProjectPreview from '../_components/ProjectPreview'
 import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { getProjectPreviewStore } from '@/store/store'
-import { RichTextEditor } from '@/components/RichTextEditor'
+import { RemirrorTextEditor } from '@/components/RichTextEditor'
+// import { RemirrorTextEditor } from '@/components/WysiwygEditor'
+// import { RichTextEditor } from '@/components/RichTextEditor'
 // import RichTextEditor from '@/components/RichTextEditor'
 
 interface Project {
@@ -337,7 +339,7 @@ export default function Project() {
                 <div className="text-left">
                     {/* <TiptapToolbar editor={editor} />
                     <TiptapEditor editor={editor} /> */}
-                    <RichTextEditor
+                    <RemirrorTextEditor
                         initialContent={initialContent}
                         setInitialContent={setInitialContent}
                     />
