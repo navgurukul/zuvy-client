@@ -210,7 +210,7 @@ export default function RootLayout({
                                                         }
                                                     />
                                                 </Label>
-                                                <ScrollArea className="h-72 w-full">
+                                                <ScrollArea className="h-[12.5rem] w-full">
                                                     <div className="w-full">
                                                         {moduleData.moduleName.map(
                                                             (
