@@ -5,8 +5,7 @@ import { Karla } from 'next/font/google'
 import { cn } from '@/lib/utils'
 import { Toaster } from '@/components/ui/toaster'
 
-import '@/app/globals.css'
-import AnalyticsScripts from '@/app/_components/AnalyticsScripts'
+import './globals.css'
 
 const karla = Karla({ subsets: ['latin'] })
 
@@ -37,7 +36,6 @@ export default function RootLayout({
                 {/* <Navbar /> */}
                 {children}
                 <Toaster />
-                <AnalyticsScripts />
             </body>
         </html>
     )
