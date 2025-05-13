@@ -48,7 +48,7 @@ const AddArticle = ({
     articleUpdateOnPreview,
     setArticleUpdateOnPreview,
 }: {
-    content: any
+    content: Content
     courseId: any
     articleUpdateOnPreview: any
     setArticleUpdateOnPreview: any
@@ -57,6 +57,9 @@ const AddArticle = ({
     const router = useRouter()
     // state
     const [title, setTitle] = useState('')
+    const [isSaved, setIsSaved] = useState(false)
+    const [lastSavedContent, setLastSavedContent] = useState<string>('')
+
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const { setArticlePreviewContent } = getArticlePreviewStore()
 
@@ -85,7 +88,11 @@ const AddArticle = ({
             )
             // setArticleUpdateOnPreview(!articleUpdateOnPreview)
             setTitle(response.data.title)
-            editor?.commands.setContent(response.data.contentDetails[0].content)
+            // editor?.commands.setContent(response.data.contentDetails[0].content)
+            const contentHTML = response.data.contentDetails[0].content
+            editor?.commands.setContent(contentHTML)
+            setLastSavedContent(contentHTML)
+            setIsSaved(true)
         } catch (error) {
             console.error('Error fetching article content:', error)
         }
@@ -93,6 +100,7 @@ const AddArticle = ({
 
     const editArticleContent = async () => {
         try {
+            const contentHTML = editor?.getHTML() || ''
             const articleContent = [editor?.getJSON()]
             const data = {
                 title,
@@ -103,6 +111,8 @@ const AddArticle = ({
                 `/Content/editChapterOfModule/${content.moduleId}?chapterId=${content.id}`,
                 data
             )
+            setLastSavedContent(contentHTML)
+            setIsSaved(true)
             setArticleUpdateOnPreview(!articleUpdateOnPreview)
             setIsChapterUpdated(!isChapterUpdated)
             toast({
@@ -128,20 +138,51 @@ const AddArticle = ({
         getArticleContent()
     }, [content, editor])
 
+    // Reset saved state if user edits content
+    useEffect(() => {
+        if (!editor) return
+    
+        const handleUpdate = () => {
+            const currentContent = editor.getHTML()
+            if (currentContent !== lastSavedContent) {
+                setIsSaved(false)
+            }
+        }
+    
+        editor.on('update', handleUpdate)
+    
+        return () => {
+            //this prevents TypeScript error on cleanup
+            editor?.off('update', handleUpdate)
+        }
+    }, [editor, lastSavedContent])
+    
+
     function previewArticle() {
-        if (content?.contentDetails[0]?.content?.length > 0) {
-            setArticlePreviewContent(content)
-            router.push(
-                `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/article/${content.topicId}/preview`
-            )
-        } else {
+        const currentText = editor?.getText().trim()
+
+        if (!currentText || currentText.length === 0) {
             return toast({
                 title: 'Cannot Preview',
-                description: 'Nothing to Preview please save some content',
+                description: 'Nothing to preview. Please add content and save.',
                 className:
                     'border border-red-500 text-red-500 text-left w-[90%] capitalize',
             })
         }
+
+        if (!isSaved) {
+            return toast({
+                title: 'Unsaved Changes',
+                description: 'Please save your changes before previewing.',
+                className:
+                    'border border-yellow-500 text-yellow-600 text-left w-[90%] capitalize',
+            })
+        }
+
+        setArticlePreviewContent(content)
+        router.push(
+            `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/article/${content.topicId}/preview`
+        )
     }
 
     return (
