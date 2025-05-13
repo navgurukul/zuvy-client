@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 import { Toaster } from '@/components/ui/toaster'
 
 import './globals.css'
+import AnalyticsScripts from '@/app/_components/AnalyticsScripts'
 
 const karla = Karla({ subsets: ['latin'] })
 
@@ -36,6 +37,7 @@ export default function RootLayout({
                 {/* <Navbar /> */}
                 {children}
                 <Toaster />
+                <AnalyticsScripts />
             </body>
         </html>
     )
