@@ -210,20 +210,24 @@ function CodingChallenge({
     }, [content])
 
     function previewCodingChallenge() {
-        if (content?.codingQuestionDetails.length > 0) {
-            setCodingPreviewContent(content)
-            router.push(
-                `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/coding/${content.topicId}/preview`
-            )
-        } else {
+        if (selectedQuestions.length === 0) {
             return toast({
                 title: 'Cannot Preview',
-                description: 'Nothing to Preview please save coding question',
+                description: 'Nothing to Preview please save coding question.',
                 className:
                     'border border-red-500 text-red-500 text-left w-[90%] capitalize',
             })
         }
+        const updatedContent = {
+            ...content,
+            codingQuestionDetails: selectedQuestions,
+        }
+        setCodingPreviewContent(updatedContent)
+        router.push(
+            `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/coding/${content.topicId}/preview`
+        )
     }
+
 
     console.log(content.codingQuestionDetails)
 
