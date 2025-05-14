@@ -118,24 +118,24 @@ export const RemirrorTextEditor = ({
     }, [initialContent])
 
     return (
-        <ScrollArea
-            className="h-96 pr-8 "
-            type="hover"
-            style={{
-                scrollbarWidth: 'none', // Firefox
-                msOverflowStyle: 'none', // IE and Edge
-            }}
+        // <ScrollArea
+        //     className="h-96 pr-8 "
+        //     type="hover"
+        //     style={{
+        //         scrollbarWidth: 'none', // Firefox
+        //         msOverflowStyle: 'none', // IE and Edge
+        //     }}
+        // >
+        <WysiwygEditor
+            key={editorKey}
+            placeholder="Start typing..."
+            initialContent={initialContent || undefined}
         >
-            <WysiwygEditor
-                key={editorKey}
-                placeholder="Start typing..."
-                initialContent={initialContent || undefined}
-            >
-                <div className="sticky top-0 z-10 bg-white pb-2">
-                    <ImageUploadButton />
-                </div>
-                <OnChangeJSON onChange={handleEditorChange} />
-            </WysiwygEditor>
-        </ScrollArea>
+            <div className="sticky top-0 z-10 bg-white pb-2">
+                <ImageUploadButton />
+            </div>
+            <OnChangeJSON onChange={handleEditorChange} />
+        </WysiwygEditor>
+        // </ScrollArea>
     )
 }

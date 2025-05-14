@@ -3408,16 +3408,1604 @@
 
 // ##################################################################################
 
+// 'use client'
+
+// import React, { useCallback, useRef, useEffect } from 'react'
+// import type { RemirrorJSON } from 'remirror'
+// import {
+//     useRemirror,
+//     Remirror,
+//     useCommands,
+//     // StateUpdateEvent,
+// } from '@remirror/react'
+// import {
+//     BoldExtension,
+//     ItalicExtension,
+//     HeadingExtension,
+//     CodeBlockExtension,
+//     ImageExtension,
+//     BlockquoteExtension,
+//     CalloutExtension,
+// } from 'remirror/extensions'
+// import { Camera, Code, Quote } from 'lucide-react'
+// import { ScrollArea } from '@/components/ui/scroll-area'
+// import { EditorComponent } from '@remirror/react'
+
+// interface RemirrorTextEditorProps {
+//     initialContent: RemirrorJSON | null | undefined
+//     setInitialContent: (content: any) => void
+// }
+
+// // Create a custom toolbar button for image uploads
+// const ImageUploadButton = () => {
+//     const { insertImage } = useCommands()
+//     const fileInputRef = useRef<HTMLInputElement>(null)
+
+//     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+//         const file = event.target.files?.[0]
+//         if (!file) return
+
+//         // Create a URL for the uploaded image
+//         const imageUrl = URL.createObjectURL(file)
+
+//         // Insert the image into the editor
+//         insertImage({ src: imageUrl, alt: file.name })
+
+//         // Reset the file input
+//         if (fileInputRef.current) {
+//             fileInputRef.current.value = ''
+//         }
+//     }
+
+//     return (
+//         <div className="flex items-center">
+//             <input
+//                 type="file"
+//                 ref={fileInputRef}
+//                 onChange={handleFileChange}
+//                 accept="image/*"
+//                 className="hidden"
+//                 id="image-upload"
+//             />
+//             <label
+//                 htmlFor="image-upload"
+//                 className="flex items-center p-2 rounded cursor-pointer hover:bg-gray-100"
+//             >
+//                 <Camera size={18} className="text-gray-600" />
+//                 <span className="ml-2">Upload Image</span>
+//             </label>
+//         </div>
+//     )
+// }
+
+// // Create a custom toolbar button for code blocks
+// const CodeBlockButton = () => {
+//     const { toggleCodeBlock } = useCommands()
+
+//     const handleToggleCode = () => {
+//         toggleCodeBlock()
+//     }
+
+//     return (
+//         <button
+//             onClick={handleToggleCode}
+//             className="flex items-center p-2 rounded cursor-pointer hover:bg-gray-100"
+//             title="Toggle Code Block"
+//             type="button"
+//         >
+//             <Code size={18} className="text-gray-600" />
+//             <span className="ml-2">Code Block</span>
+//         </button>
+//     )
+// }
+
+// // Create a custom toolbar button for blockquotes
+// const BlockquoteButton = () => {
+//     const { toggleBlockquote } = useCommands()
+
+//     const handleToggleBlockquote = () => {
+//         toggleBlockquote()
+//     }
+
+//     return (
+//         <button
+//             onClick={handleToggleBlockquote}
+//             className="flex items-center p-2 rounded cursor-pointer hover:bg-gray-100"
+//             title="Toggle Blockquote"
+//             type="button"
+//         >
+//             <Quote size={18} className="text-gray-600" />
+//             <span className="ml-2">Blockquote</span>
+//         </button>
+//     )
+// }
+
+// export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
+//     initialContent,
+//     setInitialContent,
+// }) => {
+//     // Setup the Remirror manager with needed extensions
+//     const { manager, state } = useRemirror({
+//         extensions: () => [
+//             new HeadingExtension({}),
+//             new BoldExtension({}),
+//             new ItalicExtension({}),
+//             new CodeBlockExtension({}),
+//             new ImageExtension({}),
+//             new BlockquoteExtension({}),
+//             new CalloutExtension({ defaultType: 'warn' }),
+//         ],
+//         content: initialContent || undefined,
+//         selection: 'end',
+//     })
+
+//     // Handle changes from the editor
+//     const handleEditorChange = useCallback(
+//         ({ state }: { state: any }) => {
+//             // Convert the current state to JSON and send it to parent
+//             const json = state.toJSON()
+//             console.log('Editor content JSON:', json)
+//             const timeoutId = setTimeout(() => {
+//                 setInitialContent(json as RemirrorJSON)
+//             }, 300)
+
+//             return () => clearTimeout(timeoutId)
+//         },
+//         [setInitialContent]
+//     )
+
+//     useEffect(() => {
+//         if (state) {
+//             const json = state.toJSON()
+//             console.log('Initial content JSON:', json)
+//         }
+//     }, [state])
+
+//     console.log('initialContent', initialContent)
+//     console.log('state', state)
+
+//     return (
+//         <ScrollArea
+//             className="h-96 pr-8"
+//             type="hover"
+//             style={{
+//                 scrollbarWidth: 'none',
+//                 msOverflowStyle: 'none',
+//             }}
+//         >
+//             <Remirror
+//                 manager={manager}
+//                 initialContent={state}
+//                 onChange={handleEditorChange}
+//                 placeholder="Start typing..."
+//             >
+//                 <div className="sticky top-0 z-10 bg-white pb-2 flex flex-wrap gap-2">
+//                     <ImageUploadButton />
+//                     <CodeBlockButton />
+//                     <BlockquoteButton />
+//                 </div>
+//                 <div className="remirror-editor-wrapper p-4 min-h-[300px] border rounded">
+//                     <EditorComponent />
+//                 </div>
+//             </Remirror>
+//         </ScrollArea>
+//     )
+// }
+
+// export default RemirrorTextEditor
+
+// ################################################################
+
+// 'use client'
+
+// import React, { useCallback, useRef, useEffect } from 'react'
+// import type { RemirrorJSON } from 'remirror'
+// import {
+//     useRemirror,
+//     Remirror,
+//     useCommands,
+//     useActive,
+//     EditorComponent,
+// } from '@remirror/react'
+// import type { EditorState, StateUpdateLifecycleProps } from '@remirror/core'
+// import {
+//     BoldExtension,
+//     ItalicExtension,
+//     HeadingExtension,
+//     CodeBlockExtension,
+//     ImageExtension,
+//     BlockquoteExtension,
+//     CalloutExtension,
+//     UnderlineExtension,
+//     StrikeExtension,
+//     BulletListExtension,
+//     OrderedListExtension,
+//     ListItemExtension,
+// } from 'remirror/extensions'
+// import {
+//     Camera,
+//     Code,
+//     Quote,
+//     Bold,
+//     Italic,
+//     Underline,
+//     Strikethrough,
+//     Heading1,
+//     Heading2,
+//     Heading3,
+//     ListOrdered,
+//     List,
+// } from 'lucide-react'
+// import { ScrollArea } from '@/components/ui/scroll-area'
+
+// interface RemirrorTextEditorProps {
+//     initialContent: RemirrorJSON | null | undefined
+//     setInitialContent: (content: RemirrorJSON) => void
+// }
+
+// // Create a default content for new editors
+// const createDefaultContent = (): RemirrorJSON => {
+//     return {
+//         type: 'doc',
+//         content: [
+//             {
+//                 type: 'paragraph',
+//                 content: [{ type: 'text', text: 'Start typing here...' }],
+//             },
+//         ],
+//     }
+// }
+
+// // Toolbar component with all formatting options
+// const Toolbar = () => {
+//     const {
+//         toggleBold,
+//         toggleItalic,
+//         toggleUnderline,
+//         toggleStrike,
+//         toggleHeading,
+//         toggleCodeBlock,
+//         toggleBlockquote,
+//         toggleBulletList,
+//         toggleOrderedList,
+//     } = useCommands()
+//     const active = useActive()
+
+//     const fileInputRef = useRef<HTMLInputElement>(null)
+//     const { insertImage } = useCommands()
+
+//     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+//         const file = event.target.files?.[0]
+//         if (!file) return
+
+//         // Create a URL for the uploaded image
+//         const imageUrl = URL.createObjectURL(file)
+
+//         // Insert the image into the editor
+//         insertImage({ src: imageUrl, alt: file.name })
+
+//         // Reset the file input
+//         if (fileInputRef.current) {
+//             fileInputRef.current.value = ''
+//         }
+//     }
+
+//     return (
+//         <div className="sticky top-0 z-10 bg-white border-b mb-2 p-2 flex flex-wrap gap-2">
+//             {/* Text formatting */}
+//             <button
+//                 onClick={() => toggleBold()}
+//                 className={`p-2 rounded ${
+//                     active.bold() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Bold"
+//                 type="button"
+//             >
+//                 <Bold size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleItalic()}
+//                 className={`p-2 rounded ${
+//                     active.italic() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Italic"
+//                 type="button"
+//             >
+//                 <Italic size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleUnderline()}
+//                 className={`p-2 rounded ${
+//                     active.underline() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Underline"
+//                 type="button"
+//             >
+//                 <Underline size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleStrike()}
+//                 className={`p-2 rounded ${
+//                     active.strike() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Strikethrough"
+//                 type="button"
+//             >
+//                 <Strikethrough size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Headings */}
+//             <button
+//                 onClick={() => toggleHeading({ level: 1 })}
+//                 className={`p-2 rounded ${
+//                     active.heading({ level: 1 })
+//                         ? 'bg-gray-200'
+//                         : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Heading 1"
+//                 type="button"
+//             >
+//                 <Heading1 size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleHeading({ level: 2 })}
+//                 className={`p-2 rounded ${
+//                     active.heading({ level: 2 })
+//                         ? 'bg-gray-200'
+//                         : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Heading 2"
+//                 type="button"
+//             >
+//                 <Heading2 size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleHeading({ level: 3 })}
+//                 className={`p-2 rounded ${
+//                     active.heading({ level: 3 })
+//                         ? 'bg-gray-200'
+//                         : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Heading 3"
+//                 type="button"
+//             >
+//                 <Heading3 size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Lists */}
+//             <button
+//                 onClick={() => toggleBulletList()}
+//                 className={`p-2 rounded ${
+//                     active.bulletList() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Bullet List"
+//                 type="button"
+//             >
+//                 <List size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleOrderedList()}
+//                 className={`p-2 rounded ${
+//                     active.orderedList() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Ordered List"
+//                 type="button"
+//             >
+//                 <ListOrdered size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Block elements */}
+//             <button
+//                 onClick={() => toggleCodeBlock()}
+//                 className={`p-2 rounded ${
+//                     active.codeBlock() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Code Block"
+//                 type="button"
+//             >
+//                 <Code size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleBlockquote()}
+//                 className={`p-2 rounded ${
+//                     active.blockquote() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Blockquote"
+//                 type="button"
+//             >
+//                 <Quote size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Image upload */}
+//             <div className="flex items-center">
+//                 <input
+//                     type="file"
+//                     ref={fileInputRef}
+//                     onChange={handleFileChange}
+//                     accept="image/*"
+//                     className="hidden"
+//                     id="image-upload"
+//                 />
+//                 <label
+//                     htmlFor="image-upload"
+//                     className="flex items-center p-2 rounded cursor-pointer hover:bg-gray-100"
+//                 >
+//                     <Camera size={18} className="text-gray-700" />
+//                 </label>
+//             </div>
+//         </div>
+//     )
+// }
+
+// export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
+//     initialContent,
+//     setInitialContent,
+// }) => {
+//     // Track state updates to avoid circular updates
+//     const isInternalUpdate = useRef(false)
+
+//     // Ensure we have valid content to start with
+//     const validInitialContent =
+//         initialContent && initialContent.type === 'doc'
+//             ? initialContent
+//             : createDefaultContent()
+
+//     // Setup the Remirror manager with all needed extensions
+//     const { manager, state } = useRemirror({
+//         extensions: () => [
+//             new BoldExtension({}),
+//             new ItalicExtension(),
+//             new UnderlineExtension(),
+//             new StrikeExtension(),
+//             new HeadingExtension({}),
+//             new CodeBlockExtension({
+//                 defaultLanguage: 'javascript',
+//             }),
+//             new ImageExtension({
+//                 enableResizing: true,
+//             }),
+//             new BlockquoteExtension(),
+//             new CalloutExtension({ defaultType: 'info' }),
+//             new BulletListExtension({}),
+//             new OrderedListExtension(),
+//             new ListItemExtension({}),
+//         ],
+//         content: validInitialContent,
+//         selection: 'end',
+//         stringHandler: 'markdown',
+//     })
+
+//     // Update parent when editor content changes
+//     const handleEditorChange = useCallback(
+//         (props: StateUpdateLifecycleProps) => {
+//             // Mark this as an internal update
+//             isInternalUpdate.current = true
+
+//             // Get the JSON representation and update parent
+//             const json = props.state.toJSON() as RemirrorJSON
+//             setInitialContent(json)
+//         },
+//         [setInitialContent]
+//     )
+
+//     // Effect to handle content updates from parent component
+//     useEffect(() => {
+//         if (isInternalUpdate.current) {
+//             isInternalUpdate.current = false
+//             return
+//         }
+
+//         // No need for setState here as we're using initialContent with useRemirror
+//         // which will update the state when the initialContent prop changes
+//     }, [initialContent])
+
+//     return (
+//         <ScrollArea className="h-96 pr-8" type="hover">
+//             <div className="border rounded shadow-sm">
+//                 <Remirror
+//                     manager={manager}
+//                     state={state}
+//                     onChange={handleEditorChange}
+//                     autoFocus
+//                 >
+//                     <Toolbar />
+//                     <div className="remirror-editor-wrapper p-4 min-h-[300px]">
+//                         <EditorComponent />
+//                     </div>
+//                 </Remirror>
+//             </div>
+//         </ScrollArea>
+//     )
+// }
+
+// export default RemirrorTextEditor
+
+// ^^^^^^^^^^^^^^^^^^^^^^ Remirror with all the tools but editor is not working ^^^^^^^^^^^^^^^^^
+
+// 'use client'
+
+// import React, { useCallback, useRef, useEffect } from 'react'
+// import type { RemirrorJSON } from 'remirror'
+// import {
+//     useRemirror,
+//     Remirror,
+//     useCommands,
+//     useActive,
+//     EditorComponent,
+//     // RemirrorEventListenerProps
+// } from '@remirror/react'
+// import {
+//     BoldExtension,
+//     ItalicExtension,
+//     HeadingExtension,
+//     CodeBlockExtension,
+//     ImageExtension,
+//     BlockquoteExtension,
+//     CalloutExtension,
+//     UnderlineExtension,
+//     StrikeExtension,
+//     BulletListExtension,
+//     OrderedListExtension,
+//     ListItemExtension,
+// } from 'remirror/extensions'
+// import {
+//     Camera,
+//     Code,
+//     Quote,
+//     Bold,
+//     Italic,
+//     Underline,
+//     Strikethrough,
+//     Heading1,
+//     Heading2,
+//     Heading3,
+//     ListOrdered,
+//     List,
+// } from 'lucide-react'
+// import { ScrollArea } from '@/components/ui/scroll-area'
+
+// interface RemirrorTextEditorProps {
+//     initialContent: RemirrorJSON | null | undefined
+//     setInitialContent: (content: RemirrorJSON) => void
+// }
+
+// // Create a default content for new editors
+// const createDefaultContent = (): RemirrorJSON => {
+//     return {
+//         type: 'doc',
+//         content: [
+//             {
+//                 type: 'paragraph',
+//                 content: [{ type: 'text', text: 'Start typing here...' }],
+//             },
+//         ],
+//     }
+// }
+
+// // Toolbar component with all formatting options
+// const Toolbar = () => {
+//     const {
+//         toggleBold,
+//         toggleItalic,
+//         toggleUnderline,
+//         toggleStrike,
+//         toggleHeading,
+//         toggleCodeBlock,
+//         toggleBlockquote,
+//         toggleBulletList,
+//         toggleOrderedList,
+//     } = useCommands()
+//     const active = useActive()
+
+//     const fileInputRef = useRef<HTMLInputElement>(null)
+//     const { insertImage } = useCommands()
+
+//     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+//         const file = event.target.files?.[0]
+//         if (!file) return
+
+//         // Create a URL for the uploaded image
+//         const imageUrl = URL.createObjectURL(file)
+
+//         // Insert the image into the editor
+//         insertImage({ src: imageUrl, alt: file.name })
+
+//         // Reset the file input
+//         if (fileInputRef.current) {
+//             fileInputRef.current.value = ''
+//         }
+//     }
+
+//     return (
+//         <div className="sticky top-0 z-10 bg-white border-b mb-2 p-2 flex flex-wrap gap-2">
+//             {/* Text formatting */}
+//             <button
+//                 onClick={() => toggleBold()}
+//                 className={`p-2 rounded ${
+//                     active.bold() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Bold"
+//                 type="button"
+//             >
+//                 <Bold size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleItalic()}
+//                 className={`p-2 rounded ${
+//                     active.italic() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Italic"
+//                 type="button"
+//             >
+//                 <Italic size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleUnderline()}
+//                 className={`p-2 rounded ${
+//                     active.underline() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Underline"
+//                 type="button"
+//             >
+//                 <Underline size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleStrike()}
+//                 className={`p-2 rounded ${
+//                     active.strike() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Strikethrough"
+//                 type="button"
+//             >
+//                 <Strikethrough size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Headings */}
+//             <button
+//                 onClick={() => toggleHeading({ level: 1 })}
+//                 className={`p-2 rounded ${
+//                     active.heading({ level: 1 })
+//                         ? 'bg-gray-200'
+//                         : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Heading 1"
+//                 type="button"
+//             >
+//                 <Heading1 size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleHeading({ level: 2 })}
+//                 className={`p-2 rounded ${
+//                     active.heading({ level: 2 })
+//                         ? 'bg-gray-200'
+//                         : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Heading 2"
+//                 type="button"
+//             >
+//                 <Heading2 size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleHeading({ level: 3 })}
+//                 className={`p-2 rounded ${
+//                     active.heading({ level: 3 })
+//                         ? 'bg-gray-200'
+//                         : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Heading 3"
+//                 type="button"
+//             >
+//                 <Heading3 size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Lists */}
+//             <button
+//                 onClick={() => toggleBulletList()}
+//                 className={`p-2 rounded ${
+//                     active.bulletList() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Bullet List"
+//                 type="button"
+//             >
+//                 <List size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleOrderedList()}
+//                 className={`p-2 rounded ${
+//                     active.orderedList() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Ordered List"
+//                 type="button"
+//             >
+//                 <ListOrdered size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Block elements */}
+//             <button
+//                 onClick={() => toggleCodeBlock()}
+//                 className={`p-2 rounded ${
+//                     active.codeBlock() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Code Block"
+//                 type="button"
+//             >
+//                 <Code size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleBlockquote()}
+//                 className={`p-2 rounded ${
+//                     active.blockquote() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Blockquote"
+//                 type="button"
+//             >
+//                 <Quote size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Image upload */}
+//             <div className="flex items-center">
+//                 <input
+//                     type="file"
+//                     ref={fileInputRef}
+//                     onChange={handleFileChange}
+//                     accept="image/*"
+//                     className="hidden"
+//                     id="image-upload"
+//                 />
+//                 <label
+//                     htmlFor="image-upload"
+//                     className="flex items-center p-2 rounded cursor-pointer hover:bg-gray-100"
+//                 >
+//                     <Camera size={18} className="text-gray-700" />
+//                 </label>
+//             </div>
+//         </div>
+//     )
+// }
+
+// export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
+//     initialContent,
+//     setInitialContent,
+// }) => {
+//     // Track state updates to avoid circular updates
+//     const isInternalUpdate = useRef(false)
+
+//     console.log('initialContent', initialContent)
+
+//     // Ensure we have valid content to start with
+//     const validInitialContent = initialContent
+//         ? initialContent
+//         : createDefaultContent()
+
+//     // Setup the Remirror manager with all needed extensions
+//     const { manager, state } = useRemirror({
+//         extensions: () => [
+//             new BoldExtension({}),
+//             new ItalicExtension(),
+//             new UnderlineExtension(),
+//             new StrikeExtension(),
+//             new HeadingExtension({}),
+//             new CodeBlockExtension({
+//                 defaultLanguage: 'javascript',
+//             }),
+//             new ImageExtension({
+//                 enableResizing: true,
+//             }),
+//             new BlockquoteExtension(),
+//             new CalloutExtension({ defaultType: 'info' }),
+//             new BulletListExtension({}),
+//             new OrderedListExtension(),
+//             new ListItemExtension({}),
+//         ],
+//         content: validInitialContent,
+//         selection: 'end',
+//         stringHandler: 'markdown',
+//     })
+
+//     // Handle changes from the editor using the correct event listener type
+//     const handleEditorChange = useCallback(
+//         (props: { state: any }) => {
+//             // Mark this as an internal update
+//             isInternalUpdate.current = true
+
+//             // Get the JSON representation and update parent
+//             const json = state.toJSON() as RemirrorJSON
+//             setInitialContent(json)
+//         },
+//         [setInitialContent]
+//     )
+
+//     // Effect to handle content updates from parent component
+//     useEffect(() => {
+//         if (isInternalUpdate.current) {
+//             isInternalUpdate.current = false
+//             return
+//         }
+
+//         // We're relying on the initialContent prop changes to trigger useRemirror
+//         // No need for additional state management here
+//     }, [initialContent])
+
+//     console.log('validInitialContent', validInitialContent)
+
+//     return (
+//         <ScrollArea className="h-96 pr-8" type="hover">
+//             <div className="border rounded shadow-sm">
+//                 <Remirror
+//                     manager={manager}
+//                     state={state}
+//                     onChange={handleEditorChange}
+//                     autoFocus
+//                     placeholder="Start typing..."
+//                 >
+//                     <Toolbar />
+//                     <div className="remirror-editor-wrapper p-4 min-h-[300px]">
+//                         <EditorComponent />
+//                     </div>
+//                 </Remirror>
+//             </div>
+//         </ScrollArea>
+//     )
+// }
+
+// export default RemirrorTextEditor
+
+// &&&&&&&&&&&&&&&&&&&&&&&& Re-try with all tools &&&&&&&&&&&&&&&&&&&&&&&
+
+// import React, { useCallback, useRef, useEffect, useState } from 'react'
+// import { RemirrorJSON } from 'remirror'
+// import type { EditorState } from '@remirror/pm/state'
+// import {
+//     useRemirror,
+//     Remirror,
+//     useCommands,
+//     useActive,
+//     EditorComponent,
+// } from '@remirror/react'
+// import {
+//     BoldExtension,
+//     ItalicExtension,
+//     HeadingExtension,
+//     CodeBlockExtension,
+//     ImageExtension,
+//     BlockquoteExtension,
+//     CalloutExtension,
+//     UnderlineExtension,
+//     StrikeExtension,
+//     BulletListExtension,
+//     OrderedListExtension,
+//     ListItemExtension,
+// } from 'remirror/extensions'
+// import {
+//     Camera,
+//     Code,
+//     Quote,
+//     Bold,
+//     Italic,
+//     Underline,
+//     Strikethrough,
+//     Heading1,
+//     Heading2,
+//     Heading3,
+//     ListOrdered,
+//     List,
+// } from 'lucide-react'
+// import { ScrollArea } from '@/components/ui/scroll-area'
+
+// interface RemirrorTextEditorProps {
+//     initialContent?: RemirrorJSON | null;
+//     onContentChange?: (content: RemirrorJSON) => void;
+// }
+
+// // Create a default content for new editors
+// const createDefaultContent = () => {
+//     return {
+//         type: 'doc',
+//         content: [
+//             {
+//                 type: 'paragraph',
+//                 content: [],
+//             },
+//         ],
+//     }
+// }
+
+// // Toolbar component with all formatting options
+// const Toolbar = () => {
+//     const {
+//         toggleBold,
+//         toggleItalic,
+//         toggleUnderline,
+//         toggleStrike,
+//         toggleHeading,
+//         toggleCodeBlock,
+//         toggleBlockquote,
+//         toggleBulletList,
+//         toggleOrderedList,
+//     } = useCommands()
+//     const active = useActive()
+
+//     const fileInputRef = useRef<HTMLInputElement>(null)
+//     const { insertImage } = useCommands()
+
+//     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+//         const file = event.target.files?.[0]
+//         if (!file) return
+
+//         // Create a URL for the uploaded image
+//         const imageUrl = URL.createObjectURL(file)
+
+//         // Insert the image into the editor
+//         insertImage({ src: imageUrl, alt: file.name })
+
+//         // Reset the file input
+//         if (fileInputRef.current) {
+//             fileInputRef.current.value = ''
+//         }
+//     }
+
+//     return (
+//         <div className="sticky top-0 z-10 bg-white border-b mb-2 p-2 flex flex-wrap gap-2">
+//             {/* Text formatting */}
+//             <button
+//                 onClick={() => toggleBold()}
+//                 className={`p-2 rounded ${
+//                     active.bold() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Bold"
+//                 type="button"
+//             >
+//                 <Bold size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleItalic()}
+//                 className={`p-2 rounded ${
+//                     active.italic() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Italic"
+//                 type="button"
+//             >
+//                 <Italic size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleUnderline()}
+//                 className={`p-2 rounded ${
+//                     active.underline() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Underline"
+//                 type="button"
+//             >
+//                 <Underline size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleStrike()}
+//                 className={`p-2 rounded ${
+//                     active.strike() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Strikethrough"
+//                 type="button"
+//             >
+//                 <Strikethrough size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Headings */}
+//             <button
+//                 onClick={() => toggleHeading({ level: 1 })}
+//                 className={`p-2 rounded ${
+//                     active.heading({ level: 1 })
+//                         ? 'bg-gray-200'
+//                         : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Heading 1"
+//                 type="button"
+//             >
+//                 <Heading1 size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleHeading({ level: 2 })}
+//                 className={`p-2 rounded ${
+//                     active.heading({ level: 2 })
+//                         ? 'bg-gray-200'
+//                         : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Heading 2"
+//                 type="button"
+//             >
+//                 <Heading2 size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleHeading({ level: 3 })}
+//                 className={`p-2 rounded ${
+//                     active.heading({ level: 3 })
+//                         ? 'bg-gray-200'
+//                         : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Heading 3"
+//                 type="button"
+//             >
+//                 <Heading3 size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Lists */}
+//             <button
+//                 onClick={() => toggleBulletList()}
+//                 className={`p-2 rounded ${
+//                     active.bulletList() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Bullet List"
+//                 type="button"
+//             >
+//                 <List size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleOrderedList()}
+//                 className={`p-2 rounded ${
+//                     active.orderedList() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Ordered List"
+//                 type="button"
+//             >
+//                 <ListOrdered size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Block elements */}
+//             <button
+//                 onClick={() => toggleCodeBlock()}
+//                 className={`p-2 rounded ${
+//                     active.codeBlock() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Code Block"
+//                 type="button"
+//             >
+//                 <Code size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleBlockquote()}
+//                 className={`p-2 rounded ${
+//                     active.blockquote() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Blockquote"
+//                 type="button"
+//             >
+//                 <Quote size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Image upload */}
+//             <div className="flex items-center">
+//                 <input
+//                     type="file"
+//                     ref={fileInputRef}
+//                     onChange={handleFileChange}
+//                     accept="image/*"
+//                     className="hidden"
+//                     id="image-upload"
+//                 />
+//                 <label
+//                     htmlFor="image-upload"
+//                     className="flex items-center p-2 rounded cursor-pointer hover:bg-gray-100"
+//                 >
+//                     <Camera size={18} className="text-gray-700" />
+//                 </label>
+//             </div>
+//         </div>
+//     )
+// }
+
+// const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
+//     initialContent,
+//     onContentChange,
+// }) => {
+//     // Local state to manage content
+//     const [localContent, setLocalContent] = useState<RemirrorJSON>(() => {
+//         if (initialContent &&
+//             typeof initialContent === 'object' &&
+//             initialContent.type === 'doc') {
+//             return initialContent;
+//         }
+//         return createDefaultContent();
+//     });
+
+//     // Setup the Remirror manager with all needed extensions
+//     const { manager, state, setState } = useRemirror({
+//         extensions: () => [
+//             new BoldExtension({}),
+//             new ItalicExtension(),
+//             new UnderlineExtension(),
+//             new StrikeExtension(),
+//             new HeadingExtension({}),
+//             new CodeBlockExtension({
+//                 defaultLanguage: 'javascript',
+//             }),
+//             new ImageExtension({
+//                 enableResizing: true,
+//             }),
+//             new BlockquoteExtension(),
+//             new CalloutExtension({ defaultType: 'info' }),
+//             new BulletListExtension({}),
+//             new OrderedListExtension(),
+//             new ListItemExtension({}),
+//         ],
+//         content: localContent,
+//         stringHandler: 'markdown',
+//     });
+
+//     // Handle changes from the editor
+//     const handleEditorChange = useCallback(
+//         ({ state }: { state: EditorState }) => {
+//             const doc = state.doc;
+//             const content = doc.content.toJSON();
+
+//             const remirrorJson: RemirrorJSON = {
+//                 type: 'doc',
+//                 content: content,
+//             };
+
+//             setLocalContent(remirrorJson);
+
+//             // Notify parent component if callback is provided
+//             if (onContentChange) {
+//                 onContentChange(remirrorJson);
+//             }
+//         },
+//         [onContentChange]
+//     );
+
+//     // Update editor when initialContent changes from parent
+//     useEffect(() => {
+//         if (initialContent &&
+//             typeof initialContent === 'object' &&
+//             initialContent.type === 'doc' &&
+//             JSON.stringify(initialContent) !== JSON.stringify(localContent)) {
+//             setLocalContent(initialContent);
+
+//             // Update editor state if it's already initialized
+//             if (setState) {
+//                 setState({
+//                     content: initialContent
+//                 });
+//             }
+//         }
+//     }, [initialContent, setState, localContent]);
+
+//     return (
+//         <ScrollArea className="h-96 pr-8" type="hover">
+//             <div className="border rounded shadow-sm">
+//                 <Remirror
+//                     manager={manager}
+//                     state={state}
+//                     onChange={handleEditorChange}
+//                     autoFocus
+//                     autoRender="start"
+//                 >
+//                     <Toolbar />
+//                     <div className="remirror-editor-wrapper p-4 min-h-[300px]">
+//                         <EditorComponent />
+//                     </div>
+//                 </Remirror>
+//             </div>
+//         </ScrollArea>
+//     );
+// };
+
+// export default RemirrorTextEditor;
+
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+// 'use client'
+
+// import React, { useCallback, useRef, useEffect } from 'react'
+// import type { RemirrorJSON } from 'remirror'
+// import {
+//     useRemirror,
+//     Remirror,
+//     useCommands,
+//     useActive,
+//     EditorComponent,
+//     // RemirrorEventListenerProps
+// } from '@remirror/react'
+// import {
+//     BoldExtension,
+//     ItalicExtension,
+//     HeadingExtension,
+//     CodeBlockExtension,
+//     ImageExtension,
+//     BlockquoteExtension,
+//     CalloutExtension,
+//     UnderlineExtension,
+//     StrikeExtension,
+//     BulletListExtension,
+//     OrderedListExtension,
+//     ListItemExtension,
+// } from 'remirror/extensions'
+// import {
+//     Camera,
+//     Code,
+//     Quote,
+//     Bold,
+//     Italic,
+//     Underline,
+//     Strikethrough,
+//     Heading1,
+//     Heading2,
+//     Heading3,
+//     ListOrdered,
+//     List,
+// } from 'lucide-react'
+// import { ScrollArea } from '@/components/ui/scroll-area'
+
+// interface RemirrorTextEditorProps {
+//     initialContent: RemirrorJSON | null | undefined
+//     setInitialContent: (content: RemirrorJSON) => void
+// }
+
+// // Create a default content for new editors
+// const createDefaultContent = (): RemirrorJSON => {
+//     return {
+//         type: 'doc',
+//         content: [
+//             {
+//                 type: 'paragraph',
+//                 content: [{ type: 'text', text: 'Start typing here...' }],
+//             },
+//         ],
+//     }
+// }
+
+// // Toolbar component with all formatting options
+// const Toolbar = () => {
+//     const {
+//         toggleBold,
+//         toggleItalic,
+//         toggleUnderline,
+//         toggleStrike,
+//         toggleHeading,
+//         toggleCodeBlock,
+//         toggleBlockquote,
+//         toggleBulletList,
+//         toggleOrderedList,
+//     } = useCommands()
+//     const active = useActive()
+
+//     const fileInputRef = useRef<HTMLInputElement>(null)
+//     const { insertImage } = useCommands()
+
+//     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+//         const file = event.target.files?.[0]
+//         if (!file) return
+
+//         // Create a URL for the uploaded image
+//         const imageUrl = URL.createObjectURL(file)
+
+//         // Insert the image into the editor
+//         insertImage({ src: imageUrl, alt: file.name })
+
+//         // Reset the file input
+//         if (fileInputRef.current) {
+//             fileInputRef.current.value = ''
+//         }
+//     }
+
+//     return (
+//         <div className="sticky top-0 z-10 bg-white border-b mb-2 p-2 flex flex-wrap gap-2">
+//             {/* Text formatting */}
+//             <button
+//                 onClick={() => toggleBold()}
+//                 className={`p-2 rounded ${
+//                     active.bold() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Bold"
+//                 type="button"
+//             >
+//                 <Bold size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleItalic()}
+//                 className={`p-2 rounded ${
+//                     active.italic() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Italic"
+//                 type="button"
+//             >
+//                 <Italic size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleUnderline()}
+//                 className={`p-2 rounded ${
+//                     active.underline() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Underline"
+//                 type="button"
+//             >
+//                 <Underline size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleStrike()}
+//                 className={`p-2 rounded ${
+//                     active.strike() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Strikethrough"
+//                 type="button"
+//             >
+//                 <Strikethrough size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Headings */}
+//             <button
+//                 onClick={() => toggleHeading({ level: 1 })}
+//                 className={`p-2 rounded ${
+//                     active.heading({ level: 1 })
+//                         ? 'bg-gray-200'
+//                         : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Heading 1"
+//                 type="button"
+//             >
+//                 <Heading1 size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleHeading({ level: 2 })}
+//                 className={`p-2 rounded ${
+//                     active.heading({ level: 2 })
+//                         ? 'bg-gray-200'
+//                         : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Heading 2"
+//                 type="button"
+//             >
+//                 <Heading2 size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleHeading({ level: 3 })}
+//                 className={`p-2 rounded ${
+//                     active.heading({ level: 3 })
+//                         ? 'bg-gray-200'
+//                         : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Heading 3"
+//                 type="button"
+//             >
+//                 <Heading3 size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Lists */}
+//             <button
+//                 onClick={() => toggleBulletList()}
+//                 className={`p-2 rounded ${
+//                     active.bulletList() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Bullet List"
+//                 type="button"
+//             >
+//                 <List size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleOrderedList()}
+//                 className={`p-2 rounded ${
+//                     active.orderedList() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Ordered List"
+//                 type="button"
+//             >
+//                 <ListOrdered size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Block elements */}
+//             <button
+//                 onClick={() => toggleCodeBlock()}
+//                 className={`p-2 rounded ${
+//                     active.codeBlock() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Code Block"
+//                 type="button"
+//             >
+//                 <Code size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleBlockquote()}
+//                 className={`p-2 rounded ${
+//                     active.blockquote() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Blockquote"
+//                 type="button"
+//             >
+//                 <Quote size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Image upload */}
+//             <div className="flex items-center">
+//                 <input
+//                     type="file"
+//                     ref={fileInputRef}
+//                     onChange={handleFileChange}
+//                     accept="image/*"
+//                     className="hidden"
+//                     id="image-upload"
+//                 />
+//                 <label
+//                     htmlFor="image-upload"
+//                     className="flex items-center p-2 rounded cursor-pointer hover:bg-gray-100"
+//                 >
+//                     <Camera size={18} className="text-gray-700" />
+//                 </label>
+//             </div>
+//         </div>
+//     )
+// }
+
+// export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
+//     initialContent,
+//     setInitialContent,
+// }) => {
+//     // Track state updates to avoid circular updates
+//     const isInternalUpdate = useRef(false)
+
+//     console.log('initialContent', initialContent)
+
+//     // Ensure we have valid content to start with
+//     const validInitialContent = initialContent
+//         ? initialContent
+//         : createDefaultContent()
+
+//     // Setup the Remirror manager with all needed extensions
+//     const { manager, state } = useRemirror({
+//         extensions: () => [
+//             new BoldExtension({}),
+//             new ItalicExtension(),
+//             new UnderlineExtension(),
+//             new StrikeExtension(),
+//             new HeadingExtension({}),
+//             new CodeBlockExtension({
+//                 defaultLanguage: 'javascript',
+//             }),
+//             new ImageExtension({
+//                 enableResizing: true,
+//             }),
+//             new BlockquoteExtension(),
+//             new CalloutExtension({ defaultType: 'info' }),
+//             new BulletListExtension({}),
+//             new OrderedListExtension(),
+//             new ListItemExtension({}),
+//         ],
+//         content: validInitialContent,
+//         selection: 'end',
+//         stringHandler: 'markdown',
+//     })
+
+//     // Handle changes from the editor using the correct event listener type
+//     const handleEditorChange = useCallback(
+//         (props: { state: any }) => {
+//             // Mark this as an internal update
+//             isInternalUpdate.current = true
+
+//             // Get the JSON representation and update parent
+//             const json = state.toJSON() as RemirrorJSON
+//             setInitialContent(json)
+//         },
+//         [setInitialContent]
+//     )
+
+//     // Effect to handle content updates from parent component
+//     useEffect(() => {
+//         if (isInternalUpdate.current) {
+//             isInternalUpdate.current = false
+//             return
+//         }
+
+//         // We're relying on the initialContent prop changes to trigger useRemirror
+//         // No need for additional state management here
+//     }, [initialContent])
+
+//     console.log('validInitialContent', validInitialContent)
+
+//     return (
+//         <ScrollArea className="h-96 pr-8" type="hover">
+//             <div className="border rounded shadow-sm">
+//                 <Remirror
+//                     manager={manager}
+//                     state={state}
+//                     onChange={handleEditorChange}
+//                     autoFocus
+//                     placeholder="Start typing..."
+//                 >
+//                     <Toolbar />
+//                     <div className="remirror-editor-wrapper p-4 min-h-[300px]">
+//                         <EditorComponent />
+//                     </div>
+//                 </Remirror>
+//             </div>
+//         </ScrollArea>
+//     )
+// }
+
+// export default RemirrorTextEditor
+
+// ============== Working with All the tools and editor, need to add initial content =============
+
 'use client'
 
 import React, { useCallback, useRef, useEffect } from 'react'
 import type { RemirrorJSON } from 'remirror'
+// import { useRemirror, Remirror, useCommands } from '@remirror/react'
 import {
     useRemirror,
     Remirror,
     useCommands,
-    // StateUpdateEvent,
+    useActive,
+    EditorComponent,
+    // RemirrorEventListenerProps
 } from '@remirror/react'
+// import {
+//     BoldExtension,
+//     ItalicExtension,
+//     HeadingExtension,
+//     CodeBlockExtension,
+//     ImageExtension,
+//     BlockquoteExtension,
+//     CalloutExtension,
+// } from 'remirror/extensions'
+// import { EditorComponent } from '@remirror/react'
+// import { Camera, Code, Quote } from 'lucide-react'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import {
     BoldExtension,
     ItalicExtension,
@@ -3426,10 +5014,26 @@ import {
     ImageExtension,
     BlockquoteExtension,
     CalloutExtension,
+    UnderlineExtension,
+    StrikeExtension,
+    BulletListExtension,
+    OrderedListExtension,
+    ListItemExtension,
 } from 'remirror/extensions'
-import { Camera, Code, Quote } from 'lucide-react'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { EditorComponent } from '@remirror/react'
+import {
+    Camera,
+    Code,
+    Quote,
+    Bold,
+    Italic,
+    Underline,
+    Strikethrough,
+    Heading1,
+    Heading2,
+    Heading3,
+    ListOrdered,
+    List,
+} from 'lucide-react'
 
 interface RemirrorTextEditorProps {
     initialContent: RemirrorJSON | null | undefined
@@ -3520,33 +5124,301 @@ const BlockquoteButton = () => {
     )
 }
 
+// Create a simple default content if needed
+const createDefaultContent = () => {
+    return {
+        type: 'doc',
+        content: [
+            {
+                type: 'paragraph',
+                content: [{ type: 'text', text: 'Start typing here...' }],
+            },
+        ],
+    }
+}
+
+const Toolbar = () => {
+    const {
+        toggleBold,
+        toggleItalic,
+        toggleUnderline,
+        toggleStrike,
+        toggleHeading,
+        toggleCodeBlock,
+        toggleBlockquote,
+        toggleBulletList,
+        toggleOrderedList,
+    } = useCommands()
+    const active = useActive()
+
+    const fileInputRef = useRef<HTMLInputElement>(null)
+    const { insertImage } = useCommands()
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0]
+        if (!file) return
+
+        // Create a URL for the uploaded image
+        const imageUrl = URL.createObjectURL(file)
+
+        // Insert the image into the editor
+        insertImage({ src: imageUrl, alt: file.name })
+
+        // Reset the file input
+        if (fileInputRef.current) {
+            fileInputRef.current.value = ''
+        }
+    }
+
+    return (
+        <div className="sticky top-0 z-10 bg-white border-b mb-2 p-2 flex flex-wrap gap-2">
+            {/* Text formatting */}
+            <button
+                onClick={() => toggleBold()}
+                className={`p-2 rounded ${
+                    active.bold() ? 'bg-gray-200' : 'hover:bg-gray-100'
+                }`}
+                title="Bold"
+                type="button"
+            >
+                <Bold size={18} className="text-gray-700" />
+            </button>
+
+            <button
+                onClick={() => toggleItalic()}
+                className={`p-2 rounded ${
+                    active.italic() ? 'bg-gray-200' : 'hover:bg-gray-100'
+                }`}
+                title="Italic"
+                type="button"
+            >
+                <Italic size={18} className="text-gray-700" />
+            </button>
+
+            <button
+                onClick={() => toggleUnderline()}
+                className={`p-2 rounded ${
+                    active.underline() ? 'bg-gray-200' : 'hover:bg-gray-100'
+                }`}
+                title="Underline"
+                type="button"
+            >
+                <Underline size={18} className="text-gray-700" />
+            </button>
+
+            <button
+                onClick={() => toggleStrike()}
+                className={`p-2 rounded ${
+                    active.strike() ? 'bg-gray-200' : 'hover:bg-gray-100'
+                }`}
+                title="Strikethrough"
+                type="button"
+            >
+                <Strikethrough size={18} className="text-gray-700" />
+            </button>
+
+            <div className="border-l h-8 mx-1"></div>
+
+            {/* Headings */}
+            <button
+                onClick={() => toggleHeading({ level: 1 })}
+                className={`p-2 rounded ${
+                    active.heading({ level: 1 })
+                        ? 'bg-gray-200'
+                        : 'hover:bg-gray-100'
+                }`}
+                title="Heading 1"
+                type="button"
+            >
+                <Heading1 size={18} className="text-gray-700" />
+            </button>
+
+            <button
+                onClick={() => toggleHeading({ level: 2 })}
+                className={`p-2 rounded ${
+                    active.heading({ level: 2 })
+                        ? 'bg-gray-200'
+                        : 'hover:bg-gray-100'
+                }`}
+                title="Heading 2"
+                type="button"
+            >
+                <Heading2 size={18} className="text-gray-700" />
+            </button>
+
+            <button
+                onClick={() => toggleHeading({ level: 3 })}
+                className={`p-2 rounded ${
+                    active.heading({ level: 3 })
+                        ? 'bg-gray-200'
+                        : 'hover:bg-gray-100'
+                }`}
+                title="Heading 3"
+                type="button"
+            >
+                <Heading3 size={18} className="text-gray-700" />
+            </button>
+
+            <div className="border-l h-8 mx-1"></div>
+
+            {/* Lists */}
+            <button
+                onClick={() => toggleBulletList()}
+                className={`p-2 rounded ${
+                    active.bulletList() ? 'bg-gray-200' : 'hover:bg-gray-100'
+                }`}
+                title="Bullet List"
+                type="button"
+            >
+                <List size={18} className="text-gray-700" />
+            </button>
+
+            <button
+                onClick={() => toggleOrderedList()}
+                className={`p-2 rounded ${
+                    active.orderedList() ? 'bg-gray-200' : 'hover:bg-gray-100'
+                }`}
+                title="Ordered List"
+                type="button"
+            >
+                <ListOrdered size={18} className="text-gray-700" />
+            </button>
+
+            <div className="border-l h-8 mx-1"></div>
+
+            {/* Block elements */}
+            <button
+                onClick={() => toggleCodeBlock()}
+                className={`p-2 rounded ${
+                    active.codeBlock() ? 'bg-gray-200' : 'hover:bg-gray-100'
+                }`}
+                title="Code Block"
+                type="button"
+            >
+                <Code size={18} className="text-gray-700" />
+            </button>
+
+            <button
+                onClick={() => toggleBlockquote()}
+                className={`p-2 rounded ${
+                    active.blockquote() ? 'bg-gray-200' : 'hover:bg-gray-100'
+                }`}
+                title="Blockquote"
+                type="button"
+            >
+                <Quote size={18} className="text-gray-700" />
+            </button>
+
+            <div className="border-l h-8 mx-1"></div>
+
+            {/* Image upload */}
+            <div className="flex items-center">
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept="image/*"
+                    className="hidden"
+                    id="image-upload"
+                />
+                <label
+                    htmlFor="image-upload"
+                    className="flex items-center p-2 rounded cursor-pointer hover:bg-gray-100"
+                >
+                    <Camera size={18} className="text-gray-700" />
+                </label>
+            </div>
+        </div>
+    )
+}
+
 export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
     initialContent,
     setInitialContent,
 }) => {
+    // Track if we're in the middle of editing to prevent feedback loops
+    const isEditingRef = useRef<boolean>(false)
+
+    // Reference to compare content changes
+    const contentRef = useRef<string>(
+        JSON.stringify(initialContent || createDefaultContent())
+    )
+
     // Setup the Remirror manager with needed extensions
     const { manager, state } = useRemirror({
         extensions: () => [
-            new HeadingExtension({}),
             new BoldExtension({}),
-            new ItalicExtension({}),
-            new CodeBlockExtension({}),
-            new ImageExtension({}),
-            new BlockquoteExtension({}),
-            new CalloutExtension({ defaultType: 'warn' }),
+            new ItalicExtension(),
+            new UnderlineExtension(),
+            new StrikeExtension(),
+            new HeadingExtension({}),
+            new CodeBlockExtension({
+                defaultLanguage: 'javascript',
+            }),
+            new ImageExtension({
+                enableResizing: true,
+            }),
+            new BlockquoteExtension(),
+            new CalloutExtension({ defaultType: 'info' }),
+            new BulletListExtension({}),
+            new OrderedListExtension(),
+            new ListItemExtension({}),
         ],
-        content: initialContent || undefined,
+        // Use fallback content if initialContent is potentially invalid
+        content: createDefaultContent(),
         selection: 'end',
+        // Add error handler for content validation issues
+        onError: (error) => {
+            console.warn('Content validation error:', error)
+            // Return default content on error
+            return createDefaultContent()
+        },
     })
+
+    // const { manager, state } = useRemirror({
+    //     extensions: () => [
+    //         new BoldExtension({}),
+    //         new ItalicExtension(),
+    //         new UnderlineExtension(),
+    //         new StrikeExtension(),
+    //         new HeadingExtension({}),
+    //         new CodeBlockExtension({
+    //             defaultLanguage: 'javascript',
+    //         }),
+    //         new ImageExtension({
+    //             enableResizing: true,
+    //         }),
+    //         new BlockquoteExtension(),
+    //         new CalloutExtension({ defaultType: 'info' }),
+    //         new BulletListExtension({}),
+    //         new OrderedListExtension(),
+    //         new ListItemExtension({}),
+    //     ],
+    //     content: validInitialContent,
+    //     selection: 'end',
+    //     stringHandler: 'markdown',
+    // })
 
     // Handle changes from the editor
     const handleEditorChange = useCallback(
         ({ state }: { state: any }) => {
+            // Mark that we're editing to prevent setState feedback loops
+            isEditingRef.current = true
+
             // Convert the current state to JSON and send it to parent
             const json = state.toJSON()
-            console.log('Editor content JSON:', json)
+
+            // Debounce updates to parent
             const timeoutId = setTimeout(() => {
-                setInitialContent(json as RemirrorJSON)
+                setInitialContent(json)
+
+                // Update our reference content
+                contentRef.current = JSON.stringify(json)
+
+                // Reset editing flag after debounce
+                setTimeout(() => {
+                    isEditingRef.current = false
+                }, 50)
             }, 300)
 
             return () => clearTimeout(timeoutId)
@@ -3554,15 +5426,41 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
         [setInitialContent]
     )
 
+    // Effect to apply valid initialContent when available
     useEffect(() => {
-        if (state) {
-            const json = state.toJSON()
-            console.log('Initial content JSON:', json)
+        // Skip if we're currently editing to prevent feedback loops
+        if (isEditingRef.current || !initialContent) return
+
+        try {
+            // Try to update the content carefully
+            const safeContent = initialContent || createDefaultContent()
+            const currentContentString = JSON.stringify(safeContent)
+
+            // Only update if content has actually changed
+            if (currentContentString !== contentRef.current) {
+                contentRef.current = currentContentString
+
+                try {
+                    // Try to create a valid state with error handling
+                    const newState = manager.createState({
+                        content: safeContent,
+                        selection: 'end',
+                    })
+
+                    // Update if state creation succeeded
+                    manager.view.updateState(newState)
+                } catch (err) {
+                    console.warn('Failed to update editor state:', err)
+                    // Continue with current state on error
+                }
+            }
+        } catch (err) {
+            console.warn('Error processing initialContent:', err)
         }
-    }, [state])
+    }, [initialContent, manager])
 
     console.log('initialContent', initialContent)
-    console.log('state', state)
+    console.log('initialContent', initialContent)
 
     return (
         <ScrollArea
@@ -3573,23 +5471,2127 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
                 msOverflowStyle: 'none',
             }}
         >
-            <Remirror
-                manager={manager}
-                initialContent={state}
-                onChange={handleEditorChange}
-                placeholder="Start typing..."
-            >
-                <div className="sticky top-0 z-10 bg-white pb-2 flex flex-wrap gap-2">
-                    <ImageUploadButton />
-                    <CodeBlockButton />
-                    <BlockquoteButton />
-                </div>
-                <div className="remirror-editor-wrapper p-4 min-h-[300px] border rounded">
-                    <EditorComponent />
-                </div>
-            </Remirror>
+            <div className="p-1 border rounded shadow">
+                <Remirror
+                    manager={manager}
+                    initialContent={state}
+                    onChange={handleEditorChange}
+                    placeholder="Start typing..."
+                >
+                    <div className="sticky top-0 z-10 bg-white pb-2 flex flex-wrap gap-2 border-b p-2 mb-2">
+                        <Toolbar />
+                        {/* <ImageUploadButton />
+                        <CodeBlockButton />
+                        <BlockquoteButton /> */}
+                    </div>
+                    <div className="remirror-editor-wrapper p-4 min-h-[250px]">
+                        <EditorComponent />
+                    </div>
+                </Remirror>
+            </div>
         </ScrollArea>
     )
 }
 
 export default RemirrorTextEditor
+
+// +++++++++++++ Editor worked with all the tools and initial content but there is a glitch +++++++++
+
+// 'use client'
+
+// import React, { useCallback, useRef, useEffect } from 'react'
+// import type { RemirrorJSON } from 'remirror'
+// // import { useRemirror, Remirror, useCommands } from '@remirror/react'
+// import {
+//     useRemirror,
+//     Remirror,
+//     useCommands,
+//     useActive,
+//     EditorComponent,
+//     // RemirrorEventListenerProps
+// } from '@remirror/react'
+// // import {
+// //     BoldExtension,
+// //     ItalicExtension,
+// //     HeadingExtension,
+// //     CodeBlockExtension,
+// //     ImageExtension,
+// //     BlockquoteExtension,
+// //     CalloutExtension,
+// // } from 'remirror/extensions'
+// // import { EditorComponent } from '@remirror/react'
+// // import { Camera, Code, Quote } from 'lucide-react'
+// import { ScrollArea } from '@/components/ui/scroll-area'
+// import {
+//     BoldExtension,
+//     ItalicExtension,
+//     HeadingExtension,
+//     CodeBlockExtension,
+//     ImageExtension,
+//     BlockquoteExtension,
+//     CalloutExtension,
+//     UnderlineExtension,
+//     StrikeExtension,
+//     BulletListExtension,
+//     OrderedListExtension,
+//     ListItemExtension,
+// } from 'remirror/extensions'
+// import {
+//     Camera,
+//     Code,
+//     Quote,
+//     Bold,
+//     Italic,
+//     Underline,
+//     Strikethrough,
+//     Heading1,
+//     Heading2,
+//     Heading3,
+//     ListOrdered,
+//     List,
+// } from 'lucide-react'
+
+// interface RemirrorTextEditorProps {
+//     initialContent: any
+//     setInitialContent: (content: any) => void
+// }
+
+// // Create a custom toolbar button for image uploads
+// const ImageUploadButton = () => {
+//     const { insertImage } = useCommands()
+//     const fileInputRef = useRef<HTMLInputElement>(null)
+
+//     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+//         const file = event.target.files?.[0]
+//         if (!file) return
+
+//         // Create a URL for the uploaded image
+//         const imageUrl = URL.createObjectURL(file)
+
+//         // Insert the image into the editor
+//         insertImage({ src: imageUrl, alt: file.name })
+
+//         // Reset the file input
+//         if (fileInputRef.current) {
+//             fileInputRef.current.value = ''
+//         }
+//     }
+
+//     return (
+//         <div className="flex items-center">
+//             <input
+//                 type="file"
+//                 ref={fileInputRef}
+//                 onChange={handleFileChange}
+//                 accept="image/*"
+//                 className="hidden"
+//                 id="image-upload"
+//             />
+//             <label
+//                 htmlFor="image-upload"
+//                 className="flex items-center p-2 rounded cursor-pointer hover:bg-gray-100"
+//             >
+//                 <Camera size={18} className="text-gray-600" />
+//                 <span className="ml-2">Upload Image</span>
+//             </label>
+//         </div>
+//     )
+// }
+
+// // Create a custom toolbar button for code blocks
+// const CodeBlockButton = () => {
+//     const { toggleCodeBlock } = useCommands()
+
+//     const handleToggleCode = () => {
+//         toggleCodeBlock()
+//     }
+
+//     return (
+//         <button
+//             onClick={handleToggleCode}
+//             className="flex items-center p-2 rounded cursor-pointer hover:bg-gray-100"
+//             title="Toggle Code Block"
+//             type="button"
+//         >
+//             <Code size={18} className="text-gray-600" />
+//             <span className="ml-2">Code Block</span>
+//         </button>
+//     )
+// }
+
+// // Create a custom toolbar button for blockquotes
+// const BlockquoteButton = () => {
+//     const { toggleBlockquote } = useCommands()
+
+//     const handleToggleBlockquote = () => {
+//         toggleBlockquote()
+//     }
+
+//     return (
+//         <button
+//             onClick={handleToggleBlockquote}
+//             className="flex items-center p-2 rounded cursor-pointer hover:bg-gray-100"
+//             title="Toggle Blockquote"
+//             type="button"
+//         >
+//             <Quote size={18} className="text-gray-600" />
+//             <span className="ml-2">Blockquote</span>
+//         </button>
+//     )
+// }
+
+// // Create a simple default content if needed
+// const createDefaultContent = () => {
+//     return {
+//         type: 'doc',
+//         content: [
+//             {
+//                 type: 'paragraph',
+//                 content: [{ type: 'text', text: 'Start typing here...' }],
+//             },
+//         ],
+//     }
+// }
+
+// const Toolbar = () => {
+//     const {
+//         toggleBold,
+//         toggleItalic,
+//         toggleUnderline,
+//         toggleStrike,
+//         toggleHeading,
+//         toggleCodeBlock,
+//         toggleBlockquote,
+//         toggleBulletList,
+//         toggleOrderedList,
+//     } = useCommands()
+//     const active = useActive()
+
+//     const fileInputRef = useRef<HTMLInputElement>(null)
+//     const { insertImage } = useCommands()
+
+//     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+//         const file = event.target.files?.[0]
+//         if (!file) return
+
+//         // Create a URL for the uploaded image
+//         const imageUrl = URL.createObjectURL(file)
+
+//         // Insert the image into the editor
+//         insertImage({ src: imageUrl, alt: file.name })
+
+//         // Reset the file input
+//         if (fileInputRef.current) {
+//             fileInputRef.current.value = ''
+//         }
+//     }
+
+//     return (
+//         <div className="sticky top-0 z-10 bg-white border-b mb-2 p-2 flex flex-wrap gap-2">
+//             {/* Text formatting */}
+//             <button
+//                 onClick={() => toggleBold()}
+//                 className={`p-2 rounded ${
+//                     active.bold() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Bold"
+//                 type="button"
+//             >
+//                 <Bold size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleItalic()}
+//                 className={`p-2 rounded ${
+//                     active.italic() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Italic"
+//                 type="button"
+//             >
+//                 <Italic size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleUnderline()}
+//                 className={`p-2 rounded ${
+//                     active.underline() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Underline"
+//                 type="button"
+//             >
+//                 <Underline size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleStrike()}
+//                 className={`p-2 rounded ${
+//                     active.strike() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Strikethrough"
+//                 type="button"
+//             >
+//                 <Strikethrough size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Headings */}
+//             <button
+//                 onClick={() => toggleHeading({ level: 1 })}
+//                 className={`p-2 rounded ${
+//                     active.heading({ level: 1 })
+//                         ? 'bg-gray-200'
+//                         : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Heading 1"
+//                 type="button"
+//             >
+//                 <Heading1 size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleHeading({ level: 2 })}
+//                 className={`p-2 rounded ${
+//                     active.heading({ level: 2 })
+//                         ? 'bg-gray-200'
+//                         : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Heading 2"
+//                 type="button"
+//             >
+//                 <Heading2 size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleHeading({ level: 3 })}
+//                 className={`p-2 rounded ${
+//                     active.heading({ level: 3 })
+//                         ? 'bg-gray-200'
+//                         : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Heading 3"
+//                 type="button"
+//             >
+//                 <Heading3 size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Lists */}
+//             <button
+//                 onClick={() => toggleBulletList()}
+//                 className={`p-2 rounded ${
+//                     active.bulletList() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Bullet List"
+//                 type="button"
+//             >
+//                 <List size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleOrderedList()}
+//                 className={`p-2 rounded ${
+//                     active.orderedList() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Ordered List"
+//                 type="button"
+//             >
+//                 <ListOrdered size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Block elements */}
+//             <button
+//                 onClick={() => toggleCodeBlock()}
+//                 className={`p-2 rounded ${
+//                     active.codeBlock() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Code Block"
+//                 type="button"
+//             >
+//                 <Code size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleBlockquote()}
+//                 className={`p-2 rounded ${
+//                     active.blockquote() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Blockquote"
+//                 type="button"
+//             >
+//                 <Quote size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Image upload */}
+//             <div className="flex items-center">
+//                 <input
+//                     type="file"
+//                     ref={fileInputRef}
+//                     onChange={handleFileChange}
+//                     accept="image/*"
+//                     className="hidden"
+//                     id="image-upload"
+//                 />
+//                 <label
+//                     htmlFor="image-upload"
+//                     className="flex items-center p-2 rounded cursor-pointer hover:bg-gray-100"
+//                 >
+//                     <Camera size={18} className="text-gray-700" />
+//                 </label>
+//             </div>
+//         </div>
+//     )
+// }
+
+// export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
+//     initialContent,
+//     setInitialContent,
+// }) => {
+//     // Track if we're in the middle of editing to prevent feedback loops
+//     const isEditingRef = useRef<boolean>(false)
+
+//     let editorContent = initialContent?.doc || createDefaultContent()
+
+//     useEffect(() => {
+//         editorContent = initialContent?.doc || createDefaultContent()
+//     }, [initialContent])
+
+//     // Reference to compare content changes
+//     const contentRef = useRef<string>(JSON.stringify(editorContent))
+
+//     console.log('contentRef', contentRef)
+//     console.log('createDefaultContent()', createDefaultContent())
+
+//     // Setup the Remirror manager with needed extensions
+//     const { manager, state } = useRemirror({
+//         extensions: () => [
+//             new BoldExtension({}),
+//             new ItalicExtension(),
+//             new UnderlineExtension(),
+//             new StrikeExtension(),
+//             new HeadingExtension({}),
+//             new CodeBlockExtension({
+//                 defaultLanguage: 'javascript',
+//             }),
+//             new ImageExtension({
+//                 enableResizing: true,
+//             }),
+//             new BlockquoteExtension(),
+//             new CalloutExtension({ defaultType: 'info' }),
+//             new BulletListExtension({}),
+//             new OrderedListExtension(),
+//             new ListItemExtension({}),
+//         ],
+//         // Use fallback content if initialContent is potentially invalid
+//         content: editorContent,
+//         selection: 'end',
+//         // Add error handler for content validation issues
+//         onError: (error) => {
+//             console.warn('Content validation error:', error)
+//             // Return default content on error
+//             return editorContent
+//         },
+//     })
+
+//     // Handle changes from the editor
+//     const handleEditorChange = useCallback(
+//         ({ state }: { state: any }) => {
+//             // Mark that we're editing to prevent setState feedback loops
+//             isEditingRef.current = true
+
+//             // Convert the current state to JSON and send it to parent
+//             const json = state.toJSON()
+
+//             // Debounce updates to parent
+//             const timeoutId = setTimeout(() => {
+//                 setInitialContent(json)
+
+//                 // Update our reference content
+//                 contentRef.current = JSON.stringify(json)
+
+//                 // Reset editing flag after debounce
+//                 setTimeout(() => {
+//                     isEditingRef.current = false
+//                 }, 50)
+//             }, 300)
+
+//             return () => clearTimeout(timeoutId)
+//         },
+//         [setInitialContent]
+//     )
+
+//     // Effect to apply valid initialContent when available
+//     useEffect(() => {
+//         // Skip if we're currently editing to prevent feedback loops
+//         if (isEditingRef.current || !initialContent) return
+
+//         try {
+//             // Try to update the content carefully
+//             const safeContent = initialContent.doc || createDefaultContent()
+//             const currentContentString = JSON.stringify(safeContent)
+
+//             // Only update if content has actually changed
+//             if (currentContentString !== contentRef.current) {
+//                 contentRef.current = currentContentString
+
+//                 try {
+//                     // Try to create a valid state with error handling
+//                     const newState = manager.createState({
+//                         content: safeContent,
+//                         selection: 'end',
+//                     })
+
+//                     // Update if state creation succeeded
+//                     manager.view.updateState(newState)
+//                 } catch (err) {
+//                     console.warn('Failed to update editor state:', err)
+//                     // Continue with current state on error
+//                 }
+//             }
+//         } catch (err) {
+//             console.warn('Error processing initialContent:', err)
+//         }
+//     }, [initialContent, manager])
+
+//     console.log('initialContent', initialContent)
+//     console.log('initialContent', initialContent)
+
+//     return (
+//         <div className="p-1 border rounded shadow">
+//             <Remirror
+//                 manager={manager}
+//                 initialContent={state}
+//                 onChange={handleEditorChange}
+//                 placeholder="Start typing..."
+//             >
+//                 <div className="sticky top-0 z-10 bg-white pb-2 flex flex-wrap gap-2 border-b p-2 mb-2">
+//                     <Toolbar />
+//                     {/* <ImageUploadButton />
+//                         <CodeBlockButton />
+//                         <BlockquoteButton /> */}
+//                 </div>
+//                 <ScrollArea
+//                     className="h-96 pr-8"
+//                     type="hover"
+//                     style={{
+//                         scrollbarWidth: 'none',
+//                         msOverflowStyle: 'none',
+//                     }}
+//                 >
+//                     <div className="remirror-editor-wrapper p-4 min-h-[250px]">
+//                         <EditorComponent />
+//                     </div>
+//                 </ScrollArea>
+//             </Remirror>
+//         </div>
+//     )
+// }
+
+// export default RemirrorTextEditor
+
+// =============================== Editor glitch is fixed ====================================
+
+// 'use client'
+
+// import React, { useCallback, useRef, useEffect } from 'react'
+// import type { RemirrorJSON } from 'remirror'
+// import {
+//     useRemirror,
+//     Remirror,
+//     useCommands,
+//     useActive,
+//     EditorComponent,
+// } from '@remirror/react'
+// import {
+//     BoldExtension,
+//     ItalicExtension,
+//     HeadingExtension,
+//     CodeBlockExtension,
+//     ImageExtension,
+//     BlockquoteExtension,
+//     CalloutExtension,
+//     UnderlineExtension,
+//     StrikeExtension,
+//     BulletListExtension,
+//     OrderedListExtension,
+//     ListItemExtension,
+// } from 'remirror/extensions'
+// import {
+//     Camera,
+//     Code,
+//     Quote,
+//     Bold,
+//     Italic,
+//     Underline,
+//     Strikethrough,
+//     Heading1,
+//     Heading2,
+//     Heading3,
+//     ListOrdered,
+//     List,
+// } from 'lucide-react'
+// import { ScrollArea } from '@/components/ui/scroll-area'
+
+// interface RemirrorTextEditorProps {
+//     initialContent: any
+//     setInitialContent: (content: any) => void
+// }
+
+// // Create a simple default content if needed
+// const createDefaultContent = () => {
+//     return {
+//         type: 'doc',
+//         content: [
+//             {
+//                 type: 'paragraph',
+//                 content: [{ type: 'text', text: 'Start typing here...' }],
+//             },
+//         ],
+//     }
+// }
+
+// const Toolbar = () => {
+//     const {
+//         toggleBold,
+//         toggleItalic,
+//         toggleUnderline,
+//         toggleStrike,
+//         toggleHeading,
+//         toggleCodeBlock,
+//         toggleBlockquote,
+//         toggleBulletList,
+//         toggleOrderedList,
+//     } = useCommands()
+//     const active = useActive()
+
+//     const fileInputRef = useRef<HTMLInputElement>(null)
+//     const { insertImage } = useCommands()
+
+//     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+//         const file = event.target.files?.[0]
+//         if (!file) return
+
+//         // Create a URL for the uploaded image
+//         const imageUrl = URL.createObjectURL(file)
+
+//         // Insert the image into the editor
+//         insertImage({ src: imageUrl, alt: file.name })
+
+//         // Reset the file input
+//         if (fileInputRef.current) {
+//             fileInputRef.current.value = ''
+//         }
+//     }
+
+//     return (
+//         <div className="sticky top-0 z-10 bg-white border-b mb-2 p-2 flex flex-wrap gap-2">
+//             {/* Text formatting */}
+//             <button
+//                 onClick={() => toggleBold()}
+//                 className={`p-2 rounded ${
+//                     active.bold() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Bold"
+//                 type="button"
+//             >
+//                 <Bold size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleItalic()}
+//                 className={`p-2 rounded ${
+//                     active.italic() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Italic"
+//                 type="button"
+//             >
+//                 <Italic size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleUnderline()}
+//                 className={`p-2 rounded ${
+//                     active.underline() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Underline"
+//                 type="button"
+//             >
+//                 <Underline size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleStrike()}
+//                 className={`p-2 rounded ${
+//                     active.strike() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Strikethrough"
+//                 type="button"
+//             >
+//                 <Strikethrough size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Headings */}
+//             <button
+//                 onClick={() => toggleHeading({ level: 1 })}
+//                 className={`p-2 rounded ${
+//                     active.heading({ level: 1 })
+//                         ? 'bg-gray-200'
+//                         : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Heading 1"
+//                 type="button"
+//             >
+//                 <Heading1 size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleHeading({ level: 2 })}
+//                 className={`p-2 rounded ${
+//                     active.heading({ level: 2 })
+//                         ? 'bg-gray-200'
+//                         : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Heading 2"
+//                 type="button"
+//             >
+//                 <Heading2 size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleHeading({ level: 3 })}
+//                 className={`p-2 rounded ${
+//                     active.heading({ level: 3 })
+//                         ? 'bg-gray-200'
+//                         : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Heading 3"
+//                 type="button"
+//             >
+//                 <Heading3 size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Lists */}
+//             <button
+//                 onClick={() => toggleBulletList()}
+//                 className={`p-2 rounded ${
+//                     active.bulletList() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Bullet List"
+//                 type="button"
+//             >
+//                 <List size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleOrderedList()}
+//                 className={`p-2 rounded ${
+//                     active.orderedList() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Ordered List"
+//                 type="button"
+//             >
+//                 <ListOrdered size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Block elements */}
+//             <button
+//                 onClick={() => toggleCodeBlock()}
+//                 className={`p-2 rounded ${
+//                     active.codeBlock() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Code Block"
+//                 type="button"
+//             >
+//                 <Code size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleBlockquote()}
+//                 className={`p-2 rounded ${
+//                     active.blockquote() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Blockquote"
+//                 type="button"
+//             >
+//                 <Quote size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Image upload */}
+//             <div className="flex items-center">
+//                 <input
+//                     type="file"
+//                     ref={fileInputRef}
+//                     onChange={handleFileChange}
+//                     accept="image/*"
+//                     className="hidden"
+//                     id="image-upload"
+//                 />
+//                 <label
+//                     htmlFor="image-upload"
+//                     className="flex items-center p-2 rounded cursor-pointer hover:bg-gray-100"
+//                 >
+//                     <Camera size={18} className="text-gray-700" />
+//                 </label>
+//             </div>
+//         </div>
+//     )
+// }
+
+// export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
+//     initialContent,
+//     setInitialContent,
+// }) => {
+//     // Track if we're in the middle of editing to prevent feedback loops
+//     const isEditingRef = useRef<boolean>(false)
+
+//     // Reference to compare content changes
+//     const contentRef = useRef<string>('')
+
+//     // Use default content if initialContent is undefined or invalid
+//     const editorContent = initialContent?.doc || createDefaultContent()
+
+//     // Setup the Remirror manager with needed extensions
+//     const { manager, state } = useRemirror({
+//         extensions: () => [
+//             new BoldExtension({}),
+//             new ItalicExtension(),
+//             new UnderlineExtension(),
+//             new StrikeExtension(),
+//             new HeadingExtension({}),
+//             // new HeadingExtension({
+//             //     // Optional configurations:
+//             //     levels: [1, 2, 3], // Specify which heading levels to allow (default: 1-6)
+//             //     defaultLevel: 1, // Default level when toggling a heading
+//             //     // extraAttributes: {...},   // Custom attributes to add to heading elements
+//             //     // enableLight: true,        // Enable keyboard shortcuts for light-weight headings (single #)
+//             // }),
+//             new CodeBlockExtension({
+//                 defaultLanguage: 'javascript',
+//             }),
+//             new ImageExtension({
+//                 enableResizing: true,
+//             }),
+//             new BlockquoteExtension(),
+//             new CalloutExtension({ defaultType: 'info' }),
+//             new BulletListExtension({}),
+//             new OrderedListExtension(),
+//             new ListItemExtension({}),
+//         ],
+//         // Use fallback content if initialContent is potentially invalid
+//         content: editorContent,
+//         selection: 'end',
+//         // Add error handler for content validation issues
+//         onError: (error) => {
+//             console.warn('Content validation error:', error)
+//             // Return default content on error
+//             return createDefaultContent()
+//         },
+//     })
+
+//     // Handle changes from the editor
+//     const handleEditorChange = useCallback(
+//         ({ state }: { state: any }) => {
+//             // Convert the current state to JSON
+//             const json = state.toJSON()
+
+//             // Store current selection state
+//             const selection = window.getSelection()
+//             const selectionRange = selection?.rangeCount
+//                 ? selection.getRangeAt(0)
+//                 : null
+
+//             // Mark that we're editing to prevent setState feedback loops
+//             isEditingRef.current = true
+
+//             // Update our reference content immediately to prevent issues
+//             contentRef.current = JSON.stringify(json)
+
+//             // Set content without setTimeout for immediate reflection
+//             setInitialContent(json)
+
+//             // Use requestAnimationFrame instead of setTimeout for better performance
+//             // This prevents feedback loops while not interfering with selection
+//             requestAnimationFrame(() => {
+//                 isEditingRef.current = false
+
+//                 // Restore selection if it existed
+//                 if (selectionRange && selection) {
+//                     selection.removeAllRanges()
+//                     selection.addRange(selectionRange)
+//                 }
+//             })
+//         },
+//         [setInitialContent]
+//     )
+
+//     // Initialize contentRef with the initial content
+//     useEffect(() => {
+//         contentRef.current = JSON.stringify(editorContent)
+//     }, [])
+
+//     // Effect to apply valid initialContent when available
+//     useEffect(() => {
+//         // Skip if we're currently editing to prevent feedback loops
+//         if (isEditingRef.current || !initialContent) return
+
+//         try {
+//             // Try to update the content carefully
+//             const safeContent = initialContent.doc || createDefaultContent()
+//             const currentContentString = JSON.stringify(safeContent)
+
+//             // Only update if content has actually changed
+//             if (currentContentString !== contentRef.current) {
+//                 contentRef.current = currentContentString
+
+//                 try {
+//                     // Try to create a valid state with error handling
+//                     const newState = manager.createState({
+//                         content: safeContent,
+//                         selection: 'end',
+//                     })
+
+//                     // Update if state creation succeeded
+//                     manager.view.updateState(newState)
+//                 } catch (err) {
+//                     console.warn('Failed to update editor state:', err)
+//                     // Continue with current state on error
+//                 }
+//             }
+//         } catch (err) {
+//             console.warn('Error processing initialContent:', err)
+//         }
+//     }, [initialContent, manager])
+
+//     return (
+//         <div className="p-1 border rounded shadow">
+//             <Remirror
+//                 manager={manager}
+//                 initialContent={state}
+//                 onChange={handleEditorChange}
+//                 placeholder="Start typing..."
+//             >
+//                 <div className="bg-white pb-2 border-b mb-2">
+//                     <Toolbar />
+//                 </div>
+//                 <div className="remirror-editor-wrapper p-4 min-h-[250px]">
+//                     <EditorComponent />
+//                 </div>
+//             </Remirror>
+//         </div>
+//     )
+// }
+
+// export default RemirrorTextEditor
+
+// =================== Fixing Heading tags ============================
+
+// 'use client'
+
+// import React, { useCallback, useRef, useEffect } from 'react'
+// import type { RemirrorJSON } from 'remirror'
+// import {
+//     useRemirror,
+//     Remirror,
+//     useCommands,
+//     useActive,
+//     EditorComponent,
+// } from '@remirror/react'
+// import {
+//     BoldExtension,
+//     ItalicExtension,
+//     HeadingExtension,
+//     CodeBlockExtension,
+//     ImageExtension,
+//     BlockquoteExtension,
+//     CalloutExtension,
+//     UnderlineExtension,
+//     StrikeExtension,
+//     BulletListExtension,
+//     OrderedListExtension,
+//     ListItemExtension,
+// } from 'remirror/extensions'
+// import {
+//     Camera,
+//     Code,
+//     Quote,
+//     Bold,
+//     Italic,
+//     Underline,
+//     Strikethrough,
+//     Heading1,
+//     Heading2,
+//     Heading3,
+//     Heading4,
+//     Heading5,
+//     Heading6,
+//     ListOrdered,
+//     List,
+// } from 'lucide-react'
+// import { ScrollArea } from '@/components/ui/scroll-area'
+
+// interface RemirrorTextEditorProps {
+//     initialContent: any
+//     setInitialContent: (content: any) => void
+// }
+
+// // Create a simple default content if needed
+// const createDefaultContent = () => {
+//     return {
+//         type: 'doc',
+//         content: [
+//             {
+//                 type: 'paragraph',
+//                 content: [{ type: 'text', text: 'Start typing here...' }],
+//             },
+//         ],
+//     }
+// }
+
+// const Toolbar = () => {
+//     const {
+//         toggleBold,
+//         toggleItalic,
+//         toggleUnderline,
+//         toggleStrike,
+//         toggleHeading,
+//         toggleCodeBlock,
+//         toggleBlockquote,
+//         toggleBulletList,
+//         toggleOrderedList,
+//     } = useCommands()
+//     const active = useActive()
+
+//     const fileInputRef = useRef<HTMLInputElement>(null)
+//     const { insertImage } = useCommands()
+
+//     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+//         const file = event.target.files?.[0]
+//         if (!file) return
+
+//         // Create a URL for the uploaded image
+//         const imageUrl = URL.createObjectURL(file)
+
+//         // Insert the image into the editor
+//         insertImage({ src: imageUrl, alt: file.name })
+
+//         // Reset the file input
+//         if (fileInputRef.current) {
+//             fileInputRef.current.value = ''
+//         }
+//     }
+
+//     return (
+//         <div className="sticky top-0 z-10 bg-white border-b mb-2 p-2 flex flex-wrap gap-2">
+//             {/* Text formatting */}
+//             <button
+//                 onClick={() => toggleBold()}
+//                 className={`p-2 rounded ${
+//                     active.bold() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Bold"
+//                 type="button"
+//             >
+//                 <Bold size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleItalic()}
+//                 className={`p-2 rounded ${
+//                     active.italic() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Italic"
+//                 type="button"
+//             >
+//                 <Italic size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleUnderline()}
+//                 className={`p-2 rounded ${
+//                     active.underline() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Underline"
+//                 type="button"
+//             >
+//                 <Underline size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleStrike()}
+//                 className={`p-2 rounded ${
+//                     active.strike() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Strikethrough"
+//                 type="button"
+//             >
+//                 <Strikethrough size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Headings */}
+//             <button
+//                 onClick={() => toggleHeading({ level: 1 })}
+//                 className={`p-2 rounded ${
+//                     active.heading({ level: 1 })
+//                         ? 'bg-gray-200'
+//                         : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Heading 1"
+//                 type="button"
+//             >
+//                 <Heading1 size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleHeading({ level: 2 })}
+//                 className={`p-2 rounded ${
+//                     active.heading({ level: 2 })
+//                         ? 'bg-gray-200'
+//                         : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Heading 2"
+//                 type="button"
+//             >
+//                 <Heading2 size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleHeading({ level: 3 })}
+//                 className={`p-2 rounded ${
+//                     active.heading({ level: 3 })
+//                         ? 'bg-gray-200'
+//                         : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Heading 3"
+//                 type="button"
+//             >
+//                 <Heading3 size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleHeading({ level: 4 })}
+//                 className={`p-2 rounded ${
+//                     active.heading({ level: 4 })
+//                         ? 'bg-gray-200'
+//                         : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Heading 4"
+//                 type="button"
+//             >
+//                 <Heading4 size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleHeading({ level: 5 })}
+//                 className={`p-2 rounded ${
+//                     active.heading({ level: 5 })
+//                         ? 'bg-gray-200'
+//                         : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Heading 5"
+//                 type="button"
+//             >
+//                 <Heading5 size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleHeading({ level: 6 })}
+//                 className={`p-2 rounded ${
+//                     active.heading({ level: 6 })
+//                         ? 'bg-gray-200'
+//                         : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Heading 6"
+//                 type="button"
+//             >
+//                 <Heading6 size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Lists */}
+//             <button
+//                 onClick={() => toggleBulletList()}
+//                 className={`p-2 rounded ${
+//                     active.bulletList() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Bullet List"
+//                 type="button"
+//             >
+//                 <List size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleOrderedList()}
+//                 className={`p-2 rounded ${
+//                     active.orderedList() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Ordered List"
+//                 type="button"
+//             >
+//                 <ListOrdered size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Block elements */}
+//             <button
+//                 onClick={() => toggleCodeBlock()}
+//                 className={`p-2 rounded ${
+//                     active.codeBlock() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Code Block"
+//                 type="button"
+//             >
+//                 <Code size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleBlockquote()}
+//                 className={`p-2 rounded ${
+//                     active.blockquote() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Blockquote"
+//                 type="button"
+//             >
+//                 <Quote size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Image upload */}
+//             <div className="flex items-center">
+//                 <input
+//                     type="file"
+//                     ref={fileInputRef}
+//                     onChange={handleFileChange}
+//                     accept="image/*"
+//                     className="hidden"
+//                     id="image-upload"
+//                 />
+//                 <label
+//                     htmlFor="image-upload"
+//                     className="flex items-center p-2 rounded cursor-pointer hover:bg-gray-100"
+//                 >
+//                     <Camera size={18} className="text-gray-700" />
+//                 </label>
+//             </div>
+//         </div>
+//     )
+// }
+
+// export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
+//     initialContent,
+//     setInitialContent,
+// }) => {
+//     // Track if we're in the middle of editing to prevent feedback loops
+//     const isEditingRef = useRef<boolean>(false)
+
+//     // Reference to compare content changes
+//     const contentRef = useRef<string>('')
+
+//     // Use default content if initialContent is undefined or invalid
+//     const editorContent =
+//         initialContent?.doc || initialContent || createDefaultContent()
+
+//     // Setup the Remirror manager with needed extensions
+//     const { manager, state } = useRemirror({
+//         extensions: () => [
+//             new BoldExtension({}),
+//             new ItalicExtension(),
+//             new UnderlineExtension(),
+//             new StrikeExtension(),
+//             // new HeadingExtension({}),
+//             new HeadingExtension({
+//                 levels: [1, 2, 3, 4, 5, 6],
+//                 defaultLevel: 1,
+//             }),
+//             // new HeadingExtension({
+//             //     // Optional configurations:
+//             //     levels: [1, 2, 3], // Specify which heading levels to allow (default: 1-6)
+//             //     defaultLevel: 1, // Default level when toggling a heading
+//             //     // extraAttributes: {...},   // Custom attributes to add to heading elements
+//             //     // enableLight: true,        // Enable keyboard shortcuts for light-weight headings (single #)
+//             // }),
+//             new CodeBlockExtension({
+//                 defaultLanguage: 'javascript',
+//             }),
+//             new ImageExtension({
+//                 enableResizing: true,
+//             }),
+//             new BlockquoteExtension(),
+//             new CalloutExtension({ defaultType: 'info' }),
+//             new BulletListExtension({}),
+//             new OrderedListExtension(),
+//             new ListItemExtension({}),
+//         ],
+//         // Use fallback content if initialContent is potentially invalid
+//         content: editorContent,
+//         selection: 'end',
+//         // Add error handler for content validation issues
+//         onError: (error) => {
+//             console.warn('Content validation error:', error)
+//             // Return default content on error
+//             return createDefaultContent()
+//         },
+//     })
+
+//     // Handle changes from the editor
+//     const handleEditorChange = useCallback(
+//         ({ state }: { state: any }) => {
+//             // Convert the current state to JSON
+//             const json = state.toJSON()
+
+//             // Store current selection state
+//             const selection = window.getSelection()
+//             const selectionRange = selection?.rangeCount
+//                 ? selection.getRangeAt(0)
+//                 : null
+
+//             // Mark that we're editing to prevent setState feedback loops
+//             isEditingRef.current = true
+
+//             // Update our reference content immediately to prevent issues
+//             contentRef.current = JSON.stringify(json)
+
+//             // Set content without setTimeout for immediate reflection
+//             setInitialContent(json)
+
+//             // Use requestAnimationFrame instead of setTimeout for better performance
+//             // This prevents feedback loops while not interfering with selection
+//             requestAnimationFrame(() => {
+//                 isEditingRef.current = false
+
+//                 // Restore selection if it existed
+//                 if (selectionRange && selection) {
+//                     selection.removeAllRanges()
+//                     selection.addRange(selectionRange)
+//                 }
+//             })
+//         },
+//         [setInitialContent]
+//     )
+
+//     // Initialize contentRef with the initial content
+//     useEffect(() => {
+//         contentRef.current = JSON.stringify(editorContent)
+//     }, [])
+
+//     // Effect to apply valid initialContent when available
+//     useEffect(() => {
+//         // Skip if we're currently editing to prevent feedback loops
+//         if (isEditingRef.current || !initialContent) return
+
+//         try {
+//             // Try to update the content carefully
+//             const safeContent = initialContent.doc || createDefaultContent()
+//             const currentContentString = JSON.stringify(safeContent)
+
+//             // Only update if content has actually changed
+//             if (currentContentString !== contentRef.current) {
+//                 contentRef.current = currentContentString
+
+//                 try {
+//                     // Try to create a valid state with error handling
+//                     const newState = manager.createState({
+//                         content: safeContent,
+//                         selection: 'end',
+//                     })
+
+//                     // Update if state creation succeeded
+//                     manager.view.updateState(newState)
+//                 } catch (err) {
+//                     console.warn('Failed to update editor state:', err)
+//                     // Continue with current state on error
+//                 }
+//             }
+//         } catch (err) {
+//             console.warn('Error processing initialContent:', err)
+//         }
+//     }, [initialContent, manager])
+
+//     return (
+//         <div className="p-1 border rounded shadow">
+//             <style jsx global>{`
+//                 /* CSS to hide Grammarly-specific elements */
+//                 .gr_-_button,
+//                 grammarly-shadow-root,
+//                 grammarly-ghost,
+//                 grammarly-desktop-integration,
+//                 div[data-grammarly-part='button'],
+//                 span[data-grammarly-part='highlight'] {
+//                     display: none !important;
+//                     visibility: hidden !important;
+//                     opacity: 0 !important;
+//                     pointer-events: none !important;
+//                 }
+//             `}</style>
+//             <Remirror
+//                 manager={manager}
+//                 initialContent={state}
+//                 onChange={handleEditorChange}
+//                 placeholder="Start typing..."
+//                 // attributes={{ 'data-gramm': 'false' }}
+//                 attributes={{
+//                     'data-gramm': 'false',
+//                     'data-gramm_editor': 'false',
+//                     'data-enable-grammarly': 'false',
+//                     spellcheck: 'false',
+//                 }}
+//             >
+//                 <div className="bg-white pb-2 border-b mb-2">
+//                     <Toolbar />
+//                     {/* <Toolbar editorManager={manager} /> */}
+//                 </div>
+//                 <ScrollArea
+//                     className="h-96 pr-8 "
+//                     type="hover"
+//                     style={{
+//                         scrollbarWidth: 'none', // Firefox
+//                         msOverflowStyle: 'none', // IE and Edge
+//                     }}
+//                 >
+//                     <div
+//                         className="remirror-editor-wrapper p-4 min-h-[250px]"
+//                         data-gramm="false"
+//                     >
+//                         <EditorComponent />
+//                     </div>
+//                 </ScrollArea>
+//             </Remirror>
+//         </div>
+//     )
+// }
+
+// export default RemirrorTextEditor
+
+// +++++++++++++++++++++++++ All the tools are working +++++++++++++++++++++++++++
+// All tools are working - check
+// Scrollbar is inside - check
+// Got initial content - check
+// Post data - check
+
+// 'use client'
+
+// import React, { useCallback, useRef, useEffect } from 'react'
+// import type { RemirrorJSON } from 'remirror'
+// import {
+//     useRemirror,
+//     Remirror,
+//     useCommands,
+//     useActive,
+//     EditorComponent,
+// } from '@remirror/react'
+// import {
+//     BoldExtension,
+//     ItalicExtension,
+//     HeadingExtension,
+//     CodeBlockExtension,
+//     ImageExtension,
+//     BlockquoteExtension,
+//     CalloutExtension,
+//     UnderlineExtension,
+//     StrikeExtension,
+//     BulletListExtension,
+//     OrderedListExtension,
+//     ListItemExtension,
+// } from 'remirror/extensions'
+// import {
+//     Camera,
+//     Code,
+//     Quote,
+//     Bold,
+//     Italic,
+//     Underline,
+//     Strikethrough,
+//     Heading1,
+//     Heading2,
+//     Heading3,
+//     Heading4,
+//     Heading5,
+//     Heading6,
+//     ListOrdered,
+//     List,
+// } from 'lucide-react'
+// import { ScrollArea } from '@/components/ui/scroll-area'
+
+// interface RemirrorTextEditorProps {
+//     initialContent: any
+//     setInitialContent: (content: any) => void
+// }
+
+// // Create a simple default content if needed
+// const createDefaultContent = () => {
+//     return {
+//         type: 'doc',
+//         content: [
+//             {
+//                 type: 'paragraph',
+//                 content: [{ type: 'text', text: 'Start typing here...' }],
+//             },
+//         ],
+//     }
+// }
+
+// const Toolbar = () => {
+//     const {
+//         toggleBold,
+//         toggleItalic,
+//         toggleUnderline,
+//         toggleStrike,
+//         toggleHeading,
+//         toggleCodeBlock,
+//         toggleBlockquote,
+//         toggleBulletList,
+//         toggleOrderedList,
+//     } = useCommands()
+//     const active = useActive()
+
+//     const fileInputRef = useRef<HTMLInputElement>(null)
+//     const { insertImage } = useCommands()
+
+//     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+//         const file = event.target.files?.[0]
+//         if (!file) return
+
+//         // Create a URL for the uploaded image
+//         const imageUrl = URL.createObjectURL(file)
+
+//         // Insert the image into the editor
+//         insertImage({ src: imageUrl, alt: file.name })
+
+//         // Reset the file input
+//         if (fileInputRef.current) {
+//             fileInputRef.current.value = ''
+//         }
+//     }
+
+//     return (
+//         <div className="sticky top-0 z-10 bg-white border-b mb-2 p-2 flex flex-wrap gap-2">
+//             {/* Text formatting */}
+//             <button
+//                 onClick={() => toggleBold()}
+//                 className={`p-2 rounded ${
+//                     active.bold() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Bold"
+//                 type="button"
+//             >
+//                 <Bold size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleItalic()}
+//                 className={`p-2 rounded ${
+//                     active.italic() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Italic"
+//                 type="button"
+//             >
+//                 <Italic size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleUnderline()}
+//                 className={`p-2 rounded ${
+//                     active.underline() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Underline"
+//                 type="button"
+//             >
+//                 <Underline size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleStrike()}
+//                 className={`p-2 rounded ${
+//                     active.strike() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Strikethrough"
+//                 type="button"
+//             >
+//                 <Strikethrough size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Headings */}
+//             <button
+//                 onClick={() => toggleHeading({ level: 1 })}
+//                 className={`p-2 rounded ${
+//                     active.heading({ level: 1 })
+//                         ? 'bg-gray-200'
+//                         : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Heading 1"
+//                 type="button"
+//             >
+//                 <Heading1 size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleHeading({ level: 2 })}
+//                 className={`p-2 rounded ${
+//                     active.heading({ level: 2 })
+//                         ? 'bg-gray-200'
+//                         : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Heading 2"
+//                 type="button"
+//             >
+//                 <Heading2 size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleHeading({ level: 3 })}
+//                 className={`p-2 rounded ${
+//                     active.heading({ level: 3 })
+//                         ? 'bg-gray-200'
+//                         : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Heading 3"
+//                 type="button"
+//             >
+//                 <Heading3 size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleHeading({ level: 4 })}
+//                 className={`p-2 rounded ${
+//                     active.heading({ level: 4 })
+//                         ? 'bg-gray-200'
+//                         : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Heading 4"
+//                 type="button"
+//             >
+//                 <Heading4 size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleHeading({ level: 5 })}
+//                 className={`p-2 rounded ${
+//                     active.heading({ level: 5 })
+//                         ? 'bg-gray-200'
+//                         : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Heading 5"
+//                 type="button"
+//             >
+//                 <Heading5 size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleHeading({ level: 6 })}
+//                 className={`p-2 rounded ${
+//                     active.heading({ level: 6 })
+//                         ? 'bg-gray-200'
+//                         : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Heading 6"
+//                 type="button"
+//             >
+//                 <Heading6 size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Lists */}
+//             <button
+//                 onClick={() => toggleBulletList()}
+//                 className={`p-2 rounded ${
+//                     active.bulletList() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Bullet List"
+//                 type="button"
+//             >
+//                 <List size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleOrderedList()}
+//                 className={`p-2 rounded ${
+//                     active.orderedList() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Ordered List"
+//                 type="button"
+//             >
+//                 <ListOrdered size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Block elements */}
+//             <button
+//                 onClick={() => toggleCodeBlock()}
+//                 className={`p-2 rounded ${
+//                     active.codeBlock() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Code Block"
+//                 type="button"
+//             >
+//                 <Code size={18} className="text-gray-700" />
+//             </button>
+
+//             <button
+//                 onClick={() => toggleBlockquote()}
+//                 className={`p-2 rounded ${
+//                     active.blockquote() ? 'bg-gray-200' : 'hover:bg-gray-100'
+//                 }`}
+//                 title="Blockquote"
+//                 type="button"
+//             >
+//                 <Quote size={18} className="text-gray-700" />
+//             </button>
+
+//             <div className="border-l h-8 mx-1"></div>
+
+//             {/* Image upload */}
+//             <div className="flex items-center">
+//                 <input
+//                     type="file"
+//                     ref={fileInputRef}
+//                     onChange={handleFileChange}
+//                     accept="image/*"
+//                     className="hidden"
+//                     id="image-upload"
+//                 />
+//                 <label
+//                     htmlFor="image-upload"
+//                     className="flex items-center p-2 rounded cursor-pointer hover:bg-gray-100"
+//                 >
+//                     <Camera size={18} className="text-gray-700" />
+//                 </label>
+//             </div>
+//         </div>
+//     )
+// }
+
+// export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
+//     initialContent,
+//     setInitialContent,
+// }) => {
+//     // Track if we're in the middle of editing to prevent feedback loops
+//     const isEditingRef = useRef<boolean>(false)
+
+//     // Reference to compare content changes
+//     const contentRef = useRef<string>('')
+
+//     // Use default content if initialContent is undefined or invalid
+//     const editorContent =
+//         initialContent?.doc || initialContent || createDefaultContent()
+
+//     // const editorContent: RemirrorJSON =
+//     //     initialContent?.type === 'doc' ? initialContent : createDefaultContent()
+
+//     // Setup the Remirror manager with needed extensions
+//     const { manager, state } = useRemirror({
+//         extensions: () => [
+//             new BoldExtension({}),
+//             new ItalicExtension(),
+//             new UnderlineExtension(),
+//             new StrikeExtension(),
+//             // new HeadingExtension({}),
+//             new HeadingExtension({
+//                 levels: [1, 2, 3, 4, 5, 6],
+//                 defaultLevel: 1,
+//             }),
+//             // new HeadingExtension({
+//             //     // Optional configurations:
+//             //     levels: [1, 2, 3], // Specify which heading levels to allow (default: 1-6)
+//             //     defaultLevel: 1, // Default level when toggling a heading
+//             //     // extraAttributes: {...},   // Custom attributes to add to heading elements
+//             //     // enableLight: true,        // Enable keyboard shortcuts for light-weight headings (single #)
+//             // }),
+//             new CodeBlockExtension({
+//                 defaultLanguage: 'javascript',
+//             }),
+//             new ImageExtension({
+//                 enableResizing: true,
+//             }),
+//             new BlockquoteExtension(),
+//             new CalloutExtension({ defaultType: 'info' }),
+//             new BulletListExtension({}),
+//             new OrderedListExtension(),
+//             new ListItemExtension({}),
+//         ],
+//         // Use fallback content if initialContent is potentially invalid
+//         content: editorContent,
+//         selection: 'end',
+//         // Add error handler for content validation issues
+//         onError: (error) => {
+//             console.warn('Content validation error:', error)
+//             // Return default content on error
+//             return createDefaultContent()
+//         },
+//     })
+
+//     // Handle changes from the editor
+//     const handleEditorChange = useCallback(
+//         ({ state }: { state: any }) => {
+//             // Convert the current state to JSON
+//             const json = state.toJSON()
+
+//             // Store current selection state
+//             const selection = window.getSelection()
+//             const selectionRange = selection?.rangeCount
+//                 ? selection.getRangeAt(0)
+//                 : null
+
+//             // Mark that we're editing to prevent setState feedback loops
+//             isEditingRef.current = true
+
+//             // Update our reference content immediately to prevent issues
+//             contentRef.current = JSON.stringify(json)
+
+//             // Set content without setTimeout for immediate reflection
+//             setInitialContent(json)
+
+//             // Use requestAnimationFrame instead of setTimeout for better performance
+//             // This prevents feedback loops while not interfering with selection
+//             requestAnimationFrame(() => {
+//                 isEditingRef.current = false
+
+//                 // Restore selection if it existed
+//                 if (selectionRange && selection) {
+//                     selection.removeAllRanges()
+//                     selection.addRange(selectionRange)
+//                 }
+//             })
+//         },
+//         [setInitialContent]
+//     )
+
+//     // Initialize contentRef with the initial content
+//     useEffect(() => {
+//         contentRef.current = JSON.stringify(editorContent)
+//     }, [])
+
+//     // Effect to apply valid initialContent when available
+//     useEffect(() => {
+//         // Skip if we're currently editing to prevent feedback loops
+//         if (isEditingRef.current || !initialContent) return
+
+//         try {
+//             // Try to update the content carefully
+//             const safeContent = initialContent.doc || createDefaultContent()
+//             const currentContentString = JSON.stringify(safeContent)
+
+//             // Only update if content has actually changed
+//             if (currentContentString !== contentRef.current) {
+//                 contentRef.current = currentContentString
+
+//                 try {
+//                     // Try to create a valid state with error handling
+//                     const newState = manager.createState({
+//                         content: safeContent,
+//                         selection: 'end',
+//                     })
+
+//                     // Update if state creation succeeded
+//                     manager.view.updateState(newState)
+//                 } catch (err) {
+//                     console.warn('Failed to update editor state:', err)
+//                     // Continue with current state on error
+//                 }
+//             }
+//         } catch (err) {
+//             console.warn('Error processing initialContent:', err)
+//         }
+//     }, [initialContent, manager])
+
+//     return (
+//         <div className="p-1 border rounded shadow">
+//             <style jsx global>{`
+//                 /* CSS to hide Grammarly-specific elements */
+//                 .gr_-_button,
+//                 grammarly-shadow-root,
+//                 grammarly-ghost,
+//                 grammarly-desktop-integration,
+//                 div[data-grammarly-part='button'],
+//                 span[data-grammarly-part='highlight'] {
+//                     display: none !important;
+//                     visibility: hidden !important;
+//                     opacity: 0 !important;
+//                     pointer-events: none !important;
+//                 }
+
+//                 /* Add specific styles to make headings more visible */
+//                 .ProseMirror h1 {
+//                     font-size: 2em;
+//                     font-weight: bold;
+//                     margin-top: 0.67em;
+//                     margin-bottom: 0.67em;
+//                 }
+//                 .ProseMirror h2 {
+//                     font-size: 1.5em;
+//                     font-weight: bold;
+//                     margin-top: 0.83em;
+//                     margin-bottom: 0.83em;
+//                 }
+//                 .ProseMirror h3 {
+//                     font-size: 1.17em;
+//                     font-weight: bold;
+//                     margin-top: 1em;
+//                     margin-bottom: 1em;
+//                 }
+//                 .ProseMirror h4 {
+//                     font-size: 1em;
+//                     font-weight: bold;
+//                     margin-top: 1.33em;
+//                     margin-bottom: 1.33em;
+//                 }
+//                 .ProseMirror h5 {
+//                     font-size: 0.83em;
+//                     font-weight: bold;
+//                     margin-top: 1.67em;
+//                     margin-bottom: 1.67em;
+//                 }
+//                 .ProseMirror h6 {
+//                     font-size: 0.67em;
+//                     font-weight: bold;
+//                     margin-top: 2.33em;
+//                     margin-bottom: 2.33em;
+//                 }
+//             `}</style>
+//             <Remirror
+//                 manager={manager}
+//                 initialContent={state}
+//                 onChange={handleEditorChange}
+//                 placeholder="Start typing..."
+//             >
+//                 <div className="bg-white pb-2 border-b mb-2">
+//                     <Toolbar />
+//                 </div>
+//                 <ScrollArea
+//                     className="h-96 pr-8 "
+//                     type="hover"
+//                     style={{
+//                         scrollbarWidth: 'none', // Firefox
+//                         msOverflowStyle: 'none', // IE and Edge
+//                     }}
+//                 >
+//                     <div
+//                         className="remirror-editor-wrapper p-4 min-h-[250px]"
+//                         data-gramm="false"
+//                     >
+//                         <EditorComponent />
+//                     </div>
+//                 </ScrollArea>
+//             </Remirror>
+//         </div>
+//     )
+// }
+
+// export default RemirrorTextEditor
+
+// +++++++++++++++++++++++++++ Separating files +++++++++++++++++++++++++++
+
+// 'use client'
+
+// import React, { useCallback, useRef, useEffect } from 'react'
+// import { useRemirror, Remirror, EditorComponent } from '@remirror/react'
+// import {
+//     BoldExtension,
+//     ItalicExtension,
+//     HeadingExtension,
+//     CodeBlockExtension,
+//     ImageExtension,
+//     BlockquoteExtension,
+//     CalloutExtension,
+//     UnderlineExtension,
+//     StrikeExtension,
+//     BulletListExtension,
+//     OrderedListExtension,
+//     ListItemExtension,
+// } from 'remirror/extensions'
+// import { ScrollArea } from '@/components/ui/scroll-area'
+// import { Toolbar } from './Toolbar'
+
+// interface RemirrorTextEditorProps {
+//     initialContent: any
+//     setInitialContent: (content: any) => void
+// }
+
+// // Create a simple default content if needed
+// const createDefaultContent = () => {
+//     return {
+//         type: 'doc',
+//         content: [
+//             {
+//                 type: 'paragraph',
+//                 content: [{ type: 'text', text: 'Start typing here...' }],
+//             },
+//         ],
+//     }
+// }
+
+// export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
+//     initialContent,
+//     setInitialContent,
+// }) => {
+//     // Track if we're in the middle of editing to prevent feedback loops
+//     const isEditingRef = useRef<boolean>(false)
+
+//     // Reference to compare content changes
+//     const contentRef = useRef<string>('')
+
+//     // Use default content if initialContent is undefined or invalid
+//     const editorContent =
+//         initialContent?.doc || initialContent || createDefaultContent()
+
+//     // Setup the Remirror manager with needed extensions
+//     const { manager, state } = useRemirror({
+//         extensions: () => [
+//             new BoldExtension({}),
+//             new ItalicExtension(),
+//             new UnderlineExtension(),
+//             new StrikeExtension(),
+//             // new HeadingExtension({}),
+//             new HeadingExtension({
+//                 levels: [1, 2, 3, 4, 5, 6],
+//                 defaultLevel: 1,
+//             }),
+//             new CodeBlockExtension({
+//                 defaultLanguage: 'javascript',
+//             }),
+//             new ImageExtension({
+//                 enableResizing: true,
+//             }),
+//             new BlockquoteExtension(),
+//             new CalloutExtension({ defaultType: 'info' }),
+//             new BulletListExtension({}),
+//             new OrderedListExtension(),
+//             new ListItemExtension({}),
+//         ],
+//         // Use fallback content if initialContent is potentially invalid
+//         content: editorContent,
+//         selection: 'end',
+//         // Add error handler for content validation issues
+//         onError: (error) => {
+//             console.warn('Content validation error:', error)
+//             // Return default content on error
+//             return createDefaultContent()
+//         },
+//     })
+
+//     // Handle changes from the editor
+//     const handleEditorChange = useCallback(
+//         ({ state }: { state: any }) => {
+//             // Convert the current state to JSON
+//             const json = state.toJSON()
+
+//             // Store current selection state
+//             const selection = window.getSelection()
+//             const selectionRange = selection?.rangeCount
+//                 ? selection.getRangeAt(0)
+//                 : null
+
+//             // Mark that we're editing to prevent setState feedback loops
+//             isEditingRef.current = true
+
+//             // Update our reference content immediately to prevent issues
+//             contentRef.current = JSON.stringify(json)
+
+//             // Set content without setTimeout for immediate reflection
+//             setInitialContent(json)
+
+//             // Use requestAnimationFrame instead of setTimeout for better performance
+//             // This prevents feedback loops while not interfering with selection
+//             requestAnimationFrame(() => {
+//                 isEditingRef.current = false
+
+//                 // Restore selection if it existed
+//                 if (selectionRange && selection) {
+//                     selection.removeAllRanges()
+//                     selection.addRange(selectionRange)
+//                 }
+//             })
+//         },
+//         [setInitialContent]
+//     )
+
+//     // Initialize contentRef with the initial content
+//     useEffect(() => {
+//         contentRef.current = JSON.stringify(editorContent)
+//     }, [])
+
+//     // Effect to apply valid initialContent when available
+//     useEffect(() => {
+//         // Skip if we're currently editing to prevent feedback loops
+//         if (isEditingRef.current || !initialContent) return
+
+//         try {
+//             // Try to update the content carefully
+//             const safeContent = initialContent.doc || createDefaultContent()
+//             const currentContentString = JSON.stringify(safeContent)
+
+//             // Only update if content has actually changed
+//             if (currentContentString !== contentRef.current) {
+//                 contentRef.current = currentContentString
+
+//                 try {
+//                     // Try to create a valid state with error handling
+//                     const newState = manager.createState({
+//                         content: safeContent,
+//                         selection: 'end',
+//                     })
+
+//                     // Update if state creation succeeded
+//                     manager.view.updateState(newState)
+//                 } catch (err) {
+//                     console.warn('Failed to update editor state:', err)
+//                     // Continue with current state on error
+//                 }
+//             }
+//         } catch (err) {
+//             console.warn('Error processing initialContent:', err)
+//         }
+//     }, [initialContent, manager])
+
+//     return (
+//         <div className="p-1 border rounded shadow">
+//             <Remirror
+//                 manager={manager}
+//                 initialContent={state}
+//                 onChange={handleEditorChange}
+//                 placeholder="Start typing..."
+//             >
+//                 <div className="bg-white pb-2 border-b mb-2">
+//                     <Toolbar />
+//                 </div>
+//                 <ScrollArea
+//                     className="h-96 pr-8 "
+//                     type="hover"
+//                     style={{
+//                         scrollbarWidth: 'none', // Firefox
+//                         msOverflowStyle: 'none', // IE and Edge
+//                     }}
+//                 >
+//                     <div
+//                         className="remirror-editor-wrapper p-4 min-h-[250px]"
+//                         data-gramm="false"
+//                     >
+//                         <EditorComponent />
+//                     </div>
+//                 </ScrollArea>
+//             </Remirror>
+//         </div>
+//     )
+// }
+
+// export default RemirrorTextEditor

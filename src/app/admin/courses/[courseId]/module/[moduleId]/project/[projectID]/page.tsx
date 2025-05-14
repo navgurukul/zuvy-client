@@ -41,7 +41,9 @@ import ProjectPreview from '../_components/ProjectPreview'
 import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { getProjectPreviewStore } from '@/store/store'
-import { RemirrorTextEditor } from '@/components/RichTextEditor'
+// import { RemirrorTextEditor } from '@/components/RichTextEditor'
+import { RemirrorJSON } from 'remirror'
+import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 // import { RemirrorTextEditor } from '@/components/WysiwygEditor'
 // import { RichTextEditor } from '@/components/RichTextEditor'
 // import RichTextEditor from '@/components/RichTextEditor'
@@ -66,7 +68,9 @@ export default function Project() {
     const { setProjectPreviewContent } = getProjectPreviewStore()
     const [showPreview, setShowPreview] = useState<boolean>(false)
     const { courseId, moduleId, projectID } = useParams()
-    const [initialContent, setInitialContent] = useState()
+    const [initialContent, setInitialContent] = useState<RemirrorJSON | null>(
+        null
+    )
     const editor = useEditor({
         extensions,
     })
