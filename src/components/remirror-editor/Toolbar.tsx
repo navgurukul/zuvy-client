@@ -5,6 +5,8 @@ import { useCommands, useActive } from '@remirror/react'
 import {
     Camera,
     Code,
+    Braces,
+    Blocks,
     Quote,
     Bold,
     Italic,
@@ -14,11 +16,10 @@ import {
     Heading2,
     Heading3,
     Heading4,
-    Heading5,
-    Heading6,
     ListOrdered,
     List,
 } from 'lucide-react'
+import './remirror-editor.css'
 
 export const Toolbar = () => {
     const {
@@ -27,6 +28,7 @@ export const Toolbar = () => {
         toggleUnderline,
         toggleStrike,
         toggleHeading,
+        toggleCode,
         toggleCodeBlock,
         toggleBlockquote,
         toggleBulletList,
@@ -155,32 +157,6 @@ export const Toolbar = () => {
                 <Heading4 size={18} className="text-gray-700" />
             </button>
 
-            {/* <button
-                onClick={() => toggleHeading({ level: 5 })}
-                className={`p-2 rounded ${
-                    active.heading({ level: 5 })
-                        ? 'bg-gray-200'
-                        : 'hover:bg-gray-100'
-                }`}
-                title="Heading 5"
-                type="button"
-            >
-                <Heading5 size={18} className="text-gray-700" />
-            </button>
-
-            <button
-                onClick={() => toggleHeading({ level: 6 })}
-                className={`p-2 rounded ${
-                    active.heading({ level: 6 })
-                        ? 'bg-gray-200'
-                        : 'hover:bg-gray-100'
-                }`}
-                title="Heading 6"
-                type="button"
-            >
-                <Heading6 size={18} className="text-gray-700" />
-            </button> */}
-
             <div className="border-l h-8 mx-1"></div>
 
             {/* Lists */}
@@ -209,6 +185,18 @@ export const Toolbar = () => {
             <div className="border-l h-8 mx-1"></div>
 
             {/* Block elements */}
+
+            <button
+                onClick={() => toggleCode()}
+                className={`p-2 rounded ${
+                    active.code() ? 'bg-gray-200' : 'hover:bg-gray-100'
+                }`}
+                title="Code"
+                type="button"
+            >
+                <Code size={18} className="text-gray-700" />
+            </button>
+
             <button
                 onClick={() => toggleCodeBlock()}
                 className={`p-2 rounded ${
@@ -217,7 +205,18 @@ export const Toolbar = () => {
                 title="Code Block"
                 type="button"
             >
-                <Code size={18} className="text-gray-700" />
+                <Braces size={18} className="text-gray-700" />
+            </button>
+
+            <button
+                onClick={() => toggleCodeBlock()}
+                className={`p-2 rounded ${
+                    active.codeBlock() ? 'bg-gray-200' : 'hover:bg-gray-100'
+                }`}
+                title="Code Block"
+                type="button"
+            >
+                <Blocks size={18} className="text-gray-700" />
             </button>
 
             <button

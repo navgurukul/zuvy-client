@@ -48,3 +48,90 @@ span[data-grammarly-part='highlight'] {
     margin-top: 2.33em;
     margin-bottom: 2.33em;
 }
+
+pre code {
+    font-size: 14px !important;
+    padding: 1px 5px;
+    border: none;
+    padding: 0;
+}
+
+code {
+    white-space: pre-wrap;
+    font-size: 12px;
+    box-sizing: border-box;
+    color: rgb(255, 136, 0);
+    border: 1px solid #cfcbcb;
+    border-radius: 3px;
+    padding-left: 3px;
+    padding-right: 3px;
+}
+
+/* Basic editor container styles */
+.remirror-editor {
+    position: relative;
+    border-radius: 0.375rem;
+    min-height: 200px;
+    width: 100%;
+}
+
+/* Lists styling - essential for list visibility */
+.remirror-editor ul {
+    list-style-type: disc;
+    padding-left: 2em;
+    margin: 1em 0;
+}
+
+.remirror-editor ol {
+    list-style-type: decimal;
+    padding-left: 2em;
+    margin: 1em 0;
+}
+
+/* List items styling */
+.remirror-editor li {
+    position: relative;
+    margin-bottom: 0.25em;
+}
+
+/* Nested lists styling */
+.remirror-editor ul ul,
+.remirror-editor ol ol,
+.remirror-editor ul ol,
+.remirror-editor ol ul {
+    margin-top: 0.25em;
+    margin-bottom: 0;
+}
+
+/* Different list markers for nested unordered lists */
+.remirror-editor ul ul {
+    list-style-type: circle;
+}
+
+.remirror-editor ul ul ul {
+    list-style-type: square;
+}
+
+/* Better visualization for ordered lists */
+.remirror-editor ol {
+    counter-reset: item;
+}
+
+/* Support for list spines if enabled */
+.remirror-editor .spine {
+    position: absolute;
+    left: -1.5em;
+    top: 0.5em;
+    bottom: -0.5em;
+    width: 2px;
+    background-color: #e2e8f0;
+}
+
+/* Additional helpful styles for other elements */
+.remirror-editor blockquote {
+    border-left: 4px solid #e2e8f0;
+    padding-left: 1em;
+    margin-left: 0;
+    margin-right: 0;
+    font-style: italic;
+}

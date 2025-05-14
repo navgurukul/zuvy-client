@@ -199,11 +199,17 @@
 'use client'
 
 import React, { useCallback, useRef, useEffect } from 'react'
-import { useRemirror, Remirror, EditorComponent } from '@remirror/react'
+import {
+    useRemirror,
+    Remirror,
+    EditorComponent,
+    ThemeProvider,
+} from '@remirror/react'
 import {
     BoldExtension,
     ItalicExtension,
     HeadingExtension,
+    CodeExtension,
     CodeBlockExtension,
     ImageExtension,
     BlockquoteExtension,
@@ -262,6 +268,7 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
                 levels: [1, 2, 3, 4, 5, 6],
                 defaultLevel: 1,
             }),
+            new CodeExtension(),
             new CodeBlockExtension({
                 defaultLanguage: 'javascript',
             }),
@@ -360,33 +367,45 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
     }, [initialContent, manager])
 
     return (
-        <div className="p-1 border rounded shadow">
-            <Remirror
-                manager={manager}
-                initialContent={state}
-                onChange={handleEditorChange}
-                placeholder="Start typing..."
-            >
-                <div className="bg-white pb-2 border-b mb-2">
-                    <Toolbar />
-                </div>
-                <ScrollArea
-                    className="h-96 pr-8 "
-                    type="hover"
-                    style={{
-                        scrollbarWidth: 'none', // Firefox
-                        msOverflowStyle: 'none', // IE and Edge
-                    }}
+        <ThemeProvider
+            theme={{
+                color: {
+                    primary: '#3b82f6', // Tailwind's blue-500
+                    border: '#d1d5db', // Tailwind's gray-300
+                    background: '#f9fafb', // Tailwind's gray-50
+                    active: { border: '#2563eb', primary: '#1d4ed8' }, // blue-600, blue-700
+                },
+                fontFamily: { default: 'Inter, sans-serif' },
+            }}
+        >
+            <div className="p-1 border rounded shadow">
+                <Remirror
+                    manager={manager}
+                    initialContent={state}
+                    onChange={handleEditorChange}
+                    placeholder="Start typing..."
                 >
-                    <div
-                        className="remirror-editor-wrapper p-4 min-h-[250px]"
-                        data-gramm="false"
-                    >
-                        <EditorComponent />
+                    <div className="bg-white pb-2 border-b mb-2">
+                        <Toolbar />
                     </div>
-                </ScrollArea>
-            </Remirror>
-        </div>
+                    <ScrollArea
+                        className="h-96 pr-8 "
+                        type="hover"
+                        style={{
+                            scrollbarWidth: 'none', // Firefox
+                            msOverflowStyle: 'none', // IE and Edge
+                        }}
+                    >
+                        <div
+                            className="remirror-editor-wrapper p-4 min-h-[250px]"
+                            data-gramm="false"
+                        >
+                            <EditorComponent />
+                        </div>
+                    </ScrollArea>
+                </Remirror>
+            </div>
+        </ThemeProvider>
     )
 }
 
