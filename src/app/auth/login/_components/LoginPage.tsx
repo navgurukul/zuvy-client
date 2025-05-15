@@ -16,7 +16,7 @@ import { apiMeraki, api } from '@/utils/axios.config'
 import { getUser } from '@/store/store'
 import { gapi } from 'gapi-script'
 
-const GOOGLE_CLIENT_ID = '731752885517-bkvk896u1o9mbd3nmjvcb8top6tref68.apps.googleusercontent.com'
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
 
 type Props = {}
 
