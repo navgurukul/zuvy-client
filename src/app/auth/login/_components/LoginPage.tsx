@@ -14,7 +14,7 @@ import { toast } from '@/components/ui/use-toast'
 import Link from 'next/link'
 import { apiMeraki, api } from '@/utils/axios.config'
 import { getUser } from '@/store/store'
-import { gapi } from 'gapi-script'
+import dynamic from 'next/dynamic'
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
 
@@ -40,59 +40,71 @@ function LoginPage({}: Props) {
     const router = useRouter()
 
     useEffect(() => {
-        const start = () => {
-            gapi.client.init({
-                clientId: GOOGLE_CLIENT_ID,
-                scope: 'email',
-            })
-        }
+        if (typeof window === 'undefined') return;
         
-        gapi.load('client:auth2', start)
+        const loadGapi = async () => {
+            try {
+                const { gapi } = await import('gapi-script');
+                
+                const start = () => {
+                    gapi.client.init({
+                        clientId: GOOGLE_CLIENT_ID,
+                        scope: 'email',
+                    });
+                };
+                
+                gapi.load('client:auth2', start);
+            } catch (error) {
+                console.error('Error loading gapi:', error);
+            }
+        };
         
-        const urlParams = new URLSearchParams(window.location.search)
-        const tokenVal = urlParams.get('token')
-        const loggedOutToken = urlParams.get('loggedOutToken')
+        loadGapi();
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokenVal = urlParams.get('token');
+        const loggedOutToken = urlParams.get('loggedOutToken');
 
-        let redirectUrl = localStorage.getItem('redirectedUrl')
-        setRedirectedUrl(redirectUrl)
+        let redirectUrl = localStorage.getItem('redirectedUrl');
+        setRedirectedUrl(redirectUrl);
         
         if (window.location.href.includes('route')) {
-            const route = urlParams.get('route')
-            redirectUrl = route ?? ''
-            localStorage.setItem('redirectedUrl', redirectUrl)
-            setCookie('redirectedUrl', JSON.stringify(btoa(redirectUrl)))
-            setRedirectedUrl(redirectUrl)
+            const route = urlParams.get('route');
+            redirectUrl = route ?? '';
+            localStorage.setItem('redirectedUrl', redirectUrl);
+            setCookie('redirectedUrl', JSON.stringify(btoa(redirectUrl)));
+            setRedirectedUrl(redirectUrl);
         }
 
         if (tokenVal) {
-            setLoading(true)
-            localStorage.setItem('loggedOutToken', JSON.stringify(loggedOutToken))
-            localStorage.setItem('token', reverseJwtBody(tokenVal))
-            sendGoogleUserData(reverseJwtBody(tokenVal))
+            setLoading(true);
+            localStorage.setItem('loggedOutToken', JSON.stringify(loggedOutToken));
+            localStorage.setItem('token', reverseJwtBody(tokenVal));
+            sendGoogleUserData(reverseJwtBody(tokenVal));
         }
 
         if (!localStorage.getItem('token')) {
-            localStorage.setItem('token', '')
+            localStorage.setItem('token', '');
         }
         if (!localStorage.getItem('loggedOut')) {
-            localStorage.setItem('loggedOut', String(false))
+            localStorage.setItem('loggedOut', String(false));
         }
     }, [router])
     
     useEffect(() => {
-        if (historyBlocked) {
-            window.history.pushState(null, '', window.location.href)
-            
-            const handlePopState = () => {
-                window.history.pushState(null, '', window.location.href)
-            }
-            
-            window.addEventListener('popstate', handlePopState)
-            
-            return () => {
-                window.removeEventListener('popstate', handlePopState)
-            }
-        }
+        if (typeof window === 'undefined' || !historyBlocked) return;
+        
+        window.history.pushState(null, '', window.location.href);
+        
+        const handlePopState = () => {
+            window.history.pushState(null, '', window.location.href);
+        };
+        
+        window.addEventListener('popstate', handlePopState);
+        
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+        };
     }, [historyBlocked])
 
     const handleRedirection = () => {
@@ -181,46 +193,53 @@ function LoginPage({}: Props) {
         }
     }
 
-    const handleGoogleSignIn = () => {
+    const handleGoogleSignIn = async () => {
+        if (typeof window === 'undefined') return;
+        
         try {
-            setLoading(true)
-            const auth2 = gapi.auth2.getAuthInstance()
+            setLoading(true);
+            
+            const { gapi } = await import('gapi-script');
+            
+            const auth2 = gapi.auth2.getAuthInstance();
             if (!auth2) {
                 gapi.auth2.init({
                     client_id: GOOGLE_CLIENT_ID,
                 }).then((auth2: any) => {
-                    signInWithGoogle(auth2)
-                })
+                    signInWithGoogle(auth2, gapi);
+                });
             } else {
-                signInWithGoogle(auth2)
+                signInWithGoogle(auth2, gapi);
             }
         } catch (err) {
-            console.error('Google Sign-in error:', err)
-            setLoading(false)
+            console.error('Google Sign-in error:', err);
+            setLoading(false);
             toast({
                 title: 'Failed',
                 description: 'Google Sign-in failed. Please try again.',
                 className: 'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-            })
+            });
         }
-    }
+    };
     
-    const signInWithGoogle = (auth2: any) => {
+    const signInWithGoogle = (auth2: any, gapi: any) => {
+        if (typeof window === 'undefined') return;
+        
         auth2.signIn().then((googleUser: any) => {
-            const id_token = googleUser.getAuthResponse().id_token
-            const formattedToken = reverseJwtBody(id_token)
-            localStorage.setItem('token', formattedToken)
-            sendGoogleUserData(formattedToken)
+            const id_token = googleUser.getAuthResponse().id_token;
+            const formattedToken = reverseJwtBody(id_token);
+            localStorage.setItem('token', formattedToken);
+            sendGoogleUserData(formattedToken);
         }).catch((err: any) => {
-            console.error('Google Sign-in error:', err)
-            setLoading(false)
+            console.error('Google Sign-in error:', err);
+            setLoading(false);
             toast({
                 title: 'Failed',
                 description: 'Google Sign-in failed. Please try again.',
                 className: 'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-            })
-        })
-    }
+            });
+        });
+    };
 
     const handleMagicLinkSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
