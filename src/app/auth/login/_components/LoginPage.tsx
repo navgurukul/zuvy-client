@@ -14,6 +14,9 @@ import { toast } from '@/components/ui/use-toast'
 import Link from 'next/link'
 import { apiMeraki, api } from '@/utils/axios.config'
 import { getUser } from '@/store/store'
+import { gapi } from 'gapi-script'
+
+const GOOGLE_CLIENT_ID = '731752885517-bkvk896u1o9mbd3nmjvcb8top6tref68.apps.googleusercontent.com'
 
 type Props = {}
 
@@ -32,10 +35,20 @@ function LoginPage({}: Props) {
     const [redirectedUrl, setRedirectedUrl] = useState<string | null>(null)
     const [isEnrolled, setIsEnrolled] = useState<boolean | null>(null)
     const [enrollmentChecked, setEnrollmentChecked] = useState(false)
+    const [historyBlocked, setHistoryBlocked] = useState(false)
     const { user, setUser } = getUser()
     const router = useRouter()
 
     useEffect(() => {
+        const start = () => {
+            gapi.client.init({
+                clientId: GOOGLE_CLIENT_ID,
+                scope: 'email',
+            })
+        }
+        
+        gapi.load('client:auth2', start)
+        
         const urlParams = new URLSearchParams(window.location.search)
         const tokenVal = urlParams.get('token')
         const loggedOutToken = urlParams.get('loggedOutToken')
@@ -65,6 +78,22 @@ function LoginPage({}: Props) {
             localStorage.setItem('loggedOut', String(false))
         }
     }, [router])
+    
+    useEffect(() => {
+        if (historyBlocked) {
+            window.history.pushState(null, '', window.location.href)
+            
+            const handlePopState = () => {
+                window.history.pushState(null, '', window.location.href)
+            }
+            
+            window.addEventListener('popstate', handlePopState)
+            
+            return () => {
+                window.removeEventListener('popstate', handlePopState)
+            }
+        }
+    }, [historyBlocked])
 
     const handleRedirection = () => {
         if (!user) return
@@ -101,7 +130,14 @@ function LoginPage({}: Props) {
             
             if (!isStudentEnrolled) {
                 setLoading(false)
+                setHistoryBlocked(true) // Block history when showing enrollment message
             } else {
+                // Show success message for enrolled students
+                toast({
+                    title: 'Login Successful',
+                    description: 'Welcome to Zuvy Dashboard',
+                    className: 'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+                })
                 // Continue with redirection for enrolled students
                 handleRedirection()
             }
@@ -123,20 +159,16 @@ function LoginPage({}: Props) {
             })
 
             setUser(resp.data.user)
-
-            if (resp.data.user) {
-                toast({
-                    title: 'Login Successful',
-                    description: 'Welcome to Zuvy Dashboard',
-                    className: 'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
-                })
-            }
-
             localStorage.setItem('AUTH', JSON.stringify(resp.data.user))
             
             if (!resp.data.user.rolesList[0]) {
                 await checkEnrollment()
             } else {
+                toast({
+                    title: 'Login Successful',
+                    description: 'Welcome to Zuvy Dashboard',
+                    className: 'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+                })
                 handleRedirection()
             }
         } catch (err: any) {
@@ -150,7 +182,44 @@ function LoginPage({}: Props) {
     }
 
     const handleGoogleSignIn = () => {
-        window.location.href = loginUrl || ''
+        try {
+            setLoading(true)
+            const auth2 = gapi.auth2.getAuthInstance()
+            if (!auth2) {
+                gapi.auth2.init({
+                    client_id: GOOGLE_CLIENT_ID,
+                }).then((auth2: any) => {
+                    signInWithGoogle(auth2)
+                })
+            } else {
+                signInWithGoogle(auth2)
+            }
+        } catch (err) {
+            console.error('Google Sign-in error:', err)
+            setLoading(false)
+            toast({
+                title: 'Failed',
+                description: 'Google Sign-in failed. Please try again.',
+                className: 'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+            })
+        }
+    }
+    
+    const signInWithGoogle = (auth2: any) => {
+        auth2.signIn().then((googleUser: any) => {
+            const id_token = googleUser.getAuthResponse().id_token
+            const formattedToken = reverseJwtBody(id_token)
+            localStorage.setItem('token', formattedToken)
+            sendGoogleUserData(formattedToken)
+        }).catch((err: any) => {
+            console.error('Google Sign-in error:', err)
+            setLoading(false)
+            toast({
+                title: 'Failed',
+                description: 'Google Sign-in failed. Please try again.',
+                className: 'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+            })
+        })
     }
 
     const handleMagicLinkSubmit = async (e: React.FormEvent) => {
@@ -207,6 +276,7 @@ function LoginPage({}: Props) {
                                 onClick={() => {
                                     setEnrollmentChecked(false);
                                     setIsEnrolled(null);
+                                    setHistoryBlocked(false); // Reset history blocking
                                 }} 
                                 className="w-full bg-[#2f433a]"
                             >
