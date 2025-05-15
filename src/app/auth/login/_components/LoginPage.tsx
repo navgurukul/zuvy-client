@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import './styles/login.css'
 import { toast } from '@/components/ui/use-toast'
 import Link from 'next/link'
-import { apiMeraki } from '@/utils/axios.config'
+import { apiMeraki, api } from '@/utils/axios.config'
 import { getUser } from '@/store/store'
 
 type Props = {}
@@ -30,6 +30,8 @@ function LoginPage({}: Props) {
     const [email, setEmail] = useState('')
     const [magicLinkSent, setMagicLinkSent] = useState(false)
     const [redirectedUrl, setRedirectedUrl] = useState<string | null>(null)
+    const [isEnrolled, setIsEnrolled] = useState<boolean | null>(null)
+    const [enrollmentChecked, setEnrollmentChecked] = useState(false)
     const { user, setUser } = getUser()
     const router = useRouter()
 
@@ -64,6 +66,53 @@ function LoginPage({}: Props) {
         }
     }, [router])
 
+    const handleRedirection = () => {
+        if (!user) return
+        
+        if (!user.rolesList[0]) {
+            setCookie('secure_typeuser', JSON.stringify(btoa('student')))
+
+            if (redirectedUrl) {
+                return router.push(redirectedUrl)
+            } else {
+                return router.push('student')
+            }
+        } else if (user.rolesList[0]) {
+            const userRole = user.rolesList[0]
+            setCookie('secure_typeuser', JSON.stringify(btoa(userRole)))
+            if (redirectedUrl) {
+                return router.push(redirectedUrl)
+            } else if (userRole === 'admin') {
+                return router.push('/admin/courses')
+            } else if (userRole === 'instructor') {
+                return router.push('/instructor')
+            }
+
+            return router.push(`/${userRole}`)
+        }
+    }
+
+    const checkEnrollment = async () => {
+        try {
+            const response = await api.get('/student')
+            const isStudentEnrolled = Array.isArray(response.data) && response.data.length > 0
+            setIsEnrolled(isStudentEnrolled)
+            setEnrollmentChecked(true)
+            
+            if (!isStudentEnrolled) {
+                setLoading(false)
+            } else {
+                // Continue with redirection for enrolled students
+                handleRedirection()
+            }
+        } catch (err: any) {
+            console.error('Error checking enrollment:', err)
+            setIsEnrolled(true)
+            setEnrollmentChecked(true)
+            handleRedirection()
+        }
+    }
+
     const sendGoogleUserData = async (token: any) => {
         try {
             const resp = await apiMeraki.get(`/users/me`, {
@@ -84,26 +133,11 @@ function LoginPage({}: Props) {
             }
 
             localStorage.setItem('AUTH', JSON.stringify(resp.data.user))
+            
             if (!resp.data.user.rolesList[0]) {
-                setCookie('secure_typeuser', JSON.stringify(btoa('student')))
-
-                if (redirectedUrl) {
-                    return router.push(redirectedUrl)
-                } else {
-                    return router.push('student')
-                }
-            } else if (resp.data.user.rolesList[0]) {
-                const userRole = resp.data.user.rolesList[0]
-                setCookie('secure_typeuser', JSON.stringify(btoa(resp.data.user.rolesList[0])))
-                if (redirectedUrl) {
-                    return router.push(redirectedUrl)
-                } else if (userRole === 'admin') {
-                    return router.push('/admin/courses')
-                } else if (userRole === 'instructor') {
-                    return router.push('/instructor')
-                }
-
-                return router.push(`/${resp.data.user.rolesList[0]}`)
+                await checkEnrollment()
+            } else {
+                handleRedirection()
             }
         } catch (err: any) {
             setLoading(false)
@@ -159,6 +193,27 @@ function LoginPage({}: Props) {
                 <div className="loading-container">
                     <div className="loading"></div>
                     <div id="loading-text">Loading..</div>
+                </div>
+            ) : enrollmentChecked && !isEnrolled ? (
+                // Show message for non-enrolled students
+                <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+                    <Card className="w-full max-w-md shadow-lg">
+                        <CardHeader className="space-y-2 text-center">
+                            <CardTitle className="text-3xl font-bold">Not Enrolled</CardTitle>
+                            <CardDescription>You are not enrolled in any course. Kindly login with your registered email id.</CardDescription>
+                        </CardHeader>
+                        <CardFooter>
+                            <Button 
+                                onClick={() => {
+                                    setEnrollmentChecked(false);
+                                    setIsEnrolled(null);
+                                }} 
+                                className="w-full bg-[#2f433a]"
+                            >
+                                Back to Login
+                            </Button>
+                        </CardFooter>
+                    </Card>
                 </div>
             ) : (
                 <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
