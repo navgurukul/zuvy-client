@@ -28,25 +28,17 @@ import { Button } from '@/components/ui/button'
 import { api } from '@/utils/axios.config'
 import { ArrowUpRightSquare, CalendarIcon } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
-import TiptapEditor from '@/app/_components/editor/TiptapEditor'
-import TiptapToolbar from '@/app/_components/editor/TiptapToolbar'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { toast } from '@/components/ui/use-toast'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useEditor } from '@tiptap/react'
-import extensions from '@/app/_components/editor/TiptapExtensions'
 import { useParams } from 'next/navigation'
 import ProjectPreview from '../_components/ProjectPreview'
 import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { getProjectPreviewStore } from '@/store/store'
-// import { RemirrorTextEditor } from '@/components/RichTextEditor'
 import { RemirrorJSON } from 'remirror'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
-// import { RemirrorTextEditor } from '@/components/WysiwygEditor'
-// import { RichTextEditor } from '@/components/RichTextEditor'
-// import RichTextEditor from '@/components/RichTextEditor'
 
 interface Project {
     id: number
@@ -71,9 +63,6 @@ export default function Project() {
     const [initialContent, setInitialContent] = useState<RemirrorJSON | null>(
         null
     )
-    const editor = useEditor({
-        extensions,
-    })
     const [title, setTitle] = useState('')
     const [projectData, setProjectData] = useState<ProjectData>()
 
@@ -115,10 +104,6 @@ export default function Project() {
         mode: 'onChange',
     })
 
-    useEffect(() => {
-        console.log('editor', editor)
-    }, [editor])
-
     const fetchProjectDetails = async () => {
         try {
             const response = await api.get(
@@ -126,12 +111,8 @@ export default function Project() {
             )
             setProjectData(response.data)
             setTitle(response.data.project[0].title)
-            const projectDescription =
-                response.data.project[0].instruction.description
-            editor?.commands.setContent(projectDescription)
             const content = response.data.project[0].instruction.description
             setInitialContent(JSON.parse(content))
-            console.log('response.data', response.data)
         } catch (error) {
             console.error(error)
         }
@@ -160,16 +141,11 @@ export default function Project() {
         const deadlineDate = convertToISO(data.startDate)
 
         try {
-            const projectContent = [editor?.getJSON()]
-            console.log('projectContent', projectContent)
-            console.log('typeof initialContent', initialContent)
             const initialContentString = initialContent
                 ? JSON.stringify(initialContent)
                 : ''
-            console.log('initialContentString', initialContentString)
             await api.patch(`/Content/updateProjects/${projectID}`, {
                 title,
-                // instruction: { description: projectContent },
                 instruction: { description: initialContentString },
                 isLock: projectData?.project[0].isLock,
                 deadline: deadlineDate,
@@ -341,8 +317,6 @@ export default function Project() {
                     )}
                 </div>
                 <div className="text-left">
-                    {/* <TiptapToolbar editor={editor} />
-                    <TiptapEditor editor={editor} /> */}
                     <RemirrorTextEditor
                         initialContent={initialContent}
                         setInitialContent={setInitialContent}

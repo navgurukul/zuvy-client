@@ -1,28 +1,20 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { getAssignmentPreviewStore } from '@/store/store'
 import { fetchPreviewData } from '@/utils/admin'
 import { ArrowLeft } from 'lucide-react'
-// import Link from 'next/link'
-import { useEditor } from '@tiptap/react'
-import extensions from '@/app/_components/editor/TiptapExtensions'
-import TiptapEditor from '@/app/_components/editor/TiptapEditor'
 import { Button } from '@/components/ui/button'
 import { Link } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { useRouter } from 'next/navigation'
+import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 
 const PreviewAssignment = ({ params }: { params: any }) => {
     const router = useRouter()
     const { assignmentPreviewContent, setAssignmentPreviewContent } =
         getAssignmentPreviewStore()
-
-    const editor = useEditor({
-        extensions,
-        content: '', // Initialize with empty content
-        editable: false,
-    })
+    const [initialContent, setInitialContent] = useState()
 
     const timestamp = assignmentPreviewContent?.completionDate
     const date = new Date(timestamp)
@@ -49,7 +41,7 @@ const PreviewAssignment = ({ params }: { params: any }) => {
     }, [params.chapterId, fetchPreviewData])
 
     useEffect(() => {
-        if (editor && assignmentPreviewContent?.contentDetails) {
+        if (assignmentPreviewContent?.contentDetails) {
             const contentDetails = assignmentPreviewContent.contentDetails
             const firstContent = contentDetails?.[0]?.content?.[0] ?? {
                 type: 'doc',
@@ -60,9 +52,9 @@ const PreviewAssignment = ({ params }: { params: any }) => {
                     },
                 ],
             }
-            editor.commands.setContent(firstContent)
+            setInitialContent(JSON.parse(firstContent))
         }
-    }, [assignmentPreviewContent, editor])
+    }, [assignmentPreviewContent])
 
     const goBack = () => {
         router.push(
@@ -107,7 +99,13 @@ const PreviewAssignment = ({ params }: { params: any }) => {
                         </div>
                     </div>
 
-                    <TiptapEditor editor={editor} />
+                    <div className="mt-2 text-start">
+                        <RemirrorTextEditor
+                            initialContent={initialContent}
+                            setInitialContent={setInitialContent}
+                            preview={true}
+                        />
+                    </div>
                     <div className="mt-2">
                         <div className="flex items-center">
                             <Link className="mr-2 h-4 w-4" />

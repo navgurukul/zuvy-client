@@ -6,7 +6,6 @@ import {
     Camera,
     Code,
     Braces,
-    Blocks,
     Quote,
     Bold,
     Italic,
@@ -61,7 +60,7 @@ export const Toolbar = () => {
             <button
                 onClick={() => toggleBold()}
                 className={`p-2 rounded ${
-                    active.bold() ? 'bg-gray-200' : 'hover:bg-gray-100'
+                    active.bold() ? 'bg-[#d1d5db]' : 'hover:bg-gray-200'
                 }`}
                 title="Bold"
                 type="button"
@@ -72,7 +71,7 @@ export const Toolbar = () => {
             <button
                 onClick={() => toggleItalic()}
                 className={`p-2 rounded ${
-                    active.italic() ? 'bg-gray-200' : 'hover:bg-gray-100'
+                    active.italic() ? 'bg-[#d1d5db]' : 'hover:bg-gray-200'
                 }`}
                 title="Italic"
                 type="button"
@@ -83,7 +82,7 @@ export const Toolbar = () => {
             <button
                 onClick={() => toggleUnderline()}
                 className={`p-2 rounded ${
-                    active.underline() ? 'bg-gray-200' : 'hover:bg-gray-100'
+                    active.underline() ? 'bg-[#d1d5db]' : 'hover:bg-gray-200'
                 }`}
                 title="Underline"
                 type="button"
@@ -94,7 +93,7 @@ export const Toolbar = () => {
             <button
                 onClick={() => toggleStrike()}
                 className={`p-2 rounded ${
-                    active.strike() ? 'bg-gray-200' : 'hover:bg-gray-100'
+                    active.strike() ? 'bg-[#d1d5db]' : 'hover:bg-gray-200'
                 }`}
                 title="Strikethrough"
                 type="button"
@@ -109,8 +108,8 @@ export const Toolbar = () => {
                 onClick={() => toggleHeading({ level: 1 })}
                 className={`p-2 rounded ${
                     active.heading({ level: 1 })
-                        ? 'bg-gray-200'
-                        : 'hover:bg-gray-100'
+                        ? 'bg-[#d1d5db]'
+                        : 'hover:bg-gray-200'
                 }`}
                 title="Heading 1"
                 type="button"
@@ -122,8 +121,8 @@ export const Toolbar = () => {
                 onClick={() => toggleHeading({ level: 2 })}
                 className={`p-2 rounded ${
                     active.heading({ level: 2 })
-                        ? 'bg-gray-200'
-                        : 'hover:bg-gray-100'
+                        ? 'bg-[#d1d5db]'
+                        : 'hover:bg-gray-200'
                 }`}
                 title="Heading 2"
                 type="button"
@@ -135,8 +134,8 @@ export const Toolbar = () => {
                 onClick={() => toggleHeading({ level: 3 })}
                 className={`p-2 rounded ${
                     active.heading({ level: 3 })
-                        ? 'bg-gray-200'
-                        : 'hover:bg-gray-100'
+                        ? 'bg-[#d1d5db]'
+                        : 'hover:bg-gray-200'
                 }`}
                 title="Heading 3"
                 type="button"
@@ -148,8 +147,8 @@ export const Toolbar = () => {
                 onClick={() => toggleHeading({ level: 4 })}
                 className={`p-2 rounded ${
                     active.heading({ level: 4 })
-                        ? 'bg-gray-200'
-                        : 'hover:bg-gray-100'
+                        ? 'bg-[#d1d5db]'
+                        : 'hover:bg-gray-200'
                 }`}
                 title="Heading 4"
                 type="button"
@@ -163,7 +162,7 @@ export const Toolbar = () => {
             <button
                 onClick={() => toggleBulletList()}
                 className={`p-2 rounded ${
-                    active.bulletList() ? 'bg-gray-200' : 'hover:bg-gray-100'
+                    active.bulletList() ? 'bg-[#d1d5db]' : 'hover:[#d1d5db]'
                 }`}
                 title="Bullet List"
                 type="button"
@@ -174,7 +173,7 @@ export const Toolbar = () => {
             <button
                 onClick={() => toggleOrderedList()}
                 className={`p-2 rounded ${
-                    active.orderedList() ? 'bg-gray-200' : 'hover:bg-gray-100'
+                    active.orderedList() ? 'bg-[#d1d5db]' : 'hover:bg-gray-200'
                 }`}
                 title="Ordered List"
                 type="button"
@@ -189,7 +188,7 @@ export const Toolbar = () => {
             <button
                 onClick={() => toggleCode()}
                 className={`p-2 rounded ${
-                    active.code() ? 'bg-gray-200' : 'hover:bg-gray-100'
+                    active.code() ? 'bg-[#d1d5db]' : 'hover:bg-gray-200'
                 }`}
                 title="Code"
                 type="button"
@@ -200,7 +199,7 @@ export const Toolbar = () => {
             <button
                 onClick={() => toggleCodeBlock()}
                 className={`p-2 rounded ${
-                    active.codeBlock() ? 'bg-gray-200' : 'hover:bg-gray-100'
+                    active.codeBlock() ? 'bg-[#d1d5db]' : 'hover:bg-gray-200'
                 }`}
                 title="Code Block"
                 type="button"
@@ -209,20 +208,9 @@ export const Toolbar = () => {
             </button>
 
             <button
-                onClick={() => toggleCodeBlock()}
-                className={`p-2 rounded ${
-                    active.codeBlock() ? 'bg-gray-200' : 'hover:bg-gray-100'
-                }`}
-                title="Code Block"
-                type="button"
-            >
-                <Blocks size={18} className="text-gray-700" />
-            </button>
-
-            <button
                 onClick={() => toggleBlockquote()}
                 className={`p-2 rounded ${
-                    active.blockquote() ? 'bg-gray-200' : 'hover:bg-gray-100'
+                    active.blockquote() ? 'bg-[#cbd1da]' : 'hover:bg-gray-200'
                 }`}
                 title="Blockquote"
                 type="button"
@@ -244,7 +232,7 @@ export const Toolbar = () => {
                 />
                 <label
                     htmlFor="image-upload"
-                    className="flex items-center p-2 rounded cursor-pointer hover:bg-gray-100"
+                    className="flex items-center p-2 rounded cursor-pointer hover:bg-gray-200"
                 >
                     <Camera size={18} className="text-gray-700" />
                 </label>

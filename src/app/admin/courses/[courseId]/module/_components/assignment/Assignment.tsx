@@ -25,10 +25,10 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { useEditor } from '@tiptap/react'
-import TiptapEditor from '@/app/_components/editor/TiptapEditor'
-import TiptapToolbar from '@/app/_components/editor/TiptapToolbar'
-import extensions from '@/app/_components/editor/TiptapExtensions'
+// import { useEditor } from '@tiptap/react'
+// import TiptapEditor from '@/app/_components/editor/TiptapEditor'
+// import TiptapToolbar from '@/app/_components/editor/TiptapToolbar'
+// import extensions from '@/app/_components/editor/TiptapExtensions'
 import '@/app/_components/editor/Tiptap.css'
 import { ArrowUpRightSquare, CalendarIcon, Pencil } from 'lucide-react'
 import {
@@ -43,6 +43,7 @@ import {
 } from '@/store/store'
 import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 interface ContentDetail {
     title: string
     description: string | null
@@ -81,10 +82,10 @@ const AddAssignent = ({
         }),
     })
 
-    const editor = useEditor({
-        extensions,
-        content,
-    })
+    // const editor = useEditor({
+    //     extensions,
+    //     content,
+    // })
 
     const router = useRouter()
     const [title, setTitle] = useState('')
@@ -92,6 +93,7 @@ const AddAssignent = ({
     const [titles, setTitles] = useState('')
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const { setAssignmentPreviewContent } = getAssignmentPreviewStore()
+    const [initialContent, setInitialContent] = useState()
 
     const form = useForm({
         resolver: zodResolver(formSchema),
@@ -117,10 +119,12 @@ const AddAssignent = ({
             )
             setDeadline(response.data.completionDate)
             const contentDetails = response.data.contentDetails[0]
+            console.log('contentDetails', contentDetails.content[0])
             setTitle(contentDetails.title)
             setTitles(contentDetails.title)
-            contentDetails &&
-                editor?.commands.setContent(contentDetails.content)
+            // contentDetails &&
+            //     editor?.commands.setContent(contentDetails.content)
+            setInitialContent(JSON.parse(contentDetails.content[0]))
         } catch (error) {
             console.error('Error fetching assignment content:', error)
         }
@@ -142,11 +146,14 @@ const AddAssignent = ({
         }
         const deadlineDate = convertToISO(data.startDate)
         try {
-            const articleContent = [editor?.getJSON()]
+            // const articleContent = [editor?.getJSON()]
+            const initialContentString = initialContent
+                ? [JSON.stringify(initialContent)]
+                : ''
             const requestBody = {
                 title: data.title,
                 completionDate: deadlineDate,
-                articleContent,
+                articleContent: initialContentString,
             }
 
             await api.put(
@@ -176,7 +183,11 @@ const AddAssignent = ({
     // async
     useEffect(() => {
         getAssignmentContent()
-    }, [content, editor])
+    }, [content])
+
+    // useEffect(() => {
+    //     getAssignmentContent()
+    // }, [content, editor])
 
     function previewAssignment() {
         if (content) {
@@ -187,7 +198,9 @@ const AddAssignent = ({
         }
     }
 
-return (
+    console.log('initialContent in Assignment', initialContent)
+
+    return (
         <div className="px-5">
             <>
                 <div className="w-full ">
@@ -259,64 +272,81 @@ return (
                                 control={form.control}
                                 name="startDate"
                                 render={({ field }) => {
-                                    const d = field.value ? typeof field.value === "string" ? field.value.split(' ')[0] : field.value : null
-                                    let dateValue =  typeof field.value === "string" && d ? parseISO(d) : field.value;
+                                    const d = field.value
+                                        ? typeof field.value === 'string'
+                                            ? field.value.split(' ')[0]
+                                            : field.value
+                                        : null
+                                    let dateValue =
+                                        typeof field.value === 'string' && d
+                                            ? parseISO(d)
+                                            : field.value
                                     return (
-                                    <FormItem className="flex flex-col justify-start gap-x-2 gap-y-4 text-left">
-                                        <FormLabel className="m-0">
-                                            <span className="text-xl">
-                                                Choose Deadline Date
-                                            </span>
-                                            <span className="text-red-500">
-                                                *
-                                            </span>{' '}
-                                        </FormLabel>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <FormControl>
-                                                    <Button
-                                                        variant={'outline'}
-                                                        className={`w-1/6  text-left font-normal ${
-                                                            !field.value &&
-                                                            'text-muted-foreground'
-                                                        }`}
-                                                    >
-                                                        {dateValue
-                                                            ? format(
-                                                                  dateValue,
-                                                                  'EEEE, MMMM d, yyyy'
-                                                              )
-                                                            : 'Pick a date'}
-                                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                    </Button>
-                                                </FormControl>
-                                            </PopoverTrigger>
-                                            <PopoverContent
-                                                className="w-auto p-0"
-                                                align="start"
-                                            >
-                                                <Calendar
-                                                    mode="single"
-                                                    selected={field.value}
-                                                    onSelect={field.onChange}
-                                                    disabled={(date: any) =>
-                                                        date <=
-                                                        addDays(new Date(), -1)
-                                                    } // Disable past dates
-                                                    initialFocus
-                                                />
-                                            </PopoverContent>
-                                        </Popover>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}}
+                                        <FormItem className="flex flex-col justify-start gap-x-2 gap-y-4 text-left">
+                                            <FormLabel className="m-0">
+                                                <span className="text-xl">
+                                                    Choose Deadline Date
+                                                </span>
+                                                <span className="text-red-500">
+                                                    *
+                                                </span>{' '}
+                                            </FormLabel>
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <FormControl>
+                                                        <Button
+                                                            variant={'outline'}
+                                                            className={`w-1/6  text-left font-normal ${
+                                                                !field.value &&
+                                                                'text-muted-foreground'
+                                                            }`}
+                                                        >
+                                                            {dateValue
+                                                                ? format(
+                                                                      dateValue,
+                                                                      'EEEE, MMMM d, yyyy'
+                                                                  )
+                                                                : 'Pick a date'}
+                                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                        </Button>
+                                                    </FormControl>
+                                                </PopoverTrigger>
+                                                <PopoverContent
+                                                    className="w-auto p-0"
+                                                    align="start"
+                                                >
+                                                    <Calendar
+                                                        mode="single"
+                                                        selected={field.value}
+                                                        onSelect={
+                                                            field.onChange
+                                                        }
+                                                        disabled={(date: any) =>
+                                                            date <=
+                                                            addDays(
+                                                                new Date(),
+                                                                -1
+                                                            )
+                                                        } // Disable past dates
+                                                        initialFocus
+                                                    />
+                                                </PopoverContent>
+                                            </Popover>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )
+                                }}
                             />
                         </form>
                     </Form>
                 </div>
                 <div className="text-left mt-6">
-                    <TiptapToolbar editor={editor} />
-                    <TiptapEditor editor={editor} />
+                    {/* <TiptapToolbar editor={editor} />
+                    <TiptapEditor editor={editor} /> */}
+                    <RemirrorTextEditor
+                        initialContent={initialContent}
+                        setInitialContent={setInitialContent}
+                    />
                 </div>
             </>
         </div>

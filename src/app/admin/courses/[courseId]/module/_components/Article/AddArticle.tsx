@@ -14,21 +14,14 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { useEditor } from '@tiptap/react'
-import TiptapEditor from '@/app/_components/editor/TiptapEditor'
-import TiptapToolbar from '@/app/_components/editor/TiptapToolbar'
-import extensions from '@/app/_components/editor/TiptapExtensions'
 import '@/app/_components/editor/Tiptap.css'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Pencil } from 'lucide-react'
-// import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 import { getChapterUpdateStatus, getArticlePreviewStore } from '@/store/store'
 import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-// import { RichTextEditor } from '@/components/RichTextEditor'
-import { RemirrorTextEditor } from '@/components/WysiwygEditor'
-// import RichTextEditor from '@/components/RichTextEditor'
+import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 
 interface ContentDetail {
     title: string
@@ -70,11 +63,6 @@ const AddArticle = ({
         title: z.string(),
     })
 
-    const editor = useEditor({
-        extensions,
-        content,
-    })
-
     const form = useForm({
         resolver: zodResolver(formSchema),
         values: {
@@ -90,7 +78,6 @@ const AddArticle = ({
             )
             // setArticleUpdateOnPreview(!articleUpdateOnPreview)
             setTitle(response.data.title)
-            editor?.commands.setContent(response.data.contentDetails[0].content)
             const data = response.data.contentDetails[0].content
             setInitialContent(JSON.parse(data))
         } catch (error) {
@@ -100,14 +87,11 @@ const AddArticle = ({
 
     const editArticleContent = async () => {
         try {
-            const articleContent = [editor?.getJSON()]
             const initialContentString = initialContent
                 ? [JSON.stringify(initialContent)]
                 : ''
-            console.log('initialContentString', initialContentString)
             const data = {
                 title,
-                // articleContent,
                 articleContent: initialContentString,
             }
 
@@ -135,10 +119,9 @@ const AddArticle = ({
         }
     }
 
-    // async
     useEffect(() => {
         getArticleContent()
-    }, [content, editor])
+    }, [content])
 
     function previewArticle() {
         if (content) {
@@ -216,12 +199,6 @@ const AddArticle = ({
                 </Form>
 
                 <div className="text-left mt-5">
-                    {/* <TiptapToolbar editor={editor} />
-                    <TiptapEditor editor={editor} /> */}
-                    {/* <RichTextEditor
-                        initialContent={initialContent}
-                        setInitialContent={setInitialContent}
-                    /> */}
                     <RemirrorTextEditor
                         initialContent={initialContent}
                         setInitialContent={setInitialContent}

@@ -71,7 +71,7 @@ code {
 .remirror-editor {
     position: relative;
     border-radius: 0.375rem;
-    min-height: 200px;
+    min-height: 315px !important;
     width: 100%;
 }
 
@@ -124,7 +124,7 @@ code {
     top: 0.5em;
     bottom: -0.5em;
     width: 2px;
-    background-color: #e2e8f0;
+    background-color: #cbd1da;
 }
 
 /* Additional helpful styles for other elements */
