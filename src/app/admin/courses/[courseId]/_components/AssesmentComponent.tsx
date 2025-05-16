@@ -91,7 +91,7 @@ const AssesmentComponent = (props: Props) => {
                     name: assessment.name || 'N/A',
                     email: assessment.email || 'N/A',
                     qualified: assessment.isPassed ? 'Yes' : 'No',
-                    percentage: `${Math.floor(assessment.percentage) || 0}%`,
+                    percentage: `${(assessment.percentage || 0).toFixed(2)}%`,
                     codingScore:
                         props.codingChallenges > 0
                             ? assessment.codingScore || 0
