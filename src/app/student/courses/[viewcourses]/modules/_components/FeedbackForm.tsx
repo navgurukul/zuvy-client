@@ -454,7 +454,7 @@ const FeedbackForm = (props: Props) => {
                                                             <FormControl>
                                                                 <Textarea
                                                                     {...field}
-                                                                    className="w-full h-[170px] px-3 py-2 border rounded-md" //w-[550px]
+                                                                    className="w-11/12 md:w-full lg:w-full h-[170px] px-3 py-2 border mx-auto mb-4 rounded-md" //w-[550px]
                                                                     placeholder="Type your answer..."
                                                                     value={
                                                                         field.value as string
