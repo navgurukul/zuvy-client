@@ -128,7 +128,7 @@ function Quiz(props: Props) {
     }
 
     return (
-        <ScrollArea className="h-screen">
+        <ScrollArea className="h-[calc(100vh-110px)] lg:h-screen md:h-screen">
             {questions.length == 0 ? (
                 <div>
                     <h1 className="text-center font-semibold text-2xl">
@@ -150,7 +150,7 @@ function Quiz(props: Props) {
                 </div>
             ) : (
                 <div>
-                    <div className="h-full w-full rounded-md mt-20">
+                    <div className="h-full w-full rounded-md mt-4 md:mt-20 lg:mt-20">
                         <div className="flex flex-col justify-center items-center">
                             <div className="p-4 flex gap-y-4 flex-col items-start">
                                 <h1 className="text-xl font-semibold">
@@ -298,11 +298,11 @@ function Quiz(props: Props) {
                             </div>
                         </div>
                     </div>
-                    <div className="flex flex-col items-end">
+                    <div className="flex flex-col items-end pb-24 md:pb-0 lg:pb-0 mr-3 md:mr-0 lg:mr-0">
                         <Button
                             disabled={status}
                             onClick={handleSubmit}
-                            className="flex w-1/6 flex-col"
+                            className="flex w-1/5 lg:w-1/6 flex-col"
                         >
                             Submit
                         </Button>

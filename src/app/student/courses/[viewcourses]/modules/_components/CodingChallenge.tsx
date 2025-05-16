@@ -124,10 +124,10 @@ function CodingChallenge({
     }
 
     return (
-        <div className="mt-20">
+        <div className="mt-8 lg:mt-20 md:mt-20">
             {codingQuestions.length > 0 ? (
                 <div className="flex justify-center">
-                    <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
+                    <div className="flex flex-col gap-5 lg:w-1/2 w-full text-left mt-10 mr-4 md:mr-0 lg:mr-0">
                         <h2 className="text-2xl font-bold mb-3">
                             {content.title}
                         </h2>
