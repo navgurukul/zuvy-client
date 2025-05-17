@@ -47,7 +47,7 @@ const ProjectPreview = () => {
     }, [fetchProjectDetails, projectID, courseId])
 
     useEffect(() => {
-        if (projectPreviewContent?.project[0].instruction.description) {
+        if (projectPreviewContent?.project[0]?.instruction?.description) {
             const contentDetails =
                 projectPreviewContent?.project[0].instruction.description
             const firstContent = contentDetails ?? {

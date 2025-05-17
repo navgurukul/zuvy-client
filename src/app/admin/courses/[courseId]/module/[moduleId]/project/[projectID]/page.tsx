@@ -231,18 +231,6 @@ export default function Project() {
                                                         </div>
                                                     </div>
                                                 </FormControl>
-
-                                                {/* <Button
-                                                    variant={'ghost'}
-                                                    type="button"
-                                                    className=" text-secondary w-[100px] h-[30px] gap-x-1 "
-                                                    onClick={() =>
-                                                        setShowPreview(true)
-                                                    }
-                                                >
-                                                    <ArrowUpRightSquare />
-                                                    <h1>Preview</h1>
-                                                </Button> */}
                                                 <FormMessage className="h-5" />
                                             </FormItem>
                                         )}
