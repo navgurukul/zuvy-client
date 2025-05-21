@@ -25,10 +25,6 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-// import { useEditor } from '@tiptap/react'
-// import TiptapEditor from '@/app/_components/editor/TiptapEditor'
-// import TiptapToolbar from '@/app/_components/editor/TiptapToolbar'
-// import extensions from '@/app/_components/editor/TiptapExtensions'
 import '@/app/_components/editor/Tiptap.css'
 import { ArrowUpRightSquare, CalendarIcon, Pencil } from 'lucide-react'
 import {
@@ -60,6 +56,11 @@ interface Content {
     contentDetails: ContentDetail[]
 }
 
+type EditorDoc = {
+    type: string
+    content: any[]
+}
+
 interface AssignmentProps {
     content: Content
     courseId: any
@@ -82,18 +83,15 @@ const AddAssignent = ({
         }),
     })
 
-    // const editor = useEditor({
-    //     extensions,
-    //     content,
-    // })
-
     const router = useRouter()
     const [title, setTitle] = useState('')
     const [deadline, setDeadline] = useState<any>()
     const [titles, setTitles] = useState('')
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const { setAssignmentPreviewContent } = getAssignmentPreviewStore()
-    const [initialContent, setInitialContent] = useState()
+    const [initialContent, setInitialContent] = useState<
+        { doc: EditorDoc } | undefined
+    >()
 
     const form = useForm({
         resolver: zodResolver(formSchema),
@@ -119,12 +117,16 @@ const AddAssignent = ({
             )
             setDeadline(response.data.completionDate)
             const contentDetails = response.data.contentDetails[0]
-            console.log('contentDetails', contentDetails.content[0])
             setTitle(contentDetails.title)
             setTitles(contentDetails.title)
-            // contentDetails &&
-            //     editor?.commands.setContent(contentDetails.content)
+            console.log('contentDetails.content[0]', contentDetails.content[0])
             setInitialContent(JSON.parse(contentDetails.content[0]))
+            // if (typeof contentDetails.content[0] === 'string') {
+            //     setInitialContent(JSON.parse(contentDetails.content[0]))
+            // } else {
+            //     const jsonData = { doc: contentDetails.content[0] }
+            //     setInitialContent(jsonData)
+            // }
         } catch (error) {
             console.error('Error fetching assignment content:', error)
         }
@@ -146,7 +148,6 @@ const AddAssignent = ({
         }
         const deadlineDate = convertToISO(data.startDate)
         try {
-            // const articleContent = [editor?.getJSON()]
             const initialContentString = initialContent
                 ? [JSON.stringify(initialContent)]
                 : ''
@@ -185,10 +186,6 @@ const AddAssignent = ({
         getAssignmentContent()
     }, [content])
 
-    // useEffect(() => {
-    //     getAssignmentContent()
-    // }, [content, editor])
-
     function previewAssignment() {
         if (content) {
             setAssignmentPreviewContent(content)
@@ -197,8 +194,6 @@ const AddAssignent = ({
             )
         }
     }
-
-    console.log('initialContent in Assignment', initialContent)
 
     return (
         <div className="px-5">
@@ -341,8 +336,6 @@ const AddAssignent = ({
                     </Form>
                 </div>
                 <div className="text-left mt-6">
-                    {/* <TiptapToolbar editor={editor} />
-                    <TiptapEditor editor={editor} /> */}
                     <RemirrorTextEditor
                         initialContent={initialContent}
                         setInitialContent={setInitialContent}

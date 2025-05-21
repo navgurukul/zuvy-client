@@ -33,7 +33,7 @@ import { z } from 'zod'
 import { toast } from '@/components/ui/use-toast'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useParams } from 'next/navigation'
-import ProjectPreview from '../_components/ProjectPreview'
+// import ProjectPreview from '../_components/ProjectPreview'
 import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { getProjectPreviewStore } from '@/store/store'
@@ -58,7 +58,7 @@ interface ProjectData {
 export default function Project() {
     const router = useRouter()
     const { setProjectPreviewContent } = getProjectPreviewStore()
-    const [showPreview, setShowPreview] = useState<boolean>(false)
+    // const [showPreview, setShowPreview] = useState<boolean>(false)
     const { courseId, moduleId, projectID } = useParams()
     const [initialContent, setInitialContent] = useState<RemirrorJSON | null>(
         null
@@ -182,127 +182,109 @@ export default function Project() {
             <BreadcrumbComponent crumbs={crumbs} />
             <div className="flex flex-col mt-5">
                 <div className="w-full ">
-                    {showPreview ? (
+                    {/* {showPreview ? (
                         <ProjectPreview
                             content={projectData}
                             setShowPreview={setShowPreview}
                         />
                     ) : (
-                        <>
-                            <Form {...form}>
-                                <form
-                                    id="myForm"
-                                    onSubmit={form.handleSubmit(editProject)}
-                                    className="space-y-8 mb-10"
-                                >
-                                    <FormField
-                                        control={form.control}
-                                        name="title"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                {/* <FormLabel></FormLabel> */}
+                        <> */}
+                    <Form {...form}>
+                        <form
+                            id="myForm"
+                            onSubmit={form.handleSubmit(editProject)}
+                            className="space-y-8 mb-10"
+                        >
+                            <FormField
+                                control={form.control}
+                                name="title"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        {/* <FormLabel></FormLabel> */}
+                                        <FormControl>
+                                            <div className="flex justify-between items-center">
+                                                <Input
+                                                    placeholder="Untitled Article"
+                                                    className="p-0 text-3xl w-2/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize"
+                                                    {...field}
+                                                    {...form.register('title')}
+                                                    onChange={(e) =>
+                                                        setTitle(e.target.value)
+                                                    }
+                                                />
+                                                <div
+                                                    id="previewProject"
+                                                    onClick={previewProject}
+                                                    className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer"
+                                                >
+                                                    <Eye size={18} />
+                                                    <h6 className="ml-1 text-sm">
+                                                        Preview
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                        </FormControl>
+                                        <FormMessage className="h-5" />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="startDate"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-col justify-start gap-x-2 text-left">
+                                        <FormLabel className="m-0">
+                                            <span className="text-xl">
+                                                Choose Deadline Date
+                                            </span>
+                                            <span className="text-red-500">
+                                                *
+                                            </span>{' '}
+                                        </FormLabel>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
                                                 <FormControl>
-                                                    <div className="flex justify-between items-center">
-                                                        <Input
-                                                            placeholder="Untitled Article"
-                                                            className="p-0 text-3xl w-2/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize"
-                                                            {...field}
-                                                            {...form.register(
-                                                                'title'
-                                                            )}
-                                                            onChange={(e) =>
-                                                                setTitle(
-                                                                    e.target
-                                                                        .value
-                                                                )
-                                                            }
-                                                        />
-                                                        <div
-                                                            id="previewProject"
-                                                            onClick={
-                                                                previewProject
-                                                            }
-                                                            className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer"
-                                                        >
-                                                            <Eye size={18} />
-                                                            <h6 className="ml-1 text-sm">
-                                                                Preview
-                                                            </h6>
-                                                        </div>
-                                                    </div>
-                                                </FormControl>
-                                                <FormMessage className="h-5" />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="startDate"
-                                        render={({ field }) => (
-                                            <FormItem className="flex flex-col justify-start gap-x-2 text-left">
-                                                <FormLabel className="m-0">
-                                                    <span className="text-xl">
-                                                        Choose Deadline Date
-                                                    </span>
-                                                    <span className="text-red-500">
-                                                        *
-                                                    </span>{' '}
-                                                </FormLabel>
-                                                <Popover>
-                                                    <PopoverTrigger asChild>
-                                                        <FormControl>
-                                                            <Button
-                                                                variant={
-                                                                    'outline'
-                                                                }
-                                                                className={`w-[230px]  text-left font-normal ${
-                                                                    !field.value &&
-                                                                    'text-muted-foreground'
-                                                                }`}
-                                                            >
-                                                                {field.value
-                                                                    ? format(
-                                                                          field.value,
-                                                                          'EEEE, MMMM d, yyyy'
-                                                                      )
-                                                                    : 'Pick a date'}
-                                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                            </Button>
-                                                        </FormControl>
-                                                    </PopoverTrigger>
-                                                    <PopoverContent
-                                                        className="w-auto p-0"
-                                                        align="start"
+                                                    <Button
+                                                        variant={'outline'}
+                                                        className={`w-[230px]  text-left font-normal ${
+                                                            !field.value &&
+                                                            'text-muted-foreground'
+                                                        }`}
                                                     >
-                                                        <Calendar
-                                                            mode="single"
-                                                            selected={
-                                                                field.value
-                                                            }
-                                                            onSelect={
-                                                                field.onChange
-                                                            }
-                                                            disabled={(
-                                                                date: any
-                                                            ) =>
-                                                                date <=
-                                                                addDays(
-                                                                    new Date(),
-                                                                    -1
-                                                                )
-                                                            } // Disable past dates
-                                                            initialFocus
-                                                        />
-                                                    </PopoverContent>
-                                                </Popover>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </form>
-                            </Form>
-                        </>
-                    )}
+                                                        {field.value
+                                                            ? format(
+                                                                  field.value,
+                                                                  'EEEE, MMMM d, yyyy'
+                                                              )
+                                                            : 'Pick a date'}
+                                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                    </Button>
+                                                </FormControl>
+                                            </PopoverTrigger>
+                                            <PopoverContent
+                                                className="w-auto p-0"
+                                                align="start"
+                                            >
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={field.value}
+                                                    onSelect={field.onChange}
+                                                    disabled={(date: any) =>
+                                                        date <=
+                                                        addDays(new Date(), -1)
+                                                    } // Disable past dates
+                                                    initialFocus
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </form>
+                    </Form>
+                    {/* </>
+                    )} */}
                 </div>
                 <div className="text-left">
                     <RemirrorTextEditor

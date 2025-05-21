@@ -20,6 +20,7 @@ import googleDriveLogo from '../../../../../../../public/google-drive.png'
 import Image from 'next/image'
 import { toast } from '@/components/ui/use-toast'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 
 type Props = {
     projectId: number
@@ -28,6 +29,11 @@ type Props = {
     completeChapter: () => void
     content: any
 }
+type EditorDoc = {
+    type: string
+    content: any[]
+}
+
 const FormSchema = z.object({
     link: z
         .string()
@@ -55,6 +61,9 @@ const Assignments = ({
     const [projectData, setProjectData] = useState<any>([])
     const [deadlineDate, setDeadlineDate] = useState<string>('')
     const [submittedDate, setSubmittedDate] = useState<string>('')
+    const [initialContent, setInitialContent] = useState<
+        { doc: EditorDoc } | undefined
+    >()
     const [status, setStatus] = useState<string>('')
     const [title, setTitle] = useState<string>('')
     const [icon, setIcon] = useState<JSX.Element>(
@@ -68,6 +77,8 @@ const Assignments = ({
 
         mode: 'onChange',
     })
+
+    console.log('content', content)
 
     const getProjectData = useCallback(async () => {
         try {
@@ -98,7 +109,32 @@ const Assignments = ({
     useEffect(() => {
         if (editor && content?.articleContent?.[0]) {
             editor.commands.setContent(content.articleContent[0])
+            // editor.commands.setContent(JSON.parse(content.articleContent[0]))
+            console.log(
+                'content.articleContent[0]',
+                typeof content.articleContent[0]
+            )
+            // const jsonData = JSON.parse(content.articleContent[0])
+            setInitialContent(JSON.parse(content.articleContent[0]))
+            // if (typeof content.articleContent[0] === 'string') {
+            //     setInitialContent(JSON.parse(content.articleContent[0]))
+            // } else {
+            //     const jsonData = { doc: content.articleContent[0] }
+            //     setInitialContent(jsonData)
+            // }
         } else if (editor) {
+            // const noContent = {
+            //     type: 'doc',
+            //     content: [
+            //         {
+            //             type: 'paragraph',
+            //             content: [
+            //                  { type: 'text', text: 'No Content Added Yet' },
+            //             ],
+            //         },
+            //     ],
+            // }
+            // setInitialContent(noContent)
             editor.commands.setContent('<h1>No Content Added Yet</h1>')
         }
     }, [editor, content])
@@ -181,6 +217,8 @@ const Assignments = ({
 
     const AssignmentStatus = getSubmissionStatus(submittedDate, deadlineDate)
 
+    console.log('initialContent', initialContent)
+
     return (
         <ScrollArea className="h-screen">
             <div className="flex flex-col mt-20 relative">
@@ -207,7 +245,7 @@ const Assignments = ({
                     </span>
                     {!content.articleContent ||
                     !content.articleContent.some((doc: any) =>
-                        doc.content.some(
+                        doc?.content?.some(
                             (paragraph: any) =>
                                 paragraph.content &&
                                 paragraph.content.some(
@@ -238,6 +276,13 @@ const Assignments = ({
                         Assignment Description
                     </h1>
                     {editor && <TiptapEditor editor={editor} />}
+                    {/* <div className="mt-2 text-start"> */}
+                    <RemirrorTextEditor
+                        initialContent={initialContent}
+                        setInitialContent={setInitialContent}
+                        preview={true}
+                    />
+                    {/* </div> */}
                 </div>
                 <Form {...form}>
                     <form
@@ -267,7 +312,7 @@ const Assignments = ({
 
                         {!content.articleContent ||
                         !content.articleContent.some((doc: any) =>
-                            doc.content.some(
+                            doc?.content?.some(
                                 (paragraph: any) =>
                                     paragraph.content &&
                                     paragraph.content.some(

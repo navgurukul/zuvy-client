@@ -43,6 +43,236 @@ const createDefaultContent = () => {
             },
         ],
     }
+    // return {
+    //     type: 'doc',
+    //     content: [
+    //         {
+    //             type: 'heading',
+    //             attrs: {
+    //                 level: 2,
+    //             },
+    //             content: [
+    //                 {
+    //                     type: 'text',
+    //                     text: 'What is AI?',
+    //                 },
+    //             ],
+    //         },
+    //         {
+    //             type: 'bulletList',
+    //             content: [
+    //                 {
+    //                     type: 'listItem',
+    //                     attrs: {
+    //                         closed: false,
+    //                         nested: false,
+    //                     },
+    //                     content: [
+    //                         {
+    //                             type: 'paragraph',
+    //                             content: [
+    //                                 {
+    //                                     type: 'text',
+    //                                     marks: [
+    //                                         {
+    //                                             type: 'bold',
+    //                                         },
+    //                                     ],
+    //                                     text: 'Artificial',
+    //                                 },
+    //                                 {
+    //                                     type: 'text',
+    //                                     text: ' ',
+    //                                 },
+    //                                 {
+    //                                     type: 'text',
+    //                                     marks: [
+    //                                         {
+    //                                             type: 'code',
+    //                                         },
+    //                                     ],
+    //                                     text: 'intelligence',
+    //                                 },
+    //                                 {
+    //                                     type: 'text',
+    //                                     text: ' (AI) is technology that enables computers and machines to simulate human learning, comprehension, problem solving, decision making, ',
+    //                                 },
+    //                                 {
+    //                                     type: 'text',
+    //                                     marks: [
+    //                                         {
+    //                                             type: 'strike',
+    //                                         },
+    //                                     ],
+    //                                     text: 'creativity and autonomy',
+    //                                 },
+    //                                 {
+    //                                     type: 'text',
+    //                                     text: '. [cite: 1, 5]',
+    //                                 },
+    //                             ],
+    //                         },
+    //                     ],
+    //                 },
+    //                 {
+    //                     type: 'listItem',
+    //                     attrs: {
+    //                         closed: false,
+    //                         nested: false,
+    //                     },
+    //                     content: [
+    //                         {
+    //                             type: 'paragraph',
+    //                             content: [
+    //                                 {
+    //                                     type: 'text',
+    //                                     text: 'Applications and devices equipped with AI can see and ',
+    //                                 },
+    //                                 {
+    //                                     type: 'text',
+    //                                     marks: [
+    //                                         {
+    //                                             type: 'italic',
+    //                                         },
+    //                                     ],
+    //                                     text: 'identify',
+    //                                 },
+    //                                 {
+    //                                     type: 'text',
+    //                                     text: ' objects. [cite: 2, 6] They can understand and respond to ',
+    //                                 },
+    //                                 {
+    //                                     type: 'text',
+    //                                     marks: [
+    //                                         {
+    //                                             type: 'underline',
+    //                                         },
+    //                                     ],
+    //                                     text: 'human language',
+    //                                 },
+    //                                 {
+    //                                     type: 'text',
+    //                                     text: '. [cite: 2, 6] They can learn from new information and experience. [cite: 2, 7] They can make detailed recommendations to users and experts. [cite: 7] They can act independently, replacing the need for human intelligence or intervention (a classic example being a self-driving car). [cite: 8]',
+    //                                 },
+    //                             ],
+    //                         },
+    //                     ],
+    //                 },
+    //             ],
+    //         },
+    //         {
+    //             type: 'orderedList',
+    //             attrs: {
+    //                 order: 1,
+    //             },
+    //             content: [
+    //                 {
+    //                     type: 'listItem',
+    //                     attrs: {
+    //                         closed: false,
+    //                         nested: false,
+    //                     },
+    //                     content: [
+    //                         {
+    //                             type: 'paragraph',
+    //                             content: [
+    //                                 {
+    //                                     type: 'text',
+    //                                     text: 'Point one [cite: 3, 9]',
+    //                                 },
+    //                             ],
+    //                         },
+    //                     ],
+    //                 },
+    //                 {
+    //                     type: 'listItem',
+    //                     attrs: {
+    //                         closed: false,
+    //                         nested: false,
+    //                     },
+    //                     content: [
+    //                         {
+    //                             type: 'paragraph',
+    //                             content: [
+    //                                 {
+    //                                     type: 'text',
+    //                                     text: 'Point two [cite: 3, 9]',
+    //                                 },
+    //                             ],
+    //                         },
+    //                     ],
+    //                 },
+    //             ],
+    //         },
+    //         {
+    //             type: 'codeBlock',
+    //             attrs: {
+    //                 language: 'javascript',
+    //                 wrap: false,
+    //             },
+    //             content: [
+    //                 {
+    //                     type: 'text',
+    //                     text: ' <ScrollArea\n    className="h-96 pr-8 "\n    type="hover"\n    style={{\n           scrollbarWidth: \'none\', // Firefox\n           msOverflowStyle: \'none\', // IE and Edge\n      }}\n    >\n      <div\n           className="remirror-editor-wrapper p-4 min-h-[250px]"\n           data-gramm="false"\n      >\n           <EditorComponent />\n      </div>\n </ScrollArea>',
+    //                 },
+    //             ],
+    //         },
+    //         {
+    //             type: 'paragraph',
+    //         },
+    //         {
+    //             type: 'blockquote',
+    //             content: [
+    //                 {
+    //                     type: 'paragraph',
+    //                     content: [
+    //                         {
+    //                             type: 'text',
+    //                             text: 'gihlijlj',
+    //                         },
+    //                     ],
+    //                 },
+    //                 {
+    //                     type: 'paragraph',
+    //                     content: [
+    //                         {
+    //                             type: 'text',
+    //                             text: 'fukhgjhli',
+    //                         },
+    //                     ],
+    //                 },
+    //             ],
+    //         },
+    //         {
+    //             type: 'paragraph',
+    //         },
+    //         {
+    //             type: 'paragraph',
+    //             content: [
+    //                 {
+    //                     type: 'image',
+    //                     attrs: {
+    //                         alt: 'Screenshot 2023-06-04 013912.png',
+    //                         crop: null,
+    //                         height: null,
+    //                         width: null,
+    //                         rotate: null,
+    //                         src: 'blob:http://localhost:3000/a4e337a9-d83a-4c0a-ad67-248781bc8c19',
+    //                         title: '',
+    //                         fileName: null,
+    //                         resizable: false,
+    //                     },
+    //                 },
+    //             ],
+    //         },
+    //         {
+    //             type: 'paragraph',
+    //         },
+    //         {
+    //             type: 'paragraph',
+    //         },
+    //     ],
+    // }
 }
 
 export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
@@ -59,6 +289,8 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
     // Use default content if initialContent is undefined or invalid
     const editorContent =
         initialContent?.doc || initialContent || createDefaultContent()
+
+    // console.log('editorContent', editorContent)
 
     // Setup the Remirror manager with needed extensions
     const { manager, state } = useRemirror({

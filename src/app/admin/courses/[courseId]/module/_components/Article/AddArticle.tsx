@@ -79,6 +79,8 @@ const AddArticle = ({
             // setArticleUpdateOnPreview(!articleUpdateOnPreview)
             setTitle(response.data.title)
             const data = response.data.contentDetails[0].content
+            console.log('data', data)
+            // const jsonData = JSON.parse(data)
             setInitialContent(JSON.parse(data))
         } catch (error) {
             console.error('Error fetching article content:', error)
