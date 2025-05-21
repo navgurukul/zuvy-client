@@ -8,8 +8,15 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 
+type EditorDoc = {
+    type: string
+    content: any[]
+}
+
 const PreviewArticle = ({ params }: { params: any }) => {
-    const [initialContent, setInitialContent] = useState()
+    const [initialContent, setInitialContent] = useState<
+        { doc: EditorDoc } | undefined
+    >()
     const { articlePreviewContent, setArticlePreviewContent } =
         getArticlePreviewStore()
 
@@ -29,11 +36,14 @@ const PreviewArticle = ({ params }: { params: any }) => {
                     },
                 ],
             }
-            setInitialContent(JSON.parse(firstContent))
+            if (typeof firstContent === 'string') {
+                setInitialContent(JSON.parse(firstContent))
+            } else {
+                const jsonData = { doc: firstContent }
+                setInitialContent(jsonData)
+            }
         }
     }, [articlePreviewContent])
-
-    console.log('initialContent', initialContent)
 
     return (
         <>

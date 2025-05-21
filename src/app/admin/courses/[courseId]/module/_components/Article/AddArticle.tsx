@@ -39,6 +39,11 @@ interface Content {
     contentDetails: ContentDetail[]
 }
 
+type EditorDoc = {
+    type: string
+    content: any[]
+}
+
 const AddArticle = ({
     content,
     courseId,
@@ -56,7 +61,9 @@ const AddArticle = ({
     const [title, setTitle] = useState('')
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const { setArticlePreviewContent } = getArticlePreviewStore()
-    const [initialContent, setInitialContent] = useState()
+    const [initialContent, setInitialContent] = useState<
+        { doc: EditorDoc } | undefined
+    >()
 
     // misc
     const formSchema = z.object({
@@ -76,12 +83,14 @@ const AddArticle = ({
             const response = await api.get(
                 `/Content/chapterDetailsById/${content.id}`
             )
-            // setArticleUpdateOnPreview(!articleUpdateOnPreview)
             setTitle(response.data.title)
             const data = response.data.contentDetails[0].content
-            console.log('data', data)
-            // const jsonData = JSON.parse(data)
-            setInitialContent(JSON.parse(data))
+            if (typeof data[0] === 'string') {
+                setInitialContent(JSON.parse(data))
+            } else {
+                const jsonData = { doc: data[0] }
+                setInitialContent(jsonData)
+            }
         } catch (error) {
             console.error('Error fetching article content:', error)
         }

@@ -10,11 +10,18 @@ import { Input } from '@/components/ui/input'
 import { useRouter } from 'next/navigation'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 
+type EditorDoc = {
+    type: string
+    content: any[]
+}
+
 const PreviewAssignment = ({ params }: { params: any }) => {
     const router = useRouter()
     const { assignmentPreviewContent, setAssignmentPreviewContent } =
         getAssignmentPreviewStore()
-    const [initialContent, setInitialContent] = useState()
+    const [initialContent, setInitialContent] = useState<
+        { doc: EditorDoc } | undefined
+    >()
 
     const timestamp = assignmentPreviewContent?.completionDate
     const date = new Date(timestamp)
@@ -51,15 +58,21 @@ const PreviewAssignment = ({ params }: { params: any }) => {
                         content: [
                             {
                                 type: 'text',
-                                text: 'No Content Added Yet',
+                                text: 'No content has been added yet',
                             },
                         ],
                     },
                 ],
             }
-            contentDetails?.[0]?.content?.[0]
-                ? setInitialContent(JSON.parse(firstContent))
-                : setInitialContent(firstContent)
+            if (
+                contentDetails?.[0]?.content?.[0] &&
+                typeof firstContent === 'string'
+            ) {
+                setInitialContent(JSON.parse(firstContent))
+            } else {
+                const jsonData = { doc: firstContent }
+                setInitialContent(jsonData)
+            }
         }
     }, [assignmentPreviewContent])
 
