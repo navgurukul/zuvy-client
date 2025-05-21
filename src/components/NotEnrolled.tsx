@@ -8,12 +8,6 @@ import { useEffect } from 'react'
 const Notenrolled = () => {
     const router = useRouter()
 
-    useEffect(() => {
-        router.push('/student')
-        setTimeout(() => {
-            window.location.reload()
-        }, 1000)
-    }, [router])
     return (
         <div className="flex flex-col items-center pt-24">
             {/* Set a smaller max width for the main container */}
@@ -32,6 +26,13 @@ const Notenrolled = () => {
                     <p className="text-md mt-3 mb-5">
                         You are not enrolled in this course yet
                     </p>
+                    <Button
+                        onClick={() => {
+                            router.push('/student/courses')
+                        }}
+                    >
+                        Go Back to dashboard
+                    </Button>
                 </div>
             </div>
         </div>

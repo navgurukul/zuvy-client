@@ -26,7 +26,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     <div className="w-full flex-none md:w-[25%]">
                         <Chapters />
                     </div>
-                    <div className="flex-grow  pl-10">{children}</div>
+                    <div className="flex-grow  sm:pl-10 pl-4">{children}</div>
 
                     {/* <div className="flex-grow pl-10">
                         <ScrollArea
