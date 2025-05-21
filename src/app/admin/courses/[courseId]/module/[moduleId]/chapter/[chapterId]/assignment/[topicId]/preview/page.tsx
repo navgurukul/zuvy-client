@@ -48,11 +48,18 @@ const PreviewAssignment = ({ params }: { params: any }) => {
                 content: [
                     {
                         type: 'paragraph',
-                        attrs: { textAlign: 'left' },
+                        content: [
+                            {
+                                type: 'text',
+                                text: 'No Content Added Yet',
+                            },
+                        ],
                     },
                 ],
             }
-            setInitialContent(JSON.parse(firstContent))
+            contentDetails?.[0]?.content?.[0]
+                ? setInitialContent(JSON.parse(firstContent))
+                : setInitialContent(firstContent)
         }
     }, [assignmentPreviewContent])
 

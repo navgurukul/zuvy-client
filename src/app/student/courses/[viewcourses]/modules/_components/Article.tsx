@@ -1,11 +1,12 @@
-import { Editor, useEditor } from '@tiptap/react'
 import React, { useEffect, useState } from 'react'
-import extensions from '@/app/_components/editor/TiptapExtensions'
-import TiptapEditor from '@/app/_components/editor/TiptapEditor'
-import '@/app/_components/editor/Tiptap.css'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
+
+type EditorDoc = {
+    type: string
+    content: any[]
+}
 
 function Article({
     content,
@@ -18,57 +19,44 @@ function Article({
 }) {
     let editorContent
     const [isCompleted, setIsCompleted] = useState<boolean>(false)
-    const [initialContent, setInitialContent] = useState()
+    const [initialContent, setInitialContent] = useState<
+        { doc: EditorDoc } | undefined
+    >(
+        content?.articleContent === null
+            ? undefined
+            : typeof content?.articleContent[0] === 'string'
+            ? JSON.parse(content?.articleContent[0])
+            : { doc: content?.articleContent[0] }
+    )
 
-    if (
-        content?.articleContent &&
-        Array.isArray(content.articleContent) &&
-        content.articleContent.length > 0
-    ) {
-        // console.log(
-        //     'content.articleContent',
-        //     JSON.parse(content.articleContent[0])
-        // )
-        editorContent = content.articleContent[0]
-        // const articleContent = JSON.parse(content.articleContent[0])
-        // console.log('articleContent', articleContent.doc)
-        // editorContent = { doc: content.articleContent[0] }
-        // setInitialContent(JSON.parse(content.articleContent[0]))
-        // if (typeof content.articleContent[0] === 'string') {
-        //     const json = JSON.parse(content.articleContent[0])
-        //     setInitialContent(json.doc)
-        // } else {
-        //     setInitialContent(content.articleContent[0])
-        // }
-        console.log('content.articleContent[0]', content.articleContent[0])
-        // setInitialContent(JSON.parse(editorContent))
-    } else {
-        editorContent = {
-            type: 'doc',
-            content: [
-                {
-                    type: 'paragraph',
-                    attrs: {
-                        textAlign: 'left',
-                    },
-                    content: [
-                        {
-                            text: 'No article has been added yet. Please come back later for an interesting article to learn from...',
-                            type: 'text',
-                        },
-                    ],
-                },
-            ],
+    useEffect(() => {
+        if (
+            content?.articleContent &&
+            Array.isArray(content.articleContent) &&
+            content.articleContent.length > 0
+        ) {
+            if (typeof content.articleContent[0] === 'string') {
+                setInitialContent(JSON.parse(content.articleContent[0]))
+            } else {
+                const jsonData = { doc: content.articleContent[0] }
+                setInitialContent(jsonData)
+            }
         }
-    }
-
-    console.log('initialContent', initialContent)
-
-    const editor = useEditor({
-        extensions,
-        content: editorContent,
-        editable: false,
-    })
+        // else if (editor) {
+        //     // const noContent = {
+        //     //     type: 'doc',
+        //     //     content: [
+        //     //         {
+        //     //             type: 'paragraph',
+        //     //             content: [
+        //     //                  { type: 'text', text: 'No article has been added yet. Please come back later for an interesting article to learn from...' },
+        //     //             ],
+        //     //         },
+        //     //     ],
+        //     // }
+        //     // setInitialContent(noContent)
+        // }
+    }, [content])
 
     useEffect(() => {
         setIsCompleted(status === 'Completed')
@@ -78,12 +66,13 @@ function Article({
         <ScrollArea className="h-full">
             <div className="mt-24 text-left">
                 <h1 className="font-bold text-lg my-5">{content?.title}</h1>
-                <TiptapEditor editor={editor} />
-                <RemirrorTextEditor
-                    initialContent={initialContent}
-                    setInitialContent={setInitialContent}
-                    preview={true}
-                />
+                <div className="mt-2 text-start">
+                    <RemirrorTextEditor
+                        initialContent={initialContent}
+                        setInitialContent={setInitialContent}
+                        preview={true}
+                    />
+                </div>
                 {!isCompleted && (
                     <div className="my-10 text-end">
                         <Button

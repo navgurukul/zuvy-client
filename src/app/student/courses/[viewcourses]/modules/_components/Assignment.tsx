@@ -1,8 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import extensions from '@/app/_components/editor/TiptapExtensions'
 import { api } from '@/utils/axios.config'
-import { useEditor } from '@tiptap/react'
-import TiptapEditor from '@/app/_components/editor/TiptapEditor'
 import { Input } from '@/components/ui/input'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
@@ -63,12 +60,19 @@ const Assignments = ({
     const [submittedDate, setSubmittedDate] = useState<string>('')
     const [initialContent, setInitialContent] = useState<
         { doc: EditorDoc } | undefined
-    >()
+    >(
+        content?.articleContent === null
+            ? undefined
+            : typeof content?.articleContent[0] === 'string'
+            ? JSON.parse(content?.articleContent[0])
+            : { doc: content?.articleContent[0] }
+    )
     const [status, setStatus] = useState<string>('')
     const [title, setTitle] = useState<string>('')
     const [icon, setIcon] = useState<JSX.Element>(
         <Link className="mr-2 h-4 w-4" />
     )
+
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
@@ -77,8 +81,6 @@ const Assignments = ({
 
         mode: 'onChange',
     })
-
-    console.log('content', content)
 
     const getProjectData = useCallback(async () => {
         try {
@@ -100,44 +102,30 @@ const Assignments = ({
         }
     }, [content.id])
 
-    const editor = useEditor({
-        extensions,
-        content: '<h1>No Content Added Yet</h1>',
-        editable: false,
-    })
-
     useEffect(() => {
-        if (editor && content?.articleContent?.[0]) {
-            editor.commands.setContent(content.articleContent[0])
-            // editor.commands.setContent(JSON.parse(content.articleContent[0]))
-            console.log(
-                'content.articleContent[0]',
-                typeof content.articleContent[0]
-            )
-            // const jsonData = JSON.parse(content.articleContent[0])
-            setInitialContent(JSON.parse(content.articleContent[0]))
-            // if (typeof content.articleContent[0] === 'string') {
-            //     setInitialContent(JSON.parse(content.articleContent[0]))
-            // } else {
-            //     const jsonData = { doc: content.articleContent[0] }
-            //     setInitialContent(jsonData)
-            // }
-        } else if (editor) {
-            // const noContent = {
-            //     type: 'doc',
-            //     content: [
-            //         {
-            //             type: 'paragraph',
-            //             content: [
-            //                  { type: 'text', text: 'No Content Added Yet' },
-            //             ],
-            //         },
-            //     ],
-            // }
-            // setInitialContent(noContent)
-            editor.commands.setContent('<h1>No Content Added Yet</h1>')
+        if (content?.articleContent?.[0]) {
+            if (typeof content.articleContent[0] === 'string') {
+                setInitialContent(JSON.parse(content.articleContent[0]))
+            } else {
+                const jsonData = { doc: content.articleContent[0] }
+                setInitialContent(jsonData)
+            }
         }
-    }, [editor, content])
+        //  else if (editor) {
+        //     // const noContent = {
+        //     //     type: 'doc',
+        //     //     content: [
+        //     //         {
+        //     //             type: 'paragraph',
+        //     //             content: [
+        //     //                  { type: 'text', text: 'No Content Added Yet' },
+        //     //             ],
+        //     //         },
+        //     //     ],
+        //     // }
+        //     // setInitialContent(noContent)
+        // }
+    }, [content])
 
     useEffect(() => {
         getProjectData()
@@ -217,8 +205,6 @@ const Assignments = ({
 
     const AssignmentStatus = getSubmissionStatus(submittedDate, deadlineDate)
 
-    console.log('initialContent', initialContent)
-
     return (
         <ScrollArea className="h-screen">
             <div className="flex flex-col mt-20 relative">
@@ -275,14 +261,13 @@ const Assignments = ({
                         {' '}
                         Assignment Description
                     </h1>
-                    {editor && <TiptapEditor editor={editor} />}
-                    {/* <div className="mt-2 text-start"> */}
-                    <RemirrorTextEditor
-                        initialContent={initialContent}
-                        setInitialContent={setInitialContent}
-                        preview={true}
-                    />
-                    {/* </div> */}
+                    <div className="mt-2 text-start">
+                        <RemirrorTextEditor
+                            initialContent={initialContent}
+                            setInitialContent={setInitialContent}
+                            preview={true}
+                        />
+                    </div>
                 </div>
                 <Form {...form}>
                     <form

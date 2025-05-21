@@ -23,6 +23,11 @@ type Props = {
     moduleId: number
     bootcampId: number
 }
+type EditorDoc = {
+    type: string
+    content: any[]
+}
+
 const FormSchema = z.object({
     link: z
         .string()
@@ -39,7 +44,9 @@ const Projects = ({ projectId, moduleId, bootcampId }: Props) => {
     const [content, setContent] = useState<any>('')
     const [deadlineDate, setDeadlineDate] = useState<string>('')
     const [submittedDate, setSubmittedDate] = useState<string>('')
-    const [initialContent, setInitialContent] = useState()
+    const [initialContent, setInitialContent] = useState<
+        { doc: EditorDoc } | undefined
+    >()
 
     const [icon, setIcon] = useState<JSX.Element>(
         <Link className="mr-2 h-4 w-4" />
@@ -66,13 +73,18 @@ const Projects = ({ projectId, moduleId, bootcampId }: Props) => {
             )
             const projectDetail =
                 res?.data?.data?.projectData[0]?.instruction?.description
-            setInitialContent(JSON.parse(projectDetail))
             setStatus(res?.data?.data?.status)
             setDeadlineDate(res?.data?.data?.projectData[0]?.deadline)
             setSubmittedDate(
                 res?.data?.data?.projectData[0]?.projectTrackingData[0]
                     ?.updatedAt
             )
+            if (typeof projectDetail === 'string') {
+                setInitialContent(JSON.parse(projectDetail))
+            } else {
+                const jsonData = { doc: projectDetail[0] }
+                setInitialContent(jsonData)
+            }
         } catch (error: any) {
             console.error(error.message)
         }

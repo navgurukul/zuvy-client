@@ -59,6 +59,13 @@ const ProjectPreview = () => {
                     },
                 ],
             }
+            //             if (typeof projectDetail === 'string') {
+            //     setInitialContent(JSON.parse(projectDetail))
+            // } else {
+            //     const jsonData = { doc: projectDetail }
+            //     setInitialContent(jsonData)
+            // }
+            console.log('firstContent', firstContent)
             setInitialContent(JSON.parse(firstContent))
         }
     }, [projectPreviewContent])

@@ -121,6 +121,7 @@ const AddAssignent = ({
             setTitles(contentDetails.title)
             console.log('contentDetails.content[0]', contentDetails.content[0])
             setInitialContent(JSON.parse(contentDetails.content[0]))
+
             // if (typeof contentDetails.content[0] === 'string') {
             //     setInitialContent(JSON.parse(contentDetails.content[0]))
             // } else {
@@ -194,6 +195,9 @@ const AddAssignent = ({
             )
         }
     }
+
+    console.log('content', content)
+    console.log('initialContent forrr', initialContent)
 
     return (
         <div className="px-5">
