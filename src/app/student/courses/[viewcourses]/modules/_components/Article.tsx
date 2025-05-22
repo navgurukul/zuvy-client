@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
+import Link from 'next/link'
 
 type EditorDoc = {
     type: string
@@ -18,7 +19,10 @@ function Article({
     status: string
 }) {
     let editorContent
+
     const [isCompleted, setIsCompleted] = useState<boolean>(false)
+    const [pdfLink, setPdfLink] = useState('')
+    const [viewPdf, setViewPdf] = useState(false)
     const [initialContent, setInitialContent] = useState<
         { doc: EditorDoc } | undefined
     >(
@@ -42,6 +46,14 @@ function Article({
                 setInitialContent(jsonData)
             }
         }
+        if (content?.links && content.links.length > 0) {
+            setPdfLink(content.links[0])
+            setViewPdf(true)
+        } else {
+            setPdfLink('')
+            setViewPdf(false)
+        }
+
         // else if (editor) {
         //     // const noContent = {
         //     //     type: 'doc',
@@ -62,37 +74,53 @@ function Article({
         setIsCompleted(status === 'Completed')
     }, [status])
 
+    console.log(pdfLink)
+
     return (
         <ScrollArea className="h-full">
             <div className="mt-24 text-left">
                 <h1 className="font-bold text-lg my-5">{content?.title}</h1>
-                <div className="mt-2 text-start">
-                    <RemirrorTextEditor
-                        initialContent={initialContent}
-                        setInitialContent={setInitialContent}
-                        preview={true}
-                    />
-                </div>
-                {!isCompleted && (
-                    <div className="my-10 text-end">
-                        <Button
-                            disabled={
-                                !content?.articleContent ||
-                                !content.articleContent.some((doc: any) =>
-                                    doc?.content?.some(
-                                        (paragraph: any) =>
-                                            paragraph.content &&
-                                            paragraph.content.some(
-                                                (item: any) =>
-                                                    item.type === 'text'
-                                            )
-                                    )
-                                )
-                            }
-                            onClick={completeChapter}
-                        >
-                            Mark as Done
+                {viewPdf ? (
+                    <div className="flex items-center h-full justify-center">
+                        <Button>
+                            <Link href={pdfLink} target="_blank">
+                                View PDF
+                            </Link>
                         </Button>
+                    </div>
+                ) : (
+                    <div>
+                        <div className="mt-2 text-start">
+                            <RemirrorTextEditor
+                                initialContent={initialContent}
+                                setInitialContent={setInitialContent}
+                                preview={true}
+                            />
+                        </div>
+                        {!isCompleted && (
+                            <div className="my-10 text-end">
+                                <Button
+                                    disabled={
+                                        !content?.articleContent ||
+                                        !content.articleContent.some(
+                                            (doc: any) =>
+                                                doc?.content?.some(
+                                                    (paragraph: any) =>
+                                                        paragraph.content &&
+                                                        paragraph.content.some(
+                                                            (item: any) =>
+                                                                item.type ===
+                                                                'text'
+                                                        )
+                                                )
+                                        )
+                                    }
+                                    onClick={completeChapter}
+                                >
+                                    Mark as Done
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
