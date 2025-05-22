@@ -104,7 +104,7 @@ const PreviewAssignment = ({ params }: { params: any }) => {
                 {/* Right Section: Editor */}
                 <div className="pt-20">
                     <div className="flex justify-between">
-                        <div className="flex flex-col items-start mb-3">
+                        <div className="flex flex-col items-start mb-3 gap-y-6">
                             <h1 className="text-2xl font-semibold text-left">
                                 {assignmentPreviewContent?.title
                                     ? assignmentPreviewContent.title

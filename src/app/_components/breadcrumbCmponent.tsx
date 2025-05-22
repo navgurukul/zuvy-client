@@ -19,7 +19,7 @@ function BreadcrumbComponent({
                     <React.Fragment key={index}>
                         <BreadcrumbItem
                             key={item.crumb}
-                            className={`${
+                            className={` ${
                                 !item.isLast ? 'text-secondary' : ''
                             }`}
                         >

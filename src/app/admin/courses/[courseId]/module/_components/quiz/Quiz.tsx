@@ -103,29 +103,46 @@ function Quiz(props: any) {
         saveQuizQuestionHandler(requestBody)
         setIsChapterUpdated(!isChapterUpdated)
     }
-
+    
     const getAllSavedQuizQuestion = useCallback(async () => {
-        await api
-            .get(`/Content/chapterDetailsById/${props.chapterId}`)
-            .then((res) => {
-                setAddQuestion(res.data.quizQuestionDetails)
-                setQuizTitle(res.data.title)
-            })
+        if (!props.chapterId || props.chapterId === 0) return
+    
+        try {
+            const res = await api.get(`/Content/chapterDetailsById/${props.chapterId}`)
+            setAddQuestion(res.data.quizQuestionDetails)
+            setQuizTitle(res.data.title)
+        } catch (error) {
+            console.error("Failed to fetch chapter details", error)
+        }
     }, [props.chapterId])
-
+    
     useEffect(() => {
         getAllTags()
-        getAllSavedQuizQuestion()
-    }, [getAllSavedQuizQuestion])
+        if (props.chapterId && props.chapterId !== 0) {
+            getAllSavedQuizQuestion()
+        }
+    }, [props.chapterId, getAllSavedQuizQuestion])
 
     function previewQuiz() {
-        if (props.content) {
-            setQuizPreviewContent(props.content)
+        if (addQuestion.length > 0) {
+            setQuizPreviewContent({
+                ...props.content,
+                quizQuestionDetails: addQuestion,
+            })
             router.push(
                 `/admin/courses/${props.courseId}/module/${props.moduleId}/chapter/${props.chapterId}/quiz/${props.content.topicId}/preview`
             )
+        } else {
+            return toast({
+                title: 'No Question saved yet',
+                description: 'Please add at least one question to preview.',
+                className:
+                    'border border-red-500 text-red-500 text-left w-[90%] capitalize',
+            })
         }
     }
+
+    console.log(props.content)
 
     return (
         <div>

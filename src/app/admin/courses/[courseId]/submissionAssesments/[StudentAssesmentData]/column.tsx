@@ -9,42 +9,43 @@ import Link from 'next/link'
 import { DownloadIcon, FileText } from 'lucide-react'
 import { calculateTimeTaken, getSubmissionDate } from '@/utils/admin'
 import DownloadReport from './_components/DownloadReport'
+import ApproveReattempt from './ApproveReattempt'
 
 export const columns: ColumnDef<Task>[] = [
-    {
-        accessorKey: 'profilePicture',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Profile Pitcure" />
-        ),
-        cell: ({ row }) => {
-            const student = row.original
-            const profilePitcure = student.profilePicture
-            const ImageContainer = () => {
-                return profilePitcure ? (
-                    <Image
-                        src={profilePitcure}
-                        alt="profilePic"
-                        height={10}
-                        width={30}
-                        className="rounded-[100%] ml-2"
-                    />
-                ) : (
-                    <Image
-                        src={
-                            'https://avatar.iran.liara.run/public/boy?username=Ash'
-                        }
-                        alt="profilePic"
-                        height={35}
-                        width={35}
-                        className="rounded-[50%] ml-2"
-                    />
-                )
-            }
-            return <div className="flex items-center">{ImageContainer()}</div>
-        },
-        enableSorting: false,
-        enableHiding: false,
-    },
+    // {
+    //     accessorKey: 'profilePicture',
+    //     header: ({ column }) => (
+    //         <DataTableColumnHeader column={column} title="Profile Pitcure" />
+    //     ),
+    //     cell: ({ row }) => {
+    //         const student = row.original
+    //         const profilePitcure = student.profilePicture
+    //         const ImageContainer = () => {
+    //             return profilePitcure ? (
+    //                 <Image
+    //                     src={profilePitcure}
+    //                     alt="profilePic"
+    //                     height={10}
+    //                     width={30}
+    //                     className="rounded-[100%] ml-2"
+    //                 />
+    //             ) : (
+    //                 <Image
+    //                     src={
+    //                         'https://avatar.iran.liara.run/public/boy?username=Ash'
+    //                     }
+    //                     alt="profilePic"
+    //                     height={35}
+    //                     width={35}
+    //                     className="rounded-[50%] ml-2"
+    //                 />
+    //             )
+    //         }
+    //         return <div className="flex items-center">{ImageContainer()}</div>
+    //     },
+    //     enableSorting: false,
+    //     enableHiding: false,
+    // },
     {
         accessorKey: 'name',
         header: ({ column }) => (
@@ -55,7 +56,7 @@ export const columns: ColumnDef<Task>[] = [
 
             return (
                 <div className="flex space-x-2">
-                    <span className="max-w-[500px] truncate font-medium">
+                    <span className="max-w-[500px] truncate font-medium capitalize">
                         {name}
                     </span>
                 </div>
@@ -90,7 +91,13 @@ export const columns: ColumnDef<Task>[] = [
             const startedAt = row.original.startedAt
             const submitedAt = row.original.submitedAt
 
-            const timeTaken:any = calculateTimeTaken(startedAt, submitedAt);
+            let timeTaken;
+
+            if(!submitedAt){
+                timeTaken = 'N/A'
+            }else{
+                timeTaken = calculateTimeTaken(startedAt, submitedAt);
+            }
 
             return (
                 <div className="flex space-x-2">
@@ -108,7 +115,13 @@ export const columns: ColumnDef<Task>[] = [
         ),
         cell: ({ row }) => {
             const submitedAt = row.original.submitedAt
-            const submissionDate = getSubmissionDate(submitedAt);
+            let submissionDate;
+
+            if(!submitedAt){
+                 submissionDate = 'N/A';
+            }else{
+                 submissionDate = getSubmissionDate(submitedAt);
+            }
 
             return (
                 <div className="flex space-x-2">
@@ -138,6 +151,19 @@ export const columns: ColumnDef<Task>[] = [
                         )}
                         {isQualified ? ' Passed' : 'Failed'}
                     </div>
+                </div>
+            )
+        },
+    },
+    {
+        accessorKey: 'Approve Re-attempt',
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Actions" />
+        ),
+        cell: ({ row }) => {
+            return (
+                <div className="flex space-x-2 w-10" key={row.original.email}>
+                   <ApproveReattempt data={row.original}/>
                 </div>
             )
         },

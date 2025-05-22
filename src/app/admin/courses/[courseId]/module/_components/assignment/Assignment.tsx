@@ -73,7 +73,7 @@ const AddAssignent = ({
     courseId,
     assignmentUpdateOnPreview,
     setAssignmentUpdateOnPreview,
-}: AssignmentProps) => {
+}: any) => {
     // misc
 
     const formSchema = z.object({
@@ -185,11 +185,18 @@ const AddAssignent = ({
     }, [content])
 
     function previewAssignment() {
-        if (content) {
+        if (content?.contentDetails[0]?.content?.length > 0) {
             setAssignmentPreviewContent(content)
             router.push(
                 `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/assignment/${content.topicId}/preview`
             )
+        } else {
+            return toast({
+                title: 'Cannot Preview',
+                description: 'Nothing to Preview please save some content',
+                className:
+                    'border border-red-500 text-red-500 text-left w-[90%] capitalize',
+            })
         }
     }
 

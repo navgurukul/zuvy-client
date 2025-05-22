@@ -296,7 +296,7 @@ export async function getAssessmentShortInfo(
             setSubmissionId(res.data.submitedOutsourseAssessments[0].id)
         }
     } catch (e:any) {
-        console.error(e)
+        console?.error(e)
     }
 }
 

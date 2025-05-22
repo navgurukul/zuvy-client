@@ -101,26 +101,34 @@ function Quiz(props: Props) {
         const transformedBody = {
             submitQuiz: mappedAnswers,
         }
-
-        await api
-            .post(
-                `/tracking/updateQuizAndAssignmentStatus/${props.bootcampId}/${props.moduleId}?chapterId=${props.chapterId}`,
-                transformedBody
-            )
-            .then(() => {
-                toast({
-                    title: 'Success',
-                    description: 'Submitted Quiz Successfully',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
-                })
+        if (transformedBody.submitQuiz.length === 0) {
+            return toast({
+                title: 'Cannot Submit',
+                description: 'Select alleast one question',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
-        await updateQuizChapterHandler()
-        await getAllQuizQuestionHandler()
+        } else {
+            await api
+                .post(
+                    `/tracking/updateQuizAndAssignmentStatus/${props.bootcampId}/${props.moduleId}?chapterId=${props.chapterId}`,
+                    transformedBody
+                )
+                .then(() => {
+                    toast({
+                        title: 'Success',
+                        description: 'Submitted Quiz Successfully',
+                        className:
+                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+                    })
+                })
+            await updateQuizChapterHandler()
+            await getAllQuizQuestionHandler()
+        }
     }
 
     return (
-        <ScrollArea className="h-screen">
+        <ScrollArea className="h-[calc(100vh-110px)] lg:h-screen md:h-screen">
             {questions.length == 0 ? (
                 <div>
                     <h1 className="text-center font-semibold text-2xl">
@@ -142,7 +150,7 @@ function Quiz(props: Props) {
                 </div>
             ) : (
                 <div>
-                    <div className="h-full w-full rounded-md mt-20">
+                    <div className="h-full w-full rounded-md mt-4 md:mt-20 lg:mt-20">
                         <div className="flex flex-col justify-center items-center">
                             <div className="p-4 flex gap-y-4 flex-col items-start">
                                 <h1 className="text-xl font-semibold">
@@ -165,10 +173,19 @@ function Quiz(props: Props) {
                                         question.question,
                                         additionalClass
                                     )
+
+                                    const isCompleted =
+                                        question.status === 'Completed'
+                                    const isPending =
+                                        question.status === 'Pending'
+                                    const quizTrack =
+                                        question.quizTrackingData?.[0]
+                                    const isAttempted = !!quizTrack
+
                                     return (
                                         <div key={question.id}>
                                             <div className="flex text-left space-x-2">
-                                                <h1 className="font-semibold ">
+                                                <h1 className="font-semibold">
                                                     {'Q'}
                                                     {index + 1}.
                                                 </h1>
@@ -186,104 +203,92 @@ function Quiz(props: Props) {
                                                     ([
                                                         optionId,
                                                         optionText,
-                                                    ]) => (
-                                                        <div
-                                                            key={optionId}
-                                                            className="flex items-center "
-                                                        >
-                                                            <input
-                                                                type="radio"
-                                                                name={`question_${question.id}`}
-                                                                value={optionId}
-                                                                className=" ml-8 w-3 h-3 text-secondary focus:ring-secondary-500"
-                                                                checked={
-                                                                    question.status ===
-                                                                        'pass' ||
-                                                                    question.status ===
-                                                                        'fail' ||
-                                                                    question.status ===
-                                                                        'done'
-                                                                        ? question.correctOption ===
-                                                                          Number(
-                                                                              optionId
-                                                                          )
-                                                                        : selectedAnswers[
-                                                                              question
-                                                                                  .id
-                                                                          ] ===
-                                                                          optionId
-                                                                }
-                                                                onChange={() =>
-                                                                    handleCorrectQuizQuestion(
-                                                                        question.id,
-                                                                        optionId
-                                                                    )
-                                                                }
-                                                                disabled={
-                                                                    question.status ===
-                                                                        'pass' ||
-                                                                    question.status ===
-                                                                        'fail' ||
-                                                                    question.status ===
-                                                                        'done'
-                                                                }
-                                                            />
-                                                            {status ? (
-                                                                <label
-                                                                    key={
+                                                    ]) => {
+                                                        const isCorrect =
+                                                            question.correctOption ===
+                                                            Number(optionId)
+                                                        const isChosen =
+                                                            isAttempted &&
+                                                            quizTrack.chosenOption ===
+                                                                Number(optionId)
+                                                        const isWrongChoice =
+                                                            isChosen &&
+                                                            !isCorrect
+
+                                                        const labelClass = [
+                                                            'm-2.5 flex items-center font-semibold',
+                                                            isCorrect &&
+                                                            isCompleted
+                                                                ? 'text-green-600'
+                                                                : '',
+                                                            isWrongChoice &&
+                                                            isCompleted
+                                                                ? 'text-red-600'
+                                                                : '',
+                                                        ]
+                                                            .filter(Boolean)
+                                                            .join(' ')
+
+                                                        return (
+                                                            <div
+                                                                key={optionId}
+                                                                className="flex items-center"
+                                                            >
+                                                                <input
+                                                                    type="radio"
+                                                                    name={`question_${question.id}`}
+                                                                    value={
                                                                         optionId
                                                                     }
-                                                                    className={`m-4 flex  font-semibold items-center ${
-                                                                        question
-                                                                            .quizTrackingData[0]
-                                                                            .chosenOption ===
-                                                                        Number(
+                                                                    className="ml-8 w-3 h-3 text-secondary focus:ring-secondary-500"
+                                                                    checked={
+                                                                        isCompleted
+                                                                            ? isCorrect
+                                                                            : selectedAnswers[
+                                                                                  question
+                                                                                      .id
+                                                                              ] ===
+                                                                              optionId
+                                                                    }
+                                                                    onChange={() =>
+                                                                        handleCorrectQuizQuestion(
+                                                                            question.id,
                                                                             optionId
                                                                         )
-                                                                            ? question
-                                                                                  .quizTrackingData[0]
-                                                                                  .chosenOption ===
-                                                                              question.correctOption
-                                                                                ? 'text-green-600'
-                                                                                : 'text-red-600'
-                                                                            : ''
-                                                                    }`}
-                                                                >
-                                                                    {String(
-                                                                        optionText
-                                                                    )}
-                                                                </label>
-                                                            ) : (
-                                                                <label
-                                                                    key={
-                                                                        optionId
                                                                     }
-                                                                    className="m-2.5 flex items-center"
+                                                                    disabled={
+                                                                        isCompleted
+                                                                    }
+                                                                />
+                                                                <label
+                                                                    className={
+                                                                        labelClass
+                                                                    }
                                                                 >
                                                                     {String(
                                                                         optionText
                                                                     )}
                                                                 </label>
-                                                            )}
-                                                        </div>
-                                                    )
+                                                            </div>
+                                                        )
+                                                    }
                                                 )}
 
-                                                {status && (
+                                                {isCompleted && (
                                                     <p
                                                         className={`mt-2 font-semibold ${
-                                                            question.status ===
-                                                            'fail'
-                                                                ? 'text-red-600'
-                                                                : 'text-green-600'
+                                                            isAttempted
+                                                                ? quizTrack.status ===
+                                                                  'fail'
+                                                                    ? 'text-red-600'
+                                                                    : 'text-green-600'
+                                                                : 'text-yellow-600'
                                                         }`}
                                                     >
                                                         Status:{' '}
-                                                        {
-                                                            question
-                                                                .quizTrackingData[0]
-                                                                .status
-                                                        }
+                                                        {isAttempted
+                                                            ? quizTrack.status
+                                                            : 'Not attempted'}
                                                     </p>
                                                 )}
                                             </div>
@@ -293,11 +298,11 @@ function Quiz(props: Props) {
                             </div>
                         </div>
                     </div>
-                    <div className="flex flex-col items-end">
+                    <div className="flex flex-col items-end pb-24 md:pb-0 lg:pb-0 mr-3 md:mr-0 lg:mr-0">
                         <Button
-                            disabled={!allQuestionsAnswered()}
+                            disabled={status}
                             onClick={handleSubmit}
-                            className="flex w-1/6 flex-col"
+                            className="flex w-1/5 lg:w-1/6 flex-col"
                         >
                             Submit
                         </Button>
