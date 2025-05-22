@@ -112,7 +112,6 @@ export default function Project() {
             setProjectData(response.data)
             setTitle(response.data.project[0].title)
             const content = response.data.project[0].instruction.description
-            console.log('content', content)
             setInitialContent(JSON.parse(content))
 
             // //             if (typeof projectDetail === 'string') {
