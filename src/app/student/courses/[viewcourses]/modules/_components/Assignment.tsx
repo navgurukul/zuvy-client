@@ -182,8 +182,8 @@ const Assignments = ({
     const AssignmentStatus = getSubmissionStatus(submittedDate, deadlineDate)
 
     return (
-        <ScrollArea className="h-screen">
-            <div className="flex flex-col mt-20 relative">
+        <ScrollArea className='h-[calc(100vh-110px)] lg:h-screen md:h-screen'>
+            <div className="flex flex-col sm:mt-20 mt-5 relative mr-4 md:mr-0 lg:mr-0">
                 <h1 className="text-left text-xl font-semibold flex flex-col ">
                     <span className="flex items-center gap-x-2 ">
                         {content?.title}{' '}
@@ -275,7 +275,7 @@ const Assignments = ({
                                     )
                             )
                         ) ? (
-                            <div className="flex justify-end absolute top-0 right-0">
+                            <div className="flex justify-end absolute sm:top-0 sm:right-0">
                                 <Button
                                     className="w-full mr-3"
                                     type="submit"
@@ -285,8 +285,8 @@ const Assignments = ({
                                 </Button>
                             </div>
                         ) : (
-                            <div className="flex justify-end absolute top-0 right-0">
-                                <Button className="w-full mr-3" type="submit">
+                            <div className="flex justify-end sm:justify-end relative sm:absolute sm:top-0 sm:right-0 sm:mt-0 mb-2">
+                                <Button className=" mr-3 mb-20" type="submit">
                                     Submit
                                 </Button>
                             </div>

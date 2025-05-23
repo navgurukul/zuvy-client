@@ -10,7 +10,7 @@ const TiptapEditor = ({ editor }: { editor: any }) => {
                 <ScrollArea
                     // className={`${heightClass} pr-4`}
 
-                    className="h-96 pr-8 "
+                    className="h-96 pr-4 md:pr-8 lg:pr-8"
                     type="hover"
                     style={{
                         scrollbarWidth: 'none', // Firefox

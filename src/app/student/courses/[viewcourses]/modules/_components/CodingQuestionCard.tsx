@@ -79,8 +79,8 @@ function CodingQuestionCard({
             key={id}
             className={`container mx-auto rounded-xl shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F] overflow-hidden max-w-2xl min-h-52 mt-4 py-5`}
         >
-            <div className="flex items-center justify-between gap-2">
-                <div className="flex-1 min-w-0 font-bold text-xl my-2 truncate overflow-hidden whitespace-nowrap">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div className="flex-1 min-w-0 font-bold text-lg sm:text-xl my-2 truncate">
                     {title}
                 </div>
                 <div className="flex items-center gap-4">
@@ -110,7 +110,8 @@ function CodingQuestionCard({
                     {status}
                 </span>
             </div>
-            <div className="flex justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+            {/* <div className="flex justify-between"> */}
                 <Dialog>
                     <DialogTrigger asChild>
                         <p className="cursor-pointer mt-4 flex justify-start text-secondary font-bold">
@@ -126,7 +127,8 @@ function CodingQuestionCard({
                 </Dialog>
                 <div
                     onClick={() => handleSolveChallenge(id)}
-                    className="cursor-pointer mt-5 flex justify-end text-secondary font-bold"
+                    // className="cursor-pointer mt-4 flex justify-end text-secondary font-bold"
+                    className="cursor-pointer mt-4 flex sm:justify-start text-secondary font-bold"
                 >
                     {isSuccess ? 'View Solution' : 'Solve Challenge'}
                     <ChevronRight />

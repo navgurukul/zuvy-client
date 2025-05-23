@@ -55,12 +55,12 @@ function Article({
     }, [status])
 
     return (
-        <ScrollArea className='h-full'>   
-        <div className='mt-24 text-left'>
+        <ScrollArea className='h-[calc(100vh-110px)] md:h-screen lg:h-screen'>   
+        <div className='mt-6 md:mt-24 lg:mt-24 text-left mr-4 md:mr-0 lg:mr-0'>
             <h1 className='font-bold text-lg my-5'>{content?.title}</h1>
             <TiptapEditor editor={editor} />
             {!isCompleted && (
-                <div className="my-10 text-end">
+                <div className="my-10 text-end mb-20 md:mb-0 lg:mb-0">  
                     <Button
                             disabled={
                                 !content?.articleContent ||
