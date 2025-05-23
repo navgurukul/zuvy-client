@@ -270,7 +270,7 @@ const QuizQuestions = ({
                                                             question.question
                                                         }
                                                         preview={true}
-                                                        student={true}
+                                                        bigScreen={true}
                                                     />
                                                 </div>
                                             </FormLabel>
